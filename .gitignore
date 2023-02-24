@@ -1,0 +1,13 @@
+node_modules
+tmp
+context
+coverage
+hubspot.config.yml
+hubspot.config.yaml
+acceptance-test.config.yml
+npm-debug.log
+npm-debug.log.*
+*.log
+.DS_Store
+.env
+/lib
