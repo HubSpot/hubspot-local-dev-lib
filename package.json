@@ -7,10 +7,10 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
     "lint": "eslint . && prettier --list-different src/**/*.ts",
-    "prettier:write": "prettier --write packages/**/*.{js,json}"
+    "prettier:write": "prettier --write src/**/*.{js,json}"
   },
   "lint-staged": {
-    "**/*.{js,scss,css}": [
+    "**/*.{js,scss,css,ts}": [
       "prettier -l",
       "eslint"
     ]
