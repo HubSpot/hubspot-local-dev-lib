@@ -2,6 +2,12 @@ en:
   debug:
     archive:
       extractZip:
+        init: "Extracting project source..."
         writeError: "An error occured writing temp project source."
         extractError: "An error occured extracting project source."
         success: "Completed project source extraction."
+      copySourceToDest:
+        init: "Copying project source..."
+        sourceEmpty: "Project source is empty"
+        success: "Completed copying project source."
+        error: An error occured copying project source to {{ dest }}.
