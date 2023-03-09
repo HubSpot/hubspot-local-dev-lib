@@ -1,0 +1,7 @@
+en:
+  debug:
+    archive:
+      extractZip:
+        writeError: "An error occured writing temp project source."
+        extractError: "An error occured extracting project source."
+        success: "Completed project source extraction."
