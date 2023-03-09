@@ -11,3 +11,5 @@ en:
         sourceEmpty: "Project source is empty"
         success: "Completed copying project source."
         error: An error occured copying project source to {{ dest }}.
+      cleanupTempDir:
+        error: "Failed to clean up temp dir: {{ tmpDir }}"

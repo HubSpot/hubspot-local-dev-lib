@@ -125,25 +125,21 @@ async function copySourceToDest(
   return false;
 }
 
-/**
- * Try cleaning up resources from os's tempdir
- * @param {String} tmpDir
- */
-function cleanupTempDir(tmpDir) {
+function cleanupTempDir(tmpDir: string): void {
   if (!tmpDir) return;
   try {
     fs.remove(tmpDir);
   } catch (e) {
-    logger.debug('Failed to clean up temp dir: ', tmpDir);
+    debug('archive.cleanupTempDir.error', { tmpDir });
   }
 }
 
-async function extractZipArchive(
-  zip,
-  name,
-  dest,
-  { sourceDir, includesRootDir } = {}
-) {
+export async function extractZipArchive(
+  zip: Buffer,
+  name: string,
+  dest: string,
+  { sourceDir, includesRootDir }: CopySourceToDestOptions = {}
+): Promise<boolean> {
   let success = false;
 
   if (zip) {
@@ -160,7 +156,3 @@ async function extractZipArchive(
   }
   return success;
 }
-
-module.exports = {
-  extractZipArchive,
-};
