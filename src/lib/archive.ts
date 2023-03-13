@@ -6,8 +6,7 @@ import __extract from 'extract-zip';
 
 import { throwFileSystemError } from '../errors/fileSystemErrors';
 import { throwError } from '../errors/standardErrors';
-import { log, debug } from '../utils/logger';
-import { LogCallbacks } from '../types/LogCallbacks';
+import { debug } from '../utils/logger';
 import { BaseError } from '../types/Error';
 
 const extract = promisify(__extract);
@@ -17,23 +16,11 @@ type ZipData = {
   tmpDir: string;
 };
 
-const extractZipCallbackKeys = ['onInit'] as const;
-type ExtractZipCallbackKeys = (typeof extractZipCallbackKeys)[number];
-type ExtractZipLogCallbacks = LogCallbacks<ExtractZipCallbackKeys>;
-
-async function extractZip(
-  name: string,
-  zip: Buffer,
-  logCallbacks?: ExtractZipLogCallbacks
-): Promise<ZipData> {
+async function extractZip(name: string, zip: Buffer): Promise<ZipData> {
   const result: ZipData = { extractDir: '', tmpDir: '' };
 
   const TMP_FOLDER_PREFIX = `hubspot-temp-${name}-`;
-  log<ExtractZipCallbackKeys>(
-    'onInit',
-    logCallbacks,
-    'archive.extractZip.init'
-  );
+  debug('archive.extractZip.init');
 
   // Write zip to disk
   let tmpZipPath = '';
@@ -74,23 +61,13 @@ type CopySourceToDestOptions = {
   includesRootDir?: boolean;
 };
 
-const copySourceToDestCallbackKeys = ['onInit'] as const;
-type CopySourceToDestCallbackKeys =
-  (typeof copySourceToDestCallbackKeys)[number];
-type CopySourceToDestCallbacks = LogCallbacks<ExtractZipCallbackKeys>;
-
 async function copySourceToDest(
   src: string,
   dest: string,
-  { sourceDir, includesRootDir = true }: CopySourceToDestOptions = {},
-  logCallbacks?: CopySourceToDestCallbacks
+  { sourceDir, includesRootDir = true }: CopySourceToDestOptions = {}
 ): Promise<boolean> {
   try {
-    log<CopySourceToDestCallbackKeys>(
-      'onInit',
-      logCallbacks,
-      'archive.copySourceToDest.init'
-    );
+    debug('archive.copySourceToDest.init');
     const srcDirPath = [src];
 
     if (includesRootDir) {

@@ -1,5 +1,3 @@
 import { BaseError } from '../types/Error';
 
-class HubSpotAuthError extends Error implements BaseError {}
-
-export default HubSpotAuthError;
+export class HubSpotAuthError extends Error implements BaseError {}

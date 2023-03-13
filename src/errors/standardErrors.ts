@@ -1,4 +1,4 @@
-import HubSpotAuthError from './HubSpotAuthError';
+import { HubSpotAuthError } from './HubSpotAuthError';
 import { ErrorContext } from '../types/Error';
 
 import { BaseError, SystemError, StatusCodeError } from '../types/Error';
