@@ -6,7 +6,7 @@ import __extract from 'extract-zip';
 
 import { throwFileSystemError } from '../errors/fileSystemErrors';
 import { throwError } from '../errors/standardErrors';
-import { log, debug } from '../utils/logs';
+import { log, debug } from '../utils/logger';
 import { LogCallbacks } from '../types/LogCallbacks';
 import { BaseError } from '../types/Error';
 
