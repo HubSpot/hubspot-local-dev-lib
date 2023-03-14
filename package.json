@@ -27,7 +27,8 @@
   ],
   "exports": {
     ".": "./dist/index.js",
-    "./constants": "./dist/constants.js"
+    "./constants": "./dist/constants.js",
+    "./path": "./dist/lib/path.js"
   },
   "dependencies": {
     "extract-zip": "^2.0.1",
