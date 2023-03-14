@@ -1,6 +1,6 @@
 import * as path from 'path';
 import unixify from 'unixify';
-import { ALLOWED_EXTENSIONS } from '../constants';
+import { ALLOWED_EXTENSIONS } from '../constants/extensions';
 
 export function convertToUnixPath(_path: string): string {
   return unixify(path.normalize(_path));

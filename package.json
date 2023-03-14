@@ -12,6 +12,7 @@
   },
   "license": "Apache-2.0",
   "devDependencies": {
+    "@types/findup-sync": "^4.0.2",
     "@types/fs-extra": "^11.0.1",
     "@types/js-yaml": "^4.0.5",
     "@types/node": "^18.14.2",
@@ -32,6 +33,7 @@
   },
   "dependencies": {
     "extract-zip": "^2.0.1",
+    "findup-sync": "^5.0.0",
     "fs-extra": "^11.1.0",
     "js-yaml": "^4.1.0",
     "unixify": "^1.0.0"
