@@ -27,3 +27,4 @@ en:
         systemErrorMessage: "This is the result of a system error: {{ errorMessage }}"
       standard:
         system: "A system error has occurred: {{ errorMessage }}"
+        generic: "A {{ name }} has occurred"
