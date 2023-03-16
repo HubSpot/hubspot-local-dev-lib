@@ -53,7 +53,7 @@ export function isConfigPathInGitRepo(configPath: string): boolean {
   return configDir.startsWith(gitDir);
 }
 
-function configFilenameIsIgnoredByGitignore(
+export function configFilenameIsIgnoredByGitignore(
   ignoreFiles: Array<string>,
   configPath: string
 ): boolean {
