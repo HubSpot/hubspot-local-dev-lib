@@ -3,7 +3,7 @@ import * as path from 'path';
 import ignore from 'ignore';
 import findup from 'findup-sync';
 import { DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME } from '../constants/config';
-import { i18n } from './lang';
+import { throwErrorWithMessage } from '../errors/standardErrors';
 
 const GITIGNORE_FILE = '.gitignore';
 
@@ -113,6 +113,6 @@ export function checkAndAddConfigToGitignore(configPath: string): void {
     const updatedContents = `${gitignoreContents.trim()}\n\n# HubSpot config file\n${DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME}\n`;
     writeFileSync(gitignoreFilePath, updatedContents);
   } catch (e) {
-    throw new Error(i18n('errors.utils.git.configIgnore'));
+    throw throwErrorWithMessage('utils.git.configIgnore');
   }
 }

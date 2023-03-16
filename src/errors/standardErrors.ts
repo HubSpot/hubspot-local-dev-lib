@@ -35,11 +35,18 @@ export function debugErrorAndContext(
   debug('standardErrors.context', { context: JSON.stringify(context) });
 }
 
+export function throwErrorWithMessage(
+  identifier: string,
+  interpolation?: { [key: string]: string }
+): never {
+  throw new Error(i18n(`errors.${identifier}`, interpolation));
+}
+
 function throwSystemError(error: SystemError, context?: ErrorContext): never {
   debugErrorAndContext(error, context);
-  throw new Error(
-    i18n('errors.errorTypes.standard.system', { message: error.message })
-  );
+  throwErrorWithMessage('errorTypes.standard.system', {
+    message: error.message,
+  });
 }
 
 // formally logErrorInstance
