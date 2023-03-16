@@ -3,6 +3,7 @@ import * as path from 'path';
 import ignore from 'ignore';
 import findup from 'findup-sync';
 import { DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME } from '../constants/config';
+import { i18n } from './lang';
 
 const GITIGNORE_FILE = '.gitignore';
 
@@ -76,7 +77,7 @@ type GitInclusionResult = {
   gitignoreFiles: Array<string>;
 };
 
-export function checkGitInclusion(configPath: string): GitInclusionResult {
+function checkGitInclusion(configPath: string): GitInclusionResult {
   const result: GitInclusionResult = {
     inGit: false,
     configIgnored: false,
@@ -95,7 +96,7 @@ export function checkGitInclusion(configPath: string): GitInclusionResult {
   return result;
 }
 
-export function checkAndUpdateGitignore(configPath: string): void {
+export function checkAndAddConfigToGitignore(configPath: string): void {
   try {
     const { configIgnored, gitignoreFiles } = checkGitInclusion(configPath);
     if (configIgnored) return;
@@ -112,8 +113,6 @@ export function checkAndUpdateGitignore(configPath: string): void {
     const updatedContents = `${gitignoreContents.trim()}\n\n# HubSpot config file\n${DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME}\n`;
     writeFileSync(gitignoreFilePath, updatedContents);
   } catch (e) {
-    throw new Error(
-      'Unable to determine if config file is properly ignored by git.'
-    );
+    throw new Error(i18n('errors.utils.git.configIgnore'));
   }
 }
