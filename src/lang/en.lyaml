@@ -28,6 +28,7 @@ en:
       standard:
         system: "A system error has occurred: {{ errorMessage }}"
         generic: "A {{ name }} has occurred"
+      cmsFields:
     utils:
       git:
         configIgnore: "Unable to determine if config file is properly ignored by git."
