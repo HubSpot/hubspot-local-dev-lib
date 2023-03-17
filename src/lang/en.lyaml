@@ -13,3 +13,21 @@ en:
         error: An error occured copying project source to {{ dest }}.
       cleanupTempDir:
         error: "Failed to clean up temp dir: {{ tmpDir }}"
+    standardErrors:
+      error: "Error: {{ error }}"
+      context: "Context: {{ context }}"
+  errors:
+    errorTypes:
+      fileSystem:
+        readAction: "reading from"
+        writeAction: "writing to"
+        otherAction: "accessing"
+        unknownFilepath: "a file or folder"
+        baseMessage: "An error occurred while {{ fileAction }} {{ filepath }}."
+        systemErrorMessage: "This is the result of a system error: {{ errorMessage }}"
+      standard:
+        system: "A system error has occurred: {{ errorMessage }}"
+        generic: "A {{ name }} has occurred"
+    utils:
+      git:
+        configIgnore: "Unable to determine if config file is properly ignored by git."

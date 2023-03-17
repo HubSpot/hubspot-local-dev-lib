@@ -1,4 +1,4 @@
-import { ENVIRONMENTS } from '../constants';
+import { ENVIRONMENTS } from '../constants/environments';
 
 export function getValidEnv(
   env: string,
