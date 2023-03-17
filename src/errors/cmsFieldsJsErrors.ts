@@ -17,16 +17,16 @@ export function throwFieldsJsError(
     e instanceof SyntaxError ||
     (typeof e === 'object' && e.code === 'MODULE_NOT_FOUND')
   ) {
-    throwErrorWithMessage(`${i18nKey}.fieldsJsSyntaxError`, { path });
+    throwErrorWithMessage(`${i18nKey}.syntaxError`, { path });
   }
   if (e === FieldErrors.IsNotFunction) {
-    throwErrorWithMessage(`${i18nKey}.fieldsJsNotFunction`, {
+    throwErrorWithMessage(`${i18nKey}.notFunction`, {
       path,
       returned: info.returned || '',
     });
   }
   if (e === FieldErrors.DoesNotReturnArray) {
-    throwErrorWithMessage(`${i18nKey}.fieldsJsNotReturnArray`, {
+    throwErrorWithMessage(`${i18nKey}.notReturnArray`, {
       path,
       returned: info.returned || '',
     });
