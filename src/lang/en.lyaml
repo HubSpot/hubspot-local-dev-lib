@@ -28,6 +28,11 @@ en:
       standard:
         system: "A system error has occurred: {{ errorMessage }}"
         generic: "A {{ name }} has occurred"
+      cmsFields:
+        syntax: 'There was an error converting JS file "{{ path }}"'
+        notFunction: 'There was an error loading JS file "{{ path }}". Expected type "Function" but received type "{{ returned }}". Make sure that your default export is a function.'
+        notReturnArray: 'There was an error loading JS file "{{ path }}". Expected type "Array" but received type "{{ returned }}" . Make sure that your function returns an array'
+        invalidPath: 'The path "{{ path }}" is not a path to a file or folder'
     utils:
       git:
         configIgnore: "Unable to determine if config file is properly ignored by git."

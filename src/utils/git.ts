@@ -1,5 +1,5 @@
 import { readFileSync, writeFileSync } from 'fs-extra';
-import * as path from 'path';
+import path from 'path';
 import ignore from 'ignore';
 import findup from 'findup-sync';
 import { DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME } from '../constants/config';
@@ -53,7 +53,7 @@ export function isConfigPathInGitRepo(configPath: string): boolean {
   return configDir.startsWith(gitDir);
 }
 
-function configFilenameIsIgnoredByGitignore(
+export function configFilenameIsIgnoredByGitignore(
   ignoreFiles: Array<string>,
   configPath: string
 ): boolean {

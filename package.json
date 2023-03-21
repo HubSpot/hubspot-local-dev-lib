@@ -4,7 +4,7 @@
   "description": "Provides library functionality for HubSpot local development tooling, including the HubSpot CLI",
   "main": "dist/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
     "build": "tsc",
     "lint": "eslint --max-warnings=0 . && prettier --check src/**/*.ts",
     "prettier:write": "prettier --write src/**/*.{js,json}",
@@ -14,13 +14,16 @@
   "devDependencies": {
     "@types/findup-sync": "^4.0.2",
     "@types/fs-extra": "^11.0.1",
+    "@types/jest": "^29.5.0",
     "@types/js-yaml": "^4.0.5",
     "@types/node": "^18.14.2",
     "@types/unixify": "^1.0.0",
     "@typescript-eslint/eslint-plugin": "^5.54.0",
     "eslint": "^8.35.0",
     "husky": "^8.0.0",
+    "jest": "^29.5.0",
     "prettier": "^2.8.4",
+    "ts-jest": "^29.0.5",
     "typescript": "^4.9.5"
   },
   "files": [

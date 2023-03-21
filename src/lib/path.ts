@@ -1,4 +1,4 @@
-import * as path from 'path';
+import path from 'path';
 import unixify from 'unixify';
 import { ALLOWED_EXTENSIONS } from '../constants/extensions';
 
