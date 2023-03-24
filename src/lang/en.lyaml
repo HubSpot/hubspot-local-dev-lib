@@ -16,6 +16,16 @@ en:
     standardErrors:
       error: "Error: {{ error }}"
       context: "Context: {{ context }}"
+    config:
+      errorReading: "Config file could not be read: {{ configPath }}"
+      errorParsing: "Config file could not be parsed"
+      writeSuccess: "Successfully wrote updated config data to {{ configPath }}"
+      generateNewConfig:
+        unknownType: "Unknown auth type {{ type }}"
+    environment:
+      loadConfig:
+        missingAccountId: "Unable to load config from environment variables: Missing accountId"
+        unknownAuthType: "Unable to load config from environment variables: Unknown auth type"
   errors:
     errorTypes:
       fileSystem:
