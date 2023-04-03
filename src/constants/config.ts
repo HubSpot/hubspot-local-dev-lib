@@ -8,6 +8,6 @@ export const HUBSPOT_CONFIGURATION_FILE = 'config.yml';
 export const Mode = {
   draft: 'draft',
   publish: 'publish',
-};
+} as const;
 
 export const MIN_HTTP_TIMEOUT = 3000;

@@ -14,8 +14,15 @@ import { ENVIRONMENTS } from '../constants';
 // TODO should constants all export from the same place?
 import { Mode, MIN_HTTP_TIMEOUT } from '../constants/config';
 import { CLIConfig } from '../types/Config';
-import { CLIAccount, OAuthAccount, FlatAccountFields } from '../types/Accounts';
+import {
+  CLIAccount,
+  OAuthAccount,
+  FlatAccountFields,
+  OauthTokenInfo,
+  PersonalAccessKeyTokenInfo,
+} from '../types/Accounts';
 import { CLIOptions } from '../types/CLIOptions';
+import { ValueOf } from '../types/Utils';
 
 class CLIConfiguration {
   active: boolean;
@@ -44,9 +51,10 @@ class CLIConfiguration {
     if (this.options.useEnv) {
       const configFromEnv = loadConfigFromEnvironment();
       //TODO this will always return true as long as process.env has accountId. Do we want that?
+      // TODO double check that configFromEnv.accounts[0].accountId is what we want
       if (configFromEnv) {
         logger.debug(
-          `Loaded config from environment variables for ${configFromEnv.accountId}`
+          `Loaded config from environment variables for ${configFromEnv.accounts[0].accountId}`
         );
         this.useEnvConfig = true;
         this.config = configFromEnv;
@@ -153,21 +161,6 @@ class CLIConfiguration {
     });
   }
 
-  /*
-   * Config Lookup Utils
-   */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  getConfigFlagValue(flag: keyof CLIConfig, defaultValue: any) {
-    if (typeof defaultValue === 'undefined') {
-      defaultValue = false;
-    }
-
-    if (this.config && typeof this.config[flag] !== 'undefined') {
-      return this.config[flag];
-    }
-    return defaultValue;
-  }
-
   getAccount(nameOrId: string | number | undefined): CLIAccount | null {
     let name: string | null = null;
     let accountId: number | null = null;
@@ -204,7 +197,7 @@ class CLIConfiguration {
     return account ? account.accountId : null;
   }
 
-  getDefaultAccount(): string | null {
+  getDefaultAccount(): string | number | null {
     return this.config && this.config.defaultAccount
       ? this.config.defaultAccount
       : null;
@@ -235,7 +228,7 @@ class CLIConfiguration {
     );
   }
 
-  getEnv(nameOrId: string | number): string {
+  getEnv(nameOrId: string | number): string | undefined {
     const accountId = this.getAccountId(nameOrId);
 
     if (accountId) {
@@ -244,7 +237,7 @@ class CLIConfiguration {
         return accountConfig.env;
       }
     } else {
-      const env = this.getConfigFlagValue('env', null);
+      const env = this.config && this.config.env;
       if (env) {
         return env;
       }
@@ -260,7 +253,7 @@ class CLIConfiguration {
    * @throws {Error}
    */
   updateConfigForAccount(
-    updatedAccountFields: FlatAccountFields,
+    updatedAccountFields: FlatAccountFields<OauthTokenInfo>,
     writeUpdate = true
   ): CLIAccount | null {
     const {
@@ -300,20 +293,24 @@ class CLIConfiguration {
       };
     }
 
-    const nextAccountConfig = {
+    const nextAccountConfig: Partial<FlatAccountFields<OauthTokenInfo>> = {
       ...(currentAccountConfig ? currentAccountConfig : {}),
-    } as CLIAccount;
+    };
 
     // Allow everything except for 'undefined' values to override the existing values
-    const safelyApplyUpdates = (
-      fieldName: keyof FlatAccountFields,
+    function safelyApplyUpdates<
+      T extends keyof FlatAccountFields<
+        OauthTokenInfo | PersonalAccessKeyTokenInfo
+      >
+    >(
+      fieldName: T,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      newValue: any
-    ) => {
+      newValue: FlatAccountFields<OauthTokenInfo>[T]
+    ) {
       if (typeof newValue !== 'undefined') {
         nextAccountConfig[fieldName] = newValue;
       }
-    };
+    }
 
     const updatedEnv = getValidEnv(
       env || (currentAccountConfig && currentAccountConfig.env),
@@ -321,7 +318,8 @@ class CLIConfiguration {
         maskedProductionValue: undefined,
       }
     );
-    const updatedDefaultMode = defaultMode && defaultMode.toLowerCase();
+    const updatedDefaultMode: ValueOf<typeof Mode> | undefined =
+      defaultMode && (defaultMode.toLowerCase() as ValueOf<typeof Mode>);
 
     safelyApplyUpdates('name', name);
     safelyApplyUpdates('env', updatedEnv);
@@ -333,22 +331,25 @@ class CLIConfiguration {
     }
     if (typeof updatedDefaultMode !== 'undefined') {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      safelyApplyUpdates('defaultMode', (Mode as any)[updatedDefaultMode]);
+      safelyApplyUpdates('defaultMode', Mode[updatedDefaultMode]);
     }
     safelyApplyUpdates('personalAccessKey', personalAccessKey);
     safelyApplyUpdates('sandboxAccountType', sandboxAccountType);
     safelyApplyUpdates('parentAccountId', parentAccountId);
 
+    const completedAccountConfig = nextAccountConfig as FlatAccountFields<
+      OauthTokenInfo | PersonalAccessKeyTokenInfo
+    >;
+
     if (currentAccountConfig) {
       logger.debug(`Updating account config for ${accountId}`);
       const index = this.getConfigAccountIndex(accountId);
-      this.config.accounts[index] = nextAccountConfig;
-    } else {
+      this.config.accounts[index] = completedAccountConfig;
       logger.debug(`Adding account config entry for ${accountId}`);
       if (this.config.accounts) {
-        this.config.accounts.push(nextAccountConfig);
+        this.config.accounts.push(completedAccountConfig);
       } else {
-        this.config.accounts = [nextAccountConfig];
+        this.config.accounts = [completedAccountConfig];
       }
     }
 
@@ -356,7 +357,7 @@ class CLIConfiguration {
       this.write();
     }
 
-    return nextAccountConfig;
+    return completedAccountConfig;
   }
 
   /**
@@ -388,7 +389,7 @@ class CLIConfiguration {
       throw new Error('No Config loaded.');
     }
     const accountId = this.getAccountId(currentName);
-    let accountConfigToRename;
+    let accountConfigToRename: CLIAccount | null = null;
 
     if (accountId) {
       accountConfigToRename = this.getAccount(accountId);
@@ -497,4 +498,4 @@ class CLIConfiguration {
   }
 }
 
-module.exports = CLIConfiguration;
+export default CLIConfiguration;

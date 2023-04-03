@@ -5,7 +5,7 @@ import {
   PERSONAL_ACCESS_KEY_AUTH_METHOD,
 } from '../constants/auth';
 import { CLIConfig } from '../types/Config';
-import { AuthTypes } from '../types/Accounts';
+import { AuthType } from '../types/Accounts';
 
 type PersonalAccessKeyOptions = {
   accountId: number;
@@ -90,7 +90,7 @@ function generateApiKeyConfig({
 }
 
 export default function generateNewConfig(
-  type: AuthTypes,
+  type: AuthType,
   options: PersonalAccessKeyOptions | OAuthOptions | APIKeyOptions
 ): Pick<CLIConfig, 'accounts'> | null {
   if (!options) {

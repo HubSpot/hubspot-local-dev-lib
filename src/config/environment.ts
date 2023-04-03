@@ -19,7 +19,7 @@ import generateNewConfig from './generateNewConfig';
  * @param {any} shouldMaskProduction.maskedProductionValue Alternate value to return in place of PROD
  */
 export function getValidEnv(
-  env?: string,
+  env?: string | null,
   shouldMaskProduction?: { maskedProductionValue?: string }
 ): string {
   const maskValue =

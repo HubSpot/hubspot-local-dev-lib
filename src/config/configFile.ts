@@ -43,11 +43,11 @@ function getOrderedAccount(unorderedAccount: CLIAccount): CLIAccount {
 
   return {
     name,
-    ...(accountId ? { accountId } : {}),
+    accountId,
     env,
     authType,
     ...rest,
-  } as CLIAccount;
+  };
 }
 
 // TODO is there a better solution than casting here?
