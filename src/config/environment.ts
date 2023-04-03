@@ -25,18 +25,16 @@ export function getValidEnv(
   const maskValue =
     typeof shouldMaskProduction === 'object' &&
     'maskedProductionValue' in shouldMaskProduction
-      ? shouldMaskProduction.maskedProductionValue
+      ? shouldMaskProduction.maskedProductionValue || ''
       : '';
   const prodValue = shouldMaskProduction ? maskValue : ENVIRONMENTS.PROD;
 
   const returnVal =
-    typeof env &&
-    typeof env === 'string' &&
-    env.toLowerCase() === ENVIRONMENTS.QA
+    typeof env === 'string' && env.toLowerCase() === ENVIRONMENTS.QA
       ? ENVIRONMENTS.QA
       : prodValue;
 
-  return returnVal as string;
+  return returnVal;
 }
 
 function getConfigVariablesFromEnv() {
