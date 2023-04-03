@@ -37,7 +37,6 @@ export function deleteConfigFile(): void {
   fs.unlinkSync(configPath);
 }
 
-// TODO is there a better solution than casting here?
 function getOrderedAccount(unorderedAccount: CLIAccount): CLIAccount {
   const { name, accountId, env, authType, ...rest } = unorderedAccount;
 
@@ -50,7 +49,6 @@ function getOrderedAccount(unorderedAccount: CLIAccount): CLIAccount {
   };
 }
 
-// TODO is there a better solution than casting here?
 function getOrderedConfig(unorderedConfig: CLIConfig): CLIConfig {
   const {
     defaultAccount,
@@ -68,15 +66,15 @@ function getOrderedConfig(unorderedConfig: CLIConfig): CLIConfig {
     allowUsageTracking,
     ...rest,
     accounts: accounts.map(getOrderedAccount),
-  } as CLIConfig;
+  };
 }
 
 function readConfigFile(configPath: string): {
-  source: string | undefined;
+  source: string;
   error: BaseError | undefined;
 } {
-  let source;
-  let error;
+  let source = '';
+  let error: BaseError | undefined;
 
   try {
     source = fs.readFileSync(configPath).toString();
@@ -96,7 +94,7 @@ function parseConfig(configSource: string): {
   error: BaseError | undefined;
 } {
   let parsed: CLIConfig;
-  let error;
+  let error: BaseError | undefined;
 
   try {
     parsed = yaml.load(configSource) as CLIConfig;
@@ -132,7 +130,7 @@ export function loadConfigFromFile(options: CLIOptions): CLIConfig | null {
 }
 
 export function writeConfigToFile(config: CLIConfig): void {
-  let source;
+  let source: string;
   try {
     source = yaml.dump(
       JSON.parse(JSON.stringify(getOrderedConfig(config), null, 2))
