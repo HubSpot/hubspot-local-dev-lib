@@ -68,7 +68,7 @@ function getTextValue(lookupDotNotation: string): string {
 
 export function i18n(
   lookupDotNotation: string,
-  options: { [identifier: string]: string } = {}
+  options: { [identifier: string]: string | number } = {}
 ) {
   if (typeof lookupDotNotation !== 'string') {
     throw new Error(

@@ -16,7 +16,7 @@ export function log<T extends string>(
 
 export function debug(
   identifier: string,
-  interpolation?: { [key: string]: string }
+  interpolation?: { [key: string]: string | number }
 ): void {
   console.debug(i18n(`debug.${identifier}`, interpolation));
 }

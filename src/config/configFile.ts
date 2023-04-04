@@ -14,6 +14,8 @@ import { CLIConfig } from '../types/Config';
 import { BaseError } from '../types/Error';
 import { CLIOptions } from '../types/CLIOptions';
 
+const i18nKey = 'config.configFile';
+
 function getConfigFilePath(): string {
   return path.join(
     os.homedir(),
@@ -80,7 +82,7 @@ function readConfigFile(configPath: string): {
     source = fs.readFileSync(configPath).toString();
   } catch (err) {
     error = err as BaseError;
-    debug('config.errorReading', { configPath });
+    debug(`${i18nKey}.errorReading`, { configPath });
     throwFileSystemError(error, {
       filepath: configPath,
       read: true,
@@ -100,7 +102,7 @@ function parseConfig(configSource: string): {
     parsed = yaml.load(configSource) as CLIConfig;
   } catch (err) {
     error = err as BaseError;
-    debug('config.errorParsing');
+    debug(`${i18nKey}.errorParsing`);
     throwError(error);
   }
   return { parsed, error };
@@ -143,7 +145,7 @@ export function writeConfigToFile(config: CLIConfig): void {
   try {
     fs.ensureFileSync(configPath);
     fs.writeFileSync(configPath, source);
-    debug('config.writeSuccess', { configPath });
+    debug(`${i18nKey}.writeSuccess`, { configPath });
   } catch (err) {
     throwFileSystemError(err as BaseError, {
       filepath: configPath,

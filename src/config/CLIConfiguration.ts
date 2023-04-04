@@ -1,6 +1,5 @@
-// TODO use debug util
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { debug } from '../utils/logger';
+import { throwErrorWithMessage } from '../errors/standardErrors';
 import { getValidEnv, loadConfigFromEnvironment } from './environment';
 import {
   loadConfigFromFile,
@@ -23,6 +22,8 @@ import {
 } from '../types/Accounts';
 import { CLIOptions } from '../types/CLIOptions';
 import { ValueOf } from '../types/Utils';
+
+const i18nKey = 'config.cliConfiguration';
 
 class CLIConfiguration {
   active: boolean;
@@ -53,19 +54,17 @@ class CLIConfiguration {
       //TODO this will always return true as long as process.env has accountId. Do we want that?
       // TODO double check that configFromEnv.accounts[0].accountId is what we want
       if (configFromEnv) {
-        logger.debug(
-          `Loaded config from environment variables for ${configFromEnv.accounts[0].accountId}`
-        );
+        debug(`${i18nKey}.load.configFromEnv`, {
+          accountId: configFromEnv.accounts[0].accountId,
+        });
         this.useEnvConfig = true;
         this.config = configFromEnv;
       }
     } else {
       const configFromFile = loadConfigFromFile(this.options);
-      logger.debug('Loaded config from configuration file.');
+      debug(`${i18nKey}.load.configFromFile`);
       if (!configFromFile) {
-        logger.debug(
-          'The config file was empty. Initializing an empty config.'
-        );
+        debug(`${i18nKey}.load.empty`);
         this.config = { accounts: [] };
       }
       this.useEnvConfig = false;
@@ -273,10 +272,10 @@ class CLIConfiguration {
     } = updatedAccountFields;
 
     if (!accountId) {
-      throw new Error('An accountId is required to update the config');
+      throwErrorWithMessage(`${i18nKey}.updateConfigForAccount`);
     }
     if (!this.config) {
-      logger.debug('No config to update.');
+      debug(`${i18nKey}.updateConfigForAccount.noConfigToUpdate`);
       return null;
     }
 
@@ -342,10 +341,14 @@ class CLIConfiguration {
     >;
 
     if (currentAccountConfig) {
-      logger.debug(`Updating account config for ${accountId}`);
+      debug(`${i18nKey}.updateConfigForAccount.updating`, {
+        accountId,
+      });
       const index = this.getConfigAccountIndex(accountId);
       this.config.accounts[index] = completedAccountConfig;
-      logger.debug(`Adding account config entry for ${accountId}`);
+      debug(`${i18nKey}.updateConfigForAccount.addingConfigEntry`, {
+        accountId,
+      });
       if (this.config.accounts) {
         this.config.accounts.push(completedAccountConfig);
       } else {
@@ -365,15 +368,13 @@ class CLIConfiguration {
    */
   updateDefaultAccount(defaultAccount: string | number): CLIConfig | null {
     if (!this.config) {
-      throw new Error('No Config loaded.');
+      throwErrorWithMessage(`${i18nKey}.noConfigLoaded`);
     }
     if (
       !defaultAccount ||
       (typeof defaultAccount !== 'number' && typeof defaultAccount !== 'string')
     ) {
-      throw new Error(
-        `A 'defaultAccount' with value of number or string is required to update the config.`
-      );
+      throwErrorWithMessage(`${i18nKey}.updateDefaultAccount`);
     }
 
     // TODO do we want to support numbers for default accounts?
@@ -386,7 +387,7 @@ class CLIConfiguration {
    */
   renameAccount(currentName: string, newName: string): void {
     if (!this.config) {
-      throw new Error('No Config loaded.');
+      throwErrorWithMessage(`${i18nKey}.noConfigLoaded`);
     }
     const accountId = this.getAccountId(currentName);
     let accountConfigToRename: CLIAccount | null = null;
@@ -396,7 +397,7 @@ class CLIConfiguration {
     }
 
     if (!accountConfigToRename) {
-      throw new Error(`Cannot find account with identifier ${currentName}`);
+      throwErrorWithMessage(`${i18nKey}.renameAccount`, { currentName });
     }
 
     if (accountId) {
@@ -416,19 +417,19 @@ class CLIConfiguration {
    */
   removeAccountFromConfig(nameOrId: string | number): boolean {
     if (!this.config) {
-      throw new Error('No Config loaded.');
+      throwErrorWithMessage(`${i18nKey}.noConfigLoaded`);
     }
     const accountId = this.getAccountId(nameOrId);
 
     if (!accountId) {
-      throw new Error(`Unable to find account for ${nameOrId}.`);
+      throwErrorWithMessage(`${i18nKey}.removeAccountFromConfig`, { nameOrId });
     }
 
     let shouldShowDefaultAccountPrompt = false;
     const accountConfig = this.getAccount(accountId);
 
     if (accountConfig) {
-      logger.debug(`Deleting config for ${accountId}`);
+      debug(`${i18nKey}.removeAccountFromConfig`, { accountId });
       const index = this.getConfigAccountIndex(accountId);
       this.config.accounts.splice(index, 1);
 
@@ -447,15 +448,14 @@ class CLIConfiguration {
    */
   updateDefaultMode(defaultMode: string): CLIConfig | null {
     if (!this.config) {
-      throw new Error('No Config loaded.');
+      throwErrorWithMessage(`${i18nKey}.noConfigLoaded`);
     }
     const ALL_MODES = Object.values(Mode);
     if (!defaultMode || !ALL_MODES.find(m => m === defaultMode)) {
-      throw new Error(
-        `The mode ${defaultMode} is invalid. Valid values are ${commaSeparatedValues(
-          ALL_MODES
-        )}.`
-      );
+      throwErrorWithMessage(`${i18nKey}.updateDefaultMode`, {
+        defaultMode,
+        validModes: commaSeparatedValues(ALL_MODES),
+      });
     }
 
     this.config.defaultMode = defaultMode;
@@ -467,13 +467,14 @@ class CLIConfiguration {
    */
   updateHttpTimeout(timeout: string): CLIConfig | null {
     if (!this.config) {
-      throw new Error('No Config loaded.');
+      throwErrorWithMessage(`${i18nKey}.noConfigLoaded`);
     }
     const parsedTimeout = parseInt(timeout);
     if (isNaN(parsedTimeout) || parsedTimeout < MIN_HTTP_TIMEOUT) {
-      throw new Error(
-        `The value ${timeout} is invalid. The value must be a number greater than ${MIN_HTTP_TIMEOUT}.`
-      );
+      throwErrorWithMessage(`${i18nKey}.updateHttpTimeout`, {
+        timeout,
+        minTimeout: MIN_HTTP_TIMEOUT,
+      });
     }
 
     this.config.httpTimeout = parsedTimeout;
@@ -485,12 +486,12 @@ class CLIConfiguration {
    */
   updateAllowUsageTracking(isEnabled: boolean): CLIConfig | null {
     if (!this.config) {
-      throw new Error('No Config loaded.');
+      throwErrorWithMessage(`${i18nKey}.noConfigLoaded`);
     }
     if (typeof isEnabled !== 'boolean') {
-      throw new Error(
-        `Unable to update allowUsageTracking. The value ${isEnabled} is invalid. The value must be a boolean.`
-      );
+      throwErrorWithMessage(`${i18nKey}.updateAllowUsageTracking`, {
+        isEnabled: `${isEnabled}`,
+      });
     }
 
     this.config.allowUsageTracking = isEnabled;
