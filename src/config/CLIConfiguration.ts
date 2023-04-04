@@ -10,7 +10,6 @@ import {
 } from './configFile';
 import { commaSeparatedValues } from '../utils/text';
 import { ENVIRONMENTS } from '../constants';
-// TODO should constants all export from the same place?
 import { Mode, MIN_HTTP_TIMEOUT } from '../constants/config';
 import { CLIConfig } from '../types/Config';
 import {

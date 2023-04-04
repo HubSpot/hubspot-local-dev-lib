@@ -9,14 +9,14 @@ import {
   HUBSPOT_CONFIGURATION_FILE,
   HUBSPOT_CONFIGURATION_FOLDER,
 } from '../constants';
-import { CLIAccount } from '../types/Accounts';
+import { getOrderedConfig } from './configUtils';
 import { CLIConfig } from '../types/Config';
 import { BaseError } from '../types/Error';
 import { CLIOptions } from '../types/CLIOptions';
 
 const i18nKey = 'config.configFile';
 
-function getConfigFilePath(): string {
+export function getConfigFilePath(): string {
   return path.join(
     os.homedir(),
     HUBSPOT_CONFIGURATION_FOLDER,
@@ -39,95 +39,53 @@ export function deleteConfigFile(): void {
   fs.unlinkSync(configPath);
 }
 
-function getOrderedAccount(unorderedAccount: CLIAccount): CLIAccount {
-  const { name, accountId, env, authType, ...rest } = unorderedAccount;
-
-  return {
-    name,
-    accountId,
-    env,
-    authType,
-    ...rest,
-  };
-}
-
-function getOrderedConfig(unorderedConfig: CLIConfig): CLIConfig {
-  const {
-    defaultAccount,
-    defaultMode,
-    httpTimeout,
-    allowUsageTracking,
-    accounts,
-    ...rest
-  } = unorderedConfig;
-
-  return {
-    ...(defaultAccount && { defaultAccount }),
-    defaultMode,
-    httpTimeout,
-    allowUsageTracking,
-    ...rest,
-    accounts: accounts.map(getOrderedAccount),
-  };
-}
-
-function readConfigFile(configPath: string): {
-  source: string;
-  error: BaseError | undefined;
-} {
+export function readConfigFile(configPath: string): string {
   let source = '';
-  let error: BaseError | undefined;
 
   try {
     source = fs.readFileSync(configPath).toString();
   } catch (err) {
-    error = err as BaseError;
     debug(`${i18nKey}.errorReading`, { configPath });
-    throwFileSystemError(error, {
+    throwFileSystemError(err as BaseError, {
       filepath: configPath,
       read: true,
     });
   }
-  return { source, error };
+
+  return source;
 }
 
-function parseConfig(configSource: string): {
-  parsed: CLIConfig;
-  error: BaseError | undefined;
-} {
+export function parseConfig(configSource: string): CLIConfig {
   let parsed: CLIConfig;
-  let error: BaseError | undefined;
 
   try {
     parsed = yaml.load(configSource) as CLIConfig;
   } catch (err) {
-    error = err as BaseError;
     debug(`${i18nKey}.errorParsing`);
-    throwError(error);
+    throwError(err as BaseError);
   }
-  return { parsed, error };
+
+  return parsed;
 }
 
 export function loadConfigFromFile(options: CLIOptions): CLIConfig | null {
   const configPath = getConfigFilePath();
 
   if (configPath) {
-    const { source, error: readError } = readConfigFile(configPath);
+    const source = readConfigFile(configPath);
 
-    if (readError || !source) {
+    if (!source) {
       return null;
     }
-    const { parsed, error: parseError } = parseConfig(source);
 
-    if (parseError) {
-      return null;
-    }
-    return parsed;
+    return parseConfig(source);
   }
 
-  // TODO Handle this with a custom logger to pass in (logger vs debug?
-  const errorFunc = options.silenceErrors ? debug : debug;
-  errorFunc(`A configuration file could not be found at ${configPath}.`);
+  // TODO look into this
+  if (!options.silenceErrors) {
+    debug(`A configuration file could not be found at ${configPath}.`);
+  }
+
   return null;
 }
 

@@ -1,17 +1,15 @@
-import { AuthTypes } from '../types/Accounts';
-
 export const API_KEY_AUTH_METHOD = {
-  value: 'apikey' as AuthTypes.APIKey,
+  value: 'apikey',
   name: 'API Key',
 } as const;
 
 export const OAUTH_AUTH_METHOD = {
-  value: 'oauth2' as AuthTypes.OAuth,
+  value: 'oauth2',
   name: 'OAuth2',
 } as const;
 
 export const PERSONAL_ACCESS_KEY_AUTH_METHOD = {
-  value: 'personalaccesskey' as AuthTypes.PersonalAccessKey,
+  value: 'personalaccesskey',
   name: 'Personal Access Key',
 } as const;
 

@@ -8,7 +8,7 @@ import {
   PERSONAL_ACCESS_KEY_AUTH_METHOD,
   OAUTH_SCOPES,
 } from '../constants/auth';
-import generateNewConfig from './generateNewConfig';
+import { generateConfig } from './configUtils';
 
 /**
  * Returns environment constant for QA and PROD or optional masked value for PROD
@@ -54,10 +54,7 @@ function getConfigVariablesFromEnv() {
   };
 }
 
-export function loadConfigFromEnvironment(): Pick<
-  CLIConfig,
-  'accounts'
-> | null {
+export function loadConfigFromEnvironment(): CLIConfig | null {
   const {
     apiKey,
     clientId,
@@ -73,13 +70,13 @@ export function loadConfigFromEnvironment(): Pick<
   }
 
   if (personalAccessKey) {
-    return generateNewConfig(PERSONAL_ACCESS_KEY_AUTH_METHOD.value, {
+    return generateConfig(PERSONAL_ACCESS_KEY_AUTH_METHOD.value, {
       accountId,
       personalAccessKey,
       env,
     });
   } else if (clientId && clientSecret && refreshToken) {
-    return generateNewConfig(OAUTH_AUTH_METHOD.value, {
+    return generateConfig(OAUTH_AUTH_METHOD.value, {
       accountId,
       clientId,
       clientSecret,
@@ -88,7 +85,7 @@ export function loadConfigFromEnvironment(): Pick<
       env,
     });
   } else if (apiKey) {
-    return generateNewConfig(API_KEY_AUTH_METHOD.value, {
+    return generateConfig(API_KEY_AUTH_METHOD.value, {
       accountId,
       apiKey,
       env,

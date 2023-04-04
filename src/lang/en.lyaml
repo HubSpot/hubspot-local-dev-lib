@@ -31,7 +31,7 @@ en:
         errorReading: "Config file could not be read: {{ configPath }}"
         errorParsing: "Config file could not be parsed"
         writeSuccess: "Successfully wrote updated config data to {{ configPath }}"
-      generateNewConfig:
+      configUtils:
         unknownType: "Unknown auth type {{ type }}"
     environment:
       loadConfig:
