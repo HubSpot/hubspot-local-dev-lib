@@ -30,7 +30,7 @@ en:
           duplicateAccountIds: "Valiation failed: config.accounts[] has multiple entries with {{ accountId }}."
           duplicateAccountNames: "Valiation failed: config.accounts[] has multiple entries with {{ accountName }}."
           nameContainsSpaces: "Valiation failed: config.name {{ accountName }} cannot contain spaces."
-        updateConfigForAccount:
+        updateAccount:
           noConfigToUpdate: "No config to update."
           updating: "Updating account config for {{ accountId }}"
           addingConfigEntry: "Adding account config entry for {{ accountId }}"
@@ -68,7 +68,7 @@ en:
     config:
       cliConfiguration:
         noConfigLoaded: "No Config loaded."
-        updateConfigForAccount: "An accountId is required to update the config"
+        updateAccount: "An accountId is required to update the config"
         updateDefaultAccount: "A 'defaultAccount' with value of number or string is required to update the config."
         renameAccount: "Cannot find account with identifier {{ currentName }}"
         removeAccountFromConfig: "Unable to find account for {{ nameOrId }}."

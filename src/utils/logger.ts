@@ -8,7 +8,7 @@ export function log<T extends string>(
   debugInterpolation?: { [key: string]: string | number }
 ): void {
   if (callbacks && callbacks[key]) {
-    // eslint-disable-next-line
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     callbacks[key]!();
   } else if (debugKey) {
     debug(debugKey, debugInterpolation);

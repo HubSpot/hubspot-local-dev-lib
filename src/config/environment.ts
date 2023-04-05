@@ -1,7 +1,6 @@
 import { CLIConfig } from '../types/Config';
 import { debug } from '../utils/logger';
 import { ENVIRONMENTS, ENVIRONMENT_VARIABLES } from '../constants';
-// TODO should the constants all export from the same index file?
 import {
   API_KEY_AUTH_METHOD,
   OAUTH_AUTH_METHOD,
@@ -10,31 +9,14 @@ import {
 } from '../constants/auth';
 import { generateConfig } from './configUtils';
 
-/**
- * Returns environment constant for QA and PROD or optional masked value for PROD
- * @param {string} env Environment string, can be any case
- * @param {(boolean|object)} shouldMaskProduction Returning alternate value for PROD
- *    Can be used to hide env value in the config. Boolean can be used to simply mask 'prod' with ''. The default
- *    is not to modify the returned value for production, and instead return 'prod'.
- * @param {any} shouldMaskProduction.maskedProductionValue Alternate value to return in place of PROD
- */
 export function getValidEnv(
   env?: string | null,
-  shouldMaskProduction?: { maskedProductionValue?: string }
-): string {
-  const maskValue =
-    typeof shouldMaskProduction === 'object' &&
-    'maskedProductionValue' in shouldMaskProduction
-      ? shouldMaskProduction.maskedProductionValue || ''
-      : '';
-  const prodValue = shouldMaskProduction ? maskValue : ENVIRONMENTS.PROD;
-
-  const returnVal =
-    typeof env === 'string' && env.toLowerCase() === ENVIRONMENTS.QA
-      ? ENVIRONMENTS.QA
-      : prodValue;
-
-  return returnVal;
+  useProdDefault = true
+): string | undefined {
+  if (typeof env === 'string' && env.toLowerCase() === ENVIRONMENTS.QA) {
+    return ENVIRONMENTS.QA;
+  }
+  return useProdDefault ? ENVIRONMENTS.PROD : undefined;
 }
 
 function getConfigVariablesFromEnv() {
@@ -50,7 +32,7 @@ function getConfigVariablesFromEnv() {
       10
     ),
     refreshToken: env[ENVIRONMENT_VARIABLES.HUBSPOT_REFRESH_TOKEN],
-    env: getValidEnv(env[ENVIRONMENT_VARIABLES.HUBSPOT_ENVIRONMENT]),
+    env: getValidEnv(env[ENVIRONMENT_VARIABLES.HUBSPOT_ENVIRONMENT]) as string,
   };
 }
 

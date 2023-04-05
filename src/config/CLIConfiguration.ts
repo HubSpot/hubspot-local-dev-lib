@@ -10,6 +10,7 @@ import {
 } from './configFile';
 import { commaSeparatedValues } from '../utils/text';
 import { ENVIRONMENTS } from '../constants';
+import { API_KEY_AUTH_METHOD } from '../constants/auth';
 import { Mode, MIN_HTTP_TIMEOUT } from '../constants/config';
 import { CLIConfig } from '../types/Config';
 import {
@@ -219,12 +220,16 @@ class CLIConfiguration {
   // TODO a util that returns the account to use, respecting the values set in
   // "defaultAccountOverrides"
   // Example "defaultAccountOverrides":
-  //  - /src/brodgers/customer-project: customer-account1
-  // "/src/brodgers/customer-project" is the path to the project dir
+  //  - /src/brodgers/customer-project-1: customer-account1
+  //  - /src/brodgers/customer-project-2: customer-account2
+  // "/src/brodgers/customer-project-1" is the path to the project dir
   // "customer-account1" is the name of the account to use as the default for the specified dir
-  getResolvedAccountForCWD(nameOrId: string | number): number | null {
+  // These defaults take precedence over the standard default account specified in the config
+  getResolvedDefaultAccountForCWD(
+    nameOrId: string | number
+  ): CLIAccount | null {
     // NOTE none of the actual logic is coded into this yet
-    return this.getAccountId(nameOrId);
+    return this.getAccount(nameOrId);
   }
 
   getConfigAccountIndex(accountId: number): number {
@@ -241,19 +246,14 @@ class CLIConfiguration {
     );
   }
 
-  getEnv(nameOrId: string | number): string | undefined {
-    const accountId = this.getAccountId(nameOrId);
+  getEnv(nameOrId: string | number): string {
+    const accountConfig = this.getAccount(nameOrId);
 
-    if (accountId) {
-      const accountConfig = this.getAccount(accountId);
-      if (accountConfig && accountConfig.env) {
-        return accountConfig.env;
-      }
-    } else {
-      const env = this.config && this.config.env;
-      if (env) {
-        return env;
-      }
+    if (accountConfig && accountConfig.accountId && accountConfig.env) {
+      return accountConfig.env;
+    }
+    if (this.config && this.config.env) {
+      return this.config.env;
     }
     return ENVIRONMENTS.PROD;
   }
@@ -265,7 +265,7 @@ class CLIConfiguration {
   /**
    * @throws {Error}
    */
-  updateConfigForAccount(
+  updateAccount(
     updatedAccountFields: FlatAccountFields<OauthTokenInfo>,
     writeUpdate = true
   ): CLIAccount | null {
@@ -286,10 +286,10 @@ class CLIConfiguration {
     } = updatedAccountFields;
 
     if (!accountId) {
-      throwErrorWithMessage(`${i18nKey}.updateConfigForAccount`);
+      throwErrorWithMessage(`${i18nKey}.updateAccount`);
     }
     if (!this.config) {
-      debug(`${i18nKey}.updateConfigForAccount.noConfigToUpdate`);
+      debug(`${i18nKey}.updateAccount.noConfigToUpdate`);
       return null;
     }
 
@@ -327,9 +327,7 @@ class CLIConfiguration {
 
     const updatedEnv = getValidEnv(
       env || (currentAccountConfig && currentAccountConfig.env),
-      {
-        maskedProductionValue: undefined,
-      }
+      false
     );
     const updatedDefaultMode: ValueOf<typeof Mode> | undefined =
       defaultMode && (defaultMode.toLowerCase() as ValueOf<typeof Mode>);
@@ -339,7 +337,7 @@ class CLIConfiguration {
     safelyApplyUpdates('accountId', accountId);
     safelyApplyUpdates('authType', authType);
     safelyApplyUpdates('auth', auth);
-    if (nextAccountConfig.authType === 'apikey') {
+    if (nextAccountConfig.authType === API_KEY_AUTH_METHOD.value) {
       safelyApplyUpdates('apiKey', apiKey);
     }
     if (typeof updatedDefaultMode !== 'undefined') {
@@ -355,12 +353,12 @@ class CLIConfiguration {
     >;
 
     if (currentAccountConfig) {
-      debug(`${i18nKey}.updateConfigForAccount.updating`, {
+      debug(`${i18nKey}.updateAccount.updating`, {
         accountId,
       });
       const index = this.getConfigAccountIndex(accountId);
       this.config.accounts[index] = completedAccountConfig;
-      debug(`${i18nKey}.updateConfigForAccount.addingConfigEntry`, {
+      debug(`${i18nKey}.updateAccount.addingConfigEntry`, {
         accountId,
       });
       if (this.config.accounts) {
@@ -391,7 +389,6 @@ class CLIConfiguration {
       throwErrorWithMessage(`${i18nKey}.updateDefaultAccount`);
     }
 
-    // TODO do we want to support numbers for default accounts?
     this.config.defaultAccount = defaultAccount;
     return this.write();
   }
@@ -415,10 +412,7 @@ class CLIConfiguration {
     }
 
     if (accountId) {
-      this.updateConfigForAccount({
-        accountId,
-        name: newName,
-      });
+      this.updateAccount({ accountId, name: newName });
     }
 
     if (accountConfigToRename.name === this.getDefaultAccount()) {
@@ -439,7 +433,7 @@ class CLIConfiguration {
       throwErrorWithMessage(`${i18nKey}.removeAccountFromConfig`, { nameOrId });
     }
 
-    let shouldShowDefaultAccountPrompt = false;
+    let removedAccountIsDefault = false;
     const accountConfig = this.getAccount(accountId);
 
     if (accountConfig) {
@@ -448,13 +442,13 @@ class CLIConfiguration {
       this.config.accounts.splice(index, 1);
 
       if (this.getDefaultAccount() === accountConfig.name) {
-        shouldShowDefaultAccountPrompt = true;
+        removedAccountIsDefault = true;
       }
 
       this.write();
     }
 
-    return shouldShowDefaultAccountPrompt;
+    return removedAccountIsDefault;
   }
 
   /**
