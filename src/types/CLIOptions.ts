@@ -1,4 +1,4 @@
 export interface CLIOptions {
-  useEnv?: string;
+  useEnv?: boolean;
   silenceErrors?: string;
 }

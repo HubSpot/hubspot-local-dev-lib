@@ -1,4 +1,4 @@
-import { debug } from '../utils/logger';
+import { debug, makeTypedLogger } from '../utils/logger';
 import { throwErrorWithMessage } from '../errors/standardErrors';
 import { getValidEnv, loadConfigFromEnvironment } from './environment';
 import {
@@ -21,8 +21,19 @@ import {
 } from '../types/Accounts';
 import { CLIOptions } from '../types/CLIOptions';
 import { ValueOf } from '../types/Utils';
+import { LogCallbacksArg } from '../types/LogCallbacks';
 
 const i18nKey = 'config.cliConfiguration';
+
+const validateLogCallbackKeys = [
+  'noConfig',
+  'noConfigAccounts',
+  'emptyAccountConfig',
+  'noAccountId',
+  'duplicateAccountIds',
+  'duplicateAccountNames',
+  'nameContainsSpaces',
+] as const;
 
 class CLIConfiguration {
   active: boolean;
@@ -50,8 +61,6 @@ class CLIConfiguration {
   load(): CLIConfig | null {
     if (this.options.useEnv) {
       const configFromEnv = loadConfigFromEnvironment();
-      //TODO this will always return true as long as process.env has accountId. Do we want that?
-      // TODO double check that configFromEnv.accounts[0].accountId is what we want
       if (configFromEnv) {
         debug(`${i18nKey}.load.configFromEnv`, {
           accountId: configFromEnv.accounts[0].accountId,
@@ -62,6 +71,7 @@ class CLIConfiguration {
     } else {
       const configFromFile = loadConfigFromFile(this.options);
       debug(`${i18nKey}.load.configFromFile`);
+
       if (!configFromFile) {
         debug(`${i18nKey}.load.empty`);
         this.config = { accounts: [] };
@@ -108,13 +118,20 @@ class CLIConfiguration {
     return this.config;
   }
 
-  validate(): boolean {
+  validate(
+    logCallbacks?: LogCallbacksArg<typeof validateLogCallbackKeys>
+  ): boolean {
+    const validateLogger = makeTypedLogger<typeof validateLogCallbackKeys>(
+      logCallbacks,
+      'config.cliConfiguration.validate'
+    );
+
     if (!this.config) {
-      logger.error('Valiation failed: No config was found.');
+      validateLogger('noConfig');
       return false;
     }
     if (!Array.isArray(this.config.accounts)) {
-      logger.error('Valiation failed: config.accounts[] is not defined.');
+      validateLogger('noConfigAccounts');
       return false;
     }
 
@@ -123,32 +140,30 @@ class CLIConfiguration {
 
     return this.config.accounts.every(accountConfig => {
       if (!accountConfig) {
-        logger.error('Valiation failed: config.accounts[] has an empty entry');
+        validateLogger('emptyAccountConfig');
         return false;
       }
       if (!accountConfig.accountId) {
-        logger.error(
-          'Valiation failed: config.accounts[] has an entry missing accountId'
-        );
+        validateLogger('noAccountId');
         return false;
       }
       if (accountIdsMap[accountConfig.accountId]) {
-        logger.error(
-          `Valiation failed: config.accounts[] has multiple entries with accountId=${accountConfig.accountId}`
-        );
+        validateLogger('duplicateAccountIds', {
+          accountId: accountConfig.accountId,
+        });
         return false;
       }
       if (accountConfig.name) {
         if (accountNamesMap[accountConfig.name]) {
-          logger.error(
-            `Valiation failed: config.accounts[] has multiple entries with name=${accountConfig.name}`
-          );
+          validateLogger('duplicateAccountNames', {
+            accountName: accountConfig.name,
+          });
           return false;
         }
         if (/\s+/.test(accountConfig.name)) {
-          logger.error(
-            `Valiation failed: config.name '${accountConfig.name}' cannot contain spaces`
-          );
+          validateLogger('nameContainsSpaces', {
+            accountName: accountConfig.name,
+          });
           return false;
         }
         accountNamesMap[accountConfig.name] = true;

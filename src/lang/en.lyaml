@@ -19,9 +19,17 @@ en:
     config:
       cliConfiguration:
         load:
-          configFromEnv: "Loaded config from environment variables for {{ acountId }}"
+          configFromEnv: "Loaded config from environment variables for {{ accountId }}"
           configFromFile: "Loaded config from configuration file."
           empty: "The config file was empty. Initializing an empty config."
+        validate:
+          noConfig: "Valiation failed: No config was found."
+          noConfigAccounts: "Valiation failed: config.accounts[] is not defined."
+          emptyAccountConfig: "Valiation failed: config.accounts[] has an empty entry."
+          noAccountId: "Valiation failed: config.accounts[] has an entry missing accountId."
+          duplicateAccountIds: "Valiation failed: config.accounts[] has multiple entries with {{ accountId }}."
+          duplicateAccountNames: "Valiation failed: config.accounts[] has multiple entries with {{ accountName }}."
+          nameContainsSpaces: "Valiation failed: config.name {{ accountName }} cannot contain spaces."
         updateConfigForAccount:
           noConfigToUpdate: "No config to update."
           updating: "Updating account config for {{ accountId }}"

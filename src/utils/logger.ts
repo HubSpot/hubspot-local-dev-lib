@@ -5,13 +5,26 @@ export function log<T extends string>(
   key: T,
   callbacks?: LogCallbacks<T>,
   debugKey?: string,
-  debugInterpolation?: { [key: string]: string }
+  debugInterpolation?: { [key: string]: string | number }
 ): void {
   if (callbacks && callbacks[key]) {
-    callbacks[key]();
+    // eslint-disable-next-line
+    callbacks[key]!();
   } else if (debugKey) {
     debug(debugKey, debugInterpolation);
   }
+}
+
+export function makeTypedLogger<T extends readonly string[]>(
+  callbacks?: LogCallbacks<T[number]>,
+  debugKey?: string
+) {
+  type ValidateCallbackKeys = T[number];
+
+  return (
+    key: ValidateCallbackKeys,
+    debugInterpolation?: { [key: string]: string | number }
+  ) => log<ValidateCallbackKeys>(key, callbacks, debugKey, debugInterpolation);
 }
 
 export function debug(

@@ -9,16 +9,29 @@ import {
   readConfigFile,
   parseConfig,
   loadConfigFromFile,
+  writeConfigToFile,
 } from '../configFile';
 import {
   HUBSPOT_CONFIGURATION_FILE,
   HUBSPOT_CONFIGURATION_FOLDER,
 } from '../../constants';
+import { CLIConfig } from '../../types/Config';
 
+// fs spy
 const existsSyncSpy = jest.spyOn(fs, 'existsSync');
 const readFileSyncSpy = jest.spyOn(fs, 'readFileSync');
 const unlinkSyncSpy = jest.spyOn(fs, 'unlinkSync');
+const ensureFileSyncSpy = jest.spyOn(fs, 'ensureFileSync');
+const writeFileSyncSpy = jest.spyOn(fs, 'writeFileSync');
+
+// yamp spy
 const loadSpy = jest.spyOn(yaml, 'load');
+const dumpSpy = jest.spyOn(yaml, 'dump');
+
+const CONFIG = {
+  defaultAccount: '',
+  accounts: [],
+} as CLIConfig;
 
 describe('config/configFile', () => {
   describe('getConfigFilePath method', () => {
@@ -69,6 +82,7 @@ describe('config/configFile', () => {
     it('deletes a file', () => {
       unlinkSyncSpy.mockImplementation(() => null);
       deleteConfigFile();
+
       expect(unlinkSyncSpy).toHaveBeenLastCalledWith(getConfigFilePath());
     });
   });
@@ -84,6 +98,7 @@ describe('config/configFile', () => {
       readFileSyncSpy.mockImplementation(() => {
         throw new Error('failed to do the thing');
       });
+
       expect(() => readConfigFile('path/to/config/file')).toThrow();
     });
   });
@@ -99,6 +114,7 @@ describe('config/configFile', () => {
       loadSpy.mockImplementation(() => {
         throw new Error('failed to do the thing');
       });
+
       expect(() => parseConfig('config-source')).toThrow();
     });
   });
@@ -115,7 +131,34 @@ describe('config/configFile', () => {
       loadSpy.mockImplementation(() => {
         throw new Error('failed to do the thing');
       });
+
       expect(() => loadConfigFromFile({})).toThrow();
+    });
+  });
+
+  describe('writeConfigToFile method', () => {
+    it('writes the config to a file', () => {
+      ensureFileSyncSpy.mockImplementation(() => null);
+      writeFileSyncSpy.mockImplementation(() => null);
+      writeConfigToFile(CONFIG);
+
+      expect(ensureFileSyncSpy).toHaveBeenCalled();
+      expect(writeFileSyncSpy).toHaveBeenCalled();
+    });
+    it('throws error if it fails to parse the config json', () => {
+      dumpSpy.mockImplementation(() => {
+        throw new Error('failed to do the thing');
+      });
+
+      expect(() => writeConfigToFile(CONFIG)).toThrow();
+    });
+    it('throws error if it fails to write the config to a file', () => {
+      ensureFileSyncSpy.mockImplementation(() => null);
+      writeFileSyncSpy.mockImplementation(() => {
+        throw new Error('failed to do the thing');
+      });
+
+      expect(() => writeConfigToFile(CONFIG)).toThrow();
     });
   });
 });

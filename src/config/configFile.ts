@@ -39,6 +39,9 @@ export function deleteConfigFile(): void {
   fs.unlinkSync(configPath);
 }
 
+/**
+ * @throws {Error}
+ */
 export function readConfigFile(configPath: string): string {
   let source = '';
 
@@ -55,6 +58,9 @@ export function readConfigFile(configPath: string): string {
   return source;
 }
 
+/**
+ * @throws {Error}
+ */
 export function parseConfig(configSource: string): CLIConfig {
   let parsed: CLIConfig;
 
@@ -68,6 +74,9 @@ export function parseConfig(configSource: string): CLIConfig {
   return parsed;
 }
 
+/**
+ * @throws {Error}
+ */
 export function loadConfigFromFile(options: CLIOptions): CLIConfig | null {
   const configPath = getConfigFilePath();
 
@@ -89,6 +98,9 @@ export function loadConfigFromFile(options: CLIOptions): CLIConfig | null {
   return null;
 }
 
+/**
+ * @throws {Error}
+ */
 export function writeConfigToFile(config: CLIConfig): void {
   let source: string;
   try {
