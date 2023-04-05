@@ -11,7 +11,7 @@ import {
 import { commaSeparatedValues } from '../utils/text';
 import { ENVIRONMENTS } from '../constants';
 import { API_KEY_AUTH_METHOD } from '../constants/auth';
-import { Mode, MIN_HTTP_TIMEOUT } from '../constants/config';
+import { DEFAULT_MODES, MIN_HTTP_TIMEOUT } from '../constants/config';
 import { CLIConfig } from '../types/Config';
 import {
   CLIAccount,
@@ -329,8 +329,9 @@ class CLIConfiguration {
       env || (currentAccountConfig && currentAccountConfig.env),
       false
     );
-    const updatedDefaultMode: ValueOf<typeof Mode> | undefined =
-      defaultMode && (defaultMode.toLowerCase() as ValueOf<typeof Mode>);
+    const updatedDefaultMode: ValueOf<typeof DEFAULT_MODES> | undefined =
+      defaultMode &&
+      (defaultMode.toLowerCase() as ValueOf<typeof DEFAULT_MODES>);
 
     safelyApplyUpdates('name', name);
     safelyApplyUpdates('env', updatedEnv);
@@ -342,7 +343,7 @@ class CLIConfiguration {
     }
     if (typeof updatedDefaultMode !== 'undefined') {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      safelyApplyUpdates('defaultMode', Mode[updatedDefaultMode]);
+      safelyApplyUpdates('defaultMode', DEFAULT_MODES[updatedDefaultMode]);
     }
     safelyApplyUpdates('personalAccessKey', personalAccessKey);
     safelyApplyUpdates('sandboxAccountType', sandboxAccountType);
@@ -458,7 +459,7 @@ class CLIConfiguration {
     if (!this.config) {
       throwErrorWithMessage(`${i18nKey}.noConfigLoaded`);
     }
-    const ALL_MODES = Object.values(Mode);
+    const ALL_MODES = Object.values(DEFAULT_MODES);
     if (!defaultMode || !ALL_MODES.find(m => m === defaultMode)) {
       throwErrorWithMessage(`${i18nKey}.updateDefaultMode`, {
         defaultMode,

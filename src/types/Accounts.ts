@@ -1,4 +1,4 @@
-import { Mode } from '../constants/config';
+import { DEFAULT_MODES } from '../constants/config';
 import { ValueOf } from './Utils';
 
 export type AuthType = 'personalaccesskey' | 'apikey' | 'oauth2';
@@ -6,7 +6,7 @@ export type AuthType = 'personalaccesskey' | 'apikey' | 'oauth2';
 export interface CLIAccount {
   name?: string;
   accountId: number;
-  defaultMode?: ValueOf<typeof Mode>;
+  defaultMode?: ValueOf<typeof DEFAULT_MODES>;
   env?: string;
   authType?: AuthType;
   auth?: object;
