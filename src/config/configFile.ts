@@ -12,7 +12,6 @@ import {
 import { getOrderedConfig } from './configUtils';
 import { CLIConfig } from '../types/Config';
 import { BaseError } from '../types/Error';
-import { CLIOptions } from '../types/CLIOptions';
 
 const i18nKey = 'config.configFile';
 
@@ -77,7 +76,7 @@ export function parseConfig(configSource: string): CLIConfig {
 /**
  * @throws {Error}
  */
-export function loadConfigFromFile(options: CLIOptions): CLIConfig | null {
+export function loadConfigFromFile(): CLIConfig | null {
   const configPath = getConfigFilePath();
 
   if (configPath) {
@@ -90,10 +89,8 @@ export function loadConfigFromFile(options: CLIOptions): CLIConfig | null {
     return parseConfig(source);
   }
 
-  // TODO look into this
-  if (!options.silenceErrors) {
-    debug(`A configuration file could not be found at ${configPath}.`);
-  }
+  // TODO: Maybe use log callbacks here
+  debug(`${i18nKey}.errorLoading`, { configPath });
 
   return null;
 }

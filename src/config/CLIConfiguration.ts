@@ -70,7 +70,7 @@ class CLIConfiguration {
         this.config = configFromEnv;
       }
     } else {
-      const configFromFile = loadConfigFromFile(this.options);
+      const configFromFile = loadConfigFromFile();
       debug(`${i18nKey}.load.configFromFile`);
 
       if (!configFromFile) {
@@ -228,7 +228,6 @@ class CLIConfiguration {
   getResolvedDefaultAccountForCWD(
     nameOrId: string | number
   ): CLIAccount | null {
-    // NOTE none of the actual logic is coded into this yet
     return this.getAccount(nameOrId);
   }
 

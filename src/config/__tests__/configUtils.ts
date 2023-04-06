@@ -6,7 +6,7 @@ import {
 import { CLIConfig } from '../../types/Config';
 import { CLIAccount } from '../../types/Accounts';
 
-const PAK_ACCOUNT = {
+const PAK_ACCOUNT: CLIAccount = {
   accountId: 111,
   authType: 'personalaccesskey',
   name: 'pak-account-1',
@@ -15,9 +15,9 @@ const PAK_ACCOUNT = {
     expiresAt: 1680630798,
   },
   personalAccessKey: 'pak-12345',
-} as CLIAccount;
+};
 
-const OAUTH_ACCOUNT = {
+const OAUTH_ACCOUNT: CLIAccount = {
   accountId: 222,
   authType: 'oauth2',
   name: 'oauth-account-1',
@@ -29,19 +29,19 @@ const OAUTH_ACCOUNT = {
       refreshToken: 'oauth-refresh-token',
     },
   },
-} as CLIAccount;
+};
 
-const APIKEY_ACCOUNT = {
+const APIKEY_ACCOUNT: CLIAccount = {
   accountId: 333,
   name: 'apikey-account-1',
   authType: 'apikey',
   apiKey: 'api-key',
-} as CLIAccount;
+};
 
-const CONFIG = {
+const CONFIG: CLIConfig = {
   defaultAccount: PAK_ACCOUNT.name,
   accounts: [PAK_ACCOUNT, OAUTH_ACCOUNT, APIKEY_ACCOUNT],
-} as CLIConfig;
+};
 
 describe('config/configUtils', () => {
   describe('getOrderedAccount method', () => {

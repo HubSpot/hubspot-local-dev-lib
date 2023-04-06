@@ -24,7 +24,13 @@ export function makeTypedLogger<T extends readonly string[]>(
   return (
     key: ValidateCallbackKeys,
     debugInterpolation?: { [key: string]: string | number }
-  ) => log<ValidateCallbackKeys>(key, callbacks, debugKey, debugInterpolation);
+  ) =>
+    log<ValidateCallbackKeys>(
+      key,
+      callbacks,
+      `${debugKey}.${key}`,
+      debugInterpolation
+    );
 }
 
 export function debug(

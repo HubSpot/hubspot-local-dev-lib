@@ -4,7 +4,6 @@ export const DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME = 'hubspot.config.yml';
 export const HUBSPOT_CONFIGURATION_FOLDER = '.hubspot';
 export const HUBSPOT_CONFIGURATION_FILE = 'config.yml';
 
-// TODO is this config property still being used?
 export const DEFAULT_MODES = {
   draft: 'draft',
   publish: 'publish',

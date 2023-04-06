@@ -19,7 +19,17 @@ export function getValidEnv(
   return useProdDefault ? ENVIRONMENTS.PROD : undefined;
 }
 
-function getConfigVariablesFromEnv() {
+type EnvironmentConfigVariables = {
+  apiKey?: string;
+  clientId?: string;
+  clientSecret?: string;
+  personalAccessKey?: string;
+  accountId?: number;
+  refreshToken?: string;
+  env?: string;
+};
+
+function getConfigVariablesFromEnv(): EnvironmentConfigVariables {
   const env = process.env;
 
   return {
@@ -27,12 +37,9 @@ function getConfigVariablesFromEnv() {
     clientId: env[ENVIRONMENT_VARIABLES.HUBSPOT_CLIENT_ID],
     clientSecret: env[ENVIRONMENT_VARIABLES.HUBSPOT_CLIENT_SECRET],
     personalAccessKey: env[ENVIRONMENT_VARIABLES.HUBSPOT_PERSONAL_ACCESS_KEY],
-    accountId: parseInt(
-      env[ENVIRONMENT_VARIABLES.HUBSPOT_ACCOUNT_ID] as string,
-      10
-    ),
+    accountId: parseInt(env[ENVIRONMENT_VARIABLES.HUBSPOT_ACCOUNT_ID]!, 10),
     refreshToken: env[ENVIRONMENT_VARIABLES.HUBSPOT_REFRESH_TOKEN],
-    env: getValidEnv(env[ENVIRONMENT_VARIABLES.HUBSPOT_ENVIRONMENT]) as string,
+    env: getValidEnv(env[ENVIRONMENT_VARIABLES.HUBSPOT_ENVIRONMENT]),
   };
 }
 
@@ -48,6 +55,11 @@ export function loadConfigFromEnvironment(): CLIConfig | null {
   } = getConfigVariablesFromEnv();
   if (!accountId) {
     debug('environment.loadConfig.missingAccountId');
+    return null;
+  }
+
+  if (!env) {
+    debug('environment.loadConfig.env');
     return null;
   }
 

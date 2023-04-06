@@ -123,16 +123,16 @@ describe('config/configFile', () => {
     it('loads the config from file', () => {
       readFileSyncSpy.mockImplementation(() => Buffer.from('content'));
       loadSpy.mockImplementation(() => ({}));
-      const result = loadConfigFromFile({});
+      const result = loadConfigFromFile();
 
       expect(result).toBeDefined();
     });
     it('throws error if it fails to load the config file', () => {
       loadSpy.mockImplementation(() => {
-        throw new Error('failed to do the thing');
+        throw new Error('Config file could not be read: /testpath');
       });
 
-      expect(() => loadConfigFromFile({})).toThrow();
+      expect(() => loadConfigFromFile()).toThrow();
     });
   });
 

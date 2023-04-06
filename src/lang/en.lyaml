@@ -39,11 +39,13 @@ en:
         errorReading: "Config file could not be read: {{ configPath }}"
         errorParsing: "Config file could not be parsed"
         writeSuccess: "Successfully wrote updated config data to {{ configPath }}"
+        errorLoading: "A configuration file could not be found at {{ configPath }}."
       configUtils:
         unknownType: "Unknown auth type {{ type }}"
     environment:
       loadConfig:
         missingAccountId: "Unable to load config from environment variables: Missing accountId"
+        missingEnv: "Unable to load config from environment variables: Missing env"
         unknownAuthType: "Unable to load config from environment variables: Unknown auth type"
   errors:
     errorTypes:

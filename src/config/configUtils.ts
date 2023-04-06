@@ -122,7 +122,7 @@ export function generateConfig(
   if (!options) {
     return null;
   }
-  const config = { accounts: [] } as CLIConfig;
+  const config: CLIConfig = { accounts: [] };
   let configAccount: CLIAccount;
 
   switch (type) {

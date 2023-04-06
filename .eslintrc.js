@@ -16,6 +16,7 @@ module.exports = {
   rules: {
     'no-console': 'off',
     'no-return-await': 'error',
+    '@typescript-eslint/no-non-null-assertion': 'off',
   },
   overrides: [
     {

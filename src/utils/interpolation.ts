@@ -18,7 +18,7 @@ function generateReplaceFn(
 }
 
 type InterpolationData = {
-  [indentifier: string]: string | number;
+  [identifier: string]: string | number;
 };
 
 export function interpolate(
