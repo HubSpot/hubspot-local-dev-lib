@@ -16,6 +16,37 @@ en:
     standardErrors:
       error: "Error: {{ error }}"
       context: "Context: {{ context }}"
+    config:
+      cliConfiguration:
+        load:
+          configFromEnv: "Loaded config from environment variables for {{ accountId }}"
+          configFromFile: "Loaded config from configuration file."
+          empty: "The config file was empty. Initializing an empty config."
+        validate:
+          noConfig: "Valiation failed: No config was found."
+          noConfigAccounts: "Valiation failed: config.accounts[] is not defined."
+          emptyAccountConfig: "Valiation failed: config.accounts[] has an empty entry."
+          noAccountId: "Valiation failed: config.accounts[] has an entry missing accountId."
+          duplicateAccountIds: "Valiation failed: config.accounts[] has multiple entries with {{ accountId }}."
+          duplicateAccountNames: "Valiation failed: config.accounts[] has multiple entries with {{ accountName }}."
+          nameContainsSpaces: "Valiation failed: config.name {{ accountName }} cannot contain spaces."
+        updateAccount:
+          noConfigToUpdate: "No config to update."
+          updating: "Updating account config for {{ accountId }}"
+          addingConfigEntry: "Adding account config entry for {{ accountId }}"
+        removeAccountFromConfig: "Deleting config for {{ accountId }}"
+      configFile:
+        errorReading: "Config file could not be read: {{ configPath }}"
+        errorParsing: "Config file could not be parsed"
+        writeSuccess: "Successfully wrote updated config data to {{ configPath }}"
+        errorLoading: "A configuration file could not be found at {{ configPath }}."
+      configUtils:
+        unknownType: "Unknown auth type {{ type }}"
+    environment:
+      loadConfig:
+        missingAccountId: "Unable to load config from environment variables: Missing accountId"
+        missingEnv: "Unable to load config from environment variables: Missing env"
+        unknownAuthType: "Unable to load config from environment variables: Unknown auth type"
   errors:
     errorTypes:
       fileSystem:
@@ -36,3 +67,13 @@ en:
     utils:
       git:
         configIgnore: "Unable to determine if config file is properly ignored by git."
+    config:
+      cliConfiguration:
+        noConfigLoaded: "No Config loaded."
+        updateAccount: "An accountId is required to update the config"
+        updateDefaultAccount: "A 'defaultAccount' with value of number or string is required to update the config."
+        renameAccount: "Cannot find account with identifier {{ currentName }}"
+        removeAccountFromConfig: "Unable to find account for {{ nameOrId }}."
+        updateDefaultMode: "The mode {{ defaultMode }} is invalid. Valid values are {{ validModes }}."
+        updateHttpTimeout: The value {{ timeout }} is invalid. The value must be a number greater than {{ minTimeout }}.
+        updateAllowUsageTracking: Unable to update allowUsageTracking. The value {{ isEnabled }} is invalid. The value must be a boolean.

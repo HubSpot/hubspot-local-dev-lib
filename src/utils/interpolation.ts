@@ -8,7 +8,7 @@ const delimiters = {
 function generateReplaceFn(
   matchedText: string,
   startIndex: number,
-  replacementString: string
+  replacementString: string | number
 ): (currentStringValue: string) => string {
   return function (currentStringValue: string): string {
     return `${currentStringValue.slice(0, startIndex)}${
@@ -18,7 +18,7 @@ function generateReplaceFn(
 }
 
 type InterpolationData = {
-  [indentifier: string]: string;
+  [identifier: string]: string | number;
 };
 
 export function interpolate(

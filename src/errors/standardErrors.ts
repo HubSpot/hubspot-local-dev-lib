@@ -37,7 +37,7 @@ export function debugErrorAndContext(
 
 export function throwErrorWithMessage(
   identifier: string,
-  interpolation?: { [key: string]: string }
+  interpolation?: { [key: string]: string | number }
 ): never {
   throw new Error(i18n(`errors.${identifier}`, interpolation));
 }
