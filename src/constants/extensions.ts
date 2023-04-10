@@ -17,3 +17,5 @@ export const ALLOWED_EXTENSIONS = new Set([
   'woff2',
   'graphql',
 ]);
+
+export const MODULE_EXTENSION = 'module';
