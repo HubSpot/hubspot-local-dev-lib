@@ -39,6 +39,7 @@
     "findup-sync": "^5.0.0",
     "fs-extra": "^11.1.0",
     "js-yaml": "^4.1.0",
+    "moment": "^2.29.4",
     "unixify": "^1.0.0"
   }
 }
