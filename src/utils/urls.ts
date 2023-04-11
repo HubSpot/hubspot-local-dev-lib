@@ -1,6 +1,6 @@
 import { ENVIRONMENTS } from '../constants/environments';
 
-function getEnvUrlString(env: string): string {
+function getEnvUrlString(env?: string): string {
   if (typeof env !== 'string') {
     return '';
   }
@@ -12,8 +12,8 @@ export const getHubSpotWebsiteOrigin = (env: string) =>
   `https://app.hubspot${getEnvUrlString(env)}.com`;
 
 export function getHubSpotApiOrigin(
-  env: string,
-  useLocalHost: boolean
+  env?: string,
+  useLocalHost?: boolean
 ): string {
   let domain = process.env.HUBAPI_DOMAIN_OVERRIDE;
 

@@ -45,7 +45,6 @@ class CLIConfiguration {
     this.options = {};
     this.useEnvConfig = false;
     this.config = null;
-    this.load();
   }
 
   init(options: CLIOptions = {}): void {
@@ -237,6 +236,14 @@ class CLIConfiguration {
     return (
       !!this.config && this.config.accounts && !!this.getAccountId(nameOrId)
     );
+  }
+
+  getAndLoadConfigIfNeeded(options?: CLIOptions): CLIConfig {
+    if (!this.config) {
+      this.init(options);
+      return this.config!;
+    }
+    return this.config;
   }
 
   getEnv(nameOrId?: string | number): string {
