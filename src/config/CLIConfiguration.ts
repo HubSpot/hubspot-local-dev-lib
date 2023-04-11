@@ -37,26 +37,20 @@ const validateLogCallbackKeys = [
 ] as const;
 
 class CLIConfiguration {
-  active: boolean;
   options: CLIOptions;
   useEnvConfig: boolean;
   config: CLIConfig | null;
 
-  constructor(options: CLIOptions) {
-    this.active = false;
-    this.options = options || {};
+  constructor() {
+    this.options = {};
     this.useEnvConfig = false;
     this.config = null;
+    this.load();
   }
 
-  setActive(isActive: boolean): void {
-    this.active = isActive;
-  }
-
-  init(options: CLIOptions): void {
+  init(options: CLIOptions = {}): void {
     this.options = options;
     this.load();
-    this.active = true;
   }
 
   load(): CLIConfig | null {
@@ -245,7 +239,7 @@ class CLIConfiguration {
     );
   }
 
-  getEnv(nameOrId: string | number): string {
+  getEnv(nameOrId?: string | number): string {
     const accountConfig = this.getAccount(nameOrId);
 
     if (accountConfig && accountConfig.accountId && accountConfig.env) {
@@ -507,4 +501,4 @@ class CLIConfiguration {
   }
 }
 
-export default CLIConfiguration;
+export default new CLIConfiguration();
