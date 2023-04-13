@@ -13,6 +13,22 @@ en:
         error: An error occured copying project source to {{ dest }}.
       cleanupTempDir:
         error: "Failed to clean up temp dir: {{ tmpDir }}"
+    github:
+      fetchJsonFromRepository:
+        fetching: "Fetching {{ uri }}..."
+        error: "An error occured fetching JSON file."
+      fetchReleaseData:
+        error: "Failed fetching release data for {{ tag }} project."
+        notFound: "Project {{ tag }} not found."
+      downloadGithubRepoZip:
+        fetching: "Fetching {{ releaseType }} with name {{ repoName }}..."
+        fetchingName: "Fetching {{ name }}..."
+        completed: "Completed project fetch."
+        error: "An error occured fetching the project source."
+      cloneGithubRepo:
+        success: "Your new {{ type }} has been created in {{ dest }}"
+      downloadGithubRepoContents:
+        downloading: "Downloading content piece: {{ contentPiecePath }} from {{ downloadUrl }} to {{ downloadPath }}"
     standardErrors:
       error: "Error: {{ error }}"
       context: "Context: {{ context }}"
@@ -64,6 +80,8 @@ en:
         notFunction: 'There was an error loading JS file "{{ path }}". Expected type "Function" but received type "{{ returned }}". Make sure that your default export is a function.'
         notReturnArray: 'There was an error loading JS file "{{ path }}". Expected type "Array" but received type "{{ returned }}" . Make sure that your function returns an array'
         invalidPath: 'The path "{{ path }}" is not a path to a file or folder'
+    github:
+      downloadGithubRepoContents: "Failed to fetch contents: {{ errorMessage }}"
     utils:
       git:
         configIgnore: "Unable to determine if config file is properly ignored by git."

@@ -6,6 +6,7 @@ export interface BaseError extends Error {
   code?: string | null;
   syscall?: string | null;
   reason?: string;
+  statusCode?: number;
 }
 
 export interface SystemError extends BaseError {
@@ -40,4 +41,10 @@ export interface FileSystemErrorContext extends ErrorContext {
   filepath?: string;
   read?: boolean;
   write?: boolean;
+}
+
+export interface GithubError extends BaseError {
+  error: {
+    message?: string;
+  };
 }
