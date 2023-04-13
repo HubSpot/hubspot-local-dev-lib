@@ -2,9 +2,20 @@ import path from 'path';
 import fs from 'fs-extra';
 import { getCwd, getExt, splitHubSpotPath, splitLocalPath } from './path';
 import { walk } from '../utils/walk';
-import { i18n } from '../utils/lang';
 import { MODULE_EXTENSION } from '../constants/extensions';
-import { downloadGitHubRepoContents } from './github';
+import { downloadGithubRepoContents } from './github';
+import {
+  throwErrorWithMessage,
+  throwTypeErrorWithMessage,
+} from '../errors/standardErrors';
+import { LogCallbacksArg } from '../types/LogCallbacks';
+import { makeTypedLogger } from '../utils/logger';
+
+type PathInput = {
+  isLocal: boolean;
+  isHubSpot: boolean;
+  path: string;
+};
 
 // Matches files named module.html
 const MODULE_HTML_EXTENSION_REGEX = new RegExp(
@@ -13,52 +24,35 @@ const MODULE_HTML_EXTENSION_REGEX = new RegExp(
 // Matches files named module.css
 const MODULE_CSS_EXTENSION_REGEX = new RegExp(/\.module(?:\/|\\)module\.css$/);
 
-const isBool = x => !!x === x;
+const isBool = (x: boolean) => !!x === x;
 
-/**
- * @typedef {object} PathInput
- * @property {string} path
- * @property {boolean} isLocal
- * @property {boolean} isHubSpot
- */
-
-/**
- * @param {PathInput} pathInput
- * @returns {boolean}
- */
-const isPathInput = pathInput => {
+function isPathInput(pathInput: PathInput): boolean {
   return !!(
     pathInput &&
     typeof pathInput.path === 'string' &&
     (isBool(pathInput.isLocal) || isBool(pathInput.isHubSpot))
   );
-};
+}
 
-const throwInvalidPathInput = pathInput => {
+function throwInvalidPathInput(pathInput: PathInput): void {
   if (isPathInput(pathInput)) return;
-  throw new TypeError('Expected PathInput');
-};
+  throwTypeErrorWithMessage('moduels.throwInvalidPathInput');
+}
 
-/**
- * @param {PathInput} pathInput
- * @returns {boolean}
- */
-const isModuleFolder = pathInput => {
+export function isModuleFolder(pathInput: PathInput): boolean {
   throwInvalidPathInput(pathInput);
   const _path = pathInput.isHubSpot
     ? path.posix.normalize(pathInput.path)
     : path.normalize(pathInput.path);
   return getExt(_path) === MODULE_EXTENSION;
-};
+}
 
-/**
- * @param {PathInput} pathInput
- * @returns {boolean}
- * @throws {TypeError}
- */
-const isModuleFolderChild = (pathInput, ignoreLocales = false) => {
+export function isModuleFolderChild(
+  pathInput: PathInput,
+  ignoreLocales = false
+): boolean {
   throwInvalidPathInput(pathInput);
-  let pathParts = [];
+  let pathParts: Array<string> = [];
   if (pathInput.isLocal) {
     pathParts = splitLocalPath(pathInput.path);
   } else if (pathInput.isHubSpot) {
@@ -75,10 +69,10 @@ const isModuleFolderChild = (pathInput, ignoreLocales = false) => {
   return pathParts
     .slice(0, length - 1)
     .some(part => isModuleFolder({ ...pathInput, path: part }));
-};
+}
 
 // Ids for testing
-const ValidationIds = {
+export const ValidationIds = {
   SRC_REQUIRED: 'SRC_REQUIRED',
   DEST_REQUIRED: 'DEST_REQUIRED',
   MODULE_FOLDER_REQUIRED: 'MODULE_FOLDER_REQUIRED',
@@ -86,14 +80,20 @@ const ValidationIds = {
   MODULE_NESTING: 'MODULE_NESTING',
 };
 
-const getValidationResult = (id, message) => ({ id, message });
+type ValidationResult = {
+  id: string;
+  message: string;
+};
 
-/**
- * @param {PathInput} src
- * @param {PathInput} dest
- * @returns {object[]}
- */
-async function validateSrcAndDestPaths(src, dest) {
+const getValidationResult = (
+  id: string,
+  message: string
+): ValidationResult => ({ id, message });
+
+export async function validateSrcAndDestPaths(
+  src: PathInput,
+  dest: PathInput
+): Promise<Array<ValidationResult>> {
   const results = [];
   if (!isPathInput(src)) {
     results.push(
@@ -155,34 +155,40 @@ async function validateSrcAndDestPaths(src, dest) {
       }
     }
   }
-  // TODO: Add local FS check for dest.isLocal to support `fetch`
   return results;
 }
 
-/**
- * Checks if the given path points to an .html file within a .module folder
- * @param {string} filePath
- * @returns {boolean}
- */
-const isModuleHTMLFile = filePath => MODULE_HTML_EXTENSION_REGEX.test(filePath);
+export const isModuleHTMLFile = (filePath: string) =>
+  MODULE_HTML_EXTENSION_REGEX.test(filePath);
 
-/**
- * Checks if the given path points to an .css file within a .module folder
- * @param {string} filePath
- * @returns {boolean}
- */
-const isModuleCSSFile = filePath => MODULE_CSS_EXTENSION_REGEX.test(filePath);
+export const isModuleCSSFile = (filePath: string) =>
+  MODULE_CSS_EXTENSION_REGEX.test(filePath);
 
-const createModule = async (
-  moduleDefinition,
-  name,
-  dest,
+type ModuleDefinition = {
+  contentTypes: Array<string>;
+  moduleLabel: string;
+  global: boolean;
+};
+
+const createModuleCallbackKeys = ['creatingPath', 'creatingModule'] as const;
+
+export async function createModule(
+  moduleDefinition: ModuleDefinition,
+  name: string,
+  dest: string,
   options = {
     allowExistingDir: false,
-  }
-) => {
-  const i18nKey = 'cli.commands.create.subcommands.module';
-  const writeModuleMeta = ({ contentTypes, moduleLabel, global }, dest) => {
+  },
+  logCallbacks?: LogCallbacksArg<typeof createModuleCallbackKeys>
+) {
+  const logger = makeTypedLogger<typeof createModuleCallbackKeys>(
+    logCallbacks,
+    'modules.createModule'
+  );
+  const writeModuleMeta = (
+    { contentTypes, moduleLabel, global }: ModuleDefinition,
+    dest: string
+  ) => {
     const metaData = {
       label: moduleLabel,
       css_assets: [],
@@ -200,7 +206,7 @@ const createModule = async (
     fs.writeJSONSync(dest, metaData, { spaces: 2 });
   };
 
-  const moduleFileFilter = (src, dest) => {
+  const moduleFileFilter = (src: string, dest: string) => {
     const emailEnabled = moduleDefinition.contentTypes.includes('EMAIL');
 
     switch (path.basename(src)) {
@@ -222,41 +228,24 @@ const createModule = async (
     !name || name.endsWith('.module') ? name : `${name}.module`;
   const destPath = path.join(dest, folderName);
   if (!options.allowExistingDir && fs.existsSync(destPath)) {
-    logger.error(
-      i18n(`${i18nKey}.errors.pathExists`, {
-        path: destPath,
-      })
-    );
-    return;
+    throwErrorWithMessage('modules.createModule', {
+      path: destPath,
+    });
   } else {
-    logger.log(
-      i18n(`${i18nKey}.creatingPath`, {
-        path: destPath,
-      })
-    );
+    logger('creatingPath', {
+      path: destPath,
+    });
     fs.ensureDirSync(destPath);
   }
 
-  logger.log(
-    i18n(`${i18nKey}.creatingModule`, {
-      path: destPath,
-    })
-  );
+  logger('creatingModule', {
+    path: destPath,
+  });
 
-  await downloadGitHubRepoContents(
+  await downloadGithubRepoContents(
     'cms-sample-assets',
     'modules/Sample.module',
     destPath,
-    { filter: moduleFileFilter }
+    moduleFileFilter
   );
-};
-
-module.exports = {
-  isModuleFolder,
-  isModuleFolderChild,
-  validateSrcAndDestPaths,
-  ValidationIds,
-  isModuleHTMLFile,
-  isModuleCSSFile,
-  createModule,
-};
+}

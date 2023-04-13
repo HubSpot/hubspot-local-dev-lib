@@ -42,6 +42,13 @@ export function throwErrorWithMessage(
   throw new Error(i18n(`errors.${identifier}`, interpolation));
 }
 
+export function throwTypeErrorWithMessage(
+  identifier: string,
+  interpolation?: { [key: string]: string | number }
+): never {
+  throw new TypeError(i18n(`errors.${identifier}`, interpolation));
+}
+
 function throwSystemError(error: SystemError, context?: ErrorContext): never {
   debugErrorAndContext(error, context);
   throwErrorWithMessage('errorTypes.standard.system', {

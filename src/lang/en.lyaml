@@ -29,6 +29,10 @@ en:
         success: "Your new {{ type }} has been created in {{ dest }}"
       downloadGithubRepoContents:
         downloading: "Downloading content piece: {{ contentPiecePath }} from {{ downloadUrl }} to {{ downloadPath }}"
+    modules:
+      createModule:
+        creatingModule: "Creating module at {{ path }}"
+        creatingPath: "Creating {{ path }}"
     standardErrors:
       error: "Error: {{ error }}"
       context: "Context: {{ context }}"
@@ -82,6 +86,9 @@ en:
         invalidPath: 'The path "{{ path }}" is not a path to a file or folder'
     github:
       downloadGithubRepoContents: "Failed to fetch contents: {{ errorMessage }}"
+    modules:
+      throwInvalidPathInput: "Expected PathInput"
+      writeModuleMeta: "The {{ path }} path already exists"
     utils:
       git:
         configIgnore: "Unable to determine if config file is properly ignored by git."
