@@ -13,7 +13,7 @@ import { makeTypedLogger } from '../utils/logger';
 
 type PathInput = {
   isLocal: boolean;
-  isHubSpot: boolean;
+  isHubSpot?: boolean;
   path: string;
 };
 
@@ -24,7 +24,7 @@ const MODULE_HTML_EXTENSION_REGEX = new RegExp(
 // Matches files named module.css
 const MODULE_CSS_EXTENSION_REGEX = new RegExp(/\.module(?:\/|\\)module\.css$/);
 
-const isBool = (x: boolean) => !!x === x;
+const isBool = (x: boolean | undefined) => !!x === x;
 
 function isPathInput(pathInput: PathInput): boolean {
   return !!(
