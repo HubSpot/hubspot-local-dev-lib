@@ -10,12 +10,7 @@ import {
 } from '../errors/standardErrors';
 import { LogCallbacksArg } from '../types/LogCallbacks';
 import { makeTypedLogger } from '../utils/logger';
-
-type PathInput = {
-  isLocal: boolean;
-  isHubSpot?: boolean;
-  path: string;
-};
+import { PathInput } from '../types/Modules';
 
 // Matches files named module.html
 const MODULE_HTML_EXTENSION_REGEX = new RegExp(
@@ -26,7 +21,7 @@ const MODULE_CSS_EXTENSION_REGEX = new RegExp(/\.module(?:\/|\\)module\.css$/);
 
 const isBool = (x: boolean | undefined) => !!x === x;
 
-function isPathInput(pathInput: PathInput): boolean {
+function isPathInput(pathInput?: PathInput): boolean {
   return !!(
     pathInput &&
     typeof pathInput.path === 'string' &&
@@ -91,8 +86,8 @@ const getValidationResult = (
 ): ValidationResult => ({ id, message });
 
 export async function validateSrcAndDestPaths(
-  src: PathInput,
-  dest: PathInput
+  src?: PathInput,
+  dest?: PathInput
 ): Promise<Array<ValidationResult>> {
   const results = [];
   if (!isPathInput(src)) {
@@ -105,7 +100,7 @@ export async function validateSrcAndDestPaths(
       getValidationResult(ValidationIds.DEST_REQUIRED, '`dest` is required.')
     );
   }
-  if (results.length) {
+  if (results.length || !src || !dest) {
     return results;
   }
   const [_src, _dest] = [src, dest].map(inputPath => {

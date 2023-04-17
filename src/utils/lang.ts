@@ -1,4 +1,3 @@
-import { inspect } from 'util';
 import { join } from 'path';
 import { existsSync, readFileSync } from 'fs-extra';
 import { load } from 'js-yaml';
@@ -28,11 +27,6 @@ function loadLanguageFromYaml(): void {
     languageObj = load(
       readFileSync(join(__dirname, `../lang/${locale}.lyaml`), 'utf8')
     ) as LanguageObject;
-
-    console.debug(
-      'Loaded language data: ',
-      inspect(languageObj, true, 999, true)
-    );
   } catch (e) {
     throw new Error(`Error loading language data: ${e}`);
   }
