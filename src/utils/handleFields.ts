@@ -21,7 +21,7 @@ export class FieldsJs {
   constructor(
     projectDir: string,
     filePath: string,
-    rootWriteDir: string,
+    rootWriteDir?: string,
     fieldOptions = ''
   ) {
     this.projectDir = projectDir;
@@ -110,7 +110,8 @@ export class FieldsJs {
     try {
       fs.copyFileSync(this.outputPath, savePath);
     } catch (err) {
-      throwErrorWithMessage(`${i18nKey}.saveOutput`, { path: savePath });
+      debug(`${i18nKey}.saveOutput`, { path: savePath });
+      throwError(err as BaseError);
     }
   }
 
@@ -132,14 +133,14 @@ export class FieldsJs {
   }
 }
 
-type FieldsArray = Array<string | FieldsArray>;
+type FieldsArray<T> = Array<T | FieldsArray<T>>;
 
 /*
  * Polyfill for `Array.flat(Infinity)` since the `flat` is only available for Node v11+
  * https://stackoverflow.com/a/15030117
  */
-function flattenArray(arr: FieldsArray): Array<string> {
-  return arr.reduce((flat: Array<string>, toFlatten: string | FieldsArray) => {
+function flattenArray<T>(arr: FieldsArray<T>): Array<T> {
+  return arr.reduce((flat: Array<T>, toFlatten: T | FieldsArray<T>) => {
     return flat.concat(
       Array.isArray(toFlatten) ? flattenArray(toFlatten) : toFlatten
     );
@@ -147,7 +148,7 @@ function flattenArray(arr: FieldsArray): Array<string> {
 }
 
 //Transform fields array to JSON
-export function fieldsArrayToJson(fields: FieldsArray): string {
+export function fieldsArrayToJson<T>(fields: FieldsArray<T>): string {
   const flattened = flattenArray(fields);
   return JSON.stringify(flattened, null, 2);
 }

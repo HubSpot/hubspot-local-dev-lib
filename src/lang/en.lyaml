@@ -77,6 +77,8 @@ en:
           error: "An error occured writing temporary project source."
         cleanupTmpDirSync:
           error: "There was an error deleting the temporary project source"
+        saveOutput:
+          error: "There was an error saving the json output of {{ path }}"
   errors:
     errorTypes:
       fileSystem:
@@ -102,8 +104,6 @@ en:
     utils:
       git:
         configIgnore: "Unable to determine if config file is properly ignored by git."
-      handleFields:
-        saveOutput: "There was an error saving the json output of {{ path }}"
     config:
       cliConfiguration:
         noConfigLoaded: "No Config loaded."
