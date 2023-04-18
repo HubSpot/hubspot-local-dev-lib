@@ -31,7 +31,7 @@ function isPathInput(pathInput?: PathInput): boolean {
 
 function throwInvalidPathInput(pathInput: PathInput): void {
   if (isPathInput(pathInput)) return;
-  throwTypeErrorWithMessage('moduels.throwInvalidPathInput');
+  throwTypeErrorWithMessage('modules.throwInvalidPathInput');
 }
 
 export function isModuleFolder(pathInput: PathInput): boolean {
