@@ -156,13 +156,7 @@ async function fetchGitHubRepoContentFromDownloadUrl(
   fs.writeFileSync(dest, resp.data, 'utf8');
 }
 
-/**
- * Writes files from a HubSpot public repository to the destination folder
- * @param {String} dest - Dir to write contents to
- * @param {String} repoName - Name of GitHub repository to fetch contents from
- * @param {String} path - Path to obtain contents from within repository
- * @returns {Boolean} `true` if successful, `false` otherwise.
- */
+// Writes files from a HubSpot public repository to the destination folder
 export async function downloadGithubRepoContents(
   repoName: string,
   contentPath: string,
