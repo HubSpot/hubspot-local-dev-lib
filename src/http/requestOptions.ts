@@ -1,5 +1,5 @@
 import { version } from '../../package.json';
-import CLIConfiguration from '../config/CLIConfiguration';
+import config from '../config/CLIConfiguration';
 import { getHubSpotApiOrigin } from '../utils/urls';
 
 export const DEFAULT_USER_AGENT_HEADERS = {
@@ -28,8 +28,7 @@ export function getRequestOptions(
   requestOptions = {}
 ): RequestOptions {
   const { env, localHostOverride } = options;
-  const { httpTimeout, httpUseLocalhost } =
-    CLIConfiguration.getAndLoadConfigIfNeeded();
+  const { httpTimeout, httpUseLocalhost } = config.getAndLoadConfigIfNeeded();
   return {
     baseUrl: getHubSpotApiOrigin(
       env,

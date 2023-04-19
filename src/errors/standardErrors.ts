@@ -35,6 +35,9 @@ export function debugErrorAndContext(
   debug('standardErrors.context', { context: JSON.stringify(context) });
 }
 
+/**
+ * @throws
+ */
 export function throwErrorWithMessage(
   identifier: string,
   interpolation?: { [key: string]: string | number }
@@ -42,6 +45,9 @@ export function throwErrorWithMessage(
   throw new Error(i18n(`errors.${identifier}`, interpolation));
 }
 
+/**
+ * @throws
+ */
 export function throwTypeErrorWithMessage(
   identifier: string,
   interpolation?: { [key: string]: string | number }
@@ -49,6 +55,9 @@ export function throwTypeErrorWithMessage(
   throw new TypeError(i18n(`errors.${identifier}`, interpolation));
 }
 
+/**
+ * @throws
+ */
 function throwSystemError(error: SystemError, context?: ErrorContext): never {
   debugErrorAndContext(error, context);
   throwErrorWithMessage('errorTypes.standard.system', {
@@ -56,7 +65,9 @@ function throwSystemError(error: SystemError, context?: ErrorContext): never {
   });
 }
 
-// formally logErrorInstance
+/**
+ * @throws
+ */
 export function throwError(error: BaseError, context?: ErrorContext): never {
   debugErrorAndContext(error, context);
 

@@ -1,8 +1,9 @@
 import fs from 'fs';
 
 import { getFileInfoAsync, flattenAndRemoveSymlinks } from './read';
-import { STAT_TYPES } from '../constants/files';
-import { FileData } from '../types/Files';
+import { STAT_TYPES } from '../../constants/files';
+import { FileData } from '../../types/Files';
+import { throwError } from '../../errors/standardErrors';
 
 export function listFilesInDir(dir: string): Array<string> {
   return fs
@@ -40,7 +41,6 @@ export async function walk(dir: string): Promise<Array<string>> {
     .then(processFiles)
     .then(flattenAndRemoveSymlinks)
     .catch(err => {
-      console.debug(err);
-      return [];
+      throwError(err);
     });
 }

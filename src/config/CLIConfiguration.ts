@@ -241,9 +241,8 @@ class CLIConfiguration {
   getAndLoadConfigIfNeeded(options?: CLIOptions): CLIConfig {
     if (!this.config) {
       this.init(options);
-      return this.config!;
     }
-    return this.config;
+    return this.config!;
   }
 
   getEnv(nameOrId?: string | number): string {
