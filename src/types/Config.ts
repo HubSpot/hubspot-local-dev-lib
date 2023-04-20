@@ -7,5 +7,4 @@ export interface CLIConfig {
   defaultMode?: string;
   httpTimeout?: number;
   env?: string;
-  test: number;
 }
