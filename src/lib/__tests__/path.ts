@@ -10,7 +10,7 @@ describe('cli-lib/path', () => {
     ) => {
       test(filepath, () => {
         const parts = splitHubSpotPath(filepath);
-        expect(parts).toEqual(false);
+        expect(parts).toEqual(expectedParts);
         expect(path.posix.join(...parts)).toBe(joined);
       });
     };
