@@ -68,7 +68,7 @@ en:
         missingEnv: "Unable to load config from environment variables: Missing env"
         unknownAuthType: "Unable to load config from environment variables: Unknown auth type"
     utils:
-      handleFields:
+      handleFieldsJs:
         convertFieldsJs:
           creating: "Creating child process with pid {{ pid }}"
           terminating: "Child process with pid {{ pid }} has been terminated"

@@ -8,7 +8,7 @@ import { debug } from './logger';
 import { throwErrorWithMessage, throwError } from '../errors/standardErrors';
 import { BaseError } from '../types/Error';
 
-const i18nKey = 'utils.handleFields';
+const i18nKey = 'utils.handleFieldsJs';
 
 export class FieldsJs {
   projectDir: string;
