@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "test": "jest",
-    "build": "tsc --rootDir src --outdir dist",
+    "build": "tsc --rootDir . --outdir dist",
     "lint": "eslint --max-warnings=0 . && prettier --check src/**/*.ts",
     "prettier:write": "prettier --write src/**/*.{js,json}",
     "prepare": "husky install"
