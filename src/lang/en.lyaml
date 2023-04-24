@@ -13,6 +13,26 @@ en:
         error: An error occured copying project source to {{ dest }}.
       cleanupTempDir:
         error: "Failed to clean up temp dir: {{ tmpDir }}"
+    github:
+      fetchJsonFromRepository:
+        fetching: "Fetching {{ uri }}..."
+        error: "An error occured fetching JSON file."
+      fetchReleaseData:
+        error: "Failed fetching release data for {{ tag }} project."
+        notFound: "Project {{ tag }} not found."
+      downloadGithubRepoZip:
+        fetching: "Fetching {{ releaseType }} with name {{ repoName }}..."
+        fetchingName: "Fetching {{ name }}..."
+        completed: "Completed project fetch."
+        error: "An error occured fetching the project source."
+      cloneGithubRepo:
+        success: "Your new {{ type }} has been created in {{ dest }}"
+      downloadGithubRepoContents:
+        downloading: "Downloading content piece: {{ contentPiecePath }} from {{ downloadUrl }} to {{ downloadPath }}"
+    modules:
+      createModule:
+        creatingModule: "Creating module at {{ path }}"
+        creatingPath: "Creating {{ path }}"
     standardErrors:
       error: "Error: {{ error }}"
       context: "Context: {{ context }}"
@@ -47,6 +67,18 @@ en:
         missingAccountId: "Unable to load config from environment variables: Missing accountId"
         missingEnv: "Unable to load config from environment variables: Missing env"
         unknownAuthType: "Unable to load config from environment variables: Unknown auth type"
+    utils:
+      handleFieldsJs:
+        convertFieldsJs:
+          creating: "Creating child process with pid {{ pid }}"
+          terminating: "Child process with pid {{ pid }} has been terminated"
+          error: "There was an error converting '{{ filePath }}'"
+        createTmpDirSync:
+          error: "An error occured writing temporary project source."
+        cleanupTmpDirSync:
+          error: "There was an error deleting the temporary project source"
+        saveOutput:
+          error: "There was an error saving the json output of {{ path }}"
   errors:
     errorTypes:
       fileSystem:
@@ -64,6 +96,11 @@ en:
         notFunction: 'There was an error loading JS file "{{ path }}". Expected type "Function" but received type "{{ returned }}". Make sure that your default export is a function.'
         notReturnArray: 'There was an error loading JS file "{{ path }}". Expected type "Array" but received type "{{ returned }}" . Make sure that your function returns an array'
         invalidPath: 'The path "{{ path }}" is not a path to a file or folder'
+    github:
+      downloadGithubRepoContents: "Failed to fetch contents: {{ errorMessage }}"
+    modules:
+      throwInvalidPathInput: "Expected PathInput"
+      writeModuleMeta: "The {{ path }} path already exists"
     utils:
       git:
         configIgnore: "Unable to determine if config file is properly ignored by git."
