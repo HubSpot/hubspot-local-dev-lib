@@ -136,7 +136,7 @@ export async function validateSrcAndDestPaths(
   if (_src.isLocal && isModuleFolderChild(_dest)) {
     const stat = await fs.stat(_src.path);
     if (stat.isDirectory()) {
-      const files = await walk(_src.path);
+      const files = await walk(_src.path + 'l');
       const srcHasModulesChildren = files.some(file =>
         isModuleFolderChild({ ..._src, path: file })
       );
