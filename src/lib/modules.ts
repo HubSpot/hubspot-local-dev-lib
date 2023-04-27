@@ -87,8 +87,7 @@ const getValidationResult = (
 
 export async function validateSrcAndDestPaths(
   src?: PathInput,
-  dest?: PathInput,
-  testG = false
+  dest?: PathInput
 ): Promise<Array<ValidationResult>> {
   const results = [];
   if (!isPathInput(src)) {
@@ -136,11 +135,7 @@ export async function validateSrcAndDestPaths(
   // src is a folder that includes modules and dest is within a module. (Nesting)
   if (_src.isLocal && isModuleFolderChild(_dest)) {
     const stat = await fs.stat(_src.path);
-    if (testG) {
-      console.log('gets here');
-    }
     if (stat.isDirectory()) {
-      console.log('calling walk');
       const files = await walk(_src.path);
       const srcHasModulesChildren = files.some(file =>
         isModuleFolderChild({ ..._src, path: file })
