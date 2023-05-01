@@ -33,9 +33,6 @@ en:
       createModule:
         creatingModule: "Creating module at {{ path }}"
         creatingPath: "Creating {{ path }}"
-    standardErrors:
-      error: "Error: {{ error }}"
-      context: "Context: {{ context }}"
     config:
       cliConfiguration:
         load:
@@ -88,9 +85,6 @@ en:
         unknownFilepath: "a file or folder"
         baseMessage: "An error occurred while {{ fileAction }} {{ filepath }}."
         systemErrorMessage: "This is the result of a system error: {{ errorMessage }}"
-      standard:
-        system: "A system error has occurred: {{ errorMessage }}"
-        generic: "A {{ name }} has occurred"
       cmsFields:
         syntax: 'There was an error converting JS file "{{ path }}"'
         notFunction: 'There was an error loading JS file "{{ path }}". Expected type "Function" but received type "{{ returned }}". Make sure that your default export is a function.'

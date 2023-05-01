@@ -199,9 +199,13 @@ export async function downloadGithubRepoContents(
   } catch (e) {
     const error = e as GithubError;
     if (error.error.message) {
-      throwErrorWithMessage('github.downloadGithubRepoContents', {
-        errorMessage: error.error.message,
-      });
+      throwErrorWithMessage(
+        'github.downloadGithubRepoContents',
+        {
+          errorMessage: error.error.message,
+        },
+        error
+      );
     } else {
       throwError(error);
     }

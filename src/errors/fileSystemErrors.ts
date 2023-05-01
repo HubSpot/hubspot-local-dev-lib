@@ -1,15 +1,19 @@
 import { i18n } from '../utils/lang';
-import { isSystemError, debugErrorAndContext } from './standardErrors';
-import { BaseError, FileSystemErrorContext } from '../types/Error';
+import { isSystemError } from './standardErrors';
+import { BaseError } from '../types/Error';
 
 const i18nKey = 'errors.errorTypes.fileSystem';
+
+type FileSystemErrorContext = {
+  filepath: string;
+  write?: boolean;
+  read?: boolean;
+};
 
 export function throwFileSystemError(
   error: BaseError,
   context: FileSystemErrorContext
 ) {
-  debugErrorAndContext(error, context);
-
   let fileAction = '';
   if (context.read) {
     fileAction = i18n(`${i18nKey}.readAction`);
@@ -31,5 +35,5 @@ export function throwFileSystemError(
     );
   }
 
-  throw new Error(message.join(' '));
+  throw new Error(message.join(' '), { cause: Error });
 }
