@@ -9,7 +9,7 @@ export interface BaseError extends Error {
   statusCode?: number;
 }
 
-export interface StatusCodeError extends SystemError {
+export interface StatusCodeError extends BaseError {
   name: 'StatusCodeError';
   statusCode: number;
   message: string;
