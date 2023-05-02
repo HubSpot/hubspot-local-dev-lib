@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'fs-extra';
 import { getCwd, getExt, splitHubSpotPath, splitLocalPath } from './path';
-import { walk } from '../utils/fs/walk';
+import { walk } from '../utils/fs';
 import { MODULE_EXTENSION } from '../constants/extensions';
 import { downloadGithubRepoContents } from './github';
 import {

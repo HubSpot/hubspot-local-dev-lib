@@ -6,7 +6,7 @@ import {
 import fs from 'fs-extra';
 import child_process from 'child_process';
 
-jest.mock('../fs/walk');
+jest.mock('../fs');
 jest.mock('child_process');
 
 describe('handleFieldsJs', () => {
