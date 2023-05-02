@@ -5,7 +5,7 @@ import { STAT_TYPES } from '../constants/files';
 import { StatType, FileData } from '../types/Files';
 import { throwError } from '../errors/standardErrors';
 
-export function getFileInfoAsync(dir: string, file: string): Promise<FileData> {
+function getFileInfoAsync(dir: string, file: string): Promise<FileData> {
   return new Promise((resolve, reject) => {
     const filepath = path.join(dir, file);
     fs.lstat(filepath, (error, stats) => {
@@ -23,9 +23,7 @@ export function getFileInfoAsync(dir: string, file: string): Promise<FileData> {
   });
 }
 
-export function flattenAndRemoveSymlinks(
-  filesData: Array<FileData>
-): Array<string> {
+function flattenAndRemoveSymlinks(filesData: Array<FileData>): Array<string> {
   return filesData.reduce((acc: Array<string>, fileData) => {
     switch (fileData.type) {
       case STAT_TYPES.FILE:
@@ -38,27 +36,6 @@ export function flattenAndRemoveSymlinks(
         return acc;
     }
   }, []);
-}
-
-export async function read(dir: string): Promise<Array<string>> {
-  const processFiles = (files: Array<string>) =>
-    Promise.all(files.map(file => getFileInfoAsync(dir, file)));
-
-  return fs.promises
-    .readdir(dir)
-    .then(processFiles)
-    .then(flattenAndRemoveSymlinks)
-    .catch(err => {
-      console.debug(err);
-      return [];
-    });
-}
-
-export function listFilesInDir(dir: string): Array<string> {
-  return fs
-    .readdirSync(dir, { withFileTypes: true })
-    .filter(file => !file.isDirectory())
-    .map(file => file.name);
 }
 
 const generateRecursiveFilePromise = async (
