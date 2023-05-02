@@ -3,8 +3,6 @@ en:
     archive:
       extractZip:
         init: "Extracting project source..."
-        writeError: "An error occured writing temp project source."
-        extractError: "An error occured extracting project source."
         success: "Completed project source extraction."
       copySourceToDest:
         init: "Copying project source..."
@@ -14,17 +12,11 @@ en:
       cleanupTempDir:
         error: "Failed to clean up temp dir: {{ tmpDir }}"
     github:
-      fetchJsonFromRepository:
-        fetching: "Fetching {{ uri }}..."
-        error: "An error occured fetching JSON file."
-      fetchReleaseData:
-        error: "Failed fetching release data for {{ tag }} project."
-        notFound: "Project {{ tag }} not found."
+      fetchJsonFromRepository: "Fetching {{ uri }}..."
       downloadGithubRepoZip:
         fetching: "Fetching {{ releaseType }} with name {{ repoName }}..."
         fetchingName: "Fetching {{ name }}..."
         completed: "Completed project fetch."
-        error: "An error occured fetching the project source."
       cloneGithubRepo:
         success: "Your new {{ type }} has been created in {{ dest }}"
       downloadGithubRepoContents:
@@ -54,7 +46,6 @@ en:
         removeAccountFromConfig: "Deleting config for {{ accountId }}"
       configFile:
         errorReading: "Config file could not be read: {{ configPath }}"
-        errorParsing: "Config file could not be parsed"
         writeSuccess: "Successfully wrote updated config data to {{ configPath }}"
         errorLoading: "A configuration file could not be found at {{ configPath }}."
       configUtils:
@@ -69,14 +60,11 @@ en:
         convertFieldsJs:
           creating: "Creating child process with pid {{ pid }}"
           terminating: "Child process with pid {{ pid }} has been terminated"
-          error: "There was an error converting '{{ filePath }}'"
-        createTmpDirSync:
-          error: "An error occured writing temporary project source."
-        cleanupTmpDirSync:
-          error: "There was an error deleting the temporary project source"
-        saveOutput:
-          error: "There was an error saving the json output of {{ path }}"
   errors:
+    archive:
+      extractZip:
+        write: "An error occured writing temp project source."
+        extract: "An error occured extracting project source."
     errorTypes:
       fileSystem:
         readAction: "reading from"
@@ -92,12 +80,20 @@ en:
         invalidPath: 'The path "{{ path }}" is not a path to a file or folder'
     github:
       downloadGithubRepoContents: "Failed to fetch contents: {{ errorMessage }}"
+      fetchJsonFromRepository: "An error occured fetching JSON file."
+      fetchReleaseData: "Failed fetching release data for {{ tag }} project."
+      downloadGithubRepoZip: "An error occured fetching the project source."
     modules:
       throwInvalidPathInput: "Expected PathInput"
       writeModuleMeta: "The {{ path }} path already exists"
     utils:
       git:
         configIgnore: "Unable to determine if config file is properly ignored by git."
+      handleFieldsJs:
+        convertFieldsJs: "There was an error converting '{{ filePath }}'"
+        saveOutput: "There was an error saving the json output of {{ path }}"
+        createTmpDirSync: "An error occured writing temporary project source."
+        cleanupTmpDirSync: "There was an error deleting the temporary project source"
     config:
       cliConfiguration:
         noConfigLoaded: "No Config loaded."
@@ -108,3 +104,5 @@ en:
         updateDefaultMode: "The mode {{ defaultMode }} is invalid. Valid values are {{ validModes }}."
         updateHttpTimeout: The value {{ timeout }} is invalid. The value must be a number greater than {{ minTimeout }}.
         updateAllowUsageTracking: Unable to update allowUsageTracking. The value {{ isEnabled }} is invalid. The value must be a boolean.
+      configFile:
+        parsing: "Config file could not be parsed"

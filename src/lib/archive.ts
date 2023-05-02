@@ -5,7 +5,7 @@ import { promisify } from 'util';
 import __extract from 'extract-zip';
 
 import { throwFileSystemError } from '../errors/fileSystemErrors';
-import { throwError } from '../errors/standardErrors';
+import { throwErrorWithMessage } from '../errors/standardErrors';
 import { debug } from '../utils/logger';
 import { BaseError } from '../types/Error';
 
@@ -32,14 +32,13 @@ async function extractZip(name: string, zip: Buffer): Promise<ZipData> {
       mode: 0o777,
     });
   } catch (err) {
-    debug('archive.extractZip.writeError');
     if (tmpZipPath || result.tmpDir) {
       throwFileSystemError(err as BaseError, {
         filepath: tmpZipPath || result.tmpDir,
         write: true,
       });
     } else {
-      throwError(err as BaseError);
+      throwErrorWithMessage('archive.extractZip.write', {}, err as BaseError);
     }
     return result;
   }
@@ -49,8 +48,7 @@ async function extractZip(name: string, zip: Buffer): Promise<ZipData> {
     await extract(tmpZipPath, { dir: tmpExtractPath });
     result.extractDir = tmpExtractPath;
   } catch (err) {
-    debug('archive.extractZip.extractError');
-    throwError(err as BaseError);
+    throwErrorWithMessage('archive.extractZip.extract', {}, err as BaseError);
   }
   debug('archive.extractZip.success');
   return result;
