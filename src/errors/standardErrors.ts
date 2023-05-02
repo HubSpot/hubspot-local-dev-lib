@@ -59,7 +59,7 @@ export function throwError(error: BaseError): never {
   } else {
     // Error or Error subclass
     const name = error.name || 'Error';
-    const message = [i18n('errors.errorTypes.standard.generic', { name })];
+    const message = [i18n('errors.errorTypes.generic', { name })];
     [error.message, error.reason].forEach(msg => {
       if (msg) {
         message.push(msg);

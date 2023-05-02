@@ -8,7 +8,6 @@ import child_process from 'child_process';
 
 jest.mock('../fs/walk');
 jest.mock('child_process');
-jest.mock('fs');
 
 describe('handleFieldsJs', () => {
   describe('FieldsJs', () => {
@@ -55,7 +54,9 @@ describe('handleFieldsJs', () => {
     });
 
     test('saveOutput() sets the save path correctly', () => {
-      const copyFileSpy = jest.spyOn(fs, 'copyFileSync');
+      const copyFileSpy = jest
+        .spyOn(fs, 'copyFileSync')
+        .mockImplementation(() => null);
       const fieldsJs = new FieldsJs(
         'folder',
         'folder/sample.module/fields.js',

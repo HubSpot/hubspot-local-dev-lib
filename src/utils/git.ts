@@ -114,6 +114,6 @@ export function checkAndAddConfigToGitignore(configPath: string): void {
     const updatedContents = `${gitignoreContents.trim()}\n\n# HubSpot config file\n${DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME}\n`;
     writeFileSync(gitignoreFilePath, updatedContents);
   } catch (e) {
-    throw throwErrorWithMessage('utils.git.configIgnore', {}, e as BaseError);
+    throwErrorWithMessage('utils.git.configIgnore', {}, e as BaseError);
   }
 }
