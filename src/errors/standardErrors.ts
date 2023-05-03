@@ -34,7 +34,11 @@ export function throwTypeErrorWithMessage(
   interpolation?: { [key: string]: string | number },
   cause?: BaseError
 ): never {
-  throw new TypeError(i18n(`errors.${identifier}`, interpolation), { cause });
+  const message = i18n(`errors.${identifier}`, interpolation);
+  if (cause) {
+    throw new TypeError(message, { cause });
+  }
+  throw new TypeError(message);
 }
 
 function throwStatusCodeError(error: StatusCodeError): never {
@@ -47,7 +51,7 @@ function throwStatusCodeError(error: StatusCodeError): never {
     response: response.body,
     headers: response.headers,
   });
-  throw new Error(errorData, { cause: Error });
+  throw new Error(errorData, { cause: error });
 }
 
 /**

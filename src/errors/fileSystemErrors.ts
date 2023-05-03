@@ -35,5 +35,5 @@ export function throwFileSystemError(
     );
   }
 
-  throw new Error(message.join(' '), { cause: Error });
+  throw new Error(message.join(' '), { cause: error });
 }
