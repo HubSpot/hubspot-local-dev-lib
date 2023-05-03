@@ -12,13 +12,6 @@ import { LogCallbacksArg } from '../types/LogCallbacks';
 import { makeTypedLogger } from '../utils/logger';
 import { PathInput } from '../types/Modules';
 
-// Matches files named module.html
-const MODULE_HTML_EXTENSION_REGEX = new RegExp(
-  /\.module(?:\/|\\)module\.html$/
-);
-// Matches files named module.css
-const MODULE_CSS_EXTENSION_REGEX = new RegExp(/\.module(?:\/|\\)module\.css$/);
-
 const isBool = (x: boolean | undefined) => !!x === x;
 
 function isPathInput(pathInput?: PathInput): boolean {
@@ -152,12 +145,6 @@ export async function validateSrcAndDestPaths(
   }
   return results;
 }
-
-export const isModuleHTMLFile = (filePath: string) =>
-  MODULE_HTML_EXTENSION_REGEX.test(filePath);
-
-export const isModuleCSSFile = (filePath: string) =>
-  MODULE_CSS_EXTENSION_REGEX.test(filePath);
 
 type ModuleDefinition = {
   contentTypes: Array<string>;

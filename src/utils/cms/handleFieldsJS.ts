@@ -3,7 +3,7 @@ import os from 'os';
 import path from 'path';
 import { fork } from 'child_process';
 import { escapeRegExp } from '../escapeRegExp';
-import { isModuleFolderChild } from '../../lib/modules';
+import { isModuleFolderChild } from '../../lib/cmsModules';
 import { debug } from '../logger';
 import { throwErrorWithMessage } from '../../errors/standardErrors';
 import { BaseError } from '../../types/Error';
