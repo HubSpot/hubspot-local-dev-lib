@@ -1,9 +1,7 @@
 import { HubSpotAuthError } from './HubSpotAuthError';
-import { ErrorContext } from '../types/Error';
-import { debug } from '../utils/logger';
 import { i18n } from '../utils/lang';
 
-import { BaseError, SystemError, StatusCodeError } from '../types/Error';
+import { BaseError, StatusCodeError } from '../types/Error';
 
 export function isSystemError(err: BaseError): boolean {
   return err.errno != null && err.code != null && err.syscall != null;
@@ -13,36 +11,19 @@ export function isFatalError(err: BaseError): boolean {
   return err instanceof HubSpotAuthError;
 }
 
-export function debugErrorAndContext(
-  error: BaseError,
-  context?: ErrorContext
-): void {
-  if (error.name === 'StatusCodeError') {
-    const { statusCode, message, response } = error as StatusCodeError;
-    debug('standardErrors.error', {
-      error: JSON.stringify({
-        statusCode,
-        message,
-        url: response.request.href,
-        method: response.request.method,
-        response: response.body,
-        headers: response.headers,
-      }),
-    });
-  } else {
-    debug('standardErrors.error', { error: JSON.stringify(error) });
-  }
-  debug('standardErrors.context', { context: JSON.stringify(context) });
-}
-
 /**
  * @throws
  */
 export function throwErrorWithMessage(
   identifier: string,
-  interpolation?: { [key: string]: string | number }
+  interpolation?: { [key: string]: string | number },
+  cause?: BaseError
 ): never {
-  throw new Error(i18n(`errors.${identifier}`, interpolation));
+  const message = i18n(`errors.${identifier}`, interpolation);
+  if (cause) {
+    throw new Error(message, { cause });
+  }
+  throw new Error(message);
 }
 
 /**
@@ -50,38 +31,44 @@ export function throwErrorWithMessage(
  */
 export function throwTypeErrorWithMessage(
   identifier: string,
-  interpolation?: { [key: string]: string | number }
+  interpolation?: { [key: string]: string | number },
+  cause?: BaseError
 ): never {
-  throw new TypeError(i18n(`errors.${identifier}`, interpolation));
+  const message = i18n(`errors.${identifier}`, interpolation);
+  if (cause) {
+    throw new TypeError(message, { cause });
+  }
+  throw new TypeError(message);
 }
 
-/**
- * @throws
- */
-function throwSystemError(error: SystemError, context?: ErrorContext): never {
-  debugErrorAndContext(error, context);
-  throwErrorWithMessage('errorTypes.standard.system', {
-    message: error.message,
+function throwStatusCodeError(error: StatusCodeError): never {
+  const { statusCode, message, response } = error as StatusCodeError;
+  const errorData = JSON.stringify({
+    statusCode,
+    message,
+    url: response.request.href,
+    method: response.request.method,
+    response: response.body,
+    headers: response.headers,
   });
+  throw new Error(errorData, { cause: error });
 }
 
 /**
  * @throws
  */
-export function throwError(error: BaseError, context?: ErrorContext): never {
-  debugErrorAndContext(error, context);
-
-  if (isSystemError(error)) {
-    throwSystemError(error as SystemError, context);
+export function throwError(error: BaseError): never {
+  if (error.name === 'StatusCodeError') {
+    throwStatusCodeError(error as StatusCodeError);
   } else {
     // Error or Error subclass
     const name = error.name || 'Error';
-    const message = [i18n('errors.errorTypes.standard.generic', { name })];
+    const message = [i18n('errors.errorTypes.generic', { name })];
     [error.message, error.reason].forEach(msg => {
       if (msg) {
         message.push(msg);
       }
     });
-    throw new Error(message.join(' '));
+    throw new Error(message.join(' '), { cause: error });
   }
 }

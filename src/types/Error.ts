@@ -9,13 +9,7 @@ export interface BaseError extends Error {
   statusCode?: number;
 }
 
-export interface SystemError extends BaseError {
-  errno: number;
-  code: string;
-  syscall: string;
-}
-
-export interface StatusCodeError extends SystemError {
+export interface StatusCodeError extends BaseError {
   name: 'StatusCodeError';
   statusCode: number;
   message: string;
@@ -31,16 +25,6 @@ export interface StatusCodeError extends SystemError {
       [key: string]: string;
     };
   };
-}
-
-export type ErrorContext = {
-  accountId?: number;
-};
-
-export interface FileSystemErrorContext extends ErrorContext {
-  filepath?: string;
-  read?: boolean;
-  write?: boolean;
 }
 
 export interface GithubError extends BaseError {

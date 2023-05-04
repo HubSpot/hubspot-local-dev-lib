@@ -29,15 +29,18 @@ export async function fetchJsonFromRepository(
 ): Promise<JSON> {
   try {
     const URI = `https://raw.githubusercontent.com/HubSpot/${repoName}/${filePath}`;
-    debug('github.fetchJsonFromRepository.fetching', { uri: URI });
+    debug('github.fetchJsonFromRepository', { uri: URI });
 
     const { data } = await axios.get<JSON>(URI, {
       headers: { ...DEFAULT_USER_AGENT_HEADERS, ...GITHUB_AUTH_HEADERS },
     });
     return data;
   } catch (err) {
-    debug('github.fetchJsonFromRepository.error');
-    throwError(err as BaseError);
+    throwErrorWithMessage(
+      'github.fetchJsonFromRepository',
+      {},
+      err as BaseError
+    );
   }
 }
 
@@ -59,12 +62,11 @@ async function fetchReleaseData(
     return data;
   } catch (err) {
     const error = err as BaseError;
-    debug('github.fetchReleaseData.error', { tag: tag || 'latest' });
-
-    if (tag && error.statusCode === 404) {
-      debug('github.fetchReleaseData.notFound', { tag });
-    }
-    throwError(error);
+    throwErrorWithMessage(
+      'github.fetchReleaseData',
+      { tag: tag || 'latest' },
+      error
+    );
   }
 }
 
@@ -95,8 +97,7 @@ async function downloadGithubRepoZip(
     debug('github.downloadGithubRepoZip.completed');
     return data;
   } catch (err) {
-    debug('github.downloadGithubRepoZip.error');
-    throwError(err as BaseError);
+    throwErrorWithMessage('github.downloadGithubRepoZip', {}, err as BaseError);
   }
 }
 
@@ -199,9 +200,13 @@ export async function downloadGithubRepoContents(
   } catch (e) {
     const error = e as GithubError;
     if (error.error.message) {
-      throwErrorWithMessage('github.downloadGithubRepoContents', {
-        errorMessage: error.error.message,
-      });
+      throwErrorWithMessage(
+        'github.downloadGithubRepoContents',
+        {
+          errorMessage: error.error.message,
+        },
+        error
+      );
     } else {
       throwError(error);
     }

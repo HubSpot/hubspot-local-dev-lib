@@ -4,6 +4,7 @@ import ignore from 'ignore';
 import findup from 'findup-sync';
 import { DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME } from '../constants/config';
 import { throwErrorWithMessage } from '../errors/standardErrors';
+import { BaseError } from '../types/Error';
 
 const GITIGNORE_FILE = '.gitignore';
 
@@ -113,6 +114,6 @@ export function checkAndAddConfigToGitignore(configPath: string): void {
     const updatedContents = `${gitignoreContents.trim()}\n\n# HubSpot config file\n${DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME}\n`;
     writeFileSync(gitignoreFilePath, updatedContents);
   } catch (e) {
-    throw throwErrorWithMessage('utils.git.configIgnore');
+    throwErrorWithMessage('utils.git.configIgnore', {}, e as BaseError);
   }
 }

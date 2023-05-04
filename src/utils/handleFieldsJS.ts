@@ -5,7 +5,7 @@ import { fork } from 'child_process';
 import { escapeRegExp } from './escapeRegExp';
 import { isModuleFolderChild } from '../lib/modules';
 import { debug } from './logger';
-import { throwErrorWithMessage, throwError } from '../errors/standardErrors';
+import { throwErrorWithMessage } from '../errors/standardErrors';
 import { BaseError } from '../types/Error';
 
 const i18nKey = 'utils.handleFieldsJs';
@@ -84,8 +84,7 @@ export class FieldsJs {
         });
       });
     }).catch((e: BaseError) => {
-      debug(`${i18nKey}.convertFieldsJs.error`, { filePath });
-      throwError(e);
+      throwErrorWithMessage(`${i18nKey}.convertFieldsJs`, { filePath }, e);
     });
   }
 
@@ -110,8 +109,11 @@ export class FieldsJs {
     try {
       fs.copyFileSync(this.outputPath, savePath);
     } catch (err) {
-      debug(`${i18nKey}.saveOutput`, { path: savePath });
-      throwError(err as BaseError);
+      throwErrorWithMessage(
+        `${i18nKey}.saveOutput`,
+        { path: savePath },
+        err as BaseError
+      );
     }
   }
 
@@ -180,8 +182,7 @@ export function createTmpDirSync(prefix: string): string {
   try {
     tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), prefix));
   } catch (err) {
-    debug(`${i18nKey}.createTmpDirSync.error`);
-    throwError(err as BaseError);
+    throwErrorWithMessage(`${i18nKey}.createTmpDirSync`, {}, err as BaseError);
   }
   return tmpDir;
 }
@@ -190,8 +191,11 @@ export function createTmpDirSync(prefix: string): string {
 export function cleanupTmpDirSync(tmpDir: string): void {
   fs.rm(tmpDir, { recursive: true }, err => {
     if (err) {
-      debug(`${i18nKey}.cleanupTmpDirSync.error`);
-      throwError(err as BaseError);
+      throwErrorWithMessage(
+        `${i18nKey}.cleanupTmpDirSync`,
+        {},
+        err as BaseError
+      );
     }
   });
 }

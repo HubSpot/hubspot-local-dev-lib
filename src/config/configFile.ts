@@ -4,7 +4,7 @@ import os from 'os';
 import yaml from 'js-yaml';
 import { debug } from '../utils/logger';
 import { throwFileSystemError } from '../errors/fileSystemErrors';
-import { throwError } from '../errors/standardErrors';
+import { throwError, throwErrorWithMessage } from '../errors/standardErrors';
 import {
   HUBSPOT_CONFIGURATION_FILE,
   HUBSPOT_CONFIGURATION_FOLDER,
@@ -66,8 +66,7 @@ export function parseConfig(configSource: string): CLIConfig {
   try {
     parsed = yaml.load(configSource) as CLIConfig;
   } catch (err) {
-    debug(`${i18nKey}.errorParsing`);
-    throwError(err as BaseError);
+    throwErrorWithMessage(`${i18nKey}.parsing`, {}, err as BaseError);
   }
 
   return parsed;
