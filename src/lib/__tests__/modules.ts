@@ -5,7 +5,7 @@ import {
   isModuleFolderChild,
   validateSrcAndDestPaths,
   ValidationIds,
-} from '../modules';
+} from '../cms/modules';
 
 import { PathInput } from '../../types/Modules';
 import { ValueOf } from '../../types/Utils';

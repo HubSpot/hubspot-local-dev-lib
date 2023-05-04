@@ -5,7 +5,7 @@ import { STAT_TYPES } from '../constants/files';
 import { StatType, FileData } from '../types/Files';
 import { throwError } from '../errors/standardErrors';
 
-function getFileInfoAsync(dir: string, file: string): Promise<FileData> {
+export function getFileInfoAsync(dir: string, file: string): Promise<FileData> {
   return new Promise((resolve, reject) => {
     const filepath = path.join(dir, file);
     fs.lstat(filepath, (error, stats) => {
@@ -23,7 +23,9 @@ function getFileInfoAsync(dir: string, file: string): Promise<FileData> {
   });
 }
 
-function flattenAndRemoveSymlinks(filesData: Array<FileData>): Array<string> {
+export function flattenAndRemoveSymlinks(
+  filesData: Array<FileData>
+): Array<string> {
   return filesData.reduce((acc: Array<string>, fileData) => {
     switch (fileData.type) {
       case STAT_TYPES.FILE:

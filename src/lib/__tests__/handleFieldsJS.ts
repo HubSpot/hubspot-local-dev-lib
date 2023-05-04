@@ -2,7 +2,7 @@ import {
   fieldsArrayToJson,
   FieldsJs,
   isConvertableFieldJs,
-} from '../handleFieldsJS';
+} from '../cms/handleFieldsJS';
 import fs from 'fs-extra';
 import child_process from 'child_process';
 
