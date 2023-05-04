@@ -11,14 +11,6 @@ function convertToWindowsPath(_path: string): string {
   return path.normalize(_path).replace(rgx, path.win32.sep);
 }
 
-// Converts a Win32 path to Posix, retaining the drive letter (ex. 'c:')
-export function convertToImportPath(_path: string): string {
-  if (path.sep === path.win32.sep) {
-    return _path.split(path.win32.sep).join(path.posix.sep);
-  }
-  return _path;
-}
-
 export function convertToLocalFileSystemPath(_path: string): string {
   switch (path.sep) {
     case path.posix.sep:
@@ -78,20 +70,11 @@ export function getExt(filepath: string): string {
   return ext[0] === '.' ? ext.slice(1) : ext;
 }
 
-export const getAllowedExtensions = () => {
-  return ALLOWED_EXTENSIONS;
-};
-
 export function isAllowedExtension(filepath: string): boolean {
   const ext = getExt(filepath);
-  const allowedExtensions = getAllowedExtensions();
-  return allowedExtensions.has(ext);
+  return ALLOWED_EXTENSIONS.has(ext);
 }
 
 export function getAbsoluteFilePath(_path: string): string {
   return path.resolve(getCwd(), _path);
-}
-
-export function isRelativePath(_path: string): boolean {
-  return !path.isAbsolute(_path);
 }
