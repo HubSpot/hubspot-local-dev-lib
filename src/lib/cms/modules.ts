@@ -1,16 +1,16 @@
 import path from 'path';
 import fs from 'fs-extra';
-import { getCwd, getExt, splitHubSpotPath, splitLocalPath } from './path';
-import { walk } from '../utils/fs';
-import { MODULE_EXTENSION } from '../constants/extensions';
-import { downloadGithubRepoContents } from './github';
+import { getCwd, getExt, splitHubSpotPath, splitLocalPath } from '../path';
+import { walk } from '../fs';
+import { MODULE_EXTENSION } from '../../constants/extensions';
+import { downloadGithubRepoContents } from '../github';
 import {
   throwErrorWithMessage,
   throwTypeErrorWithMessage,
-} from '../errors/standardErrors';
-import { LogCallbacksArg } from '../types/LogCallbacks';
-import { makeTypedLogger } from '../utils/logger';
-import { PathInput } from '../types/Modules';
+} from '../../errors/standardErrors';
+import { LogCallbacksArg } from '../../types/LogCallbacks';
+import { makeTypedLogger } from '../../utils/logger';
+import { PathInput } from '../../types/Modules';
 
 const isBool = (x: boolean | undefined) => !!x === x;
 

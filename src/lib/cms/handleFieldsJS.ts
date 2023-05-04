@@ -2,9 +2,9 @@ import fs from 'fs-extra';
 import os from 'os';
 import path from 'path';
 import { fork } from 'child_process';
-import { escapeRegExp } from '../escapeRegExp';
-import { isModuleFolderChild } from '../../lib/cmsModules';
-import { debug } from '../logger';
+import { escapeRegExp } from '../../utils/escapeRegExp';
+import { isModuleFolderChild } from './modules';
+import { debug } from '../../utils/logger';
 import { throwErrorWithMessage } from '../../errors/standardErrors';
 import { BaseError } from '../../types/Error';
 
