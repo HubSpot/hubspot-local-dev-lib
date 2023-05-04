@@ -30,7 +30,7 @@
     "dist/**/*"
   ],
   "exports": {
-    ".": "./dist/index.js",
+    ".": "./dist/lib/index.js",
     "./cms": "./dist/lib/cms",
     "./constants": "./dist/constants.js",
     "./github": "./dist/lib/github.js",
