@@ -1,5 +1,5 @@
 import findup from 'findup-sync';
-import { getHubSpotWebsiteOrigin } from '../../utils/urls';
+import { getHubSpotWebsiteOrigin } from '../urls';
 import { ENVIRONMENTS } from '../../constants/environments';
 import config from '../../config/CLIConfiguration';
 

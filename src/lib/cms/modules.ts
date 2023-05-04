@@ -1,63 +1,17 @@
 import path from 'path';
 import fs from 'fs-extra';
-import { getCwd, getExt, splitHubSpotPath, splitLocalPath } from '../path';
+import { getCwd } from '../path';
 import { walk } from '../fs';
-import { MODULE_EXTENSION } from '../../constants/extensions';
 import { downloadGithubRepoContents } from '../github';
-import {
-  throwErrorWithMessage,
-  throwTypeErrorWithMessage,
-} from '../../errors/standardErrors';
+import { throwErrorWithMessage } from '../../errors/standardErrors';
 import { LogCallbacksArg } from '../../types/LogCallbacks';
 import { makeTypedLogger } from '../../utils/logger';
+import {
+  isPathInput,
+  isModuleFolder,
+  isModuleFolderChild,
+} from '../../utils/modules';
 import { PathInput } from '../../types/Modules';
-
-const isBool = (x: boolean | undefined) => !!x === x;
-
-function isPathInput(pathInput?: PathInput): boolean {
-  return !!(
-    pathInput &&
-    typeof pathInput.path === 'string' &&
-    (isBool(pathInput.isLocal) || isBool(pathInput.isHubSpot))
-  );
-}
-
-function throwInvalidPathInput(pathInput: PathInput): void {
-  if (isPathInput(pathInput)) return;
-  throwTypeErrorWithMessage('modules.throwInvalidPathInput');
-}
-
-export function isModuleFolder(pathInput: PathInput): boolean {
-  throwInvalidPathInput(pathInput);
-  const _path = pathInput.isHubSpot
-    ? path.posix.normalize(pathInput.path)
-    : path.normalize(pathInput.path);
-  return getExt(_path) === MODULE_EXTENSION;
-}
-
-export function isModuleFolderChild(
-  pathInput: PathInput,
-  ignoreLocales = false
-): boolean {
-  throwInvalidPathInput(pathInput);
-  let pathParts: Array<string> = [];
-  if (pathInput.isLocal) {
-    pathParts = splitLocalPath(pathInput.path);
-  } else if (pathInput.isHubSpot) {
-    pathParts = splitHubSpotPath(pathInput.path);
-  }
-  const { length } = pathParts;
-  // Not a child path?
-  if (length <= 1) return false;
-  // Check if we should ignore this file
-  if (ignoreLocales && pathParts.find(part => part === '_locales')) {
-    return false;
-  }
-  // Check if any parent folders are module folders.
-  return pathParts
-    .slice(0, length - 1)
-    .some(part => isModuleFolder({ ...pathInput, path: part }));
-}
 
 // Ids for testing
 export const ValidationIds = {
