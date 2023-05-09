@@ -1,7 +1,7 @@
 import findup from 'findup-sync';
-import { getHubSpotWebsiteOrigin } from './urls';
-import { ENVIRONMENTS } from '../constants/environments';
-import config from '../config/CLIConfiguration';
+import { getHubSpotWebsiteOrigin } from '../urls';
+import { ENVIRONMENTS } from '../../constants/environments';
+import config from '../../config/CLIConfiguration';
 
 export function getThemeJSONPath(path: string): string | null {
   return findup('theme.json', {
@@ -10,7 +10,7 @@ export function getThemeJSONPath(path: string): string | null {
   });
 }
 
-export function getThemeNameFromPath(filePath: string): string | undefined {
+function getThemeNameFromPath(filePath: string): string | undefined {
   const themeJSONPath = getThemeJSONPath(filePath);
   if (!themeJSONPath) return;
   const pathParts = themeJSONPath.split('/');

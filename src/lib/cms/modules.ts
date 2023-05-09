@@ -1,70 +1,17 @@
 import path from 'path';
 import fs from 'fs-extra';
-import { getCwd, getExt, splitHubSpotPath, splitLocalPath } from './path';
-import { walk } from '../utils/fs/walk';
-import { MODULE_EXTENSION } from '../constants/extensions';
-import { downloadGithubRepoContents } from './github';
+import { getCwd } from '../path';
+import { walk } from '../fs';
+import { downloadGithubRepoContents } from '../github';
+import { throwErrorWithMessage } from '../../errors/standardErrors';
+import { LogCallbacksArg } from '../../types/LogCallbacks';
+import { makeTypedLogger } from '../../utils/logger';
 import {
-  throwErrorWithMessage,
-  throwTypeErrorWithMessage,
-} from '../errors/standardErrors';
-import { LogCallbacksArg } from '../types/LogCallbacks';
-import { makeTypedLogger } from '../utils/logger';
-import { PathInput } from '../types/Modules';
-
-// Matches files named module.html
-const MODULE_HTML_EXTENSION_REGEX = new RegExp(
-  /\.module(?:\/|\\)module\.html$/
-);
-// Matches files named module.css
-const MODULE_CSS_EXTENSION_REGEX = new RegExp(/\.module(?:\/|\\)module\.css$/);
-
-const isBool = (x: boolean | undefined) => !!x === x;
-
-function isPathInput(pathInput?: PathInput): boolean {
-  return !!(
-    pathInput &&
-    typeof pathInput.path === 'string' &&
-    (isBool(pathInput.isLocal) || isBool(pathInput.isHubSpot))
-  );
-}
-
-function throwInvalidPathInput(pathInput: PathInput): void {
-  if (isPathInput(pathInput)) return;
-  throwTypeErrorWithMessage('modules.throwInvalidPathInput');
-}
-
-export function isModuleFolder(pathInput: PathInput): boolean {
-  throwInvalidPathInput(pathInput);
-  const _path = pathInput.isHubSpot
-    ? path.posix.normalize(pathInput.path)
-    : path.normalize(pathInput.path);
-  return getExt(_path) === MODULE_EXTENSION;
-}
-
-export function isModuleFolderChild(
-  pathInput: PathInput,
-  ignoreLocales = false
-): boolean {
-  throwInvalidPathInput(pathInput);
-  let pathParts: Array<string> = [];
-  if (pathInput.isLocal) {
-    pathParts = splitLocalPath(pathInput.path);
-  } else if (pathInput.isHubSpot) {
-    pathParts = splitHubSpotPath(pathInput.path);
-  }
-  const { length } = pathParts;
-  // Not a child path?
-  if (length <= 1) return false;
-  // Check if we should ignore this file
-  if (ignoreLocales && pathParts.find(part => part === '_locales')) {
-    return false;
-  }
-  // Check if any parent folders are module folders.
-  return pathParts
-    .slice(0, length - 1)
-    .some(part => isModuleFolder({ ...pathInput, path: part }));
-}
+  isPathInput,
+  isModuleFolder,
+  isModuleFolderChild,
+} from '../../utils/modules';
+import { PathInput } from '../../types/Modules';
 
 // Ids for testing
 export const ValidationIds = {
@@ -152,12 +99,6 @@ export async function validateSrcAndDestPaths(
   }
   return results;
 }
-
-export const isModuleHTMLFile = (filePath: string) =>
-  MODULE_HTML_EXTENSION_REGEX.test(filePath);
-
-export const isModuleCSSFile = (filePath: string) =>
-  MODULE_CSS_EXTENSION_REGEX.test(filePath);
 
 type ModuleDefinition = {
   contentTypes: Array<string>;

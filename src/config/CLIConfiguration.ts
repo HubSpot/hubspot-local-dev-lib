@@ -8,7 +8,7 @@ import {
   configFileIsBlank,
   deleteConfigFile,
 } from './configFile';
-import { commaSeparatedValues } from '../utils/text';
+import { commaSeparatedValues } from '../lib/text';
 import { ENVIRONMENTS } from '../constants';
 import { API_KEY_AUTH_METHOD } from '../constants/auth';
 import { DEFAULT_MODES, MIN_HTTP_TIMEOUT } from '../constants/config';

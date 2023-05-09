@@ -1,6 +1,6 @@
 import { version } from '../../package.json';
 import config from '../config/CLIConfiguration';
-import { getHubSpotApiOrigin } from '../utils/urls';
+import { getHubSpotApiOrigin } from '../lib/urls';
 
 export const DEFAULT_USER_AGENT_HEADERS = {
   'User-Agent': `HubSpot Local Dev Lib/${version}`,
