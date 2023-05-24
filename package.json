@@ -1,14 +1,24 @@
 {
-  "name": "hubspot-local-dev-lib",
-  "version": "1.0.0",
+  "name": "@hubspot/local-dev-lib",
+  "version": "0.0.1",
   "description": "Provides library functionality for HubSpot local development tooling, including the HubSpot CLI",
   "main": "dist/index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/HubSpot/hubspot-local-dev-lib"
+  },
   "scripts": {
-    "test": "jest",
     "build": "tsc --rootDir . --outdir dist",
+    "check-main": "branch=$(git rev-parse --abbrev-ref HEAD) && [ $branch = main ] || (echo 'Error: New release can only be published on main branch' && exit 1)",
     "lint": "eslint --max-warnings=0 . && prettier --check src/**/*.ts",
+    "prepare": "husky install",
     "prettier:write": "prettier --write src/**/*.{js,json}",
-    "prepare": "husky install"
+    "pub": "cd dist && npm publish --tag latest && cd ..",
+    "push": "git push --atomic origin main v$npm_package_version",
+    "release:major": "yarn check-main && yarn version --major && yarn build && yarn pub && yarn push",
+    "release:minor": "yarn check-main && yarn version --minor && yarn build && yarn pub && yarn push",
+    "release:patch": "yarn check-main && yarn version --patch && yarn build && yarn pub && yarn push",
+    "test": "jest"
   },
   "license": "Apache-2.0",
   "devDependencies": {
