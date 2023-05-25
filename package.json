@@ -8,7 +8,8 @@
     "url": "https://github.com/HubSpot/hubspot-local-dev-lib"
   },
   "publishConfig": {
-    "registry": "https://registry.npmjs.org/"
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
   },
   "scripts": {
     "build": "tsc --rootDir . --outdir dist",
