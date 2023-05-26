@@ -1,4 +1,4 @@
-import { version } from '../../package.json';
+import { version } from '../package.json';
 import config from '../config/CLIConfiguration';
 import { getHubSpotApiOrigin } from '../lib/urls';
 

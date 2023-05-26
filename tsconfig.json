@@ -7,6 +7,15 @@
     "esModuleInterop": true,
     "resolveJsonModule": true
   },
-  "include": ["src"],
+  "include": [
+    "config",
+    "constants",
+    "errors",
+    "http",
+    "lang",
+    "lib",
+    "types",
+    "utils"
+  ],
   "exclude": ["node_modules", "**/__tests__/*", "**/__mocks__/*"]
 }
