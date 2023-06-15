@@ -95,6 +95,8 @@ en:
         saveOutput: "There was an error saving the json output of {{ path }}"
         createTmpDirSync: "An error occured writing temporary project source."
         cleanupTmpDirSync: "There was an error deleting the temporary project source"
+      notify:
+        filePath: Unable to notify file {{ filePath }}
     config:
       cliConfiguration:
         noConfigLoaded: "No Config loaded."
