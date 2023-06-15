@@ -30,3 +30,8 @@ export const OAUTH_SCOPES = [
     value: 'files',
   },
 ] as const;
+
+export const AUTH_METHODS = {
+  api: API_KEY_AUTH_METHOD,
+  oauth: OAUTH_AUTH_METHOD,
+};

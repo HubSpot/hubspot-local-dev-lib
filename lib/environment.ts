@@ -1,7 +1,7 @@
 import { ENVIRONMENTS } from '../constants/environments';
 
 export function getValidEnv(
-  env: string,
+  env?: string,
   maskedProductionValue?: string
 ): string {
   const prodValue = maskedProductionValue

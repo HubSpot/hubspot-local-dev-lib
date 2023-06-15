@@ -13,13 +13,7 @@ import { ENVIRONMENTS } from '../constants';
 import { API_KEY_AUTH_METHOD } from '../constants/auth';
 import { DEFAULT_MODES, MIN_HTTP_TIMEOUT } from '../constants/config';
 import { CLIConfig } from '../types/Config';
-import {
-  CLIAccount,
-  OAuthAccount,
-  FlatAccountFields,
-  OauthTokenInfo,
-  PersonalAccessKeyTokenInfo,
-} from '../types/Accounts';
+import { CLIAccount, OAuthAccount, FlatAccountFields } from '../types/Accounts';
 import { CLIOptions } from '../types/CLIOptions';
 import { ValueOf } from '../types/Utils';
 import { LogCallbacksArg } from '../types/LogCallbacks';
@@ -265,7 +259,7 @@ class CLIConfiguration {
    * @throws {Error}
    */
   updateAccount(
-    updatedAccountFields: FlatAccountFields<OauthTokenInfo>,
+    updatedAccountFields: FlatAccountFields,
     writeUpdate = true
   ): CLIAccount | null {
     const {
@@ -294,7 +288,7 @@ class CLIConfiguration {
 
     const currentAccountConfig = this.getAccount(accountId);
 
-    let auth: OAuthAccount['auth'];
+    let auth: OAuthAccount['auth'] = {};
     if (clientId || clientSecret || scopes || tokenInfo) {
       auth = {
         ...(currentAccountConfig ? currentAccountConfig.auth : {}),
@@ -305,19 +299,15 @@ class CLIConfiguration {
       };
     }
 
-    const nextAccountConfig: Partial<FlatAccountFields<OauthTokenInfo>> = {
+    const nextAccountConfig: Partial<FlatAccountFields> = {
       ...(currentAccountConfig ? currentAccountConfig : {}),
     };
 
     // Allow everything except for 'undefined' values to override the existing values
-    function safelyApplyUpdates<
-      T extends keyof FlatAccountFields<
-        OauthTokenInfo | PersonalAccessKeyTokenInfo
-      >
-    >(
+    function safelyApplyUpdates<T extends keyof FlatAccountFields>(
       fieldName: T,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      newValue: FlatAccountFields<OauthTokenInfo>[T]
+      newValue: FlatAccountFields[T]
     ) {
       if (typeof newValue !== 'undefined') {
         nextAccountConfig[fieldName] = newValue;
@@ -348,9 +338,7 @@ class CLIConfiguration {
     safelyApplyUpdates('sandboxAccountType', sandboxAccountType);
     safelyApplyUpdates('parentAccountId', parentAccountId);
 
-    const completedAccountConfig = nextAccountConfig as FlatAccountFields<
-      OauthTokenInfo | PersonalAccessKeyTokenInfo
-    >;
+    const completedAccountConfig = nextAccountConfig as FlatAccountFields;
 
     if (currentAccountConfig) {
       debug(`${i18nKey}.updateAccount.updating`, {

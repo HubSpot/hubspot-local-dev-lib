@@ -16,30 +16,27 @@ export interface CLIAccount {
   personalAccessKey?: string;
 }
 
-export type PersonalAccessKeyTokenInfo = {
-  accessToken: string;
-  expiresAt: string;
-};
-
-export type OauthTokenInfo = {
+export type TokenInfo = {
+  accessToken?: string;
+  expiresAt?: string;
   refreshToken?: string;
 };
 
 export interface PersonalAccessKeyAccount extends CLIAccount {
   authType: 'personalaccesskey';
   auth?: {
-    tokenInfo: PersonalAccessKeyTokenInfo;
+    tokenInfo: TokenInfo;
   };
   personalAccessKey: string;
 }
 
 export interface OAuthAccount extends CLIAccount {
   authType: 'oauth2';
-  auth?: {
+  auth: {
     clientId?: string;
     clientSecret?: string;
     scopes?: Array<string>;
-    tokenInfo?: OauthTokenInfo;
+    tokenInfo?: TokenInfo;
   };
 }
 
@@ -48,13 +45,12 @@ export interface APIKeyAccount extends CLIAccount {
   apiKey: string;
 }
 
-export interface FlatAccountFields<
-  T extends OauthTokenInfo | PersonalAccessKeyTokenInfo
-> extends CLIAccount {
-  tokenInfo?: T;
+export interface FlatAccountFields extends CLIAccount {
+  tokenInfo?: TokenInfo;
   clientId?: string;
   clientSecret?: string;
   scopes?: Array<string>;
   apiKey?: string;
   personalAccessKey?: string;
+  portalId?: string;
 }

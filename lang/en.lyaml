@@ -25,6 +25,11 @@ en:
       createModule:
         creatingModule: "Creating module at {{ path }}"
         creatingPath: "Creating {{ path }}"
+    oauth:
+      writeTokenInfo: "Updating Oauth2 token info for portalId: {{ portalId }}"
+      addOauthToAccountConfig:
+        init: Updating configuration
+        success: Configuration updated
     config:
       cliConfiguration:
         load:
@@ -60,6 +65,11 @@ en:
         convertFieldsJs:
           creating: "Creating child process with pid {{ pid }}"
           terminating: "Child process with pid {{ pid }} has been terminated"
+    models:
+      OAuth2Manager:
+        fetchingAccessToken: Fetching access token for accountId {{ accountId }} for clientId {{ clientId }}
+        updatingTokeninfo: Persisting updated tokenInfo for accountId {{ accountId }} for clientId {{ clientId }}
+        refreshingAccessToken: Waiting for access token for accountId {{ accountId }}  for clientId {{ clientId }} to be fetched
   errors:
     archive:
       extractZip:
@@ -109,3 +119,7 @@ en:
         updateAllowUsageTracking: Unable to update allowUsageTracking. The value {{ isEnabled }} is invalid. The value must be a boolean.
       configFile:
         parsing: "Config file could not be parsed"
+    models:
+      OAuth2Manager:
+        missingRefreshToken: "The account {{ accountId }} has not been authenticated with Oauth2"
+        auth: "Error while retrieving new token: {{ token }}"
