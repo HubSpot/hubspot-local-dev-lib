@@ -10,20 +10,17 @@ export async function fetchSandboxHubData(
   portalId: number,
   env: ValueOf<typeof ENVIRONMENTS> = ENVIRONMENTS.PROD
 ) {
-  const requestOptions = getRequestOptions(
-    { env },
-    {
-      uri: SANDBOX_HUBS_API_PATH,
-      qs: { portalId },
-    }
-  );
+  const requestOptions = getRequestOptions({
+    env,
+    uri: `${SANDBOX_HUBS_API_PATH}`,
+    qs: { portalId },
+  });
   const reqWithToken = {
     ...requestOptions,
     headers: {
       ...requestOptions.headers,
       Authorization: `Bearer ${accessToken}`,
     },
-    url: SANDBOX_HUBS_API_PATH,
   };
 
   return request.get(reqWithToken);
