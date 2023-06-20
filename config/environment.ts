@@ -1,6 +1,6 @@
-import { CLIConfig } from '../types/Config';
+import { CLIConfig, Environment } from '../types/Config';
 import { debug } from '../utils/logger';
-import { ENVIRONMENTS, ENVIRONMENT_VARIABLES } from '../constants';
+import { ENVIRONMENT_VARIABLES } from '../constants';
 import {
   API_KEY_AUTH_METHOD,
   OAUTH_AUTH_METHOD,
@@ -9,16 +9,6 @@ import {
 } from '../constants/auth';
 import { generateConfig } from './configUtils';
 
-export function getValidEnv(
-  env?: string | null,
-  useProdDefault = true
-): string | undefined {
-  if (typeof env === 'string' && env.toLowerCase() === ENVIRONMENTS.QA) {
-    return ENVIRONMENTS.QA;
-  }
-  return useProdDefault ? ENVIRONMENTS.PROD : undefined;
-}
-
 type EnvironmentConfigVariables = {
   apiKey?: string;
   clientId?: string;
@@ -26,7 +16,7 @@ type EnvironmentConfigVariables = {
   personalAccessKey?: string;
   accountId?: number;
   refreshToken?: string;
-  env?: string;
+  env?: Environment;
 };
 
 function getConfigVariablesFromEnv(): EnvironmentConfigVariables {
@@ -39,7 +29,9 @@ function getConfigVariablesFromEnv(): EnvironmentConfigVariables {
     personalAccessKey: env[ENVIRONMENT_VARIABLES.HUBSPOT_PERSONAL_ACCESS_KEY],
     accountId: parseInt(env[ENVIRONMENT_VARIABLES.HUBSPOT_ACCOUNT_ID]!, 10),
     refreshToken: env[ENVIRONMENT_VARIABLES.HUBSPOT_REFRESH_TOKEN],
-    env: getValidEnv(env[ENVIRONMENT_VARIABLES.HUBSPOT_ENVIRONMENT]),
+    env: getValidEnv(
+      env[ENVIRONMENT_VARIABLES.HUBSPOT_ENVIRONMENT] as Environment
+    ),
   };
 }
 

@@ -1,6 +1,7 @@
 import { debug, makeTypedLogger } from '../utils/logger';
 import { throwErrorWithMessage } from '../errors/standardErrors';
-import { getValidEnv, loadConfigFromEnvironment } from './environment';
+import { loadConfigFromEnvironment } from './environment';
+import { getValidEnv } from '../lib/environment';
 import {
   loadConfigFromFile,
   writeConfigToFile,
@@ -12,7 +13,7 @@ import { commaSeparatedValues } from '../lib/text';
 import { ENVIRONMENTS } from '../constants';
 import { API_KEY_AUTH_METHOD } from '../constants/auth';
 import { DEFAULT_MODES, MIN_HTTP_TIMEOUT } from '../constants/config';
-import { CLIConfig } from '../types/Config';
+import { CLIConfig, Environment } from '../types/Config';
 import { CLIAccount, OAuthAccount, FlatAccountFields } from '../types/Accounts';
 import { CLIOptions } from '../types/CLIOptions';
 import { ValueOf } from '../types/Utils';
@@ -239,7 +240,7 @@ class CLIConfiguration {
     return this.config!;
   }
 
-  getEnv(nameOrId?: string | number): string {
+  getEnv(nameOrId?: string | number): Environment {
     const accountConfig = this.getAccount(nameOrId);
 
     if (accountConfig && accountConfig.accountId && accountConfig.env) {
@@ -315,8 +316,7 @@ class CLIConfiguration {
     }
 
     const updatedEnv = getValidEnv(
-      env || (currentAccountConfig && currentAccountConfig.env),
-      false
+      env || (currentAccountConfig && currentAccountConfig.env)
     );
     const updatedDefaultMode: ValueOf<typeof DEFAULT_MODES> | undefined =
       defaultMode &&
@@ -400,7 +400,7 @@ class CLIConfiguration {
     }
 
     if (accountId) {
-      this.updateAccount({ accountId, name: newName });
+      this.updateAccount({ accountId, name: newName, env: this.getEnv() });
     }
 
     if (accountConfigToRename.name === this.getDefaultAccount()) {

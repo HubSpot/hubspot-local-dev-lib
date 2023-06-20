@@ -1,190 +1,206 @@
-// const moment = require('moment');
-// const { HubSpotAuthError } = require('./lib/models/Errors');
-// const {
-//   getEnv,
-//   getAccountConfig,
-//   updateAccountConfig,
-//   updateDefaultAccount,
-//   writeConfig,
-// } = require('./lib/config');
-// const { getValidEnv } = require('./lib/environment');
-// const {
-//   PERSONAL_ACCESS_KEY_AUTH_METHOD,
-//   ENVIRONMENTS,
-// } = require('./lib/constants');
-// const { logErrorInstance } = require('./errorHandlers/standardErrors');
-// const { fetchAccessToken } = require('./api/localDevAuth/unauthenticated');
-// const { fetchSandboxHubData } = require('./api/hubs');
+import moment from 'moment';
+import CLIConfiguration from '../config/CLIConfiguration';
+import { getValidEnv } from '../lib/environment';
+import { ENVIRONMENTS } from '../constants/environments';
+import { PERSONAL_ACCESS_KEY_AUTH_METHOD } from '../constants/auth';
+import {
+  throwAuthErrorWithMessage,
+  throwErrorWithMessage,
+  throwError,
+} from '../errors/standardErrors';
+import { fetchAccessToken } from '../api/localDevAuth/unauthenticated';
+import { fetchSandboxHubData } from '../api/hubs';
+import { BaseError, StatusCodeError } from '../types/Error';
+import { CLIAccount, PersonalAccessKeyAccount } from '../types/Accounts';
+import { Environment } from '../types/Config';
 
-// const refreshRequests = new Map();
+const refreshRequests = new Map();
 
-// function getRefreshKey(personalAccessKey, expiration) {
-//   return `${personalAccessKey}-${expiration || 'fresh'}`;
-// }
+function getRefreshKey(personalAccessKey: string, expiration?: string): string {
+  return `${personalAccessKey}-${expiration || 'fresh'}`;
+}
 
-// async function getAccessToken(
-//   personalAccessKey,
-//   env = ENVIRONMENTS.PROD,
-//   accountId
-// ) {
-//   let response;
-//   try {
-//     response = await fetchAccessToken(personalAccessKey, env, accountId);
-//   } catch (e) {
-//     if (e.response) {
-//       const errorOutput = `Error while retrieving new access token: ${e.response.body.message}.`;
-//       if (e.response.statusCode === 401) {
-//         // Before adjusting the error message below, please verify that changes do not break regex match in cli/commands/sandbox/delete.js
-//         // For future changes: if response.statusCode is passed into the new error below, sandboxes can skip the regex check and pull the statusCode instead
-//         throw new HubSpotAuthError(
-//           `${errorOutput} \nYour personal access key is invalid. Please run "hs auth personalaccesskey" to reauthenticate. See https://designers.hubspot.com/docs/personal-access-keys for more information.`
-//         );
-//       } else {
-//         throw new HubSpotAuthError(errorOutput);
-//       }
-//     } else {
-//       throw e;
-//     }
-//   }
-//   return {
-//     portalId: response.hubId,
-//     accessToken: response.oauthAccessToken,
-//     expiresAt: moment(response.expiresAtMillis),
-//     scopeGroups: response.scopeGroups,
-//     encodedOauthRefreshToken: response.encodedOauthRefreshToken,
-//   };
-// }
+type AccessToken = {
+  portalId: number;
+  accessToken: string;
+  expiresAt: string;
+  scopeGroups: Array<string>;
+  encodedOauthRefreshToken: string;
+};
 
-// async function refreshAccessToken(
-//   accountId,
-//   personalAccessKey,
-//   env = ENVIRONMENTS.PROD
-// ) {
-//   const { accessToken, expiresAt } = await getAccessToken(
-//     personalAccessKey,
-//     env,
-//     accountId
-//   );
-//   const config = getAccountConfig(accountId);
+export async function getAccessToken(
+  personalAccessKey: string,
+  env: Environment = ENVIRONMENTS.PROD,
+  accountId?: number
+): Promise<AccessToken> {
+  let response;
+  try {
+    response = await fetchAccessToken(personalAccessKey, env, accountId);
+  } catch (e) {
+    const error = e as StatusCodeError;
+    if (error.response) {
+      if (error.response.statusCode === 401) {
+        // Before adjusting the error message below, please verify that changes do not break regex match in cli/commands/sandbox/delete.js
+        // For future changes: if response.statusCode is passed into the new error below, sandboxes can skip the regex check and pull the statusCode instead
+        throwAuthErrorWithMessage(
+          'personalAccessKey.invalidPersonalAccessKey401',
+          { errorMessage: error.response.body.message },
+          error
+        );
+      } else {
+        throwAuthErrorWithMessage(
+          'personalAccessKey.invalidPersonalAccessKey',
+          { errorMessage: error.response.body.message },
+          error
+        );
+      }
+    } else {
+      throwError(e as BaseError);
+    }
+  }
+  return {
+    portalId: response.hubId,
+    accessToken: response.oauthAccessToken,
+    expiresAt: moment(response.expiresAtMillis).toISOString(),
+    scopeGroups: response.scopeGroups,
+    encodedOauthRefreshToken: response.encodedOauthRefreshToken,
+  };
+}
 
-//   updateAccountConfig({
-//     ...config,
-//     portalId: accountId,
-//     tokenInfo: {
-//       accessToken,
-//       expiresAt: expiresAt.toISOString(),
-//     },
-//   });
-//   writeConfig();
+async function refreshAccessToken(
+  personalAccessKey: string,
+  env: Environment = ENVIRONMENTS.PROD,
+  accountId: number
+): Promise<string> {
+  const { accessToken, expiresAt } = await getAccessToken(
+    personalAccessKey,
+    env,
+    accountId
+  );
+  const config = CLIConfiguration.getAccount(accountId);
 
-//   return accessToken;
-// }
+  CLIConfiguration.updateAccount({
+    env,
+    ...config,
+    accountId,
+    tokenInfo: {
+      accessToken,
+      expiresAt: expiresAt,
+    },
+  });
+  CLIConfiguration.write();
 
-// async function getNewAccessToken(accountId, personalAccessKey, expiresAt, env) {
-//   const key = getRefreshKey(personalAccessKey, expiresAt);
-//   if (refreshRequests.has(key)) {
-//     return refreshRequests.get(key);
-//   }
-//   let accessToken;
-//   try {
-//     const refreshAccessPromise = refreshAccessToken(
-//       accountId,
-//       personalAccessKey,
-//       env
-//     );
-//     if (key) {
-//       refreshRequests.set(key, refreshAccessPromise);
-//     }
-//     accessToken = await refreshAccessPromise;
-//   } catch (e) {
-//     if (key) {
-//       refreshRequests.delete(key);
-//     }
-//     throw e;
-//   }
-//   return accessToken;
-// }
+  return accessToken;
+}
 
-// async function accessTokenForPersonalAccessKey(accountId) {
-//   const { auth, personalAccessKey, env } = getAccountConfig(accountId);
-//   const authTokenInfo = auth && auth.tokenInfo;
-//   const authDataExists = authTokenInfo && auth.tokenInfo.accessToken;
+async function getNewAccessToken(
+  accountId: number,
+  personalAccessKey: string,
+  expiresAt: string | undefined,
+  env: Environment
+): Promise<string> {
+  const key = getRefreshKey(personalAccessKey, expiresAt);
+  if (refreshRequests.has(key)) {
+    return refreshRequests.get(key);
+  }
+  let accessToken;
+  try {
+    const refreshAccessPromise = refreshAccessToken(
+      personalAccessKey,
+      env,
+      accountId
+    );
+    if (key) {
+      refreshRequests.set(key, refreshAccessPromise);
+    }
+    accessToken = await refreshAccessPromise;
+  } catch (e) {
+    if (key) {
+      refreshRequests.delete(key);
+    }
+    throw e;
+  }
+  return accessToken;
+}
 
-//   if (
-//     !authDataExists ||
-//     moment().add(5, 'minutes').isAfter(moment(authTokenInfo.expiresAt))
-//   ) {
-//     return getNewAccessToken(
-//       accountId,
-//       personalAccessKey,
-//       authTokenInfo && authTokenInfo.expiresAt,
-//       env
-//     );
-//   }
+export async function accessTokenForPersonalAccessKey(
+  accountId: number
+): Promise<string | undefined> {
+  const account = CLIConfiguration.getAccount(
+    accountId
+  ) as PersonalAccessKeyAccount;
+  if (!account) {
+    throwErrorWithMessage('personalAccessKey.accountNotFound', { accountId });
+  }
+  const { auth, personalAccessKey, env } = account;
+  const authTokenInfo = auth && auth.tokenInfo;
+  const authDataExists = authTokenInfo && auth?.tokenInfo?.accessToken;
 
-//   return auth.tokenInfo.accessToken;
-// }
+  if (
+    !authDataExists ||
+    moment().add(5, 'minutes').isAfter(moment(authTokenInfo.expiresAt))
+  ) {
+    return getNewAccessToken(
+      accountId,
+      personalAccessKey,
+      authTokenInfo && authTokenInfo.expiresAt,
+      env
+    );
+  }
 
-// /**
-//  * Adds a account to the config using authType: personalAccessKey
-//  *
-//  * @param {object} configData Data containing personalAccessKey and name properties
-//  * @param {string} configData.personalAccessKey Personal access key string to place in config
-//  * @param {string} configData.name Unique name to identify this config entry
-//  * @param {boolean} makeDefault option to make the account being added to the config the default account
-//  */
-// const updateConfigWithPersonalAccessKey = async (configData, makeDefault) => {
-//   const { personalAccessKey, name, env } = configData;
-//   const accountEnv = env || getEnv(name);
+  return auth?.tokenInfo?.accessToken;
+}
 
-//   let token;
-//   try {
-//     token = await getAccessToken(personalAccessKey, accountEnv);
-//   } catch (err) {
-//     logErrorInstance(err);
-//     return;
-//   }
-//   const { portalId, accessToken, expiresAt } = token;
+// Adds a account to the config using authType: personalAccessKey
+export const updateConfigWithPersonalAccessKey = async (
+  personalAccessKey: string,
+  name: string,
+  env: Environment,
+  makeDefault = false
+): Promise<CLIAccount | null> => {
+  const accountEnv = env || CLIConfiguration.getEnv(name);
 
-//   let hubInfo;
-//   try {
-//     hubInfo = await fetchSandboxHubData(accessToken, portalId, accountEnv);
-//   } catch (err) {
-//     // Ignore error, returns 404 if account is not a sandbox
-//   }
+  let token;
+  try {
+    token = await getAccessToken(personalAccessKey, accountEnv);
+  } catch (err) {
+    throwError(err as BaseError);
+  }
+  const { portalId, accessToken, expiresAt } = token;
 
-//   let sandboxAccountType = null;
-//   let parentAccountId = null;
-//   if (hubInfo) {
-//     if (hubInfo.type !== undefined) {
-//       sandboxAccountType = hubInfo.type === null ? 'STANDARD' : hubInfo.type;
-//     }
-//     if (hubInfo.parentHubId) {
-//       parentAccountId = hubInfo.parentHubId;
-//     }
-//   }
+  let hubInfo;
+  try {
+    hubInfo = await fetchSandboxHubData(accessToken, portalId, accountEnv);
+  } catch (err) {
+    // Ignore error, returns 404 if account is not a sandbox
+  }
 
-//   const updatedConfig = updateAccountConfig({
-//     portalId,
-//     personalAccessKey,
-//     name,
-//     environment: getValidEnv(accountEnv, true),
-//     authType: PERSONAL_ACCESS_KEY_AUTH_METHOD.value,
-//     tokenInfo: { accessToken, expiresAt },
-//     sandboxAccountType,
-//     parentAccountId,
-//   });
-//   writeConfig();
+  let sandboxAccountType = null;
+  let parentAccountId = null;
+  if (hubInfo) {
+    if (hubInfo.type !== undefined) {
+      sandboxAccountType = hubInfo.type === null ? 'STANDARD' : hubInfo.type;
+    }
+    if (hubInfo.parentHubId) {
+      parentAccountId = hubInfo.parentHubId;
+    }
+  }
 
-//   if (makeDefault) {
-//     updateDefaultAccount(name);
-//   }
+  const updatedConfig = CLIConfiguration.updateAccount({
+    accountId: portalId,
+    personalAccessKey,
+    name,
+    env: getValidEnv(accountEnv, ''),
+    authType: PERSONAL_ACCESS_KEY_AUTH_METHOD.value,
+    tokenInfo: { accessToken, expiresAt },
+    sandboxAccountType,
+    parentAccountId,
+  });
+  CLIConfiguration.write();
 
-//   return updatedConfig;
-// };
+  if (makeDefault) {
+    CLIConfiguration.updateDefaultAccount(name);
+  }
 
-// module.exports = {
-//   accessTokenForPersonalAccessKey,
-//   updateConfigWithPersonalAccessKey,
-//   getAccessToken,
-// };
+  return updatedConfig;
+};

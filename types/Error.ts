@@ -24,6 +24,7 @@ export interface StatusCodeError extends BaseError {
     headers: {
       [key: string]: string;
     };
+    statusCode: number;
   };
 }
 

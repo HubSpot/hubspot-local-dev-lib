@@ -12,7 +12,7 @@ type GetRequestOptionsOptions = {
   env?: string;
   localHostOverride?: boolean;
   qs?: { portalId?: number };
-  body: {
+  body?: {
     [key: string]: string;
   };
 };

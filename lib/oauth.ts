@@ -11,9 +11,9 @@ import { makeTypedLogger } from '../utils/logger';
 const oauthManagers = new Map<string, OAuth2Manager>();
 
 function writeOauthTokenInfo(accountConfig: FlatAccountFields): void {
-  const { portalId } = accountConfig;
+  const { accountId } = accountConfig;
 
-  debug('oauth.writeTokenInfo', { portalId: portalId || '' });
+  debug('oauth.writeTokenInfo', { portalId: accountId || '' });
 
   CLIConfiguration.updateAccount(accountConfig);
   CLIConfiguration.write();

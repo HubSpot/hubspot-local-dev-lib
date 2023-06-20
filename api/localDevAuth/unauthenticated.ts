@@ -1,15 +1,23 @@
 import request from 'request-promise-native';
 import { getRequestOptions } from '../../http/requestOptions';
 import { ENVIRONMENTS } from '../../constants/environments';
-import { ValueOf } from '../../types/Utils';
+import { Environment } from '../../types/Config';
 
 const LOCALDEVAUTH_API_AUTH_PATH = 'localdevauth/v1/auth';
 
+type AccessTokenResponse = {
+  hubId: number;
+  oauthAccessToken: string;
+  expiresAtMillis: number;
+  scopeGroups: Array<string>;
+  encodedOauthRefreshToken: string;
+};
+
 export async function fetchAccessToken(
   personalAccessKey: string,
-  env: ValueOf<typeof ENVIRONMENTS> = ENVIRONMENTS.PROD,
-  portalId: number
-) {
+  env: Environment = ENVIRONMENTS.PROD,
+  portalId?: number
+): Promise<AccessTokenResponse> {
   const query = portalId ? { portalId } : {};
   const requestOptions = getRequestOptions({
     env,

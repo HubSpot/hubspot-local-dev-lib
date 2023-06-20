@@ -1,5 +1,6 @@
 import { DEFAULT_MODES } from '../constants/config';
 import { ValueOf } from './Utils';
+import { Environment } from './Config';
 
 export type AuthType = 'personalaccesskey' | 'apikey' | 'oauth2';
 
@@ -7,9 +8,11 @@ export interface CLIAccount {
   name?: string;
   accountId: number;
   defaultMode?: ValueOf<typeof DEFAULT_MODES>;
-  env?: string;
+  env: Environment;
   authType?: AuthType;
-  auth?: object;
+  auth?: {
+    tokenInfo?: TokenInfo;
+  };
   sandboxAccountType?: string | null;
   parentAccountId?: number | null;
   apiKey?: string;
@@ -24,9 +27,6 @@ export type TokenInfo = {
 
 export interface PersonalAccessKeyAccount extends CLIAccount {
   authType: 'personalaccesskey';
-  auth?: {
-    tokenInfo: TokenInfo;
-  };
   personalAccessKey: string;
 }
 
@@ -52,5 +52,4 @@ export interface FlatAccountFields extends CLIAccount {
   scopes?: Array<string>;
   apiKey?: string;
   personalAccessKey?: string;
-  portalId?: string;
 }
