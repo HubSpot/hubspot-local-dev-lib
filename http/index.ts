@@ -1,6 +1,6 @@
 import path from 'path';
 import request from 'request';
-import requestPN from 'request-promise-native';
+import requestPN, { FullResponse } from 'request-promise-native';
 import fs from 'fs-extra';
 import contentDisposition from 'content-disposition';
 
@@ -10,7 +10,12 @@ import { accessTokenForPersonalAccessKey } from '../lib/personalAccessKey';
 import { getOauthManager } from '../lib/oauth';
 import { FlatAccountFields } from '../types/Accounts';
 import { LogCallbacksArg } from '../types/LogCallbacks';
-import { GetRequestOptionsOptions, RequestOptions } from '../types/Http';
+import {
+  GetRequestOptionsOptions,
+  HttpOptions,
+  QueryParams,
+  RequestOptions,
+} from '../types/Http';
 import { throwErrorWithMessage } from '../errors/standardErrors';
 import { makeTypedLogger } from '../utils/logger';
 
@@ -100,10 +105,6 @@ async function withAuth(
   };
 }
 
-type QueryParams = {
-  [key: string]: string;
-};
-
 function addQueryParams(
   requestOptions: GetRequestOptionsOptions,
   params: QueryParams = {}
@@ -118,48 +119,44 @@ function addQueryParams(
   };
 }
 
-type GetRequestOptionsOptionsWithQuery = GetRequestOptionsOptions & {
-  query: QueryParams;
-};
-
-export async function getRequest(
+async function getRequest(
   accountId: number,
-  options: GetRequestOptionsOptionsWithQuery
-) {
+  options: HttpOptions
+): Promise<FullResponse> {
   const { query, ...rest } = options;
   const requestOptions = addQueryParams(rest, query);
   const requestOptionsWithAuth = await withAuth(accountId, requestOptions);
   return requestPN.get(requestOptionsWithAuth);
 }
 
-export async function postRequest(
+async function postRequest(
   accountId: number,
-  options: GetRequestOptionsOptionsWithQuery
-) {
+  options: HttpOptions
+): Promise<FullResponse> {
   const requestOptionsWithAuth = await withAuth(accountId, options);
   return requestPN.post(requestOptionsWithAuth);
 }
 
-export async function putRequest(
+async function putRequest(
   accountId: number,
-  options: GetRequestOptionsOptionsWithQuery
-) {
+  options: HttpOptions
+): Promise<FullResponse> {
   const requestOptionsWithAuth = await withAuth(accountId, options);
   return requestPN.put(requestOptionsWithAuth);
 }
 
-export async function patchRequest(
+async function patchRequest(
   accountId: number,
-  options: GetRequestOptionsOptionsWithQuery
-) {
+  options: HttpOptions
+): Promise<FullResponse> {
   const requestOptionsWithAuth = await withAuth(accountId, options);
   return requestPN.patch(requestOptionsWithAuth);
 }
 
-export async function deleteRequest(
+async function deleteRequest(
   accountId: number,
-  options: GetRequestOptionsOptionsWithQuery
-) {
+  options: HttpOptions
+): Promise<FullResponse> {
   const requestOptionsWithAuth = await withAuth(accountId, options);
   return requestPN.del(requestOptionsWithAuth);
 }
@@ -169,10 +166,10 @@ const getRequestStreamCallbackKeys = ['onWrite'];
 function createGetRequestStream(contentType: string) {
   return async (
     accountId: number,
-    options: GetRequestOptionsOptionsWithQuery,
+    options: HttpOptions,
     destPath: string,
     logCallbacks?: LogCallbacksArg<typeof getRequestStreamCallbackKeys>
-  ) => {
+  ): Promise<FullResponse> => {
     const { query, ...rest } = options;
     const requestOptions = addQueryParams(rest, query);
     const logger = makeTypedLogger<typeof getRequestStreamCallbackKeys>(
@@ -185,7 +182,7 @@ function createGetRequestStream(contentType: string) {
     // https://github.com/request/request-promise#api-in-detail
     //
     // eslint-disable-next-line no-async-promise-executor
-    return new Promise(async (resolve, reject) => {
+    return new Promise<FullResponse>(async (resolve, reject) => {
       try {
         const { headers, ...opts } = await withAuth(accountId, requestOptions);
         const req = request.get({
@@ -238,6 +235,15 @@ function createGetRequestStream(contentType: string) {
   };
 }
 
-export const getOctetStream = createGetRequestStream(
-  'application/octet-stream'
-);
+const getOctetStream = createGetRequestStream('application/octet-stream');
+
+const http = {
+  get: getRequest,
+  post: postRequest,
+  put: putRequest,
+  patch: patchRequest,
+  delete: deleteRequest,
+  getOctetStream,
+};
+
+export default http;
