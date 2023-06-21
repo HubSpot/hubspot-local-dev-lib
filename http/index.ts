@@ -8,11 +8,11 @@ import CLIConfiguration from '../config/CLIConfiguration';
 import { getRequestOptions } from './requestOptions';
 import { accessTokenForPersonalAccessKey } from '../lib/personalAccessKey';
 import { getOauthManager } from '../lib/oauth';
-import { throwFileSystemError } from '../errors/fileSystemErrors';
-import { FileSystemErrorContext } from '../types/Error';
 import { FlatAccountFields } from '../types/Accounts';
+import { LogCallbacksArg } from '../types/LogCallbacks';
 import { GetRequestOptionsOptions, RequestOptions } from '../types/Http';
 import { throwErrorWithMessage } from '../errors/standardErrors';
+import { makeTypedLogger } from '../utils/logger';
 
 async function withOauth(
   accountId: number,
@@ -122,7 +122,7 @@ type GetRequestOptionsOptionsWithQuery = GetRequestOptionsOptions & {
   query: QueryParams;
 };
 
-async function getRequest(
+export async function getRequest(
   accountId: number,
   options: GetRequestOptionsOptionsWithQuery
 ) {
@@ -132,7 +132,7 @@ async function getRequest(
   return requestPN.get(requestOptionsWithAuth);
 }
 
-async function postRequest(
+export async function postRequest(
   accountId: number,
   options: GetRequestOptionsOptionsWithQuery
 ) {
@@ -140,7 +140,7 @@ async function postRequest(
   return requestPN.post(requestOptionsWithAuth);
 }
 
-async function putRequest(
+export async function putRequest(
   accountId: number,
   options: GetRequestOptionsOptionsWithQuery
 ) {
@@ -148,7 +148,7 @@ async function putRequest(
   return requestPN.put(requestOptionsWithAuth);
 }
 
-async function patchRequest(
+export async function patchRequest(
   accountId: number,
   options: GetRequestOptionsOptionsWithQuery
 ) {
@@ -156,7 +156,7 @@ async function patchRequest(
   return requestPN.patch(requestOptionsWithAuth);
 }
 
-async function deleteRequest(
+export async function deleteRequest(
   accountId: number,
   options: GetRequestOptionsOptionsWithQuery
 ) {
@@ -164,22 +164,21 @@ async function deleteRequest(
   return requestPN.del(requestOptionsWithAuth);
 }
 
-const createGetRequestStream =
-  ({ contentType }) =>
-  async (accountId, options, destPath) => {
+const getRequestStreamCallbackKeys = ['onWrite'];
+
+function createGetRequestStream(contentType: string) {
+  return async (
+    accountId: number,
+    options: GetRequestOptionsOptionsWithQuery,
+    destPath: string,
+    logCallbacks?: LogCallbacksArg<typeof getRequestStreamCallbackKeys>
+  ) => {
     const { query, ...rest } = options;
     const requestOptions = addQueryParams(rest, query);
-
-    const logFsError = err => {
-      logFileSystemErrorInstance(
-        err,
-        new FileSystemErrorContext({
-          destPath,
-          accountId,
-          write: true,
-        })
-      );
-    };
+    const logger = makeTypedLogger<typeof getRequestStreamCallbackKeys>(
+      logCallbacks,
+      'http.index.createGetRequestStream'
+    );
 
     // Using `request` instead of `request-promise` per the docs so
     // the response can be piped.
@@ -206,7 +205,7 @@ const createGetRequestStream =
               const stat = fs.statSync(destPath);
               if (stat.isDirectory()) {
                 const { parameters } = contentDisposition.parse(
-                  res.headers['content-disposition']
+                  res.headers['content-disposition'] || ''
                 );
                 filepath = path.join(destPath, parameters.filename);
               }
@@ -222,11 +221,10 @@ const createGetRequestStream =
             req.pipe(writeStream);
 
             writeStream.on('error', err => {
-              logFsError(err);
               reject(err);
             });
             writeStream.on('close', async () => {
-              logger.log('Wrote file "%s"', filepath);
+              logger('onWrite', { filepath });
               resolve(res);
             });
           } else {
@@ -238,16 +236,8 @@ const createGetRequestStream =
       }
     });
   };
+}
 
-module.exports = {
-  getRequestOptions,
-  request: requestPN,
-  get: getRequest,
-  getOctetStream: createGetRequestStream({
-    contentType: 'application/octet-stream',
-  }),
-  post: postRequest,
-  put: putRequest,
-  patch: patchRequest,
-  delete: deleteRequest,
-};
+export const getOctetStream = createGetRequestStream(
+  'application/octet-stream'
+);

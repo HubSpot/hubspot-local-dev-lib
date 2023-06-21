@@ -70,6 +70,10 @@ en:
         fetchingAccessToken: Fetching access token for accountId {{ accountId }} for clientId {{ clientId }}
         updatingTokeninfo: Persisting updated tokenInfo for accountId {{ accountId }} for clientId {{ clientId }}
         refreshingAccessToken: Waiting for access token for accountId {{ accountId }}  for clientId {{ clientId }} to be fetched
+    http:
+      index:
+        createGetRequestStream:
+          onWrite: "Wrote file {{ filepath }}"
   errors:
     archive:
       extractZip:
