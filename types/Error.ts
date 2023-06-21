@@ -33,3 +33,9 @@ export interface GithubError extends BaseError {
     message?: string;
   };
 }
+
+export type FileSystemErrorContext = {
+  filepath: string;
+  write?: boolean;
+  read?: boolean;
+};

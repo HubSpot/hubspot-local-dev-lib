@@ -127,3 +127,7 @@ en:
       OAuth2Manager:
         missingRefreshToken: "The account {{ accountId }} has not been authenticated with Oauth2"
         auth: "Error while retrieving new token: {{ token }}"
+    http:
+      index:
+        withOauth: "Oauth manager for account {{ accountId }} not found."
+        withAuth: "Account with id {{ accountId }} not found."

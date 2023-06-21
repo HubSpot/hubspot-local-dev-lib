@@ -1,14 +1,8 @@
 import { i18n } from '../utils/lang';
 import { isSystemError } from './standardErrors';
-import { BaseError } from '../types/Error';
+import { BaseError, FileSystemErrorContext } from '../types/Error';
 
 const i18nKey = 'errors.errorTypes.fileSystem';
-
-type FileSystemErrorContext = {
-  filepath: string;
-  write?: boolean;
-  read?: boolean;
-};
 
 export function throwFileSystemError(
   error: BaseError,

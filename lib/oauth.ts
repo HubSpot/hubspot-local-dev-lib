@@ -8,7 +8,7 @@ import { BaseError } from '../types/Error';
 import { LogCallbacksArg } from '../types/LogCallbacks';
 import { makeTypedLogger } from '../utils/logger';
 
-const oauthManagers = new Map<string, OAuth2Manager>();
+const oauthManagers = new Map<number, OAuth2Manager>();
 
 function writeOauthTokenInfo(accountConfig: FlatAccountFields): void {
   const { accountId } = accountConfig;
@@ -20,7 +20,7 @@ function writeOauthTokenInfo(accountConfig: FlatAccountFields): void {
 }
 
 export function getOauthManager(
-  accountId: string,
+  accountId: number,
   accountConfig: FlatAccountFields
 ) {
   if (!oauthManagers.has(accountId)) {

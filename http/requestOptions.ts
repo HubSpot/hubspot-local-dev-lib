@@ -1,23 +1,11 @@
 import { version } from '../package.json';
 import config from '../config/CLIConfiguration';
 import { getHubSpotApiOrigin } from '../lib/urls';
-import { CoreOptions, UriOptions } from 'request';
+import { RequestOptions, GetRequestOptionsOptions } from '../types/Http';
 
 export const DEFAULT_USER_AGENT_HEADERS = {
   'User-Agent': `HubSpot Local Dev Lib/${version}`,
 };
-
-type GetRequestOptionsOptions = {
-  uri: string;
-  env?: string;
-  localHostOverride?: boolean;
-  qs?: { portalId?: number };
-  body?: {
-    [key: string]: string;
-  };
-};
-
-type RequestOptions = CoreOptions & UriOptions;
 
 export function getRequestOptions(
   options: GetRequestOptionsOptions

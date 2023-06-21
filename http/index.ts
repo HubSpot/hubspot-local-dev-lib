@@ -6,16 +6,26 @@
 
 // import CLIConfiguration from '../config/CLIConfiguration';
 // import { getRequestOptions } from './requestOptions';
-// const { accessTokenForPersonalAccessKey } = require('./personalAccessKey');
-// const { getOauthManager } = require('./oauth');
-// const {
-//   FileSystemErrorContext,
-//   logFileSystemErrorInstance,
-// } = require('./errorHandlers/fileSystemErrors');
+// import { accessTokenForPersonalAccessKey } from '../lib/personalAccessKey';
+// import { getOauthManager } from '../lib/oauth';
+// import { throwFileSystemError } from '../errors/fileSystemErrors';
+// import { FileSystemErrorContext } from '../types/Error';
+// import { FlatAccountFields } from '../types/Accounts';
+// import { GetRequestOptionsOptions, RequestOptions } from '../types/Http';
+// import { throwErrorWithMessage } from '../errors/standardErrors';
 
-// const withOauth = async (accountId, accountConfig, requestOptions) => {
+// async function withOauth(
+//   accountId: number,
+//   accountConfig: FlatAccountFields,
+//   requestOptions: RequestOptions
+// ): Promise<RequestOptions> {
 //   const { headers } = requestOptions;
 //   const oauth = getOauthManager(accountId, accountConfig);
+
+//   if (!oauth) {
+//     throwErrorWithMessage('http.index.withOauth', { accountId });
+//   }
+
 //   const accessToken = await oauth.accessToken();
 //   return {
 //     ...requestOptions,
@@ -24,13 +34,12 @@
 //       Authorization: `Bearer ${accessToken}`,
 //     },
 //   };
-// };
+// }
 
-// const withPersonalAccessKey = async (
-//   accountId,
-//   accountConfig,
-//   requestOptions
-// ) => {
+// async function withPersonalAccessKey(
+//   accountId: number,
+//   requestOptions: RequestOptions
+// ): Promise<RequestOptions> {
 //   const { headers } = requestOptions;
 //   const accessToken = await accessTokenForPersonalAccessKey(accountId);
 //   return {
@@ -40,9 +49,12 @@
 //       Authorization: `Bearer ${accessToken}`,
 //     },
 //   };
-// };
+// }
 
-// const withPortalId = (portalId, requestOptions) => {
+// function withPortalId(
+//   portalId: number,
+//   requestOptions: RequestOptions
+// ): RequestOptions {
 //   const { qs } = requestOptions;
 
 //   return {
@@ -52,18 +64,26 @@
 //       portalId,
 //     },
 //   };
-// };
+// }
 
-// const withAuth = async (accountId, options) => {
-//   const accountConfig = getAccountConfig(accountId);
+// async function withAuth(
+//   accountId: number,
+//   options: GetRequestOptionsOptions
+// ): Promise<RequestOptions> {
+//   const accountConfig = CLIConfiguration.getAccount(accountId);
+
+//   if (!accountConfig) {
+//     throwErrorWithMessage('http.index.withAuth', { accountId });
+//   }
+
 //   const { env, authType, apiKey } = accountConfig;
 //   const requestOptions = withPortalId(
 //     accountId,
-//     getRequestOptions({ env }, options)
+//     getRequestOptions({ env, ...options })
 //   );
 
 //   if (authType === 'personalaccesskey') {
-//     return withPersonalAccessKey(accountId, accountConfig, requestOptions);
+//     return withPersonalAccessKey(accountId, requestOptions);
 //   }
 
 //   if (authType === 'oauth2') {
@@ -78,9 +98,16 @@
 //       hapikey: apiKey,
 //     },
 //   };
+// }
+
+// type QueryParams = {
+//   [key: string]: string;
 // };
 
-// const addQueryParams = (requestOptions, params = {}) => {
+// function addQueryParams(
+//   requestOptions: RequestOptions,
+//   params: QueryParams = {}
+// ): RequestOptions {
 //   const { qs } = requestOptions;
 //   return {
 //     ...requestOptions,
@@ -89,13 +116,17 @@
 //       ...params,
 //     },
 //   };
+// }
+
+// type RequestOptionsWithQuery = RequestOptions & {
+//   query: QueryParams;
 // };
 
-// const getRequest = async (accountId, options) => {
+// function getRequest(accountId: number, options: RequestOptionsWithQuery) {
 //   const { query, ...rest } = options;
 //   const requestOptions = addQueryParams(rest, query);
 //   return requestPN.get(await withAuth(accountId, requestOptions));
-// };
+// }
 
 // const postRequest = async (accountId, options) => {
 //   return requestPN.post(await withAuth(accountId, options));
