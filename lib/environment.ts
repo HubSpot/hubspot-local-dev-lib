@@ -2,7 +2,7 @@ import { ENVIRONMENTS } from '../constants/environments';
 import { Environment } from '../types/Config';
 
 export function getValidEnv(
-  env?: Environment,
+  env?: Environment | null,
   maskedProductionValue?: Environment
 ): Environment {
   const prodValue = maskedProductionValue

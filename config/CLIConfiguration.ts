@@ -260,7 +260,7 @@ class CLIConfiguration {
    * @throws {Error}
    */
   updateAccount(
-    updatedAccountFields: FlatAccountFields,
+    updatedAccountFields: Partial<FlatAccountFields>,
     writeUpdate = true
   ): CLIAccount | null {
     const {

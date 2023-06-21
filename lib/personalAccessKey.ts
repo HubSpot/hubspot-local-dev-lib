@@ -1,6 +1,5 @@
 import moment from 'moment';
 import CLIConfiguration from '../config/CLIConfiguration';
-import { getValidEnv } from '../lib/environment';
 import { ENVIRONMENTS } from '../constants/environments';
 import { PERSONAL_ACCESS_KEY_AUTH_METHOD } from '../constants/auth';
 import {
@@ -190,7 +189,6 @@ export const updateConfigWithPersonalAccessKey = async (
     accountId: portalId,
     personalAccessKey,
     name,
-    env: getValidEnv(accountEnv, ''),
     authType: PERSONAL_ACCESS_KEY_AUTH_METHOD.value,
     tokenInfo: { accessToken, expiresAt },
     sandboxAccountType,

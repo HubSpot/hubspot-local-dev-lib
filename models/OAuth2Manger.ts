@@ -12,7 +12,7 @@ import {
   throwErrorWithMessage,
   throwAuthErrorWithMessage,
 } from '../errors/standardErrors';
-import { BaseError } from '../types/Error';
+import { BaseError, StatusCodeError } from '../types/Error';
 
 type WriteTokenInfoFunction = (tokenInfo: TokenInfo) => void;
 
@@ -114,13 +114,17 @@ class OAuth2Manager {
         await this.fetchAccessToken(exchangeProof);
       }
     } catch (e) {
-      if (e.response) {
-        throwAuthErrorWithMessage(`${i18nKey}.auth`, {
-          token: e.response.body.message,
-          e,
-        });
+      const error = e as StatusCodeError;
+      if (error.response) {
+        throwAuthErrorWithMessage(
+          `${i18nKey}.auth`,
+          {
+            token: error.response.body.message,
+          },
+          error
+        );
       } else {
-        throwError(e as BaseError);
+        throwError(error);
       }
     }
   }

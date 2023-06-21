@@ -8,6 +8,7 @@ import {
   OAUTH_SCOPES,
 } from '../constants/auth';
 import { generateConfig } from './configUtils';
+import { getValidEnv } from '../lib/environment';
 
 type EnvironmentConfigVariables = {
   apiKey?: string;
