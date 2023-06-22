@@ -3,15 +3,19 @@ import path from 'path';
 import contentDisposition from 'content-disposition';
 import { FullResponse } from 'request-promise-native';
 import http from '../http';
+import { getRequestOptions } from '../http/requestOptions';
 import { getCwd } from '../lib/path';
 import CLIConfiguration from '../config/CLIConfiguration';
 import { FileMapperNode } from '../types/Files';
 import { HttpOptions } from '../types/Http';
+import { debug } from '../utils/logger';
 
 const FILE_MAPPER_API_PATH = 'content/filemapper/v1';
 
+type FileMapperOptions = Omit<HttpOptions, 'uri'>;
+
 // https://github.com/request/request-promise#the-transform-function}
-function createFileMapperNodeFromStreamResponse(
+export function createFileMapperNodeFromStreamResponse(
   filePath: string,
   response: FullResponse
 ): FileMapperNode {
@@ -44,11 +48,11 @@ function createFileMapperNodeFromStreamResponse(
   };
 }
 
-async function upload(
+export async function upload(
   accountId: number,
   src: string,
   dest: string,
-  options: Omit<HttpOptions, 'uri'> = {}
+  options: FileMapperOptions = {}
 ) {
   return http.post(accountId, {
     uri: `${FILE_MAPPER_API_PATH}/upload/${encodeURIComponent(dest)}`,
@@ -60,10 +64,10 @@ async function upload(
 }
 
 // Fetch a module by moduleId
-async function fetchModule(
+export async function fetchModule(
   accountId: number,
   moduleId: number,
-  options: Omit<HttpOptions, 'uri'> = {}
+  options: FileMapperOptions = {}
 ) {
   return http.get(accountId, {
     uri: `${FILE_MAPPER_API_PATH}/modules/${moduleId}`,
@@ -72,11 +76,11 @@ async function fetchModule(
 }
 
 //Fetch a file by file path.
-async function fetchFileStream(
+export async function fetchFileStream(
   accountId: number,
   filePath: string,
   destination: string,
-  options: Omit<HttpOptions, 'uri'> = {}
+  options: FileMapperOptions = {}
 ): Promise<FileMapperNode> {
   const response = await http.getOctetStream(
     accountId,
@@ -89,81 +93,50 @@ async function fetchFileStream(
   return createFileMapperNodeFromStreamResponse(filePath, response);
 }
 
-/**
- * Fetch a folder or file node by path.
- *
- * @async
- * @param {number} accountId
- * @param {string} filepath
- * @param {object} options
- * @returns {Promise<FileMapperNode>}
- */
-async function download(accountId, filepath, options = {}) {
+// Fetch a folder or file node by path.
+export async function download(
+  accountId: number,
+  filepath: string,
+  options: FileMapperOptions = {}
+): Promise<FullResponse> {
   return http.get(accountId, {
     uri: `${FILE_MAPPER_API_PATH}/download/${encodeURIComponent(filepath)}`,
     ...options,
   });
 }
 
-/**
- * Fetch a folder or file node by path.
- *
- * @async
- * @param {number} accountId
- * @param {string} filepath
- * @param {object} options
- * @returns {Promise<FileMapperNode>}
- */
-async function downloadDefault(accountId, filepath, options = {}) {
+// Fetch a folder or file node by path.
+export async function downloadDefault(
+  accountId: number,
+  filepath: string,
+  options: FileMapperOptions = {}
+): Promise<FullResponse> {
   return http.get(accountId, {
     uri: `${FILE_MAPPER_API_PATH}/download-default/${filepath}`,
     ...options,
   });
 }
 
-/**
- * Delete a file or folder by path
- *
- * @async
- * @param {number} accountId
- * @param {string} filePath
- * @param {object} options
- * @returns {Promise}
- */
-async function deleteFile(accountId, filePath, options = {}) {
+// Delete a file or folder by path
+export async function deleteFile(
+  accountId: number,
+  filePath: string,
+  options: FileMapperOptions = {}
+): Promise<FullResponse> {
   return http.delete(accountId, {
     uri: `${FILE_MAPPER_API_PATH}/delete/${encodeURIComponent(filePath)}`,
     ...options,
   });
 }
 
-/**
- * Delete folder by path
- *
- * @deprecated since 1.0.1 - use `deleteFile()` instead.
- * @async
- * @param {number} accountId
- * @param {string} folderPath
- * @param {object} options
- * @returns {Promise}
- */
-async function deleteFolder(accountId, folderPath, options = {}) {
-  logger.warn(
-    '`cli-lib/api/fileMapper#deleteFolder()` is deprecated. Use `cli-lib/api/fileMapper#deleteFile()` instead.'
-  );
-  return http.delete(accountId, {
-    uri: `${FILE_MAPPER_API_PATH}/delete/folder/${folderPath}`,
-    ...options,
-  });
-}
-
-/**
- * Track CMS CLI usage
- *
- * @async
- * @returns {Promise}
- */
-async function trackUsage(eventName, eventClass, meta = {}, accountId) {
+// Track CMS CLI usage
+export async function trackUsage(
+  eventName: string,
+  eventClass: string,
+  meta = {},
+  accountId: number
+) {
+  const i18nKey = 'api.filemapper.trackUsage';
   const usageEvent = {
     accountId,
     eventName,
@@ -185,17 +158,15 @@ async function trackUsage(eventName, eventClass, meta = {}, accountId) {
       analyticsEndpoint = 'vscode-extension-usage';
       break;
     default:
-      logger.debug(
-        `Usage tracking event '${eventName}' is not a valid event type.`
-      );
+      debug(`${i18nKey}.invalidEvent`, { eventName });
   }
 
   const path = `${FILE_MAPPER_API_PATH}/${analyticsEndpoint}`;
 
-  const accountConfig = accountId && getAccountConfig(accountId);
+  const accountConfig = accountId && CLIConfiguration.getAccount(accountId);
 
   if (accountConfig && accountConfig.authType === 'personalaccesskey') {
-    logger.debug('Sending usage event to authenticated endpoint');
+    debug(`${i18nKey}.sendingEventAuthenticated`);
     return http.post(accountId, {
       uri: `${path}/authenticated`,
       body: usageEvent,
@@ -203,57 +174,34 @@ async function trackUsage(eventName, eventClass, meta = {}, accountId) {
     });
   }
 
-  const env = getEnv(accountId);
-  const requestOptions = http.getRequestOptions(
-    { env },
-    {
-      uri: path,
-      body: usageEvent,
-      resolveWithFullResponse: true,
-    }
-  );
-  logger.debug('Sending usage event to unauthenticated endpoint');
-  return http.request.post(requestOptions);
+  const env = CLIConfiguration.getEnv(accountId);
+  const requestOptions = getRequestOptions({
+    env,
+    uri: path,
+    body: usageEvent,
+    resolveWithFullResponse: true,
+  });
+  debug(`${i18nKey}.sendingEventUnauthenticated`);
+  return http.post(accountId, requestOptions);
 }
 
-/**
- * Moves file from srcPath to destPath
- *
- * @async
- * @param {number} portalId
- * @param {string} srcPath
- * @param {string} destPath
- * @returns {Promise}
- */
-async function moveFile(portalId, srcPath, destPath) {
-  return http.put(portalId, {
+// Moves file from srcPath to destPath
+export async function moveFile(
+  accountId: number,
+  srcPath: string,
+  destPath: string
+): Promise<FullResponse> {
+  return http.put(accountId, {
     uri: `${FILE_MAPPER_API_PATH}/rename/${srcPath}?path=${destPath}`,
   });
 }
 
-/**
- * Get directory contents
- *
- * @async
- * @param {string} path
- * @returns {Promise}
- */
-async function getDirectoryContentsByPath(portalId, path) {
-  return http.get(portalId, {
+// Get directory contents
+export async function getDirectoryContentsByPath(
+  accountId: number,
+  path: string
+): Promise<FullResponse> {
+  return http.get(accountId, {
     uri: `${FILE_MAPPER_API_PATH}/meta/${path}`,
   });
 }
-
-module.exports = {
-  deleteFile,
-  deleteFolder,
-  download,
-  downloadDefault,
-  fetchFileStream,
-  fetchModule,
-  trackUsage,
-  upload,
-  createFileMapperNodeFromStreamResponse,
-  moveFile,
-  getDirectoryContentsByPath,
-};

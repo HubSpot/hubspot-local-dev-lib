@@ -74,6 +74,12 @@ en:
       index:
         createGetRequestStream:
           onWrite: "Wrote file {{ filepath }}"
+    api:
+      filemapper:
+        trackUsage:
+          invalidEvent: "Usage tracking event {{ eventName }} is not a valid event type."
+          sendingEventAuthenticated: "Sending usage event to authenticated endpoint"
+          sendingEventUnauthenticated: "Sending usage event to unauthenticated endpoint"
   errors:
     archive:
       extractZip:
