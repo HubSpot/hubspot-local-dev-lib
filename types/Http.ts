@@ -10,13 +10,18 @@ export type GetRequestOptionsOptions = {
   uri: string | Url;
   env?: string;
   localHostOverride?: boolean;
-  qs?: { portalId?: number };
+  qs?: {
+    portalId?: number;
+    buffer?: boolean;
+    environmentId?: number;
+    version?: string;
+  };
   body?: Body;
   resolveWithFullResponse?: boolean;
 };
 
 export type QueryParams = {
-  [key: string]: string;
+  [key: string]: string | number;
 };
 
 export type HttpOptions = GetRequestOptionsOptions & {

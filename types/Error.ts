@@ -38,4 +38,5 @@ export type FileSystemErrorContext = {
   filepath: string;
   write?: boolean;
   read?: boolean;
+  accountId?: number;
 };

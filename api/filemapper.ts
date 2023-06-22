@@ -7,12 +7,10 @@ import { getRequestOptions } from '../http/requestOptions';
 import { getCwd } from '../lib/path';
 import CLIConfiguration from '../config/CLIConfiguration';
 import { FileMapperNode } from '../types/Files';
-import { HttpOptions } from '../types/Http';
+import { FileMapperOptions } from '../types/Files';
 import { debug } from '../utils/logger';
 
 const FILE_MAPPER_API_PATH = 'content/filemapper/v1';
-
-type FileMapperOptions = Omit<HttpOptions, 'uri'>;
 
 // https://github.com/request/request-promise#the-transform-function}
 export function createFileMapperNodeFromStreamResponse(

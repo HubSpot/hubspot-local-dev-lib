@@ -99,6 +99,9 @@ en:
         notReturnArray: 'There was an error loading JS file "{{ path }}". Expected type "Array" but received type "{{ returned }}" . Make sure that your function returns an array'
         invalidPath: 'The path "{{ path }}" is not a path to a file or folder'
       generic: "A {{ name }} has occurred"
+    filemapper:
+      invalidNode: "Invalid FileMapperNode: {{ json }}"
+      invalidFileType: "Invalid file type requested: {{ srcPath }}"
     github:
       downloadGithubRepoContents: "Failed to fetch contents: {{ errorMessage }}"
       fetchJsonFromRepository: "An error occured fetching JSON file."

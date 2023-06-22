@@ -19,3 +19,9 @@ export const ALLOWED_EXTENSIONS = new Set([
 ]);
 
 export const MODULE_EXTENSION = 'module';
+export const FUNCTIONS_EXTENSION = 'functions';
+
+export const MODE = {
+  DRAFT: 'draft',
+  PUBLISH: 'publish',
+} as const;
