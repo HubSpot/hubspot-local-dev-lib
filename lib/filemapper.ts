@@ -173,13 +173,6 @@
 //   }
 // }
 
-// /**
-//  * @private
-//  * @async
-//  * @param {FileMapperInputArguments} input
-//  * @param {string} filepath
-//  * @returns {Promise<boolean}
-//  */
 // async function skipExisting(
 //   filepath: string,
 //   overwrite = false

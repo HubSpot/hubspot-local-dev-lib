@@ -35,3 +35,7 @@ export const AUTH_METHODS = {
   api: API_KEY_AUTH_METHOD,
   oauth: OAUTH_AUTH_METHOD,
 };
+
+export const SCOPE_GROUPS = {
+  FUNCTIONS: 'cms.functions.read_write',
+};
