@@ -119,44 +119,44 @@ function addQueryParams(
   };
 }
 
-async function getRequest(
+async function getRequest<T = FullResponse>(
   accountId: number,
   options: HttpOptions
-): Promise<FullResponse> {
+): Promise<T> {
   const { query, ...rest } = options;
   const requestOptions = addQueryParams(rest, query);
   const requestOptionsWithAuth = await withAuth(accountId, requestOptions);
   return requestPN.get(requestOptionsWithAuth);
 }
 
-async function postRequest(
+async function postRequest<T = FullResponse>(
   accountId: number,
   options: HttpOptions
-): Promise<FullResponse> {
+): Promise<T> {
   const requestOptionsWithAuth = await withAuth(accountId, options);
   return requestPN.post(requestOptionsWithAuth);
 }
 
-async function putRequest(
+async function putRequest<T = FullResponse>(
   accountId: number,
   options: HttpOptions
-): Promise<FullResponse> {
+): Promise<T> {
   const requestOptionsWithAuth = await withAuth(accountId, options);
   return requestPN.put(requestOptionsWithAuth);
 }
 
-async function patchRequest(
+async function patchRequest<T = FullResponse>(
   accountId: number,
   options: HttpOptions
-): Promise<FullResponse> {
+): Promise<T> {
   const requestOptionsWithAuth = await withAuth(accountId, options);
   return requestPN.patch(requestOptionsWithAuth);
 }
 
-async function deleteRequest(
+async function deleteRequest<T = FullResponse>(
   accountId: number,
   options: HttpOptions
-): Promise<FullResponse> {
+): Promise<T> {
   const requestOptionsWithAuth = await withAuth(accountId, options);
   return requestPN.del(requestOptionsWithAuth);
 }

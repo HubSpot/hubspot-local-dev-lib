@@ -40,3 +40,10 @@ export type FileSystemErrorContext = {
   read?: boolean;
   accountId?: number;
 };
+
+export type StatusCodeErrorContext = {
+  accountId?: number;
+  request?: string;
+  payload?: string;
+  projectName?: string;
+};

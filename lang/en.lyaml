@@ -30,6 +30,13 @@ en:
       addOauthToAccountConfig:
         init: Updating configuration
         success: Configuration updated
+    filemapper:
+      fetchAndWriteFileStream:
+        skippedExisting: "Skipped existing {{ filepath }}"
+        wroteFolder: "Wrote folder {{ filepath }}"
+        completedFetch: 'Completed fetch of file "{{ src }}"{{ version }} to "{{ dest }}" from the Design Manager'
+        folderFetch: 'Fetched "{{ src }}" from account {{ accountId }} from the Design Manager successfully'
+        completedFolderFetch: 'Completed fetch of folder "{{ src }}"{{ version }} to "{{ dest }}" from the Design Manager'
     config:
       cliConfiguration:
         load:
@@ -102,6 +109,11 @@ en:
     filemapper:
       invalidNode: "Invalid FileMapperNode: {{ json }}"
       invalidFileType: "Invalid file type requested: {{ srcPath }}"
+      assetTiemout: "HubSpot assets are unavailable at the moment. Please wait a few minutes and try again."
+      failedToFetchFile: 'Failed fetch of file "{{ src }}" to "{{ dest }}" from the Design Manager'
+      failedToFetchFoder: 'Failed fetch of folder "{{ src }}" to "{{ dest }}" from the Design Manager'
+      invalidFetchFolderRequest: 'Invalid request for folder: "{{ src }}"'
+      incompleteFetch: 'Not all files in folder "{{ src }}" were successfully fetched.  Re-run the last command to try again`'
     github:
       downloadGithubRepoContents: "Failed to fetch contents: {{ errorMessage }}"
       fetchJsonFromRepository: "An error occured fetching JSON file."

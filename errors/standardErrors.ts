@@ -1,5 +1,6 @@
 import { HubSpotAuthError } from './HubSpotAuthError';
 import { i18n } from '../utils/lang';
+import { throwStatusCodeError } from './apiErrors';
 
 import { BaseError, StatusCodeError } from '../types/Error';
 
@@ -61,19 +62,6 @@ export function throwAuthErrorWithMessage(
     interpolation,
     cause
   );
-}
-
-function throwStatusCodeError(error: StatusCodeError): never {
-  const { statusCode, message, response } = error as StatusCodeError;
-  const errorData = JSON.stringify({
-    statusCode,
-    message,
-    url: response.request.href,
-    method: response.request.method,
-    response: response.body,
-    headers: response.headers,
-  });
-  throw new Error(errorData, { cause: error });
 }
 
 /**

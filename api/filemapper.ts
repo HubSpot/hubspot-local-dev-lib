@@ -96,8 +96,8 @@ export async function download(
   accountId: number,
   filepath: string,
   options: FileMapperOptions = {}
-): Promise<FullResponse> {
-  return http.get(accountId, {
+): Promise<FileMapperNode> {
+  return http.get<FileMapperNode>(accountId, {
     uri: `${FILE_MAPPER_API_PATH}/download/${encodeURIComponent(filepath)}`,
     ...options,
   });
@@ -108,8 +108,8 @@ export async function downloadDefault(
   accountId: number,
   filepath: string,
   options: FileMapperOptions = {}
-): Promise<FullResponse> {
-  return http.get(accountId, {
+): Promise<FileMapperNode> {
+  return http.get<FileMapperNode>(accountId, {
     uri: `${FILE_MAPPER_API_PATH}/download-default/${filepath}`,
     ...options,
   });
