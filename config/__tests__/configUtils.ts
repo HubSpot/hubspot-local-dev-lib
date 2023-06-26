@@ -4,20 +4,27 @@ import {
   getOrderedConfig,
 } from '../configUtils';
 import { CLIConfig } from '../../types/Config';
-import { CLIAccount } from '../../types/Accounts';
+import {
+  CLIAccount,
+  OAuthAccount,
+  PersonalAccessKeyAccount,
+} from '../../types/Accounts';
 
-const PAK_ACCOUNT: CLIAccount = {
+const PAK_ACCOUNT: PersonalAccessKeyAccount = {
   accountId: 111,
   authType: 'personalaccesskey',
   name: 'pak-account-1',
   auth: {
-    accessToken: 'pak-access-token',
-    expiresAt: 1680630798,
+    tokenInfo: {
+      accessToken: 'pak-access-token',
+      expiresAt: 1680630798,
+    },
   },
   personalAccessKey: 'pak-12345',
+  env: '',
 };
 
-const OAUTH_ACCOUNT: CLIAccount = {
+const OAUTH_ACCOUNT: OAuthAccount = {
   accountId: 222,
   authType: 'oauth2',
   name: 'oauth-account-1',
@@ -29,6 +36,7 @@ const OAUTH_ACCOUNT: CLIAccount = {
       refreshToken: 'oauth-refresh-token',
     },
   },
+  env: '',
 };
 
 const APIKEY_ACCOUNT: CLIAccount = {
@@ -36,6 +44,7 @@ const APIKEY_ACCOUNT: CLIAccount = {
   name: 'apikey-account-1',
   authType: 'apikey',
   apiKey: 'api-key',
+  env: '',
 };
 
 const CONFIG: CLIConfig = {
