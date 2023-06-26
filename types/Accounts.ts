@@ -21,7 +21,7 @@ export interface CLIAccount {
 
 export type TokenInfo = {
   accessToken?: string;
-  expiresAt?: number;
+  expiresAt?: string;
   refreshToken?: string;
 };
 

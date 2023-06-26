@@ -17,7 +17,7 @@ const PAK_ACCOUNT: PersonalAccessKeyAccount = {
   auth: {
     tokenInfo: {
       accessToken: 'pak-access-token',
-      expiresAt: 1680630798,
+      expiresAt: '',
     },
   },
   personalAccessKey: 'pak-12345',
