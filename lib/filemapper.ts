@@ -2,7 +2,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import PQueue from 'p-queue';
 import { getCwd, getExt, convertToLocalFileSystemPath } from './path';
-import { fetchFileStream, download, downloadDefault } from '../api/fileMapper';
+import { fetchFileStream, download, downloadDefault } from '../api/filemapper';
 import {
   throwErrorWithMessage,
   throwTypeErrorWithMessage,

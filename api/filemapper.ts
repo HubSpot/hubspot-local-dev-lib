@@ -13,7 +13,7 @@ import { debug } from '../utils/logger';
 const FILE_MAPPER_API_PATH = 'content/filemapper/v1';
 
 // https://github.com/request/request-promise#the-transform-function}
-export function createFileMapperNodeFromStreamResponse(
+function createFileMapperNodeFromStreamResponse(
   filePath: string,
   response: FullResponse
 ): FileMapperNode {

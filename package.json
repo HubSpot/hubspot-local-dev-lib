@@ -64,6 +64,7 @@
     "fs-extra": "^11.1.0",
     "js-yaml": "^4.1.0",
     "moment": "^2.29.4",
+    "p-queue": "^7.3.4",
     "unixify": "^1.0.0"
   },
   "engines": {
