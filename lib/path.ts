@@ -70,9 +70,9 @@ export function getExt(filepath: string): string {
   return ext[0] === '.' ? ext.slice(1) : ext;
 }
 
-export function isAllowedExtension(filepath: string): boolean {
+export function isAllowedExtension(filepath: string, allowList: Array<string> = []): boolean {
   const ext = getExt(filepath);
-  return ALLOWED_EXTENSIONS.has(ext);
+  return ALLOWED_EXTENSIONS.has(ext) || allowList.includes(ext);
 }
 
 export function getAbsoluteFilePath(_path: string): string {
