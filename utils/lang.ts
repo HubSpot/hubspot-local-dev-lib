@@ -1,6 +1,7 @@
 import { join } from 'path';
 import { existsSync, readFileSync } from 'fs-extra';
 import { load } from 'js-yaml';
+import { LangKey } from '../types/Lang';
 
 const MISSING_LANGUAGE_DATA_PREFIX = '[Missing language data]';
 
@@ -18,20 +19,20 @@ function loadLanguageFromYaml(): void {
     const nodeLocale = Intl.DateTimeFormat()
       .resolvedOptions()
       .locale.split('-')[0];
-    const languageFilePath = join(__dirname, `../lang/${nodeLocale}.lyaml`);
+    const languageFilePath = join(__dirname, `../lang/${nodeLocale}.yml`);
     const languageFileExists = existsSync(languageFilePath);
 
     // Fall back to using the default language file
     locale = languageFileExists ? nodeLocale : 'en';
     languageObj = load(
-      readFileSync(join(__dirname, `../lang/${locale}.lyaml`), 'utf8')
+      readFileSync(join(__dirname, `../lang/${locale}.yml`), 'utf8')
     ) as LanguageObject;
   } catch (e) {
     throw new Error(`Error loading language data: ${e}`);
   }
 }
 
-function getTextValue(lookupDotNotation: string): string {
+function getTextValue(lookupDotNotation: LangKey): string {
   const lookupProps = [locale, ...lookupDotNotation.split('.')];
   const missingTextData = `${MISSING_LANGUAGE_DATA_PREFIX}: ${lookupProps.join(
     '.'
@@ -115,7 +116,7 @@ export function interpolate(
 }
 
 export function i18n(
-  lookupDotNotation: string,
+  lookupDotNotation: LangKey,
   options: { [identifier: string]: string | number } = {}
 ) {
   if (typeof lookupDotNotation !== 'string') {

@@ -12,9 +12,9 @@ module.exports = {
   requirePragma: false,
   overrides: [
     {
-      files: ['*.lyaml'],
+      files: ['*.yml'],
       options: {
-        // Prevent wrapping behavior in lyaml files
+        // Prevent wrapping behavior in yml files
         printWidth: 999,
         // Wrapping looks bad for certain strings that use newlines
         proseWrap: 'preserve',

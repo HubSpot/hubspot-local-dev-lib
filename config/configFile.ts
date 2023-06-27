@@ -8,7 +8,7 @@ import { throwError, throwErrorWithMessage } from '../errors/standardErrors';
 import {
   HUBSPOT_CONFIGURATION_FILE,
   HUBSPOT_CONFIGURATION_FOLDER,
-} from '../constants';
+} from '../constants/config';
 import { getOrderedConfig } from './configUtils';
 import { CLIConfig } from '../types/Config';
 import { BaseError } from '../types/Error';
