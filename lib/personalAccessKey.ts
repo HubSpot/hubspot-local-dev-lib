@@ -7,8 +7,8 @@ import {
   throwErrorWithMessage,
   throwError,
 } from '../errors/standardErrors';
-import { fetchAccessToken } from '../api/localDevAuth/unauthenticated';
-import { fetchSandboxHubData } from '../api/hubs';
+import { fetchAccessToken } from '../api/localDevAuth';
+import { fetchSandboxHubData } from '../api/sandboxHubs';
 import { BaseError, StatusCodeError } from '../types/Error';
 import { CLIAccount, PersonalAccessKeyAccount } from '../types/Accounts';
 import { Environment } from '../types/Config';

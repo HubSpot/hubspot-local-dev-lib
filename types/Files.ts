@@ -1,6 +1,6 @@
 import { ValueOf } from '../types/Utils';
 import { STAT_TYPES } from '../constants/files';
-import { MODE } from '../constants/extensions';
+import { MODE } from '../constants/files';
 import { HttpOptions } from './Http';
 
 export type StatType = ValueOf<typeof STAT_TYPES>;

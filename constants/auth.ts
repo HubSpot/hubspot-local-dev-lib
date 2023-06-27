@@ -37,5 +37,5 @@ export const AUTH_METHODS = {
 };
 
 export const SCOPE_GROUPS = {
-  FUNCTIONS: 'cms.functions.read_write',
+  CMS_FUNCTIONS: 'cms.functions.read_write',
 };

@@ -1,7 +1,8 @@
 import request from 'request-promise-native';
-import { getRequestOptions } from '../../http/requestOptions';
-import { ENVIRONMENTS } from '../../constants/environments';
-import { Environment } from '../../types/Config';
+import { getRequestOptions } from '../http/requestOptions';
+import http from '../http';
+import { ENVIRONMENTS } from '../constants/environments';
+import { Environment } from '../types/Config';
 
 const LOCALDEVAUTH_API_AUTH_PATH = 'localdevauth/v1/auth';
 
@@ -31,4 +32,13 @@ export async function fetchAccessToken(
   });
 
   return request.post(requestOptions);
+}
+
+export async function fetchScopeData(accountId: number, scopeGroup: string) {
+  return http.get(accountId, {
+    uri: `localdevauth/v1/auth/check-scopes`,
+    query: {
+      scopeGroup,
+    },
+  });
 }

@@ -11,9 +11,9 @@ import {
   ALLOWED_EXTENSIONS,
   MODULE_EXTENSION,
   FUNCTIONS_EXTENSION,
-  MODE,
 } from '../constants/extensions';
-import { FileMapperNode, Mode } from '../types/Files';
+import { MODE } from '../constants/files';
+import { FileMapperNode, Mode, FileMapperOptions } from '../types/Files';
 import { FileMapperOptions } from '../types/Files';
 import { throwFileSystemError } from '../errors/fileSystemErrors';
 import { throwStatusCodeError } from '../errors/apiErrors';
