@@ -1,4 +1,4 @@
-import { getValidEnv } from '../environment';
+import { getValidEnv } from '../../lib/environment';
 import { ENVIRONMENTS } from '../../constants';
 
 // TODO write tests for environment.ts

@@ -19,3 +19,4 @@ export const ALLOWED_EXTENSIONS = new Set([
 ]);
 
 export const MODULE_EXTENSION = 'module';
+export const FUNCTIONS_EXTENSION = 'functions';

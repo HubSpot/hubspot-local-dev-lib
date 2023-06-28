@@ -1,6 +1,7 @@
 import { debug, makeTypedLogger } from '../utils/logger';
 import { throwErrorWithMessage } from '../errors/standardErrors';
-import { getValidEnv, loadConfigFromEnvironment } from './environment';
+import { loadConfigFromEnvironment } from './environment';
+import { getValidEnv } from '../lib/environment';
 import {
   loadConfigFromFile,
   writeConfigToFile,
@@ -12,14 +13,8 @@ import { commaSeparatedValues } from '../lib/text';
 import { ENVIRONMENTS } from '../constants';
 import { API_KEY_AUTH_METHOD } from '../constants/auth';
 import { DEFAULT_MODES, MIN_HTTP_TIMEOUT } from '../constants/config';
-import { CLIConfig } from '../types/Config';
-import {
-  CLIAccount,
-  OAuthAccount,
-  FlatAccountFields,
-  OauthTokenInfo,
-  PersonalAccessKeyTokenInfo,
-} from '../types/Accounts';
+import { CLIConfig, Environment } from '../types/Config';
+import { CLIAccount, OAuthAccount, FlatAccountFields } from '../types/Accounts';
 import { CLIOptions } from '../types/CLIOptions';
 import { ValueOf } from '../types/Utils';
 import { LogCallbacksArg } from '../types/LogCallbacks';
@@ -245,7 +240,7 @@ class CLIConfiguration {
     return this.config!;
   }
 
-  getEnv(nameOrId?: string | number): string {
+  getEnv(nameOrId?: string | number): Environment {
     const accountConfig = this.getAccount(nameOrId);
 
     if (accountConfig && accountConfig.accountId && accountConfig.env) {
@@ -265,7 +260,7 @@ class CLIConfiguration {
    * @throws {Error}
    */
   updateAccount(
-    updatedAccountFields: FlatAccountFields<OauthTokenInfo>,
+    updatedAccountFields: Partial<FlatAccountFields>,
     writeUpdate = true
   ): CLIAccount | null {
     const {
@@ -294,7 +289,7 @@ class CLIConfiguration {
 
     const currentAccountConfig = this.getAccount(accountId);
 
-    let auth: OAuthAccount['auth'];
+    let auth: OAuthAccount['auth'] = {};
     if (clientId || clientSecret || scopes || tokenInfo) {
       auth = {
         ...(currentAccountConfig ? currentAccountConfig.auth : {}),
@@ -305,19 +300,15 @@ class CLIConfiguration {
       };
     }
 
-    const nextAccountConfig: Partial<FlatAccountFields<OauthTokenInfo>> = {
+    const nextAccountConfig: Partial<FlatAccountFields> = {
       ...(currentAccountConfig ? currentAccountConfig : {}),
     };
 
     // Allow everything except for 'undefined' values to override the existing values
-    function safelyApplyUpdates<
-      T extends keyof FlatAccountFields<
-        OauthTokenInfo | PersonalAccessKeyTokenInfo
-      >
-    >(
+    function safelyApplyUpdates<T extends keyof FlatAccountFields>(
       fieldName: T,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      newValue: FlatAccountFields<OauthTokenInfo>[T]
+      newValue: FlatAccountFields[T]
     ) {
       if (typeof newValue !== 'undefined') {
         nextAccountConfig[fieldName] = newValue;
@@ -325,8 +316,7 @@ class CLIConfiguration {
     }
 
     const updatedEnv = getValidEnv(
-      env || (currentAccountConfig && currentAccountConfig.env),
-      false
+      env || (currentAccountConfig && currentAccountConfig.env)
     );
     const updatedDefaultMode: ValueOf<typeof DEFAULT_MODES> | undefined =
       defaultMode &&
@@ -348,9 +338,7 @@ class CLIConfiguration {
     safelyApplyUpdates('sandboxAccountType', sandboxAccountType);
     safelyApplyUpdates('parentAccountId', parentAccountId);
 
-    const completedAccountConfig = nextAccountConfig as FlatAccountFields<
-      OauthTokenInfo | PersonalAccessKeyTokenInfo
-    >;
+    const completedAccountConfig = nextAccountConfig as FlatAccountFields;
 
     if (currentAccountConfig) {
       debug(`${i18nKey}.updateAccount.updating`, {
@@ -412,7 +400,7 @@ class CLIConfiguration {
     }
 
     if (accountId) {
-      this.updateAccount({ accountId, name: newName });
+      this.updateAccount({ accountId, name: newName, env: this.getEnv() });
     }
 
     if (accountConfigToRename.name === this.getDefaultAccount()) {

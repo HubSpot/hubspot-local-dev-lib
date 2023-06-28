@@ -1,9 +1,10 @@
 import { ENVIRONMENTS } from '../constants/environments';
+import { Environment } from '../types/Config';
 
 export function getValidEnv(
-  env: string,
-  maskedProductionValue?: string
-): string {
+  env?: Environment | null,
+  maskedProductionValue?: Environment
+): Environment {
   const prodValue = maskedProductionValue
     ? maskedProductionValue
     : ENVIRONMENTS.PROD;
