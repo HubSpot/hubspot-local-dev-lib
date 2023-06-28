@@ -4,7 +4,7 @@ import {
   OAUTH_AUTH_METHOD,
   PERSONAL_ACCESS_KEY_AUTH_METHOD,
 } from '../constants/auth';
-import { CLIConfig } from '../types/Config';
+import { CLIConfig, Environment } from '../types/Config';
 import {
   AuthType,
   CLIAccount,
@@ -48,7 +48,7 @@ export function getOrderedConfig(unorderedConfig: CLIConfig): CLIConfig {
 type PersonalAccessKeyOptions = {
   accountId: number;
   personalAccessKey: string;
-  env: string;
+  env: Environment;
 };
 
 function generatePersonalAccessKeyAccountConfig({
@@ -70,7 +70,7 @@ type OAuthOptions = {
   clientSecret: string;
   refreshToken: string;
   scopes: Array<string>;
-  env: string;
+  env: Environment;
 };
 
 function generateOauthAccountConfig({
@@ -99,7 +99,7 @@ function generateOauthAccountConfig({
 type APIKeyOptions = {
   accountId: number;
   apiKey: string;
-  env: string;
+  env: Environment;
 };
 
 function generateApiKeyAccountConfig({

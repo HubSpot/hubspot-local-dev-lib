@@ -1,5 +1,6 @@
 import { HubSpotAuthError } from './HubSpotAuthError';
 import { i18n } from '../utils/lang';
+import { throwStatusCodeError } from './apiErrors';
 
 import { BaseError, StatusCodeError } from '../types/Error';
 
@@ -11,6 +12,19 @@ export function isFatalError(err: BaseError): boolean {
   return err instanceof HubSpotAuthError;
 }
 
+function genericThrowErrorWithMessage(
+  ErrorType: ErrorConstructor,
+  identifier: string,
+  interpolation?: { [key: string]: string | number },
+  cause?: BaseError
+): never {
+  const message = i18n(`errors.${identifier}`, interpolation);
+  if (cause) {
+    throw new ErrorType(message, { cause });
+  }
+  throw new ErrorType(message);
+}
+
 /**
  * @throws
  */
@@ -19,11 +33,7 @@ export function throwErrorWithMessage(
   interpolation?: { [key: string]: string | number },
   cause?: BaseError
 ): never {
-  const message = i18n(`errors.${identifier}`, interpolation);
-  if (cause) {
-    throw new Error(message, { cause });
-  }
-  throw new Error(message);
+  genericThrowErrorWithMessage(Error, identifier, interpolation, cause);
 }
 
 /**
@@ -34,24 +44,24 @@ export function throwTypeErrorWithMessage(
   interpolation?: { [key: string]: string | number },
   cause?: BaseError
 ): never {
-  const message = i18n(`errors.${identifier}`, interpolation);
-  if (cause) {
-    throw new TypeError(message, { cause });
-  }
-  throw new TypeError(message);
+  genericThrowErrorWithMessage(TypeError, identifier, interpolation, cause);
 }
 
-function throwStatusCodeError(error: StatusCodeError): never {
-  const { statusCode, message, response } = error as StatusCodeError;
-  const errorData = JSON.stringify({
-    statusCode,
-    message,
-    url: response.request.href,
-    method: response.request.method,
-    response: response.body,
-    headers: response.headers,
-  });
-  throw new Error(errorData, { cause: error });
+/**
+ * @throws
+ */
+export function throwAuthErrorWithMessage(
+  identifier: string,
+  interpolation?: { [key: string]: string | number },
+  cause?: BaseError
+): never {
+  genericThrowErrorWithMessage(
+    // @ts-expect-error HubSpotAuthError is not callable
+    HubSpotAuthError,
+    identifier,
+    interpolation,
+    cause
+  );
 }
 
 /**

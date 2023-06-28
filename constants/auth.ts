@@ -30,3 +30,12 @@ export const OAUTH_SCOPES = [
     value: 'files',
   },
 ] as const;
+
+export const AUTH_METHODS = {
+  api: API_KEY_AUTH_METHOD,
+  oauth: OAUTH_AUTH_METHOD,
+};
+
+export const SCOPE_GROUPS = {
+  CMS_FUNCTIONS: 'cms.functions.read_write',
+};

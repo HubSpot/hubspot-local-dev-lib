@@ -1,5 +1,6 @@
 import { DEFAULT_MODES } from '../constants/config';
 import { ValueOf } from './Utils';
+import { Environment } from './Config';
 
 export type AuthType = 'personalaccesskey' | 'apikey' | 'oauth2';
 
@@ -7,39 +8,35 @@ export interface CLIAccount {
   name?: string;
   accountId: number;
   defaultMode?: ValueOf<typeof DEFAULT_MODES>;
-  env?: string;
+  env: Environment;
   authType?: AuthType;
-  auth?: object;
+  auth?: {
+    tokenInfo?: TokenInfo;
+  };
   sandboxAccountType?: string | null;
   parentAccountId?: number | null;
   apiKey?: string;
   personalAccessKey?: string;
 }
 
-export type PersonalAccessKeyTokenInfo = {
-  accessToken: string;
-  expiresAt: string;
-};
-
-export type OauthTokenInfo = {
+export type TokenInfo = {
+  accessToken?: string;
+  expiresAt?: string;
   refreshToken?: string;
 };
 
 export interface PersonalAccessKeyAccount extends CLIAccount {
   authType: 'personalaccesskey';
-  auth?: {
-    tokenInfo: PersonalAccessKeyTokenInfo;
-  };
   personalAccessKey: string;
 }
 
 export interface OAuthAccount extends CLIAccount {
   authType: 'oauth2';
-  auth?: {
+  auth: {
     clientId?: string;
     clientSecret?: string;
     scopes?: Array<string>;
-    tokenInfo?: OauthTokenInfo;
+    tokenInfo?: TokenInfo;
   };
 }
 
@@ -48,10 +45,8 @@ export interface APIKeyAccount extends CLIAccount {
   apiKey: string;
 }
 
-export interface FlatAccountFields<
-  T extends OauthTokenInfo | PersonalAccessKeyTokenInfo
-> extends CLIAccount {
-  tokenInfo?: T;
+export interface FlatAccountFields extends CLIAccount {
+  tokenInfo?: TokenInfo;
   clientId?: string;
   clientSecret?: string;
   scopes?: Array<string>;
