@@ -14,7 +14,6 @@ import {
 } from '../constants/extensions';
 import { MODE } from '../constants/files';
 import { FileMapperNode, Mode, FileMapperOptions } from '../types/Files';
-import { FileMapperOptions } from '../types/Files';
 import { throwFileSystemError } from '../errors/fileSystemErrors';
 import { throwStatusCodeError } from '../errors/apiErrors';
 import { BaseError, StatusCodeError } from '../types/Error';
