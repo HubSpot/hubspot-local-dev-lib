@@ -1,13 +1,9 @@
 import { join } from 'path';
 import { existsSync, readFileSync } from 'fs-extra';
 import { load } from 'js-yaml';
-import { LangKey } from '../types/Lang';
+import { LangKey, LanguageObject } from '../types/Lang';
 
 const MISSING_LANGUAGE_DATA_PREFIX = '[Missing language data]';
-
-type LanguageObject = {
-  [key: string]: LanguageObject | string;
-};
 
 let locale = '';
 let languageObj: LanguageObject;
