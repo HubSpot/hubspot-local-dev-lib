@@ -26,7 +26,7 @@ import { BaseError } from '../types/Error';
 
 const ALL_MODES = Object.values(MODE);
 let _config: CLIConfig_DEPRECATED | undefined;
-let _configPath: string;
+let _configPath: string | null;
 let environmentVariableConfigLoaded = false;
 
 const commaSeparatedValues = (
@@ -75,11 +75,11 @@ function getConfigAccountId(
   return account.portalId;
 }
 
-function setConfigPath(path: string) {
+function setConfigPath(path: string | null) {
   return (_configPath = path);
 }
 
-function getConfigPath(path: string): string | null {
+function getConfigPath(path: string | null): string | null {
   return path || (configFileExists() && _configPath) || findConfig(getCwd());
 }
 
@@ -183,7 +183,7 @@ type WriteConfigOptions = {
   source?: string;
 };
 
-const writeConfig = (options: WriteConfigOptions = {}) => {
+function writeConfig(options: WriteConfigOptions = {}): void {
   if (environmentVariableConfigLoaded) {
     return;
   }
@@ -193,7 +193,7 @@ const writeConfig = (options: WriteConfigOptions = {}) => {
       typeof options.source === 'string'
         ? options.source
         : yaml.dump(
-            JSON.parse(JSON.stringify(getOrderedConfig(getConfig()), null, 2))
+            JSON.parse(JSON.stringify(getOrderedConfig(getConfig()!), null, 2))
           );
   } catch (err) {
     logErrorInstance(err as BaseError);
@@ -202,18 +202,18 @@ const writeConfig = (options: WriteConfigOptions = {}) => {
   const configPath = options.path || _configPath;
   try {
     console.debug(`Writing current config to ${configPath}`);
-    fs.ensureFileSync(configPath);
-    fs.writeFileSync(configPath, source);
+    fs.ensureFileSync(configPath || '');
+    fs.writeFileSync(configPath || '', source);
     setConfig(parseConfig(source).parsed);
   } catch (err) {
     logFileSystemErrorInstance(err as BaseError, {
-      filepath: configPath,
+      filepath: configPath || '',
       write: true,
     });
   }
-};
+}
 
-const readConfigFile = () => {
+function readConfigFile(): { source?: string; error?: BaseError } {
   isConfigPathInGitRepo(_configPath);
   let source;
   let error;
@@ -227,12 +227,12 @@ const readConfigFile = () => {
     console.error('Config file could not be read "%s"', _configPath);
     logFileSystemErrorInstance(error, { filepath: _configPath, read: true });
   }
-  return { source, error };
-};
+  return { source: source && source.toString(), error };
+}
 
-function parseConfig(configSource: string): {
-  parsed: CLIConfig_DEPRECATED | undefined;
-  error: BaseError | undefined;
+function parseConfig(configSource?: string): {
+  parsed?: CLIConfig_DEPRECATED;
+  error?: BaseError;
 } {
   let parsed: CLIConfig_DEPRECATED | undefined = undefined;
   let error: BaseError | undefined = undefined;
@@ -249,7 +249,15 @@ function parseConfig(configSource: string): {
   return { parsed, error };
 }
 
-const loadConfigFromFile = (path, options = {}) => {
+type LoadConfigFromFileOptions = {
+  silenceErrors?: boolean;
+  useEnv?: boolean;
+};
+
+function loadConfigFromFile(
+  path: string,
+  options: LoadConfigFromFileOptions = {}
+) {
   setConfigPath(getConfigPath(path));
   if (!_configPath) {
     if (!options.silenceErrors) {
@@ -265,7 +273,7 @@ const loadConfigFromFile = (path, options = {}) => {
   }
 
   console.debug(`Reading config from ${_configPath}`);
-  const { source, error: sourceError } = readConfigFile(_configPath);
+  const { source, error: sourceError } = readConfigFile();
   if (sourceError) return;
   const { parsed, error: parseError } = parseConfig(source);
   if (parseError) return;
@@ -278,45 +286,45 @@ const loadConfigFromFile = (path, options = {}) => {
   }
 
   return getConfig();
-};
+}
 
-const loadConfig = (
-  path,
-  options = {
+function loadConfig(
+  path: string,
+  options: LoadConfigFromFileOptions = {
     useEnv: false,
   }
-) => {
+) {
   if (options.useEnv && loadEnvironmentVariableConfig(options)) {
     console.debug('Loaded environment variable config');
     environmentVariableConfigLoaded = true;
   } else {
-    l.debug(`Loading config from ${path}`);
+    console.debug(`Loading config from ${path}`);
     loadConfigFromFile(path, options);
     environmentVariableConfigLoaded = false;
   }
 
   return getConfig();
-};
+}
 
-const isTrackingAllowed = () => {
+function isTrackingAllowed(): boolean {
   if (!configFileExists() || configFileIsBlank()) {
     return true;
   }
   const { allowUsageTracking } = getAndLoadConfigIfNeeded();
   return allowUsageTracking !== false;
-};
+}
 
-const getAndLoadConfigIfNeeded = (options = {}) => {
+function getAndLoadConfigIfNeeded(options = {}): Partial<CLIConfig_DEPRECATED> {
   if (!getConfig()) {
-    loadConfig(null, {
+    loadConfig('', {
       silenceErrors: true,
       ...options,
     });
   }
-  return getConfig() || {};
-};
+  return getConfig() || { allowUsageTracking: undefined };
+}
 
-const findConfig = directory => {
+function findConfig(directory: string): string | null {
   return findup(
     [
       DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME,
@@ -324,7 +332,7 @@ const findConfig = directory => {
     ],
     { cwd: directory }
   );
-};
+}
 
 const getEnv = nameOrId => {
   let env = ENVIRONMENTS.PROD;
