@@ -20,14 +20,21 @@ import {
   logErrorInstance,
   logFileSystemErrorInstance,
 } from '../errors/errors_DEPRECATED';
+import { CLIConfig_DEPRECATED } from '../types/Config';
+import { CLIAccount_DEPRECATED } from '../types/Accounts';
+import { BaseError } from '../types/Error';
 
 const ALL_MODES = Object.values(MODE);
-let _config;
-let _configPath;
+let _config: CLIConfig_DEPRECATED | undefined;
+let _configPath: string;
 let environmentVariableConfigLoaded = false;
 
-const commaSeparatedValues = (arr, conjunction = 'and', ifempty = '') => {
-  let l = arr.length;
+const commaSeparatedValues = (
+  arr: Array<string>,
+  conjunction = 'and',
+  ifempty = ''
+): string => {
+  const l = arr.length;
   if (!l) return ifempty;
   if (l < 2) return arr[0];
   if (l < 3) return arr.join(` ${conjunction} `);
@@ -38,41 +45,45 @@ const commaSeparatedValues = (arr, conjunction = 'and', ifempty = '') => {
 
 const getConfig = () => _config;
 
-const setConfig = updatedConfig => {
+function setConfig(
+  updatedConfig?: CLIConfig_DEPRECATED
+): CLIConfig_DEPRECATED | undefined {
   _config = updatedConfig;
   return _config;
-};
+}
 
-const getConfigAccounts = config => {
+function getConfigAccounts(
+  config?: CLIConfig_DEPRECATED
+): Array<CLIAccount_DEPRECATED> | undefined {
   const __config = config || getConfig();
   if (!__config) return;
   return __config.portals;
-};
+}
 
-const getConfigDefaultAccount = config => {
+function getConfigDefaultAccount(
+  config: CLIConfig_DEPRECATED
+): string | number | undefined {
   const __config = config || getConfig();
   if (!__config) return;
   return __config.defaultPortal;
-};
+}
 
-const getConfigAccountId = config => {
-  const __config = config || getConfig();
-  if (!__config) return;
-  return __config.portalId;
-};
+function getConfigAccountId(
+  account: CLIAccount_DEPRECATED
+): number | undefined {
+  if (!account) return;
+  return account.portalId;
+}
 
-const setConfigPath = path => {
+function setConfigPath(path: string) {
   return (_configPath = path);
-};
+}
 
-const getConfigPath = path => {
+function getConfigPath(path: string): string | null {
   return path || (configFileExists() && _configPath) || findConfig(getCwd());
-};
+}
 
-/**
- * @returns {boolean}
- */
-const validateConfig = () => {
+function validateConfig(): boolean {
   const config = getConfig();
   if (!config) {
     console.error('No config was found');
@@ -83,8 +94,8 @@ const validateConfig = () => {
     console.error('config.portals[] is not defined');
     return false;
   }
-  const accountIdsHash = {};
-  const accountNamesHash = {};
+  const accountIdsHash: { [id: number]: CLIAccount_DEPRECATED } = {};
+  const accountNamesHash: { [name: string]: CLIAccount_DEPRECATED } = {};
   return accounts.every(cfg => {
     if (!cfg) {
       console.error('config.portals[] has an empty entry');
@@ -120,9 +131,9 @@ const validateConfig = () => {
     accountIdsHash[accountId] = cfg;
     return true;
   });
-};
+}
 
-const accountNameExistsInConfig = name => {
+function accountNameExistsInConfig(name: string): boolean {
   const config = getConfig();
   const accounts = getConfigAccounts();
 
@@ -131,9 +142,11 @@ const accountNameExistsInConfig = name => {
   }
 
   return accounts.some(cfg => cfg.name && cfg.name === name);
-};
+}
 
-const getOrderedAccount = unorderedAccount => {
+function getOrderedAccount(
+  unorderedAccount: CLIAccount_DEPRECATED
+): CLIAccount_DEPRECATED {
   const { name, portalId, env, authType, ...rest } = unorderedAccount;
 
   return {
@@ -143,9 +156,9 @@ const getOrderedAccount = unorderedAccount => {
     authType,
     ...rest,
   };
-};
+}
 
-const getOrderedConfig = unorderedConfig => {
+function getOrderedConfig(unorderedConfig: CLIConfig_DEPRECATED) {
   const {
     defaultPortal,
     defaultMode,
@@ -163,14 +176,14 @@ const getOrderedConfig = unorderedConfig => {
     ...rest,
     portals: portals.map(getOrderedAccount),
   };
+}
+
+type WriteConfigOptions = {
+  path?: string;
+  source?: string;
 };
 
-/**
- * @param {object}  options
- * @param {string}  options.path
- * @param {string}  options.source
- */
-const writeConfig = (options = {}) => {
+const writeConfig = (options: WriteConfigOptions = {}) => {
   if (environmentVariableConfigLoaded) {
     return;
   }
@@ -183,7 +196,7 @@ const writeConfig = (options = {}) => {
             JSON.parse(JSON.stringify(getOrderedConfig(getConfig()), null, 2))
           );
   } catch (err) {
-    logErrorInstance(err);
+    logErrorInstance(err as BaseError);
     return;
   }
   const configPath = options.path || _configPath;
@@ -193,7 +206,10 @@ const writeConfig = (options = {}) => {
     fs.writeFileSync(configPath, source);
     setConfig(parseConfig(source).parsed);
   } catch (err) {
-    logFileSystemErrorInstance(err, { filepath: configPath, write: true });
+    logFileSystemErrorInstance(err as BaseError, {
+      filepath: configPath,
+      write: true,
+    });
   }
 };
 
@@ -207,28 +223,31 @@ const readConfigFile = () => {
   try {
     source = fs.readFileSync(_configPath);
   } catch (err) {
-    error = err;
+    error = err as BaseError;
     console.error('Config file could not be read "%s"', _configPath);
-    logFileSystemErrorInstance(err, { filepath: _configPath, read: true });
+    logFileSystemErrorInstance(error, { filepath: _configPath, read: true });
   }
   return { source, error };
 };
 
-const parseConfig = configSource => {
-  let parsed;
-  let error;
+function parseConfig(configSource: string): {
+  parsed: CLIConfig_DEPRECATED | undefined;
+  error: BaseError | undefined;
+} {
+  let parsed: CLIConfig_DEPRECATED | undefined = undefined;
+  let error: BaseError | undefined = undefined;
   if (!configSource) {
     return { parsed, error };
   }
   try {
-    parsed = yaml.load(configSource);
+    parsed = yaml.load(configSource) as CLIConfig_DEPRECATED;
   } catch (err) {
-    error = err;
+    error = err as BaseError;
     console.error('Config file could not be parsed "%s"', _configPath);
-    logErrorInstance(err);
+    logErrorInstance(err as BaseError);
   }
   return { parsed, error };
-};
+}
 
 const loadConfigFromFile = (path, options = {}) => {
   setConfigPath(getConfigPath(path));

@@ -1,3 +1,5 @@
+import { BaseError, FileSystemErrorContext } from '../types/Error';
+
 const isSystemError = err =>
   err.errno != null && err.code != null && err.syscall != null;
 
@@ -18,7 +20,7 @@ function debugErrorAndContext(error, context) {
   console.debug('Context: %o', context);
 }
 
-export function logErrorInstance(error, context) {
+export function logErrorInstance(error: BaseError, context?: any) {
   // SystemError
   if (isSystemError(error)) {
     console.error(`A system error has occurred: ${error.message}`);
@@ -42,7 +44,10 @@ export function logErrorInstance(error, context) {
   debugErrorAndContext(error, context);
 }
 
-export function logFileSystemErrorInstance(error, context) {
+export function logFileSystemErrorInstance(
+  error: BaseError,
+  context: FileSystemErrorContext
+) {
   let fileAction = '';
   if (context.read) {
     fileAction = 'reading from';

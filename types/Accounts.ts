@@ -19,6 +19,21 @@ export interface CLIAccount {
   personalAccessKey?: string;
 }
 
+export interface CLIAccount_DEPRECATED {
+  name?: string;
+  portalId?: number;
+  defaultMode?: ValueOf<typeof DEFAULT_MODES>;
+  env: Environment;
+  authType?: AuthType;
+  auth?: {
+    tokenInfo?: TokenInfo;
+  };
+  sandboxAccountType?: string | null;
+  parentAccountId?: number | null;
+  apiKey?: string;
+  personalAccessKey?: string;
+}
+
 export type TokenInfo = {
   accessToken?: string;
   expiresAt?: string;
