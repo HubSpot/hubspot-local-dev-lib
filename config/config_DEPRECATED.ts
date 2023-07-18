@@ -1,32 +1,40 @@
-const fs = require('fs-extra');
-const yaml = require('js-yaml');
-const findup = require('findup-sync');
-const { logger } = require('../logger');
-const {
-  logFileSystemErrorInstance,
-} = require('../errorHandlers/fileSystemErrors');
-const { logErrorInstance } = require('../errorHandlers/standardErrors');
-const { commaSeparatedValues } = require('./text');
-const { getCwd } = require('../path');
-const {
+import fs from 'fs-extra';
+import yaml from 'js-yaml';
+import findup from 'findup-sync';
+import { getCwd } from '../lib/path';
+import {
   DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME,
-  EMPTY_CONFIG_FILE_CONTENTS,
-  Mode,
-  ENVIRONMENTS,
+  MIN_HTTP_TIMEOUT,
+} from '../constants/config';
+import { ENVIRONMENTS, ENVIRONMENT_VARIABLES } from '../constants/environments';
+import {
   API_KEY_AUTH_METHOD,
   OAUTH_AUTH_METHOD,
   PERSONAL_ACCESS_KEY_AUTH_METHOD,
   OAUTH_SCOPES,
-  ENVIRONMENT_VARIABLES,
-  MIN_HTTP_TIMEOUT,
-} = require('./constants');
-const { getValidEnv } = require('./environment');
-const { isConfigPathInGitRepo } = require('./git');
+} from '../constants/auth';
+import { MODE } from '../constants/files';
+import { getValidEnv } from '../lib/environment';
+import { isConfigPathInGitRepo } from '../utils/git';
+import {
+  logErrorInstance,
+  logFileSystemErrorInstance,
+} from '../errors/errors_DEPRECATED';
 
-const ALL_MODES = Object.values(Mode);
+const ALL_MODES = Object.values(MODE);
 let _config;
 let _configPath;
 let environmentVariableConfigLoaded = false;
+
+const commaSeparatedValues = (arr, conjunction = 'and', ifempty = '') => {
+  let l = arr.length;
+  if (!l) return ifempty;
+  if (l < 2) return arr[0];
+  if (l < 3) return arr.join(` ${conjunction} `);
+  arr = arr.slice();
+  arr[l - 1] = `${conjunction} ${arr[l - 1]}`;
+  return arr.join(', ');
+};
 
 const getConfig = () => _config;
 
@@ -67,29 +75,29 @@ const getConfigPath = path => {
 const validateConfig = () => {
   const config = getConfig();
   if (!config) {
-    logger.error('No config was found');
+    console.error('No config was found');
     return false;
   }
   const accounts = getConfigAccounts();
   if (!Array.isArray(accounts)) {
-    logger.error('config.portals[] is not defined');
+    console.error('config.portals[] is not defined');
     return false;
   }
   const accountIdsHash = {};
   const accountNamesHash = {};
   return accounts.every(cfg => {
     if (!cfg) {
-      logger.error('config.portals[] has an empty entry');
+      console.error('config.portals[] has an empty entry');
       return false;
     }
 
     const accountId = getConfigAccountId(cfg);
     if (!accountId) {
-      logger.error('config.portals[] has an entry missing portalId');
+      console.error('config.portals[] has an entry missing portalId');
       return false;
     }
     if (accountIdsHash[accountId]) {
-      logger.error(
+      console.error(
         `config.portals[] has multiple entries with portalId=${accountId}`
       );
       return false;
@@ -97,13 +105,13 @@ const validateConfig = () => {
 
     if (cfg.name) {
       if (accountNamesHash[cfg.name]) {
-        logger.error(
+        console.error(
           `config.name has multiple entries with portalId=${accountId}`
         );
         return false;
       }
       if (/\s+/.test(cfg.name)) {
-        logger.error(`config.name '${cfg.name}' cannot contain spaces`);
+        console.error(`config.name '${cfg.name}' cannot contain spaces`);
         return false;
       }
       accountNamesHash[cfg.name] = cfg;
@@ -180,7 +188,7 @@ const writeConfig = (options = {}) => {
   }
   const configPath = options.path || _configPath;
   try {
-    logger.debug(`Writing current config to ${configPath}`);
+    console.debug(`Writing current config to ${configPath}`);
     fs.ensureFileSync(configPath);
     fs.writeFileSync(configPath, source);
     setConfig(parseConfig(source).parsed);
@@ -200,7 +208,7 @@ const readConfigFile = () => {
     source = fs.readFileSync(_configPath);
   } catch (err) {
     error = err;
-    logger.error('Config file could not be read "%s"', _configPath);
+    console.error('Config file could not be read "%s"', _configPath);
     logFileSystemErrorInstance(err, { filepath: _configPath, read: true });
   }
   return { source, error };
@@ -216,7 +224,7 @@ const parseConfig = configSource => {
     parsed = yaml.load(configSource);
   } catch (err) {
     error = err;
-    logger.error('Config file could not be parsed "%s"', _configPath);
+    console.error('Config file could not be parsed "%s"', _configPath);
     logErrorInstance(err);
   }
   return { parsed, error };
@@ -226,18 +234,18 @@ const loadConfigFromFile = (path, options = {}) => {
   setConfigPath(getConfigPath(path));
   if (!_configPath) {
     if (!options.silenceErrors) {
-      logger.error(
+      console.error(
         `A ${DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME} file could not be found. To create a new config file, use the "hs init" command.`
       );
     } else {
-      logger.debug(
+      console.debug(
         `A ${DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME} file could not be found`
       );
     }
     return;
   }
 
-  logger.debug(`Reading config from ${_configPath}`);
+  console.debug(`Reading config from ${_configPath}`);
   const { source, error: sourceError } = readConfigFile(_configPath);
   if (sourceError) return;
   const { parsed, error: parseError } = parseConfig(source);
@@ -245,8 +253,8 @@ const loadConfigFromFile = (path, options = {}) => {
   setConfig(parsed);
 
   if (!getConfig()) {
-    logger.debug('The config file was empty config');
-    logger.debug('Initializing an empty config');
+    console.debug('The config file was empty config');
+    console.debug('Initializing an empty config');
     setConfig({ portals: [] });
   }
 
@@ -260,10 +268,10 @@ const loadConfig = (
   }
 ) => {
   if (options.useEnv && loadEnvironmentVariableConfig(options)) {
-    logger.debug('Loaded environment variable config');
+    console.debug('Loaded environment variable config');
     environmentVariableConfigLoaded = true;
   } else {
-    logger.debug(`Loading config from ${path}`);
+    l.debug(`Loading config from ${path}`);
     loadConfigFromFile(path, options);
     environmentVariableConfigLoaded = false;
   }
@@ -386,7 +394,7 @@ const removeSandboxAccountFromConfig = nameOrId => {
   let accounts = getConfigAccounts(config);
 
   if (accountConfig) {
-    logger.debug(`Deleting config for ${accountId}`);
+    console.debug(`Deleting config for ${accountId}`);
     const index = accounts.indexOf(accountConfig);
     accounts.splice(index, 1);
   }
@@ -446,7 +454,7 @@ const updateAccountConfig = configOptions => {
     authType,
     auth,
     apiKey,
-    defaultMode: Mode[mode] ? mode : undefined,
+    defaultMode: MODE[mode] ? mode : undefined,
     personalAccessKey,
     sandboxAccountType,
     parentAccountId,
@@ -454,11 +462,11 @@ const updateAccountConfig = configOptions => {
 
   let accounts = getConfigAccounts(config);
   if (accountConfig) {
-    logger.debug(`Updating config for ${portalId}`);
+    console.debug(`Updating config for ${portalId}`);
     const index = accounts.indexOf(accountConfig);
     accounts[index] = nextAccountConfig;
   } else {
-    logger.debug(`Adding config entry for ${portalId}`);
+    console.debug(`Adding config entry for ${portalId}`);
     if (accounts) {
       accounts.push(nextAccountConfig);
     } else {
@@ -621,7 +629,7 @@ const createEmptyConfigFile = ({ path } = {}) => {
     setConfigPath(path);
   }
 
-  writeConfig({ source: EMPTY_CONFIG_FILE_CONTENTS, path });
+  writeConfig({ source: '', path });
 };
 
 const deleteEmptyConfigFile = () => {
@@ -715,7 +723,7 @@ const loadConfigFromEnvironment = ({ useEnv = false } = {}) => {
     'Unable to load config from environment variables.';
 
   if (!portalId) {
-    useEnv && logger.error(unableToLoadEnvConfigError);
+    useEnv && console.error(unableToLoadEnvConfigError);
     return;
   }
 
@@ -733,7 +741,7 @@ const loadConfigFromEnvironment = ({ useEnv = false } = {}) => {
   } else if (apiKey) {
     return generateApiKeyConfig(portalId, apiKey, env);
   } else {
-    useEnv && logger.error(unableToLoadEnvConfigError);
+    useEnv && console.error(unableToLoadEnvConfigError);
     return;
   }
 };
@@ -746,7 +754,7 @@ const loadEnvironmentVariableConfig = options => {
   }
   const { portalId } = getConfigVariablesFromEnv();
 
-  logger.debug(
+  console.debug(
     `Loaded config from environment variables for account ${portalId}`
   );
 
