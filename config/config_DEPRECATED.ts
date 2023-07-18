@@ -20,9 +20,10 @@ import {
   logErrorInstance,
   logFileSystemErrorInstance,
 } from '../errors/errors_DEPRECATED';
-import { CLIConfig_DEPRECATED } from '../types/Config';
+import { CLIConfig_DEPRECATED, Environment } from '../types/Config';
 import { CLIAccount_DEPRECATED } from '../types/Accounts';
 import { BaseError } from '../types/Error';
+import { ValueOf } from '../types/Utils';
 
 const ALL_MODES = Object.values(MODE);
 let _config: CLIConfig_DEPRECATED | undefined;
@@ -334,21 +335,21 @@ function findConfig(directory: string): string | null {
   );
 }
 
-const getEnv = nameOrId => {
-  let env = ENVIRONMENTS.PROD;
+function getEnv(nameOrId: string | number) {
+  let env: Environment = ENVIRONMENTS.PROD;
   const config = getAndLoadConfigIfNeeded();
   const accountId = getAccountId(nameOrId);
 
   if (accountId) {
     const accountConfig = getAccountConfig(accountId);
-    if (accountConfig.env) {
+    if (accountConfig && accountConfig.env) {
       env = accountConfig.env;
     }
   } else if (config && config.env) {
     env = config.env;
   }
   return env;
-};
+}
 
 const getAccountConfig = accountId =>
   getConfigAccounts(getAndLoadConfigIfNeeded()).find(
@@ -358,13 +359,15 @@ const getAccountConfig = accountId =>
 /*
  * Returns a portalId from the config if it exists, else returns null
  */
-const getAccountId = nameOrId => {
-  const config = getAndLoadConfigIfNeeded();
-  let name;
-  let accountId;
-  let account;
+function getAccountId(nameOrId: string | number) {
+  const config = getAndLoadConfigIfNeeded() as CLIConfig_DEPRECATED;
+  let name: string | undefined = undefined;
+  let accountId: number | undefined = undefined;
+  let account: CLIAccount_DEPRECATED | undefined = undefined;
 
-  const setNameOrAccountFromSuppliedValue = suppliedValue => {
+  function setNameOrAccountFromSuppliedValue(
+    suppliedValue: string | number
+  ): void {
     if (typeof suppliedValue === 'number') {
       accountId = suppliedValue;
     } else if (/^\d+$/.test(suppliedValue)) {
@@ -372,7 +375,7 @@ const getAccountId = nameOrId => {
     } else {
       name = suppliedValue;
     }
-  };
+  }
 
   if (!nameOrId) {
     const defaultAccount = getConfigDefaultAccount(config);
@@ -385,9 +388,9 @@ const getAccountId = nameOrId => {
   }
 
   const accounts = getConfigAccounts(config);
-  if (name) {
+  if (name && accounts) {
     account = accounts.find(p => p.name === name);
-  } else if (accountId) {
+  } else if (accountId && accounts) {
     account = accounts.find(p => accountId === p.portalId);
   }
 
@@ -396,7 +399,7 @@ const getAccountId = nameOrId => {
   }
 
   return null;
-};
+}
 
 /**
  * @throws {Error}
