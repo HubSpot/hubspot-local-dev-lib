@@ -1,16 +1,23 @@
-import { FullResponse } from 'request-promise-native';
+import { StatusCodeError } from '../types/Error';
 
 export class HubSpotAuthError extends Error {
   statusCode?: number;
   category?: string;
   subCategory?: string;
-  constructor(message: string, errorResponse: Partial<FullResponse> = {}) {
+  constructor(
+    message: string,
+    { cause = {} }: { cause?: Partial<StatusCodeError> }
+  ) {
     super(message);
     this.name = 'HubSpotAuthError';
-    this.statusCode = errorResponse && errorResponse.statusCode;
+    this.statusCode = cause.statusCode;
     this.category =
-      (errorResponse.body && errorResponse.body.category) || undefined;
+      (cause.response && cause.response.body && cause.response.body.category) ||
+      undefined;
     this.subCategory =
-      (errorResponse.body && errorResponse.body.subCategory) || undefined;
+      (cause.response &&
+        cause.response.body &&
+        cause.response.body.subCategory) ||
+      undefined;
   }
 }
