@@ -52,7 +52,7 @@ function isAllowedExtension(filepath: string): boolean {
 }
 
 function useApiBuffer(mode: Mode): boolean {
-  return mode === MODE.DRAFT;
+  return mode === MODE.draft;
 }
 
 type FileMapperInputOptions = {

@@ -21,9 +21,14 @@ import {
   logFileSystemErrorInstance,
 } from '../errors/errors_DEPRECATED';
 import { CLIConfig_DEPRECATED, Environment } from '../types/Config';
-import { CLIAccount_DEPRECATED } from '../types/Accounts';
+import {
+  APIKeyAccount_DEPRECATED,
+  CLIAccount_DEPRECATED,
+  FlatAccountFields_DEPRECATED,
+  OAuthAccount_DEPRECATED,
+} from '../types/Accounts';
 import { BaseError } from '../types/Error';
-import { ValueOf } from '../types/Utils';
+import { Mode } from '../types/Files';
 
 const ALL_MODES = Object.values(MODE);
 let _config: CLIConfig_DEPRECATED | undefined;
@@ -44,16 +49,16 @@ const commaSeparatedValues = (
   return arr.join(', ');
 };
 
-const getConfig = () => _config;
+export const getConfig = () => _config;
 
-function setConfig(
+export function setConfig(
   updatedConfig?: CLIConfig_DEPRECATED
 ): CLIConfig_DEPRECATED | undefined {
   _config = updatedConfig;
   return _config;
 }
 
-function getConfigAccounts(
+export function getConfigAccounts(
   config?: CLIConfig_DEPRECATED
 ): Array<CLIAccount_DEPRECATED> | undefined {
   const __config = config || getConfig();
@@ -61,30 +66,30 @@ function getConfigAccounts(
   return __config.portals;
 }
 
-function getConfigDefaultAccount(
-  config: CLIConfig_DEPRECATED
+export function getConfigDefaultAccount(
+  config?: CLIConfig_DEPRECATED
 ): string | number | undefined {
   const __config = config || getConfig();
   if (!__config) return;
   return __config.defaultPortal;
 }
 
-function getConfigAccountId(
+export function getConfigAccountId(
   account: CLIAccount_DEPRECATED
 ): number | undefined {
   if (!account) return;
   return account.portalId;
 }
 
-function setConfigPath(path: string | null) {
+export function setConfigPath(path: string | null) {
   return (_configPath = path);
 }
 
-function getConfigPath(path: string | null): string | null {
+export function getConfigPath(path: string | null): string | null {
   return path || (configFileExists() && _configPath) || findConfig(getCwd());
 }
 
-function validateConfig(): boolean {
+export function validateConfig(): boolean {
   const config = getConfig();
   if (!config) {
     console.error('No config was found');
@@ -134,7 +139,7 @@ function validateConfig(): boolean {
   });
 }
 
-function accountNameExistsInConfig(name: string): boolean {
+export function accountNameExistsInConfig(name: string): boolean {
   const config = getConfig();
   const accounts = getConfigAccounts();
 
@@ -145,7 +150,7 @@ function accountNameExistsInConfig(name: string): boolean {
   return accounts.some(cfg => cfg.name && cfg.name === name);
 }
 
-function getOrderedAccount(
+export function getOrderedAccount(
   unorderedAccount: CLIAccount_DEPRECATED
 ): CLIAccount_DEPRECATED {
   const { name, portalId, env, authType, ...rest } = unorderedAccount;
@@ -159,7 +164,7 @@ function getOrderedAccount(
   };
 }
 
-function getOrderedConfig(unorderedConfig: CLIConfig_DEPRECATED) {
+export function getOrderedConfig(unorderedConfig: CLIConfig_DEPRECATED) {
   const {
     defaultPortal,
     defaultMode,
@@ -184,7 +189,7 @@ type WriteConfigOptions = {
   source?: string;
 };
 
-function writeConfig(options: WriteConfigOptions = {}): void {
+export function writeConfig(options: WriteConfigOptions = {}): void {
   if (environmentVariableConfigLoaded) {
     return;
   }
@@ -289,7 +294,7 @@ function loadConfigFromFile(
   return getConfig();
 }
 
-function loadConfig(
+export function loadConfig(
   path: string,
   options: LoadConfigFromFileOptions = {
     useEnv: false,
@@ -307,7 +312,7 @@ function loadConfig(
   return getConfig();
 }
 
-function isTrackingAllowed(): boolean {
+export function isTrackingAllowed(): boolean {
   if (!configFileExists() || configFileIsBlank()) {
     return true;
   }
@@ -315,7 +320,9 @@ function isTrackingAllowed(): boolean {
   return allowUsageTracking !== false;
 }
 
-function getAndLoadConfigIfNeeded(options = {}): Partial<CLIConfig_DEPRECATED> {
+export function getAndLoadConfigIfNeeded(
+  options = {}
+): Partial<CLIConfig_DEPRECATED> {
   if (!getConfig()) {
     loadConfig('', {
       silenceErrors: true,
@@ -325,7 +332,7 @@ function getAndLoadConfigIfNeeded(options = {}): Partial<CLIConfig_DEPRECATED> {
   return getConfig() || { allowUsageTracking: undefined };
 }
 
-function findConfig(directory: string): string | null {
+export function findConfig(directory: string): string | null {
   return findup(
     [
       DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME,
@@ -335,7 +342,7 @@ function findConfig(directory: string): string | null {
   );
 }
 
-function getEnv(nameOrId: string | number) {
+export function getEnv(nameOrId: string | number): Environment {
   let env: Environment = ENVIRONMENTS.PROD;
   const config = getAndLoadConfigIfNeeded();
   const accountId = getAccountId(nameOrId);
@@ -351,15 +358,18 @@ function getEnv(nameOrId: string | number) {
   return env;
 }
 
-const getAccountConfig = accountId =>
-  getConfigAccounts(getAndLoadConfigIfNeeded()).find(
-    account => account.portalId === accountId
-  );
+export function getAccountConfig(
+  accountId: number | undefined
+): CLIAccount_DEPRECATED | undefined {
+  return getConfigAccounts(
+    getAndLoadConfigIfNeeded() as CLIConfig_DEPRECATED
+  )?.find(account => account.portalId === accountId);
+}
 
 /*
  * Returns a portalId from the config if it exists, else returns null
  */
-function getAccountId(nameOrId: string | number) {
+export function getAccountId(nameOrId: string | number): number | undefined {
   const config = getAndLoadConfigIfNeeded() as CLIConfig_DEPRECATED;
   let name: string | undefined = undefined;
   let accountId: number | undefined = undefined;
@@ -398,13 +408,15 @@ function getAccountId(nameOrId: string | number) {
     return account.portalId;
   }
 
-  return null;
+  return undefined;
 }
 
 /**
  * @throws {Error}
  */
-const removeSandboxAccountFromConfig = nameOrId => {
+export function removeSandboxAccountFromConfig(
+  nameOrId: string | number
+): boolean {
   const config = getAndLoadConfigIfNeeded();
   const accountId = getAccountId(nameOrId);
   let promptDefaultAccount = false;
@@ -415,15 +427,15 @@ const removeSandboxAccountFromConfig = nameOrId => {
 
   const accountConfig = getAccountConfig(accountId);
 
-  if (accountConfig.sandboxAccountType === null) return promptDefaultAccount;
+  if (accountConfig?.sandboxAccountType === null) return promptDefaultAccount;
 
-  if (config.defaultPortal === accountConfig.name) {
+  if (config.defaultPortal === accountConfig?.name) {
     promptDefaultAccount = true;
   }
 
-  let accounts = getConfigAccounts(config);
+  const accounts = getConfigAccounts(config as CLIConfig_DEPRECATED);
 
-  if (accountConfig) {
+  if (accountConfig && accounts) {
     console.debug(`Deleting config for ${accountId}`);
     const index = accounts.indexOf(accountConfig);
     accounts.splice(index, 1);
@@ -432,12 +444,18 @@ const removeSandboxAccountFromConfig = nameOrId => {
   writeConfig();
 
   return promptDefaultAccount;
+}
+
+type UpdateAccountConfigOptions = FlatAccountFields_DEPRECATED & {
+  environment?: Environment;
 };
 
 /**
  * @throws {Error}
  */
-const updateAccountConfig = configOptions => {
+export function updateAccountConfig(
+  configOptions: UpdateAccountConfigOptions
+): FlatAccountFields_DEPRECATED {
   const {
     portalId,
     authType,
@@ -458,10 +476,10 @@ const updateAccountConfig = configOptions => {
     throw new Error('A portalId is required to update the config');
   }
 
-  const config = getAndLoadConfigIfNeeded();
+  const config = getAndLoadConfigIfNeeded() as CLIConfig_DEPRECATED;
   const accountConfig = getAccountConfig(portalId);
 
-  let auth;
+  let auth: OAuthAccount['auth'] | undefined = undefined;
   if (clientId || clientSecret || scopes || tokenInfo) {
     auth = {
       ...(accountConfig ? accountConfig.auth : {}),
@@ -472,11 +490,13 @@ const updateAccountConfig = configOptions => {
     };
   }
 
-  const env = getValidEnv(environment || (accountConfig && accountConfig.env), {
-    maskedProductionValue: undefined,
-  });
-  const mode = defaultMode && defaultMode.toLowerCase();
-  const nextAccountConfig = {
+  const env = getValidEnv(
+    environment || (accountConfig && accountConfig.env),
+    undefined
+  );
+  const mode: Mode | undefined =
+    defaultMode && (defaultMode.toLowerCase() as Mode);
+  const nextAccountConfig: FlatAccountFields_DEPRECATED = {
     ...accountConfig,
     name: name || (accountConfig && accountConfig.name),
     env,
@@ -484,14 +504,14 @@ const updateAccountConfig = configOptions => {
     authType,
     auth,
     apiKey,
-    defaultMode: MODE[mode] ? mode : undefined,
+    defaultMode: mode && Object.hasOwn(MODE, mode) ? mode : undefined,
     personalAccessKey,
     sandboxAccountType,
     parentAccountId,
   };
 
   let accounts = getConfigAccounts(config);
-  if (accountConfig) {
+  if (accountConfig && accounts) {
     console.debug(`Updating config for ${portalId}`);
     const index = accounts.indexOf(accountConfig);
     accounts[index] = nextAccountConfig;
@@ -505,12 +525,12 @@ const updateAccountConfig = configOptions => {
   }
 
   return nextAccountConfig;
-};
+}
 
 /**
  * @throws {Error}
  */
-const updateDefaultAccount = defaultAccount => {
+export function updateDefaultAccount(defaultAccount: string | number): void {
   if (
     !defaultAccount ||
     (typeof defaultAccount !== 'number' && typeof defaultAccount !== 'string')
@@ -525,12 +545,12 @@ const updateDefaultAccount = defaultAccount => {
 
   setDefaultConfigPathIfUnset();
   writeConfig();
-};
+}
 
 /**
  * @throws {Error}
  */
-const updateDefaultMode = defaultMode => {
+export function updateDefaultMode(defaultMode: Mode): void {
   if (!defaultMode || !ALL_MODES.find(m => m === defaultMode)) {
     throw new Error(
       `The mode ${defaultMode} is invalid. Valid values are ${commaSeparatedValues(
@@ -544,12 +564,12 @@ const updateDefaultMode = defaultMode => {
 
   setDefaultConfigPathIfUnset();
   writeConfig();
-};
+}
 
 /**
  * @throws {Error}
  */
-const updateHttpTimeout = timeout => {
+export function updateHttpTimeout(timeout: string): void {
   const parsedTimeout = parseInt(timeout);
   if (isNaN(parsedTimeout) || parsedTimeout < MIN_HTTP_TIMEOUT) {
     throw new Error(
@@ -562,12 +582,12 @@ const updateHttpTimeout = timeout => {
 
   setDefaultConfigPathIfUnset();
   writeConfig();
-};
+}
 
 /**
  * @throws {Error}
  */
-const updateAllowUsageTracking = isEnabled => {
+export function updateAllowUsageTracking(isEnabled: boolean): void {
   if (typeof isEnabled !== 'boolean') {
     throw new Error(
       `Unable to update allowUsageTracking. The value ${isEnabled} is invalid. The value must be a boolean.`
@@ -579,12 +599,15 @@ const updateAllowUsageTracking = isEnabled => {
 
   setDefaultConfigPathIfUnset();
   writeConfig();
-};
+}
 
 /**
  * @throws {Error}
  */
-const renameAccount = async (currentName, newName) => {
+export async function renameAccount(
+  currentName: string,
+  newName: string
+): Promise<void> {
   const accountId = getAccountId(currentName);
   const accountConfigToRename = getAccountConfig(accountId);
   const defaultAccount = getConfigDefaultAccount();
@@ -603,17 +626,17 @@ const renameAccount = async (currentName, newName) => {
   }
 
   return writeConfig();
-};
+}
 
 /**
  * @throws {Error}
  */
-const deleteAccount = async accountName => {
-  const config = getAndLoadConfigIfNeeded();
-  let accounts = getConfigAccounts(config);
+export async function deleteAccount(accountName: string): Promise<void> {
+  const config = getAndLoadConfigIfNeeded() as CLIConfig_DEPRECATED;
+  const accounts = getConfigAccounts(config);
   const accountIdToDelete = getAccountId(accountName);
 
-  if (!accountIdToDelete) {
+  if (!accountIdToDelete || !accounts) {
     throw new Error(`Cannot find account with identifier ${accountName}`);
   }
 
@@ -622,33 +645,33 @@ const deleteAccount = async accountName => {
     defaultPortal:
       config.defaultPortal === accountName ||
       config.defaultPortal === accountIdToDelete
-        ? null
+        ? undefined
         : config.defaultPortal,
     portals: accounts.filter(account => account.portalId !== accountIdToDelete),
   });
 
   return writeConfig();
-};
+}
 
-const setDefaultConfigPathIfUnset = () => {
+function setDefaultConfigPathIfUnset(): void {
   if (!_configPath) {
     setDefaultConfigPath();
   }
-};
+}
 
-const setDefaultConfigPath = () => {
+function setDefaultConfigPath(): void {
   setConfigPath(`${getCwd()}/${DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME}`);
-};
+}
 
-const configFileExists = () => {
-  return _configPath && fs.existsSync(_configPath);
-};
+function configFileExists(): boolean {
+  return Boolean(_configPath && fs.existsSync(_configPath));
+}
 
-const configFileIsBlank = () => {
-  return _configPath && fs.readFileSync(_configPath).length === 0;
-};
+function configFileIsBlank(): boolean {
+  return Boolean(_configPath && fs.readFileSync(_configPath).length === 0);
+}
 
-const createEmptyConfigFile = ({ path } = {}) => {
+export function createEmptyConfigFile({ path }: { path?: string } = {}): void {
   if (!path) {
     setDefaultConfigPathIfUnset();
 
@@ -660,19 +683,17 @@ const createEmptyConfigFile = ({ path } = {}) => {
   }
 
   writeConfig({ source: '', path });
-};
+}
 
-const deleteEmptyConfigFile = () => {
-  return (
-    configFileExists() && configFileIsBlank() && fs.unlinkSync(_configPath)
-  );
-};
+export function deleteEmptyConfigFile(): void {
+  configFileExists() && configFileIsBlank() && fs.unlinkSync(_configPath || '');
+}
 
-const deleteConfigFile = () => {
-  return configFileExists() && fs.unlinkSync(_configPath);
-};
+export function deleteConfigFile(): void {
+  configFileExists() && fs.unlinkSync(_configPath || '');
+}
 
-const getConfigVariablesFromEnv = () => {
+function getConfigVariablesFromEnv() {
   const env = process.env;
 
   return {
@@ -680,13 +701,19 @@ const getConfigVariablesFromEnv = () => {
     clientId: env[ENVIRONMENT_VARIABLES.HUBSPOT_CLIENT_ID],
     clientSecret: env[ENVIRONMENT_VARIABLES.HUBSPOT_CLIENT_SECRET],
     personalAccessKey: env[ENVIRONMENT_VARIABLES.HUBSPOT_PERSONAL_ACCESS_KEY],
-    portalId: parseInt(env[ENVIRONMENT_VARIABLES.HUBSPOT_PORTAL_ID], 10),
+    portalId: parseInt(env[ENVIRONMENT_VARIABLES.HUBSPOT_PORTAL_ID] || '', 10),
     refreshToken: env[ENVIRONMENT_VARIABLES.HUBSPOT_REFRESH_TOKEN],
-    env: getValidEnv(env[ENVIRONMENT_VARIABLES.HUBSPOT_ENVIRONMENT]),
+    env: getValidEnv(
+      env[ENVIRONMENT_VARIABLES.HUBSPOT_ENVIRONMENT] as Environment
+    ),
   };
-};
+}
 
-const generatePersonalAccessKeyConfig = (portalId, personalAccessKey, env) => {
+function generatePersonalAccessKeyConfig(
+  portalId: number,
+  personalAccessKey: string,
+  env: Environment
+): { portals: Array<CLIAccount_DEPRECATED> } {
   return {
     portals: [
       {
@@ -697,16 +724,16 @@ const generatePersonalAccessKeyConfig = (portalId, personalAccessKey, env) => {
       },
     ],
   };
-};
+}
 
-const generateOauthConfig = (
-  portalId,
-  clientId,
-  clientSecret,
-  refreshToken,
-  scopes,
-  env
-) => {
+function generateOauthConfig(
+  portalId: number,
+  clientId: string,
+  clientSecret: string,
+  refreshToken: string,
+  scopes: Array<string>,
+  env: Environment
+): { portals: Array<OAuthAccount_DEPRECATED> } {
   return {
     portals: [
       {
@@ -724,9 +751,13 @@ const generateOauthConfig = (
       },
     ],
   };
-};
+}
 
-const generateApiKeyConfig = (portalId, apiKey, env) => {
+function generateApiKeyConfig(
+  portalId: number,
+  apiKey: string,
+  env: Environment
+): { portals: Array<APIKeyAccount_DEPRECATED> } {
   return {
     portals: [
       {
@@ -737,9 +768,13 @@ const generateApiKeyConfig = (portalId, apiKey, env) => {
       },
     ],
   };
-};
+}
 
-const loadConfigFromEnvironment = ({ useEnv = false } = {}) => {
+export function loadConfigFromEnvironment({
+  useEnv = false,
+}: { useEnv?: boolean } = {}):
+  | { portals: Array<CLIAccount_DEPRECATED> }
+  | undefined {
   const {
     apiKey,
     clientId,
@@ -774,9 +809,11 @@ const loadConfigFromEnvironment = ({ useEnv = false } = {}) => {
     useEnv && console.error(unableToLoadEnvConfigError);
     return;
   }
-};
+}
 
-const loadEnvironmentVariableConfig = options => {
+function loadEnvironmentVariableConfig(options: {
+  useEnv?: boolean;
+}): CLIConfig_DEPRECATED | undefined {
   const envConfig = loadConfigFromEnvironment(options);
 
   if (!envConfig) {
@@ -789,49 +826,14 @@ const loadEnvironmentVariableConfig = options => {
   );
 
   return setConfig(envConfig);
-};
+}
 
-const isConfigFlagEnabled = flag => {
+export function isConfigFlagEnabled(flag: keyof CLIConfig_DEPRECATED): boolean {
   if (!configFileExists() || configFileIsBlank()) {
     return false;
   }
 
   const config = getAndLoadConfigIfNeeded();
 
-  return config[flag] || false;
-};
-
-module.exports = {
-  getAndLoadConfigIfNeeded,
-  getEnv,
-  getConfig,
-  getConfigAccounts,
-  getConfigDefaultAccount,
-  getConfigAccountId,
-  getConfigPath,
-  getOrderedAccount,
-  getOrderedConfig,
-  isConfigFlagEnabled,
-  setConfig,
-  setConfigPath,
-  loadConfig,
-  findConfig,
-  loadConfigFromEnvironment,
-  getAccountConfig,
-  getAccountId,
-  removeSandboxAccountFromConfig,
-  updateAccountConfig,
-  updateDefaultAccount,
-  updateDefaultMode,
-  updateHttpTimeout,
-  updateAllowUsageTracking,
-  renameAccount,
-  deleteAccount,
-  createEmptyConfigFile,
-  deleteEmptyConfigFile,
-  deleteConfigFile,
-  isTrackingAllowed,
-  validateConfig,
-  writeConfig,
-  accountNameExistsInConfig,
-};
+  return Boolean(config[flag] || false);
+}
