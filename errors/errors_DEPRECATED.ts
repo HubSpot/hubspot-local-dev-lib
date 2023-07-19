@@ -1,11 +1,20 @@
-import { BaseError, FileSystemErrorContext } from '../types/Error';
+import {
+  BaseError,
+  FileSystemErrorContext,
+  StatusCodeError,
+} from '../types/Error';
 
-const isSystemError = err =>
-  err.errno != null && err.code != null && err.syscall != null;
+type ErrorContext = {
+  accountId?: number;
+};
 
-function debugErrorAndContext(error, context) {
+function isSystemError(err: BaseError) {
+  return err.errno != null && err.code != null && err.syscall != null;
+}
+
+function debugErrorAndContext(error: BaseError, context?: ErrorContext): void {
   if (error.name === 'StatusCodeError') {
-    const { statusCode, message, response } = error;
+    const { statusCode, message, response } = error as StatusCodeError;
     console.debug('Error: %o', {
       statusCode,
       message,
@@ -20,14 +29,18 @@ function debugErrorAndContext(error, context) {
   console.debug('Context: %o', context);
 }
 
-export function logErrorInstance(error: BaseError, context?: any) {
+export function logErrorInstance(error: BaseError, context?: ErrorContext) {
   // SystemError
   if (isSystemError(error)) {
     console.error(`A system error has occurred: ${error.message}`);
     debugErrorAndContext(error, context);
     return;
   }
-  if (error instanceof Error || error.message || error.reason) {
+  if (
+    error instanceof Error ||
+    (error as BaseError).message ||
+    (error as BaseError).reason
+  ) {
     // Error or Error subclass
     const name = error.name || 'Error';
     const message = [`A ${name} has occurred.`];
