@@ -4,16 +4,18 @@ import {
   OAUTH_AUTH_METHOD,
   PERSONAL_ACCESS_KEY_AUTH_METHOD,
 } from '../constants/auth';
-import { CLIConfig, Environment } from '../types/Config';
+import { CLIConfig_NEW, Environment } from '../types/Config';
 import {
   AuthType,
-  CLIAccount,
-  APIKeyAccount,
-  OAuthAccount,
+  CLIAccount_NEW,
+  APIKeyAccount_NEW,
+  OAuthAccount_NEW,
   PersonalAccessKeyAccount,
 } from '../types/Accounts';
 
-export function getOrderedAccount(unorderedAccount: CLIAccount): CLIAccount {
+export function getOrderedAccount(
+  unorderedAccount: CLIAccount_NEW
+): CLIAccount_NEW {
   const { name, accountId, env, authType, ...rest } = unorderedAccount;
 
   return {
@@ -25,7 +27,9 @@ export function getOrderedAccount(unorderedAccount: CLIAccount): CLIAccount {
   };
 }
 
-export function getOrderedConfig(unorderedConfig: CLIConfig): CLIConfig {
+export function getOrderedConfig(
+  unorderedConfig: CLIConfig_NEW
+): CLIConfig_NEW {
   const {
     defaultAccount,
     defaultMode,
@@ -80,7 +84,7 @@ function generateOauthAccountConfig({
   refreshToken,
   scopes,
   env,
-}: OAuthOptions): OAuthAccount {
+}: OAuthOptions): OAuthAccount_NEW {
   return {
     authType: OAUTH_AUTH_METHOD.value,
     accountId,
@@ -106,7 +110,7 @@ function generateApiKeyAccountConfig({
   accountId,
   apiKey,
   env,
-}: APIKeyOptions): APIKeyAccount {
+}: APIKeyOptions): APIKeyAccount_NEW {
   return {
     authType: API_KEY_AUTH_METHOD.value,
     accountId,
@@ -118,12 +122,12 @@ function generateApiKeyAccountConfig({
 export function generateConfig(
   type: AuthType,
   options: PersonalAccessKeyOptions | OAuthOptions | APIKeyOptions
-): CLIConfig | null {
+): CLIConfig_NEW | null {
   if (!options) {
     return null;
   }
-  const config: CLIConfig = { accounts: [] };
-  let configAccount: CLIAccount;
+  const config: CLIConfig_NEW = { accounts: [] };
+  let configAccount: CLIAccount_NEW;
 
   switch (type) {
     case API_KEY_AUTH_METHOD.value:
