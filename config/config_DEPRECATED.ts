@@ -29,6 +29,7 @@ import {
 } from '../types/Accounts';
 import { BaseError } from '../types/Error';
 import { Mode } from '../types/Files';
+import { CLIOptions } from '../types/CLIOptions';
 
 const ALL_MODES = Object.values(MODE);
 let _config: CLIConfig_DEPRECATED | undefined;
@@ -255,15 +256,7 @@ function parseConfig(configSource?: string): {
   return { parsed, error };
 }
 
-type LoadConfigFromFileOptions = {
-  silenceErrors?: boolean;
-  useEnv?: boolean;
-};
-
-function loadConfigFromFile(
-  path: string,
-  options: LoadConfigFromFileOptions = {}
-) {
+function loadConfigFromFile(path: string, options: CLIOptions = {}) {
   setConfigPath(getConfigPath(path));
   if (!_configPath) {
     if (!options.silenceErrors) {
@@ -296,7 +289,7 @@ function loadConfigFromFile(
 
 export function loadConfig(
   path: string,
-  options: LoadConfigFromFileOptions = {
+  options: CLIOptions = {
     useEnv: false,
   }
 ) {

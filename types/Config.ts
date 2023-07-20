@@ -1,9 +1,9 @@
 import { ENVIRONMENTS } from '../constants/environments';
-import { CLIAccount, CLIAccount_DEPRECATED } from './Accounts';
+import { CLIAccount_NEW, CLIAccount_DEPRECATED } from './Accounts';
 import { ValueOf } from './Utils';
 
-export interface CLIConfig {
-  accounts: Array<CLIAccount>;
+export interface CLIConfig_NEW {
+  accounts: Array<CLIAccount_NEW>;
   allowUsageTracking?: boolean;
   defaultAccount?: string | number;
   defaultMode?: string;
@@ -21,5 +21,7 @@ export interface CLIConfig_DEPRECATED {
   env?: Environment;
   httpUseLocalhost?: boolean;
 }
+
+export type CLIConfig = CLIConfig_NEW | CLIConfig_DEPRECATED;
 
 export type Environment = ValueOf<typeof ENVIRONMENTS> | '';
