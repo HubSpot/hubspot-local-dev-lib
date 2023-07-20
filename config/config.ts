@@ -6,32 +6,7 @@ import {
   CLIConfig_DEPRECATED,
   CLIConfig,
 } from '../types/Config';
-import { CLIOptions } from '../types/CLIOptions';
-
-// This file is used to maintain backwards compatiblity for the legacy hubspot.config.yml config.
-// If the hubspot.config.yml file exists, we will fall back to legacy behavior. Otherwise we will
-// use the new root config handling.
-
-// NOTE This is gross. Everything in the code uses portalId, but that's an outdated term
-// Ideally we can slowly switch to accountId, but that means we need to convert back to
-// portalId while we're still supporting the legacy config.
-function withPortals(config?: CLIConfig_NEW): CLIConfig_DEPRECATED | undefined {
-  if (config) {
-    const configWithPortals: CLIConfig_DEPRECATED = { ...config, portals: [] };
-
-    if (config.defaultAccount) {
-      configWithPortals.defaultPortal = config.defaultAccount;
-    }
-    if (config.accounts) {
-      configWithPortals.portals = config.accounts.map(account => {
-        const { accountId, ...rest } = account;
-        return { ...rest, portalId: accountId };
-      });
-    }
-    return configWithPortals;
-  }
-  return config;
-}
+import { CLIOptions, WriteConfigOptions } from '../types/CLIOptions';
 
 // Prioritize using the new config if it exists
 function loadConfig(path: string, options: CLIOptions = {}): CLIConfig | null {
@@ -66,56 +41,60 @@ function validateConfig(): boolean {
   return config_DEPRECATED.validateConfig();
 }
 
-const loadConfigFromEnvironment = () => {
-  if (CLIConfig.active) {
-    return CLIConfig.useEnvConfig;
+function loadConfigFromEnvironment(): boolean {
+  if (CLIConfiguration.isActive()) {
+    return CLIConfiguration.useEnvConfig;
   }
-  return legacyConfig.loadConfigFromEnvironment();
-};
+  return Boolean(config_DEPRECATED.loadConfigFromEnvironment());
+}
 
-const createEmptyConfigFile = (...args) => {
-  // TODO hs init has not loaded config yet so this will never be active
-  if (CLIConfig.active) {
-    return CLIConfig.write({ accounts: [] });
+function createEmptyConfigFile(
+  options: { path?: string } = {},
+  useRootConfig = false
+): void {
+  if (useRootConfig) {
+    CLIConfiguration.write({ accounts: [] });
   }
-  return legacyConfig.createEmptyConfigFile(...args);
-};
+  return config_DEPRECATED.createEmptyConfigFile(options);
+}
 
-const deleteEmptyConfigFile = () => {
-  if (CLIConfig.active) {
-    return CLIConfig.delete();
+function deleteEmptyConfigFile() {
+  if (CLIConfiguration.isActive()) {
+    return CLIConfiguration.delete();
   }
-  return legacyConfig.deleteEmptyConfigFile();
-};
+  return config_DEPRECATED.deleteEmptyConfigFile();
+}
 
-const getConfig = () => {
-  if (CLIConfig.active) {
-    return withPortals(CLIConfig.config);
+function getConfig(): CLIConfig | null {
+  if (CLIConfiguration.isActive()) {
+    return CLIConfiguration.config;
   }
-  return legacyConfig.getConfig();
-};
+  return config_DEPRECATED.getConfig();
+}
 
-const writeConfig = (options = {}) => {
-  if (CLIConfig.active) {
-    const config = options.source ? JSON.parse(options.source) : undefined;
-    return CLIConfig.write(config);
+function writeConfig(options: WriteConfigOptions = {}): void {
+  if (CLIConfiguration.isActive()) {
+    const config = options.source
+      ? (JSON.parse(options.source) as CLIConfig_NEW)
+      : undefined;
+    CLIConfiguration.write(config);
   }
-  return legacyConfig.writeConfig(options);
-};
+  config_DEPRECATED.writeConfig(options);
+}
 
-const getConfigPath = () => {
-  if (CLIConfig.active) {
+function getConfigPath(path?: string): string | null {
+  if (CLIConfiguration.isActive()) {
     return getConfigFilePath();
   }
-  return legacyConfig.getConfigPath();
-};
+  return config_DEPRECATED.getConfigPath(path);
+}
 
-const getAccountConfig = accountId => {
+function getAccountConfig(accountId: number) {
   if (CLIConfig.active) {
     return CLIConfig.getConfigForAccount(accountId);
   }
   return legacyConfig.getAccountConfig(accountId);
-};
+}
 
 const accountNameExistsInConfig = (...args) => {
   if (CLIConfig.active) {

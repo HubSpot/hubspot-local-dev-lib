@@ -29,10 +29,10 @@ import {
 } from '../types/Accounts';
 import { BaseError } from '../types/Error';
 import { Mode } from '../types/Files';
-import { CLIOptions } from '../types/CLIOptions';
+import { CLIOptions, WriteConfigOptions } from '../types/CLIOptions';
 
 const ALL_MODES = Object.values(MODE);
-let _config: CLIConfig_DEPRECATED | undefined;
+let _config: CLIConfig_DEPRECATED | null;
 let _configPath: string | null;
 let environmentVariableConfigLoaded = false;
 
@@ -54,8 +54,8 @@ export const getConfig = () => _config;
 
 export function setConfig(
   updatedConfig?: CLIConfig_DEPRECATED
-): CLIConfig_DEPRECATED | undefined {
-  _config = updatedConfig;
+): CLIConfig_DEPRECATED | null {
+  _config = updatedConfig || null;
   return _config;
 }
 
@@ -86,7 +86,7 @@ export function setConfigPath(path: string | null) {
   return (_configPath = path);
 }
 
-export function getConfigPath(path: string | null): string | null {
+export function getConfigPath(path?: string | null): string | null {
   return path || (configFileExists() && _configPath) || findConfig(getCwd());
 }
 
@@ -184,11 +184,6 @@ export function getOrderedConfig(unorderedConfig: CLIConfig_DEPRECATED) {
     portals: portals.map(getOrderedAccount),
   };
 }
-
-type WriteConfigOptions = {
-  path?: string;
-  source?: string;
-};
 
 export function writeConfig(options: WriteConfigOptions = {}): void {
   if (environmentVariableConfigLoaded) {
@@ -472,7 +467,7 @@ export function updateAccountConfig(
   const config = getAndLoadConfigIfNeeded() as CLIConfig_DEPRECATED;
   const accountConfig = getAccountConfig(portalId);
 
-  let auth: OAuthAccount['auth'] | undefined = undefined;
+  let auth: OAuthAccount_DEPRECATED['auth'] | undefined = undefined;
   if (clientId || clientSecret || scopes || tokenInfo) {
     auth = {
       ...(accountConfig ? accountConfig.auth : {}),
@@ -806,11 +801,11 @@ export function loadConfigFromEnvironment({
 
 function loadEnvironmentVariableConfig(options: {
   useEnv?: boolean;
-}): CLIConfig_DEPRECATED | undefined {
+}): CLIConfig_DEPRECATED | null {
   const envConfig = loadConfigFromEnvironment(options);
 
   if (!envConfig) {
-    return;
+    return null;
   }
   const { portalId } = getConfigVariablesFromEnv();
 
