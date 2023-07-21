@@ -7,11 +7,12 @@ import { debug } from '../utils/logger';
 import { BaseError } from '../types/Error';
 import { LogCallbacksArg } from '../types/LogCallbacks';
 import { makeTypedLogger } from '../utils/logger';
+import { getAccountIdentifier } from '../utils/getAccountIdentifier';
 
 const oauthManagers = new Map<number, OAuth2Manager>();
 
 function writeOauthTokenInfo(accountConfig: FlatAccountFields): void {
-  const { accountId } = accountConfig;
+  const accountId = getAccountIdentifier(accountConfig);
 
   debug('oauth.writeTokenInfo', { portalId: accountId || '' });
 
