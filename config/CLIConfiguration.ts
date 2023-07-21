@@ -210,6 +210,16 @@ class CLIConfiguration {
     return null;
   }
 
+  isConfigFlagEnabled(
+    flag: keyof CLIConfig_NEW,
+    defaultValue = false
+  ): boolean {
+    if (this.config && typeof this.config[flag] !== 'undefined') {
+      return Boolean(this.config[flag]);
+    }
+    return defaultValue;
+  }
+
   getAccountId(nameOrId: string | number): number | null {
     const account = this.getAccount(nameOrId);
     return account ? account.accountId : null;
@@ -241,6 +251,14 @@ class CLIConfiguration {
           account => account.accountId === accountId
         )
       : -1;
+  }
+
+  getConfigForAccount(accountId: number): CLIAccount_NEW | null {
+    if (this.config) {
+      this.config.accounts.find(account => account.accountId === accountId) ||
+        null;
+    }
+    return null;
   }
 
   isAccountInConfig(nameOrId: string | number): boolean {
@@ -278,7 +296,7 @@ class CLIConfiguration {
   updateAccount(
     updatedAccountFields: Partial<FlatAccountFields_NEW>,
     writeUpdate = true
-  ): CLIAccount_NEW | null {
+  ): FlatAccountFields_NEW | null {
     const {
       accountId,
       apiKey,
@@ -508,6 +526,13 @@ class CLIConfiguration {
 
     this.config.allowUsageTracking = isEnabled;
     return this.write();
+  }
+
+  isTrackingAllowed(): boolean {
+    if (!this.config) {
+      return true;
+    }
+    return this.config.allowUsageTracking !== false;
   }
 }
 

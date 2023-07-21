@@ -1,15 +1,19 @@
 import * as config_DEPRECATED from './config_DEPRECATED';
 import CLIConfiguration from './CLIConfiguration';
-import { configFileExists, getConfigFilePath } from './configFile';
 import {
-  CLIConfig_NEW,
-  CLIConfig_DEPRECATED,
-  CLIConfig,
-} from '../types/Config';
+  configFileExists,
+  getConfigFilePath,
+  deleteConfigFile as newDeleteConfigFile,
+} from './configFile';
+import { CLIConfig_NEW, CLIConfig } from '../types/Config';
 import { CLIOptions, WriteConfigOptions } from '../types/CLIOptions';
+import { CLIAccount, FlatAccountFields } from '../types/Accounts';
 
 // Prioritize using the new config if it exists
-function loadConfig(path: string, options: CLIOptions = {}): CLIConfig | null {
+export function loadConfig(
+  path: string,
+  options: CLIOptions = {}
+): CLIConfig | null {
   // Attempt to load the root config
   if (configFileExists()) {
     return CLIConfiguration.init(options);
@@ -25,7 +29,7 @@ function loadConfig(path: string, options: CLIOptions = {}): CLIConfig | null {
   return CLIConfiguration.init(options);
 }
 
-function getAndLoadConfigIfNeeded(
+export function getAndLoadConfigIfNeeded(
   options: CLIOptions
 ): Partial<CLIConfig> | null {
   if (CLIConfiguration.active) {
@@ -34,185 +38,170 @@ function getAndLoadConfigIfNeeded(
   return config_DEPRECATED.getAndLoadConfigIfNeeded(options);
 }
 
-function validateConfig(): boolean {
+export function validateConfig(): boolean {
   if (CLIConfiguration.active) {
     return CLIConfiguration.validate();
   }
   return config_DEPRECATED.validateConfig();
 }
 
-function loadConfigFromEnvironment(): boolean {
+export function loadConfigFromEnvironment(): boolean {
   if (CLIConfiguration.isActive()) {
     return CLIConfiguration.useEnvConfig;
   }
   return Boolean(config_DEPRECATED.loadConfigFromEnvironment());
 }
 
-function createEmptyConfigFile(
+export function createEmptyConfigFile(
   options: { path?: string } = {},
   useRootConfig = false
 ): void {
   if (useRootConfig) {
     CLIConfiguration.write({ accounts: [] });
+  } else {
+    return config_DEPRECATED.createEmptyConfigFile(options);
   }
-  return config_DEPRECATED.createEmptyConfigFile(options);
 }
 
-function deleteEmptyConfigFile() {
+export function deleteEmptyConfigFile() {
   if (CLIConfiguration.isActive()) {
     return CLIConfiguration.delete();
   }
   return config_DEPRECATED.deleteEmptyConfigFile();
 }
 
-function getConfig(): CLIConfig | null {
+export function getConfig(): CLIConfig | null {
   if (CLIConfiguration.isActive()) {
     return CLIConfiguration.config;
   }
   return config_DEPRECATED.getConfig();
 }
 
-function writeConfig(options: WriteConfigOptions = {}): void {
+export function writeConfig(options: WriteConfigOptions = {}): void {
   if (CLIConfiguration.isActive()) {
     const config = options.source
       ? (JSON.parse(options.source) as CLIConfig_NEW)
       : undefined;
     CLIConfiguration.write(config);
+  } else {
+    config_DEPRECATED.writeConfig(options);
   }
-  config_DEPRECATED.writeConfig(options);
 }
 
-function getConfigPath(path?: string): string | null {
+export function getConfigPath(path?: string): string | null {
   if (CLIConfiguration.isActive()) {
     return getConfigFilePath();
   }
   return config_DEPRECATED.getConfigPath(path);
 }
 
-function getAccountConfig(accountId: number) {
-  if (CLIConfig.active) {
-    return CLIConfig.getConfigForAccount(accountId);
+export function getAccountConfig(accountId: number): CLIAccount | null {
+  if (CLIConfiguration.isActive()) {
+    return CLIConfiguration.getConfigForAccount(accountId);
   }
-  return legacyConfig.getAccountConfig(accountId);
+  return config_DEPRECATED.getAccountConfig(accountId) || null;
 }
 
-const accountNameExistsInConfig = (...args) => {
-  if (CLIConfig.active) {
-    return CLIConfig.isAccountNameInConfig(...args);
+export function accountNameExistsInConfig(name: string): boolean {
+  if (CLIConfiguration.isActive()) {
+    return CLIConfiguration.isAccountInConfig(name);
   }
-  return legacyConfig.accountNameExistsInConfig(...args);
-};
+  return config_DEPRECATED.accountNameExistsInConfig(name);
+}
 
-const updateAccountConfig = configOptions => {
-  if (CLIConfig.active) {
-    return CLIConfig.updateConfigForAccount(configOptions);
+export function updateAccountConfig(
+  configOptions: FlatAccountFields
+): FlatAccountFields | null {
+  if (CLIConfiguration.isActive()) {
+    return CLIConfiguration.updateAccount(configOptions);
   }
-  return legacyConfig.updateAccountConfig(configOptions);
-};
+  return config_DEPRECATED.updateAccountConfig(configOptions);
+}
 
-const updateDefaultAccount = (...args) => {
-  if (CLIConfig.active) {
-    return CLIConfig.updateDefaultAccount(...args);
+export function updateDefaultAccount(nameOrId: string | number): void {
+  if (CLIConfiguration.isActive()) {
+    CLIConfiguration.updateDefaultAccount(nameOrId);
+  } else {
+    config_DEPRECATED.updateDefaultAccount(nameOrId);
   }
-  return legacyConfig.updateDefaultAccount(...args);
-};
+}
 
-const renameAccount = async (...args) => {
-  if (CLIConfig.active) {
-    return CLIConfig.renameAccount(...args);
+export async function renameAccount(
+  currentName: string,
+  newName: string
+): Promise<void> {
+  if (CLIConfiguration.isActive()) {
+    CLIConfiguration.renameAccount(currentName, newName);
+  } else {
+    config_DEPRECATED.renameAccount(currentName, newName);
   }
-  return legacyConfig.renameAccount(...args);
-};
+}
 
-const getAccountId = nameOrId => {
-  if (CLIConfig.active) {
-    return CLIConfig.getAccountId(nameOrId);
+export function getAccountId(nameOrId: string | number): number | null {
+  if (CLIConfiguration.isActive()) {
+    return CLIConfiguration.getAccountId(nameOrId);
   }
-  return legacyConfig.getAccountId(nameOrId);
-};
+  return config_DEPRECATED.getAccountId(nameOrId) || null;
+}
 
-const removeSandboxAccountFromConfig = nameOrId => {
-  if (CLIConfig.active) {
-    return CLIConfig.removeAccountFromConfig(nameOrId);
+export function removeSandboxAccountFromConfig(
+  nameOrId: string | number
+): boolean {
+  if (CLIConfiguration.isActive()) {
+    return CLIConfiguration.removeAccountFromConfig(nameOrId);
   }
-  return legacyConfig.removeSandboxAccountFromConfig(nameOrId);
-};
+  return config_DEPRECATED.removeSandboxAccountFromConfig(nameOrId);
+}
 
-const deleteAccount = accountName => {
-  if (CLIConfig.active) {
-    return CLIConfig.removeAccountFromConfig(accountName);
+export async function deleteAccount(accountName: string): Promise<void> {
+  if (CLIConfiguration.isActive()) {
+    CLIConfiguration.removeAccountFromConfig(accountName);
+  } else {
+    config_DEPRECATED.deleteAccount(accountName);
   }
-  return legacyConfig.deleteAccount(accountName);
-};
+}
 
-const updateHttpTimeout = timeout => {
-  if (CLIConfig.active) {
-    return CLIConfig.updateHttpTimeout(timeout);
+export function updateHttpTimeout(timeout: string): void {
+  if (CLIConfiguration.isActive()) {
+    CLIConfiguration.updateHttpTimeout(timeout);
+  } else {
+    config_DEPRECATED.updateHttpTimeout(timeout);
   }
-  return legacyConfig.updateHttpTimeout(timeout);
-};
+}
 
-const updateAllowUsageTracking = isEnabled => {
-  if (CLIConfig.active) {
-    return CLIConfig.updateAllowUsageTracking(isEnabled);
+export function updateAllowUsageTracking(isEnabled: boolean): void {
+  if (CLIConfiguration.isActive()) {
+    CLIConfiguration.updateAllowUsageTracking(isEnabled);
+  } else {
+    config_DEPRECATED.updateAllowUsageTracking(isEnabled);
   }
-  return legacyConfig.updateAllowUsageTracking(isEnabled);
-};
+}
 
-const deleteConfigFile = () => {
-  if (CLIConfig.active) {
-    return configFile.deleteConfigFile();
+export function deleteConfigFile(): void {
+  if (CLIConfiguration.isActive()) {
+    newDeleteConfigFile();
+  } else {
+    config_DEPRECATED.deleteConfigFile();
   }
-  return legacyConfig.deleteConfigFile();
-};
+}
 
-const isConfigFlagEnabled = flag => {
-  if (CLIConfig.active) {
-    return configFile.getConfigFlagValue(flag);
+export function isConfigFlagEnabled(flag: keyof CLIConfig): boolean {
+  if (CLIConfiguration.isActive()) {
+    return CLIConfiguration.isConfigFlagEnabled(flag);
   }
-  return legacyConfig.isConfigFlagEnabled(flag);
-};
+  return config_DEPRECATED.isConfigFlagEnabled(flag);
+}
 
-const isTrackingAllowed = () => {
-  if (CLIConfig.active) {
-    return configFile.getConfigFlagValue('allowUsageTracking', true);
+export function isTrackingAllowed() {
+  if (CLIConfiguration.active) {
+    return CLIConfiguration.isTrackingAllowed();
   }
-  return legacyConfig.isTrackingAllowed();
-};
+  return config_DEPRECATED.isTrackingAllowed();
+}
 
-const getEnv = nameOrId => {
-  if (CLIConfig.active) {
-    return getEnv(nameOrId);
+export function getEnv(nameOrId: string | number) {
+  if (CLIConfiguration.isActive()) {
+    return CLIConfiguration.getEnv(nameOrId);
   }
-  return legacyConfig.getEnv(nameOrId);
-};
-
-module.exports = {
-  ...legacyConfig,
-  CLIConfig,
-
-  // Override legacy config exports
-  accountNameExistsInConfig,
-  createEmptyConfigFile,
-  deleteAccount,
-  deleteConfigFile,
-  deleteEmptyConfigFile,
-  getAccountConfig,
-  getAccountId,
-  getAndLoadConfigIfNeeded,
-  getConfig,
-  getConfigPath,
-  getEnv,
-  isConfigFlagEnabled,
-  isTrackingAllowed,
-  loadConfig,
-  loadConfigFromEnvironment,
-  removeSandboxAccountFromConfig,
-  renameAccount,
-  updateAccountConfig,
-  updateAllowUsageTracking,
-  updateDefaultAccount,
-  updateHttpTimeout,
-  validateConfig,
-  writeConfig,
-};
+  return config_DEPRECATED.getEnv(nameOrId);
+}
