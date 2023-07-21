@@ -1,5 +1,4 @@
 import OAuth2Manager from '../models/OAuth2Manger';
-import CLIConfiguration from '../config/CLIConfiguration';
 import { AUTH_METHODS } from '../constants/auth';
 import { FlatAccountFields } from '../types/Accounts';
 import { throwError } from '../errors/standardErrors';
@@ -8,6 +7,7 @@ import { BaseError } from '../types/Error';
 import { LogCallbacksArg } from '../types/LogCallbacks';
 import { makeTypedLogger } from '../utils/logger';
 import { getAccountIdentifier } from '../utils/getAccountIdentifier';
+import { updateAccountConfig, writeConfig } from '../config';
 
 const oauthManagers = new Map<number, OAuth2Manager>();
 
@@ -16,8 +16,8 @@ function writeOauthTokenInfo(accountConfig: FlatAccountFields): void {
 
   debug('oauth.writeTokenInfo', { portalId: accountId || '' });
 
-  CLIConfiguration.updateAccount(accountConfig);
-  CLIConfiguration.write();
+  updateAccountConfig(accountConfig);
+  writeConfig();
 }
 
 export function getOauthManager(
@@ -47,11 +47,11 @@ export function addOauthToAccountConfig(
   );
   logger('init');
   try {
-    CLIConfiguration.updateAccount({
+    updateAccountConfig({
       ...oauth.toObj(),
       authType: AUTH_METHODS.oauth.value,
     });
-    CLIConfiguration.write();
+    writeConfig();
     logger('success');
   } catch (err) {
     throwError(err as BaseError);

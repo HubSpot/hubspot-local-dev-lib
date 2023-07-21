@@ -1,7 +1,7 @@
 import findup from 'findup-sync';
 import { getHubSpotWebsiteOrigin } from '../urls';
 import { ENVIRONMENTS } from '../../constants/environments';
-import config from '../../config/CLIConfiguration';
+import { getEnv } from '../../config';
 
 export function getThemeJSONPath(path: string): string | null {
   return findup('theme.json', {
@@ -26,7 +26,7 @@ export function getThemePreviewUrl(
   if (!themeName) return;
 
   const baseUrl = getHubSpotWebsiteOrigin(
-    config.getEnv() === 'qa' ? ENVIRONMENTS.QA : ENVIRONMENTS.PROD
+    getEnv(accountId) === 'qa' ? ENVIRONMENTS.QA : ENVIRONMENTS.PROD
   );
 
   return `${baseUrl}/theme-previewer/${accountId}/edit/${encodeURIComponent(

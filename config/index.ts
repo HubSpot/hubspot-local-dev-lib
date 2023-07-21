@@ -30,7 +30,7 @@ export function loadConfig(
 }
 
 export function getAndLoadConfigIfNeeded(
-  options: CLIOptions
+  options?: CLIOptions
 ): Partial<CLIConfig> | null {
   if (CLIConfiguration.active) {
     return CLIConfiguration.config;
@@ -110,7 +110,7 @@ export function accountNameExistsInConfig(name: string): boolean {
 }
 
 export function updateAccountConfig(
-  configOptions: FlatAccountFields
+  configOptions: Partial<FlatAccountFields>
 ): FlatAccountFields | null {
   if (CLIConfiguration.isActive()) {
     return CLIConfiguration.updateAccount(configOptions);

@@ -1,8 +1,7 @@
 import { debug } from '../utils/logger';
-import CLIConfiguration from '../config/CLIConfiguration';
 import http from '../http';
 import { getRequestOptions } from '../http/requestOptions';
-
+import { getAccountConfig, getEnv } from '../config';
 import { FILE_MAPPER_API_PATH } from '../api/filemapper';
 
 export async function trackUsage(
@@ -38,7 +37,7 @@ export async function trackUsage(
 
   const path = `${FILE_MAPPER_API_PATH}/${analyticsEndpoint}`;
 
-  const accountConfig = accountId && CLIConfiguration.getAccount(accountId);
+  const accountConfig = accountId && getAccountConfig(accountId);
 
   if (accountConfig && accountConfig.authType === 'personalaccesskey') {
     debug(`${i18nKey}.sendingEventAuthenticated`);
@@ -49,7 +48,7 @@ export async function trackUsage(
     });
   }
 
-  const env = CLIConfiguration.getEnv(accountId);
+  const env = getEnv(accountId);
   const requestOptions = getRequestOptions({
     env,
     uri: path,
