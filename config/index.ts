@@ -9,7 +9,7 @@ import { CLIConfig_NEW, CLIConfig } from '../types/Config';
 import { CLIOptions, WriteConfigOptions } from '../types/CLIOptions';
 import { CLIAccount, FlatAccountFields } from '../types/Accounts';
 
-// Prioritize using the new config if it exists
+// Use new config if it exists
 export function loadConfig(
   path: string,
   options: CLIOptions = {}
@@ -18,28 +18,20 @@ export function loadConfig(
   if (configFileExists()) {
     return CLIConfiguration.init(options);
   }
-  const deprecatedConfig = config_DEPRECATED.loadConfig(path, options);
-
-  if (deprecatedConfig) {
-    return deprecatedConfig;
-  }
-
-  // There are no config files, set the CLIConfig to active so
-  // we use the new behavior by default.
-  return CLIConfiguration.init(options);
+  return config_DEPRECATED.loadConfig(path, options);
 }
 
 export function getAndLoadConfigIfNeeded(
   options?: CLIOptions
 ): Partial<CLIConfig> | null {
-  if (CLIConfiguration.active) {
+  if (CLIConfiguration.isActive()) {
     return CLIConfiguration.config;
   }
   return config_DEPRECATED.getAndLoadConfigIfNeeded(options);
 }
 
 export function validateConfig(): boolean {
-  if (CLIConfiguration.active) {
+  if (CLIConfiguration.isActive()) {
     return CLIConfiguration.validate();
   }
   return config_DEPRECATED.validateConfig();
@@ -193,7 +185,7 @@ export function isConfigFlagEnabled(flag: keyof CLIConfig): boolean {
 }
 
 export function isTrackingAllowed() {
-  if (CLIConfiguration.active) {
+  if (CLIConfiguration.isActive()) {
     return CLIConfiguration.isTrackingAllowed();
   }
   return config_DEPRECATED.isTrackingAllowed();

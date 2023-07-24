@@ -251,7 +251,7 @@ function parseConfig(configSource?: string): {
   return { parsed, error };
 }
 
-function loadConfigFromFile(path: string, options: CLIOptions = {}) {
+function loadConfigFromFile(path?: string, options: CLIOptions = {}) {
   setConfigPath(getConfigPath(path));
   if (!_configPath) {
     if (!options.silenceErrors) {
@@ -283,16 +283,16 @@ function loadConfigFromFile(path: string, options: CLIOptions = {}) {
 }
 
 export function loadConfig(
-  path: string,
+  path?: string,
   options: CLIOptions = {
     useEnv: false,
   }
-) {
+): CLIConfig_DEPRECATED | null {
   if (options.useEnv && loadEnvironmentVariableConfig(options)) {
     console.debug('Loaded environment variable config');
     environmentVariableConfigLoaded = true;
   } else {
-    console.debug(`Loading config from ${path}`);
+    path && console.debug(`Loading config from ${path}`);
     loadConfigFromFile(path, options);
     environmentVariableConfigLoaded = false;
   }
