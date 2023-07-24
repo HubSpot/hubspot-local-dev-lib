@@ -197,3 +197,15 @@ export function getEnv(nameOrId: string | number) {
   }
   return config_DEPRECATED.getEnv(nameOrId);
 }
+
+// These functions are either not supported or have breaking changes with the new config setup
+export const getConfigAccounts = config_DEPRECATED.getConfigAccounts;
+export const getConfigDefaultAccount =
+  config_DEPRECATED.getConfigDefaultAccount;
+export const getConfigAccountId = config_DEPRECATED.getConfigAccountId;
+export const getOrderedAccount = config_DEPRECATED.getOrderedAccount;
+export const getOrderedConfig = config_DEPRECATED.getOrderedConfig;
+export const setConfig = config_DEPRECATED.setConfig;
+export const setConfigPath = config_DEPRECATED.setConfigPath;
+export const findConfig = config_DEPRECATED.findConfig;
+export const updateDefaultMode = config_DEPRECATED.updateDefaultMode;
