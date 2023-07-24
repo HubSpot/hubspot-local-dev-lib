@@ -53,6 +53,7 @@
   "exports": {
     ".": "./lib/index.js",
     "./cms": "./lib/cms",
+    "./config": "./config",
     "./constants": "./constants",
     "./github": "./lib/github.js",
     "./path": "./lib/path.js"
