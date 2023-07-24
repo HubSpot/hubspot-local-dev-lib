@@ -52,9 +52,9 @@
   },
   "exports": {
     ".": "./lib/index.js",
-    "./cms": "./lib/cms",
-    "./config": "./config",
-    "./constants": "./constants",
+    "./cms": "./lib/cms/index.js",
+    "./config": "./config/index.js",
+    "./constants": "./constants/index.js",
     "./github": "./lib/github.js",
     "./path": "./lib/path.js"
   },
