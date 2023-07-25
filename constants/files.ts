@@ -5,6 +5,6 @@ export const STAT_TYPES = {
 } as const;
 
 export const MODE = {
-  DRAFT: 'draft',
-  PUBLISH: 'publish',
+  draft: 'draft',
+  publish: 'publish',
 } as const;

@@ -13,8 +13,12 @@ import { commaSeparatedValues } from '../lib/text';
 import { ENVIRONMENTS } from '../constants';
 import { API_KEY_AUTH_METHOD } from '../constants/auth';
 import { DEFAULT_MODES, MIN_HTTP_TIMEOUT } from '../constants/config';
-import { CLIConfig, Environment } from '../types/Config';
-import { CLIAccount, OAuthAccount, FlatAccountFields } from '../types/Accounts';
+import { CLIConfig_NEW, Environment } from '../types/Config';
+import {
+  CLIAccount_NEW,
+  OAuthAccount_NEW,
+  FlatAccountFields_NEW,
+} from '../types/Accounts';
 import { CLIOptions } from '../types/CLIOptions';
 import { ValueOf } from '../types/Utils';
 import { LogCallbacksArg } from '../types/LogCallbacks';
@@ -34,20 +38,32 @@ const validateLogCallbackKeys = [
 class CLIConfiguration {
   options: CLIOptions;
   useEnvConfig: boolean;
-  config: CLIConfig | null;
+  config: CLIConfig_NEW | null;
+  active: boolean;
 
   constructor() {
     this.options = {};
     this.useEnvConfig = false;
     this.config = null;
+    this.active = false;
   }
 
-  init(options: CLIOptions = {}): void {
+  setActive(isActive: boolean): void {
+    this.active = isActive;
+  }
+
+  isActive(): boolean {
+    return this.active;
+  }
+
+  init(options: CLIOptions = {}): CLIConfig_NEW | null {
     this.options = options;
     this.load();
+    this.setActive(true);
+    return this.config;
   }
 
-  load(): CLIConfig | null {
+  load(): CLIConfig_NEW | null {
     if (this.options.useEnv) {
       const configFromEnv = loadConfigFromEnvironment();
       if (configFromEnv) {
@@ -95,7 +111,7 @@ class CLIConfiguration {
     }
   }
 
-  write(updatedConfig?: CLIConfig): CLIConfig | null {
+  write(updatedConfig?: CLIConfig_NEW): CLIConfig_NEW | null {
     if (!this.useEnvConfig) {
       if (updatedConfig) {
         this.config = updatedConfig;
@@ -163,7 +179,7 @@ class CLIConfiguration {
     });
   }
 
-  getAccount(nameOrId: string | number | undefined): CLIAccount | null {
+  getAccount(nameOrId: string | number | undefined): CLIAccount_NEW | null {
     let name: string | null = null;
     let accountId: number | null = null;
 
@@ -194,6 +210,16 @@ class CLIConfiguration {
     return null;
   }
 
+  isConfigFlagEnabled(
+    flag: keyof CLIConfig_NEW,
+    defaultValue = false
+  ): boolean {
+    if (this.config && typeof this.config[flag] !== 'undefined') {
+      return Boolean(this.config[flag]);
+    }
+    return defaultValue;
+  }
+
   getAccountId(nameOrId: string | number): number | null {
     const account = this.getAccount(nameOrId);
     return account ? account.accountId : null;
@@ -215,7 +241,7 @@ class CLIConfiguration {
   // These defaults take precedence over the standard default account specified in the config
   getResolvedDefaultAccountForCWD(
     nameOrId: string | number
-  ): CLIAccount | null {
+  ): CLIAccount_NEW | null {
     return this.getAccount(nameOrId);
   }
 
@@ -227,13 +253,21 @@ class CLIConfiguration {
       : -1;
   }
 
+  getConfigForAccount(accountId: number): CLIAccount_NEW | null {
+    if (this.config) {
+      this.config.accounts.find(account => account.accountId === accountId) ||
+        null;
+    }
+    return null;
+  }
+
   isAccountInConfig(nameOrId: string | number): boolean {
     return (
       !!this.config && this.config.accounts && !!this.getAccountId(nameOrId)
     );
   }
 
-  getAndLoadConfigIfNeeded(options?: CLIOptions): CLIConfig {
+  getAndLoadConfigIfNeeded(options?: CLIOptions): CLIConfig_NEW {
     if (!this.config) {
       this.init(options);
     }
@@ -260,9 +294,9 @@ class CLIConfiguration {
    * @throws {Error}
    */
   updateAccount(
-    updatedAccountFields: Partial<FlatAccountFields>,
+    updatedAccountFields: Partial<FlatAccountFields_NEW>,
     writeUpdate = true
-  ): CLIAccount | null {
+  ): FlatAccountFields_NEW | null {
     const {
       accountId,
       apiKey,
@@ -289,7 +323,7 @@ class CLIConfiguration {
 
     const currentAccountConfig = this.getAccount(accountId);
 
-    let auth: OAuthAccount['auth'] = {};
+    let auth: OAuthAccount_NEW['auth'] = {};
     if (clientId || clientSecret || scopes || tokenInfo) {
       auth = {
         ...(currentAccountConfig ? currentAccountConfig.auth : {}),
@@ -300,15 +334,15 @@ class CLIConfiguration {
       };
     }
 
-    const nextAccountConfig: Partial<FlatAccountFields> = {
+    const nextAccountConfig: Partial<FlatAccountFields_NEW> = {
       ...(currentAccountConfig ? currentAccountConfig : {}),
     };
 
     // Allow everything except for 'undefined' values to override the existing values
-    function safelyApplyUpdates<T extends keyof FlatAccountFields>(
+    function safelyApplyUpdates<T extends keyof FlatAccountFields_NEW>(
       fieldName: T,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      newValue: FlatAccountFields[T]
+      newValue: FlatAccountFields_NEW[T]
     ) {
       if (typeof newValue !== 'undefined') {
         nextAccountConfig[fieldName] = newValue;
@@ -338,7 +372,7 @@ class CLIConfiguration {
     safelyApplyUpdates('sandboxAccountType', sandboxAccountType);
     safelyApplyUpdates('parentAccountId', parentAccountId);
 
-    const completedAccountConfig = nextAccountConfig as FlatAccountFields;
+    const completedAccountConfig = nextAccountConfig as FlatAccountFields_NEW;
 
     if (currentAccountConfig) {
       debug(`${i18nKey}.updateAccount.updating`, {
@@ -366,7 +400,7 @@ class CLIConfiguration {
   /**
    * @throws {Error}
    */
-  updateDefaultAccount(defaultAccount: string | number): CLIConfig | null {
+  updateDefaultAccount(defaultAccount: string | number): CLIConfig_NEW | null {
     if (!this.config) {
       throwErrorWithMessage(`${i18nKey}.noConfigLoaded`);
     }
@@ -389,7 +423,7 @@ class CLIConfiguration {
       throwErrorWithMessage(`${i18nKey}.noConfigLoaded`);
     }
     const accountId = this.getAccountId(currentName);
-    let accountConfigToRename: CLIAccount | null = null;
+    let accountConfigToRename: CLIAccount_NEW | null = null;
 
     if (accountId) {
       accountConfigToRename = this.getAccount(accountId);
@@ -442,7 +476,7 @@ class CLIConfiguration {
   /**
    * @throws {Error}
    */
-  updateDefaultMode(defaultMode: string): CLIConfig | null {
+  updateDefaultMode(defaultMode: string): CLIConfig_NEW | null {
     if (!this.config) {
       throwErrorWithMessage(`${i18nKey}.noConfigLoaded`);
     }
@@ -461,7 +495,7 @@ class CLIConfiguration {
   /**
    * @throws {Error}
    */
-  updateHttpTimeout(timeout: string): CLIConfig | null {
+  updateHttpTimeout(timeout: string): CLIConfig_NEW | null {
     if (!this.config) {
       throwErrorWithMessage(`${i18nKey}.noConfigLoaded`);
     }
@@ -480,7 +514,7 @@ class CLIConfiguration {
   /**
    * @throws {Error}
    */
-  updateAllowUsageTracking(isEnabled: boolean): CLIConfig | null {
+  updateAllowUsageTracking(isEnabled: boolean): CLIConfig_NEW | null {
     if (!this.config) {
       throwErrorWithMessage(`${i18nKey}.noConfigLoaded`);
     }
@@ -492,6 +526,13 @@ class CLIConfiguration {
 
     this.config.allowUsageTracking = isEnabled;
     return this.write();
+  }
+
+  isTrackingAllowed(): boolean {
+    if (!this.config) {
+      return true;
+    }
+    return this.config.allowUsageTracking !== false;
   }
 }
 

@@ -4,7 +4,7 @@ import requestPN, { FullResponse } from 'request-promise-native';
 import fs from 'fs-extra';
 import contentDisposition from 'content-disposition';
 
-import CLIConfiguration from '../config/CLIConfiguration';
+import { getAccountConfig } from '../config';
 import { getRequestOptions } from './requestOptions';
 import { accessTokenForPersonalAccessKey } from '../lib/personalAccessKey';
 import { getOauthManager } from '../lib/oauth';
@@ -75,7 +75,7 @@ async function withAuth(
   accountId: number,
   options: GetRequestOptionsOptions
 ): Promise<RequestOptions> {
-  const accountConfig = CLIConfiguration.getAccount(accountId);
+  const accountConfig = getAccountConfig(accountId);
 
   if (!accountConfig) {
     throwErrorWithMessage('http.index.withAuth', { accountId });

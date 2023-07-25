@@ -10,7 +10,7 @@ import {
   HUBSPOT_CONFIGURATION_FOLDER,
 } from '../constants';
 import { getOrderedConfig } from './configUtils';
-import { CLIConfig } from '../types/Config';
+import { CLIConfig_NEW } from '../types/Config';
 import { BaseError } from '../types/Error';
 
 const i18nKey = 'config.configFile';
@@ -60,11 +60,11 @@ export function readConfigFile(configPath: string): string {
 /**
  * @throws {Error}
  */
-export function parseConfig(configSource: string): CLIConfig {
-  let parsed: CLIConfig;
+export function parseConfig(configSource: string): CLIConfig_NEW {
+  let parsed: CLIConfig_NEW;
 
   try {
-    parsed = yaml.load(configSource) as CLIConfig;
+    parsed = yaml.load(configSource) as CLIConfig_NEW;
   } catch (err) {
     throwErrorWithMessage(`${i18nKey}.parsing`, {}, err as BaseError);
   }
@@ -75,7 +75,7 @@ export function parseConfig(configSource: string): CLIConfig {
 /**
  * @throws {Error}
  */
-export function loadConfigFromFile(): CLIConfig | null {
+export function loadConfigFromFile(): CLIConfig_NEW | null {
   const configPath = getConfigFilePath();
 
   if (configPath) {
@@ -97,7 +97,7 @@ export function loadConfigFromFile(): CLIConfig | null {
 /**
  * @throws {Error}
  */
-export function writeConfigToFile(config: CLIConfig): void {
+export function writeConfigToFile(config: CLIConfig_NEW): void {
   let source: string;
   try {
     source = yaml.dump(
