@@ -137,7 +137,7 @@ export async function renameAccount(
   }
 }
 
-export function getAccountId(nameOrId: string | number): number | null {
+export function getAccountId(nameOrId?: string | number): number | null {
   if (CLIConfiguration.isActive()) {
     return CLIConfiguration.getAccountId(nameOrId);
   }

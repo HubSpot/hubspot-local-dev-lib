@@ -220,7 +220,7 @@ class CLIConfiguration {
     return defaultValue;
   }
 
-  getAccountId(nameOrId: string | number): number | null {
+  getAccountId(nameOrId?: string | number): number | null {
     const account = this.getAccount(nameOrId);
     return account ? account.accountId : null;
   }
