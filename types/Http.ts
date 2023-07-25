@@ -32,6 +32,6 @@ export type HttpOptions = GetRequestOptionsOptions & {
   query?: QueryParams;
   formData?: FormData;
   timeout?: number;
-  encoding?: null;
+  encoding?: string | null;
   headers?: { [header: string]: string | string[] | undefined };
 };
