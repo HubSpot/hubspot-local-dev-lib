@@ -8,6 +8,7 @@ import {
 import { CLIConfig_NEW, CLIConfig } from '../types/Config';
 import { CLIOptions, WriteConfigOptions } from '../types/CLIOptions';
 import { CLIAccount, FlatAccountFields } from '../types/Accounts';
+import { getAccountIdentifier } from '../utils/getAccountIdentifier';
 
 // Use new config if it exists
 export function loadConfig(
@@ -104,10 +105,17 @@ export function accountNameExistsInConfig(name: string): boolean {
 export function updateAccountConfig(
   configOptions: Partial<FlatAccountFields>
 ): FlatAccountFields | null {
+  const accountIdentifier = getAccountIdentifier(configOptions);
   if (CLIConfiguration.isActive()) {
-    return CLIConfiguration.updateAccount(configOptions);
+    return CLIConfiguration.updateAccount({
+      ...configOptions,
+      accountId: accountIdentifier,
+    });
   }
-  return config_DEPRECATED.updateAccountConfig(configOptions);
+  return config_DEPRECATED.updateAccountConfig({
+    ...configOptions,
+    portalId: accountIdentifier,
+  });
 }
 
 export function updateDefaultAccount(nameOrId: string | number): void {
