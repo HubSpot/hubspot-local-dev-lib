@@ -24,9 +24,14 @@ export type QueryParams = {
   [key: string]: string | number;
 };
 
+export type FormData = {
+  [key: string]: string | ReadStream;
+};
+
 export type HttpOptions = GetRequestOptionsOptions & {
   query?: QueryParams;
-  formData?: {
-    [key: string]: string | ReadStream;
-  };
+  formData?: FormData;
+  timeout?: number;
+  encoding?: null;
+  headers?: { [header: string]: string | string[] | undefined };
 };
