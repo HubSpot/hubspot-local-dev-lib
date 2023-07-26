@@ -83,6 +83,7 @@ const PERSONAL_ACCESS_KEY_CONFIG: PersonalAccessKeyAccount_DEPRECATED = {
   },
   personalAccessKey: 'fakePersonalAccessKey',
   env: ENVIRONMENTS.QA,
+  portalId: 1,
 };
 
 const PORTALS = [API_KEY_CONFIG, OAUTH2_CONFIG, PERSONAL_ACCESS_KEY_CONFIG];
@@ -138,7 +139,9 @@ describe('lib/config', () => {
     });
 
     it('returns defaultPortal from config', () => {
-      expect(getAccountId()).toEqual(PERSONAL_ACCESS_KEY_CONFIG.portalId);
+      expect(getAccountId() || undefined).toEqual(
+        PERSONAL_ACCESS_KEY_CONFIG.portalId
+      );
     });
 
     describe('when defaultPortal is a portalId', () => {
@@ -151,7 +154,9 @@ describe('lib/config', () => {
       });
 
       it('returns defaultPortal from config', () => {
-        expect(getAccountId()).toEqual(PERSONAL_ACCESS_KEY_CONFIG.portalId);
+        expect(getAccountId() || undefined).toEqual(
+          PERSONAL_ACCESS_KEY_CONFIG.portalId
+        );
       });
     });
   });
@@ -171,8 +176,10 @@ describe('lib/config', () => {
 
   describe('deleteEmptyConfigFile method', () => {
     it('does not delete config file if there are contents', () => {
-      // fs.__setReadFile('defaultPortal: Foo');
-      // fs.__setExistsValue(true);
+      jest
+        .spyOn(fs, 'readFileSync')
+        .mockImplementation(() => 'defaultPortal: "test"');
+      jest.spyOn(fs, 'existsSync').mockImplementation(() => true);
       fs.unlinkSync = jest.fn();
 
       deleteEmptyConfigFile();
@@ -180,8 +187,8 @@ describe('lib/config', () => {
     });
 
     it('deletes config file if empty', () => {
-      // fs.__setReadFile('');
-      // fs.__setExistsValue(true);
+      jest.spyOn(fs, 'readFileSync').mockImplementation(() => '');
+      jest.spyOn(fs, 'existsSync').mockImplementation(() => true);
       fs.unlinkSync = jest.fn();
 
       deleteEmptyConfigFile();
