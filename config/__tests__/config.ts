@@ -14,6 +14,7 @@ import {
   createEmptyConfigFile,
 } from '../index';
 import {
+  getAccountIdentifier,
   getAccounts,
   getDefaultAccount,
 } from '../../utils/getAccountIdentifier';
@@ -23,7 +24,10 @@ import {
   APIKeyAccount_DEPRECATED,
   AuthType,
   CLIAccount,
+  OAuthAccount,
   OAuthAccount_DEPRECATED,
+  APIKeyAccount,
+  PersonalAccessKeyAccount,
   PersonalAccessKeyAccount_DEPRECATED,
 } from '../../types/Accounts';
 
@@ -395,7 +399,7 @@ describe('lib/config', () => {
         auth: { clientId, clientSecret },
       } = OAUTH2_CONFIG;
       const refreshToken = OAUTH2_CONFIG.auth.tokenInfo?.refreshToken || '';
-      let portalConfig;
+      let portalConfig: OAuthAccount | null;
 
       beforeEach(() => {
         process.env = {
@@ -405,7 +409,7 @@ describe('lib/config', () => {
           HUBSPOT_REFRESH_TOKEN: refreshToken,
         };
         getAndLoadConfigIfNeeded({ useEnv: true });
-        portalConfig = getAccountConfig(portalId);
+        portalConfig = getAccountConfig(portalId) as OAuthAccount;
         fsReadFileSyncSpy.mockReset();
       });
 
@@ -425,25 +429,27 @@ describe('lib/config', () => {
       });
 
       it('properly loads portal id value', () => {
-        expect(portalConfig.portalId).toEqual(portalId);
+        expect(getAccountIdentifier(portalConfig)).toEqual(portalId);
       });
 
       it('properly loads client id value', () => {
-        expect(portalConfig.auth.clientId).toEqual(clientId);
+        expect(portalConfig?.auth.clientId).toEqual(clientId);
       });
 
       it('properly loads client secret value', () => {
-        expect(portalConfig.auth.clientSecret).toEqual(clientSecret);
+        expect(portalConfig?.auth.clientSecret).toEqual(clientSecret);
       });
 
       it('properly loads refresh token value', () => {
-        expect(portalConfig.auth.tokenInfo.refreshToken).toEqual(refreshToken);
+        expect(portalConfig?.auth?.tokenInfo?.refreshToken).toEqual(
+          refreshToken
+        );
       });
     });
 
     describe('apikey environment variable config', () => {
       const { portalId, apiKey } = API_KEY_CONFIG;
-      let portalConfig;
+      let portalConfig: APIKeyAccount;
 
       beforeEach(() => {
         process.env = {
@@ -451,7 +457,7 @@ describe('lib/config', () => {
           HUBSPOT_API_KEY: apiKey,
         };
         getAndLoadConfigIfNeeded({ useEnv: true });
-        portalConfig = getAccountConfig(portalId);
+        portalConfig = getAccountConfig(portalId) as APIKeyAccount;
         fsReadFileSyncSpy.mockReset();
       });
 
@@ -471,7 +477,7 @@ describe('lib/config', () => {
       });
 
       it('properly loads portal id value', () => {
-        expect(portalConfig.portalId).toEqual(portalId);
+        expect(getAccountIdentifier(portalConfig)).toEqual(portalId);
       });
 
       it('properly loads api key value', () => {
@@ -481,7 +487,7 @@ describe('lib/config', () => {
 
     describe('personalaccesskey environment variable config', () => {
       const { portalId, personalAccessKey } = PERSONAL_ACCESS_KEY_CONFIG;
-      let portalConfig;
+      let portalConfig: PersonalAccessKeyAccount | null;
 
       beforeEach(() => {
         process.env = {
@@ -489,7 +495,7 @@ describe('lib/config', () => {
           HUBSPOT_PERSONAL_ACCESS_KEY: personalAccessKey,
         };
         getAndLoadConfigIfNeeded({ useEnv: true });
-        portalConfig = getAccountConfig(portalId);
+        portalConfig = getAccountConfig(portalId) as PersonalAccessKeyAccount;
         fsReadFileSyncSpy.mockReset();
       });
 
@@ -509,11 +515,11 @@ describe('lib/config', () => {
       });
 
       it('properly loads portal id value', () => {
-        expect(portalConfig.portalId).toEqual(portalId);
+        expect(getAccountIdentifier(portalConfig)).toEqual(portalId);
       });
 
       it('properly loads personal access key value', () => {
-        expect(portalConfig.personalAccessKey).toEqual(personalAccessKey);
+        expect(portalConfig?.personalAccessKey).toEqual(personalAccessKey);
       });
     });
   });
@@ -579,7 +585,7 @@ describe('lib/config', () => {
 
   describe('createEmptyConfigFile method', () => {
     describe('when no config is present', () => {
-      let fsExistsSyncSpy;
+      let fsExistsSyncSpy: jest.SpyInstance;
 
       beforeEach(() => {
         setConfigPath(CONFIG_PATHS.none);
@@ -606,7 +612,7 @@ describe('lib/config', () => {
     });
 
     describe('when a config is present', () => {
-      let fsExistsSyncAndReturnTrueSpy;
+      let fsExistsSyncAndReturnTrueSpy: jest.SpyInstance;
 
       beforeAll(() => {
         setConfigPath(CONFIG_PATHS.cwd);
