@@ -10,16 +10,22 @@ type Account = {
   accountId?: number;
 };
 
-export function getAccountIdentifier(account: Account): number | undefined {
-  if (Object.hasOwn(account, 'portalId')) {
+export function getAccountIdentifier(
+  account?: Account | null
+): number | undefined {
+  if (!account) {
+    return undefined;
+  } else if (Object.hasOwn(account, 'portalId')) {
     return account.portalId;
   } else if (Object.hasOwn(account, 'accountId')) {
     return account.accountId;
   }
 }
 
-export function getAccounts(config: CLIConfig): Array<CLIAccount> {
-  if (Object.hasOwn(config, 'portals')) {
+export function getAccounts(config?: CLIConfig | null): Array<CLIAccount> {
+  if (!config) {
+    return [];
+  } else if (Object.hasOwn(config, 'portals')) {
     return (config as CLIConfig_DEPRECATED).portals;
   } else if (Object.hasOwn(config, 'accounts')) {
     return (config as CLIConfig_NEW).accounts;
@@ -28,9 +34,11 @@ export function getAccounts(config: CLIConfig): Array<CLIAccount> {
 }
 
 export function getDefaultAccount(
-  config: CLIConfig
+  config?: CLIConfig | null
 ): string | number | undefined {
-  if (Object.hasOwn(config, 'defaultPortal')) {
+  if (!config) {
+    return undefined;
+  } else if (Object.hasOwn(config, 'defaultPortal')) {
     return (config as CLIConfig_DEPRECATED).defaultPortal;
   } else if (Object.hasOwn(config, 'defaultAccount')) {
     return (config as CLIConfig_NEW).defaultAccount;

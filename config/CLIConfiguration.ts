@@ -253,7 +253,7 @@ class CLIConfiguration {
       : -1;
   }
 
-  getConfigForAccount(accountId: number): CLIAccount_NEW | null {
+  getConfigForAccount(accountId?: number): CLIAccount_NEW | null {
     if (this.config) {
       this.config.accounts.find(account => account.accountId === accountId) ||
         null;

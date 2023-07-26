@@ -10,7 +10,7 @@ import {
   CLIAccount_NEW,
   APIKeyAccount_NEW,
   OAuthAccount_NEW,
-  PersonalAccessKeyAccount,
+  PersonalAccessKeyAccount_NEW,
 } from '../types/Accounts';
 
 export function getOrderedAccount(
@@ -59,7 +59,7 @@ function generatePersonalAccessKeyAccountConfig({
   accountId,
   personalAccessKey,
   env,
-}: PersonalAccessKeyOptions): PersonalAccessKeyAccount {
+}: PersonalAccessKeyOptions): PersonalAccessKeyAccount_NEW {
   return {
     authType: PERSONAL_ACCESS_KEY_AUTH_METHOD.value,
     accountId,

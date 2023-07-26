@@ -88,7 +88,7 @@ export function getConfigPath(path?: string): string | null {
   return config_DEPRECATED.getConfigPath(path);
 }
 
-export function getAccountConfig(accountId: number): CLIAccount | null {
+export function getAccountConfig(accountId?: number): CLIAccount | null {
   if (CLIConfiguration.isActive()) {
     return CLIConfiguration.getConfigForAccount(accountId);
   }
