@@ -1,18 +1,18 @@
 import http from '../http';
 import fs from 'fs';
 import { FormData } from '../types/Http';
+import {
+  Project,
+  FetchProjectResponse,
+  UploadProjectResponse,
+} from '../types/Project';
 
 const PROJECTS_API_PATH = 'dfs/v1/projects';
 const PROJECTS_DEPLOY_API_PATH = 'dfs/deploy/v1';
 
-/**
- * Fetch projects
- *
- * @async
- * @param {number} accountId
- * @returns {Promise}
- */
-export async function fetchProjects(accountId) {
+export async function fetchProjects(
+  accountId: number
+): Promise<FetchProjectResponse> {
   return http.get(accountId, {
     uri: PROJECTS_API_PATH,
   });
@@ -26,7 +26,10 @@ export async function fetchProjects(accountId) {
  * @param {string} name
  * @returns {Promise}
  */
-export async function createProject(accountId, name) {
+export async function createProject(
+  accountId: number,
+  name: string
+): Promise<Project> {
   return http.post(accountId, {
     uri: PROJECTS_API_PATH,
     body: {
@@ -46,12 +49,12 @@ export async function createProject(accountId, name) {
  */
 
 export async function uploadProject(
-  accountId,
-  projectName,
-  projectFile,
-  uploadMessage,
-  platformVersion
-) {
+  accountId: number,
+  projectName: string,
+  projectFile: string,
+  uploadMessage: string,
+  platformVersion?: string
+): Promise<UploadProjectResponse> {
   const formData: FormData = {
     file: fs.createReadStream(projectFile),
     uploadMessage,
@@ -67,15 +70,10 @@ export async function uploadProject(
   });
 }
 
-/**
- * Fetch project
- *
- * @async
- * @param {number} accountId
- * @param {string} projectName
- * @returns {Promise}
- */
-export async function fetchProject(accountId, projectName) {
+export async function fetchProject(
+  accountId: number,
+  projectName: string
+): Promise<Project> {
   return http.get(accountId, {
     uri: `${PROJECTS_API_PATH}/${encodeURIComponent(projectName)}`,
   });
@@ -89,7 +87,11 @@ export async function fetchProject(accountId, projectName) {
  * @param {string} projectName
  * @returns {Promise}
  */
-export async function downloadProject(accountId, projectName, buildId) {
+export async function downloadProject(
+  accountId: number,
+  projectName: string,
+  buildId: number
+) {
   return http.get(accountId, {
     uri: `${PROJECTS_API_PATH}/${encodeURIComponent(
       projectName
