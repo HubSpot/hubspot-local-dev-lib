@@ -13,7 +13,12 @@ import {
   FUNCTIONS_EXTENSION,
 } from '../constants/extensions';
 import { MODE } from '../constants/files';
-import { FileMapperNode, Mode, FileMapperOptions } from '../types/Files';
+import {
+  FileMapperNode,
+  Mode,
+  FileMapperOptions,
+  FileMapperInputOptions,
+} from '../types/Files';
 import { throwFileSystemError } from '../errors/fileSystemErrors';
 import { throwStatusCodeError } from '../errors/apiErrors';
 import { BaseError, StatusCodeError } from '../types/Error';
@@ -51,19 +56,13 @@ function isAllowedExtension(filepath: string): boolean {
   return ALLOWED_EXTENSIONS.has(ext);
 }
 
-function useApiBuffer(mode: Mode): boolean {
+function useApiBuffer(mode: Mode | null): boolean {
   return mode === MODE.draft;
 }
 
-type FileMapperInputOptions = {
-  staging?: boolean;
-  assetVersion?: string;
-  overwrite?: boolean;
-};
-
 // Determines API param based on mode an options
-function getFileMapperQueryValues(
-  mode: Mode,
+export function getFileMapperQueryValues(
+  mode: Mode | null,
   { staging, assetVersion }: FileMapperInputOptions
 ): FileMapperOptions {
   return {
