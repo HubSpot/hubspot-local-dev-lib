@@ -31,6 +31,10 @@ export interface StatusCodeError extends BaseError {
   options?: {
     method: HttpMethod;
   };
+  error?: {
+    category: string;
+    message: string;
+  };
 }
 
 export interface GithubError extends BaseError {

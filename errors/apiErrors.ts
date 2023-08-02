@@ -18,6 +18,24 @@ export function throwStatusCodeError(
   throw new Error(errorData, { cause: error });
 }
 
+function isMissingScopeError(err: StatusCodeError) {
+  return (
+    err.name === 'StatusCodeError' &&
+    err.statusCode === 403 &&
+    err.error &&
+    err.error.category === 'MISSING_SCOPES'
+  );
+}
+
+function isGatingError(err: StatusCodeError) {
+  return (
+    err.name === 'StatusCodeError' &&
+    err.statusCode === 403 &&
+    err.error &&
+    err.error.category === 'GATED'
+  );
+}
+
 function throwApiStatusCodeError(
   error: StatusCodeError,
   context: StatusCodeErrorContext
