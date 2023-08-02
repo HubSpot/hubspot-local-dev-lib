@@ -1,3 +1,5 @@
+import { HttpMethod } from './Api';
+
 // See https://nodejs.org/api/errors.html#class-systemerror
 export interface BaseError extends Error {
   name: string;
@@ -25,6 +27,9 @@ export interface StatusCodeError extends BaseError {
       [key: string]: string;
     };
     statusCode: number;
+  };
+  options?: {
+    method: HttpMethod;
   };
 }
 
