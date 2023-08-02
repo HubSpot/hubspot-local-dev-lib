@@ -11,9 +11,14 @@ import { getFileMapperQueryValues } from '../fileMapper';
 import { upload } from '../../api/fileMapper';
 import { isModuleFolderChild } from '../../utils/modules';
 import { escapeRegExp } from '../../utils/escapeRegExp';
+import { debug } from '../../utils/logger';
 import { convertToUnixPath, getExt } from '../path';
+import { isFatalError } from '../../errors/standardErrors';
 import { ValueOf } from '../../types/Utils';
 import { FileMapperInputOptions } from '../../types/Files';
+import { LogCallbacksArg } from '../../types/LogCallbacks';
+import { makeTypedLogger } from '../../utils/logger';
+import { StatusCodeError } from '../../types/Error';
 
 const FileUploadResultType = {
   SUCCESS: 'SUCCESS',
@@ -33,6 +38,7 @@ const FileTypes = {
 } as const;
 
 type FileType = ValueOf<typeof FileTypes>;
+type ResultType = ValueOf<typeof FileUploadResultType>;
 
 type CommandOptions = {
   convertFields?: boolean;
@@ -42,6 +48,12 @@ type CommandOptions = {
 
 type FilePathsByType = {
   [key: string]: Array<string>;
+};
+
+type UploadFolderResults = {
+  resultType: ResultType;
+  error: StatusCodeError | null;
+  file: string;
 };
 
 function getFileType(filePath: string): FileType {
@@ -65,7 +77,7 @@ function getFileType(filePath: string): FileType {
 async function getFilesByType(
   filePaths: Array<string>,
   projectDir: string,
-  rootWriteDir: string,
+  rootWriteDir: string | null,
   commandOptions: CommandOptions
 ): Promise<[FilePathsByType, Array<FieldsJs>]> {
   const { convertFields, fieldOptions } = commandOptions;
@@ -122,14 +134,21 @@ async function getFilesByType(
   return [filePathsByType, fieldsJsObjects];
 }
 
+const uploadFolderCallbackKeys = ['success'];
+
 async function uploadFolder(
   accountId: number,
   src: string,
   dest: string,
   fileMapperOptions: FileMapperInputOptions,
   commandOptions: CommandOptions = {},
-  filePaths: Array<string> = []
-) {
+  filePaths: Array<string> = [],
+  logCallbacks?: LogCallbacksArg<typeof uploadFolderCallbackKeys>
+): Promise<Array<UploadFolderResults>> {
+  const logger = makeTypedLogger<typeof uploadFolderCallbackKeys>(
+    logCallbacks,
+    'cms.uploadFolder'
+  );
   const { saveOutput, convertFields } = commandOptions;
   const tmpDir = convertFields
     ? createTmpDirSync('hubspot-temp-fieldsjs-output-')
@@ -137,27 +156,25 @@ async function uploadFolder(
   const regex = new RegExp(`^${escapeRegExp(src)}`);
 
   const apiOptions = getFileMapperQueryValues(null, fileMapperOptions);
-  const failures = [];
-  let filesByType;
-  let fieldsJsObjects = [];
-  let fieldsJsPaths = [];
-  let tmpDirRegex;
+  const failures: Array<{ file: string; destPath: string }> = [];
+  let fieldsJsPaths: Array<Partial<FieldsJs>> = [];
+  let tmpDirRegex: RegExp;
 
-  [filesByType, fieldsJsObjects] = await getFilesByType(
+  const [filesByType, fieldsJsObjects] = await getFilesByType(
     filePaths,
     src,
     tmpDir,
     commandOptions
   );
-  filesByType = Object.values(filesByType);
+  const fileList = Object.values(filesByType);
   if (fieldsJsObjects.length) {
     fieldsJsPaths = fieldsJsObjects.map(fieldsJs => {
       return { outputPath: fieldsJs.outputPath, filePath: fieldsJs.filePath };
     });
-    tmpDirRegex = new RegExp(`^${escapeRegExp(tmpDir)}`);
+    tmpDirRegex = new RegExp(`^${escapeRegExp(tmpDir || '')}`);
   }
 
-  const uploadFile = file => {
+  function uploadFile(file: string): () => Promise<void> {
     const fieldsJsFileInfo = fieldsJsPaths.find(f => f.outputPath === file);
     const originalFilePath = fieldsJsFileInfo
       ? fieldsJsFileInfo.filePath
@@ -170,27 +187,26 @@ async function uploadFolder(
     );
     const destPath = convertToUnixPath(path.join(dest, relativePath));
     return async () => {
-      logger.debug(
-        'Attempting to upload file "%s" to "%s"',
-        originalFilePath,
-        destPath
-      );
+      debug('uploadFolder.attempt', {
+        file: originalFilePath || '',
+        destPath,
+      });
       try {
         await upload(accountId, file, destPath, apiOptions);
-        logger.log('Uploaded file "%s" to "%s"', originalFilePath, destPath);
-      } catch (error) {
+        logger('success', {
+          file: originalFilePath || '',
+          destPath,
+        });
+      } catch (err) {
+        const error = err as StatusCodeError;
         if (isFatalError(error)) {
           throw error;
         }
-        logger.debug(
-          'Uploading file "%s" to "%s" failed so scheduled retry',
-          file,
-          destPath
-        );
+        debug('uploadFolder.failed', { file, destPath });
         if (error.response && error.response.body) {
-          logger.debug(error.response.body);
+          console.debug(error.response.body);
         } else {
-          logger.debug(error.message);
+          console.debug(error.message);
         }
         failures.push({
           file,
@@ -198,11 +214,11 @@ async function uploadFolder(
         });
       }
     };
-  };
+  }
 
   // Implemented using a for loop due to async/await
-  for (let i = 0; i < filesByType.length; i++) {
-    const filesToUpload = filesByType[i];
+  for (let i = 0; i < fileList.length; i++) {
+    const filesToUpload = fileList[i];
     await queue.addAll(filesToUpload.map(uploadFile));
   }
 
@@ -210,17 +226,18 @@ async function uploadFolder(
     .addAll(
       failures.map(({ file, destPath }) => {
         return async () => {
-          logger.debug('Retrying to upload file "%s" to "%s"', file, destPath);
+          debug('retry', { file, destPath });
           try {
             await upload(accountId, file, destPath, apiOptions);
-            logger.log('Uploaded file "%s" to "%s"', file, destPath);
+            logger('success', { file, destPath });
             return {
               resultType: FileUploadResultType.SUCCESS,
               error: null,
               file,
             };
-          } catch (error) {
-            logger.error('Uploading file "%s" to "%s" failed', file, destPath);
+          } catch (err) {
+            debug('uploadFolder.retryFailed', { file, destPath });
+            const error = err as StatusCodeError;
             if (isFatalError(error)) {
               throw error;
             }
@@ -246,13 +263,13 @@ async function uploadFolder(
       if (saveOutput) {
         fieldsJsObjects.forEach(fieldsJs => fieldsJs.saveOutput());
       }
-      cleanupTmpDirSync(tmpDir);
+      cleanupTmpDirSync(tmpDir || '');
     });
 
   return results;
 }
 
-function hasUploadErrors(results) {
+function hasUploadErrors(results: Array<UploadFolderResults>): boolean {
   return results.some(
     result => result.resultType === FileUploadResultType.FAILURE
   );

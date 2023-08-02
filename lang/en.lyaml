@@ -67,11 +67,17 @@ en:
         missingAccountId: "Unable to load config from environment variables: Missing accountId"
         missingEnv: "Unable to load config from environment variables: Missing env"
         unknownAuthType: "Unable to load config from environment variables: Unknown auth type"
-    utils:
+    cms:
       handleFieldsJs:
         convertFieldsJs:
           creating: "Creating child process with pid {{ pid }}"
           terminating: "Child process with pid {{ pid }} has been terminated"
+      uploadFolder:
+        attempt: 'Attempting to upload file "{{ file }}" to "{{ destPath }}"'
+        success: 'Uploaded file "{{ file}}" to "{{ destPath }}"'
+        failed: 'Uploading file "{{ file }}" to "{{ destPath }}" failed so scheduled retry'
+        retry: 'Retrying to upload file "{{ file }}" to "{{ destPath }}"'
+        retryFailed: 'Uploading file "{{ file }}" to "{{ destPath }}" failed'
     models:
       OAuth2Manager:
         fetchingAccessToken: Fetching access token for accountId {{ accountId }} for clientId {{ clientId }}
