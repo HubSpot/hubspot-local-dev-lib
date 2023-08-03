@@ -146,7 +146,7 @@ en:
       writeModuleMeta: "The {{ path }} path already exists"
     personalAccessKey:
       accountNotFound: "Account with id {{ accountId }} does not exist."
-      invalidPersonalAccessKey: "Error while retrieving new access token: {{ errorMessage }}."
+      invalidPersonalAccessKey: "Error while retrieving new access token: {{ errorMessage }}"
       invalidPersonalAccessKey401: 'Error while retrieving new access token: {{ errorMessage }}. Your personal access key is invalid. Please run "hs auth personalaccesskey" to reauthenticate. See https://designers.hubspot.com/docs/personal-access-keys for more information.'
     utils:
       git:

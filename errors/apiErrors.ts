@@ -1,6 +1,7 @@
 import { StatusCodeError, StatusCodeErrorContext } from '../types/Error';
 import { HTTP_METHOD_VERBS, HTTP_METHOD_PREPOSITIONS } from '../constants/api';
 import { i18n } from '../utils/lang';
+import { HubSpotAuthError } from './HubSpotAuthError';
 
 export function throwStatusCodeError(
   error: StatusCodeError,
@@ -19,7 +20,7 @@ export function throwStatusCodeError(
   throw new Error(errorData, { cause: error });
 }
 
-function isMissingScopeError(err: StatusCodeError) {
+export function isMissingScopeError(err: StatusCodeError) {
   return (
     err.name === 'StatusCodeError' &&
     err.statusCode === 403 &&
@@ -28,12 +29,27 @@ function isMissingScopeError(err: StatusCodeError) {
   );
 }
 
-function isGatingError(err: StatusCodeError) {
+export function isGatingError(err: StatusCodeError) {
   return (
     err.name === 'StatusCodeError' &&
     err.statusCode === 403 &&
     err.error &&
     err.error.category === 'GATED'
+  );
+}
+
+export function isSpecifiedHubSpotAuthError(
+  err: HubSpotAuthError,
+  { statusCode, category, subCategory }: Partial<HubSpotAuthError>
+): boolean {
+  const statusCodeErr = !statusCode || err.statusCode === statusCode;
+  const categoryErr = !category || err.category === category;
+  const subCategoryErr = !subCategory || err.subCategory === subCategory;
+  return (
+    err.name === 'HubSpotAuthError' &&
+    statusCodeErr &&
+    categoryErr &&
+    subCategoryErr
   );
 }
 

@@ -12,9 +12,11 @@ export interface BaseError extends Error {
 }
 
 export interface StatusCodeError extends BaseError {
-  name: 'StatusCodeError';
-  statusCode: number;
+  name: string;
+  statusCode?: number;
   message: string;
+  category?: string;
+  subCategory?: string;
   response: {
     request: {
       href: string;
@@ -31,10 +33,7 @@ export interface StatusCodeError extends BaseError {
   options?: {
     method: HttpMethod;
   };
-  error?: {
-    category: string;
-    message: string;
-  };
+  error?: StatusCodeError;
 }
 
 export interface GithubError extends BaseError {
