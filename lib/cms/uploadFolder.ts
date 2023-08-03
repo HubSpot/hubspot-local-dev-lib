@@ -15,31 +15,16 @@ import { debug } from '../../utils/logger';
 import { convertToUnixPath, getExt } from '../path';
 import { isFatalError } from '../../errors/standardErrors';
 import { throwApiUploadError } from '../../errors/apiErrors';
-import { ValueOf } from '../../types/Utils';
 import { FileMapperInputOptions } from '../../types/Files';
 import { LogCallbacksArg } from '../../types/LogCallbacks';
 import { makeTypedLogger } from '../../utils/logger';
 import { StatusCodeError } from '../../types/Error';
-
-const FileUploadResultType = {
-  SUCCESS: 'SUCCESS',
-  FAILURE: 'FAILURE',
-} as const;
+import { FILE_TYPES, FILE_UPLOAD_RESULT_TYPES } from '../../constants/files';
+import { FileType, UploadFolderResults } from '../../types/Files';
 
 const queue = new PQueue({
   concurrency: 10,
 });
-
-const FileTypes = {
-  other: 'otherFiles',
-  module: 'moduleFiles',
-  cssAndJs: 'cssAndJsFiles',
-  template: 'templateFiles',
-  json: 'jsonFiles',
-} as const;
-
-type FileType = ValueOf<typeof FileTypes>;
-type ResultType = ValueOf<typeof FileUploadResultType>;
 
 type CommandOptions = {
   convertFields?: boolean;
@@ -51,27 +36,21 @@ type FilePathsByType = {
   [key: string]: Array<string>;
 };
 
-type UploadFolderResults = {
-  resultType: ResultType;
-  error: StatusCodeError | null;
-  file: string;
-};
-
 function getFileType(filePath: string): FileType {
   const extension = getExt(filePath);
   const moduleFolder = isModuleFolderChild({ path: filePath, isLocal: true });
-  if (moduleFolder) return FileTypes.module;
+  if (moduleFolder) return FILE_TYPES.module;
 
   switch (extension) {
     case 'js':
     case 'css':
-      return FileTypes.cssAndJs;
+      return FILE_TYPES.cssAndJs;
     case 'html':
-      return FileTypes.template;
+      return FILE_TYPES.template;
     case 'json':
-      return FileTypes.json;
+      return FILE_TYPES.json;
     default:
-      return FileTypes.other;
+      return FILE_TYPES.other;
   }
 }
 
@@ -87,7 +66,7 @@ export async function getFilesByType(
 
   // Create object with key-value pairs of form { FileType.type: [] }
   const filePathsByType = Object.values<FileType>(
-    FileTypes
+    FILE_TYPES
   ).reduce<FilePathsByType>((acc: FilePathsByType, fileType: FileType) => {
     return {
       ...acc,
@@ -112,7 +91,7 @@ export async function getFilesByType(
 
     if (convertableFields) {
       const rootOrModule =
-        path.dirname(relPath) === '/' ? FileTypes.json : FileTypes.module;
+        path.dirname(relPath) === '/' ? FILE_TYPES.json : FILE_TYPES.module;
       const fieldsJs = await new FieldsJs(
         projectDir,
         filePath,
@@ -232,7 +211,7 @@ export async function uploadFolder(
             await upload(accountId, file, destPath, apiOptions);
             logger('success', { file, destPath });
             return {
-              resultType: FileUploadResultType.SUCCESS,
+              resultType: FILE_UPLOAD_RESULT_TYPES.SUCCESS,
               error: null,
               file,
             };
@@ -264,6 +243,6 @@ export async function uploadFolder(
 
 export function hasUploadErrors(results: Array<UploadFolderResults>): boolean {
   return results.some(
-    result => result.resultType === FileUploadResultType.FAILURE
+    result => result.resultType === FILE_UPLOAD_RESULT_TYPES.FAILURE
   );
 }

@@ -37,6 +37,17 @@ en:
         completedFetch: 'Completed fetch of file "{{ src }}"{{ version }} to "{{ dest }}" from the Design Manager'
         folderFetch: 'Fetched "{{ src }}" from account {{ accountId }} from the Design Manager successfully'
         completedFolderFetch: 'Completed fetch of folder "{{ src }}"{{ version }} to "{{ dest }}" from the Design Manager'
+    watch:
+      notifyOfThemePreview: "To preview this theme, visit: {{ previewUrl }}"
+      skipUnsupportedExtension: "Skipping {{ file }} due to unsupported extension"
+      skipIgnoreRule: "Skipping {{ file }} due to an ignore rule"
+      uploadAttempt: 'Attempting to upload file "{{ file }}" to "{{ dest }}"'
+      uploadSuccess: "Uploaded file {{ file }} to {{ dest }}"
+      uploadFailed: "Uploading file {{ file }} to {{ dest }} failed"
+      uploadRetry: 'Retrying to upload file "{{ file }}" to "{{ dest }}"'
+      deleteAttempt: Attempting to delete file {{ remoteFilePath }}"
+      deleteSuccess: Deleted file {{ remoteFilePath }}
+      deleteFailed: Deleting file {{ remoteFilePath }} failed
     config:
       cliConfiguration:
         load:

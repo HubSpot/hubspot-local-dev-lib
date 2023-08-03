@@ -62,7 +62,9 @@ export function shouldIgnoreFile(file: string, isInProject = false): boolean {
   return !!relativePath && ignoreRules.ignores(relativePath);
 }
 
-function createIgnoreFilter(isInProject: boolean): (file: string) => boolean {
+export function createIgnoreFilter(
+  isInProject: boolean
+): (file: string) => boolean {
   loadIgnoreConfig(isInProject);
   return (file: string) => !shouldIgnoreFile(file);
 }
@@ -70,9 +72,3 @@ function createIgnoreFilter(isInProject: boolean): (file: string) => boolean {
 export function ignoreFile(filePath: string): void {
   ignoreRules.add(filePath);
 }
-
-module.exports = {
-  shouldIgnoreFile,
-  createIgnoreFilter,
-  ignoreFile,
-};
