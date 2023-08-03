@@ -4,38 +4,37 @@ import { i18n } from '../utils/lang';
 import { throwError } from './standardErrors';
 import { HubSpotAuthError } from './HubSpotAuthError';
 
-export function throwStatusCodeError(
-  error: StatusCodeError,
-  context: StatusCodeErrorContext = {}
-): never {
-  const { statusCode, message, response } = error;
-  const errorData = JSON.stringify({
-    statusCode,
-    message,
-    url: response.request.href,
-    method: response.request.method,
-    response: response.body,
-    headers: response.headers,
-    context,
-  });
-  throw new Error(errorData, { cause: error });
-}
-
-export function isMissingScopeError(err: StatusCodeError) {
+function isApiStatusCodeError(err: StatusCodeError) {
   return (
-    err.name === 'StatusCodeError' &&
-    err.statusCode === 403 &&
-    err.error &&
-    err.error.category === 'MISSING_SCOPES'
+    err.name === 'StatusCodeError' ||
+    (err.statusCode && err.statusCode >= 100 && err.statusCode < 600)
   );
 }
 
-export function isGatingError(err: StatusCodeError) {
-  return (
+export function isMissingScopeError(err: StatusCodeError): boolean {
+  return Boolean(
     err.name === 'StatusCodeError' &&
-    err.statusCode === 403 &&
-    err.error &&
-    err.error.category === 'GATED'
+      err.statusCode === 403 &&
+      err.error &&
+      err.error.category === 'MISSING_SCOPES'
+  );
+}
+
+export function isGatingError(err: StatusCodeError): boolean {
+  return Boolean(
+    err.name === 'StatusCodeError' &&
+      err.statusCode === 403 &&
+      err.error &&
+      err.error.category === 'GATED'
+  );
+}
+
+function isApiUploadValidationError(err: StatusCodeError): boolean {
+  return Boolean(
+    err.statusCode === 400 &&
+      err.response &&
+      err.response.body &&
+      (err.response.body.message || err.response.body.errors)
   );
 }
 
@@ -54,10 +53,63 @@ export function isSpecifiedHubSpotAuthError(
   );
 }
 
+function parseValidationErrors(
+  responseBody: {
+    errors?: Array<StatusCodeError>;
+    message?: string;
+  } = { errors: [], message: '' }
+) {
+  const errorMessages = [];
+
+  const { errors, message } = responseBody;
+
+  if (message) {
+    errorMessages.push(message);
+  }
+
+  if (errors) {
+    const specificErrors = errors.map(error => {
+      let errorMessage = error.message;
+      if (error.errorTokens && error.errorTokens.line) {
+        errorMessage = `line ${error.errorTokens.line}: ${errorMessage}`;
+      }
+      return errorMessage;
+    });
+    errorMessages.push(...specificErrors);
+  }
+
+  return errorMessages;
+}
+
+function logValidationErrors(error: StatusCodeError) {
+  const { response = { body: undefined } } = error;
+  const validationErrorMessages = parseValidationErrors(response.body);
+  if (validationErrorMessages.length) {
+    throwError(new Error(validationErrorMessages.join(' '), { cause: error }));
+  }
+}
+
+export function throwStatusCodeError(
+  error: StatusCodeError,
+  context: StatusCodeErrorContext = {}
+): never {
+  const { statusCode, message, response } = error;
+  const errorData = JSON.stringify({
+    statusCode,
+    message,
+    url: response.request.href,
+    method: response.request.method,
+    response: response.body,
+    headers: response.headers,
+    context,
+  });
+  throw new Error(errorData, { cause: error });
+}
+
 export function throwApiStatusCodeError(
   error: StatusCodeError,
   context: StatusCodeErrorContext
-) {
+): never {
   const i18nKey = 'errors.api';
   const { statusCode } = error;
   const { method } = error.options || {};
@@ -159,4 +211,27 @@ export function throwApiStatusCodeError(
     });
   }
   throwError(new Error(errorMessage.join(' '), { cause: error }));
+}
+
+// Logs a message for an error instance resulting from API interaction.
+export function throwApiError(
+  error: StatusCodeError,
+  context: StatusCodeErrorContext
+): never {
+  // StatusCodeError
+  if (isApiStatusCodeError(error)) {
+    throwApiStatusCodeError(error, context);
+  }
+  throwError(error);
+}
+
+// Logs a message for an error instance resulting from filemapper API upload.
+export function throwApiUploadError(
+  error: StatusCodeError,
+  context: StatusCodeErrorContext
+): never {
+  if (isApiUploadValidationError(error)) {
+    logValidationErrors(error);
+  }
+  throwApiError(error, context);
 }

@@ -25,7 +25,8 @@ export interface StatusCodeError extends BaseError {
       method: string;
     };
     body: {
-      [key: string]: string;
+      message?: string;
+      errors?: Array<StatusCodeError>;
     };
     headers: {
       [key: string]: string;
@@ -34,6 +35,9 @@ export interface StatusCodeError extends BaseError {
   };
   options?: {
     method: HttpMethod;
+  };
+  errorTokens?: {
+    line: number;
   };
   error?: StatusCodeError;
   errors?: Array<StatusCodeError>;

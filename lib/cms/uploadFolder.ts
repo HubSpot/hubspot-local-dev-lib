@@ -14,6 +14,7 @@ import { escapeRegExp } from '../../utils/escapeRegExp';
 import { debug } from '../../utils/logger';
 import { convertToUnixPath, getExt } from '../path';
 import { isFatalError } from '../../errors/standardErrors';
+import { throwApiUploadError } from '../../errors/apiErrors';
 import { ValueOf } from '../../types/Utils';
 import { FileMapperInputOptions } from '../../types/Files';
 import { LogCallbacksArg } from '../../types/LogCallbacks';
@@ -74,7 +75,7 @@ function getFileType(filePath: string): FileType {
   }
 }
 
-async function getFilesByType(
+export async function getFilesByType(
   filePaths: Array<string>,
   projectDir: string,
   rootWriteDir: string | null,
@@ -136,7 +137,7 @@ async function getFilesByType(
 
 const uploadFolderCallbackKeys = ['success'];
 
-async function uploadFolder(
+export async function uploadFolder(
   accountId: number,
   src: string,
   dest: string,
@@ -241,19 +242,11 @@ async function uploadFolder(
             if (isFatalError(error)) {
               throw error;
             }
-            logApiUploadErrorInstance(
-              error,
-              new ApiErrorContext({
-                accountId,
-                request: destPath,
-                payload: file,
-              })
-            );
-            return {
-              resultType: FileUploadResultType.FAILURE,
-              error,
-              file,
-            };
+            throwApiUploadError(error, {
+              accountId,
+              request: destPath,
+              payload: file,
+            });
           }
         };
       })
@@ -269,16 +262,8 @@ async function uploadFolder(
   return results;
 }
 
-function hasUploadErrors(results: Array<UploadFolderResults>): boolean {
+export function hasUploadErrors(results: Array<UploadFolderResults>): boolean {
   return results.some(
     result => result.resultType === FileUploadResultType.FAILURE
   );
 }
-
-module.exports = {
-  getFilesByType,
-  hasUploadErrors,
-  FileUploadResultType,
-  uploadFolder,
-  FileTypes,
-};
