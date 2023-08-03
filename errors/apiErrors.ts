@@ -1,5 +1,6 @@
 import { StatusCodeError, StatusCodeErrorContext } from '../types/Error';
 import { HTTP_METHOD_VERBS, HTTP_METHOD_PREPOSITIONS } from '../constants/api';
+import { i18n } from '../utils/lang';
 
 export function throwStatusCodeError(
   error: StatusCodeError,
@@ -36,29 +37,38 @@ function isGatingError(err: StatusCodeError) {
   );
 }
 
-function throwApiStatusCodeError(
+export function throwApiStatusCodeError(
   error: StatusCodeError,
   context: StatusCodeErrorContext
 ) {
+  const i18nKey = 'errors.api';
   const { statusCode } = error;
   const { method } = error.options || {};
   const { projectName } = context;
+
   const isPutOrPost = method === 'PUT' || method === 'POST';
   const action =
     method && (HTTP_METHOD_VERBS[method] || HTTP_METHOD_VERBS.DEFAULT);
   const preposition =
     (method && HTTP_METHOD_PREPOSITIONS[method]) ||
     HTTP_METHOD_PREPOSITIONS.DEFAULT;
-  let messageDetail = '';
-  {
-    const request = context.request
-      ? `${action} ${preposition} "${context.request}"`
-      : action;
-    messageDetail = `${request} in account ${context.accountId}`;
-  }
-  const errorMessage = [];
+
+  const request = context.request
+    ? `${action} ${preposition} "${context.request}"`
+    : action;
+  const messageDetail =
+    request && context.accountId
+      ? i18n(`${i18nKey}.messageDetail`, {
+          request,
+          accountId: context.accountId,
+        })
+      : 'request';
+
+  const errorMessage: Array<string> = [];
   if (isPutOrPost && context.payload) {
-    errorMessage.push(`Unable to upload "${context.payload}".`);
+    errorMessage.push(
+      i18n(`${i18nKey}.unableToUpload`, { payload: context.payload })
+    );
   }
   const isProjectMissingScopeError = isMissingScopeError(error) && projectName;
   const isProjectGatingError = isGatingError(error) && projectName;
