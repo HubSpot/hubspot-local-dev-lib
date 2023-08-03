@@ -120,7 +120,7 @@ class OAuth2Manager {
         throwAuthErrorWithMessage(
           `${i18nKey}.auth`,
           {
-            token: error.response.body.message,
+            token: error.response.body.message || '',
           },
           error
         );

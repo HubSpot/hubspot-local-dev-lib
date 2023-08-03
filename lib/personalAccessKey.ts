@@ -49,13 +49,13 @@ export async function getAccessToken(
         // For future changes: if response.statusCode is passed into the new error below, sandboxes can skip the regex check and pull the statusCode instead
         throwAuthErrorWithMessage(
           'personalAccessKey.invalidPersonalAccessKey401',
-          { errorMessage: error.response.body.message },
+          { errorMessage: error.response.body.message || '' },
           error
         );
       } else {
         throwAuthErrorWithMessage(
           'personalAccessKey.invalidPersonalAccessKey',
-          { errorMessage: error.response.body.message },
+          { errorMessage: error.response.body.message || '' },
           error
         );
       }
