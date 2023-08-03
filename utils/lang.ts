@@ -137,4 +137,4 @@ export function i18n(
 export const setLangData = (newLocale: string, newLangObj: LanguageObject) => {
   locale = newLocale;
   languageObj = newLangObj;
-}
+};
