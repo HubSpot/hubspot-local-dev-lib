@@ -213,19 +213,16 @@ export function throwApiStatusCodeError(
   throwError(new Error(errorMessage.join(' '), { cause: error }));
 }
 
-// Logs a message for an error instance resulting from API interaction.
 export function throwApiError(
   error: StatusCodeError,
   context: StatusCodeErrorContext
 ): never {
-  // StatusCodeError
   if (isApiStatusCodeError(error)) {
     throwApiStatusCodeError(error, context);
   }
   throwError(error);
 }
 
-// Logs a message for an error instance resulting from filemapper API upload.
 export function throwApiUploadError(
   error: StatusCodeError,
   context: StatusCodeErrorContext

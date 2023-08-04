@@ -198,7 +198,6 @@ export async function uploadFolder(
     };
   }
 
-  // Implemented using a for loop due to async/await
   for (let i = 0; i < fileList.length; i++) {
     const filesToUpload = fileList[i];
     await queue.addAll(filesToUpload.map(uploadFile));
