@@ -21,7 +21,7 @@ export type GetRequestOptionsOptions = {
 };
 
 export type QueryParams = {
-  [key: string]: string | number;
+  [key: string]: string | number | boolean;
 };
 
 export type FormData = {

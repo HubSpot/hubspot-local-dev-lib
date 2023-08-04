@@ -1,11 +1,17 @@
 import http from '../http';
 import fs from 'fs';
-import { FormData } from '../types/Http';
+import { FormData, QueryParams } from '../types/Http';
 import {
   Project,
   FetchProjectResponse,
   UploadProjectResponse,
 } from '../types/Project';
+import {
+  Build,
+  BuildComponentStructureResponse,
+  FetchProjectBuildsResponse,
+} from '../types/Build';
+import { ProjectDeployResponse } from '../types/Deploy';
 
 const PROJECTS_API_PATH = 'dfs/v1/projects';
 const PROJECTS_DEPLOY_API_PATH = 'dfs/deploy/v1';
@@ -18,14 +24,6 @@ export async function fetchProjects(
   });
 }
 
-/**
- * Create project
- *
- * @async
- * @param {number} accountId
- * @param {string} name
- * @returns {Promise}
- */
 export async function createProject(
   accountId: number,
   name: string
@@ -37,16 +35,6 @@ export async function createProject(
     },
   });
 }
-
-/**
- * Upload project
- *
- * @async
- * @param {number} accountId
- * @param {string} projectName
- * @param {string} projectFile
- * @returns {Promise}
- */
 
 export async function uploadProject(
   accountId: number,
@@ -79,14 +67,7 @@ export async function fetchProject(
   });
 }
 
-/**
- * Download project
- *
- * @async
- * @param {number} accountId
- * @param {string} projectName
- * @returns {Promise}
- */
+//TODO
 export async function downloadProject(
   accountId: number,
   projectName: string,
@@ -101,46 +82,31 @@ export async function downloadProject(
   });
 }
 
-/**
- * Delete project
- *
- * @async
- * @param {number} accountId
- * @param {string} projectName
- * @returns {Promise}
- */
-export async function deleteProject(accountId, projectName) {
+export async function deleteProject(
+  accountId: number,
+  projectName: string
+): Promise<null> {
   return http.delete(accountId, {
     uri: `${PROJECTS_API_PATH}/${encodeURIComponent(projectName)}`,
   });
 }
 
-/**
- * Fetch list of project builds
- *
- * @async
- * @param {number} accountId
- * @param {string} projectName
- * @param {object} query
- * @returns {Promise}
- */
-export async function fetchProjectBuilds(accountId, projectName, query) {
+export async function fetchProjectBuilds(
+  accountId: number,
+  projectName: string,
+  query: QueryParams
+): Promise<FetchProjectBuildsResponse> {
   return http.get(accountId, {
     uri: `${PROJECTS_API_PATH}/${encodeURIComponent(projectName)}/builds`,
     query,
   });
 }
 
-/**
- * Get project build status
- *
- * @async
- * @param {number} accountId
- * @param {string} projectName
- * @param {number} buildId
- * @returns {Promise}
- */
-export async function getBuildStatus(accountId, projectName, buildId) {
+export async function getBuildStatus(
+  accountId: number,
+  projectName: string,
+  buildId: number
+): Promise<Build> {
   return http.get(accountId, {
     uri: `${PROJECTS_API_PATH}/${encodeURIComponent(
       projectName
@@ -148,16 +114,11 @@ export async function getBuildStatus(accountId, projectName, buildId) {
   });
 }
 
-/**
- * Get project build component structure
- *
- * @async
- * @param {number} accountId
- * @param {string} projectName
- * @param {number} buildId
- * @returns {Promise}
- */
-export async function getBuildStructure(accountId, projectName, buildId) {
+export async function getBuildStructure(
+  accountId: number,
+  projectName: string,
+  buildId: number
+): Promise<BuildComponentStructureResponse> {
   return http.get(accountId, {
     uri: `dfs/v1/builds/by-project-name/${encodeURIComponent(
       projectName
@@ -165,16 +126,11 @@ export async function getBuildStructure(accountId, projectName, buildId) {
   });
 }
 
-/**
- * Deploy project
- *
- * @async
- * @param {number} accountId
- * @param {string} projectName
- * @param {number} buildId
- * @returns {Promise}
- */
-export async function deployProject(accountId, projectName, buildId) {
+export async function deployProject(
+  accountId: number,
+  projectName: string,
+  buildId: number
+): Promise<ProjectDeployResponse> {
   return http.post(accountId, {
     uri: `${PROJECTS_DEPLOY_API_PATH}/deploys/queue/async`,
     body: {

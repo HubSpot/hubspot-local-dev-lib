@@ -25,7 +25,7 @@ export type UploadProjectResponse = {
     path: string;
     name: string;
     parentPath: string;
-    updatedAt: 0;
+    updatedAt: number;
     children: Array<UploadProjectResponse>;
     folder: boolean;
   };

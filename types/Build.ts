@@ -36,3 +36,21 @@ export type Build = {
   subbuildStatuses: Array<SubbuildStatus>;
   uploadMessage: string;
 };
+
+export type BuildComponentStructure = {
+  [key: string]: Array<string>;
+};
+
+export type BuildComponentStructureResponse = {
+  topLevelComponentsWithChildren: BuildComponentStructure;
+};
+
+export type FetchProjectBuildsResponse = {
+  results: Array<Build>;
+  paging: {
+    next: {
+      after: string;
+      link: string;
+    };
+  };
+};
