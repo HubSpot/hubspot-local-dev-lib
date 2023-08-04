@@ -45,9 +45,13 @@ en:
       uploadSuccess: "Uploaded file {{ file }} to {{ dest }}"
       uploadFailed: "Uploading file {{ file }} to {{ dest }} failed"
       uploadRetry: 'Retrying to upload file "{{ file }}" to "{{ dest }}"'
-      deleteAttempt: Attempting to delete file {{ remoteFilePath }}"
-      deleteSuccess: Deleted file {{ remoteFilePath }}
-      deleteFailed: Deleting file {{ remoteFilePath }} failed
+      deleteAttempt: "Attempting to delete file {{ remoteFilePath }}"
+      deleteAttemptWithType: "Attempting to delete {{ type }} {{ remoteFilePath }}"
+      deleteSuccess: "Deleted file {{ remoteFilePath }}"
+      deleteSuccessWithType: "Deleted {{ type }} {{ remoteFilePath }}"
+      deleteFailed: "Deleting file {{ remoteFilePath }} failed"
+      folderUploadSuccess: "Completed uploading files in {{ src }} to {{ dest }} in {{ accountId }}"
+      ready: "Watcher is ready and watching {{ src }}. Any changes detected will be automatically uploaded and overwrite the current version in the developer file system."
     config:
       cliConfiguration:
         load:

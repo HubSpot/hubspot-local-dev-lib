@@ -21,6 +21,7 @@ import { makeTypedLogger } from '../../utils/logger';
 import { StatusCodeError } from '../../types/Error';
 import { FILE_TYPES, FILE_UPLOAD_RESULT_TYPES } from '../../constants/files';
 import { FileType, UploadFolderResults } from '../../types/Files';
+import { Mode } from '../../types/Files';
 
 const queue = new PQueue({
   concurrency: 10,
@@ -123,6 +124,7 @@ export async function uploadFolder(
   fileMapperOptions: FileMapperInputOptions,
   commandOptions: CommandOptions = {},
   filePaths: Array<string> = [],
+  mode: Mode | null = null,
   logCallbacks?: LogCallbacksArg<typeof uploadFolderCallbackKeys>
 ): Promise<Array<UploadFolderResults>> {
   const logger = makeTypedLogger<typeof uploadFolderCallbackKeys>(
@@ -135,7 +137,7 @@ export async function uploadFolder(
     : null;
   const regex = new RegExp(`^${escapeRegExp(src)}`);
 
-  const apiOptions = getFileMapperQueryValues(null, fileMapperOptions);
+  const apiOptions = getFileMapperQueryValues(mode, fileMapperOptions);
   const failures: Array<{ file: string; destPath: string }> = [];
   let fieldsJsPaths: Array<Partial<FieldsJs>> = [];
   let tmpDirRegex: RegExp;

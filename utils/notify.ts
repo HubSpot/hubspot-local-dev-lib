@@ -15,7 +15,7 @@ const debouncedWaitForActionsToCompleteAndWriteQueueToFile = debounce(
 // Collects actions that have been taken on files and the corresponding Promise
 // for the remote action that is in-process
 export function triggerNotify(
-  filePathToNotify: string,
+  filePathToNotify: string | undefined,
   actionType: string,
   filePath: string,
   actionPromise: Promise<void>

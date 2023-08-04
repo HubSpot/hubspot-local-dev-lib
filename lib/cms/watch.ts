@@ -4,7 +4,6 @@ import PQueue from 'p-queue';
 import { debounce } from 'debounce';
 
 import { throwApiError, throwApiUploadError } from '../../errors/apiErrors';
-import { throwError } from '../../errors/standardErrors';
 import { isConvertableFieldJs, FieldsJs } from './handleFieldsJS';
 import { uploadFolder } from './uploadFolder';
 import { shouldIgnoreFile, ignoreFile } from '../ignoreRules';
@@ -24,6 +23,9 @@ const watchCallbackKeys = [
   'notifyOfThemePreview',
   'uploadSuccess',
   'deleteSuccess',
+  'folderUploadSuccess',
+  'ready',
+  'deleteSuccessWithType',
 ] as const;
 const makeLogger = makeTypedLogger<typeof watchCallbackKeys>;
 type WatchLogCallbacks = LogCallbacksArg<typeof watchCallbackKeys>;
@@ -60,8 +62,9 @@ async function uploadFile(
   file: string,
   dest: string,
   options: UploadFileOptions,
+  mode: Mode | null = null,
   logCallbacks: WatchLogCallbacks
-) {
+): Promise<void> {
   const logger = makeLogger(logCallbacks, 'watch');
   const src = options.src;
 
@@ -102,8 +105,8 @@ async function uploadFile(
     convertFields && fieldsJs?.outputPath ? fieldsJs.outputPath : file;
 
   debug('watch.uploadAttempt', { file, dest });
-  const apiOptions = getFileMapperQueryValues(null, options);
-  return queue.add(() => {
+  const apiOptions = getFileMapperQueryValues(mode, options);
+  queue.add(() => {
     return upload(accountId, fileToUpload, dest, apiOptions)
       .then(() => {
         logger('uploadSuccess', { file, dest });
@@ -158,13 +161,13 @@ type WatchOptions = {
   remove?: boolean;
   disableInitial?: boolean;
   notify?: string;
-  commandOptions?: {
+  commandOptions: {
     convertFields?: boolean;
   };
   filePaths?: Array<string>;
 };
 
-function watch(
+export function watch(
   accountId: number,
   src: string,
   dest: string,
@@ -199,74 +202,96 @@ function watch(
 
   if (!disableInitial) {
     // Use uploadFolder so that failures of initial upload are retried
-    uploadFolder(accountId, src, dest, { mode }, commandOptions, filePaths)
-      .then(result => {
-        logger.success(
-          `Completed uploading files in ${src} to ${dest} in ${accountId}`
-        );
-        if (postInitialUploadCallback) {
-          postInitialUploadCallback(result);
-        }
-      })
-      .catch(error => {
-        logger.error(
-          `Initial uploading of folder "${src}" to "${dest} in account ${accountId} failed`
-        );
-        logErrorInstance(error, {
-          accountId,
-        });
-      });
+    uploadFolder(
+      accountId,
+      src,
+      dest,
+      {},
+      commandOptions,
+      filePaths,
+      mode || null
+    ).then(result => {
+      logger('folderUploadSuccess', { src, dest, accountId });
+      if (postInitialUploadCallback) {
+        postInitialUploadCallback(result);
+      }
+    });
+    // TODO: Figure out how to handle errors that we don't want to break control flow
+    // .catch(error => {
+    //   logger.error(
+    //     `Initial uploading of folder "${src}" to "${dest} in account ${accountId} failed`
+    //   );
+    //   logErrorInstance(error, {
+    //     accountId,
+    //   });
+    // });
   }
 
   watcher.on('ready', () => {
-    logger.log(
-      `Watcher is ready and watching ${src}. Any changes detected will be automatically uploaded and overwrite the current version in the developer file system.`
-    );
+    logger('ready', { src });
   });
 
   watcher.on('add', async filePath => {
     const destPath = getDesignManagerPath(filePath);
-    const uploadPromise = uploadFile(accountId, filePath, destPath, {
-      src,
+    const uploadPromise = uploadFile(
+      accountId,
+      filePath,
+      destPath,
+      {
+        src,
+        commandOptions,
+      },
       mode,
-      commandOptions,
-    });
+      logCallbacks
+    );
     triggerNotify(notify, 'Added', filePath, uploadPromise);
   });
 
   if (remove) {
-    const deleteFileOrFolder = type => filePath => {
-      // If it's a fields.js file that is in a module folder or the root, then ignore because it will not exist on the server.
-      if (isConvertableFieldJs(src, filePath, commandOptions.convertFields)) {
-        return;
-      }
+    const deleteFileOrFolder =
+      (type: 'file' | 'folder') => (filePath: string) => {
+        // If it's a fields.js file that is in a module folder or the root, then ignore because it will not exist on the server.
+        if (isConvertableFieldJs(src, filePath, commandOptions.convertFields)) {
+          return;
+        }
 
-      const remotePath = getDesignManagerPath(filePath);
-      if (shouldIgnoreFile(filePath)) {
-        logger.debug(`Skipping ${filePath} due to an ignore rule`);
-        return;
-      }
+        const remotePath = getDesignManagerPath(filePath);
+        if (shouldIgnoreFile(filePath)) {
+          debug('watch.skipIgnoreRule', { file: filePath });
+          return;
+        }
 
-      logger.debug('Attempting to delete %s "%s"', type, remotePath);
-      queue.add(() => {
-        const deletePromise = deleteRemoteFile(accountId, filePath, remotePath)
-          .then(() => {
-            logger.log('Deleted %s "%s"', type, remotePath);
-          })
-          .catch(error => {
-            logger.error('Deleting %s "%s" failed', type, remotePath);
-            logApiErrorInstance(
-              error,
-              new ApiErrorContext({
-                accountId,
-                request: remotePath,
-              })
-            );
+        debug('watch.deleteAttemptWithType', {
+          type,
+          remoteFilePath: remotePath,
+        });
+        queue.add(() => {
+          const deletePromise = deleteRemoteFile(
+            accountId,
+            filePath,
+            remotePath,
+            logCallbacks
+          ).then(() => {
+            logger('deleteSuccessWithType', {
+              type,
+              remoteFilePath: remotePath,
+            });
           });
-        triggerNotify(notify, 'Removed', filePath, deletePromise);
-        return deletePromise;
-      });
-    };
+          // TODO: Figure out how to handle errors that we don't want to break control flow
+          // .catch(error => {
+          //   logger.error('Deleting %s "%s" failed', type, remotePath);
+          //   logApiErrorInstance(
+          //     error,
+          //     new ApiErrorContext({
+          //       accountId,
+          //       request: remotePath,
+          //     })
+          //   );
+          // });
+          triggerNotify(notify, 'Removed', filePath, deletePromise);
+          return deletePromise;
+        });
+      };
 
     watcher.on('unlink', deleteFileOrFolder('file'));
     watcher.on('unlinkDir', deleteFileOrFolder('folder'));
@@ -274,17 +299,19 @@ function watch(
 
   watcher.on('change', async filePath => {
     const destPath = getDesignManagerPath(filePath);
-    const uploadPromise = uploadFile(accountId, filePath, destPath, {
-      src,
+    const uploadPromise = uploadFile(
+      accountId,
+      filePath,
+      destPath,
+      {
+        src,
+        commandOptions,
+      },
       mode,
-      commandOptions,
-    });
+      logCallbacks
+    );
     triggerNotify(notify, 'Changed', filePath, uploadPromise);
   });
 
   return watcher;
 }
-
-module.exports = {
-  watch,
-};
