@@ -5,13 +5,14 @@ import {
   Project,
   FetchProjectResponse,
   UploadProjectResponse,
+  ProjectSettings,
 } from '../types/Project';
+import { Build, FetchProjectBuildsResponse } from '../types/Build';
 import {
-  Build,
-  BuildComponentStructureResponse,
-  FetchProjectBuildsResponse,
-} from '../types/Build';
-import { ProjectDeployResponse } from '../types/Deploy';
+  ComponentMetadataResponse,
+  ComponentStructureResponse,
+} from '../types/ComponentStructure';
+import { Deploy, ProjectDeployResponse } from '../types/Deploy';
 
 const PROJECTS_API_PATH = 'dfs/v1/projects';
 const PROJECTS_DEPLOY_API_PATH = 'dfs/deploy/v1';
@@ -118,7 +119,7 @@ export async function getBuildStructure(
   accountId: number,
   projectName: string,
   buildId: number
-): Promise<BuildComponentStructureResponse> {
+): Promise<ComponentStructureResponse> {
   return http.get(accountId, {
     uri: `dfs/v1/builds/by-project-name/${encodeURIComponent(
       projectName
@@ -140,16 +141,11 @@ export async function deployProject(
   });
 }
 
-/**
- * Get project deploy status
- *
- * @async
- * @param {number} accountId
- * @param {string} projectName
- * @param {number} deployId
- * @returns {Promise}
- */
-export async function getDeployStatus(accountId, projectName, deployId) {
+export async function getDeployStatus(
+  accountId: number,
+  projectName: string,
+  deployId: number
+): Promise<Deploy> {
   return http.get(accountId, {
     uri: `${PROJECTS_DEPLOY_API_PATH}/deploy-status/projects/${encodeURIComponent(
       projectName
@@ -157,16 +153,11 @@ export async function getDeployStatus(accountId, projectName, deployId) {
   });
 }
 
-/**
- * Get project deploy component structure
- *
- * @async
- * @param {number} accountId
- * @param {string} projectName
- * @param {number} buildId
- * @returns {Promise}
- */
-export async function getDeployStructure(accountId, projectName, deployId) {
+export async function getDeployStructure(
+  accountId: number,
+  projectName: string,
+  deployId: number
+): Promise<ComponentStructureResponse> {
   return http.get(accountId, {
     uri: `${PROJECTS_DEPLOY_API_PATH}/deploys/by-project-name/${encodeURIComponent(
       projectName
@@ -174,29 +165,19 @@ export async function getDeployStructure(accountId, projectName, deployId) {
   });
 }
 
-/**
- * Get project settings
- *
- * @async
- * @param {number} accountId
- * @param {string} projectName
- * @returns {Promise}
- */
-export async function fetchProjectSettings(accountId, projectName) {
+export async function fetchProjectSettings(
+  accountId: number,
+  projectName: string
+): Promise<ProjectSettings> {
   return http.get(accountId, {
     uri: `${PROJECTS_API_PATH}/${encodeURIComponent(projectName)}/settings`,
   });
 }
 
-/**
- * Fetch top-level deploy components metadata
- *
- * @async
- * @param {number} accountId
- * @param {number} projectId
- * @returns {Promise}
- */
-export async function fetchDeployComponentsMetadata(accountId, projectId) {
+export async function fetchDeployComponentsMetadata(
+  accountId: number,
+  projectId: number
+): Promise<ComponentMetadataResponse> {
   return http.get(accountId, {
     uri: `${PROJECTS_API_PATH}/by-id/${projectId}/deploy-components-metadata`,
   });

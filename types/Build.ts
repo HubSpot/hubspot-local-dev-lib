@@ -37,14 +37,6 @@ export type Build = {
   uploadMessage: string;
 };
 
-export type BuildComponentStructure = {
-  [key: string]: Array<string>;
-};
-
-export type BuildComponentStructureResponse = {
-  topLevelComponentsWithChildren: BuildComponentStructure;
-};
-
 export type FetchProjectBuildsResponse = {
   results: Array<Build>;
   paging: {

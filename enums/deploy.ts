@@ -1,0 +1,12 @@
+export const DEPLOY_STATUS = {
+  DEPLOYING: 'DEPLOYING',
+  FAILURE: 'FAILURE',
+  PENDING: 'PENDING',
+  SUCCESS: 'SUCCESS',
+  FINISHED: 'FINISHED',
+} as const;
+
+export const DEPLOY_ACTION = {
+  REMOVE: 'REMOVE',
+  INSTALL: 'INSTALL',
+};

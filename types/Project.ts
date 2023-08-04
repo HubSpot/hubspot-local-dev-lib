@@ -36,3 +36,7 @@ export type UploadProjectResponse = {
     };
   };
 };
+
+export type ProjectSettings = {
+  isAutoDeployEnabled: boolean;
+};
