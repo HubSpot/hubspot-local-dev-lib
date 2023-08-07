@@ -183,99 +183,10 @@ export async function fetchDeployComponentsMetadata(
   });
 }
 
-/**
- * Provision new project build
- *
- * @async
- * @param {number} accountId
- * @param {string} projectName
- * @returns {Promise}
- */
-export async function provisionBuild(accountId, projectName, platformVersion) {
-  const requestString = platformVersion
-    ? `/builds/staged/provision?platformVersion=${platformVersion}`
-    : '/builds/staged/provision';
-
-  return http.post(accountId, {
-    uri: `${PROJECTS_API_PATH}/${encodeURIComponent(
-      projectName
-    )}${requestString}`,
-    timeout: 50000,
-  });
-}
-
-/**
- * Queue build
- *
- * @async
- * @param {number} accountId
- * @param {string} projectName
- * @returns {Promise}
- */
-export async function queueBuild(accountId, projectName, platformVersion) {
-  const requestString = platformVersion
-    ? `/builds/staged/queue?platformVersion=${platformVersion}`
-    : '/builds/staged/queue';
-
-  return http.post(accountId, {
-    uri: `${PROJECTS_API_PATH}/${encodeURIComponent(
-      projectName
-    )}${requestString}`,
-  });
-}
-
-/**
- * Upload file to staged build (watch)
- *
- * @async
- * @param {number} accountId
- * @param {string} projectName
- * @param {string} filePath
- * @param {string} path
- * @returns {Promise}
- */
-export async function uploadFileToBuild(
-  accountId,
-  projectName,
-  filePath,
-  path
-) {
-  return http.put(accountId, {
-    uri: `${PROJECTS_API_PATH}/${encodeURIComponent(
-      projectName
-    )}/builds/staged/files/${encodeURIComponent(path)}`,
-    formData: {
-      file: fs.createReadStream(filePath),
-    },
-  });
-}
-
-/**
- * Delete file from staged build (watch)
- *
- * @async
- * @param {number} accountId
- * @param {string} projectName
- * @param {string} path
- * @returns {Promise}
- */
-export async function deleteFileFromBuild(accountId, projectName, path) {
-  return http.delete(accountId, {
-    uri: `${PROJECTS_API_PATH}/${encodeURIComponent(
-      projectName
-    )}/builds/staged/files/${encodeURIComponent(path)}`,
-  });
-}
-
-/**
- * Cancel staged build
- *
- * @async
- * @param {number} accountId
- * @param {string} projectName
- * @returns {Promise}
- */
-export async function cancelStagedBuild(accountId, projectName) {
+export async function cancelStagedBuild(
+  accountId: number,
+  projectName: string
+): Promise<void> {
   return http.post(accountId, {
     uri: `${PROJECTS_API_PATH}/${encodeURIComponent(
       projectName
