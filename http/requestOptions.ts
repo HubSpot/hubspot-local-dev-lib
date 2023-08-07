@@ -1,34 +1,19 @@
 import { version } from '../package.json';
-import config from '../config/CLIConfiguration';
+import { getAndLoadConfigIfNeeded } from '../config';
 import { getHubSpotApiOrigin } from '../lib/urls';
+import { RequestOptions, GetRequestOptionsOptions } from '../types/Http';
+import { CLIConfig } from '../types/Config';
 
 export const DEFAULT_USER_AGENT_HEADERS = {
   'User-Agent': `HubSpot Local Dev Lib/${version}`,
 };
 
-type GetRequestOptionsOptions = {
-  env?: string;
-  localHostOverride?: boolean;
-};
-
-type RequestOptions = {
-  baseUrl: string;
-  headers: {
-    'User-Agent': string;
-  };
-  json: boolean;
-  simple: boolean;
-  timeout: number;
-  env?: string;
-  localHostOverride?: boolean;
-};
-
 export function getRequestOptions(
-  options: GetRequestOptionsOptions = {},
-  requestOptions = {}
+  options: GetRequestOptionsOptions
 ): RequestOptions {
   const { env, localHostOverride } = options;
-  const { httpTimeout, httpUseLocalhost } = config.getAndLoadConfigIfNeeded();
+  const { httpTimeout, httpUseLocalhost } =
+    getAndLoadConfigIfNeeded() as CLIConfig;
   return {
     baseUrl: getHubSpotApiOrigin(
       env,
@@ -38,8 +23,7 @@ export function getRequestOptions(
       ...DEFAULT_USER_AGENT_HEADERS,
     },
     json: true,
-    simple: true,
     timeout: httpTimeout || 15000,
-    ...requestOptions,
+    ...options,
   };
 }

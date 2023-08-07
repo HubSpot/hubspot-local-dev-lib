@@ -1,3 +1,6 @@
-import { BaseError } from '../types/Error';
-
-export class HubSpotAuthError extends Error implements BaseError {}
+export class HubSpotAuthError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'HubSpotAuthError';
+  }
+}

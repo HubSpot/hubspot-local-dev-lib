@@ -12,6 +12,7 @@ export const ALLOWED_EXTENSIONS = new Set([
   'map',
   'svg',
   'eot',
+  'otf',
   'ttf',
   'woff',
   'woff2',
@@ -19,3 +20,4 @@ export const ALLOWED_EXTENSIONS = new Set([
 ]);
 
 export const MODULE_EXTENSION = 'module';
+export const FUNCTIONS_EXTENSION = 'functions';

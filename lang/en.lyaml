@@ -25,6 +25,18 @@ en:
       createModule:
         creatingModule: "Creating module at {{ path }}"
         creatingPath: "Creating {{ path }}"
+    oauth:
+      writeTokenInfo: "Updating Oauth2 token info for portalId: {{ portalId }}"
+      addOauthToAccountConfig:
+        init: Updating configuration
+        success: Configuration updated
+    filemapper:
+      fetchAndWriteFileStream:
+        skippedExisting: "Skipped existing {{ filepath }}"
+        wroteFolder: "Wrote folder {{ filepath }}"
+        completedFetch: 'Completed fetch of file "{{ src }}"{{ version }} to "{{ dest }}" from the Design Manager'
+        folderFetch: 'Fetched "{{ src }}" from account {{ accountId }} from the Design Manager successfully'
+        completedFolderFetch: 'Completed fetch of folder "{{ src }}"{{ version }} to "{{ dest }}" from the Design Manager'
     config:
       cliConfiguration:
         load:
@@ -60,6 +72,21 @@ en:
         convertFieldsJs:
           creating: "Creating child process with pid {{ pid }}"
           terminating: "Child process with pid {{ pid }} has been terminated"
+    models:
+      OAuth2Manager:
+        fetchingAccessToken: Fetching access token for accountId {{ accountId }} for clientId {{ clientId }}
+        updatingTokeninfo: Persisting updated tokenInfo for accountId {{ accountId }} for clientId {{ clientId }}
+        refreshingAccessToken: Waiting for access token for accountId {{ accountId }}  for clientId {{ clientId }} to be fetched
+    http:
+      index:
+        createGetRequestStream:
+          onWrite: "Wrote file {{ filepath }}"
+    api:
+      filemapper:
+        trackUsage:
+          invalidEvent: "Usage tracking event {{ eventName }} is not a valid event type."
+          sendingEventAuthenticated: "Sending usage event to authenticated endpoint"
+          sendingEventUnauthenticated: "Sending usage event to unauthenticated endpoint"
   errors:
     archive:
       extractZip:
@@ -79,6 +106,14 @@ en:
         notReturnArray: 'There was an error loading JS file "{{ path }}". Expected type "Array" but received type "{{ returned }}" . Make sure that your function returns an array'
         invalidPath: 'The path "{{ path }}" is not a path to a file or folder'
       generic: "A {{ name }} has occurred"
+    filemapper:
+      invalidNode: "Invalid FileMapperNode: {{ json }}"
+      invalidFileType: "Invalid file type requested: {{ srcPath }}"
+      assetTiemout: "HubSpot assets are unavailable at the moment. Please wait a few minutes and try again."
+      failedToFetchFile: 'Failed fetch of file "{{ src }}" to "{{ dest }}" from the Design Manager'
+      failedToFetchFoder: 'Failed fetch of folder "{{ src }}" to "{{ dest }}" from the Design Manager'
+      invalidFetchFolderRequest: 'Invalid request for folder: "{{ src }}"'
+      incompleteFetch: 'Not all files in folder "{{ src }}" were successfully fetched.  Re-run the last command to try again`'
     github:
       downloadGithubRepoContents: "Failed to fetch contents: {{ errorMessage }}"
       fetchJsonFromRepository: "An error occured fetching JSON file."
@@ -87,6 +122,10 @@ en:
     modules:
       throwInvalidPathInput: "Expected PathInput"
       writeModuleMeta: "The {{ path }} path already exists"
+    personalAccessKey:
+      accountNotFound: "Account with id {{ accountId }} does not exist."
+      invalidPersonalAccessKey: "Error while retrieving new access token: {{ errorMessage }}."
+      invalidPersonalAccessKey401: 'Error while retrieving new access token: {{ errorMessage }}. Your personal access key is invalid. Please run "hs auth personalaccesskey" to reauthenticate. See https://designers.hubspot.com/docs/personal-access-keys for more information.'
     utils:
       git:
         configIgnore: "Unable to determine if config file is properly ignored by git."
@@ -95,6 +134,8 @@ en:
         saveOutput: "There was an error saving the json output of {{ path }}"
         createTmpDirSync: "An error occured writing temporary project source."
         cleanupTmpDirSync: "There was an error deleting the temporary project source"
+      notify:
+        filePath: Unable to notify file {{ filePath }}
     config:
       cliConfiguration:
         noConfigLoaded: "No Config loaded."
@@ -107,3 +148,11 @@ en:
         updateAllowUsageTracking: Unable to update allowUsageTracking. The value {{ isEnabled }} is invalid. The value must be a boolean.
       configFile:
         parsing: "Config file could not be parsed"
+    models:
+      OAuth2Manager:
+        missingRefreshToken: "The account {{ accountId }} has not been authenticated with Oauth2"
+        auth: "Error while retrieving new token: {{ token }}"
+    http:
+      index:
+        withOauth: "Oauth manager for account {{ accountId }} not found."
+        withAuth: "Account with id {{ accountId }} not found."

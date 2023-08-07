@@ -3,3 +3,8 @@ export const STAT_TYPES = {
   SYMBOLIC_LINK: 'symlink',
   DIRECTORY: 'dir',
 } as const;
+
+export const MODE = {
+  draft: 'draft',
+  publish: 'publish',
+} as const;

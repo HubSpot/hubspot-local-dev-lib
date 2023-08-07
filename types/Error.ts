@@ -24,6 +24,7 @@ export interface StatusCodeError extends BaseError {
     headers: {
       [key: string]: string;
     };
+    statusCode: number;
   };
 }
 
@@ -32,3 +33,17 @@ export interface GithubError extends BaseError {
     message?: string;
   };
 }
+
+export type FileSystemErrorContext = {
+  filepath: string;
+  write?: boolean;
+  read?: boolean;
+  accountId?: number;
+};
+
+export type StatusCodeErrorContext = {
+  accountId?: number;
+  request?: string;
+  payload?: string;
+  projectName?: string;
+};
