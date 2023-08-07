@@ -68,18 +68,17 @@ export async function fetchProject(
   });
 }
 
-//TODO
 export async function downloadProject(
   accountId: number,
   projectName: string,
   buildId: number
-) {
+): Promise<Buffer> {
   return http.get(accountId, {
     uri: `${PROJECTS_API_PATH}/${encodeURIComponent(
       projectName
-    )}/builds/${buildId}/archive`,
+    )}/builds/${buildId}/archive-full`,
     encoding: null,
-    headers: { accept: 'application/octet-stream' },
+    headers: { accept: 'application/zip', contentType: 'application/json' },
   });
 }
 
