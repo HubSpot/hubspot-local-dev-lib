@@ -121,9 +121,7 @@ describe('lib/config', () => {
     });
 
     it('returns portalId from config when a name is passed', () => {
-      expect(getAccountId(OAUTH2_CONFIG.name || '')).toEqual(
-        OAUTH2_CONFIG.portalId
-      );
+      expect(getAccountId(OAUTH2_CONFIG.name)).toEqual(OAUTH2_CONFIG.portalId);
     });
 
     it('returns portalId from config when a string id is passed', () => {
@@ -133,7 +131,7 @@ describe('lib/config', () => {
     });
 
     it('returns portalId from config when a numeric id is passed', () => {
-      expect(getAccountId(OAUTH2_CONFIG.portalId || '')).toEqual(
+      expect(getAccountId(OAUTH2_CONFIG.portalId)).toEqual(
         OAUTH2_CONFIG.portalId
       );
     });
