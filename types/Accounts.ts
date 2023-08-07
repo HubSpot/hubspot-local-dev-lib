@@ -41,10 +41,20 @@ export type TokenInfo = {
   refreshToken?: string;
 };
 
-export interface PersonalAccessKeyAccount extends CLIAccount_NEW {
+export interface PersonalAccessKeyAccount_NEW extends CLIAccount_NEW {
   authType: 'personalaccesskey';
   personalAccessKey: string;
 }
+
+export interface PersonalAccessKeyAccount_DEPRECATED
+  extends CLIAccount_DEPRECATED {
+  authType: 'personalaccesskey';
+  personalAccessKey: string;
+}
+
+export type PersonalAccessKeyAccount =
+  | PersonalAccessKeyAccount_NEW
+  | PersonalAccessKeyAccount_DEPRECATED;
 
 export interface OAuthAccount_NEW extends CLIAccount_NEW {
   authType: 'oauth2';

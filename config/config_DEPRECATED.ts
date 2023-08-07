@@ -357,7 +357,7 @@ export function getAccountConfig(
 /*
  * Returns a portalId from the config if it exists, else returns null
  */
-export function getAccountId(nameOrId: string | number): number | undefined {
+export function getAccountId(nameOrId?: string | number): number | undefined {
   const config = getAndLoadConfigIfNeeded() as CLIConfig_DEPRECATED;
   let name: string | undefined = undefined;
   let accountId: number | undefined = undefined;
