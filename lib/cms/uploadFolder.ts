@@ -6,7 +6,7 @@ import {
   FieldsJs,
   createTmpDirSync,
   cleanupTmpDirSync,
-} from './handleFieldsJs';
+} from './handleFieldsJS';
 import { getFileMapperQueryValues } from '../fileMapper';
 import { upload } from '../../api/fileMapper';
 import { isModuleFolderChild } from '../../utils/modules';

@@ -18,6 +18,7 @@ import { makeTypedLogger } from '../../utils/logger';
 import { debug } from '../../utils/logger';
 import { FileMapperInputOptions, Mode } from '../../types/Files';
 import { UploadFolderResults } from '../../types/Files';
+import { StatusCodeError } from '../../types/Error';
 
 const watchCallbackKeys = [
   'notifyOfThemePreview',
@@ -115,14 +116,16 @@ async function uploadFile(
       .catch(() => {
         debug('watch.uploadFailed', { file, dest });
         debug('watch.uploadRetry', { file, dest });
-        return upload(accountId, file, dest, apiOptions).catch(error => {
-          debug('watch.uploadFailed', { file, dest });
-          throwApiUploadError(error, {
-            accountId,
-            request: dest,
-            payload: file,
-          });
-        });
+        return upload(accountId, file, dest, apiOptions).catch(
+          (error: StatusCodeError) => {
+            debug('watch.uploadFailed', { file, dest });
+            throwApiUploadError(error, {
+              accountId,
+              request: dest,
+              payload: file,
+            });
+          }
+        );
       });
   });
 }
@@ -146,7 +149,7 @@ async function deleteRemoteFile(
         logger('deleteSuccess', { remoteFilePath });
         notifyOfThemePreview(filePath, accountId, logCallbacks);
       })
-      .catch(error => {
+      .catch((error: StatusCodeError) => {
         debug('watch.deleteFailed', { remoteFilePath });
         throwApiError(error, {
           accountId,
@@ -192,7 +195,7 @@ export function watch(
 
   const watcher = chokidar.watch(src, {
     ignoreInitial: true,
-    ignored: file => shouldIgnoreFile(file),
+    ignored: (file: string) => shouldIgnoreFile(file),
   });
 
   function getDesignManagerPath(file: string): string {
@@ -231,7 +234,7 @@ export function watch(
     logger('ready', { src });
   });
 
-  watcher.on('add', async filePath => {
+  watcher.on('add', async (filePath: string) => {
     const destPath = getDesignManagerPath(filePath);
     const uploadPromise = uploadFile(
       accountId,
@@ -297,7 +300,7 @@ export function watch(
     watcher.on('unlinkDir', deleteFileOrFolder('folder'));
   }
 
-  watcher.on('change', async filePath => {
+  watcher.on('change', async (filePath: string) => {
     const destPath = getDesignManagerPath(filePath);
     const uploadPromise = uploadFile(
       accountId,
