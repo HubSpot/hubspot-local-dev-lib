@@ -1,6 +1,6 @@
 import { fetchPlatformVersions } from '../api/developerProjects';
 
-export const fetchDefaultVersion = async (accountId: number) => {
+export async function fetchDefaultVersion(accountId: number): Promise<string> {
   const platformVersions = await fetchPlatformVersions(accountId);
   return platformVersions.defaultPlatformVersion;
-};
+}

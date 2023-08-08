@@ -85,7 +85,7 @@ export async function downloadProject(
 export async function deleteProject(
   accountId: number,
   projectName: string
-): Promise<null> {
+): Promise<void> {
   return http.delete(accountId, {
     uri: `${PROJECTS_API_PATH}/${encodeURIComponent(projectName)}`,
   });
