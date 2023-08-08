@@ -56,21 +56,3 @@ export type StatusCodeErrorContext = {
   payload?: string;
   projectName?: string;
 };
-
-export type Error = {
-  category: string;
-  context: {
-    FILE_NAME?: Array<string>;
-    FILE_PATH?: Array<string>;
-    filepath?: string;
-  };
-  message?: string;
-  status: string;
-  subCategory: string;
-  responseJSON?: {
-    message?: string;
-  };
-  errors?: Array<Error>;
-};
-
-export type OptionalError = Error | null | undefined;
