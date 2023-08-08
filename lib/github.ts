@@ -8,7 +8,7 @@ import { extractZipArchive } from './archive';
 
 import { GITHUB_RELEASE_TYPES } from '../constants/github';
 import { DEFAULT_USER_AGENT_HEADERS } from '../http/requestOptions';
-import { BaseError, GithubError } from '../types/Error';
+import { BaseError } from '../types/Error';
 import { GithubReleaseData, GithubRepoFile } from '../types/Github';
 import { ValueOf } from '../types/Utils';
 import { LogCallbacksArg } from '../types/LogCallbacks';
@@ -198,8 +198,8 @@ export async function downloadGithubRepoContents(
 
     Promise.all(contentPromises);
   } catch (e) {
-    const error = e as GithubError;
-    if (error.error.message) {
+    const error = e as BaseError;
+    if (error?.error?.message) {
       throwErrorWithMessage(
         'github.downloadGithubRepoContents',
         {

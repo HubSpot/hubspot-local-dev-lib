@@ -12,6 +12,7 @@ export const ALLOWED_EXTENSIONS = new Set([
   'map',
   'svg',
   'eot',
+  'otf',
   'ttf',
   'woff',
   'woff2',

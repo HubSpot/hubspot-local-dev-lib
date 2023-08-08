@@ -1,4 +1,4 @@
-import { CLIConfig, Environment } from '../types/Config';
+import { CLIConfig_NEW, Environment } from '../types/Config';
 import { debug } from '../utils/logger';
 import { ENVIRONMENT_VARIABLES } from '../constants';
 import {
@@ -36,7 +36,7 @@ function getConfigVariablesFromEnv(): EnvironmentConfigVariables {
   };
 }
 
-export function loadConfigFromEnvironment(): CLIConfig | null {
+export function loadConfigFromEnvironment(): CLIConfig_NEW | null {
   const {
     apiKey,
     clientId,

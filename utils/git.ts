@@ -11,10 +11,13 @@ export function makeComparisonDir(filepath: string | null): string | null {
 
 export const getGitComparisonDir = () => makeComparisonDir(findup('.git'));
 
-export function isConfigPathInGitRepo(configPath: string): boolean {
+export function isConfigPathInGitRepo(configPath?: string | null): boolean {
+  if (configPath) {
+    return false;
+  }
   const gitDir = getGitComparisonDir();
   if (!gitDir) return false;
-  const configDir = makeComparisonDir(configPath);
+  const configDir = makeComparisonDir(configPath!);
   if (!configDir) return false;
   return configDir.startsWith(gitDir);
 }

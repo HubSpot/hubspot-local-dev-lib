@@ -6,6 +6,7 @@ import { getHubSpotApiOrigin } from '../lib/urls';
 import { getValidEnv } from '../lib/environment';
 import { FlatAccountFields, OAuthAccount, TokenInfo } from '../types/Accounts';
 import { debug } from '../utils/logger';
+import { getAccountIdentifier } from '../utils/getAccountIdentifier';
 import { AUTH_METHODS } from '../constants/auth';
 import {
   throwError,
@@ -45,7 +46,7 @@ class OAuth2Manager {
   async accessToken(): Promise<string | undefined> {
     if (!this.account.auth.tokenInfo?.refreshToken) {
       throwErrorWithMessage(`${i18nKey}.missingRefreshToken`, {
-        accountId: this.account.accountId,
+        accountId: getAccountIdentifier(this.account)!,
       });
     }
     if (
@@ -61,7 +62,7 @@ class OAuth2Manager {
 
   async fetchAccessToken(exchangeProof: ExchangeProof): Promise<void> {
     debug(`${i18nKey}.fetchingAccessToken`, {
-      accountId: this.account.accountId,
+      accountId: getAccountIdentifier(this.account)!,
       clientId: this.account.auth.clientId || '',
     });
 
@@ -90,7 +91,7 @@ class OAuth2Manager {
         .toString();
       if (this.writeTokenInfo) {
         debug(`${i18nKey}.updatingTokenInfo`, {
-          accountId: this.account.accountId,
+          accountId: getAccountIdentifier(this.account)!,
           clientId: this.account.auth.clientId || '',
         });
         this.writeTokenInfo(this.account.auth.tokenInfo);
@@ -106,7 +107,7 @@ class OAuth2Manager {
     try {
       if (this.refreshTokenRequest) {
         debug(`${i18nKey}.refreshingAccessToken`, {
-          accountId: this.account.accountId,
+          accountId: getAccountIdentifier(this.account)!,
           clientId: this.account.auth.clientId || '',
         });
         await this.refreshTokenRequest;
@@ -119,7 +120,7 @@ class OAuth2Manager {
         throwAuthErrorWithMessage(
           `${i18nKey}.auth`,
           {
-            token: error.response.body.message,
+            token: error.response.body.message || '',
           },
           error
         );
@@ -147,7 +148,7 @@ class OAuth2Manager {
       scopes: this.account.auth.scopes,
       tokenInfo: this.account.auth.tokenInfo,
       name: this.account.name,
-      accountId: this.account.accountId,
+      accountId: getAccountIdentifier(this.account)!,
     };
   }
 
