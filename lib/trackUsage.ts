@@ -2,7 +2,7 @@ import { debug } from '../utils/logger';
 import http from '../http';
 import { getRequestOptions } from '../http/requestOptions';
 import { getAccountConfig, getEnv } from '../config';
-import { FILE_MAPPER_API_PATH } from '../api/filemapper';
+import { FILE_MAPPER_API_PATH } from '../api/fileMapper';
 
 export async function trackUsage(
   eventName: string,
