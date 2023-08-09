@@ -21,12 +21,17 @@ export type GetRequestOptionsOptions = {
 };
 
 export type QueryParams = {
-  [key: string]: string | number;
+  [key: string]: string | number | boolean;
+};
+
+export type FormData = {
+  [key: string]: string | ReadStream;
 };
 
 export type HttpOptions = GetRequestOptionsOptions & {
   query?: QueryParams;
-  formData?: {
-    [key: string]: string | ReadStream;
-  };
+  formData?: FormData;
+  timeout?: number;
+  encoding?: string | null;
+  headers?: { [header: string]: string | string[] | undefined };
 };

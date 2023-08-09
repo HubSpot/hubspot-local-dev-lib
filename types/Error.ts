@@ -56,3 +56,5 @@ export type StatusCodeErrorContext = {
   payload?: string;
   projectName?: string;
 };
+
+export type OptionalError = BaseError | null | undefined;
