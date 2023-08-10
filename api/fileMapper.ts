@@ -49,7 +49,7 @@ export async function upload(
   options: FileMapperOptions = {}
 ) {
   return http.post(accountId, {
-    uri: `${FILE_MAPPER_API_PATH}/upload/${encodeURIComponent(dest)}`,
+    url: `${FILE_MAPPER_API_PATH}/upload/${encodeURIComponent(dest)}`,
     formData: {
       file: fs.createReadStream(path.resolve(getCwd(), src)),
     },
@@ -64,7 +64,7 @@ export async function fetchModule(
   options: FileMapperOptions = {}
 ) {
   return http.get(accountId, {
-    uri: `${FILE_MAPPER_API_PATH}/modules/${moduleId}`,
+    url: `${FILE_MAPPER_API_PATH}/modules/${moduleId}`,
     ...options,
   });
 }
@@ -79,7 +79,7 @@ export async function fetchFileStream(
   const response = await http.getOctetStream(
     accountId,
     {
-      uri: `${FILE_MAPPER_API_PATH}/stream/${encodeURIComponent(filePath)}`,
+      url: `${FILE_MAPPER_API_PATH}/stream/${encodeURIComponent(filePath)}`,
       ...options,
     },
     destination
@@ -94,7 +94,7 @@ export async function download(
   options: FileMapperOptions = {}
 ): Promise<FileMapperNode> {
   return http.get<FileMapperNode>(accountId, {
-    uri: `${FILE_MAPPER_API_PATH}/download/${encodeURIComponent(filepath)}`,
+    url: `${FILE_MAPPER_API_PATH}/download/${encodeURIComponent(filepath)}`,
     ...options,
   });
 }
@@ -106,7 +106,7 @@ export async function downloadDefault(
   options: FileMapperOptions = {}
 ): Promise<FileMapperNode> {
   return http.get<FileMapperNode>(accountId, {
-    uri: `${FILE_MAPPER_API_PATH}/download-default/${filepath}`,
+    url: `${FILE_MAPPER_API_PATH}/download-default/${filepath}`,
     ...options,
   });
 }
@@ -118,7 +118,7 @@ export async function deleteFile(
   options: FileMapperOptions = {}
 ): Promise<void> {
   return http.delete(accountId, {
-    uri: `${FILE_MAPPER_API_PATH}/delete/${encodeURIComponent(filePath)}`,
+    url: `${FILE_MAPPER_API_PATH}/delete/${encodeURIComponent(filePath)}`,
     ...options,
   });
 }
@@ -130,7 +130,7 @@ export async function moveFile(
   destPath: string
 ): Promise<void> {
   return http.put(accountId, {
-    uri: `${FILE_MAPPER_API_PATH}/rename/${srcPath}?path=${destPath}`,
+    url: `${FILE_MAPPER_API_PATH}/rename/${srcPath}?path=${destPath}`,
   });
 }
 
@@ -140,6 +140,6 @@ export async function getDirectoryContentsByPath(
   path: string
 ): Promise<void> {
   return http.get(accountId, {
-    uri: `${FILE_MAPPER_API_PATH}/meta/${path}`,
+    url: `${FILE_MAPPER_API_PATH}/meta/${path}`,
   });
 }

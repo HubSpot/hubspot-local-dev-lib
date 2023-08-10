@@ -12,7 +12,7 @@ export async function fetchSandboxHubData(
 ) {
   const axiosConfig = getAxiosConfig({
     env,
-    uri: `${SANDBOX_HUBS_API_PATH}`,
+    url: `${SANDBOX_HUBS_API_PATH}`,
     params: { portalId },
   });
   const reqWithToken = {

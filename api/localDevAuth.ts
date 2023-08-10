@@ -24,7 +24,7 @@ export async function fetchAccessToken(
     env,
     localHostOverride: true,
 
-    uri: `${LOCALDEVAUTH_API_AUTH_PATH}/refresh`,
+    url: `${LOCALDEVAUTH_API_AUTH_PATH}/refresh`,
     body: {
       encodedOAuthRefreshToken: personalAccessKey,
     },
@@ -41,7 +41,7 @@ export async function fetchAccessToken(
 
 export async function fetchScopeData(accountId: number, scopeGroup: string) {
   return http.get(accountId, {
-    uri: `localdevauth/v1/auth/check-scopes`,
+    url: `localdevauth/v1/auth/check-scopes`,
     query: {
       scopeGroup,
     },
