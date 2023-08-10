@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import contentDisposition from 'content-disposition';
-import { FullResponse } from 'request-promise-native';
+import { AxiosResponse } from 'axios';
 import http from '../http';
 import { getCwd } from '../lib/path';
 import { FileMapperNode } from '../types/Files';
@@ -9,10 +9,9 @@ import { FileMapperOptions } from '../types/Files';
 
 export const FILE_MAPPER_API_PATH = 'content/filemapper/v1';
 
-// https://github.com/request/request-promise#the-transform-function}
 function createFileMapperNodeFromStreamResponse(
   filePath: string,
-  response: FullResponse
+  response: AxiosResponse
 ): FileMapperNode {
   if (filePath[0] !== '/') {
     filePath = `/${filePath}`;

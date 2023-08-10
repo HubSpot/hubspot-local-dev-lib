@@ -1,6 +1,4 @@
 import path from 'path';
-import request from 'request';
-import requestPN, { FullResponse } from 'request-promise-native';
 import fs from 'fs-extra';
 import contentDisposition from 'content-disposition';
 
@@ -13,7 +11,7 @@ import { LogCallbacksArg } from '../types/LogCallbacks';
 import { AxiosConfigOptions, HttpOptions, QueryParams } from '../types/Http';
 import { throwErrorWithMessage } from '../errors/standardErrors';
 import { makeTypedLogger } from '../utils/logger';
-import { Axios, AxiosRequestConfig } from 'axios';
+import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 
 async function withOauth(
   accountId: number,
@@ -115,46 +113,51 @@ function addQueryParams(
   };
 }
 
-async function getRequest<T = FullResponse>(
+async function getRequest<T>(
   accountId: number,
   options: HttpOptions
 ): Promise<T> {
   const { query, ...rest } = options;
   const axiosConfig = addQueryParams(rest, query);
   const configWithAuth = await withAuth(accountId, axiosConfig);
-  return requestPN.get(configWithAuth);
+  const { data } = await axios<T>(configWithAuth);
+  return data;
 }
 
-async function postRequest<T = FullResponse>(
+async function postRequest<T>(
   accountId: number,
   options: HttpOptions
 ): Promise<T> {
   const configWithAuth = await withAuth(accountId, options);
-  return requestPN.post(configWithAuth);
+  const { data } = await axios({ ...configWithAuth, method: 'post' });
+  return data;
 }
 
-async function putRequest<T = FullResponse>(
+async function putRequest<T>(
   accountId: number,
   options: HttpOptions
 ): Promise<T> {
   const configWithAuth = await withAuth(accountId, options);
-  return requestPN.put(configWithAuth);
+  const { data } = await axios({ ...configWithAuth, method: 'put' });
+  return data;
 }
 
-async function patchRequest<T = FullResponse>(
+async function patchRequest<T>(
   accountId: number,
   options: HttpOptions
 ): Promise<T> {
   const configWithAuth = await withAuth(accountId, options);
-  return requestPN.patch(configWithAuth);
+  const { data } = await axios({ ...configWithAuth, method: 'put' });
+  return data;
 }
 
-async function deleteRequest<T = FullResponse>(
+async function deleteRequest<T>(
   accountId: number,
   options: HttpOptions
 ): Promise<T> {
   const configWithAuth = await withAuth(accountId, options);
-  return requestPN.del(configWithAuth);
+  const { data } = await axios({ ...configWithAuth, method: 'delete' });
+  return data;
 }
 
 const getRequestStreamCallbackKeys = ['onWrite'];
@@ -165,7 +168,7 @@ function createGetRequestStream(contentType: string) {
     options: HttpOptions,
     destPath: string,
     logCallbacks?: LogCallbacksArg<typeof getRequestStreamCallbackKeys>
-  ): Promise<FullResponse> => {
+  ): Promise<AxiosResponse> => {
     const { query, ...rest } = options;
     const axiosConfig = addQueryParams(rest, query);
     const logger = makeTypedLogger<typeof getRequestStreamCallbackKeys>(
@@ -173,15 +176,11 @@ function createGetRequestStream(contentType: string) {
       'http.index.createGetRequestStream'
     );
 
-    // Using `request` instead of `request-promise` per the docs so
-    // the response can be piped.
-    // https://github.com/request/request-promise#api-in-detail
-    //
     // eslint-disable-next-line no-async-promise-executor
-    return new Promise<FullResponse>(async (resolve, reject) => {
+    return new Promise<AxiosResponse>(async (resolve, reject) => {
       try {
         const { headers, ...opts } = await withAuth(accountId, axiosConfig);
-        const req = request.get({
+        const res = await axios({
           ...opts,
           headers: {
             ...headers,
@@ -189,41 +188,38 @@ function createGetRequestStream(contentType: string) {
           },
           responseType: 'stream',
         });
-        req.on('error', reject);
-        req.on('response', res => {
-          if (res.statusCode >= 200 && res.statusCode < 300) {
-            let filepath = destPath;
+        if (res.status >= 200 && res.status < 300) {
+          let filepath = destPath;
 
-            if (fs.existsSync(destPath)) {
-              const stat = fs.statSync(destPath);
-              if (stat.isDirectory()) {
-                const { parameters } = contentDisposition.parse(
-                  res.headers['content-disposition'] || ''
-                );
-                filepath = path.join(destPath, parameters.filename);
-              }
+          if (fs.existsSync(destPath)) {
+            const stat = fs.statSync(destPath);
+            if (stat.isDirectory()) {
+              const { parameters } = contentDisposition.parse(
+                res.headers['content-disposition'] || ''
+              );
+              filepath = path.join(destPath, parameters.filename);
             }
-            try {
-              fs.ensureFileSync(filepath);
-            } catch (err) {
-              reject(err);
-            }
-            const writeStream = fs.createWriteStream(filepath, {
-              encoding: 'binary',
-            });
-            req.pipe(writeStream);
-
-            writeStream.on('error', err => {
-              reject(err);
-            });
-            writeStream.on('close', async () => {
-              logger('onWrite', { filepath });
-              resolve(res);
-            });
-          } else {
-            reject(res);
           }
-        });
+          try {
+            fs.ensureFileSync(filepath);
+          } catch (err) {
+            reject(err);
+          }
+          const writeStream = fs.createWriteStream(filepath, {
+            encoding: 'binary',
+          });
+          res.data.pipe(writeStream);
+
+          writeStream.on('error', err => {
+            reject(err);
+          });
+          writeStream.on('close', async () => {
+            logger('onWrite', { filepath });
+            resolve(res);
+          });
+        } else {
+          reject(res);
+        }
       } catch (err) {
         reject(err);
       }

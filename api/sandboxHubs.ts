@@ -1,4 +1,4 @@
-import request from 'request-promise-native';
+import axios from 'axios';
 import { getAxiosConfig } from '../http/getAxiosConfig';
 import { ENVIRONMENTS } from '../constants/environments';
 import { Environment } from '../types/Config';
@@ -23,5 +23,7 @@ export async function fetchSandboxHubData(
     },
   };
 
-  return request.get(reqWithToken);
+  const { data } = await axios(reqWithToken);
+
+  return data;
 }

@@ -1,4 +1,4 @@
-import request from 'request-promise-native';
+import axios from 'axios';
 import moment from 'moment';
 
 import { ENVIRONMENTS } from '../constants/environments';
@@ -67,20 +67,20 @@ class OAuth2Manager {
     });
 
     try {
-      this.refreshTokenRequest = request.post(
+      const { data } = await axios.post(
         `${getHubSpotApiOrigin(getValidEnv(this.account.env))}/oauth/v1/token`,
         {
           form: exchangeProof,
           json: true,
         }
       );
+      this.refreshTokenRequest = data;
 
-      const response = await this.refreshTokenRequest;
       const {
         refresh_token: refreshToken,
         access_token: accessToken,
         expires_in: expiresIn,
-      } = response;
+      } = data;
       if (!this.account.auth.tokenInfo) {
         this.account.auth.tokenInfo = {};
       }
