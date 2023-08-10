@@ -1,8 +1,5 @@
 import { ReadStream } from 'fs';
-import { CoreOptions, UriOptions } from 'request';
 import { Url } from 'url';
-
-export type RequestOptions = CoreOptions & UriOptions;
 
 type Body = { [key: string]: string | number | Body };
 

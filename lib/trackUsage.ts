@@ -1,6 +1,6 @@
 import { debug } from '../utils/logger';
 import http from '../http';
-import { getRequestOptions } from '../http/requestOptions';
+import { getAxiosConfig } from '../http/getAxiosConfig';
 import { getAccountConfig, getEnv } from '../config';
 import { FILE_MAPPER_API_PATH } from '../api/fileMapper';
 
@@ -49,12 +49,12 @@ export async function trackUsage(
   }
 
   const env = getEnv(accountId);
-  const requestOptions = getRequestOptions({
+  const axiosConfig = getAxiosConfig({
     env,
     uri: path,
     body: usageEvent,
     resolveWithFullResponse: true,
   });
   debug(`${i18nKey}.sendingEventUnauthenticated`);
-  return http.post(accountId, requestOptions);
+  return http.post(accountId, axiosConfig);
 }

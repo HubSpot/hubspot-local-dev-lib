@@ -5,7 +5,7 @@ import fs from 'fs-extra';
 import contentDisposition from 'content-disposition';
 
 import { getAccountConfig } from '../config';
-import { getRequestOptions } from './requestOptions';
+import { getAxiosConfig } from './getAxiosConfig';
 import { accessTokenForPersonalAccessKey } from '../lib/personalAccessKey';
 import { getOauthManager } from '../lib/oauth';
 import { FlatAccountFields } from '../types/Accounts';
@@ -14,16 +14,16 @@ import {
   GetRequestOptionsOptions,
   HttpOptions,
   QueryParams,
-  RequestOptions,
 } from '../types/Http';
 import { throwErrorWithMessage } from '../errors/standardErrors';
 import { makeTypedLogger } from '../utils/logger';
+import { Axios, AxiosRequestConfig } from 'axios';
 
 async function withOauth(
   accountId: number,
   accountConfig: FlatAccountFields,
-  requestOptions: RequestOptions
-): Promise<RequestOptions> {
+  requestOptions: AxiosRequestConfig
+): Promise<AxiosRequestConfig> {
   const { headers } = requestOptions;
   const oauth = getOauthManager(accountId, accountConfig);
 
@@ -43,8 +43,8 @@ async function withOauth(
 
 async function withPersonalAccessKey(
   accountId: number,
-  requestOptions: RequestOptions
-): Promise<RequestOptions> {
+  requestOptions: AxiosRequestConfig
+): Promise<AxiosRequestConfig> {
   const { headers } = requestOptions;
   const accessToken = await accessTokenForPersonalAccessKey(accountId);
   return {
@@ -58,14 +58,14 @@ async function withPersonalAccessKey(
 
 function withPortalId(
   portalId: number,
-  requestOptions: RequestOptions
-): RequestOptions {
-  const { qs } = requestOptions;
+  requestOptions: AxiosRequestConfig
+): AxiosRequestConfig {
+  const { params } = requestOptions;
 
   return {
     ...requestOptions,
-    qs: {
-      ...qs,
+    params: {
+      ...params,
       portalId,
     },
   };
@@ -74,7 +74,7 @@ function withPortalId(
 async function withAuth(
   accountId: number,
   options: GetRequestOptionsOptions
-): Promise<RequestOptions> {
+): Promise<AxiosRequestConfig> {
   const accountConfig = getAccountConfig(accountId);
 
   if (!accountConfig) {
@@ -82,24 +82,24 @@ async function withAuth(
   }
 
   const { env, authType, apiKey } = accountConfig;
-  const requestOptions = withPortalId(
+  const axiosConfig = withPortalId(
     accountId,
-    getRequestOptions({ env, ...options })
+    getAxiosConfig({ env, ...options })
   );
 
   if (authType === 'personalaccesskey') {
-    return withPersonalAccessKey(accountId, requestOptions);
+    return withPersonalAccessKey(accountId, axiosConfig);
   }
 
   if (authType === 'oauth2') {
-    return withOauth(accountId, accountConfig, requestOptions);
+    return withOauth(accountId, accountConfig, axiosConfig);
   }
-  const { qs } = requestOptions;
+  const { params } = axiosConfig;
 
   return {
-    ...requestOptions,
-    qs: {
-      ...qs,
+    ...axiosConfig,
+    params: {
+      ...params,
       hapikey: apiKey,
     },
   };

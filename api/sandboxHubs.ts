@@ -1,5 +1,5 @@
 import request from 'request-promise-native';
-import { getRequestOptions } from '../http/requestOptions';
+import { getAxiosConfig } from '../http/getAxiosConfig';
 import { ENVIRONMENTS } from '../constants/environments';
 import { Environment } from '../types/Config';
 
@@ -10,15 +10,15 @@ export async function fetchSandboxHubData(
   portalId: number,
   env: Environment = ENVIRONMENTS.PROD
 ) {
-  const requestOptions = getRequestOptions({
+  const axiosConfig = getAxiosConfig({
     env,
     uri: `${SANDBOX_HUBS_API_PATH}`,
     qs: { portalId },
   });
   const reqWithToken = {
-    ...requestOptions,
+    ...axiosConfig,
     headers: {
-      ...requestOptions.headers,
+      ...axiosConfig.headers,
       Authorization: `Bearer ${accessToken}`,
     },
   };

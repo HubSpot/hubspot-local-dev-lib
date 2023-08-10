@@ -1,5 +1,5 @@
 import request from 'request-promise-native';
-import { getRequestOptions } from '../http/requestOptions';
+import { getAxiosConfig } from '../http/getAxiosConfig';
 import http from '../http';
 import { ENVIRONMENTS } from '../constants/environments';
 import { Environment } from '../types/Config';
@@ -20,7 +20,7 @@ export async function fetchAccessToken(
   portalId?: number
 ): Promise<AccessTokenResponse> {
   const query = portalId ? { portalId } : {};
-  const requestOptions = getRequestOptions({
+  const axiosConfig = getAxiosConfig({
     env,
     localHostOverride: true,
 
@@ -31,7 +31,7 @@ export async function fetchAccessToken(
     qs: query,
   });
 
-  return request.post(requestOptions);
+  return request.post(axiosConfig);
 }
 
 export async function fetchScopeData(accountId: number, scopeGroup: string) {
