@@ -10,11 +10,7 @@ import { accessTokenForPersonalAccessKey } from '../lib/personalAccessKey';
 import { getOauthManager } from '../lib/oauth';
 import { FlatAccountFields } from '../types/Accounts';
 import { LogCallbacksArg } from '../types/LogCallbacks';
-import {
-  GetRequestOptionsOptions,
-  HttpOptions,
-  QueryParams,
-} from '../types/Http';
+import { AxiosConfigOptions, HttpOptions, QueryParams } from '../types/Http';
 import { throwErrorWithMessage } from '../errors/standardErrors';
 import { makeTypedLogger } from '../utils/logger';
 import { Axios, AxiosRequestConfig } from 'axios';
@@ -22,9 +18,9 @@ import { Axios, AxiosRequestConfig } from 'axios';
 async function withOauth(
   accountId: number,
   accountConfig: FlatAccountFields,
-  requestOptions: AxiosRequestConfig
+  axiosConfig: AxiosRequestConfig
 ): Promise<AxiosRequestConfig> {
-  const { headers } = requestOptions;
+  const { headers } = axiosConfig;
   const oauth = getOauthManager(accountId, accountConfig);
 
   if (!oauth) {
@@ -33,7 +29,7 @@ async function withOauth(
 
   const accessToken = await oauth.accessToken();
   return {
-    ...requestOptions,
+    ...axiosConfig,
     headers: {
       ...headers,
       Authorization: `Bearer ${accessToken}`,
@@ -43,12 +39,12 @@ async function withOauth(
 
 async function withPersonalAccessKey(
   accountId: number,
-  requestOptions: AxiosRequestConfig
+  axiosConfig: AxiosRequestConfig
 ): Promise<AxiosRequestConfig> {
-  const { headers } = requestOptions;
+  const { headers } = axiosConfig;
   const accessToken = await accessTokenForPersonalAccessKey(accountId);
   return {
-    ...requestOptions,
+    ...axiosConfig,
     headers: {
       ...headers,
       Authorization: `Bearer ${accessToken}`,
@@ -58,12 +54,12 @@ async function withPersonalAccessKey(
 
 function withPortalId(
   portalId: number,
-  requestOptions: AxiosRequestConfig
+  axiosConfig: AxiosRequestConfig
 ): AxiosRequestConfig {
-  const { params } = requestOptions;
+  const { params } = axiosConfig;
 
   return {
-    ...requestOptions,
+    ...axiosConfig,
     params: {
       ...params,
       portalId,
@@ -73,7 +69,7 @@ function withPortalId(
 
 async function withAuth(
   accountId: number,
-  options: GetRequestOptionsOptions
+  options: AxiosConfigOptions
 ): Promise<AxiosRequestConfig> {
   const accountConfig = getAccountConfig(accountId);
 
@@ -106,14 +102,14 @@ async function withAuth(
 }
 
 function addQueryParams(
-  requestOptions: GetRequestOptionsOptions,
-  params: QueryParams = {}
-): GetRequestOptionsOptions {
-  const { qs } = requestOptions;
+  configOptions: AxiosConfigOptions,
+  queryParams: QueryParams = {}
+): AxiosConfigOptions {
+  const { params } = configOptions;
   return {
-    ...requestOptions,
-    qs: {
-      ...qs,
+    ...configOptions,
+    params: {
+      ...queryParams,
       ...params,
     },
   };
@@ -124,41 +120,41 @@ async function getRequest<T = FullResponse>(
   options: HttpOptions
 ): Promise<T> {
   const { query, ...rest } = options;
-  const requestOptions = addQueryParams(rest, query);
-  const requestOptionsWithAuth = await withAuth(accountId, requestOptions);
-  return requestPN.get(requestOptionsWithAuth);
+  const axiosConfig = addQueryParams(rest, query);
+  const configWithAuth = await withAuth(accountId, axiosConfig);
+  return requestPN.get(configWithAuth);
 }
 
 async function postRequest<T = FullResponse>(
   accountId: number,
   options: HttpOptions
 ): Promise<T> {
-  const requestOptionsWithAuth = await withAuth(accountId, options);
-  return requestPN.post(requestOptionsWithAuth);
+  const configWithAuth = await withAuth(accountId, options);
+  return requestPN.post(configWithAuth);
 }
 
 async function putRequest<T = FullResponse>(
   accountId: number,
   options: HttpOptions
 ): Promise<T> {
-  const requestOptionsWithAuth = await withAuth(accountId, options);
-  return requestPN.put(requestOptionsWithAuth);
+  const configWithAuth = await withAuth(accountId, options);
+  return requestPN.put(configWithAuth);
 }
 
 async function patchRequest<T = FullResponse>(
   accountId: number,
   options: HttpOptions
 ): Promise<T> {
-  const requestOptionsWithAuth = await withAuth(accountId, options);
-  return requestPN.patch(requestOptionsWithAuth);
+  const configWithAuth = await withAuth(accountId, options);
+  return requestPN.patch(configWithAuth);
 }
 
 async function deleteRequest<T = FullResponse>(
   accountId: number,
   options: HttpOptions
 ): Promise<T> {
-  const requestOptionsWithAuth = await withAuth(accountId, options);
-  return requestPN.del(requestOptionsWithAuth);
+  const configWithAuth = await withAuth(accountId, options);
+  return requestPN.del(configWithAuth);
 }
 
 const getRequestStreamCallbackKeys = ['onWrite'];
@@ -171,7 +167,7 @@ function createGetRequestStream(contentType: string) {
     logCallbacks?: LogCallbacksArg<typeof getRequestStreamCallbackKeys>
   ): Promise<FullResponse> => {
     const { query, ...rest } = options;
-    const requestOptions = addQueryParams(rest, query);
+    const axiosConfig = addQueryParams(rest, query);
     const logger = makeTypedLogger<typeof getRequestStreamCallbackKeys>(
       logCallbacks,
       'http.index.createGetRequestStream'
@@ -184,14 +180,14 @@ function createGetRequestStream(contentType: string) {
     // eslint-disable-next-line no-async-promise-executor
     return new Promise<FullResponse>(async (resolve, reject) => {
       try {
-        const { headers, ...opts } = await withAuth(accountId, requestOptions);
+        const { headers, ...opts } = await withAuth(accountId, axiosConfig);
         const req = request.get({
           ...opts,
           headers: {
             ...headers,
             accept: contentType,
           },
-          json: false,
+          responseType: 'stream',
         });
         req.on('error', reject);
         req.on('response', res => {

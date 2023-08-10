@@ -3,11 +3,11 @@ import { Url } from 'url';
 
 type Body = { [key: string]: string | number | Body };
 
-export type GetRequestOptionsOptions = {
+export type AxiosConfigOptions = {
   uri: string | Url;
   env?: string;
   localHostOverride?: boolean;
-  qs?: {
+  params?: {
     portalId?: number;
     buffer?: boolean;
     environmentId?: number;
@@ -25,7 +25,7 @@ export type FormData = {
   [key: string]: string | ReadStream;
 };
 
-export type HttpOptions = GetRequestOptionsOptions & {
+export type HttpOptions = AxiosConfigOptions & {
   query?: QueryParams;
   formData?: FormData;
   timeout?: number;
