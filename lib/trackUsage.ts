@@ -9,7 +9,7 @@ export async function trackUsage(
   eventClass: string,
   meta = {},
   accountId: number
-) {
+): Promise<void> {
   const i18nKey = 'api.filemapper.trackUsage';
   const usageEvent = {
     accountId,
@@ -42,7 +42,7 @@ export async function trackUsage(
   if (accountConfig && accountConfig.authType === 'personalaccesskey') {
     debug(`${i18nKey}.sendingEventAuthenticated`);
     return http.post(accountId, {
-      uri: `${path}/authenticated`,
+      url: `${path}/authenticated`,
       body: usageEvent,
       resolveWithFullResponse: true,
     });
@@ -51,10 +51,10 @@ export async function trackUsage(
   const env = getEnv(accountId);
   const axiosConfig = getAxiosConfig({
     env,
-    uri: path,
+    url: path,
     body: usageEvent,
     resolveWithFullResponse: true,
   });
   debug(`${i18nKey}.sendingEventUnauthenticated`);
-  return http.post(accountId, axiosConfig);
+  http.post<void>(accountId, axiosConfig);
 }

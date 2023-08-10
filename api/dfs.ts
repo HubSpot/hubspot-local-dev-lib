@@ -21,7 +21,7 @@ export async function fetchProjects(
   accountId: number
 ): Promise<FetchProjectResponse> {
   return http.get(accountId, {
-    uri: PROJECTS_API_PATH,
+    url: PROJECTS_API_PATH,
   });
 }
 
@@ -30,7 +30,7 @@ export async function createProject(
   name: string
 ): Promise<Project> {
   return http.post(accountId, {
-    uri: PROJECTS_API_PATH,
+    url: PROJECTS_API_PATH,
     body: {
       name,
     },

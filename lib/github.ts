@@ -28,10 +28,10 @@ export async function fetchJsonFromRepository(
   filePath: string
 ): Promise<JSON> {
   try {
-    const URI = `https://raw.githubusercontent.com/HubSpot/${repoName}/${filePath}`;
-    debug('github.fetchJsonFromRepository', { uri: URI });
+    const URL = `https://raw.githubusercontent.com/HubSpot/${repoName}/${filePath}`;
+    debug('github.fetchJsonFromRepository', { url: URL });
 
-    const { data } = await axios.get<JSON>(URI, {
+    const { data } = await axios.get<JSON>(URL, {
       headers: { ...DEFAULT_USER_AGENT_HEADERS, ...GITHUB_AUTH_HEADERS },
     });
     return data;

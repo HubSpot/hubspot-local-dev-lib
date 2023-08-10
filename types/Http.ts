@@ -1,10 +1,9 @@
 import { ReadStream } from 'fs';
-import { Url } from 'url';
 
 type Body = { [key: string]: string | number | Body };
 
 export type AxiosConfigOptions = {
-  uri: string | Url;
+  url: string;
   env?: string;
   localHostOverride?: boolean;
   params?: {

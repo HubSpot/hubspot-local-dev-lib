@@ -116,7 +116,7 @@ export async function deleteFile(
   accountId: number,
   filePath: string,
   options: FileMapperOptions = {}
-): Promise<FullResponse> {
+): Promise<void> {
   return http.delete(accountId, {
     uri: `${FILE_MAPPER_API_PATH}/delete/${encodeURIComponent(filePath)}`,
     ...options,
@@ -128,7 +128,7 @@ export async function moveFile(
   accountId: number,
   srcPath: string,
   destPath: string
-): Promise<FullResponse> {
+): Promise<void> {
   return http.put(accountId, {
     uri: `${FILE_MAPPER_API_PATH}/rename/${srcPath}?path=${destPath}`,
   });
@@ -138,7 +138,7 @@ export async function moveFile(
 export async function getDirectoryContentsByPath(
   accountId: number,
   path: string
-): Promise<FullResponse> {
+): Promise<void> {
   return http.get(accountId, {
     uri: `${FILE_MAPPER_API_PATH}/meta/${path}`,
   });

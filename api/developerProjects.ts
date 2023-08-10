@@ -11,6 +11,6 @@ export async function fetchPlatformVersions(
   accountId: number
 ): Promise<FetchPlatformVersionResponse> {
   return http.get(accountId, {
-    uri: `${DEVELOPER_PROJECTS_API_PATH}/platformVersion`,
+    url: `${DEVELOPER_PROJECTS_API_PATH}/platformVersion`,
   });
 }
