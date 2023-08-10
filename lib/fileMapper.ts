@@ -66,7 +66,7 @@ export function getFileMapperQueryValues(
   { staging, assetVersion }: FileMapperInputOptions
 ): FileMapperOptions {
   return {
-    qs: {
+    params: {
       buffer: useApiBuffer(mode),
       environmentId: staging ? 2 : 1,
       version: assetVersion,

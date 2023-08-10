@@ -28,7 +28,7 @@ export async function fetchAccessToken(
     body: {
       encodedOAuthRefreshToken: personalAccessKey,
     },
-    qs: query,
+    params: query,
   });
 
   return request.post(axiosConfig);
