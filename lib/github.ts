@@ -7,7 +7,7 @@ import { throwError, throwErrorWithMessage } from '../errors/standardErrors';
 import { extractZipArchive } from './archive';
 
 import { GITHUB_RELEASE_TYPES } from '../constants/github';
-import { DEFAULT_USER_AGENT_HEADERS } from '../http/requestOptions';
+import { DEFAULT_USER_AGENT_HEADERS } from '../http/getAxiosConfig';
 import { BaseError } from '../types/Error';
 import { GithubReleaseData, GithubRepoFile } from '../types/Github';
 import { ValueOf } from '../types/Utils';
@@ -28,10 +28,10 @@ export async function fetchJsonFromRepository(
   filePath: string
 ): Promise<JSON> {
   try {
-    const URI = `https://raw.githubusercontent.com/HubSpot/${repoName}/${filePath}`;
-    debug('github.fetchJsonFromRepository', { uri: URI });
+    const URL = `https://raw.githubusercontent.com/HubSpot/${repoName}/${filePath}`;
+    debug('github.fetchJsonFromRepository', { url: URL });
 
-    const { data } = await axios.get<JSON>(URI, {
+    const { data } = await axios.get<JSON>(URL, {
       headers: { ...DEFAULT_USER_AGENT_HEADERS, ...GITHUB_AUTH_HEADERS },
     });
     return data;

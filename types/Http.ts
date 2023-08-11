@@ -1,16 +1,12 @@
 import { ReadStream } from 'fs';
-import { CoreOptions, UriOptions } from 'request';
-import { Url } from 'url';
-
-export type RequestOptions = CoreOptions & UriOptions;
 
 type Body = { [key: string]: string | number | Body };
 
-export type GetRequestOptionsOptions = {
-  uri: string | Url;
+export type AxiosConfigOptions = {
+  url: string;
   env?: string;
   localHostOverride?: boolean;
-  qs?: {
+  params?: {
     portalId?: number;
     buffer?: boolean;
     environmentId?: number;
@@ -28,7 +24,7 @@ export type FormData = {
   [key: string]: string | ReadStream;
 };
 
-export type HttpOptions = GetRequestOptionsOptions & {
+export type HttpOptions = AxiosConfigOptions & {
   query?: QueryParams;
   formData?: FormData;
   timeout?: number;

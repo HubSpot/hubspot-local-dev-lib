@@ -1,8 +1,8 @@
-import request from 'request-promise-native';
-import { getRequestOptions } from '../http/requestOptions';
+import { getAxiosConfig } from '../http/getAxiosConfig';
 import http from '../http';
 import { ENVIRONMENTS } from '../constants/environments';
 import { Environment } from '../types/Config';
+import axios from 'axios';
 
 const LOCALDEVAUTH_API_AUTH_PATH = 'localdevauth/v1/auth';
 
@@ -20,23 +20,28 @@ export async function fetchAccessToken(
   portalId?: number
 ): Promise<AccessTokenResponse> {
   const query = portalId ? { portalId } : {};
-  const requestOptions = getRequestOptions({
+  const axiosConfig = getAxiosConfig({
     env,
     localHostOverride: true,
 
-    uri: `${LOCALDEVAUTH_API_AUTH_PATH}/refresh`,
+    url: `${LOCALDEVAUTH_API_AUTH_PATH}/refresh`,
     body: {
       encodedOAuthRefreshToken: personalAccessKey,
     },
-    qs: query,
+    params: query,
   });
 
-  return request.post(requestOptions);
+  const { data } = await axios<AccessTokenResponse>({
+    ...axiosConfig,
+    method: 'post',
+  });
+
+  return data;
 }
 
 export async function fetchScopeData(accountId: number, scopeGroup: string) {
   return http.get(accountId, {
-    uri: `localdevauth/v1/auth/check-scopes`,
+    url: `localdevauth/v1/auth/check-scopes`,
     query: {
       scopeGroup,
     },

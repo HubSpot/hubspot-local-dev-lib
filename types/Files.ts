@@ -28,7 +28,7 @@ export type FileMapperNode = {
 
 export type Mode = ValueOf<typeof MODE>;
 
-export type FileMapperOptions = Omit<HttpOptions, 'uri'>;
+export type FileMapperOptions = Omit<HttpOptions, 'url'>;
 
 export type FileMapperInputOptions = {
   staging?: boolean;
