@@ -187,9 +187,9 @@ export function watch(
   postInitialUploadCallback:
     | ((result: Array<UploadFolderResults>) => void)
     | null = null,
-  logCallbacks?: WatchLogCallbacks,
   onUploadFolderError?: ErrorHandler,
-  onQueueAddError?: ErrorHandler
+  onQueueAddError?: ErrorHandler,
+  logCallbacks?: WatchLogCallbacks
 ) {
   const logger = makeLogger(logCallbacks, 'watch');
   const regex = new RegExp(`^${escapeRegExp(src)}`);
