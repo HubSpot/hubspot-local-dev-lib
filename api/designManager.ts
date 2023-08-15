@@ -2,21 +2,32 @@ import http from '../http';
 
 const DESIGN_MANAGER_API_PATH = 'designmanager/v1';
 
-export async function fetchThemes(accountId: number, query = {}) {
-  return http.get(accountId, {
+type FetchThemesResponse = {
+  objects: Array<{
+    theme: {
+      path: string;
+    };
+  }>;
+};
+
+export async function fetchThemes(
+  accountId: number,
+  query = {}
+): Promise<FetchThemesResponse> {
+  return http.get<FetchThemesResponse>(accountId, {
     url: `${DESIGN_MANAGER_API_PATH}/themes/combined`,
     query,
   });
 }
 
-export async function fetchBuiltinMapping(accountId: number) {
-  return http.get(accountId, {
-    url: `${DESIGN_MANAGER_API_PATH}/widgets/builtin-mapping`,
-  });
-}
+type FetchBuiltinMappingResponse = {
+  [key: string]: string;
+};
 
-export async function fetchRawAssetByPath(accountId: number, path: string) {
-  return http.get(accountId, {
-    url: `${DESIGN_MANAGER_API_PATH}/raw-assets/by-path/${path}?portalId=${accountId}`,
+export async function fetchBuiltinMapping(
+  accountId: number
+): Promise<FetchBuiltinMappingResponse> {
+  return http.get<FetchBuiltinMappingResponse>(accountId, {
+    url: `${DESIGN_MANAGER_API_PATH}/widgets/builtin-mapping`,
   });
 }

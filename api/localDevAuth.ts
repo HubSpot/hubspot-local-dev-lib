@@ -2,6 +2,7 @@ import { getAxiosConfig } from '../http/getAxiosConfig';
 import http from '../http';
 import { ENVIRONMENTS } from '../constants/environments';
 import { Environment } from '../types/Config';
+import { ScopeData } from '../types/Accounts';
 import axios from 'axios';
 
 const LOCALDEVAUTH_API_AUTH_PATH = 'localdevauth/v1/auth';
@@ -39,8 +40,11 @@ export async function fetchAccessToken(
   return data;
 }
 
-export async function fetchScopeData(accountId: number, scopeGroup: string) {
-  return http.get(accountId, {
+export async function fetchScopeData(
+  accountId: number,
+  scopeGroup: string
+): Promise<ScopeData> {
+  return http.get<ScopeData>(accountId, {
     url: `localdevauth/v1/auth/check-scopes`,
     query: {
       scopeGroup,

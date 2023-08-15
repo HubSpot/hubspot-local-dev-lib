@@ -44,3 +44,9 @@ export type UploadFolderResults = {
   error: StatusCodeError | null;
   file: string;
 };
+
+export type FileTree = {
+  source?: string;
+  path: string;
+  children: Array<FileTree>;
+};

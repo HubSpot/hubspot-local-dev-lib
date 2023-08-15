@@ -4,8 +4,7 @@ import contentDisposition from 'content-disposition';
 import { AxiosResponse } from 'axios';
 import http from '../http';
 import { getCwd } from '../lib/path';
-import { FileMapperNode } from '../types/Files';
-import { FileMapperOptions } from '../types/Files';
+import { FileMapperNode, FileMapperOptions, FileTree } from '../types/Files';
 
 export const FILE_MAPPER_API_PATH = 'content/filemapper/v1';
 
@@ -47,8 +46,8 @@ export async function upload(
   src: string,
   dest: string,
   options: FileMapperOptions = {}
-) {
-  return http.post(accountId, {
+): Promise<void> {
+  return http.post<void>(accountId, {
     url: `${FILE_MAPPER_API_PATH}/upload/${encodeURIComponent(dest)}`,
     formData: {
       file: fs.createReadStream(path.resolve(getCwd(), src)),
@@ -62,8 +61,8 @@ export async function fetchModule(
   accountId: number,
   moduleId: number,
   options: FileMapperOptions = {}
-) {
-  return http.get(accountId, {
+): Promise<FileTree> {
+  return http.get<FileTree>(accountId, {
     url: `${FILE_MAPPER_API_PATH}/modules/${moduleId}`,
     ...options,
   });
