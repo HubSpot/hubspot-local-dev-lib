@@ -111,3 +111,8 @@ export interface FlatAccountFields_DEPRECATED extends CLIAccount_DEPRECATED {
 export type FlatAccountFields =
   | FlatAccountFields_NEW
   | FlatAccountFields_DEPRECATED;
+
+export type ScopeData = {
+  portalScopesInGroup: Array<string>;
+  userScopesInGroup: Array<string>;
+};
