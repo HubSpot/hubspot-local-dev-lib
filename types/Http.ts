@@ -12,7 +12,7 @@ export type AxiosConfigOptions = {
     environmentId?: number;
     version?: string;
   };
-  body?: Body;
+  body?: Body | JSON;
   resolveWithFullResponse?: boolean;
 };
 
