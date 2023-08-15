@@ -38,7 +38,7 @@ const queue = new PQueue({
 function _notifyOfThemePreview(
   filePath: string,
   accountId: number,
-  logCallbacks: WatchLogCallbacks
+  logCallbacks?: WatchLogCallbacks
 ): void {
   const logger = makeLogger(logCallbacks, 'watch');
   if (queue.size > 0) return;
@@ -64,7 +64,7 @@ async function uploadFile(
   dest: string,
   options: UploadFileOptions,
   mode: Mode | null = null,
-  logCallbacks: WatchLogCallbacks
+  logCallbacks?: WatchLogCallbacks
 ): Promise<void> {
   const logger = makeLogger(logCallbacks, 'watch');
   const src = options.src;
@@ -134,7 +134,7 @@ async function deleteRemoteFile(
   accountId: number,
   filePath: string,
   remoteFilePath: string,
-  logCallbacks: WatchLogCallbacks
+  logCallbacks?: WatchLogCallbacks
 ): Promise<void> {
   const logger = makeLogger(logCallbacks, 'watch');
   if (shouldIgnoreFile(filePath)) {
@@ -170,6 +170,8 @@ type WatchOptions = {
   filePaths?: Array<string>;
 };
 
+type ErrorHandler = (error: StatusCodeError) => void;
+
 export function watch(
   accountId: number,
   src: string,
@@ -185,7 +187,9 @@ export function watch(
   postInitialUploadCallback:
     | ((result: Array<UploadFolderResults>) => void)
     | null = null,
-  logCallbacks: WatchLogCallbacks
+  logCallbacks?: WatchLogCallbacks,
+  onUploadFolderError?: ErrorHandler,
+  onQueueAddError?: ErrorHandler
 ) {
   const logger = makeLogger(logCallbacks, 'watch');
   const regex = new RegExp(`^${escapeRegExp(src)}`);
@@ -205,7 +209,7 @@ export function watch(
 
   if (!disableInitial) {
     // Use uploadFolder so that failures of initial upload are retried
-    uploadFolder(
+    const uploadFolderPromise = uploadFolder(
       accountId,
       src,
       dest,
@@ -219,15 +223,10 @@ export function watch(
         postInitialUploadCallback(result);
       }
     });
-    // TODO: Figure out how to handle errors that we don't want to break control flow
-    // .catch(error => {
-    //   logger.error(
-    //     `Initial uploading of folder "${src}" to "${dest} in account ${accountId} failed`
-    //   );
-    //   logErrorInstance(error, {
-    //     accountId,
-    //   });
-    // });
+
+    if (onUploadFolderError) {
+      uploadFolderPromise.catch(onUploadFolderError);
+    }
   }
 
   watcher.on('ready', () => {
@@ -268,7 +267,7 @@ export function watch(
           type,
           remoteFilePath: remotePath,
         });
-        queue.add(() => {
+        const queueAddPromise = queue.add(() => {
           const deletePromise = deleteRemoteFile(
             accountId,
             filePath,
@@ -280,17 +279,10 @@ export function watch(
               remoteFilePath: remotePath,
             });
           });
-          // TODO: Figure out how to handle errors that we don't want to break control flow
-          // .catch(error => {
-          //   logger.error('Deleting %s "%s" failed', type, remotePath);
-          //   logApiErrorInstance(
-          //     error,
-          //     new ApiErrorContext({
-          //       accountId,
-          //       request: remotePath,
-          //     })
-          //   );
-          // });
+
+          if (onQueueAddError) {
+            queueAddPromise.catch(onQueueAddError);
+          }
           triggerNotify(notify, 'Removed', filePath, deletePromise);
           return deletePromise;
         });
