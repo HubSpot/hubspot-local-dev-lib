@@ -57,3 +57,10 @@ export type GithubRepoFile = {
     html: string;
   };
 };
+
+export interface GithubSourceData {
+  branch: string;
+  owner: string;
+  repositoryName: string;
+  source: string;
+}

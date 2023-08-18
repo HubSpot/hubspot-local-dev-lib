@@ -140,6 +140,9 @@ describe('config/configFile', () => {
     it('writes the config to a file', () => {
       ensureFileSyncSpy.mockImplementation(() => null);
       writeFileSyncSpy.mockImplementation(() => null);
+      readFileSyncSpy.mockImplementation(() => Buffer.from('content'));
+      loadSpy.mockImplementation(() => ({}))
+
       writeConfigToFile(CONFIG);
 
       expect(ensureFileSyncSpy).toHaveBeenCalled();

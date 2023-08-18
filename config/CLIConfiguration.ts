@@ -220,7 +220,7 @@ class CLIConfiguration {
     return defaultValue;
   }
 
-  getAccountId(nameOrId: string | number): number | null {
+  getAccountId(nameOrId?: string | number): number | null {
     const account = this.getAccount(nameOrId);
     return account ? account.accountId : null;
   }
@@ -253,7 +253,7 @@ class CLIConfiguration {
       : -1;
   }
 
-  getConfigForAccount(accountId: number): CLIAccount_NEW | null {
+  getConfigForAccount(accountId?: number): CLIAccount_NEW | null {
     if (this.config) {
       this.config.accounts.find(account => account.accountId === accountId) ||
         null;

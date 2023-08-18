@@ -1,15 +1,14 @@
 import { debug } from '../utils/logger';
 import http from '../http';
-import { getRequestOptions } from '../http/requestOptions';
 import { getAccountConfig, getEnv } from '../config';
-import { FILE_MAPPER_API_PATH } from '../api/filemapper';
+import { FILE_MAPPER_API_PATH } from '../api/fileMapper';
 
 export async function trackUsage(
   eventName: string,
   eventClass: string,
   meta = {},
   accountId: number
-) {
+): Promise<void> {
   const i18nKey = 'api.filemapper.trackUsage';
   const usageEvent = {
     accountId,
@@ -42,19 +41,18 @@ export async function trackUsage(
   if (accountConfig && accountConfig.authType === 'personalaccesskey') {
     debug(`${i18nKey}.sendingEventAuthenticated`);
     return http.post(accountId, {
-      uri: `${path}/authenticated`,
+      url: `${path}/authenticated`,
       body: usageEvent,
       resolveWithFullResponse: true,
     });
   }
 
   const env = getEnv(accountId);
-  const requestOptions = getRequestOptions({
+  debug(`${i18nKey}.sendingEventUnauthenticated`);
+  http.post<void>(accountId, {
     env,
-    uri: path,
+    url: path,
     body: usageEvent,
     resolveWithFullResponse: true,
   });
-  debug(`${i18nKey}.sendingEventUnauthenticated`);
-  return http.post(accountId, requestOptions);
 }

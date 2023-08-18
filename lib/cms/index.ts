@@ -11,6 +11,12 @@ import {
   getThemeJSONPath as __getThemeJSONPath,
   getThemePreviewUrl as __getThemePreviewUrl,
 } from './themes';
+import { watch as __watch } from './watch';
+import {
+  uploadFolder as __uploadFolder,
+  getFilesByType as __getFilesByType,
+  hasUploadErrors as __hasUploadErrors,
+} from './uploadFolder';
 
 export const isConvertableFieldJs = __isConvertableFieldJs;
 export const createTmpDirSync = __createTmpDirSync;
@@ -19,3 +25,7 @@ export const validateSrcAndDestPaths = __validateSrcAndDestPaths;
 export const createModule = __createModule;
 export const getThemeJSONPath = __getThemeJSONPath;
 export const getThemePreviewUrl = __getThemePreviewUrl;
+export const watch = __watch;
+export const uploadFolder = __uploadFolder;
+export const getFilesByType = __getFilesByType;
+export const hasUploadErrors = __hasUploadErrors;

@@ -1,18 +1,16 @@
 import fs from 'fs';
 import path from 'path';
 import contentDisposition from 'content-disposition';
-import { FullResponse } from 'request-promise-native';
+import { AxiosResponse } from 'axios';
 import http from '../http';
 import { getCwd } from '../lib/path';
-import { FileMapperNode } from '../types/Files';
-import { FileMapperOptions } from '../types/Files';
+import { FileMapperNode, FileMapperOptions, FileTree } from '../types/Files';
 
 export const FILE_MAPPER_API_PATH = 'content/filemapper/v1';
 
-// https://github.com/request/request-promise#the-transform-function}
 function createFileMapperNodeFromStreamResponse(
   filePath: string,
-  response: FullResponse
+  response: AxiosResponse
 ): FileMapperNode {
   if (filePath[0] !== '/') {
     filePath = `/${filePath}`;
@@ -48,9 +46,9 @@ export async function upload(
   src: string,
   dest: string,
   options: FileMapperOptions = {}
-) {
-  return http.post(accountId, {
-    uri: `${FILE_MAPPER_API_PATH}/upload/${encodeURIComponent(dest)}`,
+): Promise<void> {
+  return http.post<void>(accountId, {
+    url: `${FILE_MAPPER_API_PATH}/upload/${encodeURIComponent(dest)}`,
     formData: {
       file: fs.createReadStream(path.resolve(getCwd(), src)),
     },
@@ -63,9 +61,9 @@ export async function fetchModule(
   accountId: number,
   moduleId: number,
   options: FileMapperOptions = {}
-) {
-  return http.get(accountId, {
-    uri: `${FILE_MAPPER_API_PATH}/modules/${moduleId}`,
+): Promise<FileTree> {
+  return http.get<FileTree>(accountId, {
+    url: `${FILE_MAPPER_API_PATH}/modules/${moduleId}`,
     ...options,
   });
 }
@@ -80,7 +78,7 @@ export async function fetchFileStream(
   const response = await http.getOctetStream(
     accountId,
     {
-      uri: `${FILE_MAPPER_API_PATH}/stream/${encodeURIComponent(filePath)}`,
+      url: `${FILE_MAPPER_API_PATH}/stream/${encodeURIComponent(filePath)}`,
       ...options,
     },
     destination
@@ -95,7 +93,7 @@ export async function download(
   options: FileMapperOptions = {}
 ): Promise<FileMapperNode> {
   return http.get<FileMapperNode>(accountId, {
-    uri: `${FILE_MAPPER_API_PATH}/download/${encodeURIComponent(filepath)}`,
+    url: `${FILE_MAPPER_API_PATH}/download/${encodeURIComponent(filepath)}`,
     ...options,
   });
 }
@@ -107,7 +105,7 @@ export async function downloadDefault(
   options: FileMapperOptions = {}
 ): Promise<FileMapperNode> {
   return http.get<FileMapperNode>(accountId, {
-    uri: `${FILE_MAPPER_API_PATH}/download-default/${filepath}`,
+    url: `${FILE_MAPPER_API_PATH}/download-default/${filepath}`,
     ...options,
   });
 }
@@ -117,9 +115,9 @@ export async function deleteFile(
   accountId: number,
   filePath: string,
   options: FileMapperOptions = {}
-): Promise<FullResponse> {
+): Promise<void> {
   return http.delete(accountId, {
-    uri: `${FILE_MAPPER_API_PATH}/delete/${encodeURIComponent(filePath)}`,
+    url: `${FILE_MAPPER_API_PATH}/delete/${encodeURIComponent(filePath)}`,
     ...options,
   });
 }
@@ -129,9 +127,9 @@ export async function moveFile(
   accountId: number,
   srcPath: string,
   destPath: string
-): Promise<FullResponse> {
+): Promise<void> {
   return http.put(accountId, {
-    uri: `${FILE_MAPPER_API_PATH}/rename/${srcPath}?path=${destPath}`,
+    url: `${FILE_MAPPER_API_PATH}/rename/${srcPath}?path=${destPath}`,
   });
 }
 
@@ -139,8 +137,8 @@ export async function moveFile(
 export async function getDirectoryContentsByPath(
   accountId: number,
   path: string
-): Promise<FullResponse> {
+): Promise<void> {
   return http.get(accountId, {
-    uri: `${FILE_MAPPER_API_PATH}/meta/${path}`,
+    url: `${FILE_MAPPER_API_PATH}/meta/${path}`,
   });
 }
