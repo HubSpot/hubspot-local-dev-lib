@@ -7,7 +7,7 @@ import {
   convertToLocalFileSystemPath,
   isAllowedExtension,
 } from './path';
-import { fetchFileStream, download, downloadDefault } from '../api/filemapper';
+import { fetchFileStream, download, downloadDefault } from '../api/fileMapper';
 import {
   throwErrorWithMessage,
   throwTypeErrorWithMessage,
