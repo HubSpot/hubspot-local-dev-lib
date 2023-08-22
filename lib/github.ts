@@ -25,10 +25,11 @@ const GITHUB_AUTH_HEADERS = {
 
 export async function fetchJsonFromRepository(
   repoName: string,
-  filePath: string
+  filePath: string,
+  ref: string
 ): Promise<JSON> {
   try {
-    const URL = `https://raw.githubusercontent.com/HubSpot/${repoName}/${filePath}`;
+    const URL = `https://raw.githubusercontent.com/HubSpot/${repoName}/${ref}/${filePath}`;
     debug('github.fetchJsonFromRepository', { url: URL });
 
     const { data } = await axios.get<JSON>(URL, {
@@ -44,7 +45,7 @@ export async function fetchJsonFromRepository(
   }
 }
 
-async function fetchReleaseData(
+export async function fetchReleaseData(
   repoName: string,
   tag = ''
 ): Promise<GithubReleaseData> {
@@ -53,8 +54,8 @@ async function fetchReleaseData(
     tag = `v${tag}`;
   }
   const URI = tag
-    ? `https://api.github.com/repos/HubSpot/${repoName}/releases/tags/${tag}`
-    : `https://api.github.com/repos/HubSpot/${repoName}/releases/latest`;
+    ? `https://api.github.com/repos/${repoName}/releases/tags/${tag}`
+    : `https://api.github.com/repos/${repoName}/releases/latest`;
   try {
     const { data } = await axios.get<GithubReleaseData>(URI, {
       headers: { ...DEFAULT_USER_AGENT_HEADERS, ...GITHUB_AUTH_HEADERS },
@@ -79,10 +80,10 @@ async function downloadGithubRepoZip(
   ref?: string
 ): Promise<Buffer> {
   try {
-    let zipUrl;
+    let zipUrl: string;
     if (releaseType === GITHUB_RELEASE_TYPES.REPOSITORY) {
       debug('github.downloadGithubRepoZip.fetching', { releaseType, repoName });
-      zipUrl = `https://api.github.com/repos/HubSpot/${repoName}/zipball${
+      zipUrl = `https://api.github.com/repos/${repoName}/zipball${
         ref ? `/${ref}` : ''
       }`;
     } else {
@@ -135,9 +136,11 @@ export async function cloneGithubRepo(
 
 async function getGitHubRepoContentsAtPath(
   repoName: string,
-  path: string
+  path: string,
+  ref?: string
 ): Promise<Array<GithubRepoFile>> {
-  const contentsRequestUrl = `https://api.github.com/repos/HubSpot/${repoName}/contents/${path}`;
+  const refQuery = ref ? `?ref=${ref}` : '';
+  const contentsRequestUrl = `https://api.github.com/repos/${repoName}/contents/${path}${refQuery}`;
 
   const response = await axios.get<Array<GithubRepoFile>>(contentsRequestUrl, {
     headers: { ...DEFAULT_USER_AGENT_HEADERS, ...GITHUB_AUTH_HEADERS },
@@ -162,6 +165,7 @@ export async function downloadGithubRepoContents(
   repoName: string,
   contentPath: string,
   dest: string,
+  ref?: string,
   filter?: (contentPiecePath: string, downloadPath: string) => boolean
 ): Promise<void> {
   fs.ensureDirSync(path.dirname(dest));
@@ -169,7 +173,8 @@ export async function downloadGithubRepoContents(
   try {
     const contentsResp = await getGitHubRepoContentsAtPath(
       repoName,
-      contentPath
+      contentPath,
+      ref
     );
 
     const downloadContent = async (
