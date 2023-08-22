@@ -10,13 +10,6 @@ type ValidateHublResponse = {
   renderingErrors: Array<HubLValidationError>;
 };
 
-/**
- * @async
- * @param {number} accountId
- * @param {string} sourceCode
- * @param {object} hublValidationOptions
- * @returns {Promise}
- */
 export async function validateHubl(
   accountId: number,
   sourceCode: string,
