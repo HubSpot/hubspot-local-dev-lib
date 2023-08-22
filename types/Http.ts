@@ -1,6 +1,6 @@
 import { ReadStream } from 'fs';
 
-type Body = { [key: string]: string | number | Body };
+type Body = { [key: string]: string | number | boolean | Body };
 
 export type AxiosConfigOptions = {
   url: string;
