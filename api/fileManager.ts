@@ -2,7 +2,11 @@ import fs from 'fs';
 import path from 'path';
 import http from '../http';
 import { FormData } from '../types/Http';
-import { FetchResponse, UploadResponse } from '../types/FileManager';
+import {
+  FetchStatResponse,
+  FetchResponse,
+  UploadResponse,
+} from '../types/FileManager';
 
 const FILE_MANAGER_V2_API_PATH = 'filemanager/api/v2';
 const FILE_MANAGER_V3_API_PATH = 'filemanager/api/v3';
@@ -38,7 +42,7 @@ export async function uploadFile(
 export async function fetchStat(
   accountId: number,
   src: string
-): Promise<FetchResponse> {
+): Promise<FetchStatResponse> {
   return http.get(accountId, {
     uri: `${FILE_MANAGER_V2_API_PATH}/files/stat/${src}`,
   });

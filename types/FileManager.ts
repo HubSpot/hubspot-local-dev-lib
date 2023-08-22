@@ -1,4 +1,4 @@
-type UploadedFile = {
+type File = {
   id: number;
   portal_id: number;
   name: string;
@@ -36,7 +36,7 @@ type UploadedFile = {
   file_hash: string;
 };
 
-type UploadedFolder = {
+type Folder = {
   id: number;
   portal_id: number;
   name: string;
@@ -53,10 +53,17 @@ type UploadedFolder = {
 };
 
 export type UploadResponse = {
-  objects: Array<UploadedFile>;
+  objects: Array<File>;
+};
+
+export type FetchStatResponse = {
+  file: File | null;
+  folder: Folder | null;
 };
 
 export type FetchResponse = {
-  file: UploadedFile | null;
-  folder: UploadedFolder | null;
+  limit: number;
+  offset: number;
+  objects: Array<File | Folder>;
+  total_count: number;
 };
