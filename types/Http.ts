@@ -3,7 +3,7 @@ import { ReadStream } from 'fs';
 type Body = { [key: string]: string | number | boolean | Body };
 
 export type AxiosConfigOptions = {
-  url: string;
+  url?: string;
   env?: string;
   localHostOverride?: boolean;
   params?: {
@@ -30,4 +30,11 @@ export type HttpOptions = AxiosConfigOptions & {
   timeout?: number;
   encoding?: string | null;
   headers?: { [header: string]: string | string[] | undefined };
+  uri?: string;
+  qs?: {
+    hidden?: number;
+    offset?: number;
+    folder_id?: number;
+    parent_folder_id?: number;
+  };
 };
