@@ -182,6 +182,7 @@ export async function createModule(
     'cms-sample-assets',
     'modules/Sample.module',
     destPath,
+    '',
     moduleFileFilter
   );
 }
