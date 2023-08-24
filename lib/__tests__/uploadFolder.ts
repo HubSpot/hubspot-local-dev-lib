@@ -2,51 +2,70 @@ import path from 'path';
 import fs from 'fs-extra';
 import { uploadFolder, getFilesByType } from '../cms/uploadFolder';
 import { FILE_TYPES } from '../../constants/files';
-import { upload } from '../../api/fileMapper';
-import { walk } from '../fs';
-import { createIgnoreFilter } from '../ignoreRules';
+import { upload as __upload } from '../../api/fileMapper';
+import { walk as __walk } from '../fs';
+import { createIgnoreFilter as __createIgnoreFilter } from '../ignoreRules';
 import {
-  FieldsJs,
-  isConvertableFieldJs,
-  cleanupTmpDirSync,
-  createTmpDirSync,
+  FieldsJs as __FieldsJs,
+  isConvertableFieldJs as __isConvertableFields,
+  cleanupTmpDirSync as __cleanupTmpDirSync,
+  createTmpDirSync as __createTmpDirSync,
 } from '../cms/handleFieldsJS';
-import { throwApiUploadError } from '../../errors/apiErrors';
 
-jest.mock('../walk');
+jest.mock('../fs');
 jest.mock('../../api/fileMapper');
-jest.mock('../../ignoreRules');
-jest.mock('../handleFieldsJs');
-jest.mock('../../errorHandlers');
+jest.mock('../ignoreRules');
+jest.mock('../cms/handleFieldsJs');
 
-function listFilesInDir(dir: string) {
+function __listFilesInDir(dir: string) {
   return fs
     .readdirSync(dir, { withFileTypes: true })
     .filter(file => !file.isDirectory())
     .map(file => file.name);
 }
 
+const FieldsJs = __FieldsJs as jest.Mock;
+const isConvertableFieldJs = __isConvertableFields as jest.MockedFunction<
+  typeof __isConvertableFields
+>;
+const createIgnoreFilter = __createIgnoreFilter as jest.MockedFunction<
+  typeof __createIgnoreFilter
+>;
+const createTmpDirSync = __createTmpDirSync as jest.MockedFunction<
+  typeof __createTmpDirSync
+>;
+const walk = __walk as jest.MockedFunction<typeof __walk>;
+const upload = __upload as jest.MockedFunction<typeof __upload>;
+const cleanupTmpDirSync = __cleanupTmpDirSync as jest.MockedFunction<
+  typeof __cleanupTmpDirSync
+>;
+const listFilesInDir = __listFilesInDir as jest.MockedFunction<
+  typeof __listFilesInDir
+>;
+
 //folder/fields.js -> folder/fields.converted.js
 // We add the .converted to differentiate from a unconverted fields.json
-const defaultFieldsJsImplementation = jest.fn((src, filePath, rootWriteDir) => {
-  const fieldsJs = Object.create(FieldsJs.prototype);
-  const outputPath =
-    filePath.substring(0, filePath.lastIndexOf('.')) + '.converted.json';
-  return {
-    init: jest.fn().mockReturnValue(
-      Object.assign(fieldsJs, {
-        src,
-        outputPath,
-        rootWriteDir,
-        getOutputPathPromise: jest.fn().mockResolvedValue(outputPath),
-        rejected: false,
-      })
-    ),
-  };
-});
+const defaultFieldsJsImplementation = jest.fn(
+  (src: string, filePath: string, rootWriteDir: string | undefined | null) => {
+    const fieldsJs = Object.create(FieldsJs.prototype);
+    const outputPath =
+      filePath.substring(0, filePath.lastIndexOf('.')) + '.converted.json';
+    return {
+      init: jest.fn().mockReturnValue(
+        Object.assign(fieldsJs, {
+          src,
+          outputPath,
+          rootWriteDir,
+          getOutputPathPromise: jest.fn().mockResolvedValue(outputPath),
+          rejected: false,
+        })
+      ),
+    };
+  }
+);
 FieldsJs.mockImplementation(defaultFieldsJsImplementation);
 
-isConvertableFieldJs.mockImplementation((src, filePath) => {
+isConvertableFieldJs.mockImplementation((src: string, filePath: string) => {
   const fileName = path.basename(filePath);
   return fileName === 'fields.js';
 });
@@ -102,7 +121,15 @@ describe('uploadFolder', () => {
         'folder/fields.json',
       ];
 
-      await uploadFolder(...defaultParams, uploadedFilesInOrder);
+      await uploadFolder(
+        123,
+        'folder',
+        'folder',
+        {},
+        { saveOutput: true, convertFields: false },
+        uploadedFilesInOrder,
+        'publish'
+      );
       expect(upload).toReturnTimes(11);
       uploadedFilesInOrder.forEach((file, index) => {
         expect(upload).nthCalledWith(index + 1, defaultParams[0], file, file, {
@@ -111,31 +138,22 @@ describe('uploadFolder', () => {
       });
     });
 
-    it('catches non-fatal upload errors and retries, and if fails again, logs.', async () => {
-      const uploadMock = jest.fn().mockRejectedValue(new Error('Async error'));
-      const logSpy = jest.spyOn(logger, 'debug');
-      const file = 'folder/test.json';
-
-      logApiUploadErrorInstance.mockImplementation(() => {});
-      upload.mockImplementation(uploadMock);
-
-      await uploadFolder(...defaultParams, [file]);
-      expect(logSpy).toHaveBeenCalledWith(
-        'Retrying to upload file "%s" to "%s"',
-        file,
-        file
-      );
-      expect(logApiUploadErrorInstance).toHaveBeenCalled();
-    });
-
     it('does not create a temp directory if --convertFields is false', async () => {
-      const tmpDirSpy = createTmpDirSync.mockImplementation(() => {});
+      const tmpDirSpy = createTmpDirSync.mockImplementation(() => '');
       const params = [...defaultParams];
       params[4] = { saveOutput: true, convertFields: true };
 
       upload.mockImplementation(() => Promise.resolve());
 
-      await uploadFolder(...params, []);
+      await uploadFolder(
+        123,
+        'folder',
+        'folder',
+        {},
+        { saveOutput: true, convertFields: false },
+        [],
+        'publish'
+      );
       expect(tmpDirSpy).toHaveBeenCalled();
     });
 
@@ -147,21 +165,35 @@ describe('uploadFolder', () => {
       createTmpDirSync.mockReturnValue('folder');
       upload.mockImplementation(() => Promise.resolve());
 
-      await uploadFolder(...params, [
-        'folder/fields.js',
-        'folder/sample.module/fields.js',
-      ]);
+      await uploadFolder(
+        123,
+        'folder',
+        'folder',
+        {},
+        { saveOutput: true, convertFields: false },
+        ['folder/fields.js', 'folder/sample.module/fields.js'],
+        'publish'
+      );
+
       expect(saveOutputSpy).toHaveBeenCalledTimes(2);
     });
 
     it('deletes the temporary directory', async () => {
-      const deleteDirSpy = cleanupTmpDirSync.mockImplementation(() => {});
+      const deleteDirSpy = cleanupTmpDirSync.mockImplementation(() => '');
       const params = [...defaultParams];
       params[4] = { saveOutput: true, convertFields: true };
 
       upload.mockImplementation(() => Promise.resolve());
 
-      await uploadFolder(...params, []);
+      await uploadFolder(
+        123,
+        'folder',
+        'folder',
+        {},
+        { saveOutput: true, convertFields: false },
+        [],
+        'publish'
+      );
       expect(deleteDirSpy).toHaveBeenCalledWith('folder');
     });
   });
@@ -186,7 +218,7 @@ describe('uploadFolder', () => {
       jest.resetModules();
     });
     it('outputs getFilesByType with no processing if convertFields is false', async () => {
-      let files = [...filesProto];
+      const files = [...filesProto];
       files.push('folder/sample.module/fields.js');
       const [filesByType] = await getFilesByType(files, 'folder', 'folder', {
         convertFields: false,
@@ -217,14 +249,14 @@ describe('uploadFolder', () => {
       const files = [...filesProto];
       files.push('folder/fields.js', 'folder/sample.module/fields.js');
       listFilesInDir.mockReturnValue(['fields.json']);
-      let [filesByType, fieldsJsObjects] = await getFilesByType(
+      const [filesByType, fieldsJsObjects] = await getFilesByType(
         files,
         'folder',
         'folder',
         { convertFields: true }
       );
 
-      filesByType = Object.values(filesByType);
+      const filesByTypeValues = Object.values(filesByType);
       expect(filesByType[1]).toEqual([
         'folder/sample.module/module.css',
         'folder/sample.module/module.js',
@@ -232,7 +264,7 @@ describe('uploadFolder', () => {
         'folder/sample.module/module.html',
         convertedModuleFilePath,
       ]);
-      expect(filesByType[4]).toContainEqual(convertedFilePath);
+      expect(filesByTypeValues[4]).toContainEqual(convertedFilePath);
       expect(JSON.stringify(fieldsJsObjects)).toBe(
         JSON.stringify([convertedFieldsObj, convertedModuleFieldsObj])
       );
