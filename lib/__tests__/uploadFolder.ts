@@ -15,7 +15,7 @@ import {
 jest.mock('../fs');
 jest.mock('../../api/fileMapper');
 jest.mock('../ignoreRules');
-jest.mock('../cms/handleFieldsJs');
+jest.mock('../cms/handleFieldsJS');
 
 const listFilesInDir = jest.fn((dir: string) => {
   return fs
