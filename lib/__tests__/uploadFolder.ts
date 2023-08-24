@@ -17,12 +17,12 @@ jest.mock('../../api/fileMapper');
 jest.mock('../ignoreRules');
 jest.mock('../cms/handleFieldsJs');
 
-function __listFilesInDir(dir: string) {
+const listFilesInDir = jest.fn((dir: string) => {
   return fs
     .readdirSync(dir, { withFileTypes: true })
     .filter(file => !file.isDirectory())
     .map(file => file.name);
-}
+});
 
 const FieldsJs = __FieldsJs as jest.Mock;
 const isConvertableFieldJs = __isConvertableFields as jest.MockedFunction<
@@ -38,9 +38,6 @@ const walk = __walk as jest.MockedFunction<typeof __walk>;
 const upload = __upload as jest.MockedFunction<typeof __upload>;
 const cleanupTmpDirSync = __cleanupTmpDirSync as jest.MockedFunction<
   typeof __cleanupTmpDirSync
->;
-const listFilesInDir = __listFilesInDir as jest.MockedFunction<
-  typeof __listFilesInDir
 >;
 
 //folder/fields.js -> folder/fields.converted.js
@@ -94,14 +91,6 @@ describe('uploadFolder', () => {
   });
 
   describe('uploadFolder()', () => {
-    const defaultParams = [
-      '123',
-      'folder',
-      'folder',
-      { mode: 'publish' },
-      { saveOutput: true, convertFields: false },
-    ];
-
     it('uploads files in the correct order', async () => {
       listFilesInDir.mockReturnValue(['fields.json']);
       walk.mockResolvedValue(filesProto);
@@ -132,16 +121,14 @@ describe('uploadFolder', () => {
       );
       expect(upload).toReturnTimes(11);
       uploadedFilesInOrder.forEach((file, index) => {
-        expect(upload).nthCalledWith(index + 1, defaultParams[0], file, file, {
-          qs: { buffer: false, environmentId: 1 },
+        expect(upload).nthCalledWith(index + 1, 123, file, file, {
+          params: { buffer: false, environmentId: 1 },
         });
       });
     });
 
-    it('does not create a temp directory if --convertFields is false', async () => {
+    it('creates a temp directory if --convertFields is true', async () => {
       const tmpDirSpy = createTmpDirSync.mockImplementation(() => '');
-      const params = [...defaultParams];
-      params[4] = { saveOutput: true, convertFields: true };
 
       upload.mockImplementation(() => Promise.resolve());
 
@@ -150,7 +137,7 @@ describe('uploadFolder', () => {
         'folder',
         'folder',
         {},
-        { saveOutput: true, convertFields: false },
+        { saveOutput: true, convertFields: true },
         [],
         'publish'
       );
@@ -159,8 +146,6 @@ describe('uploadFolder', () => {
 
     it('tries to save output of each fields file', async () => {
       const saveOutputSpy = jest.spyOn(FieldsJs.prototype, 'saveOutput');
-      const params = [...defaultParams];
-      params[4] = { saveOutput: true, convertFields: true };
 
       createTmpDirSync.mockReturnValue('folder');
       upload.mockImplementation(() => Promise.resolve());
@@ -170,7 +155,7 @@ describe('uploadFolder', () => {
         'folder',
         'folder',
         {},
-        { saveOutput: true, convertFields: false },
+        { saveOutput: true, convertFields: true },
         ['folder/fields.js', 'folder/sample.module/fields.js'],
         'publish'
       );
@@ -180,8 +165,6 @@ describe('uploadFolder', () => {
 
     it('deletes the temporary directory', async () => {
       const deleteDirSpy = cleanupTmpDirSync.mockImplementation(() => '');
-      const params = [...defaultParams];
-      params[4] = { saveOutput: true, convertFields: true };
 
       upload.mockImplementation(() => Promise.resolve());
 
@@ -190,7 +173,7 @@ describe('uploadFolder', () => {
         'folder',
         'folder',
         {},
-        { saveOutput: true, convertFields: false },
+        { saveOutput: true, convertFields: true },
         [],
         'publish'
       );
@@ -257,7 +240,7 @@ describe('uploadFolder', () => {
       );
 
       const filesByTypeValues = Object.values(filesByType);
-      expect(filesByType[1]).toEqual([
+      expect(filesByTypeValues[1]).toEqual([
         'folder/sample.module/module.css',
         'folder/sample.module/module.js',
         'folder/sample.module/meta.json',
