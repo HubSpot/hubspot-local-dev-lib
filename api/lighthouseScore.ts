@@ -12,7 +12,7 @@ export async function requestLighthouseScore(
   body: Body = {}
 ): Promise<RequestLighthouseScoreResponse> {
   return http.post(accountId, {
-    uri: `${LIGHTHOUSE_SCORE_API_BASE}/request`,
+    url: `${LIGHTHOUSE_SCORE_API_BASE}/request`,
     body,
   });
 }
@@ -22,7 +22,7 @@ export async function getLighthouseScoreStatus(
   query: QueryParams = {}
 ): Promise<string> {
   return http.get(accountId, {
-    uri: `${LIGHTHOUSE_SCORE_API_BASE}/status`,
+    url: `${LIGHTHOUSE_SCORE_API_BASE}/status`,
     query,
   });
 }
@@ -32,7 +32,7 @@ export async function getLighthouseScore(
   query: QueryParams = {}
 ): Promise<GetLighthouseScoreResponse> {
   return http.get(accountId, {
-    uri: `${LIGHTHOUSE_SCORE_API_BASE}/scores`,
+    url: `${LIGHTHOUSE_SCORE_API_BASE}/scores`,
     query,
   });
 }
