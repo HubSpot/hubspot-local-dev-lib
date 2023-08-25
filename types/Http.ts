@@ -4,7 +4,7 @@ import { Row, Schema } from './Hubdb';
 type Body = { [key: string]: string | number | boolean | Body | Row[] };
 
 export type AxiosConfigOptions = {
-  url?: string;
+  url: string;
   env?: string;
   localHostOverride?: boolean;
   params?: {
@@ -12,6 +12,10 @@ export type AxiosConfigOptions = {
     buffer?: boolean;
     environmentId?: number;
     version?: string;
+    hidden?: number;
+    offset?: number;
+    folder_id?: number;
+    parent_folder_id?: number;
   };
   body?: Body | JSON | Schema;
   resolveWithFullResponse?: boolean;
@@ -31,11 +35,4 @@ export type HttpOptions = AxiosConfigOptions & {
   timeout?: number;
   encoding?: string | null;
   headers?: { [header: string]: string | string[] | undefined };
-  uri?: string;
-  qs?: {
-    hidden?: number;
-    offset?: number;
-    folder_id?: number;
-    parent_folder_id?: number;
-  };
 };

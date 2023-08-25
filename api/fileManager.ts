@@ -4,7 +4,7 @@ import http from '../http';
 import { FormData } from '../types/Http';
 import {
   FetchStatResponse,
-  FetchResponse,
+  FetchFilesOrFolderResponse,
   UploadResponse,
 } from '../types/FileManager';
 
@@ -34,7 +34,7 @@ export async function uploadFile(
   }
 
   return http.post(accountId, {
-    uri: `${FILE_MANAGER_V3_API_PATH}/files/upload`,
+    url: `${FILE_MANAGER_V3_API_PATH}/files/upload`,
     formData,
   });
 }
@@ -44,7 +44,7 @@ export async function fetchStat(
   src: string
 ): Promise<FetchStatResponse> {
   return http.get(accountId, {
-    uri: `${FILE_MANAGER_V2_API_PATH}/files/stat/${src}`,
+    url: `${FILE_MANAGER_V2_API_PATH}/files/stat/${src}`,
   });
 }
 
@@ -52,10 +52,10 @@ export async function fetchFiles(
   accountId: number,
   folderId: number,
   { offset, archived }
-): Promise<FetchResponse> {
+): Promise<FetchFilesOrFolderResponse> {
   return http.get(accountId, {
-    uri: `${FILE_MANAGER_V2_API_PATH}/files/`,
-    qs: {
+    url: `${FILE_MANAGER_V2_API_PATH}/files/`,
+    params: {
       hidden: 0,
       offset: offset,
       folder_id: folderId,
@@ -67,10 +67,10 @@ export async function fetchFiles(
 export async function fetchFolders(
   accountId: number,
   folderId: number
-): Promise<FetchResponse> {
+): Promise<FetchFilesOrFolderResponse> {
   return http.get(accountId, {
-    uri: `${FILE_MANAGER_V2_API_PATH}/folders/`,
-    qs: {
+    url: `${FILE_MANAGER_V2_API_PATH}/folders/`,
+    params: {
       hidden: 0,
       parent_folder_id: folderId,
     },

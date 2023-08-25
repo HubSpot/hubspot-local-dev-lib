@@ -61,7 +61,7 @@ export type FetchStatResponse = {
   folder: Folder | null;
 };
 
-export type FetchResponse = {
+export type FetchFilesOrFolderResponse = {
   limit: number;
   offset: number;
   objects: Array<File | Folder>;
