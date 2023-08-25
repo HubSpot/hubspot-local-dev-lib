@@ -32,7 +32,7 @@ export type Table = {
       type: string;
     }
   ];
-  partitioningSettings?: null;
+  partitioningSettings?: null; //TODO
   published: boolean;
   cosObjectType: string;
   updated: number;
@@ -50,7 +50,7 @@ export type Table = {
   allowChildTables: boolean;
   enableChildTablePages: boolean;
   crmObjectTypeId: number;
-  dynamicMetaTags?: null;
+  dynamicMetaTags?: null; //TODO
   allowPublicApiAccess: boolean;
 };
 
