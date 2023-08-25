@@ -1,4 +1,5 @@
 import http from '../http';
+import { QueryParams } from '../types/Http';
 import { CreateRowsResponse, Row, Schema, Table } from '../types/Hubdb';
 
 const HUBDB_API_PATH = 'cms/v3/hubdb';
@@ -54,7 +55,7 @@ export async function createRows(
 export async function fetchRows(
   accountId: number,
   tableId: number,
-  query = {}
+  query: QueryParams = {}
 ): Promise<Array<Row>> {
   return http.get(accountId, {
     uri: `${HUBDB_API_PATH}/tables/${tableId}/rows/draft`,
