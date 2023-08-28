@@ -1,6 +1,7 @@
 import { ReadStream } from 'fs';
+import { Row, Schema } from './Hubdb';
 
-type Body = { [key: string]: string | number | boolean | Body };
+type Body = { [key: string]: string | number | boolean | Body | Row[] };
 
 export type AxiosConfigOptions = {
   url: string;
@@ -12,7 +13,7 @@ export type AxiosConfigOptions = {
     environmentId?: number;
     version?: string;
   };
-  body?: Body | JSON;
+  body?: Body | JSON | Schema;
   resolveWithFullResponse?: boolean;
 };
 
