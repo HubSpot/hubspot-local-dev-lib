@@ -12,10 +12,6 @@ export type AxiosConfigOptions = {
     buffer?: boolean;
     environmentId?: number;
     version?: string;
-    hidden?: number;
-    offset?: number;
-    folder_id?: number;
-    parent_folder_id?: number;
   };
   body?: Body | JSON | Schema;
   resolveWithFullResponse?: boolean;

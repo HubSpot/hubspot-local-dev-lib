@@ -9,7 +9,7 @@ export async function fetchTable(
   tableId: number
 ): Promise<Table> {
   return http.get(accountId, {
-    uri: `${HUBDB_API_PATH}/tables/${tableId}`,
+    url: `${HUBDB_API_PATH}/tables/${tableId}`,
   });
 }
 
@@ -18,7 +18,7 @@ export async function createTable(
   schema: Schema
 ): Promise<Table> {
   return http.post(accountId, {
-    uri: `${HUBDB_API_PATH}/tables`,
+    url: `${HUBDB_API_PATH}/tables`,
     body: schema,
   });
 }
@@ -28,7 +28,7 @@ export async function publishTable(
   tableId: number
 ): Promise<Table> {
   return http.post(accountId, {
-    uri: `${HUBDB_API_PATH}/tables/${tableId}/draft/publish`,
+    url: `${HUBDB_API_PATH}/tables/${tableId}/draft/publish`,
   });
 }
 
@@ -37,7 +37,7 @@ export async function deleteTable(
   tableId: number
 ): Promise<void> {
   return http.delete(accountId, {
-    uri: `${HUBDB_API_PATH}/tables/${tableId}`,
+    url: `${HUBDB_API_PATH}/tables/${tableId}`,
   });
 }
 
@@ -47,7 +47,7 @@ export async function createRows(
   rows: Array<Row>
 ): Promise<CreateRowsResponse> {
   return http.post(accountId, {
-    uri: `${HUBDB_API_PATH}/tables/${tableId}/rows/draft/batch/create`,
+    url: `${HUBDB_API_PATH}/tables/${tableId}/rows/draft/batch/create`,
     body: { inputs: rows },
   });
 }
@@ -58,7 +58,7 @@ export async function fetchRows(
   query: QueryParams = {}
 ): Promise<Array<Row>> {
   return http.get(accountId, {
-    uri: `${HUBDB_API_PATH}/tables/${tableId}/rows/draft`,
+    url: `${HUBDB_API_PATH}/tables/${tableId}/rows/draft`,
     query,
   });
 }
@@ -69,7 +69,7 @@ export async function deleteRows(
   rowIds
 ): Promise<void> {
   return http.post(accountId, {
-    uri: `${HUBDB_API_PATH}/tables/${tableId}/rows/draft/batch/purge`,
+    url: `${HUBDB_API_PATH}/tables/${tableId}/rows/draft/batch/purge`,
     body: { inputs: rowIds },
   });
 }

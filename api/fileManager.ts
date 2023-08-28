@@ -55,7 +55,7 @@ export async function fetchFiles(
 ): Promise<FetchFilesOrFolderResponse> {
   return http.get(accountId, {
     url: `${FILE_MANAGER_V2_API_PATH}/files/`,
-    params: {
+    query: {
       hidden: 0,
       offset: offset,
       folder_id: folderId,
@@ -70,7 +70,7 @@ export async function fetchFolders(
 ): Promise<FetchFilesOrFolderResponse> {
   return http.get(accountId, {
     url: `${FILE_MANAGER_V2_API_PATH}/folders/`,
-    params: {
+    query: {
       hidden: 0,
       parent_folder_id: folderId,
     },
