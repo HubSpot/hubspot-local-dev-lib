@@ -108,6 +108,9 @@ en:
           invalidEvent: "Usage tracking event {{ eventName }} is not a valid event type."
           sendingEventAuthenticated: "Sending usage event to authenticated endpoint"
           sendingEventUnauthenticated: "Sending usage event to unauthenticated endpoint"
+    hubdb:
+      invalidJsonPath: "The HubDB table file must be a '.json' file"
+      invalidJsonFile: "The '{{{ src }}' path is not a path to a file"
   errors:
     archive:
       extractZip:
