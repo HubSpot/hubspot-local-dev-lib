@@ -1,7 +1,7 @@
 import { ReadStream } from 'fs';
 import { Row, Schema } from './Hubdb';
 
-type Body = { [key: string]: string | number | boolean | Body | Row[] };
+export type Body = { [key: string]: string | number | boolean | Body | Row[] };
 
 export type AxiosConfigOptions = {
   url: string;
