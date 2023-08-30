@@ -13,8 +13,8 @@ import {
 export async function lint(
   accountId: number,
   filepath: string,
-  callback?
-): Promise<LintResult | object> {
+  callback?: (LintResult) => number
+): Promise<LintResult | number | object> {
   const stats = await fs.stat(filepath);
   const files = stats.isDirectory() ? await walk(filepath) : [filepath];
   if (!(files && files.length)) {
