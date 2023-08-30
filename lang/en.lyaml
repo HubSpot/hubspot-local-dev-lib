@@ -163,6 +163,9 @@ en:
       accountNotFound: "Account with id {{ accountId }} does not exist."
       invalidPersonalAccessKey: "Error while retrieving new access token: {{ errorMessage }}"
       invalidPersonalAccessKey401: 'Error while retrieving new access token: {{ errorMessage }}. Your personal access key is invalid. Please run "hs auth personalaccesskey" to reauthenticate. See https://designers.hubspot.com/docs/personal-access-keys for more information.'
+    templates:
+      fileAnnotations: "Error reading file annotations {{ file }}"
+      pathExists: "The {{ path }} path already exists"
     utils:
       git:
         configIgnore: "Unable to determine if config file is properly ignored by git."
@@ -193,3 +196,9 @@ en:
       index:
         withOauth: "Oauth manager for account {{ accountId }} not found."
         withAuth: "Account with id {{ accountId }} not found."
+  topLevelExports:
+    templates:
+      debug:
+        creatingPath: "Making {{ path }} if needed"
+      logging:
+        creatingFile: "Creating file at {{ path }}"
