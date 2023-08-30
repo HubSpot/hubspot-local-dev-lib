@@ -13,7 +13,7 @@ type ValidateHublResponse = {
 export async function validateHubl(
   accountId: number,
   sourceCode: string,
-  hublValidationOptions: HublValidationOptions
+  hublValidationOptions?: HublValidationOptions
 ): Promise<ValidateHublResponse> {
   return http.post(accountId, {
     url: HUBL_VALIDATE_API_PATH,
