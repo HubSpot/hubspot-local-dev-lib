@@ -83,6 +83,23 @@ en:
         missingEnv: "Unable to load config from environment variables: Missing env"
         unknownAuthType: "Unable to load config from environment variables: Unknown auth type"
     cms:
+      functions:
+        createFunction:
+          nestedConfigError: "Cannot create a functions directory inside '{{ ancestorConfigPath }}'"
+          jsFileConflict: "The JavaScript file at '{{ functionFilePath }}'' already exists"
+          failedToCreateFile: "The file {{ configFilePath }} could not be created"
+          failedToCreateFunction: "The function could not be created"
+          destAlreadyExists: "The {{ path }} path already exists"
+          createdDest: "Created {{ path }}"
+          createdFunctionFile: "Created {{ path }}"
+          createdConfigFile: "Created {{ path }}"
+          success: "A function for the endpoint '/_hcms/api/{{ endpointPath }}' has been created. Upload {{ folderName }} to try it out"
+        updateExistingFile:
+          unableToReadFile: "The file {{ configFilePath }} could not be read"
+          invalidJSON: "The file {{ configFilePath }} is not valid JSON"
+          endpointAreadyExists: "The endpoint {{ endpointPath }} already exists in {{ configFilePath }}"
+          couldNotUpdateFile: "The file {{ configFilePath }} could not be updated"
+          configIsNotObject: "The existing {{ configFilePath }} is not an object"
       handleFieldsJs:
         convertFieldsJs:
           creating: "Creating child process with pid {{ pid }}"
