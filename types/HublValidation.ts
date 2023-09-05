@@ -20,7 +20,7 @@ export type HubLValidationError = {
 
 export type LintResult = {
   file: string;
-  validation: Validation;
+  validation: Validation | null;
 };
 
 export type Validation = {
