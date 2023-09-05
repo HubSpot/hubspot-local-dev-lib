@@ -8,8 +8,6 @@ import { LogCallbacksArg } from './types/LogCallbacks';
 // Matches the .html file extension, excluding module.html
 const TEMPLATE_EXTENSION_REGEX = new RegExp(/(?<!module)\.html$/);
 
-// Matches the comment brackets that wrap annotations
-const ANNOTATIONS_REGEX = /<!--([\s\S]*?)-->/;
 // Matches an annotation value, ending at space, newline, or end of string
 const ANNOTATION_VALUE_REGEX = ':\\s?([\\S|\\s]*?)(\n|$)';
 
@@ -22,26 +20,13 @@ export const ANNOTATION_KEYS = {
   description: 'description',
 };
 
-export function getAnnotationValue(annotations, key) {
+export function getAnnotationValue(
+  annotations: string,
+  key: string
+): string | null {
   const valueRegex = new RegExp(`${key}${ANNOTATION_VALUE_REGEX}`);
   const match = annotations.match(valueRegex);
   return match ? match[1].trim() : null;
-}
-
-export function buildAnnotationValueGetter(file) {
-  let source;
-  try {
-    source = fs.readFileSync(file, 'utf8');
-  } catch (e) {
-    throwErrorWithMessage('errors.templates.fileAnnotations', { file }, e);
-  }
-  return getAnnotationsFromSource(source);
-}
-
-export function getAnnotationsFromSource(source) {
-  const match = source.match(ANNOTATIONS_REGEX);
-  const annotation = match && match[1] ? match[1] : '';
-  return annotationKey => getAnnotationValue(annotation, annotationKey);
 }
 
 /*
@@ -66,12 +51,12 @@ const ASSET_PATHS = {
 const templatesCallbackKeys = ['creatingFile'];
 
 export async function createTemplate(
-  name,
-  dest,
+  name: string,
+  dest: string,
   type = 'page-template',
-  options = { allowExisting: false },
+  options: { allowExisting: boolean } = { allowExisting: false },
   logCallbacks?: LogCallbacksArg<typeof templatesCallbackKeys>
-) {
+): Promise<void> {
   const assetPath = ASSET_PATHS[type];
   const filename = name.endsWith('.html') ? name : `${name}.html`;
   const filePath = path.join(dest, filename);
