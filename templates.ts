@@ -63,12 +63,12 @@ export async function createTemplate(
   if (!options.allowExisting && fs.existsSync(filePath)) {
     throwErrorWithMessage('errors.templates.pathExists', { path: filePath });
   }
-  debug('topLevelExports.templates.debug.creatingPath', { path: dest });
+  debug('templates.debug.creatingPath', { path: dest });
   fs.mkdirp(dest);
 
   const logger = makeTypedLogger<typeof templatesCallbackKeys>(
     logCallbacks,
-    'topLevelExports.templates.logging'
+    'templates.logging'
   );
   logger('creatingFile', { path: filePath });
 

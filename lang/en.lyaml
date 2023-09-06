@@ -108,6 +108,11 @@ en:
           invalidEvent: "Usage tracking event {{ eventName }} is not a valid event type."
           sendingEventAuthenticated: "Sending usage event to authenticated endpoint"
           sendingEventUnauthenticated: "Sending usage event to unauthenticated endpoint"
+    templates:
+      debug:
+        creatingPath: "Making {{ path }} if needed"
+      logging:
+        creatingFile: "Creating file at {{ path }}"
   errors:
     archive:
       extractZip:
@@ -196,9 +201,3 @@ en:
       index:
         withOauth: "Oauth manager for account {{ accountId }} not found."
         withAuth: "Account with id {{ accountId }} not found."
-  topLevelExports:
-    templates:
-      debug:
-        creatingPath: "Making {{ path }} if needed"
-      logging:
-        creatingFile: "Creating file at {{ path }}"
