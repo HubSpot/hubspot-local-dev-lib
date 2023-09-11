@@ -81,56 +81,60 @@ export type Task = {
 };
 
 export type Sandbox = {
-  sandbox: {
-    sandboxHubId: number;
+  sandboxHubId: number;
+  parentHubId: number;
+  createdAt: string;
+  updatedAt: string | null;
+  archivedAt: string | null;
+  type: string;
+  archived: boolean;
+  name: string;
+  domain: string;
+  createdByUser: User;
+  updatedByUser: User | null;
+  lastSync: {
+    id: string;
     parentHubId: number;
-    createdAt: string;
-    updatedAt: string | null;
-    archivedAt: string | null;
-    type: string;
-    archived: boolean;
-    name: string;
-    domain: string;
-    createdByUser: User;
-    updatedByUser: User | null;
-    lastSync: {
-      id: string;
-      parentHubId: number;
-      sandboxHubId: number;
-      fromHubId: number;
-      toHubId: number;
-      command: string;
-      status: string;
-      result: string;
-      sandboxType: string;
-      requestedAt: string;
-      requestedByUserId: number;
-      requestedByUser: User;
-      startedAt: string;
-      completedAt: string;
-      tasks: Array<Task>;
-    };
-    currentUserHasAccess: boolean | null;
-    currentUserHasSuperAdminAccess: boolean | null;
-    requestAccessFrom: User | null;
-    superAdminsInSandbox: number | null;
+    sandboxHubId: number;
+    fromHubId: number;
+    toHubId: number;
+    command: string;
+    status: string;
+    result: string;
+    sandboxType: string;
+    requestedAt: string;
+    requestedByUserId: number;
+    requestedByUser: User;
+    startedAt: string;
+    completedAt: string;
+    tasks: Array<Task>;
   };
+  currentUserHasAccess: boolean | null;
+  currentUserHasSuperAdminAccess: boolean | null;
+  requestAccessFrom: User | null;
+  superAdminsInSandbox: number | null;
+};
+
+export type SandboxResponse = {
+  sandbox: Sandbox;
   personalAccessKey: string;
 };
 
-export type SandboxUsageLimits = {
-  usage: {
-    STANDARD: {
-      used: number;
-      available: number;
-      limit: number;
-    };
-    DEVELOPER: {
-      used: number;
-      available: number;
-      limit: number;
-    };
+export type Usage = {
+  STANDARD: {
+    used: number;
+    available: number;
+    limit: number;
   };
+  DEVELOPER: {
+    used: number;
+    available: number;
+    limit: number;
+  };
+};
+
+export type SandboxUsageLimitsResponse = {
+  usage: Usage;
 };
 
 export type SyncTask = {
@@ -157,15 +161,15 @@ export type InitiateSyncResponse = {
   id: string;
 };
 
+export type SandboxType = {
+  name: string;
+  dependsOn: Array<string>;
+  pushToParentEnabled: boolean;
+  isBeta: boolean;
+  diffEnabled: boolean;
+  groupType: string;
+};
+
 export type FetchTypesResponse = {
-  results: [
-    {
-      name: string;
-      dependsOn: Array<string>;
-      pushToParentEnabled: boolean;
-      isBeta: boolean;
-      diffEnabled: boolean;
-      groupType: string;
-    }
-  ];
+  results: Array<SandboxType>;
 };

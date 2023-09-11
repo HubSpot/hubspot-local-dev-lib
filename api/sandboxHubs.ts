@@ -3,7 +3,11 @@ import http from '../http';
 import { getAxiosConfig } from '../http/getAxiosConfig';
 import { ENVIRONMENTS } from '../constants/environments';
 import { Environment } from '../types/Config';
-import { Sandbox, SandboxHubData, SandboxUsageLimits } from '../types/Sandbox';
+import {
+  SandboxHubData,
+  SandboxResponse,
+  SandboxUsageLimitsResponse,
+} from '../types/Sandbox';
 
 const SANDBOX_API_PATH = 'sandbox-hubs/v1';
 const SANDBOX_API_PATH_V2 = 'sandbox-hubs/v2';
@@ -12,7 +16,7 @@ export async function createSandbox(
   accountId: number,
   name: string,
   type: string
-): Promise<Sandbox> {
+): Promise<SandboxResponse> {
   return http.post(accountId, {
     body: { name, type, generatePersonalAccessKey: true }, // For CLI, generatePersonalAccessKey will always be true since we'll be saving the entry to the config
     timeout: 60000,
@@ -31,7 +35,7 @@ export async function deleteSandbox(
 
 export async function getSandboxUsageLimits(
   parentAccountId: number
-): Promise<SandboxUsageLimits> {
+): Promise<SandboxUsageLimitsResponse> {
   return http.get(parentAccountId, {
     url: `${SANDBOX_API_PATH}/parent/${parentAccountId}/usage`,
   });
