@@ -1,7 +1,10 @@
 import { ReadStream } from 'fs';
 import { Row, Schema } from './Hubdb';
+import { SyncTask } from './Sandbox';
 
-export type Body = { [key: string]: string | number | boolean | Body | Row[] };
+export type Body = {
+  [key: string]: string | number | boolean | Body | Row[] | SyncTask[];
+};
 
 export type AxiosConfigOptions = {
   url: string;

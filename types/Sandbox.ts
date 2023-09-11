@@ -56,7 +56,7 @@ type TaskStatus = {
   mutationErrors: Array<MutationError>;
 };
 
-type Task = {
+export type Task = {
   id: string;
   parentHubId: number;
   sandboxHubId: number;
@@ -131,4 +131,41 @@ export type SandboxUsageLimits = {
       limit: number;
     };
   };
+};
+
+export type SyncTask = {
+  type: string;
+};
+
+export type InitiateSyncResponse = {
+  links: {
+    status: string;
+  };
+  sync: {
+    id: string;
+    parentHubId: number;
+    sandboxHubId: number;
+    fromHubId: number;
+    toHubId: number;
+    command: string;
+    status: string;
+    sandboxType: string;
+    requestedAt: string;
+    requestedByUserId: number;
+    tasks: Array<Task>;
+  };
+  id: string;
+};
+
+export type FetchTypesResponse = {
+  results: [
+    {
+      name: string;
+      dependsOn: Array<string>;
+      pushToParentEnabled: boolean;
+      isBeta: boolean;
+      diffEnabled: boolean;
+      groupType: string;
+    }
+  ];
 };
