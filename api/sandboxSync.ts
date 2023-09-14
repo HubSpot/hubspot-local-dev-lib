@@ -5,6 +5,7 @@ import {
   SyncTask,
   FetchTypesResponse,
 } from '../types/Sandbox';
+import { SANDBOX_TIMEOUT } from '../constants/api';
 const SANDBOXES_SYNC_API_PATH = 'sandboxes-sync/v1';
 
 export async function initiateSync(
@@ -21,7 +22,7 @@ export async function initiateSync(
       sandboxHubId,
       tasks,
     },
-    timeout: 60000,
+    timeout: SANDBOX_TIMEOUT,
     url: `${SANDBOXES_SYNC_API_PATH}/tasks/initiate/async`,
   });
 }

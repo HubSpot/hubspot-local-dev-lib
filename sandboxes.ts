@@ -8,7 +8,7 @@ import {
   initiateSync as _initiateSync,
   fetchTaskStatus as _fetchTaskStatus,
   fetchTypes as _fetchTypes,
-} from './api/sandboxesSync';
+} from './api/sandboxSync';
 import {
   InitiateSyncResponse,
   Sandbox,

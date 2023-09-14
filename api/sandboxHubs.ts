@@ -2,6 +2,7 @@ import axios from 'axios';
 import http from '../http';
 import { getAxiosConfig } from '../http/getAxiosConfig';
 import { ENVIRONMENTS } from '../constants/environments';
+import { SANDBOX_TIMEOUT } from '../constants/api';
 import { Environment } from '../types/Config';
 import {
   SandboxHubData,
@@ -19,7 +20,7 @@ export async function createSandbox(
 ): Promise<SandboxResponse> {
   return http.post(accountId, {
     body: { name, type, generatePersonalAccessKey: true }, // For CLI, generatePersonalAccessKey will always be true since we'll be saving the entry to the config
-    timeout: 60000,
+    timeout: SANDBOX_TIMEOUT,
     url: SANDBOX_API_PATH_V2, // Create uses v2 for sandbox type and PAK generation support
   });
 }
