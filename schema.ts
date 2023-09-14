@@ -29,8 +29,6 @@ export async function downloadSchemas(
   if (response.results.length) {
     response.results.forEach(r => writeSchemaToDisk(r, dest));
   }
-
-  return;
 }
 
 export async function downloadSchema(

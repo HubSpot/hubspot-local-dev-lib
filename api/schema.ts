@@ -4,13 +4,10 @@ import { FetchSchemasResponse, Schema } from '../types/Schemas';
 
 const SCHEMA_API_PATH = 'crm-object-schemas/v3/schemas';
 
-export function createSchema(
-  accountId: number,
-  filePath: string
-): Promise<Schema> {
+export function createSchema(accountId: number, object: JSON): Promise<Schema> {
   return http.post(accountId, {
     url: SCHEMA_API_PATH,
-    body: JSON.parse(fs.readFileSync(filePath, 'utf-8')),
+    body: object,
   });
 }
 

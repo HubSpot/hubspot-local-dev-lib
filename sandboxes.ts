@@ -17,6 +17,9 @@ import {
   Task,
   Usage,
 } from './types/Sandbox';
+import { throwErrorWithMessage } from './errors/standardErrors';
+
+const i18nKey = 'errors.errorTypes.sandboxes';
 
 export async function createSandbox(
   accountId: number,
@@ -26,29 +29,26 @@ export async function createSandbox(
   name: string;
   sandbox: Sandbox;
   personalAccessKey: string;
-} | void> {
-  let resp;
-
+}> {
   try {
-    resp = await _createSandbox(accountId, name, type);
+    const resp = await _createSandbox(accountId, name, type);
+    return {
+      name,
+      ...resp,
+    };
   } catch (err) {
-    throw err;
+    throwErrorWithMessage(`${i18nKey}.createSandbox`, {}, err);
   }
-
-  return {
-    name,
-    ...resp,
-  };
 }
 
 export async function deleteSandbox(
   parentAccountId: number,
   sandboxAccountId: number
-): Promise<{ parentAccountId: number; sandboxAccountId: number } | void> {
+): Promise<{ parentAccountId: number; sandboxAccountId: number }> {
   try {
     await _deleteSandbox(parentAccountId, sandboxAccountId);
   } catch (err) {
-    throw err;
+    throwErrorWithMessage(`${i18nKey}.deleteSandbox`, {}, err);
   }
 
   return {
@@ -60,15 +60,12 @@ export async function deleteSandbox(
 export async function getSandboxUsageLimits(
   parentAccountId: number
 ): Promise<Usage | void> {
-  let resp;
-
   try {
-    resp = await _getSandboxUsageLimits(parentAccountId);
+    const resp = await _getSandboxUsageLimits(parentAccountId);
+    return resp && resp.usage;
   } catch (err) {
-    throw err;
+    throwErrorWithMessage(`${i18nKey}.getSandboxUsageLimits`, {}, err);
   }
-
-  return resp && resp.usage;
 }
 
 export async function initiateSync(
@@ -76,44 +73,33 @@ export async function initiateSync(
   toHubId: number,
   tasks: Array<SyncTask>,
   sandboxHubId: number
-): Promise<InitiateSyncResponse | void> {
-  let resp;
-
+): Promise<InitiateSyncResponse> {
   try {
-    resp = await _initiateSync(fromHubId, toHubId, tasks, sandboxHubId);
+    return await _initiateSync(fromHubId, toHubId, tasks, sandboxHubId);
   } catch (err) {
-    throw err;
+    throwErrorWithMessage(`${i18nKey}.initiateSync`, {}, err);
   }
-
-  return resp;
 }
 
 export async function fetchTaskStatus(
   accountId: number,
   taskId: number
-): Promise<Task | void> {
-  let resp;
-
+): Promise<Task> {
   try {
-    resp = await _fetchTaskStatus(accountId, taskId);
+    return await _fetchTaskStatus(accountId, taskId);
   } catch (err) {
-    throw err;
+    throwErrorWithMessage(`${i18nKey}.fetchTaskStatus`, {}, err);
   }
-
-  return resp;
 }
 
 export async function fetchTypes(
   accountId: number,
   toHubId: number
 ): Promise<Array<SandboxType> | void> {
-  let resp;
-
   try {
-    resp = await _fetchTypes(accountId, toHubId);
+    const resp = await _fetchTypes(accountId, toHubId);
+    return resp && resp.results;
   } catch (err) {
-    throw err;
+    throwErrorWithMessage(`${i18nKey}.fetchTypes`, {}, err);
   }
-
-  return resp && resp.results;
 }
