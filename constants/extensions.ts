@@ -19,5 +19,6 @@ export const ALLOWED_EXTENSIONS = new Set([
   'graphql',
 ]);
 
+export const HUBL_EXTENSIONS = new Set(['css', 'html', 'js']);
 export const MODULE_EXTENSION = 'module';
 export const FUNCTIONS_EXTENSION = 'functions';
