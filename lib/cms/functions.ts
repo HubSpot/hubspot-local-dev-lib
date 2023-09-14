@@ -32,7 +32,17 @@ function createEndpoint(endpointMethod: string, filename: string) {
   };
 }
 
-function createConfig({ endpointPath, endpointMethod, functionFile }): Config {
+type ConfigInfo = {
+  endpointPath: string;
+  endpointMethod: string;
+  functionFile: string;
+};
+
+function createConfig({
+  endpointPath,
+  endpointMethod,
+  functionFile,
+}: ConfigInfo): Config {
   return {
     runtime: 'nodejs18.x',
     version: '1.0',
@@ -51,7 +61,7 @@ function writeConfig(configFilePath: string, config: Config): void {
 
 function updateExistingConfig(
   configFilePath: string,
-  { endpointPath, endpointMethod, functionFile }
+  { endpointPath, endpointMethod, functionFile }: ConfigInfo
 ) {
   let configString!: string;
   try {
