@@ -8,11 +8,11 @@ en:
         init: "Copying project source..."
         sourceEmpty: "Project source is empty"
         success: "Completed copying project source."
-        error: An error occured copying project source to {{ dest }}.
+        error: "An error occured copying project source to {{ dest }}."
       cleanupTempDir:
         error: "Failed to clean up temp dir: {{ tmpDir }}"
     github:
-      fetchJsonFromRepository: "Fetching {{ uri }}..."
+      fetchJsonFromRepository: "Fetching {{ url }}..."
       downloadGithubRepoZip:
         fetching: "Fetching {{ releaseType }} with name {{ repoName }}..."
         fetchingName: "Fetching {{ name }}..."
@@ -95,9 +95,9 @@ en:
         retryFailed: 'Uploading file "{{ file }}" to "{{ destPath }}" failed'
     models:
       OAuth2Manager:
-        fetchingAccessToken: Fetching access token for accountId {{ accountId }} for clientId {{ clientId }}
-        updatingTokeninfo: Persisting updated tokenInfo for accountId {{ accountId }} for clientId {{ clientId }}
-        refreshingAccessToken: Waiting for access token for accountId {{ accountId }}  for clientId {{ clientId }} to be fetched
+        fetchingAccessToken: "Fetching access token for accountId {{ accountId }} for clientId {{ clientId }}"
+        updatingTokenInfo: "Persisting updated tokenInfo for accountId {{ accountId }} for clientId {{ clientId }}"
+        refreshingAccessToken: "Waiting for access token for accountId {{ accountId }}  for clientId {{ clientId }} to be fetched"
     http:
       index:
         createGetRequestStream:

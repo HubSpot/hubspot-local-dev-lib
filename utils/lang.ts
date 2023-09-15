@@ -44,6 +44,7 @@ function getTextValue(lookupDotNotation: string): string {
     if (typeof textValue === 'object') {
       textValue = textValue[prop];
     } else {
+      // TODO - Replace with debug?
       console.debug(
         `Unable to access language property: ${lookupProps.join(
           '.'

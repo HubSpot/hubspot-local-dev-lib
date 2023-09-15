@@ -52,7 +52,7 @@ export function loadConfigFromEnvironment(): CLIConfig_NEW | null {
   }
 
   if (!env) {
-    debug('environment.loadConfig.env');
+    debug('environment.loadConfig.missingEnv');
     return null;
   }
 
