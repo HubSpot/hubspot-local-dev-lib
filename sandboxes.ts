@@ -1,4 +1,3 @@
-/* eslint-disable no-useless-catch */
 import {
   createSandbox as _createSandbox,
   deleteSandbox as _deleteSandbox,
@@ -19,7 +18,7 @@ import {
 } from './types/Sandbox';
 import { throwErrorWithMessage } from './errors/standardErrors';
 
-const i18nKey = 'errors.errorTypes.sandboxes';
+const i18nKey = 'errorTypes.sandboxes';
 
 export async function createSandbox(
   accountId: number,
