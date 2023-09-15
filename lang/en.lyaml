@@ -28,8 +28,8 @@ en:
     oauth:
       writeTokenInfo: "Updating Oauth2 token info for portalId: {{ portalId }}"
       addOauthToAccountConfig:
-        init: Updating configuration
-        success: Configuration updated
+        init: "Updating configuration"
+        success: "Configuration updated"
     filemapper:
       fetchAndWriteFileStream:
         skippedExisting: "Skipped existing {{ filepath }}"

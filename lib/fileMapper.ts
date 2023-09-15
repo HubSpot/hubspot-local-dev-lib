@@ -194,7 +194,7 @@ async function fetchAndWriteFileStream(
 ): Promise<void> {
   const logger = makeTypedLogger<typeof filemapperCallbackKeys>(
     logCallbacks,
-    'filemapper'
+    'filemapper.fetchAndWriteFileStream'
   );
   if (typeof srcPath !== 'string' || !srcPath.trim()) {
     return;
@@ -234,7 +234,7 @@ async function writeFileMapperNode(
 ): Promise<boolean> {
   const logger = makeTypedLogger<typeof filemapperCallbackKeys>(
     logCallbacks,
-    'filemapper'
+    'filemapper.fetchAndWriteFileStream'
   );
   const localFilepath = convertToLocalFileSystemPath(path.resolve(filepath));
   if (await skipExisting(localFilepath, options.overwrite)) {
@@ -284,7 +284,7 @@ async function downloadFile(
 ): Promise<void> {
   const logger = makeTypedLogger<typeof filemapperCallbackKeys>(
     logCallbacks,
-    'filemapper'
+    'filemapper.fetchAndWriteFileStream'
   );
   const { isFile, isHubspot } = getTypeDataFromPath(src);
   try {
@@ -345,7 +345,7 @@ async function fetchFolderFromApi(
 ): Promise<FileMapperNode> {
   const logger = makeTypedLogger<typeof filemapperCallbackKeys>(
     logCallbacks,
-    'filemapper'
+    'filemapper.fetchAndWriteFileStream'
   );
   const { isRoot, isFolder, isHubspot } = getTypeDataFromPath(src);
   if (!isFolder) {
@@ -382,7 +382,7 @@ async function downloadFolder(
 ) {
   const logger = makeTypedLogger<typeof filemapperCallbackKeys>(
     logCallbacks,
-    'filemapper'
+    'filemapper.fetchAndWriteFileStream'
   );
   try {
     const node = await fetchFolderFromApi(
