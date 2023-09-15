@@ -349,7 +349,7 @@ async function fetchFolderFromApi(
   );
   const { isRoot, isFolder, isHubspot } = getTypeDataFromPath(src);
   if (!isFolder) {
-    throwErrorWithMessage('filemapper.invalidFetchFolderRequest');
+    throwErrorWithMessage('filemapper.invalidFetchFolderRequest', { src });
   }
   try {
     const srcPath = isRoot ? '@root' : src;

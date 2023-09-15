@@ -61,7 +61,7 @@ export async function createTemplate(
   const filename = name.endsWith('.html') ? name : `${name}.html`;
   const filePath = path.join(dest, filename);
   if (!options.allowExisting && fs.existsSync(filePath)) {
-    throwErrorWithMessage('errors.templates.pathExists', { path: filePath });
+    throwErrorWithMessage('templates.pathExists', { path: filePath });
   }
   debug('templates.debug.creatingPath', { path: dest });
   fs.mkdirp(dest);
