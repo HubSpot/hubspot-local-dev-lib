@@ -1,17 +1,18 @@
 import fs from 'fs-extra';
 import path from 'path';
 import PQueue from 'p-queue';
-import { getCwd, getExt, convertToLocalFileSystemPath } from './path';
+import {
+  getCwd,
+  getExt,
+  convertToLocalFileSystemPath,
+  isAllowedExtension,
+} from './path';
 import { fetchFileStream, download, downloadDefault } from '../api/fileMapper';
 import {
   throwErrorWithMessage,
   throwTypeErrorWithMessage,
 } from '../errors/standardErrors';
-import {
-  ALLOWED_EXTENSIONS,
-  MODULE_EXTENSION,
-  FUNCTIONS_EXTENSION,
-} from '../constants/extensions';
+import { MODULE_EXTENSION, FUNCTIONS_EXTENSION } from '../constants/extensions';
 import { MODE } from '../constants/files';
 import {
   FileMapperNode,
@@ -48,12 +49,6 @@ function isPathToRoot(filepath: string): boolean {
 function isPathToHubspot(filepath: string): boolean {
   if (typeof filepath !== 'string') return false;
   return /^(\/|\\)?@hubspot/i.test(filepath.trim());
-}
-
-function isAllowedExtension(filepath: string): boolean {
-  const ext = getExt(filepath);
-  if (!ext) return false;
-  return ALLOWED_EXTENSIONS.has(ext);
 }
 
 function useApiBuffer(mode: Mode | null): boolean {
@@ -354,7 +349,7 @@ async function fetchFolderFromApi(
   );
   const { isRoot, isFolder, isHubspot } = getTypeDataFromPath(src);
   if (!isFolder) {
-    throwErrorWithMessage('filemapper.invalidFetchFolderRequest');
+    throwErrorWithMessage('filemapper.invalidFetchFolderRequest', { src });
   }
   try {
     const srcPath = isRoot ? '@root' : src;

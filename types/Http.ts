@@ -1,7 +1,10 @@
 import { ReadStream } from 'fs';
 
-/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-type Body = { [key: string]: any };
+export type Body = {
+  // TODO - Return if we find a better way to represent the Body type
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [key: string]: any;
+};
 
 export type AxiosConfigOptions = {
   url: string;

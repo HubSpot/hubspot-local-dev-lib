@@ -164,7 +164,7 @@ export async function createModule(
     !name || name.endsWith('.module') ? name : `${name}.module`;
   const destPath = path.join(dest, folderName);
   if (!options.allowExistingDir && fs.existsSync(destPath)) {
-    throwErrorWithMessage('modules.createModule', {
+    throwErrorWithMessage('modules.writeModuleMeta', {
       path: destPath,
     });
   } else {
