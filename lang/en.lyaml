@@ -8,11 +8,11 @@ en:
         init: "Copying project source..."
         sourceEmpty: "Project source is empty"
         success: "Completed copying project source."
-        error: An error occured copying project source to {{ dest }}.
+        error: "An error occured copying project source to {{ dest }}."
       cleanupTempDir:
         error: "Failed to clean up temp dir: {{ tmpDir }}"
     github:
-      fetchJsonFromRepository: "Fetching {{ uri }}..."
+      fetchJsonFromRepository: "Fetching {{ url }}..."
       downloadGithubRepoZip:
         fetching: "Fetching {{ releaseType }} with name {{ repoName }}..."
         fetchingName: "Fetching {{ name }}..."
@@ -28,15 +28,14 @@ en:
     oauth:
       writeTokenInfo: "Updating Oauth2 token info for portalId: {{ portalId }}"
       addOauthToAccountConfig:
-        init: Updating configuration
-        success: Configuration updated
+        init: "Updating configuration"
+        success: "Configuration updated"
     filemapper:
-      fetchAndWriteFileStream:
-        skippedExisting: "Skipped existing {{ filepath }}"
-        wroteFolder: "Wrote folder {{ filepath }}"
-        completedFetch: 'Completed fetch of file "{{ src }}"{{ version }} to "{{ dest }}" from the Design Manager'
-        folderFetch: 'Fetched "{{ src }}" from account {{ accountId }} from the Design Manager successfully'
-        completedFolderFetch: 'Completed fetch of folder "{{ src }}"{{ version }} to "{{ dest }}" from the Design Manager'
+      skippedExisting: "Skipped existing {{ filepath }}"
+      wroteFolder: "Wrote folder {{ filepath }}"
+      completedFetch: 'Completed fetch of file "{{ src }}"{{ version }} to "{{ dest }}" from the Design Manager'
+      folderFetch: 'Fetched "{{ src }}" from account {{ accountId }} from the Design Manager successfully'
+      completedFolderFetch: 'Completed fetch of folder "{{ src }}"{{ version }} to "{{ dest }}" from the Design Manager'
     watch:
       notifyOfThemePreview: "To preview this theme, visit: {{ previewUrl }}"
       skipUnsupportedExtension: "Skipping {{ file }} due to unsupported extension"
@@ -95,9 +94,9 @@ en:
         retryFailed: 'Uploading file "{{ file }}" to "{{ destPath }}" failed'
     models:
       OAuth2Manager:
-        fetchingAccessToken: Fetching access token for accountId {{ accountId }} for clientId {{ clientId }}
-        updatingTokeninfo: Persisting updated tokenInfo for accountId {{ accountId }} for clientId {{ clientId }}
-        refreshingAccessToken: Waiting for access token for accountId {{ accountId }}  for clientId {{ clientId }} to be fetched
+        fetchingAccessToken: "Fetching access token for accountId {{ accountId }} for clientId {{ clientId }}"
+        updatingTokenInfo: "Persisting updated tokenInfo for accountId {{ accountId }} for clientId {{ clientId }}"
+        refreshingAccessToken: "Waiting for access token for accountId {{ accountId }}  for clientId {{ clientId }} to be fetched"
     http:
       index:
         createGetRequestStream:
@@ -151,18 +150,18 @@ en:
     filemapper:
       invalidNode: "Invalid FileMapperNode: {{ json }}"
       invalidFileType: "Invalid file type requested: {{ srcPath }}"
-      assetTiemout: "HubSpot assets are unavailable at the moment. Please wait a few minutes and try again."
+      assetTimeout: "HubSpot assets are unavailable at the moment. Please wait a few minutes and try again."
       failedToFetchFile: 'Failed fetch of file "{{ src }}" to "{{ dest }}" from the Design Manager'
-      failedToFetchFoder: 'Failed fetch of folder "{{ src }}" to "{{ dest }}" from the Design Manager'
+      failedToFetchFolder: 'Failed fetch of folder "{{ src }}" to "{{ dest }}" from the Design Manager'
       invalidFetchFolderRequest: 'Invalid request for folder: "{{ src }}"'
-      incompleteFetch: 'Not all files in folder "{{ src }}" were successfully fetched.  Re-run the last command to try again`'
+      incompleteFetch: 'Not all files in folder "{{ src }}" were successfully fetched.  Re-run the last command to try again'
     github:
       downloadGithubRepoContents: "Failed to fetch contents: {{ errorMessage }}"
       fetchJsonFromRepository: "An error occured fetching JSON file."
       fetchReleaseData: "Failed fetching release data for {{ tag }} project."
-      downloadGithubRepoZip: "An error occured fetching the project source."
+      downloadGithubRepoZip: "An error occurred fetching the project source."
     modules:
-      throwInvalidPathInput: "Expected PathInput"
+      throwInvalidPathInput: "Expected Path Input"
       writeModuleMeta: "The {{ path }} path already exists"
     personalAccessKey:
       accountNotFound: "Account with id {{ accountId }} does not exist."
@@ -174,23 +173,18 @@ en:
     utils:
       git:
         configIgnore: "Unable to determine if config file is properly ignored by git."
-      handleFieldsJs:
-        convertFieldsJs: "There was an error converting '{{ filePath }}'"
-        saveOutput: "There was an error saving the json output of {{ path }}"
-        createTmpDirSync: "An error occured writing temporary project source."
-        cleanupTmpDirSync: "There was an error deleting the temporary project source"
       notify:
-        filePath: Unable to notify file {{ filePath }}
+        filePath: "Unable to notify file '{{ filePath }}'"
     config:
       cliConfiguration:
-        noConfigLoaded: "No Config loaded."
+        noConfigLoaded: "No config loaded."
         updateAccount: "An accountId is required to update the config"
         updateDefaultAccount: "A 'defaultAccount' with value of number or string is required to update the config."
         renameAccount: "Cannot find account with identifier {{ currentName }}"
         removeAccountFromConfig: "Unable to find account for {{ nameOrId }}."
         updateDefaultMode: "The mode {{ defaultMode }} is invalid. Valid values are {{ validModes }}."
-        updateHttpTimeout: The value {{ timeout }} is invalid. The value must be a number greater than {{ minTimeout }}.
-        updateAllowUsageTracking: Unable to update allowUsageTracking. The value {{ isEnabled }} is invalid. The value must be a boolean.
+        updateHttpTimeout: "The value {{ timeout }} is invalid. The value must be a number greater than {{ minTimeout }}."
+        updateAllowUsageTracking: "Unable to update allowUsageTracking. The value {{ isEnabled }} is invalid. The value must be a boolean."
       configFile:
         parsing: "Config file could not be parsed"
     models:
@@ -201,6 +195,12 @@ en:
       index:
         withOauth: "Oauth manager for account {{ accountId }} not found."
         withAuth: "Account with id {{ accountId }} not found."
+    cms:
+      handleFieldsJs:
+        convertFieldsJs: "There was an error converting '{{ filePath }}'"
+        saveOutput: "There was an error saving the json output of {{ path }}"
+        createTmpDirSync: "An error occured writing temporary project source."
+        cleanupTmpDirSync: "There was an error deleting the temporary project source"
     sandboxes:
       createSandbox: "There was an error creating your sandbox."
       deleteSandbox: "There was an error deleting your sandbox."
