@@ -2,6 +2,7 @@ import { ReadStream } from 'fs';
 import { Schema } from './Hubdb';
 
 export type Body = {
+  // TODO - Return if we find a better way to represent the Body type
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
 };
