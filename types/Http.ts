@@ -1,7 +1,11 @@
 import { ReadStream } from 'fs';
-import { Row, Schema } from './Hubdb';
+import { Schema } from './Hubdb';
 
-export type Body = { [key: string]: string | number | boolean | Body | Row[] };
+export type Body = {
+  // TODO - Return if we find a better way to represent the Body type
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [key: string]: any;
+};
 
 export type AxiosConfigOptions = {
   url: string;

@@ -201,3 +201,10 @@ en:
         saveOutput: "There was an error saving the json output of {{ path }}"
         createTmpDirSync: "An error occured writing temporary project source."
         cleanupTmpDirSync: "There was an error deleting the temporary project source"
+    sandboxes:
+      createSandbox: "There was an error creating your sandbox."
+      deleteSandbox: "There was an error deleting your sandbox."
+      getSandboxUsageLimits: "There was an error fetching sandbox usage limits."
+      initiateSync: "There was an error initiating the sandbox sync."
+      fetchTaskStatus: "There was an error fetching the task status while syncing sandboxes."
+      fetchTypes: "There was an error fetching sandbox types."
