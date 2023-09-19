@@ -18,7 +18,7 @@ import {
 } from './types/Sandbox';
 import { throwErrorWithMessage } from './errors/standardErrors';
 
-const i18nKey = 'errorTypes.sandboxes';
+const i18nKey = 'sandboxes';
 
 export async function createSandbox(
   accountId: number,

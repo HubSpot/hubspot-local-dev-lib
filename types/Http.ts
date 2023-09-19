@@ -1,9 +1,9 @@
 import { ReadStream } from 'fs';
-import { Row, Schema } from './Hubdb';
-import { SyncTask } from './Sandbox';
+import { Schema } from './Hubdb';
 
 export type Body = {
-  [key: string]: string | number | boolean | Body | Row[] | SyncTask[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [key: string]: any;
 };
 
 export type AxiosConfigOptions = {

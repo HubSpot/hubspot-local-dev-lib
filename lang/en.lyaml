@@ -121,13 +121,6 @@ en:
         unknownFilepath: "a file or folder"
         baseMessage: "An error occurred while {{ fileAction }} {{ filepath }}."
         systemErrorMessage: "This is the result of a system error: {{ errorMessage }}"
-      sandboxes:
-        createSandbox: "There was an error creating your sandbox."
-        deleteSandbox: "There was an error deleting your sandbox."
-        getSandboxUsageLimits: "There was an error fetching sandbox usage limits."
-        initiateSync: "There was an error initiating the sandbox sync."
-        fetchTaskStatus: "There was an error fetching the task status while syncing sandboxes."
-        fetchTypes: "There was an error fetching sandbox types."
       api:
         messageDetail: "{{ request }} in account {{ accountId }}"
         unableToUpload: 'Unable to upload "{{ payload }}.'
@@ -200,3 +193,10 @@ en:
       index:
         withOauth: "Oauth manager for account {{ accountId }} not found."
         withAuth: "Account with id {{ accountId }} not found."
+    sandboxes:
+      createSandbox: "There was an error creating your sandbox."
+      deleteSandbox: "There was an error deleting your sandbox."
+      getSandboxUsageLimits: "There was an error fetching sandbox usage limits."
+      initiateSync: "There was an error initiating the sandbox sync."
+      fetchTaskStatus: "There was an error fetching the task status while syncing sandboxes."
+      fetchTypes: "There was an error fetching sandbox types."
