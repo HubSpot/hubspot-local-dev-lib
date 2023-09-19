@@ -186,10 +186,8 @@ export async function uploadFolder(
         }
         debug('cms.uploadFolder.failed', { file, destPath });
         if (error.response && error.response.body) {
-          //TODO - Replace with debug?
           console.debug(error.response.body);
         } else {
-          //TODO - Replace with debug?
           console.debug(error.message);
         }
         failures.push({
