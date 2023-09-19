@@ -17,6 +17,7 @@ export type Table = {
   updatedAt: string;
   label: string;
   columns: Array<Column>;
+  rows: Array<Row>;
   partitioningSettings?: null; //TODO
   published: boolean;
   cosObjectType: string;

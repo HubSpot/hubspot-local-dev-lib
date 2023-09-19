@@ -21,12 +21,15 @@ function validateJsonPath(src: string): void {
 }
 
 function validateJsonFile(src: string): void {
+  let stats;
+
   try {
-    const stats = fs.statSync(src);
-    if (!stats.isFile()) {
-      throwErrorWithMessage('hubdb.invalidJsonFile', { src });
-    }
+    stats = fs.statSync(src);
   } catch (e) {
+    throwErrorWithMessage('hubdb.invalidJsonFile', { src });
+  }
+
+  if (!stats.isFile()) {
     throwErrorWithMessage('hubdb.invalidJsonFile', { src });
   }
 
@@ -42,11 +45,11 @@ export async function addRowsToHubDbTable(
     const values = row.values;
 
     return {
-      childTableId: 0,
+      childTableId: '0',
       isSoftEditable: false,
       ...row,
       values,
-    } as Row;
+    };
   });
 
   if (rowsToUpdate.length > 0) {
@@ -67,7 +70,7 @@ export async function createHubDbTable(
 ): Promise<{ tableId: string; rowCount: number }> {
   validateJsonFile(src);
 
-  const table = fs.readJsonSync(src);
+  const table: Table = fs.readJsonSync(src);
   const { rows, ...schema } = table;
   const { id } = await createTable(accountId, schema);
 
