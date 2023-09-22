@@ -66,7 +66,7 @@ export async function fetchRows(
 export async function deleteRows(
   accountId: number,
   tableId: number,
-  rowIds
+  rowIds: Array<string>
 ): Promise<void> {
   return http.post(accountId, {
     url: `${HUBDB_API_PATH}/tables/${tableId}/rows/draft/batch/purge`,

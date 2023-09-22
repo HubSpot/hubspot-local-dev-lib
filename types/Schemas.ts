@@ -16,7 +16,7 @@ export type Schema = {
       externalOptions: boolean;
       archived: boolean;
       hasUniqueValue: boolean;
-    }
+    },
   ];
   associations?: [
     {
@@ -24,7 +24,7 @@ export type Schema = {
       fromObjectTypeId: string;
       toObjectTypeId: string;
       name: string;
-    }
+    },
   ];
   labels: {
     singular: string;
