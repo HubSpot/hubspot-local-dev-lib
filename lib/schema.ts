@@ -11,13 +11,14 @@ export function getResolvedPath(dest: string, name: string): string {
   return path.resolve(getCwd(), dest || '');
 }
 
-export function writeSchemaToDisk(schema: Schema, dest: string): void {
-  fs.outputFileSync(
-    getResolvedPath(dest, schema.name),
-    prettier.format(JSON.stringify(schema), {
-      parser: 'json',
-    })
-  );
+export async function writeSchemaToDisk(
+  schema: Schema,
+  dest: string
+): Promise<void> {
+  const formattedSchema = await prettier.format(JSON.stringify(schema), {
+    parser: 'json',
+  });
+  fs.outputFileSync(getResolvedPath(dest, schema.name), formattedSchema);
 }
 
 export async function downloadSchemas(
