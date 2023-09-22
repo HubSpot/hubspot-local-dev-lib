@@ -37,6 +37,7 @@
     "@types/jest": "^29.5.0",
     "@types/js-yaml": "^4.0.5",
     "@types/node": "^18.14.2",
+    "@types/prettier": "^3.0.0",
     "@types/unixify": "^1.0.0",
     "@typescript-eslint/eslint-plugin": "^5.54.0",
     "@typescript-eslint/parser": "^5.59.7",
@@ -67,6 +68,7 @@
     "js-yaml": "^4.1.0",
     "moment": "^2.29.4",
     "p-queue": "^6.0.2",
+    "prettier": "^2.8.4",
     "unixify": "^1.0.0"
   },
   "engines": {

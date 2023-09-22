@@ -145,11 +145,13 @@ async function fetchAllRows(
   let rows: Array<Row> = [];
   let after: string | null = null;
   do {
-    const { paging, results } = await fetchRows(
+    const response = await fetchRows(
       accountId,
       tableId,
       after ? { after } : undefined
     );
+
+    const { paging, results } = response;
 
     rows = rows.concat(results);
     after = paging && paging.next ? paging.next.after : null;
