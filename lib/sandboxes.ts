@@ -2,12 +2,12 @@ import {
   createSandbox as _createSandbox,
   deleteSandbox as _deleteSandbox,
   getSandboxUsageLimits as _getSandboxUsageLimits,
-} from './api/sandboxHubs';
+} from '../api/sandboxHubs';
 import {
   initiateSync as _initiateSync,
   fetchTaskStatus as _fetchTaskStatus,
   fetchTypes as _fetchTypes,
-} from './api/sandboxSync';
+} from '../api/sandboxSync';
 import {
   InitiateSyncResponse,
   Sandbox,
@@ -15,8 +15,9 @@ import {
   SyncTask,
   Task,
   Usage,
-} from './types/Sandbox';
-import { throwErrorWithMessage } from './errors/standardErrors';
+} from '../types/Sandbox';
+import { throwErrorWithMessage } from '../errors/standardErrors';
+import { BaseError } from '../types/Error';
 
 const i18nKey = 'sandboxes';
 
@@ -36,7 +37,7 @@ export async function createSandbox(
       ...resp,
     };
   } catch (err) {
-    throwErrorWithMessage(`${i18nKey}.createSandbox`, {}, err);
+    throwErrorWithMessage(`${i18nKey}.createSandbox`, {}, err as BaseError);
   }
 }
 
@@ -47,7 +48,7 @@ export async function deleteSandbox(
   try {
     await _deleteSandbox(parentAccountId, sandboxAccountId);
   } catch (err) {
-    throwErrorWithMessage(`${i18nKey}.deleteSandbox`, {}, err);
+    throwErrorWithMessage(`${i18nKey}.deleteSandbox`, {}, err as BaseError);
   }
 
   return {
@@ -63,7 +64,11 @@ export async function getSandboxUsageLimits(
     const resp = await _getSandboxUsageLimits(parentAccountId);
     return resp && resp.usage;
   } catch (err) {
-    throwErrorWithMessage(`${i18nKey}.getSandboxUsageLimits`, {}, err);
+    throwErrorWithMessage(
+      `${i18nKey}.getSandboxUsageLimits`,
+      {},
+      err as BaseError
+    );
   }
 }
 
@@ -76,7 +81,7 @@ export async function initiateSync(
   try {
     return await _initiateSync(fromHubId, toHubId, tasks, sandboxHubId);
   } catch (err) {
-    throwErrorWithMessage(`${i18nKey}.initiateSync`, {}, err);
+    throwErrorWithMessage(`${i18nKey}.initiateSync`, {}, err as BaseError);
   }
 }
 
@@ -87,7 +92,7 @@ export async function fetchTaskStatus(
   try {
     return await _fetchTaskStatus(accountId, taskId);
   } catch (err) {
-    throwErrorWithMessage(`${i18nKey}.fetchTaskStatus`, {}, err);
+    throwErrorWithMessage(`${i18nKey}.fetchTaskStatus`, {}, err as BaseError);
   }
 }
 
@@ -99,6 +104,6 @@ export async function fetchTypes(
     const resp = await _fetchTypes(accountId, toHubId);
     return resp && resp.results;
   } catch (err) {
-    throwErrorWithMessage(`${i18nKey}.fetchTypes`, {}, err);
+    throwErrorWithMessage(`${i18nKey}.fetchTypes`, {}, err as BaseError);
   }
 }

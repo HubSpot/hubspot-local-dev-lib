@@ -1,9 +1,9 @@
 import fs from 'fs-extra';
 import path from 'path';
 import prettier from 'prettier';
-import { getCwd } from './lib/path';
-import { fetchSchemas, fetchSchema } from './api/schema';
-import { Schema } from './types/Schemas';
+import { getCwd } from '../lib/path';
+import { fetchSchemas, fetchSchema } from '../api/schema';
+import { Schema } from '../types/Schemas';
 
 export function getResolvedPath(dest: string, name: string): string {
   if (name) return path.resolve(getCwd(), dest || '', `${name}.json`);

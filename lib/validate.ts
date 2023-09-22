@@ -1,14 +1,14 @@
 import fs from 'fs-extra';
-import { HUBL_EXTENSIONS } from './constants/extensions';
-import { validateHubl } from './api/validateHubl';
-import { walk } from './lib/fs';
-import { getExt } from './lib/path';
-import { LintResult } from './types/HublValidation';
+import { HUBL_EXTENSIONS } from '../constants/extensions';
+import { validateHubl } from '../api/validateHubl';
+import { walk } from '../lib/fs';
+import { getExt } from '../lib/path';
+import { LintResult } from '../types/HublValidation';
 
 export async function lint(
   accountId: number,
   filepath: string,
-  callback?: (LintResult) => number
+  callback?: (lintResult: LintResult) => number
 ): Promise<Array<Partial<LintResult>> | void> {
   const stats = await fs.stat(filepath);
   const files = stats.isDirectory() ? await walk(filepath) : [filepath];
