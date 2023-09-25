@@ -1,9 +1,9 @@
 import fs from 'fs-extra';
 import path from 'path';
-import { downloadGithubRepoContents } from './lib/github';
-import { throwErrorWithMessage } from './errors/standardErrors';
-import { debug, makeTypedLogger } from './utils/logger';
-import { LogCallbacksArg } from './types/LogCallbacks';
+import { downloadGithubRepoContents } from '../lib/github';
+import { throwErrorWithMessage } from '../errors/standardErrors';
+import { debug, makeTypedLogger } from '../utils/logger';
+import { LogCallbacksArg } from '../types/LogCallbacks';
 
 // Matches the .html file extension, excluding module.html
 const TEMPLATE_EXTENSION_REGEX = new RegExp(/(?<!module)\.html$/);
@@ -46,14 +46,14 @@ const ASSET_PATHS = {
   'blog-post-template': 'templates/blog-post-template.html',
   'search-template': 'templates/search-template.html',
   section: 'templates/section.html',
-};
+} as const;
 
 const templatesCallbackKeys = ['creatingFile'];
 
 export async function createTemplate(
   name: string,
   dest: string,
-  type = 'page-template',
+  type: keyof typeof ASSET_PATHS = 'page-template',
   options: { allowExisting: boolean } = { allowExisting: false },
   logCallbacks?: LogCallbacksArg<typeof templatesCallbackKeys>
 ): Promise<void> {

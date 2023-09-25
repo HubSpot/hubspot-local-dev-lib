@@ -7,6 +7,7 @@ import {
   getHubSpotWebsiteOrigin as __getHubSpotWebsiteOrigin,
 } from './urls';
 import { trackUsage as __trackUsage } from './trackUsage';
+import { lint as __lint } from './validate';
 
 export const extractZipArchive = __extractZipArchive;
 export const getValidEnv = __getValidEnv;
@@ -15,3 +16,4 @@ export const commaSeparatedValues = __commaSeparatedValues;
 export const getHubSpotApiOrigin = __getHubSpotApiOrigin;
 export const getHubSpotWebsiteOrigin = __getHubSpotWebsiteOrigin;
 export const trackUsage = __trackUsage;
+export const lint = __lint;
