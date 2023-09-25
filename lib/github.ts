@@ -24,12 +24,12 @@ const GITHUB_AUTH_HEADERS = {
 };
 
 export async function fetchJsonFromRepository(
-  repoName: string,
+  repoPath: string,
   filePath: string,
   ref: string
 ): Promise<JSON> {
   try {
-    const URL = `https://raw.githubusercontent.com/HubSpot/${repoName}/${ref}/${filePath}`;
+    const URL = `https://raw.githubusercontent.com/${repoPath}/${ref}/${filePath}`;
     debug('github.fetchJsonFromRepository', { url: URL });
 
     const { data } = await axios.get<JSON>(URL, {
@@ -46,7 +46,7 @@ export async function fetchJsonFromRepository(
 }
 
 export async function fetchReleaseData(
-  repoName: string,
+  repoPath: string,
   tag = ''
 ): Promise<GithubReleaseData> {
   tag = tag.trim().toLowerCase();
@@ -54,8 +54,8 @@ export async function fetchReleaseData(
     tag = `v${tag}`;
   }
   const URI = tag
-    ? `https://api.github.com/repos/${repoName}/releases/tags/${tag}`
-    : `https://api.github.com/repos/${repoName}/releases/latest`;
+    ? `https://api.github.com/repos/${repoPath}/releases/tags/${tag}`
+    : `https://api.github.com/repos/${repoPath}/releases/latest`;
   try {
     const { data } = await axios.get<GithubReleaseData>(URI, {
       headers: { ...DEFAULT_USER_AGENT_HEADERS, ...GITHUB_AUTH_HEADERS },
@@ -72,7 +72,7 @@ export async function fetchReleaseData(
 }
 
 async function downloadGithubRepoZip(
-  repoName: string,
+  repoPath: string,
   tag = '',
   releaseType: ValueOf<
     typeof GITHUB_RELEASE_TYPES
@@ -82,12 +82,12 @@ async function downloadGithubRepoZip(
   try {
     let zipUrl: string;
     if (releaseType === GITHUB_RELEASE_TYPES.REPOSITORY) {
-      debug('github.downloadGithubRepoZip.fetching', { releaseType, repoName });
-      zipUrl = `https://api.github.com/repos/${repoName}/zipball${
+      debug('github.downloadGithubRepoZip.fetching', { releaseType, repoPath });
+      zipUrl = `https://api.github.com/repos/${repoPath}/zipball${
         ref ? `/${ref}` : ''
       }`;
     } else {
-      const releaseData = await fetchReleaseData(repoName, tag);
+      const releaseData = await fetchReleaseData(repoPath, tag);
       zipUrl = releaseData.zipball_url;
       const { name } = releaseData;
       debug('github.downloadGithubRepoZip.fetchingName', { name });
@@ -114,7 +114,7 @@ const cloneGithubRepoCallbackKeys = ['success'];
 export async function cloneGithubRepo(
   dest: string,
   type: string,
-  repoName: string,
+  repoPath: string,
   sourceDir: string,
   options: CloneGithubRepoOptions = {},
   logCallbacks?: LogCallbacksArg<typeof cloneGithubRepoCallbackKeys>
@@ -125,7 +125,8 @@ export async function cloneGithubRepo(
   );
   const { themeVersion, projectVersion, releaseType, ref } = options;
   const tag = projectVersion || themeVersion;
-  const zip = await downloadGithubRepoZip(repoName, tag, releaseType, ref);
+  const zip = await downloadGithubRepoZip(repoPath, tag, releaseType, ref);
+  const repoName = repoPath.split('/')[1];
   const success = await extractZipArchive(zip, repoName, dest, { sourceDir });
 
   if (success) {
@@ -135,12 +136,12 @@ export async function cloneGithubRepo(
 }
 
 async function getGitHubRepoContentsAtPath(
-  repoName: string,
+  repoPath: string,
   path: string,
   ref?: string
 ): Promise<Array<GithubRepoFile>> {
   const refQuery = ref ? `?ref=${ref}` : '';
-  const contentsRequestUrl = `https://api.github.com/repos/${repoName}/contents/${path}${refQuery}`;
+  const contentsRequestUrl = `https://api.github.com/repos/${repoPath}/contents/${path}${refQuery}`;
 
   const response = await axios.get<Array<GithubRepoFile>>(contentsRequestUrl, {
     headers: { ...DEFAULT_USER_AGENT_HEADERS, ...GITHUB_AUTH_HEADERS },
@@ -160,9 +161,9 @@ async function fetchGitHubRepoContentFromDownloadUrl(
   fs.writeFileSync(dest, resp.data, 'utf8');
 }
 
-// Writes files from a HubSpot public repository to the destination folder
+// Writes files from a public repository to the destination folder
 export async function downloadGithubRepoContents(
-  repoName: string,
+  repoPath: string,
   contentPath: string,
   dest: string,
   ref?: string,
@@ -172,7 +173,7 @@ export async function downloadGithubRepoContents(
 
   try {
     const contentsResp = await getGitHubRepoContentsAtPath(
-      repoName,
+      repoPath,
       contentPath,
       ref
     );
