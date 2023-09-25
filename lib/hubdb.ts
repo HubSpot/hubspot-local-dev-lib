@@ -177,7 +177,7 @@ export async function downloadHubDbTable(
 
   const rows = await fetchAllRows(accountId, tableId);
   const tableToWrite = JSON.stringify(convertToJSON(table, rows));
-  const tableJson = prettier.format(tableToWrite, {
+  const tableJson = await prettier.format(tableToWrite, {
     parser: 'json',
   });
 
