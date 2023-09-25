@@ -7,7 +7,7 @@ export type Schema = {
       label: string;
       id: string;
       type: string;
-    }
+    },
   ];
   useForPages: boolean;
   allowChildTables: boolean;
@@ -30,7 +30,7 @@ export type Table = {
       id: string;
       archived: boolean;
       type: string;
-    }
+    },
   ];
   partitioningSettings?: null; //TODO
   published: boolean;

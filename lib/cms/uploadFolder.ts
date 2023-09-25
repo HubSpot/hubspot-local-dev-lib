@@ -169,7 +169,7 @@ export async function uploadFolder(
     );
     const destPath = convertToUnixPath(path.join(dest, relativePath));
     return async () => {
-      debug('uploadFolder.attempt', {
+      debug('cms.uploadFolder.attempt', {
         file: originalFilePath || '',
         destPath,
       });
@@ -184,7 +184,7 @@ export async function uploadFolder(
         if (isFatalError(error)) {
           throw error;
         }
-        debug('uploadFolder.failed', { file, destPath });
+        debug('cms.uploadFolder.failed', { file, destPath });
         if (error.response && error.response.body) {
           console.debug(error.response.body);
         } else {
@@ -207,7 +207,7 @@ export async function uploadFolder(
     .addAll(
       failures.map(({ file, destPath }) => {
         return async () => {
-          debug('retry', { file, destPath });
+          debug('cms.uploadFolder.retry', { file, destPath });
           try {
             await upload(accountId, file, destPath, apiOptions);
             logger('success', { file, destPath });
@@ -217,7 +217,7 @@ export async function uploadFolder(
               file,
             };
           } catch (err) {
-            debug('uploadFolder.retryFailed', { file, destPath });
+            debug('cms.uploadFolder.retryFailed', { file, destPath });
             const error = err as StatusCodeError;
             if (isFatalError(error)) {
               throw error;

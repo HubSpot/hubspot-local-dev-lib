@@ -15,3 +15,5 @@ export const HTTP_METHOD_PREPOSITIONS = {
   POST: 'to',
   PUT: 'to',
 } as const;
+
+export const SANDBOX_TIMEOUT = 60000;
