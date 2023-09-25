@@ -11,7 +11,7 @@ import {
   deleteRows,
 } from '../api/hubdb';
 import { getCwd } from './path';
-import { Row, Table } from '../types/Hubdb';
+import { FetchRowsResponse, Row, Table } from '../types/Hubdb';
 import { throwErrorWithMessage } from '../errors/standardErrors';
 
 function validateJsonPath(src: string): void {
@@ -145,13 +145,11 @@ async function fetchAllRows(
   let rows: Array<Row> = [];
   let after: string | null = null;
   do {
-    const response = await fetchRows(
+    const { paging, results }: FetchRowsResponse = await fetchRows(
       accountId,
       tableId,
       after ? { after } : undefined
     );
-
-    const { paging, results } = response;
 
     rows = rows.concat(results);
     after = paging && paging.next ? paging.next.after : null;
