@@ -18,13 +18,15 @@ declare global {
   var githubToken: string;
 }
 
+type RepoPath = `${string}/${string}`;
+
 const GITHUB_AUTH_HEADERS = {
   authorization:
     global && global.githubToken ? `Bearer ${global.githubToken}` : null,
 };
 
 export async function fetchJsonFromRepository(
-  repoPath: string,
+  repoPath: RepoPath,
   filePath: string,
   ref: string
 ): Promise<JSON> {
@@ -46,7 +48,7 @@ export async function fetchJsonFromRepository(
 }
 
 export async function fetchReleaseData(
-  repoPath: string,
+  repoPath: RepoPath,
   tag = ''
 ): Promise<GithubReleaseData> {
   tag = tag.trim().toLowerCase();
@@ -72,7 +74,7 @@ export async function fetchReleaseData(
 }
 
 async function downloadGithubRepoZip(
-  repoPath: string,
+  repoPath: RepoPath,
   tag = '',
   releaseType: ValueOf<
     typeof GITHUB_RELEASE_TYPES
@@ -114,7 +116,7 @@ const cloneGithubRepoCallbackKeys = ['success'];
 export async function cloneGithubRepo(
   dest: string,
   type: string,
-  repoPath: string,
+  repoPath: RepoPath,
   sourceDir: string,
   options: CloneGithubRepoOptions = {},
   logCallbacks?: LogCallbacksArg<typeof cloneGithubRepoCallbackKeys>
@@ -136,7 +138,7 @@ export async function cloneGithubRepo(
 }
 
 async function getGitHubRepoContentsAtPath(
-  repoPath: string,
+  repoPath: RepoPath,
   path: string,
   ref?: string
 ): Promise<Array<GithubRepoFile>> {
@@ -163,7 +165,7 @@ async function fetchGitHubRepoContentFromDownloadUrl(
 
 // Writes files from a public repository to the destination folder
 export async function downloadGithubRepoContents(
-  repoPath: string,
+  repoPath: RepoPath,
   contentPath: string,
   dest: string,
   ref?: string,
