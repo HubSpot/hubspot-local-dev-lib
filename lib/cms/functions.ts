@@ -78,7 +78,7 @@ function updateExistingConfig(
 
   let config!: Config;
   try {
-    config = JSON.parse(configString);
+    config = JSON.parse(configString) as Config;
   } catch (err) {
     debug(`${i18nKey}.updateExistingConfig.invalidJSON`, {
       configFilePath,
@@ -90,9 +90,10 @@ function updateExistingConfig(
   }
 
   if (!isObject(config)) {
-    throwErrorWithMessage(`${i18nKey}.updateExistingConfig.configIsNotObjectError`, {
-      configFilePath,
-    });
+    throwErrorWithMessage(
+      `${i18nKey}.updateExistingConfig.configIsNotObjectError`,
+      { configFilePath }
+    );
   }
   if (config.endpoints) {
     if (config.endpoints[endpointPath]) {
