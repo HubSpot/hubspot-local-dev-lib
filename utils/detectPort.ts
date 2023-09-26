@@ -72,6 +72,7 @@ function listen(
     if (err.code === 'ENOTFOUND') {
       return callback(null, port);
     }
+    return callback(err, 0);
   });
 
   server.listen(port, hostname, () => {
