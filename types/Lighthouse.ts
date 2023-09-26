@@ -19,7 +19,7 @@ export type GetLighthouseScoreResponse = {
       emulatedFormFactor: string;
       templatePath: string | null;
       link: string | null;
-    }
+    },
   ];
   failedTemplatePaths: Array<string>;
   error: Error | null;

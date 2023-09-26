@@ -13,6 +13,7 @@ import {
 import { getCwd } from './path';
 import { FetchRowsResponse, Row, Table } from '../types/Hubdb';
 import { throwErrorWithMessage } from '../errors/standardErrors';
+import { BaseError } from '../types/Error';
 
 function validateJsonPath(src: string): void {
   if (path.extname(src) !== '.json') {
@@ -25,8 +26,8 @@ function validateJsonFile(src: string): void {
 
   try {
     stats = fs.statSync(src);
-  } catch (e) {
-    throwErrorWithMessage('hubdb.invalidJsonFile', { src });
+  } catch (err) {
+    throwErrorWithMessage('hubdb.invalidJsonFile', { src }, err as BaseError);
   }
 
   if (!stats.isFile()) {
@@ -84,7 +85,7 @@ export async function updateHubDbTable(
 ) {
   validateJsonFile(src);
 
-  const table = fs.readJsonSync(src);
+  const table: Table = fs.readJsonSync(src);
   const { ...schema } = table;
 
   return updateTable(accountId, tableId, schema);
