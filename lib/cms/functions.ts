@@ -90,14 +90,14 @@ function updateExistingConfig(
   }
 
   if (!isObject(config)) {
-    throwErrorWithMessage(`${i18nKey}.updateExistingConfig.configIsNotObject`, {
+    throwErrorWithMessage(`${i18nKey}.updateExistingConfig.configIsNotObjectError`, {
       configFilePath,
     });
   }
   if (config.endpoints) {
     if (config.endpoints[endpointPath]) {
       throwErrorWithMessage(
-        `${i18nKey}.updateExistingConfig.endpointAreadyExists`,
+        `${i18nKey}.updateExistingConfig.endpointAreadyExistsError`,
         {
           configFilePath,
           endpointPath,
@@ -139,7 +139,7 @@ type FunctionOptions = {
 };
 
 const createFunctionCallbackKeys = [
-  'destAlreadyExists',
+  'destPathAlreadyExists',
   'createdDest',
   'createdFunctionFile',
   'createdConfigFile',
@@ -154,7 +154,7 @@ export async function createFunction(
 ): Promise<void> {
   const logger = makeTypedLogger<typeof createFunctionCallbackKeys>(
     logCallbacks,
-    'cms.functions'
+    `${i18nKey}.createFunction`
   );
   const { functionsFolder, filename, endpointPath, endpointMethod } =
     functionInfo;
@@ -192,15 +192,15 @@ export async function createFunction(
   const configFilePath = path.join(destPath, 'serverless.json');
 
   if (!allowExistingFile && fs.existsSync(functionFilePath)) {
-    throwErrorWithMessage(`${i18nKey}.createFunction.jsFileConflict`, {
+    throwErrorWithMessage(`${i18nKey}.createFunction.jsFileConflictError`, {
       functionFilePath,
     });
   }
 
   await downloadGithubRepoContents(
-    'cms-sample-assets',
-    'functions/sample-function',
-    destPath
+    'HubSpot/cms-sample-assets',
+    'functions/sample-function.js',
+    functionFilePath
   );
 
   logger('createdFunctionFile', {
@@ -208,15 +208,11 @@ export async function createFunction(
   });
 
   if (fs.existsSync(configFilePath)) {
-    try {
-      updateExistingConfig(configFilePath, {
-        endpointPath,
-        endpointMethod,
-        functionFile,
-      });
-    } catch (err) {
-      throwErrorWithMessage(`${i18nKey}.createFunction.failedToCreateFunction`);
-    }
+    updateExistingConfig(configFilePath, {
+      endpointPath,
+      endpointMethod,
+      functionFile,
+    });
 
     logger('createdFunctionFile', {
       path: functionFilePath,

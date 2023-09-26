@@ -179,7 +179,7 @@ export async function createModule(
   });
 
   await downloadGithubRepoContents(
-    'cms-sample-assets',
+    'HubSpot/cms-sample-assets',
     'modules/Sample.module',
     destPath,
     '',
