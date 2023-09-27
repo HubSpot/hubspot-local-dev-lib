@@ -1,14 +1,7 @@
 export type Schema = {
   label: string;
   name: string;
-  columns: [
-    {
-      name: string;
-      label: string;
-      id: string;
-      type: string;
-    },
-  ];
+  columns: Array<Column>;
   useForPages: boolean;
   allowChildTables: boolean;
   enableChildTablePages: boolean;
@@ -23,15 +16,8 @@ export type Table = {
   publishedAt: string;
   updatedAt: string;
   label: string;
-  columns: [
-    {
-      name: string;
-      label: string;
-      id: string;
-      archived: boolean;
-      type: string;
-    },
-  ];
+  columns: Array<Column>;
+  rows: Array<Row>;
   partitioningSettings?: null; //TODO
   published: boolean;
   cosObjectType: string;
@@ -54,6 +40,21 @@ export type Table = {
   allowPublicApiAccess: boolean;
 };
 
+export type Column = {
+  name: string;
+  label: string;
+  id: string;
+  archived: boolean;
+  type: string;
+  deleted?: boolean;
+  foreignIdsByName?: {
+    [key: string]: { id: string; name: string; type: string };
+  };
+  foreignIdsById?: {
+    [key: string]: { id: string; name: string; type: string };
+  };
+};
+
 export type Row = {
   id: string;
   createdAt: string;
@@ -62,8 +63,8 @@ export type Row = {
   values: { text_column: string };
   path: string | null;
   name: string | null;
-  childTableId: string;
-  isSoftEditable: boolean;
+  childTableId?: string;
+  isSoftEditable?: boolean;
 };
 
 export type CreateRowsResponse = {
@@ -71,4 +72,10 @@ export type CreateRowsResponse = {
   results: Array<Row>;
   startedAt: string;
   completedAt: string;
+};
+
+export type FetchRowsResponse = {
+  total: number;
+  results: Array<Row>;
+  paging?: { next: { after: string | null } };
 };

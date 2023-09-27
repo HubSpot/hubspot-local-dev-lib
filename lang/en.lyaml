@@ -113,6 +113,9 @@ en:
       logging:
         creatingFile: "Creating file at {{ path }}"
   errors:
+    hubdb:
+      invalidJsonPath: "The HubDB table file must be a '.json' file"
+      invalidJsonFile: "The '{{{ src }}' path is not a path to a file"
     archive:
       extractZip:
         write: "An error occured writing temp project source."

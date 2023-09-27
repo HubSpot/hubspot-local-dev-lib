@@ -1,12 +1,18 @@
 import http from '../http';
 import { QueryParams } from '../types/Http';
-import { CreateRowsResponse, Row, Schema, Table } from '../types/Hubdb';
+import {
+  CreateRowsResponse,
+  FetchRowsResponse,
+  Row,
+  Schema,
+  Table,
+} from '../types/Hubdb';
 
 const HUBDB_API_PATH = 'cms/v3/hubdb';
 
 export async function fetchTable(
   accountId: number,
-  tableId: number
+  tableId: string
 ): Promise<Table> {
   return http.get(accountId, {
     url: `${HUBDB_API_PATH}/tables/${tableId}`,
@@ -23,9 +29,20 @@ export async function createTable(
   });
 }
 
+export async function updateTable(
+  accountId: number,
+  tableId: string,
+  schema: Schema
+) {
+  return http.patch(accountId, {
+    url: `${HUBDB_API_PATH}/tables/${tableId}/draft`,
+    body: schema,
+  });
+}
+
 export async function publishTable(
   accountId: number,
-  tableId: number
+  tableId: string
 ): Promise<Table> {
   return http.post(accountId, {
     url: `${HUBDB_API_PATH}/tables/${tableId}/draft/publish`,
@@ -34,7 +51,7 @@ export async function publishTable(
 
 export async function deleteTable(
   accountId: number,
-  tableId: number
+  tableId: string
 ): Promise<void> {
   return http.delete(accountId, {
     url: `${HUBDB_API_PATH}/tables/${tableId}`,
@@ -43,7 +60,7 @@ export async function deleteTable(
 
 export async function createRows(
   accountId: number,
-  tableId: number,
+  tableId: string,
   rows: Array<Row>
 ): Promise<CreateRowsResponse> {
   return http.post(accountId, {
@@ -54,9 +71,9 @@ export async function createRows(
 
 export async function fetchRows(
   accountId: number,
-  tableId: number,
+  tableId: string,
   query: QueryParams = {}
-): Promise<Array<Row>> {
+): Promise<FetchRowsResponse> {
   return http.get(accountId, {
     url: `${HUBDB_API_PATH}/tables/${tableId}/rows/draft`,
     query,
@@ -65,7 +82,7 @@ export async function fetchRows(
 
 export async function deleteRows(
   accountId: number,
-  tableId: number,
+  tableId: string,
   rowIds: Array<string>
 ): Promise<void> {
   return http.post(accountId, {

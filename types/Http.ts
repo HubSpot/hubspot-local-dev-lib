@@ -1,5 +1,4 @@
 import { ReadStream } from 'fs';
-import { Schema } from './Hubdb';
 
 export type Body = {
   // TODO - Return if we find a better way to represent the Body type
@@ -17,7 +16,7 @@ export type AxiosConfigOptions = {
     environmentId?: number;
     version?: string;
   };
-  body?: Body | JSON | Schema;
+  body?: Body | JSON;
   resolveWithFullResponse?: boolean;
 };
 
