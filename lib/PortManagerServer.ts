@@ -35,12 +35,6 @@ class PortManagerServer {
     );
   }
 
-  close(): void {
-    if (this.server) {
-      this.server.close();
-    }
-  }
-
   setupRoutes(): void {
     if (!this.app) {
       return;
@@ -49,6 +43,7 @@ class PortManagerServer {
     this.app.get('/servers/:instanceId', this.getPortByInstanceId);
     this.app.post('/servers', this.assignPortToServer);
     this.app.delete('/servers/:instanceId', this.deleteServerInstance);
+    this.app.post('/close', this.closeServer);
   }
 
   setPort(instanceId: string, port: number) {
@@ -102,6 +97,13 @@ class PortManagerServer {
       this.send404(res, instanceId);
     }
   };
+
+  closeServer = (req: Request, res: Response): void => {
+    if (this.server) {
+      res.send(200);
+      this.server.close();
+    }
+  };
 }
 
-export default PortManagerServer;
+export default new PortManagerServer();
