@@ -25,7 +25,10 @@ type Config = {
   };
 };
 
-function createEndpoint(endpointMethod: string, filename: string) {
+function createEndpoint(
+  endpointMethod: string,
+  filename: string
+): { method: string; file: string } {
   return {
     method: endpointMethod || 'GET',
     file: filename,
@@ -62,7 +65,7 @@ function writeConfig(configFilePath: string, config: Config): void {
 function updateExistingConfig(
   configFilePath: string,
   { endpointPath, endpointMethod, functionFile }: ConfigInfo
-) {
+): void {
   let configString!: string;
   try {
     configString = fs.readFileSync(configFilePath).toString();
