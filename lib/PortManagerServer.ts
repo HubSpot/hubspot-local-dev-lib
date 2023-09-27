@@ -8,19 +8,17 @@ import {
   PORT_MANAGER_SERVER_PORT,
 } from '../constants/ports';
 
-type PortMap = {
+type ServerPortMap = {
   [instanceId: string]: number;
 };
 
 class PortManagerServer {
   app?: Express;
   server?: Server;
-  ports: PortMap;
+  serverPortMap: ServerPortMap;
 
   constructor() {
-    this.ports = {
-      yaa: 6000,
-    };
+    this.serverPortMap = {};
   }
 
   init(): void {
@@ -40,14 +38,15 @@ class PortManagerServer {
       return;
     }
 
-    this.app.get('/servers/:instanceId', this.getPortByInstanceId);
+    this.app.get('/servers', this.getServers);
+    this.app.get('/servers/:instanceId', this.getServerPortByInstanceId);
     this.app.post('/servers', this.assignPortToServer);
     this.app.delete('/servers/:instanceId', this.deleteServerInstance);
     this.app.post('/close', this.closeServer);
   }
 
   setPort(instanceId: string, port: number) {
-    this.ports[instanceId] = port;
+    this.serverPortMap[instanceId] = port;
   }
 
   send404(res: Response, instanceId: string) {
@@ -56,9 +55,16 @@ class PortManagerServer {
       .send(`Could not find a server with instanceId ${instanceId}`);
   }
 
-  getPortByInstanceId = (req: Request, res: Response): void => {
+  getServers = async (req: Request, res: Response): Promise<void> => {
+    res.send({
+      servers: this.serverPortMap,
+      count: Object.keys(this.serverPortMap.length),
+    });
+  };
+
+  getServerPortByInstanceId = (req: Request, res: Response): void => {
     const { instanceId } = req.params;
-    const port = this.ports[instanceId];
+    const port = this.serverPortMap[instanceId];
 
     if (port) {
       res.send({ port });
@@ -70,7 +76,7 @@ class PortManagerServer {
   assignPortToServer = async (req: Request, res: Response): Promise<void> => {
     const { instanceId, port } = req.body;
 
-    if (this.ports[instanceId]) {
+    if (this.serverPortMap[instanceId]) {
       res
         .status(409)
         .send('This server instance has already been assigned a port');
@@ -88,10 +94,10 @@ class PortManagerServer {
 
   deleteServerInstance = (req: Request, res: Response): void => {
     const { instanceId } = req.params;
-    const port = this.ports[instanceId];
+    const port = this.serverPortMap[instanceId];
 
     if (port) {
-      delete this.ports[instanceId];
+      delete this.serverPortMap[instanceId];
       res.send(200);
     } else {
       this.send404(res, instanceId);
