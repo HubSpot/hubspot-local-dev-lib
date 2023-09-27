@@ -54,7 +54,8 @@
     "./constants": "./constants/index.js",
     "./github": "./lib/github.js",
     "./ignoreRules": "./lib/ignoreRules.js",
-    "./path": "./lib/path.js"
+    "./path": "./lib/path.js",
+    "./portManager": "./lib/portManager.js"
   },
   "dependencies": {
     "@types/express": "^4.17.18",
