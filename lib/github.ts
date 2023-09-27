@@ -202,7 +202,13 @@ export async function downloadGithubRepoContents(
       return fetchGitHubRepoContentFromDownloadUrl(downloadPath, download_url);
     };
 
-    const contentPromises = contentsResp.map(downloadContent);
+    let contentPromises;
+
+    if (Array.isArray(contentsResp)) {
+      contentPromises = contentsResp.map(downloadContent);
+    } else {
+      contentPromises = [downloadContent(contentsResp)];
+    }
 
     Promise.all(contentPromises);
   } catch (e) {

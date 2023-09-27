@@ -82,6 +82,18 @@ en:
         missingEnv: "Unable to load config from environment variables: Missing env"
         unknownAuthType: "Unable to load config from environment variables: Unknown auth type"
     cms:
+      functions:
+        updateExistingConfig:
+          unableToReadFile: "The file {{ configFilePath }} could not be read"
+          invalidJSON: "The file {{ configFilePath }} is not valid JSON"
+          couldNotUpdateFile: "The file {{ configFilePath }} could not be updated"
+        createFunction:
+          destPathAlreadyExists: "The {{ path }} path already exists"
+          createdDest: "Created {{ path }}"
+          failedToCreateFile: "The file {{ configFilePath }} could not be created"
+          createdFunctionFile: "Created {{ path }}"
+          createdConfigFile: "Created {{ path }}"
+          success: "A function for the endpoint '/_hcms/api/{{ endpointPath }}' has been created. Upload {{ folderName }} to try it out"
       handleFieldsJs:
         convertFieldsJs:
           creating: "Creating child process with pid {{ pid }}"
@@ -204,6 +216,13 @@ en:
         saveOutput: "There was an error saving the json output of {{ path }}"
         createTmpDirSync: "An error occured writing temporary project source."
         cleanupTmpDirSync: "There was an error deleting the temporary project source"
+      functions:
+        updateExistingConfig:
+          configIsNotObjectError: "The existing {{ configFilePath }} is not an object"
+          endpointAreadyExistsError:  "The endpoint {{ endpointPath }} already exists in {{ configFilePath }}"
+        createFunction:
+          nestedConfigError: "Cannot create a functions directory inside '{{ ancestorConfigPath }}'"
+          jsFileConflictError: "The JavaScript file at '{{ functionFilePath }}'' already exists"
     sandboxes:
       createSandbox: "There was an error creating your sandbox."
       deleteSandbox: "There was an error deleting your sandbox."
