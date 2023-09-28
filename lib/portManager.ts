@@ -4,7 +4,7 @@ import PortManagerServer from './PortManagerServer';
 import { detectPort } from '../utils/detectPort';
 import { PORT_MANAGER_SERVER_PORT } from '../constants/ports';
 
-const BASE_URL = `localhost:${PORT_MANAGER_SERVER_PORT}`;
+const BASE_URL = `http://localhost:${PORT_MANAGER_SERVER_PORT}`;
 
 async function isPortManagerServerRunning(): Promise<boolean> {
   const port = await detectPort(PORT_MANAGER_SERVER_PORT);
@@ -43,7 +43,15 @@ export async function deleteServerInstance(
   await axios.post(`${BASE_URL}/servers/${serverInstanceId}`);
 }
 
-export async function hasActiveServers() {
+export async function portManagerHasActiveServers() {
   const { data } = await axios.get(`${BASE_URL}/servers`);
   return data.count > 0;
+}
+
+function toId(str: string) {
+  return str.replace(/\s+/g, '-').toLowerCase();
+}
+
+export function getServerInstanceId(serverId: string, resourceId: string) {
+  return `${toId(serverId)}__${toId(resourceId)}`;
 }

@@ -58,7 +58,7 @@ class PortManagerServer {
   getServers = async (req: Request, res: Response): Promise<void> => {
     res.send({
       servers: this.serverPortMap,
-      count: Object.keys(this.serverPortMap.length),
+      count: Object.keys(this.serverPortMap).length,
     });
   };
 
