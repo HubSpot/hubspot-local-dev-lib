@@ -8,7 +8,7 @@ const BASE_URL = `localhost:${PORT_MANAGER_SERVER_PORT}`;
 
 async function isPortManagerServerRunning(): Promise<boolean> {
   const port = await detectPort(PORT_MANAGER_SERVER_PORT);
-  return port === PORT_MANAGER_SERVER_PORT;
+  return port !== PORT_MANAGER_SERVER_PORT;
 }
 
 export async function startPortManagerServer(): Promise<void> {
@@ -41,4 +41,9 @@ export async function deleteServerInstance(
   serverInstanceId: string
 ): Promise<void> {
   await axios.post(`${BASE_URL}/servers/${serverInstanceId}`);
+}
+
+export async function hasActiveServers() {
+  const { data } = await axios.get(`${BASE_URL}/servers`);
+  return data.count > 0;
 }

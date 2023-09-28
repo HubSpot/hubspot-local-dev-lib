@@ -80,16 +80,14 @@ class PortManagerServer {
       res
         .status(409)
         .send('This server instance has already been assigned a port');
-    }
-
-    if (port && (port < MIN_PORT_NUMBER || port > MAX_PORT_NUMBER)) {
+    } else if (port && (port < MIN_PORT_NUMBER || port > MAX_PORT_NUMBER)) {
       res.status(400).send('Port must be between 1024 and 65535');
+    } else {
+      const portToUse = await detectPort(port);
+      this.setPort(instanceId, portToUse);
+
+      res.send({ port: portToUse });
     }
-
-    const portToUse = await detectPort(port);
-    this.setPort(instanceId, portToUse);
-
-    res.send({ port: portToUse });
   };
 
   deleteServerInstance = (req: Request, res: Response): void => {
