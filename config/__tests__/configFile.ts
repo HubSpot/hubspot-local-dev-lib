@@ -15,7 +15,7 @@ import {
   HUBSPOT_CONFIGURATION_FILE,
   HUBSPOT_CONFIGURATION_FOLDER,
 } from '../../constants';
-import { CLIConfig } from '../../types/Config';
+import { CLIConfig_NEW } from '../../types/Config';
 
 // fs spy
 const existsSyncSpy = jest.spyOn(fs, 'existsSync');
@@ -31,7 +31,7 @@ const dumpSpy = jest.spyOn(yaml, 'dump');
 const CONFIG = {
   defaultAccount: '',
   accounts: [],
-} as CLIConfig;
+} as CLIConfig_NEW;
 
 describe('config/configFile', () => {
   describe('getConfigFilePath method', () => {
@@ -140,6 +140,9 @@ describe('config/configFile', () => {
     it('writes the config to a file', () => {
       ensureFileSyncSpy.mockImplementation(() => null);
       writeFileSyncSpy.mockImplementation(() => null);
+      readFileSyncSpy.mockImplementation(() => Buffer.from('content'));
+      loadSpy.mockImplementation(() => ({}))
+
       writeConfigToFile(CONFIG);
 
       expect(ensureFileSyncSpy).toHaveBeenCalled();

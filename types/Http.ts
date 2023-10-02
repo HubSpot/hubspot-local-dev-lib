@@ -1,32 +1,37 @@
 import { ReadStream } from 'fs';
-import { CoreOptions, UriOptions } from 'request';
-import { Url } from 'url';
 
-export type RequestOptions = CoreOptions & UriOptions;
+export type Body = {
+  // TODO - Return if we find a better way to represent the Body type
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [key: string]: any;
+};
 
-type Body = { [key: string]: string | number | Body };
-
-export type GetRequestOptionsOptions = {
-  uri: string | Url;
+export type AxiosConfigOptions = {
+  url: string;
   env?: string;
   localHostOverride?: boolean;
-  qs?: {
+  params?: {
     portalId?: number;
     buffer?: boolean;
     environmentId?: number;
     version?: string;
   };
-  body?: Body;
+  body?: Body | JSON;
   resolveWithFullResponse?: boolean;
 };
 
 export type QueryParams = {
-  [key: string]: string | number;
+  [key: string]: string | number | boolean;
 };
 
-export type HttpOptions = GetRequestOptionsOptions & {
+export type FormData = {
+  [key: string]: string | ReadStream;
+};
+
+export type HttpOptions = AxiosConfigOptions & {
   query?: QueryParams;
-  formData?: {
-    [key: string]: string | ReadStream;
-  };
+  formData?: FormData;
+  timeout?: number;
+  encoding?: string | null;
+  headers?: { [header: string]: string | string[] | undefined };
 };

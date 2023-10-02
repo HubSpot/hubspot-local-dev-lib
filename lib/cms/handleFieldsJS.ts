@@ -8,7 +8,7 @@ import { debug } from '../../utils/logger';
 import { throwErrorWithMessage } from '../../errors/standardErrors';
 import { BaseError } from '../../types/Error';
 
-const i18nKey = 'utils.handleFieldsJs';
+const i18nKey = 'cms.handleFieldsJs';
 
 export class FieldsJs {
   projectDir: string;
@@ -21,7 +21,7 @@ export class FieldsJs {
   constructor(
     projectDir: string,
     filePath: string,
-    rootWriteDir?: string,
+    rootWriteDir?: string | null,
     fieldOptions = ''
   ) {
     this.projectDir = projectDir;
@@ -30,7 +30,7 @@ export class FieldsJs {
     this.rejected = false;
     // Create tmpDir if no writeDir is given.
     this.rootWriteDir =
-      rootWriteDir === undefined
+      rootWriteDir === undefined || rootWriteDir === null
         ? createTmpDirSync('hubspot-temp-fieldsjs-output-')
         : rootWriteDir;
   }

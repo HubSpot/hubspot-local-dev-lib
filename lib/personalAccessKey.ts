@@ -1,5 +1,4 @@
 import moment from 'moment';
-import CLIConfiguration from '../config/CLIConfiguration';
 import { ENVIRONMENTS } from '../constants/environments';
 import { PERSONAL_ACCESS_KEY_AUTH_METHOD } from '../constants/auth';
 import {
@@ -12,6 +11,13 @@ import { fetchSandboxHubData } from '../api/sandboxHubs';
 import { BaseError, StatusCodeError } from '../types/Error';
 import { CLIAccount, PersonalAccessKeyAccount } from '../types/Accounts';
 import { Environment } from '../types/Config';
+import {
+  getAccountConfig,
+  updateAccountConfig,
+  writeConfig,
+  getEnv,
+  updateDefaultAccount,
+} from '../config';
 
 const refreshRequests = new Map();
 
@@ -66,9 +72,9 @@ async function refreshAccessToken(
     env,
     accountId
   );
-  const config = CLIConfiguration.getAccount(accountId);
+  const config = getAccountConfig(accountId);
 
-  CLIConfiguration.updateAccount({
+  updateAccountConfig({
     env,
     ...config,
     accountId,
@@ -77,7 +83,7 @@ async function refreshAccessToken(
       expiresAt: expiresAt,
     },
   });
-  CLIConfiguration.write();
+  writeConfig();
 
   return accessToken;
 }
@@ -115,9 +121,7 @@ async function getNewAccessToken(
 export async function accessTokenForPersonalAccessKey(
   accountId: number
 ): Promise<string | undefined> {
-  const account = CLIConfiguration.getAccount(
-    accountId
-  ) as PersonalAccessKeyAccount;
+  const account = getAccountConfig(accountId) as PersonalAccessKeyAccount;
   if (!account) {
     throwErrorWithMessage('personalAccessKey.accountNotFound', { accountId });
   }
@@ -147,7 +151,7 @@ export const updateConfigWithPersonalAccessKey = async (
   env: Environment,
   makeDefault = false
 ): Promise<CLIAccount | null> => {
-  const accountEnv = env || CLIConfiguration.getEnv(name);
+  const accountEnv = env || getEnv(name);
 
   let token;
   try {
@@ -175,7 +179,7 @@ export const updateConfigWithPersonalAccessKey = async (
     }
   }
 
-  const updatedConfig = CLIConfiguration.updateAccount({
+  const updatedConfig = updateAccountConfig({
     accountId: portalId,
     personalAccessKey,
     name,
@@ -184,10 +188,10 @@ export const updateConfigWithPersonalAccessKey = async (
     sandboxAccountType,
     parentAccountId,
   });
-  CLIConfiguration.write();
+  writeConfig();
 
   if (makeDefault) {
-    CLIConfiguration.updateDefaultAccount(name);
+    updateDefaultAccount(name);
   }
 
   return updatedConfig;

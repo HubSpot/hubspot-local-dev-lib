@@ -1,3 +1,5 @@
+import { HttpMethod } from './Api';
+
 // See https://nodejs.org/api/errors.html#class-systemerror
 export interface BaseError extends Error {
   name: string;
@@ -7,31 +9,38 @@ export interface BaseError extends Error {
   syscall?: string | null;
   reason?: string;
   statusCode?: number;
+  error?: BaseError;
+  errors?: Array<BaseError>;
 }
 
 export interface StatusCodeError extends BaseError {
-  name: 'StatusCodeError';
-  statusCode: number;
+  name: string;
+  statusCode?: number;
   message: string;
+  category?: string;
+  subCategory?: string;
   response: {
     request: {
       href: string;
       method: string;
     };
     body: {
-      [key: string]: string;
+      message?: string;
+      errors?: Array<StatusCodeError>;
     };
     headers: {
       [key: string]: string;
     };
     statusCode: number;
   };
-}
-
-export interface GithubError extends BaseError {
-  error: {
-    message?: string;
+  options?: {
+    method: HttpMethod;
   };
+  errorTokens?: {
+    line: number;
+  };
+  error?: StatusCodeError;
+  errors?: Array<StatusCodeError>;
 }
 
 export type FileSystemErrorContext = {
@@ -47,3 +56,5 @@ export type StatusCodeErrorContext = {
   payload?: string;
   projectName?: string;
 };
+
+export type OptionalError = BaseError | null | undefined;

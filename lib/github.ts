@@ -7,8 +7,8 @@ import { throwError, throwErrorWithMessage } from '../errors/standardErrors';
 import { extractZipArchive } from './archive';
 
 import { GITHUB_RELEASE_TYPES } from '../constants/github';
-import { DEFAULT_USER_AGENT_HEADERS } from '../http/requestOptions';
-import { BaseError, GithubError } from '../types/Error';
+import { DEFAULT_USER_AGENT_HEADERS } from '../http/getAxiosConfig';
+import { BaseError } from '../types/Error';
 import { GithubReleaseData, GithubRepoFile } from '../types/Github';
 import { ValueOf } from '../types/Utils';
 import { LogCallbacksArg } from '../types/LogCallbacks';
@@ -18,20 +18,23 @@ declare global {
   var githubToken: string;
 }
 
+type RepoPath = `${string}/${string}`;
+
 const GITHUB_AUTH_HEADERS = {
   authorization:
     global && global.githubToken ? `Bearer ${global.githubToken}` : null,
 };
 
 export async function fetchJsonFromRepository(
-  repoName: string,
-  filePath: string
+  repoPath: RepoPath,
+  filePath: string,
+  ref: string
 ): Promise<JSON> {
   try {
-    const URI = `https://raw.githubusercontent.com/HubSpot/${repoName}/${filePath}`;
-    debug('github.fetchJsonFromRepository', { uri: URI });
+    const URL = `https://raw.githubusercontent.com/${repoPath}/${ref}/${filePath}`;
+    debug('github.fetchJsonFromRepository', { url: URL });
 
-    const { data } = await axios.get<JSON>(URI, {
+    const { data } = await axios.get<JSON>(URL, {
       headers: { ...DEFAULT_USER_AGENT_HEADERS, ...GITHUB_AUTH_HEADERS },
     });
     return data;
@@ -44,8 +47,8 @@ export async function fetchJsonFromRepository(
   }
 }
 
-async function fetchReleaseData(
-  repoName: string,
+export async function fetchReleaseData(
+  repoPath: RepoPath,
   tag = ''
 ): Promise<GithubReleaseData> {
   tag = tag.trim().toLowerCase();
@@ -53,8 +56,8 @@ async function fetchReleaseData(
     tag = `v${tag}`;
   }
   const URI = tag
-    ? `https://api.github.com/repos/HubSpot/${repoName}/releases/tags/${tag}`
-    : `https://api.github.com/repos/HubSpot/${repoName}/releases/latest`;
+    ? `https://api.github.com/repos/${repoPath}/releases/tags/${tag}`
+    : `https://api.github.com/repos/${repoPath}/releases/latest`;
   try {
     const { data } = await axios.get<GithubReleaseData>(URI, {
       headers: { ...DEFAULT_USER_AGENT_HEADERS, ...GITHUB_AUTH_HEADERS },
@@ -71,7 +74,7 @@ async function fetchReleaseData(
 }
 
 async function downloadGithubRepoZip(
-  repoName: string,
+  repoPath: RepoPath,
   tag = '',
   releaseType: ValueOf<
     typeof GITHUB_RELEASE_TYPES
@@ -79,14 +82,14 @@ async function downloadGithubRepoZip(
   ref?: string
 ): Promise<Buffer> {
   try {
-    let zipUrl;
+    let zipUrl: string;
     if (releaseType === GITHUB_RELEASE_TYPES.REPOSITORY) {
-      debug('github.downloadGithubRepoZip.fetching', { releaseType, repoName });
-      zipUrl = `https://api.github.com/repos/HubSpot/${repoName}/zipball${
+      debug('github.downloadGithubRepoZip.fetching', { releaseType, repoPath });
+      zipUrl = `https://api.github.com/repos/${repoPath}/zipball${
         ref ? `/${ref}` : ''
       }`;
     } else {
-      const releaseData = await fetchReleaseData(repoName, tag);
+      const releaseData = await fetchReleaseData(repoPath, tag);
       zipUrl = releaseData.zipball_url;
       const { name } = releaseData;
       debug('github.downloadGithubRepoZip.fetchingName', { name });
@@ -113,7 +116,7 @@ const cloneGithubRepoCallbackKeys = ['success'];
 export async function cloneGithubRepo(
   dest: string,
   type: string,
-  repoName: string,
+  repoPath: RepoPath,
   sourceDir: string,
   options: CloneGithubRepoOptions = {},
   logCallbacks?: LogCallbacksArg<typeof cloneGithubRepoCallbackKeys>
@@ -124,7 +127,8 @@ export async function cloneGithubRepo(
   );
   const { themeVersion, projectVersion, releaseType, ref } = options;
   const tag = projectVersion || themeVersion;
-  const zip = await downloadGithubRepoZip(repoName, tag, releaseType, ref);
+  const zip = await downloadGithubRepoZip(repoPath, tag, releaseType, ref);
+  const repoName = repoPath.split('/')[1];
   const success = await extractZipArchive(zip, repoName, dest, { sourceDir });
 
   if (success) {
@@ -134,10 +138,12 @@ export async function cloneGithubRepo(
 }
 
 async function getGitHubRepoContentsAtPath(
-  repoName: string,
-  path: string
+  repoPath: RepoPath,
+  path: string,
+  ref?: string
 ): Promise<Array<GithubRepoFile>> {
-  const contentsRequestUrl = `https://api.github.com/repos/HubSpot/${repoName}/contents/${path}`;
+  const refQuery = ref ? `?ref=${ref}` : '';
+  const contentsRequestUrl = `https://api.github.com/repos/${repoPath}/contents/${path}${refQuery}`;
 
   const response = await axios.get<Array<GithubRepoFile>>(contentsRequestUrl, {
     headers: { ...DEFAULT_USER_AGENT_HEADERS, ...GITHUB_AUTH_HEADERS },
@@ -157,19 +163,21 @@ async function fetchGitHubRepoContentFromDownloadUrl(
   fs.writeFileSync(dest, resp.data, 'utf8');
 }
 
-// Writes files from a HubSpot public repository to the destination folder
+// Writes files from a public repository to the destination folder
 export async function downloadGithubRepoContents(
-  repoName: string,
+  repoPath: RepoPath,
   contentPath: string,
   dest: string,
+  ref?: string,
   filter?: (contentPiecePath: string, downloadPath: string) => boolean
 ): Promise<void> {
   fs.ensureDirSync(path.dirname(dest));
 
   try {
     const contentsResp = await getGitHubRepoContentsAtPath(
-      repoName,
-      contentPath
+      repoPath,
+      contentPath,
+      ref
     );
 
     const downloadContent = async (
@@ -194,12 +202,18 @@ export async function downloadGithubRepoContents(
       return fetchGitHubRepoContentFromDownloadUrl(downloadPath, download_url);
     };
 
-    const contentPromises = contentsResp.map(downloadContent);
+    let contentPromises;
+
+    if (Array.isArray(contentsResp)) {
+      contentPromises = contentsResp.map(downloadContent);
+    } else {
+      contentPromises = [downloadContent(contentsResp)];
+    }
 
     Promise.all(contentPromises);
   } catch (e) {
-    const error = e as GithubError;
-    if (error.error.message) {
+    const error = e as BaseError;
+    if (error?.error?.message) {
       throwErrorWithMessage(
         'github.downloadGithubRepoContents',
         {

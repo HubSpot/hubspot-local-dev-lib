@@ -7,6 +7,17 @@
     "esModuleInterop": true,
     "resolveJsonModule": true
   },
-  "include": ["config", "constants", "errors", "http", "lib", "types", "utils"],
+  "include": [
+    "api",
+    "config",
+    "constants",
+    "enums",
+    "errors",
+    "http",
+    "lib",
+    "models",
+    "types",
+    "utils"
+  ],
   "exclude": ["node_modules", "**/__tests__/*", "**/__mocks__/*"]
 }

@@ -12,11 +12,13 @@ export const ALLOWED_EXTENSIONS = new Set([
   'map',
   'svg',
   'eot',
+  'otf',
   'ttf',
   'woff',
   'woff2',
   'graphql',
 ]);
 
+export const HUBL_EXTENSIONS = new Set(['css', 'html', 'js']);
 export const MODULE_EXTENSION = 'module';
 export const FUNCTIONS_EXTENSION = 'functions';
