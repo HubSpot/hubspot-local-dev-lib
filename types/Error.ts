@@ -27,6 +27,8 @@ export interface StatusCodeError extends BaseError {
     body: {
       message?: string;
       errors?: Array<StatusCodeError>;
+      category?: string;
+      subCategory?: string;
     };
     headers: {
       [key: string]: string;

@@ -44,21 +44,11 @@ export async function getAccessToken(
   } catch (e) {
     const error = e as StatusCodeError;
     if (error.response) {
-      if (error.response.statusCode === 401) {
-        // Before adjusting the error message below, please verify that changes do not break regex match in cli/commands/sandbox/delete.js
-        // For future changes: if response.statusCode is passed into the new error below, sandboxes can skip the regex check and pull the statusCode instead
-        throwAuthErrorWithMessage(
-          'personalAccessKey.invalidPersonalAccessKey401',
-          { errorMessage: error.response.body.message || '' },
-          error
-        );
-      } else {
-        throwAuthErrorWithMessage(
-          'personalAccessKey.invalidPersonalAccessKey',
-          { errorMessage: error.response.body.message || '' },
-          error
-        );
-      }
+      throwAuthErrorWithMessage(
+        'personalAccessKey.invalidPersonalAccessKey',
+        { errorMessage: error.response.body.message || '' },
+        error
+      );
     } else {
       throwError(e as BaseError);
     }
