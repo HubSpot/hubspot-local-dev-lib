@@ -46,7 +46,7 @@ export async function getAccessToken(
     if (error.response) {
       throwAuthErrorWithMessage(
         'personalAccessKey.invalidPersonalAccessKey',
-        { errorMessage: error.response.body.message },
+        { errorMessage: error.response.body.message || '' },
         error
       );
     } else {

@@ -11,9 +11,7 @@ export class HubSpotAuthError extends Error {
     super(message);
     this.name = 'HubSpotAuthError';
     this.statusCode = cause.statusCode;
-    this.category =
-      (cause.response && cause.response.body && cause.response.body.category) ||
-      undefined;
+    this.category = cause?.response?.body?.category || undefined;
     this.subCategory =
       (cause.response &&
         cause.response.body &&
