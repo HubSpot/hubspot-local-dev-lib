@@ -1,5 +1,6 @@
 import express, { Express, Request, Response } from 'express';
 import { Server } from 'http';
+import cors from 'cors';
 
 import { detectPort } from '../utils/detectPort';
 import {
@@ -27,6 +28,7 @@ class PortManagerServer {
     }
     this.app = express();
     this.app.use(express.json());
+    this.app.use(cors());
     this.setupRoutes();
     this.server = this.app.listen(PORT_MANAGER_SERVER_PORT, () =>
       console.log('Running port manager')
