@@ -17,6 +17,7 @@ export class FieldsJs {
   rejected: boolean;
   fieldOptions: string;
   outputPath?: string;
+  toJSON?: () => JSON;
 
   constructor(
     projectDir: string,
@@ -48,7 +49,7 @@ export class FieldsJs {
 
     return new Promise<string>((resolve, reject) => {
       const convertFieldsProcess = fork(
-        path.join(__dirname, './processFieldsJs.js'),
+        path.join(__dirname, './processFieldsJs.ts'),
         [],
         {
           cwd: dirName,
