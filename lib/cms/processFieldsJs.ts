@@ -87,12 +87,7 @@ function flattenArray(arr: Array<any>): Array<any> {
   }, []);
 }
 
-/**
- * Converts an array of field objects to JSON
- * @param {array} fields - Array of field objects
- * @returns {string} - Returns converted JSON
- */
-async function fieldsArrayToJson(fields: Array<FieldsJs>) {
+async function fieldsArrayToJson(fields: Array<FieldsJs>): Promise<string> {
   const allFields = await Promise.all(flattenArray(fields));
   const jsonFields = allFields.map(field => {
     return typeof field['toJSON'] === 'function' ? field.toJSON() : field;
