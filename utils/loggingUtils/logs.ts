@@ -12,7 +12,7 @@ const LOG_STATUS_COLORS = {
 
 type Log = {
   log: string;
-  status: string;
+  status: 'SUCCESS' | 'ERROR' | 'UNHANDLED_ERROR' | 'HANDLED_ERROR';
   createdAt: string;
   executionTime: string;
   error: {
