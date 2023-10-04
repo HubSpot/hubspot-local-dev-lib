@@ -61,11 +61,11 @@ export class Logger {
 let currentLogger = new Logger();
 let currentLogLevel = LOG_LEVEL.ERROR;
 
-export function setLogger(logger: Logger) {
+export function setLogger(logger: Logger): void {
   currentLogger = logger;
 }
 
-export function setLogLevel(level: number) {
+export function setLogLevel(level: number): void {
   switch (level) {
     case LOG_LEVEL.DEBUG:
       currentLogLevel =
@@ -86,11 +86,11 @@ export function setLogLevel(level: number) {
   }
 }
 
-export function shouldLog(level: number) {
+export function shouldLog(level: number): number {
   return currentLogLevel & level;
 }
 
-export function getLogLevel() {
+export function getLogLevel(): number {
   switch (currentLogLevel) {
     case LOG_LEVEL.DEBUG | LOG_LEVEL.LOG | LOG_LEVEL.WARN | LOG_LEVEL.ERROR:
       return LOG_LEVEL.DEBUG;
