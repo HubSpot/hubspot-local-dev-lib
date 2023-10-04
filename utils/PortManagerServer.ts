@@ -2,16 +2,21 @@ import express, { Express, Request, Response } from 'express';
 import { Server } from 'http';
 import cors from 'cors';
 
-import { detectPort } from '../utils/detectPort';
+import { detectPort } from './detectPort';
 import {
   MIN_PORT_NUMBER,
   MAX_PORT_NUMBER,
   PORT_MANAGER_SERVER_PORT,
 } from '../constants/ports';
+import { throwErrorWithMessage } from '../errors/standardErrors';
+import { debug } from './logger';
+import { i18n } from './lang';
 
 type ServerPortMap = {
   [instanceId: string]: number;
 };
+
+const i18nKey = 'utils.PortManagerServer';
 
 class PortManagerServer {
   app?: Express;
@@ -24,14 +29,16 @@ class PortManagerServer {
 
   init(): void {
     if (this.app) {
-      throw new Error('Port manager server is already running');
+      throwErrorWithMessage(`${i18nKey}.duplicateInstance`);
     }
     this.app = express();
     this.app.use(express.json());
     this.app.use(cors());
     this.setupRoutes();
     this.server = this.app.listen(PORT_MANAGER_SERVER_PORT, () =>
-      console.log('Running port manager')
+      debug(`${i18nKey}.started`, {
+        port: PORT_MANAGER_SERVER_PORT,
+      })
     );
   }
 
@@ -48,13 +55,22 @@ class PortManagerServer {
   }
 
   setPort(instanceId: string, port: number) {
+    debug(`${i18nKey}.setPort`, { instanceId, port });
     this.serverPortMap[instanceId] = port;
+  }
+
+  deletePort(instanceId: string) {
+    debug(`${i18nKey}.deletePort`, {
+      instanceId,
+      port: this.serverPortMap[instanceId],
+    });
+    delete this.serverPortMap[instanceId];
   }
 
   send404(res: Response, instanceId: string) {
     res
       .status(404)
-      .send(`Could not find a server with instanceId ${instanceId}`);
+      .send(i18n(`errors.${i18nKey}.404`, { instanceId: instanceId }));
   }
 
   getServers = async (req: Request, res: Response): Promise<void> => {
@@ -79,11 +95,14 @@ class PortManagerServer {
     const { instanceId, port } = req.body;
 
     if (this.serverPortMap[instanceId]) {
-      res
-        .status(409)
-        .send('This server instance has already been assigned a port');
+      res.status(409).send(
+        i18n(`errors.${i18nKey}.409`, {
+          instanceId,
+          port: this.serverPortMap[instanceId],
+        })
+      );
     } else if (port && (port < MIN_PORT_NUMBER || port > MAX_PORT_NUMBER)) {
-      res.status(400).send('Port must be between 1024 and 65535');
+      res.status(400).send(i18n(`errors.${i18nKey}.400`));
     } else {
       const portToUse = await detectPort(port);
       this.setPort(instanceId, portToUse);
@@ -97,7 +116,7 @@ class PortManagerServer {
     const port = this.serverPortMap[instanceId];
 
     if (port) {
-      delete this.serverPortMap[instanceId];
+      this.deletePort(instanceId);
       res.send(200);
     } else {
       this.send404(res, instanceId);
@@ -106,6 +125,7 @@ class PortManagerServer {
 
   closeServer = (req: Request, res: Response): void => {
     if (this.server) {
+      debug(`${i18nKey}.close`);
       res.send(200);
       this.server.close();
     }
