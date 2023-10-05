@@ -18,7 +18,13 @@ export function checkAndWarnGitInclusion(configPath: string): void {
     logger.warn(i18n(`${i18nKey}.securityIssue`));
     logger.warn(i18n(`${i18nKey}.configFileTracked`));
     logger.warn(i18n(`${i18nKey}.fileName`, { configPath }));
-    logger.warn(i18n(`${i18nKey}.remediate`, { homeDir: os.homedir(), configPath }));
+    logger.warn(i18n(`${i18nKey}.remediate`));
+    logger.log('');
+    logger.warn(i18n(`${i18nKey}.moveConfig`, { homeDir: os.homedir() }));
+    logger.log('');
+    logger.warn(i18n(`${i18nKey}.addGitignore`, { configPath }));
+    logger.log('');
+    logger.warn(i18n(`${i18nKey}.noRemote`));
   } catch (e) {
     // fail silently
     logger.debug(i18n(`${i18nKey}.checkFailed`));
@@ -36,8 +42,7 @@ export function checkAndUpdateGitignore(configPath: string): void {
     if (!gitignoreFilePath) {
       gitignoreFilePath = path.resolve(configPath, GITIGNORE_FILE);
 
-      // TODO: Figure out if this ever worked
-      // fs.writeFileSync(gitignoreFilePath);
+      fs.writeFileSync(gitignoreFilePath, '');
     }
 
     const gitignoreContents = fs.readFileSync(gitignoreFilePath).toString();

@@ -31,7 +31,6 @@ export function stylize(label: string, style: (...text: unknown[]) => string, ar
   return [styledLabel, ...args];
 }
 
-// TODO: Eliminate the args parameter; it's too broad.
 export class Logger {
   error(...args:any[]) {
     console.error(...stylize('[ERROR]', Styles.error, args));

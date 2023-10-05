@@ -25,10 +25,10 @@ en:
       securityIssue: "Security Issue Detected"
       configFileTracked: "The HubSpot config file can be tracked by git."
       fileName: 'File: "{{ configPath }}"'
-      remediate: "To remediate:
-      \n- Move the config file to your home directory: '{{ homeDir }}'
-      \n- Add gitignore pattern '{{ configPath }}' to a .gitignore file in root of your repository.
-      \n- Ensure that the config file has not already been pushed to a remote repository."
+      remediate: "To remediate:"
+      moveConfig: "- Move the config file to your home directory: '{{ homeDir }}'"
+      addGitignore: "- Add gitignore pattern '{{ configPath }}' to a .gitignore file in root of your repository."
+      noRemote: "- Ensure that the config file has not already been pushed to a remote repository."
       checkFailed: "Unable to determine if config file is properly ignored by git."
     modules:
       createModule:
