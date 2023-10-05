@@ -216,13 +216,13 @@ export function writeConfig(options: WriteConfigOptions = {}): void {
 }
 
 function readConfigFile(): { source?: string; error?: BaseError } {
-  isConfigPathInGitRepo(_configPath);
   let source;
   let error;
   if (!_configPath) {
     return { source, error };
   }
   try {
+    isConfigPathInGitRepo(_configPath);
     source = fs.readFileSync(_configPath);
   } catch (err) {
     error = err as BaseError;
