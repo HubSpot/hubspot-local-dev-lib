@@ -49,7 +49,7 @@ export class FieldsJs {
 
     return new Promise<string>((resolve, reject) => {
       const convertFieldsProcess = fork(
-        path.join(__dirname, './processFieldsJs.ts'),
+        path.join(__dirname, './processFieldsJs.js'),
         [],
         {
           cwd: dirName,

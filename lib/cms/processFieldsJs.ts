@@ -100,7 +100,7 @@ async function fieldsArrayToJson(fields: Array<FieldsJs>): Promise<string> {
  * @param {string} filePath - Path to javascript file
  * @returns {Promise | undefined} - Returns _default_ exported content if ESM, or exported module content if CJS, or undefined if node version < 13.2 and file is .mjs.
  */
-async function dynamicImport(filePath: string) {
+async function dynamicImport(filePath: string): Promise<any> {
   if (semver.gte(process.version, '13.2.0')) {
     const exported = await import(pathToFileURL(filePath).toString()).then(
       content => content.default
