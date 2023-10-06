@@ -1,4 +1,4 @@
-import { configFilenameIsIgnoredByGitignore } from '../git';
+import { configFilenameIsIgnoredByGitignore } from '../../utils/git';
 import fs from 'fs-extra';
 
 describe('lib/git', () => {

@@ -17,6 +17,7 @@ export class FieldsJs {
   rejected: boolean;
   fieldOptions: string;
   outputPath?: string;
+  toJSON?: () => JSON;
 
   constructor(
     projectDir: string,

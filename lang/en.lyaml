@@ -21,6 +21,15 @@ en:
         success: "Your new {{ type }} has been created in {{ dest }}"
       downloadGithubRepoContents:
         downloading: "Downloading content piece: {{ contentPiecePath }} from {{ downloadUrl }} to {{ downloadPath }}"
+    git:
+      securityIssue: "Security Issue Detected"
+      configFileTracked: "The HubSpot config file can be tracked by git."
+      fileName: 'File: "{{ configPath }}"'
+      remediate: "To remediate:"
+      moveConfig: "- Move the config file to your home directory: '{{ homeDir }}'"
+      addGitignore: "- Add gitignore pattern '{{ configPath }}' to a .gitignore file in root of your repository."
+      noRemote: "- Ensure that the config file has not already been pushed to a remote repository."
+      checkFailed: "Unable to determine if config file is properly ignored by git."
     modules:
       createModule:
         creatingModule: "Creating module at {{ path }}"
@@ -124,6 +133,9 @@ en:
         creatingPath: "Making {{ path }} if needed"
       logging:
         creatingFile: "Creating file at {{ path }}"
+    processFieldsJs:
+      converting: "Converting \"{{ src }}\" to \"{{ dest }}\"."
+      converted: "Finished converting \"{{ src }}\" to \"{{ dest }}\"."
   errors:
     hubdb:
       invalidJsonPath: "The HubDB table file must be a '.json' file"
@@ -229,3 +241,7 @@ en:
       initiateSync: "There was an error initiating the sandbox sync."
       fetchTaskStatus: "There was an error fetching the task status while syncing sandboxes."
       fetchTypes: "There was an error fetching sandbox types."
+    processFieldsJs:
+      fieldsJsNotReturnArray: "There was an error loading JS file \"{{ path }}\". Expected type \"Array\". Make sure that your function returns an array"
+      fieldsJsNotFunction:  "There was an error loading JS file \"{{ path }}\". Expected type \"Function\". Make sure that your default export is a function."
+      invalidMjsFile: ".mjs files are only supported when using Node 13.2.0+"
