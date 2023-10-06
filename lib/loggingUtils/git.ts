@@ -19,11 +19,8 @@ export function checkAndWarnGitInclusion(configPath: string): void {
     logger.warn(i18n(`${i18nKey}.configFileTracked`));
     logger.warn(i18n(`${i18nKey}.fileName`, { configPath }));
     logger.warn(i18n(`${i18nKey}.remediate`));
-    logger.log('');
     logger.warn(i18n(`${i18nKey}.moveConfig`, { homeDir: os.homedir() }));
-    logger.log('');
     logger.warn(i18n(`${i18nKey}.addGitignore`, { configPath }));
-    logger.log('');
     logger.warn(i18n(`${i18nKey}.noRemote`));
   } catch (e) {
     // fail silently
