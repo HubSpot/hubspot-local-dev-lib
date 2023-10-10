@@ -1,6 +1,6 @@
 import path from 'path';
 
-import { isModuleFolder, isModuleFolderChild } from '../modules';
+import { isModuleFolder, isModuleFolderChild } from '../cms/modules';
 
 import { PathInput } from '../../types/Modules';
 

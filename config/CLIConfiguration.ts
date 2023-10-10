@@ -10,7 +10,7 @@ import {
   deleteConfigFile,
 } from './configFile';
 import { commaSeparatedValues } from '../lib/text';
-import { ENVIRONMENTS } from '../constants';
+import { ENVIRONMENTS } from '../constants/environments';
 import { API_KEY_AUTH_METHOD } from '../constants/auth';
 import { DEFAULT_MODES, MIN_HTTP_TIMEOUT } from '../constants/config';
 import { CLIConfig_NEW, Environment } from '../types/Config';

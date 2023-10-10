@@ -2,7 +2,7 @@
   "name": "@hubspot/local-dev-lib",
   "version": "0.0.5",
   "description": "Provides library functionality for HubSpot local development tooling, including the HubSpot CLI",
-  "main": "dist/index.js",
+  "main": "lib/index.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/HubSpot/hubspot-local-dev-lib"
@@ -49,13 +49,12 @@
     "typescript": "^4.9.5"
   },
   "exports": {
-    ".": "./lib/index.js",
-    "./cms": "./lib/cms/index.js",
+    "./*": "./lib/*.js",
+    "./api/*": "./api/*.js",
+    "./errors/*": "./errors/*.js",
+    "./http": "./http/index.js",
     "./config": "./config/index.js",
-    "./constants": "./constants/index.js",
-    "./github": "./lib/github.js",
-    "./ignoreRules": "./lib/ignoreRules.js",
-    "./path": "./lib/path.js",
+    "./constants/*": "./constants/*.js",
     "./loggingUtils": "./lib/loggingUtils/index.js",
     "./logger": "./lib/loggingUtils/logger.js"
   },

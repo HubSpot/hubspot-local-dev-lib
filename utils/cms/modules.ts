@@ -1,8 +1,8 @@
 import path from 'path';
-import { getExt, splitHubSpotPath, splitLocalPath } from '../lib/path';
-import { MODULE_EXTENSION } from '../constants/extensions';
-import { throwTypeErrorWithMessage } from '../errors/standardErrors';
-import { PathInput } from '../types/Modules';
+import { getExt, splitHubSpotPath, splitLocalPath } from '../../lib/path';
+import { MODULE_EXTENSION } from '../../constants/extensions';
+import { throwTypeErrorWithMessage } from '../../errors/standardErrors';
+import { PathInput } from '../../types/Modules';
 
 const isBool = (x: boolean | undefined) => !!x === x;
 

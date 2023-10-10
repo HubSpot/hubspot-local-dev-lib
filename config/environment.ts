@@ -1,6 +1,6 @@
 import { CLIConfig_NEW, Environment } from '../types/Config';
 import { debug } from '../utils/logger';
-import { ENVIRONMENT_VARIABLES } from '../constants';
+import { ENVIRONMENT_VARIABLES } from '../constants/environments';
 import {
   API_KEY_AUTH_METHOD,
   OAUTH_AUTH_METHOD,
