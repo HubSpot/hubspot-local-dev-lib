@@ -10,7 +10,7 @@ import {
   isPathInput,
   isModuleFolder,
   isModuleFolderChild,
-} from '../../utils/modules';
+} from '../../utils/cms/modules';
 import { PathInput } from '../../types/Modules';
 
 // Ids for testing
