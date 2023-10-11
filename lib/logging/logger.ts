@@ -20,9 +20,13 @@ export const Styles = {
   info: chalk.reset.white,
   warn: chalk.reset.yellow,
   error: chalk.reset.red,
-}
+};
 
-export function stylize(label: string, style: (...text: unknown[]) => string, args:any[]) {
+export function stylize(
+  label: string,
+  style: (...text: unknown[]) => string,
+  args: any[]
+) {
   const styledLabel = style(label);
   const [firstArg, ...rest] = args;
   if (typeof firstArg === 'string') {
@@ -32,25 +36,25 @@ export function stylize(label: string, style: (...text: unknown[]) => string, ar
 }
 
 export class Logger {
-  error(...args:any[]) {
+  error(...args: any[]) {
     console.error(...stylize('[ERROR]', Styles.error, args));
   }
-  warn(...args:any[]) {
+  warn(...args: any[]) {
     console.warn(...stylize('[WARNING]', Styles.warn, args));
   }
-  log(...args:any[]) {
+  log(...args: any[]) {
     console.log(...args);
   }
-  success(...args:any[]) {
+  success(...args: any[]) {
     console.log(...stylize('[SUCCESS]', Styles.success, args));
   }
-  info(...args:any[]) {
+  info(...args: any[]) {
     console.info(...stylize('[INFO]', Styles.info, args));
   }
-  debug(...args:any[]) {
+  debug(...args: any[]) {
     console.debug(...stylize('[DEBUG]', Styles.log, args));
   }
-  group(...args:any[]) {
+  group(...args: any[]) {
     console.group(...args);
   }
   groupEnd() {
@@ -106,40 +110,40 @@ export function getLogLevel(): number {
 }
 
 export const logger = {
-  error(...args:any[]) {
+  error(...args: any[]) {
     if (shouldLog(LOG_LEVEL.ERROR)) {
       currentLogger.error(...args);
     }
   },
-  warn(...args:any[]) {
+  warn(...args: any[]) {
     if (shouldLog(LOG_LEVEL.WARN)) {
       currentLogger.warn(...args);
     }
   },
-  log(...args:any[]) {
+  log(...args: any[]) {
     if (shouldLog(LOG_LEVEL.LOG)) {
       currentLogger.log(...args);
     }
   },
-  success(...args:any[]) {
+  success(...args: any[]) {
     if (shouldLog(LOG_LEVEL.LOG)) {
       currentLogger.success(...args);
     }
   },
-  info(...args:any[]) {
+  info(...args: any[]) {
     if (shouldLog(LOG_LEVEL.LOG)) {
       currentLogger.info(...args);
     }
   },
-  debug(...args:any[]) {
+  debug(...args: any[]) {
     if (shouldLog(LOG_LEVEL.DEBUG)) {
       currentLogger.debug(...args);
     }
   },
-  group(...args:any[]) {
+  group(...args: any[]) {
     currentLogger.group(...args);
   },
   groupEnd() {
     currentLogger.groupEnd();
   },
-}
+};

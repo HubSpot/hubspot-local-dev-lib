@@ -1,9 +1,9 @@
 import fs from 'fs-extra';
 import path from 'path';
-import { downloadGithubRepoContents } from '../lib/github';
-import { throwErrorWithMessage } from '../errors/standardErrors';
-import { debug, makeTypedLogger } from '../utils/logger';
-import { LogCallbacksArg } from '../types/LogCallbacks';
+import { downloadGithubRepoContents } from '../../lib/github';
+import { throwErrorWithMessage } from '../../errors/standardErrors';
+import { debug, makeTypedLogger } from '../../utils/logger';
+import { LogCallbacksArg } from '../../types/LogCallbacks';
 
 // Matches the .html file extension, excluding module.html
 const TEMPLATE_EXTENSION_REGEX = new RegExp(/(?<!module)\.html$/);
