@@ -55,7 +55,6 @@
     "./http": "./http/index.js",
     "./config": "./config/index.js",
     "./constants/*": "./constants/*.js",
-    "./loggingUtils": "./lib/loggingUtils/index.js",
     "./logger": "./lib/loggingUtils/logger.js"
   },
   "dependencies": {
