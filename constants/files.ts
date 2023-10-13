@@ -9,6 +9,8 @@ export const MODE = {
   publish: 'publish',
 } as const;
 
+export const DEFAULT_MODE = MODE.publish;
+
 export const FILE_UPLOAD_RESULT_TYPES = {
   SUCCESS: 'SUCCESS',
   FAILURE: 'FAILURE',
