@@ -1,4 +1,4 @@
-import { HubSpotAuthError } from './HubSpotAuthError';
+import { HubSpotAuthError } from '../models/HubSpotAuthError';
 import { i18n } from '../utils/lang';
 import { throwStatusCodeError } from './apiErrors';
 

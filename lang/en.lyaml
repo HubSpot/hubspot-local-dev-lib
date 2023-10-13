@@ -134,8 +134,8 @@ en:
       logging:
         creatingFile: "Creating file at {{ path }}"
     processFieldsJs:
-      converting: "Converting \"{{ src }}\" to \"{{ dest }}\"."
-      converted: "Finished converting \"{{ src }}\" to \"{{ dest }}\"."
+      converting: 'Converting "{{ src }}" to "{{ dest }}".'
+      converted: 'Finished converting "{{ src }}" to "{{ dest }}".'
   errors:
     hubdb:
       invalidJsonPath: "The HubDB table file must be a '.json' file"
@@ -242,6 +242,6 @@ en:
       fetchTaskStatus: "There was an error fetching the task status while syncing sandboxes."
       fetchTypes: "There was an error fetching sandbox types."
     processFieldsJs:
-      fieldsJsNotReturnArray: "There was an error loading JS file \"{{ path }}\". Expected type \"Array\". Make sure that your function returns an array"
-      fieldsJsNotFunction:  "There was an error loading JS file \"{{ path }}\". Expected type \"Function\". Make sure that your default export is a function."
+      fieldsJsNotReturnArray: 'There was an error loading JS file "{{ path }}". Expected type "Array". Make sure that your function returns an array'
+      fieldsJsNotFunction: 'There was an error loading JS file "{{ path }}". Expected type "Function". Make sure that your default export is a function.'
       invalidMjsFile: ".mjs files are only supported when using Node 13.2.0+"

@@ -1,7 +1,7 @@
 import path, { PlatformPath } from 'path';
 import { splitHubSpotPath, splitLocalPath } from '../path';
 
-describe('cli-lib/path', () => {
+describe('path', () => {
   describe('splitHubSpotPath()', () => {
     const testSplit = (
       filepath: string,
