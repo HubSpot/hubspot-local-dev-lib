@@ -4,6 +4,7 @@ export interface GenericError extends Error {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
 }
+
 // See https://nodejs.org/api/errors.html#class-systemerror
 export interface BaseError extends Error {
   name: string;

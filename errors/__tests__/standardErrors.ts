@@ -53,14 +53,14 @@ describe('standardErrors', () => {
 
   describe('throwErrorWithMessage', () => {
     it('throws error with message', () => {
-      const error = newError() as BaseError;
+      const error = newError();
       expect(() => throwErrorWithMessage('', {}, error)).toThrow();
     });
   });
 
   describe('throwTypeErrorWithMessage', () => {
     it('throws type error with message', () => {
-      const error = newError() as BaseError;
+      const error = newError();
       expect(() => throwTypeErrorWithMessage('', {}, error)).toThrow();
     });
   });
@@ -74,7 +74,7 @@ describe('standardErrors', () => {
 
   describe('throwError', () => {
     it('throws error', () => {
-      const error = newError() as BaseError;
+      const error = newError();
       expect(() => throwError(error)).toThrow();
     });
   });
