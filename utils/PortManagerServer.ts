@@ -11,6 +11,7 @@ import {
 import { throwErrorWithMessage } from '../errors/standardErrors';
 import { debug } from './logger';
 import { i18n } from './lang';
+import { BaseError } from '../types/Error';
 
 type ServerPortMap = {
   [instanceId: string]: number;
@@ -27,7 +28,7 @@ class PortManagerServer {
     this.serverPortMap = {};
   }
 
-  init(): void {
+  async init(): Promise<void> {
     if (this.app) {
       throwErrorWithMessage(`${i18nKey}.duplicateInstance`);
     }
@@ -35,11 +36,35 @@ class PortManagerServer {
     this.app.use(express.json());
     this.app.use(cors());
     this.setupRoutes();
-    this.server = this.app.listen(PORT_MANAGER_SERVER_PORT, () =>
-      debug(`${i18nKey}.started`, {
-        port: PORT_MANAGER_SERVER_PORT,
-      })
-    );
+
+    try {
+      this.server = await this.listen();
+    } catch (e) {
+      const error = e as BaseError;
+      if (error.code === 'EADDRINUSE') {
+        throwErrorWithMessage(
+          `${i18n}.portInUse`,
+          {
+            port: PORT_MANAGER_SERVER_PORT,
+          },
+          error
+        );
+      }
+      throw error;
+    }
+  }
+
+  listen(): Promise<Server> {
+    return new Promise<Server>((resolve, reject) => {
+      const server = this.app!.listen(PORT_MANAGER_SERVER_PORT, () => {
+        debug(`${i18nKey}.started`, {
+          port: PORT_MANAGER_SERVER_PORT,
+        });
+        resolve(server);
+      }).on('error', err => {
+        reject(err);
+      });
+    });
   }
 
   setupRoutes(): void {

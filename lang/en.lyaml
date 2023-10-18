@@ -208,6 +208,7 @@ en:
       notify:
         filePath: "Unable to notify file '{{ filePath }}'"
       PortManagerServer:
+        portInUse: "Failed to start PortManagerServer. Port {{ port }} is already in use."
         duplicateInstance: "Failed to start PortManagerServer. An instance of PortManagerServer is already running."
         404: "Could not find a server with instanceId {{ instanceId }}"
         409: "Failed to assign port. Server with instanceId {{ instanceId }} is already running on port {{ port }}"

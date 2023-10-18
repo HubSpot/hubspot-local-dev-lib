@@ -15,7 +15,7 @@ export async function startPortManagerServer(): Promise<void> {
   const isRunning = await isPortManagerServerRunning();
 
   if (!isRunning) {
-    PortManagerServer.init();
+    await PortManagerServer.init();
   }
 }
 
