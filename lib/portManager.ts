@@ -27,7 +27,7 @@ export async function stopPortManagerServer(): Promise<void> {
   }
 }
 
-export async function assignPortToServerInstance(
+export async function requestPortForServerInstance(
   serverInstanceId: string
 ): Promise<number> {
   const { data } = await axios.post(`${BASE_URL}/servers`, {
