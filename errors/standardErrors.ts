@@ -53,7 +53,7 @@ export function throwTypeErrorWithMessage(
 export function throwAuthErrorWithMessage(
   identifier: string,
   interpolation?: { [key: string]: string | number },
-  cause?: BaseError
+  cause?: StatusCodeError
 ): never {
   genericThrowErrorWithMessage(
     // @ts-expect-error HubSpotAuthError is not callable

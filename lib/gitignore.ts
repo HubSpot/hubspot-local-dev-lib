@@ -1,73 +1,12 @@
 import { readFileSync, writeFileSync } from 'fs-extra';
 import path from 'path';
-import findup from 'findup-sync';
 
-import {
-  isConfigPathInGitRepo,
-  configFilenameIsIgnoredByGitignore,
-  getGitComparisonDir,
-  makeComparisonDir,
-} from '../utils/git';
+import { checkGitInclusion } from '../utils/git';
 import { DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME } from '../constants/config';
 import { throwErrorWithMessage } from '../errors/standardErrors';
 import { BaseError } from '../types/Error';
 
 const GITIGNORE_FILE = '.gitignore';
-
-// Get all .gitignore files since they can cascade down directory structures
-function getGitignoreFiles(configPath: string): Array<string> {
-  const gitDir = getGitComparisonDir();
-  const files: Array<string> = [];
-  if (!gitDir) {
-    // Not in git
-    return files;
-  }
-  // Start findup from config dir
-  let cwd: string | null = configPath && path.dirname(configPath);
-  while (cwd) {
-    const ignorePath = findup(GITIGNORE_FILE, { cwd });
-    const ignorePathComparisonDir = makeComparisonDir(ignorePath);
-    const gitComparisonDir = makeComparisonDir(gitDir);
-    if (
-      ignorePath &&
-      ignorePathComparisonDir &&
-      gitComparisonDir &&
-      ignorePathComparisonDir.startsWith(gitComparisonDir)
-    ) {
-      const file = path.resolve(ignorePath);
-      files.push(file);
-      cwd = path.resolve(path.dirname(file) + '..');
-    } else {
-      cwd = null;
-    }
-  }
-  return files;
-}
-
-type GitInclusionResult = {
-  inGit: boolean;
-  configIgnored: boolean;
-  gitignoreFiles: Array<string>;
-};
-
-function checkGitInclusion(configPath: string): GitInclusionResult {
-  const result: GitInclusionResult = {
-    inGit: false,
-    configIgnored: false,
-    gitignoreFiles: [],
-  };
-
-  if (isConfigPathInGitRepo(configPath)) {
-    result.inGit = true;
-    result.gitignoreFiles = getGitignoreFiles(configPath);
-
-    if (configFilenameIsIgnoredByGitignore(result.gitignoreFiles, configPath)) {
-      // Found ignore statement in .gitignore that matches config filename
-      result.configIgnored = true;
-    }
-  }
-  return result;
-}
 
 export function checkAndAddConfigToGitignore(configPath: string): void {
   try {

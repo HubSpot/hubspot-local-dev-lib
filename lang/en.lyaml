@@ -21,6 +21,15 @@ en:
         success: "Your new {{ type }} has been created in {{ dest }}"
       downloadGithubRepoContents:
         downloading: "Downloading content piece: {{ contentPiecePath }} from {{ downloadUrl }} to {{ downloadPath }}"
+    git:
+      securityIssue: "Security Issue Detected"
+      configFileTracked: "The HubSpot config file can be tracked by git."
+      fileName: 'File: "{{ configPath }}"'
+      remediate: "To remediate:"
+      moveConfig: "- Move the config file to your home directory: '{{ homeDir }}'"
+      addGitignore: "- Add gitignore pattern '{{ configPath }}' to a .gitignore file in root of your repository."
+      noRemote: "- Ensure that the config file has not already been pushed to a remote repository."
+      checkFailed: "Unable to determine if config file is properly ignored by git."
     modules:
       createModule:
         creatingModule: "Creating module at {{ path }}"
@@ -82,6 +91,18 @@ en:
         missingEnv: "Unable to load config from environment variables: Missing env"
         unknownAuthType: "Unable to load config from environment variables: Unknown auth type"
     cms:
+      functions:
+        updateExistingConfig:
+          unableToReadFile: "The file {{ configFilePath }} could not be read"
+          invalidJSON: "The file {{ configFilePath }} is not valid JSON"
+          couldNotUpdateFile: "The file {{ configFilePath }} could not be updated"
+        createFunction:
+          destPathAlreadyExists: "The {{ path }} path already exists"
+          createdDest: "Created {{ path }}"
+          failedToCreateFile: "The file {{ configFilePath }} could not be created"
+          createdFunctionFile: "Created {{ path }}"
+          createdConfigFile: "Created {{ path }}"
+          success: "A function for the endpoint '/_hcms/api/{{ endpointPath }}' has been created. Upload {{ folderName }} to try it out"
       handleFieldsJs:
         convertFieldsJs:
           creating: "Creating child process with pid {{ pid }}"
@@ -112,6 +133,9 @@ en:
         creatingPath: "Making {{ path }} if needed"
       logging:
         creatingFile: "Creating file at {{ path }}"
+    processFieldsJs:
+      converting: 'Converting "{{ src }}" to "{{ dest }}".'
+      converted: 'Finished converting "{{ src }}" to "{{ dest }}".'
     utils:
       PortManagerServer:
         started: "PortManagerServer running on port {{ port }}"
@@ -119,6 +143,9 @@ en:
         deletedPort: "Server with instanceId {{ instanceId }} unassigned from port {{ port }}"
         close: "PortManagerServer shutting down."
   errors:
+    hubdb:
+      invalidJsonPath: "The HubDB table file must be a '.json' file"
+      invalidJsonFile: "The '{{{ src }}' path is not a path to a file"
     archive:
       extractZip:
         write: "An error occured writing temp project source."
@@ -172,7 +199,6 @@ en:
     personalAccessKey:
       accountNotFound: "Account with id {{ accountId }} does not exist."
       invalidPersonalAccessKey: "Error while retrieving new access token: {{ errorMessage }}"
-      invalidPersonalAccessKey401: 'Error while retrieving new access token: {{ errorMessage }}. Your personal access key is invalid. Please run "hs auth personalaccesskey" to reauthenticate. See https://designers.hubspot.com/docs/personal-access-keys for more information.'
     templates:
       fileAnnotations: "Error reading file annotations {{ file }}"
       pathExists: "The {{ path }} path already exists"
@@ -212,6 +238,13 @@ en:
         saveOutput: "There was an error saving the json output of {{ path }}"
         createTmpDirSync: "An error occured writing temporary project source."
         cleanupTmpDirSync: "There was an error deleting the temporary project source"
+      functions:
+        updateExistingConfig:
+          configIsNotObjectError: "The existing {{ configFilePath }} is not an object"
+          endpointAreadyExistsError: "The endpoint {{ endpointPath }} already exists in {{ configFilePath }}"
+        createFunction:
+          nestedConfigError: "Cannot create a functions directory inside '{{ ancestorConfigPath }}'"
+          jsFileConflictError: "The JavaScript file at '{{ functionFilePath }}'' already exists"
     sandboxes:
       createSandbox: "There was an error creating your sandbox."
       deleteSandbox: "There was an error deleting your sandbox."
@@ -219,3 +252,7 @@ en:
       initiateSync: "There was an error initiating the sandbox sync."
       fetchTaskStatus: "There was an error fetching the task status while syncing sandboxes."
       fetchTypes: "There was an error fetching sandbox types."
+    processFieldsJs:
+      fieldsJsNotReturnArray: 'There was an error loading JS file "{{ path }}". Expected type "Array". Make sure that your function returns an array'
+      fieldsJsNotFunction: 'There was an error loading JS file "{{ path }}". Expected type "Function". Make sure that your default export is a function.'
+      invalidMjsFile: ".mjs files are only supported when using Node 13.2.0+"

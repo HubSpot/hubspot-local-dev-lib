@@ -9,7 +9,7 @@ import {
 } from './handleFieldsJS';
 import { getFileMapperQueryValues } from '../fileMapper';
 import { upload } from '../../api/fileMapper';
-import { isModuleFolderChild } from '../../utils/modules';
+import { isModuleFolderChild } from '../../utils/cms/modules';
 import { escapeRegExp } from '../../utils/escapeRegExp';
 import { debug } from '../../utils/logger';
 import { convertToUnixPath, getExt } from '../path';

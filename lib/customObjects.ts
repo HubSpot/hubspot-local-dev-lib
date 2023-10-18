@@ -2,7 +2,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import prettier from 'prettier';
 import { getCwd } from '../lib/path';
-import { fetchSchemas, fetchSchema } from '../api/schema';
+import { fetchObjectSchemas, fetchObjectSchema } from '../api/customObjects';
 import { Schema } from '../types/Schemas';
 
 export function getResolvedPath(dest: string, name: string): string {
@@ -25,10 +25,10 @@ export async function downloadSchemas(
   accountId: number,
   dest: string
 ): Promise<void> {
-  const response = await fetchSchemas(accountId);
+  const response = await fetchObjectSchemas(accountId);
 
   if (response.results.length) {
-    response.results.forEach(r => writeSchemaToDisk(r, dest));
+    response.results.forEach((r: Schema) => writeSchemaToDisk(r, dest));
   }
 }
 
@@ -37,6 +37,6 @@ export async function downloadSchema(
   schemaObjectType: string,
   dest: string
 ): Promise<void> {
-  const response = await fetchSchema(accountId, schemaObjectType);
+  const response = await fetchObjectSchema(accountId, schemaObjectType);
   writeSchemaToDisk(response, dest);
 }

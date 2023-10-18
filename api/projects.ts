@@ -16,6 +16,7 @@ import { Deploy, ProjectDeployResponse } from '../types/Deploy';
 
 const PROJECTS_API_PATH = 'dfs/v1/projects';
 const PROJECTS_DEPLOY_API_PATH = 'dfs/deploy/v1';
+const DEVELOPER_PROJECTS_API_PATH = 'developer/projects/v1';
 
 export async function fetchProjects(
   accountId: number
@@ -88,6 +89,19 @@ export async function deleteProject(
 ): Promise<void> {
   return http.delete(accountId, {
     url: `${PROJECTS_API_PATH}/${encodeURIComponent(projectName)}`,
+  });
+}
+
+type FetchPlatformVersionResponse = {
+  defaultPlatformVersion: string;
+  activePlatformVersions: Array<string>;
+};
+
+export async function fetchPlatformVersions(
+  accountId: number
+): Promise<FetchPlatformVersionResponse> {
+  return http.get(accountId, {
+    url: `${DEVELOPER_PROJECTS_API_PATH}/platformVersion`,
   });
 }
 

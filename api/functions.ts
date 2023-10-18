@@ -32,36 +32,3 @@ export async function getBuildStatus(
     url: `${FUNCTION_API_PATH}/build/${buildId}/poll`,
   });
 }
-
-//These endpoints are temporarily disabled, while the Apps team refactors them.
-
-// export async function getProjectAppFunctionLogs(
-//   accountId: number,
-//   functionName: string,
-//   projectName: string,
-//   appPath: string,
-//   query: QueryParams = {}
-// ) {
-//   const { limit = 10 } = query;
-
-//   return http.get(accountId, {
-//     url: `${FUNCTION_API_PATH}/app-function/logs/project/${encodeURIComponent(
-//       projectName
-//     )}/function/${encodeURIComponent(functionName)}`,
-//     query: { ...query, limit, appPath },
-//   });
-// }
-
-// export async function getLatestProjectAppFunctionLog(
-//   accountId: number,
-//   functionName: string,
-//   projectName: string,
-//   appPath: string
-// ) {
-//   return http.get(accountId, {
-//     url: `${FUNCTION_API_PATH}/app-function/logs/project/${encodeURIComponent(
-//       projectName
-//     )}/function/${encodeURIComponent(functionName)}/latest`,
-//     query: { appPath },
-//   });
-// }

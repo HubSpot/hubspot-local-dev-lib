@@ -1,5 +1,5 @@
 import { getValidEnv } from '../../lib/environment';
-import { ENVIRONMENTS } from '../../constants';
+import { ENVIRONMENTS } from '../../constants/environments';
 
 // TODO write tests for environment.ts
 describe('config/environment', () => {

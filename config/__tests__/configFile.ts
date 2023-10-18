@@ -14,7 +14,7 @@ import {
 import {
   HUBSPOT_CONFIGURATION_FILE,
   HUBSPOT_CONFIGURATION_FOLDER,
-} from '../../constants';
+} from '../../constants/config';
 import { CLIConfig_NEW } from '../../types/Config';
 
 // fs spy
@@ -141,7 +141,7 @@ describe('config/configFile', () => {
       ensureFileSyncSpy.mockImplementation(() => null);
       writeFileSyncSpy.mockImplementation(() => null);
       readFileSyncSpy.mockImplementation(() => Buffer.from('content'));
-      loadSpy.mockImplementation(() => ({}))
+      loadSpy.mockImplementation(() => ({}));
 
       writeConfigToFile(CONFIG);
 

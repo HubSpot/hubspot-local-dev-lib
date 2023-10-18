@@ -1,20 +1,21 @@
-type ErrorResponse = {
-  statusCode: number;
-  body: { category: string; subCategory: string };
-};
+import { StatusCodeError } from '../types/Error';
 
 export class HubSpotAuthError extends Error {
-  statusCode: number;
+  statusCode?: number;
   category?: string;
   subCategory?: string;
-
-  constructor(message: string, errorResponse: ErrorResponse) {
+  constructor(
+    message: string,
+    { cause = {} }: { cause?: Partial<StatusCodeError> }
+  ) {
     super(message);
     this.name = 'HubSpotAuthError';
-    this.statusCode = errorResponse.statusCode;
-    this.category =
-      (errorResponse.body && errorResponse.body.category) || undefined;
+    this.statusCode = cause.statusCode;
+    this.category = cause?.response?.body?.category || undefined;
     this.subCategory =
-      (errorResponse.body && errorResponse.body.subCategory) || undefined;
+      (cause.response &&
+        cause.response.body &&
+        cause.response.body.subCategory) ||
+      undefined;
   }
 }

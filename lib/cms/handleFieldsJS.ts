@@ -3,7 +3,7 @@ import os from 'os';
 import path from 'path';
 import { fork } from 'child_process';
 import { escapeRegExp } from '../../utils/escapeRegExp';
-import { isModuleFolderChild } from '../../utils/modules';
+import { isModuleFolderChild } from '../../utils/cms/modules';
 import { debug } from '../../utils/logger';
 import { throwErrorWithMessage } from '../../errors/standardErrors';
 import { BaseError } from '../../types/Error';
@@ -17,6 +17,7 @@ export class FieldsJs {
   rejected: boolean;
   fieldOptions: string;
   outputPath?: string;
+  toJSON?: () => JSON;
 
   constructor(
     projectDir: string,
