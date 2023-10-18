@@ -27,11 +27,11 @@ export async function stopPortManagerServer(): Promise<void> {
   }
 }
 
-export async function requestPortForServerInstance(
-  serverInstanceId: string
-): Promise<number> {
+export async function requestPorts(
+  serverInstanceIds: Array<string>
+): Promise<Array<number>> {
   const { data } = await axios.post(`${BASE_URL}/servers`, {
-    instanceId: serverInstanceId,
+    instanceIds: serverInstanceIds,
   });
 
   return data.port;

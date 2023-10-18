@@ -74,7 +74,7 @@ class PortManagerServer {
 
     this.app.get('/servers', this.getServers);
     this.app.get('/servers/:instanceId', this.getServerPortByInstanceId);
-    this.app.post('/servers', this.assignPortToServer);
+    this.app.post('/servers', this.assignPortsToServers);
     this.app.delete('/servers/:instanceId', this.deleteServerInstance);
     this.app.post('/close', this.closeServer);
   }
@@ -116,24 +116,36 @@ class PortManagerServer {
     }
   };
 
-  assignPortToServer = async (req: Request, res: Response): Promise<void> => {
-    const { instanceId, port } = req.body;
+  assignPortsToServers = async (req: Request, res: Response): Promise<void> => {
+    const { instanceIds, port } = req.body;
 
-    if (this.serverPortMap[instanceId]) {
-      res.status(409).send(
-        i18n(`errors.${i18nKey}.409`, {
-          instanceId,
-          port: this.serverPortMap[instanceId],
-        })
-      );
-    } else if (port && (port < MIN_PORT_NUMBER || port > MAX_PORT_NUMBER)) {
-      res.status(400).send(i18n(`errors.${i18nKey}.400`));
-    } else {
-      const portToUse = await detectPort(port);
-      this.setPort(instanceId, portToUse);
+    const portPromises: Array<Promise<number>> = [];
 
-      res.send({ port: portToUse });
-    }
+    instanceIds.forEach((instanceId: number) => {
+      if (this.serverPortMap[instanceId]) {
+        res.status(409).send(
+          i18n(`errors.${i18nKey}.409`, {
+            instanceId,
+            port: this.serverPortMap[instanceId],
+          })
+        );
+        return;
+      } else if (port && (port < MIN_PORT_NUMBER || port > MAX_PORT_NUMBER)) {
+        res.status(400).send(i18n(`errors.${i18nKey}.400`));
+        return;
+      } else {
+        portPromises.push(detectPort(port));
+      }
+    });
+
+    const ports = await Promise.all(portPromises);
+
+    ports.forEach((port: number, index: number) => {
+      const instanceId = instanceIds[index];
+      this.setPort(instanceId, port);
+    });
+
+    res.send({ ports });
   };
 
   deleteServerInstance = (req: Request, res: Response): void => {
