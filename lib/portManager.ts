@@ -34,7 +34,7 @@ export async function requestPorts(
     instanceIds: serverInstanceIds,
   });
 
-  return data.port;
+  return data.ports;
 }
 
 export async function deleteServerInstance(
