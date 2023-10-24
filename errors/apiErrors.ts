@@ -97,10 +97,10 @@ export function throwStatusCodeError(
   const errorData = JSON.stringify({
     statusCode,
     message,
-    url: response.request.href,
-    method: response.request.method,
-    response: response.body,
-    headers: response.headers,
+    url: response ? response.request.href : null,
+    method: response ? response.request.method : null,
+    response: response ? response.body : null,
+    headers: response ? response.headers : null,
     context,
   });
   throw new Error(errorData, { cause: error });
