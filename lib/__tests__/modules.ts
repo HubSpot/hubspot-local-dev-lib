@@ -10,7 +10,7 @@ const isHubSpot = true;
 
 // TODO: Replace two missing tests
 
-describe('cli-lib/modules', () => {
+describe('modules', () => {
   describe('validateSrcAndDestPaths()', () => {
     const emptyLocal = { isLocal, path: '' };
     const emptyHubSpot = { isHubSpot, path: '' };
