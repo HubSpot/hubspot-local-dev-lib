@@ -30,35 +30,35 @@ const queue = new PQueue({
   concurrency: 10,
 });
 
-function isPathToFile(filepath: string): boolean {
+export function isPathToFile(filepath: string): boolean {
   const ext = getExt(filepath);
   return !!ext && ext !== MODULE_EXTENSION && ext !== FUNCTIONS_EXTENSION;
 }
 
-function isPathToModule(filepath: string): boolean {
+export function isPathToModule(filepath: string): boolean {
   const ext = getExt(filepath);
   return ext === MODULE_EXTENSION;
 }
 
-function isPathToRoot(filepath: string): boolean {
+export function isPathToRoot(filepath: string): boolean {
   if (typeof filepath !== 'string') return false;
   // Root pattern matches empty strings and: / \
   return /^(\/|\\)?$/.test(filepath.trim());
 }
 
-function isPathToHubspot(filepath: string): boolean {
+export function isPathToHubspot(filepath: string): boolean {
   if (typeof filepath !== 'string') return false;
   return /^(\/|\\)?@hubspot/i.test(filepath.trim());
 }
 
-function useApiBuffer(mode: Mode | null): boolean {
+function useApiBuffer(mode?: Mode | null): boolean {
   return mode === MODE.draft;
 }
 
 // Determines API param based on mode an options
 export function getFileMapperQueryValues(
-  mode: Mode | null,
-  { staging, assetVersion }: FileMapperInputOptions
+  mode?: Mode | null,
+  { staging, assetVersion }: FileMapperInputOptions = {}
 ): FileMapperOptions {
   return {
     params: {
@@ -105,7 +105,7 @@ type PathTypeData = {
   isFolder: boolean;
 };
 
-function getTypeDataFromPath(src: string): PathTypeData {
+export function getTypeDataFromPath(src: string): PathTypeData {
   const isModule = isPathToModule(src);
   const isHubspot = isPathToHubspot(src);
   const isFile = !isModule && isPathToFile(src);
@@ -126,7 +126,7 @@ type RecursiveFileMapperCallback = (
   depth?: number
 ) => boolean;
 
-function recurseFolder(
+export function recurseFolder(
   node: FileMapperNode,
   callback: RecursiveFileMapperCallback,
   filepath = '',
@@ -150,7 +150,7 @@ function recurseFolder(
   return depth === 0 ? false : __break;
 }
 
-async function writeUtimes(
+export async function writeUtimes(
   accountId: number,
   filepath: string,
   node: FileMapperNode
@@ -188,7 +188,7 @@ async function fetchAndWriteFileStream(
   accountId: number,
   srcPath: string,
   filepath: string,
-  mode: Mode,
+  mode?: Mode,
   options: FileMapperInputOptions = {},
   logCallbacks?: LogCallbacksArg<typeof filemapperCallbackKeys>
 ): Promise<void> {
@@ -206,20 +206,21 @@ async function fetchAndWriteFileStream(
   if (!isAllowedExtension(srcPath)) {
     throwErrorWithMessage('filemapper.invalidFileType', { srcPath });
   }
+  let node: FileMapperNode;
   try {
-    const node = await fetchFileStream(
+    node = await fetchFileStream(
       accountId,
       srcPath,
       filepath,
       getFileMapperQueryValues(mode, options)
     );
-    await writeUtimes(accountId, filepath, node);
   } catch (err) {
     throwStatusCodeError(err as StatusCodeError, {
       accountId,
       request: srcPath,
     });
   }
+  await writeUtimes(accountId, filepath, node);
 }
 
 // Writes an individual file or folder (not recursive).  If file source is missing, the
@@ -228,7 +229,7 @@ async function writeFileMapperNode(
   accountId: number,
   filepath: string,
   node: FileMapperNode,
-  mode: Mode,
+  mode?: Mode,
   options: FileMapperInputOptions = {},
   logCallbacks?: LogCallbacksArg<typeof filemapperCallbackKeys>
 ): Promise<boolean> {
@@ -278,7 +279,7 @@ async function downloadFile(
   accountId: number,
   src: string,
   destPath: string,
-  mode: Mode,
+  mode?: Mode,
   options: FileMapperInputOptions = {},
   logCallbacks?: LogCallbacksArg<typeof filemapperCallbackKeys>
 ): Promise<void> {
@@ -293,7 +294,7 @@ async function downloadFile(
     }
     const dest = path.resolve(destPath);
     const cwd = getCwd();
-    let filepath;
+    let filepath: string;
     if (dest === cwd) {
       // Dest: CWD
       filepath = path.resolve(cwd, path.basename(src));
@@ -336,12 +337,12 @@ async function downloadFile(
   }
 }
 
-async function fetchFolderFromApi(
+export async function fetchFolderFromApi(
   accountId: number,
   src: string,
-  mode: Mode,
+  mode?: Mode,
   options: FileMapperInputOptions = {},
-  logCallbacks: LogCallbacksArg<typeof filemapperCallbackKeys>
+  logCallbacks?: LogCallbacksArg<typeof filemapperCallbackKeys>
 ): Promise<FileMapperNode> {
   const logger = makeTypedLogger<typeof filemapperCallbackKeys>(
     logCallbacks,
@@ -376,9 +377,9 @@ async function downloadFolder(
   accountId: number,
   src: string,
   destPath: string,
-  mode: Mode,
+  mode?: Mode,
   options: FileMapperInputOptions = {},
-  logCallbacks: LogCallbacksArg<typeof filemapperCallbackKeys>
+  logCallbacks?: LogCallbacksArg<typeof filemapperCallbackKeys>
 ) {
   const logger = makeTypedLogger<typeof filemapperCallbackKeys>(
     logCallbacks,
@@ -452,9 +453,9 @@ export async function downloadFileOrFolder(
   accountId: number,
   src: string,
   dest: string,
-  mode: Mode,
+  mode?: Mode,
   options: FileMapperInputOptions = {},
-  logCallbacks: LogCallbacksArg<typeof filemapperCallbackKeys>
+  logCallbacks?: LogCallbacksArg<typeof filemapperCallbackKeys>
 ): Promise<void> {
   if (!src) {
     return;
