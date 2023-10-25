@@ -12,8 +12,9 @@
     "access": "public"
   },
   "scripts": {
-    "build": "rm -rf ./dist/ && tsc --rootDir . --outdir dist && yarn copy-files",
+    "build": "rm -rf ./dist/ && tsc --rootDir . --outdir dist && yarn copy-files && yarn clear-postinstall",
     "check-main": "branch=$(git rev-parse --abbrev-ref HEAD) && [ $branch = main ] || (echo 'Error: New release can only be published on main branch' && exit 1)",
+    "clear-postinstall": "cd dist && npm pkg delete scripts.postinstall",
     "copy-files": "cp -r lang dist/lang",
     "lint": "eslint --max-warnings=0 . && prettier --check ./**/*.ts",
     "local-dev": "yarn build && cd dist && yarn link && cd .. && tsc --watch --rootDir . --outdir dist",
