@@ -9,10 +9,12 @@ const LOCALDEVAUTH_API_AUTH_PATH = 'localdevauth/v1/auth';
 
 type AccessTokenResponse = {
   hubId: number;
+  userId: number;
   oauthAccessToken: string;
   expiresAtMillis: number;
+  enabledFeatures?: { [key: string]: number };
   scopeGroups: Array<string>;
-  encodedOauthRefreshToken: string;
+  encodedOAuthRefreshToken: string;
 };
 
 export async function fetchAccessToken(

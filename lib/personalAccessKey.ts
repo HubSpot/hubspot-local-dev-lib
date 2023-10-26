@@ -30,7 +30,7 @@ type AccessToken = {
   accessToken: string;
   expiresAt: string;
   scopeGroups: Array<string>;
-  encodedOauthRefreshToken: string;
+  encodedOAuthRefreshToken: string;
 };
 
 export async function getAccessToken(
@@ -58,7 +58,7 @@ export async function getAccessToken(
     accessToken: response.oauthAccessToken,
     expiresAt: moment(response.expiresAtMillis).toISOString(),
     scopeGroups: response.scopeGroups,
-    encodedOauthRefreshToken: response.encodedOauthRefreshToken,
+    encodedOAuthRefreshToken: response.encodedOAuthRefreshToken,
   };
 }
 
@@ -144,7 +144,7 @@ export async function accessTokenForPersonalAccessKey(
   return auth?.tokenInfo?.accessToken;
 }
 
-// Adds a account to the config using authType: personalAccessKey
+// Adds an account to the config using authType: personalAccessKey
 export const updateConfigWithPersonalAccessKey = async (
   personalAccessKey: string,
   name: string,

@@ -3,6 +3,11 @@ import { Environment } from './Config';
 
 export type AuthType = 'personalaccesskey' | 'apikey' | 'oauth2';
 
+// export enum AuthType {
+//   personalaccesskey = 'personalaccesskey',
+//   apikey = 'apikey',
+//   oauth2 = 'oauth2',
+// }
 export interface CLIAccount_NEW {
   name?: string;
   accountId: number;
