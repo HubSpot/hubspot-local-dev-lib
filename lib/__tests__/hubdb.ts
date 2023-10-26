@@ -7,7 +7,6 @@ import {
 import {
   createRows as __createRows,
   createTable as __createTable,
-  deleteRows as __deleteRows,
   fetchRows as __fetchRows,
   fetchTable as __fetchTable,
   publishTable as __publishTable,
@@ -27,7 +26,6 @@ const mockedFS = fs as jest.Mocked<typeof fs>;
 const getCwd = __getCwd as jest.MockedFunction<typeof __getCwd>;
 const createRows = __createRows as jest.MockedFunction<typeof __createRows>;
 const createTable = __createTable as jest.MockedFunction<typeof __createTable>;
-const deleteRows = __deleteRows as jest.MockedFunction<typeof __deleteRows>;
 const fetchRows = __fetchRows as jest.MockedFunction<typeof __fetchRows>;
 const fetchTable = __fetchTable as jest.MockedFunction<typeof __fetchTable>;
 const publishTable = __publishTable as jest.MockedFunction<
