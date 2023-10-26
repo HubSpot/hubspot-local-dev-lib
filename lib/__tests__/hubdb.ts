@@ -1,8 +1,13 @@
 import fs from 'fs-extra';
-import { downloadHubDbTable, createHubDbTable } from '../hubdb';
+import {
+  downloadHubDbTable,
+  createHubDbTable,
+  clearHubDbTableRows,
+} from '../hubdb';
 import {
   createRows as __createRows,
   createTable as __createTable,
+  deleteRows as __deleteRows,
   fetchRows as __fetchRows,
   fetchTable as __fetchTable,
   publishTable as __publishTable,
@@ -22,6 +27,7 @@ const mockedFS = fs as jest.Mocked<typeof fs>;
 const getCwd = __getCwd as jest.MockedFunction<typeof __getCwd>;
 const createRows = __createRows as jest.MockedFunction<typeof __createRows>;
 const createTable = __createTable as jest.MockedFunction<typeof __createTable>;
+const deleteRows = __deleteRows as jest.MockedFunction<typeof __deleteRows>;
 const fetchRows = __fetchRows as jest.MockedFunction<typeof __fetchRows>;
 const fetchTable = __fetchTable as jest.MockedFunction<typeof __fetchTable>;
 const publishTable = __publishTable as jest.MockedFunction<
@@ -103,6 +109,15 @@ describe('hubdb', () => {
       expect(table.rowCount).toEqual(3);
       expect(table.tableId).toEqual('cool-table-id');
       expect(publishTable).toBeCalled();
+    });
+  });
+
+  describe('clearHubDbTableRows', () => {
+    it('clears all of the hubdb table rows', async () => {
+      fetchRows.mockReturnValue(Promise.resolve(hubdbFetchRowResponse));
+      const result = await clearHubDbTableRows(123, '456');
+
+      expect(result.deletedRowCount).toBe(3);
     });
   });
 });

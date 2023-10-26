@@ -22,7 +22,7 @@ function validateJsonPath(src: string): void {
 }
 
 function validateJsonFile(src: string): void {
-  let stats;
+  let stats: fs.Stats;
 
   try {
     stats = fs.statSync(src);
