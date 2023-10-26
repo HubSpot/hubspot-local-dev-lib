@@ -1,0 +1,28 @@
+{
+  "id": "cool-table-id",
+  "name": "cool-table-name",
+  "createdAt": "string",
+  "publishedAt": "string",
+  "updatedAt": "string",
+  "label": "string",
+  "allowChildTables": false,
+  "allowPublicApiAccess": false,
+  "columns": [
+    {
+      "name": "first_col",
+      "label": "first_col",
+      "id": "col_1",
+      "type": "TEXT"
+    },
+    {
+      "name": "second_col",
+      "label": "first_col",
+      "id": "col_2",
+      "type": "TEXT"
+    }
+  ],
+  "rowCount": 3,
+  "useForPages": false,
+  "enableChildTablePages": false,
+  "archived": false
+}

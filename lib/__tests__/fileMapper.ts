@@ -13,7 +13,7 @@ import {
   download as __download,
   fetchFileStream as __fetchFileStream,
 } from '../../api/fileMapper';
-import folderWithoutSources from './fixtures/folderWithoutSources.json';
+import folderWithoutSources from './fixtures/fileMapper/folderWithoutSources.json';
 
 jest.mock('../../api/fileMapper');
 const utimesSpy = jest.spyOn(fs, 'utimes');

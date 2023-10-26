@@ -11,22 +11,27 @@ export type Schema = {
 export type Table = {
   id: string;
   name: string;
-  portalId: number;
+  portalId?: number;
   createdAt: string;
   publishedAt: string;
   updatedAt: string;
   label: string;
   columns: Array<Column>;
-  rows: Array<Row>;
-  partitioningSettings?: null; //TODO
-  published: boolean;
-  cosObjectType: string;
-  updated: number;
+  rows?: Array<Row>;
+  partitioningSettings?: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    teamIds: Array<any>;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    userIds: Array<any>;
+  };
+  published?: boolean;
+  cosObjectType?: string;
+  updated?: number;
   archived: boolean;
-  columnCount: number;
-  cdnPurgeEmbargoTime: number | null;
+  columnCount?: number;
+  cdnPurgeEmbargoTime?: number | null;
   rowCount: number;
-  createdBy: {
+  createdBy?: {
     id: string;
     email: string;
     firstName: string;
@@ -35,16 +40,16 @@ export type Table = {
   useForPages: boolean;
   allowChildTables: boolean;
   enableChildTablePages: boolean;
-  crmObjectTypeId: number;
-  dynamicMetaTags?: null; //TODO
+  crmObjectTypeId?: number;
+  dynamicMetaTags?: { [key: string]: number };
   allowPublicApiAccess: boolean;
 };
 
 export type Column = {
   name: string;
   label: string;
-  id: string;
-  archived: boolean;
+  id?: string;
+  archived?: boolean;
   type: string;
   deleted?: boolean;
   foreignIdsByName?: {
@@ -60,7 +65,12 @@ export type Row = {
   createdAt: string;
   updatedAt: string;
   publishedAt: string | null;
-  values: { text_column: string };
+  values: {
+    text_column?: string;
+    number_column?: number;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    multiselect?: Array<any>;
+  };
   path: string | null;
   name: string | null;
   childTableId?: string;
@@ -70,12 +80,14 @@ export type Row = {
 export type CreateRowsResponse = {
   status: string;
   results: Array<Row>;
-  startedAt: string;
-  completedAt: string;
+  startedAt?: string;
+  completedAt?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  links?: { [key: string]: any };
 };
 
 export type FetchRowsResponse = {
   total: number;
   results: Array<Row>;
-  paging?: { next: { after: string | null } };
+  paging?: { next: { after: string | null } } | null;
 };
