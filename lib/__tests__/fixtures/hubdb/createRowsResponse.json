@@ -1,0 +1,32 @@
+{
+  "status": "COMPLETE",
+  "results": [
+    {
+      "name": "My Event",
+      "id": "string",
+      "createdAt": "string",
+      "updatedAt": "string",
+      "publishedAt": null,
+      "values": { "text_column": "a" },
+      "path": null
+    },
+    {
+      "name": "My Better Event",
+      "id": "string",
+      "createdAt": "string",
+      "updatedAt": "string",
+      "publishedAt": null,
+      "values": { "text_column": "b" },
+      "path": null
+    },
+    {
+      "name": "My Best Event",
+      "id": "string",
+      "createdAt": "string",
+      "updatedAt": "string",
+      "publishedAt": null,
+      "values": { "text_column": "c" },
+      "path": null
+    }
+  ]
+}

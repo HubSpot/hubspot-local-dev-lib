@@ -1,0 +1,37 @@
+{
+  "total": 3,
+  "results": [
+    {
+      "name": "Paging 1",
+      "id": "string",
+      "createdAt": "string",
+      "updatedAt": "string",
+      "publishedAt": null,
+      "values": { "text_column": "a" },
+      "path": null
+    },
+    {
+      "name": "Paging 2",
+      "id": "string",
+      "createdAt": "string",
+      "updatedAt": "string",
+      "publishedAt": null,
+      "values": { "text_column": "b" },
+      "path": null
+    },
+    {
+      "name": "Paging 3",
+      "id": "string",
+      "createdAt": "string",
+      "updatedAt": "string",
+      "publishedAt": null,
+      "values": { "text_column": "c" },
+      "path": null
+    }
+  ],
+  "paging": {
+    "next": {
+      "after": "testing"
+    }
+  }
+}
