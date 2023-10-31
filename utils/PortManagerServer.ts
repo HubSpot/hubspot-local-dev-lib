@@ -123,7 +123,7 @@ class PortManagerServer {
   ): Promise<void> => {
     const { portData } = req.body;
 
-    const portPromises: Array<Promise<Required<RequestPortsData>>> = [];
+    const portPromises: Array<Promise<{ [instanceId: string]: number }>> = [];
 
     portData.forEach(data => {
       const { port, instanceId } = data;
@@ -139,23 +139,25 @@ class PortManagerServer {
         res.status(400).send(i18n(`errors.${i18nKey}.400`));
         return;
       } else {
-        const promise = new Promise<Required<RequestPortsData>>(resolve => {
-          detectPort(port).then(resolvedPort => {
-            resolve({
-              instanceId,
-              port: resolvedPort,
+        const promise = new Promise<{ [instanceId: string]: number }>(
+          resolve => {
+            detectPort(port).then(resolvedPort => {
+              resolve({
+                [instanceId]: resolvedPort,
+              });
             });
-          });
-        });
+          }
+        );
         portPromises.push(promise);
       }
     });
 
-    const ports = await Promise.all(portPromises);
+    const portList = await Promise.all(portPromises);
+    const ports = portList.reduce((a, c) => Object.assign(a, c));
 
-    ports.forEach(({ port, instanceId }) => {
-      this.setPort(instanceId, port);
-    });
+    for (const instanceId in ports) {
+      this.setPort(instanceId, ports[instanceId]);
+    }
 
     res.send({ ports });
   };
