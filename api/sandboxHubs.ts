@@ -19,7 +19,7 @@ export async function createSandbox(
   type: string
 ): Promise<SandboxResponse> {
   return http.post(accountId, {
-    body: { name, type, generatePersonalAccessKey: true }, // For CLI, generatePersonalAccessKey will always be true since we'll be saving the entry to the config
+    data: { name, type, generatePersonalAccessKey: true }, // For CLI, generatePersonalAccessKey will always be true since we'll be saving the entry to the config
     timeout: SANDBOX_TIMEOUT,
     url: SANDBOX_API_PATH_V2, // Create uses v2 for sandbox type and PAK generation support
   });

@@ -181,6 +181,7 @@ function createGetRequestStream(contentType: string) {
       try {
         const { headers, ...opts } = await withAuth(accountId, axiosConfig);
         const res = await axios({
+          method: 'get',
           ...opts,
           headers: {
             ...headers,

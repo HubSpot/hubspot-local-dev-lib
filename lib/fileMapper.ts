@@ -272,7 +272,7 @@ async function writeFileMapperNode(
 }
 
 function isTimeout(err: StatusCodeError): boolean {
-  return !!err && (err.statusCode === 408 || err.code === 'ESOCKETTIMEDOUT');
+  return !!err && (err.status === 408 || err.code === 'ESOCKETTIMEDOUT');
 }
 
 async function downloadFile(

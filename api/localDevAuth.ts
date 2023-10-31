@@ -26,9 +26,8 @@ export async function fetchAccessToken(
   const axiosConfig = getAxiosConfig({
     env,
     localHostOverride: true,
-
     url: `${LOCALDEVAUTH_API_AUTH_PATH}/refresh`,
-    body: {
+    data: {
       encodedOAuthRefreshToken: personalAccessKey,
     },
     params: query,

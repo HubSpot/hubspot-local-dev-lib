@@ -14,9 +14,9 @@ function isSystemError(err: BaseError) {
 
 function debugErrorAndContext(error: BaseError, context?: ErrorContext): void {
   if (error.name === 'StatusCodeError') {
-    const { statusCode, message, response } = error as StatusCodeError;
+    const { status, message, response } = error as StatusCodeError;
     console.debug('Error: %o', {
-      statusCode,
+      status,
       message,
       url: response.request.href,
       method: response.request.method,

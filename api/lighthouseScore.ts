@@ -1,5 +1,5 @@
 import http from '../http';
-import { Body, QueryParams } from '../types/Http';
+import { Data, QueryParams } from '../types/Http';
 import {
   GetLighthouseScoreResponse,
   RequestLighthouseScoreResponse,
@@ -9,11 +9,11 @@ const LIGHTHOUSE_SCORE_API_BASE = 'quality-engine/v1/lighthouse';
 
 export async function requestLighthouseScore(
   accountId: number,
-  body: Body = {}
+  data: Data = {}
 ): Promise<RequestLighthouseScoreResponse> {
   return http.post(accountId, {
     url: `${LIGHTHOUSE_SCORE_API_BASE}/request`,
-    body,
+    data,
   });
 }
 

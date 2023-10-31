@@ -42,7 +42,7 @@ export async function trackUsage(
     debug(`${i18nKey}.sendingEventAuthenticated`);
     return http.post(accountId, {
       url: `${path}/authenticated`,
-      body: usageEvent,
+      data: usageEvent,
       resolveWithFullResponse: true,
     });
   }
@@ -52,7 +52,7 @@ export async function trackUsage(
   http.post<void>(accountId, {
     env,
     url: path,
-    body: usageEvent,
+    data: usageEvent,
     resolveWithFullResponse: true,
   });
 }

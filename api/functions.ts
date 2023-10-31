@@ -18,7 +18,7 @@ export async function buildPackage(
     headers: {
       Accept: 'text/plain',
     },
-    body: {
+    data: {
       folderPath,
     },
   });
