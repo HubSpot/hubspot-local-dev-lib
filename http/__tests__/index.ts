@@ -1,13 +1,11 @@
 import axios from 'axios';
 import fs from 'fs-extra';
-//import moment from 'moment';
 import {
   getAndLoadConfigIfNeeded as __getAndLoadConfigIfNeeded,
   getAccountConfig as __getAccountConfig,
 } from '../../config';
 import { ENVIRONMENTS } from '../../constants/environments';
 import http from '../';
-//import { version } from '../../package.json';
 import { StatusCodeError } from '../../types/Error';
 
 jest.mock('fs-extra');
@@ -111,141 +109,5 @@ describe('http', () => {
       }
     });
   });
-  // describe('getRequestOptions()', () => {
-  //   it('constructs baseUrl as expected based on environment', () => {
-  //     getAndLoadConfigIfNeeded.mockReturnValue({
-  //       accounts: [],
-  //     });
-
-  //     expect(http.getRequestOptions()).toMatchObject({
-  //       baseUrl: 'https://api.hubapi.com',
-  //     });
-  //     expect(http.getRequestOptions({ env: ENVIRONMENTS.QA })).toMatchObject({
-  //       baseUrl: 'https://api.hubapiqa.com',
-  //     });
-  //   });
-  //   it('supports httpUseLocalhost config option to construct baseUrl for local HTTP services', () => {
-  //     getAndLoadConfigIfNeeded.mockReturnValue({
-  //       httpUseLocalhost: true,
-  //       accounts: [],
-  //     });
-
-  //     expect(http.getRequestOptions()).toMatchObject({
-  //       baseUrl: 'https://local.hubapi.com',
-  //     });
-  //     expect(http.getRequestOptions({ env: ENVIRONMENTS.QA })).toMatchObject({
-  //       baseUrl: 'https://local.hubapiqa.com',
-  //     });
-  //   });
-  // });
-  // describe('get()', () => {
-  //   it('adds authorization header when using OAuth2 with valid access token', async () => {
-  //     const accessToken = 'let-me-in';
-  //     const account = {
-  //       portalId: 123,
-  //       authType: 'oauth2',
-  //       clientId: 'd996372f-2b53-30d3-9c3b-4fdde4bce3a2',
-  //       clientSecret: 'f90a6248-fbc0-3b03-b0db-ec58c95e791',
-  //       scopes: ['content'],
-  //       tokenInfo: {
-  //         expiresAt: moment().add(2, 'hours').toISOString(),
-  //         refreshToken: '84d22710-4cb7-5581-ba05-35f9945e5e8e',
-  //         accessToken,
-  //       },
-  //     };
-  //     getAndLoadConfigIfNeeded.mockReturnValue({
-  //       accounts: [account],
-  //     });
-  //     getAccountConfig.mockReturnValue(account);
-  //     await http.get(123, {
-  //       uri: 'some/endpoint/path',
-  //     });
-
-  //     expect(requestPN.get).toBeCalledWith({
-  //       baseUrl: `https://api.hubapi.com`,
-  //       uri: 'some/endpoint/path',
-  //       headers: {
-  //         'User-Agent': `HubSpot CLI/${version}`,
-  //         Authorization: `Bearer ${accessToken}`,
-  //       },
-  //       json: true,
-  //       simple: true,
-  //       timeout: 15000,
-  //       qs: {
-  //         portalId: 123,
-  //       },
-  //     });
-  //   });
-  //   it('adds authorization header when using a user token', async () => {
-  //     const accessToken = 'let-me-in';
-  //     const account = {
-  //       portalId: 123,
-  //       authType: 'personalaccesskey',
-  //       personalAccessKey: 'some-secret',
-  //       auth: {
-  //         tokenInfo: {
-  //           expiresAt: moment().add(2, 'hours').toISOString(),
-  //           accessToken,
-  //         },
-  //       },
-  //     };
-  //     getAndLoadConfigIfNeeded.mockReturnValue({
-  //       accounts: [account],
-  //     });
-  //     getAccountConfig.mockReturnValue(account);
-  //     await http.get(123, {
-  //       uri: 'some/endpoint/path',
-  //     });
-
-  //     expect(requestPN.get).toBeCalledWith({
-  //       baseUrl: `https://api.hubapi.com`,
-  //       uri: 'some/endpoint/path',
-  //       headers: {
-  //         'User-Agent': `HubSpot CLI/${version}`,
-  //         Authorization: `Bearer ${accessToken}`,
-  //       },
-  //       json: true,
-  //       simple: true,
-  //       timeout: 15000,
-  //       qs: {
-  //         portalId: 123,
-  //       },
-  //     });
-  //   });
-
-  //   it('supports setting a custom timeout', async () => {
-  //     getAndLoadConfigIfNeeded.mockReturnValue({
-  //       httpTimeout: 1000,
-  //       accounts: [
-  //         {
-  //           portalId: 123,
-  //           apiKey: 'abc',
-  //         },
-  //       ],
-  //     });
-  //     getAccountConfig.mockReturnValue({
-  //       portalId: 123,
-  //       apiKey: 'abc',
-  //     });
-
-  //     await http.get(123, {
-  //       uri: 'some/endpoint/path',
-  //     });
-
-  //     expect(requestPN.get).toBeCalledWith({
-  //       baseUrl: `https://api.hubapi.com`,
-  //       uri: 'some/endpoint/path',
-  //       headers: {
-  //         'User-Agent': `HubSpot CLI/${version}`,
-  //       },
-  //       json: true,
-  //       simple: true,
-  //       timeout: 1000,
-  //       qs: {
-  //         portalId: 123,
-  //         hapikey: 'abc',
-  //       },
-  //     });
-  //   });
-  //});
+  // NOTE: there are more tests to add, but I'm stopping here to keep the PR smaller
 });
