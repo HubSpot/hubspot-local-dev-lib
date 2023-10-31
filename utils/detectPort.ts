@@ -9,7 +9,7 @@ type NetError = Error & {
 
 type ListenCallback = (error: NetError | null, port: number) => void;
 
-export function detectPort(port: number | null): Promise<number> {
+export function detectPort(port?: number | null): Promise<number> {
   if (port && (port < MIN_PORT_NUMBER || port > MAX_PORT_NUMBER)) {
     throw new Error('Port must be between 1024 and 65535');
   }

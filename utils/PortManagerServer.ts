@@ -12,6 +12,7 @@ import { throwErrorWithMessage } from '../errors/standardErrors';
 import { debug } from './logger';
 import { i18n } from './lang';
 import { BaseError } from '../types/Error';
+import { RequestPortsData } from '../types/PortManager';
 
 type ServerPortMap = {
   [instanceId: string]: number;
@@ -116,12 +117,16 @@ class PortManagerServer {
     }
   };
 
-  assignPortsToServers = async (req: Request, res: Response): Promise<void> => {
-    const { instanceIds, port } = req.body;
+  assignPortsToServers = async (
+    req: Request<never, never, { portData: Array<RequestPortsData> }>,
+    res: Response
+  ): Promise<void> => {
+    const { portData } = req.body;
 
-    const portPromises: Array<Promise<number>> = [];
+    const portPromises: Array<Promise<Required<RequestPortsData>>> = [];
 
-    instanceIds.forEach((instanceId: number) => {
+    portData.forEach(data => {
+      const { port, instanceId } = data;
       if (this.serverPortMap[instanceId]) {
         res.status(409).send(
           i18n(`errors.${i18nKey}.409`, {
@@ -134,14 +139,21 @@ class PortManagerServer {
         res.status(400).send(i18n(`errors.${i18nKey}.400`));
         return;
       } else {
-        portPromises.push(detectPort(port));
+        const promise = new Promise<Required<RequestPortsData>>(resolve => {
+          detectPort(port).then(resolvedPort => {
+            resolve({
+              instanceId,
+              port: resolvedPort,
+            });
+          });
+        });
+        portPromises.push(promise);
       }
     });
 
     const ports = await Promise.all(portPromises);
 
-    ports.forEach((port: number, index: number) => {
-      const instanceId = instanceIds[index];
+    ports.forEach(({ port, instanceId }) => {
       this.setPort(instanceId, port);
     });
 
