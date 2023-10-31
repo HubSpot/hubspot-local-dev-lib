@@ -22,7 +22,7 @@ function validateJsonPath(src: string): void {
 }
 
 function validateJsonFile(src: string): void {
-  let stats;
+  let stats: fs.Stats;
 
   try {
     stats = fs.statSync(src);
@@ -40,7 +40,7 @@ function validateJsonFile(src: string): void {
 export async function addRowsToHubDbTable(
   accountId: number,
   tableId: string,
-  rows: Array<Row>
+  rows: Array<Row> = []
 ): Promise<{ tableId: string; rowCount: number }> {
   const rowsToUpdate = rows.map(row => {
     const values = row.values;

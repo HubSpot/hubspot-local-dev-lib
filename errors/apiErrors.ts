@@ -1,55 +1,60 @@
-import { StatusCodeError, StatusCodeErrorContext } from '../types/Error';
+import {
+  GenericError,
+  StatusCodeError,
+  StatusCodeErrorContext,
+} from '../types/Error';
 import { HTTP_METHOD_VERBS, HTTP_METHOD_PREPOSITIONS } from '../constants/api';
 import { i18n } from '../utils/lang';
 import { throwError } from './standardErrors';
-import { HubSpotAuthError } from './HubSpotAuthError';
+import { HubSpotAuthError } from '../models/HubSpotAuthError';
 
-function isApiStatusCodeError(err: StatusCodeError) {
+export function isApiStatusCodeError(err: GenericError): boolean {
   return (
     err.name === 'StatusCodeError' ||
-    (err.statusCode && err.statusCode >= 100 && err.statusCode < 600)
+    (!!err.statusCode && err.statusCode >= 100 && err.statusCode < 600)
   );
 }
 
-export function isMissingScopeError(err: StatusCodeError): boolean {
-  return Boolean(
-    err.name === 'StatusCodeError' &&
-      err.statusCode === 403 &&
-      err.error &&
-      err.error.category === 'MISSING_SCOPES'
+export function isMissingScopeError(err: GenericError): boolean {
+  return (
+    isApiStatusCodeError(err) &&
+    err.statusCode === 403 &&
+    !!err.error &&
+    err.error.category === 'MISSING_SCOPES'
   );
 }
 
-export function isGatingError(err: StatusCodeError): boolean {
-  return Boolean(
-    err.name === 'StatusCodeError' &&
-      err.statusCode === 403 &&
-      err.error &&
-      err.error.category === 'GATED'
+export function isGatingError(err: GenericError): boolean {
+  return (
+    isApiStatusCodeError(err) &&
+    err.statusCode === 403 &&
+    !!err.error &&
+    err.error.category === 'GATED'
   );
 }
 
-function isApiUploadValidationError(err: StatusCodeError): boolean {
-  return Boolean(
+export function isApiUploadValidationError(err: GenericError): boolean {
+  return (
+    isApiStatusCodeError(err) &&
     err.statusCode === 400 &&
-      err.response &&
-      err.response.body &&
-      (err.response.body.message || err.response.body.errors)
+    !!err.response &&
+    !!err.response.body &&
+    !!(err.response.body.message || !!err.response.body.errors)
   );
 }
 
 export function isSpecifiedHubSpotAuthError(
-  err: HubSpotAuthError,
+  err: GenericError,
   { statusCode, category, subCategory }: Partial<HubSpotAuthError>
 ): boolean {
   const statusCodeErr = !statusCode || err.statusCode === statusCode;
   const categoryErr = !category || err.category === category;
   const subCategoryErr = !subCategory || err.subCategory === subCategory;
-  return (
+  return Boolean(
     err.name === 'HubSpotAuthError' &&
-    statusCodeErr &&
-    categoryErr &&
-    subCategoryErr
+      statusCodeErr &&
+      categoryErr &&
+      subCategoryErr
   );
 }
 
@@ -89,6 +94,9 @@ function logValidationErrors(error: StatusCodeError) {
   }
 }
 
+/**
+ * @throws
+ */
 export function throwStatusCodeError(
   error: StatusCodeError,
   context: StatusCodeErrorContext = {}
@@ -97,20 +105,23 @@ export function throwStatusCodeError(
   const errorData = JSON.stringify({
     statusCode,
     message,
-    url: response.request.href,
-    method: response.request.method,
-    response: response.body,
-    headers: response.headers,
+    url: response ? response.request.href : null,
+    method: response ? response.request.method : null,
+    response: response ? response.body : null,
+    headers: response ? response.headers : null,
     context,
   });
   throw new Error(errorData, { cause: error });
 }
 
+/**
+ * @throws
+ */
 export function throwApiStatusCodeError(
   error: StatusCodeError,
-  context: StatusCodeErrorContext
+  context: StatusCodeErrorContext = {}
 ): never {
-  const i18nKey = 'errors.api';
+  const i18nKey = 'errors.errorTypes.api';
   const { statusCode } = error;
   const { method } = error.options || {};
   const { projectName } = context;
@@ -213,9 +224,12 @@ export function throwApiStatusCodeError(
   throwError(new Error(errorMessage.join(' '), { cause: error }));
 }
 
+/**
+ * @throws
+ */
 export function throwApiError(
   error: StatusCodeError,
-  context: StatusCodeErrorContext
+  context: StatusCodeErrorContext = {}
 ): never {
   if (isApiStatusCodeError(error)) {
     throwApiStatusCodeError(error, context);
@@ -223,9 +237,12 @@ export function throwApiError(
   throwError(error);
 }
 
+/**
+ * @throws
+ */
 export function throwApiUploadError(
   error: StatusCodeError,
-  context: StatusCodeErrorContext
+  context: StatusCodeErrorContext = {}
 ): never {
   if (isApiUploadValidationError(error)) {
     logValidationErrors(error);
