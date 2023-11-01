@@ -20,5 +20,5 @@ export function getHubSpotApiOrigin(
   if (!domain || typeof domain !== 'string') {
     domain = `${useLocalHost ? 'local' : 'api'}.hubapi${getEnvUrlString(env)}`;
   }
-  return `https://${domain}.com/`;
+  return `https://${domain}.com`;
 }
