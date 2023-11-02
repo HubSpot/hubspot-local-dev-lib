@@ -264,16 +264,14 @@ describe('fileMapper', () => {
       ensureDirSpy.mockImplementationOnce(() => true);
 
       fetchFileStream.mockClear();
-      fetchFileStream.mockImplementationOnce(() => {
-        return Promise.resolve({
-          name: '',
-          createdAt: 1,
-          updatedAt: 1,
-          source: null,
-          path: '',
-          folder: false,
-          children: [],
-        });
+      fetchFileStream.mockResolvedValueOnce({
+        name: '',
+        createdAt: 1,
+        updatedAt: 1,
+        source: null,
+        path: '',
+        folder: false,
+        children: [],
       });
       utimesSpy.mockClear();
     });
@@ -285,16 +283,14 @@ describe('fileMapper', () => {
     });
     it('should execute downloadFolder', async () => {
       pathExistsSpy.mockImplementationOnce(() => false);
-      download.mockImplementationOnce(() => {
-        return Promise.resolve({
-          name: '',
-          createdAt: 1,
-          updatedAt: 1,
-          source: null,
-          path: '',
-          folder: true,
-          children: [],
-        });
+      download.mockResolvedValueOnce({
+        name: '',
+        createdAt: 1,
+        updatedAt: 1,
+        source: null,
+        path: '',
+        folder: true,
+        children: [],
       });
       await downloadFileOrFolder(accountId, '/a/b/c', './');
       expect(ensureDirSpy).toHaveBeenCalled();

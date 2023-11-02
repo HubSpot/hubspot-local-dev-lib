@@ -11,14 +11,14 @@ import { HubSpotAuthError } from '../models/HubSpotAuthError';
 export function isApiStatusCodeError(err: GenericError): boolean {
   return (
     err.name === 'StatusCodeError' ||
-    (!!err.statusCode && err.statusCode >= 100 && err.statusCode < 600)
+    (!!err.status && err.status >= 100 && err.status < 600)
   );
 }
 
 export function isMissingScopeError(err: GenericError): boolean {
   return (
     isApiStatusCodeError(err) &&
-    err.statusCode === 403 &&
+    err.status === 403 &&
     !!err.error &&
     err.error.category === 'MISSING_SCOPES'
   );
@@ -27,7 +27,7 @@ export function isMissingScopeError(err: GenericError): boolean {
 export function isGatingError(err: GenericError): boolean {
   return (
     isApiStatusCodeError(err) &&
-    err.statusCode === 403 &&
+    err.status === 403 &&
     !!err.error &&
     err.error.category === 'GATED'
   );
@@ -36,7 +36,7 @@ export function isGatingError(err: GenericError): boolean {
 export function isApiUploadValidationError(err: GenericError): boolean {
   return (
     isApiStatusCodeError(err) &&
-    err.statusCode === 400 &&
+    err.status === 400 &&
     !!err.response &&
     !!err.response.body &&
     !!(err.response.body.message || !!err.response.body.errors)
@@ -45,9 +45,9 @@ export function isApiUploadValidationError(err: GenericError): boolean {
 
 export function isSpecifiedHubSpotAuthError(
   err: GenericError,
-  { statusCode, category, subCategory }: Partial<HubSpotAuthError>
+  { status, category, subCategory }: Partial<HubSpotAuthError>
 ): boolean {
-  const statusCodeErr = !statusCode || err.statusCode === statusCode;
+  const statusCodeErr = !status || err.status === status;
   const categoryErr = !category || err.category === category;
   const subCategoryErr = !subCategory || err.subCategory === subCategory;
   return Boolean(
@@ -101,9 +101,9 @@ export function throwStatusCodeError(
   error: StatusCodeError,
   context: StatusCodeErrorContext = {}
 ): never {
-  const { statusCode, message, response } = error;
+  const { status, message, response } = error;
   const errorData = JSON.stringify({
-    statusCode,
+    status,
     message,
     url: response ? response.request.href : null,
     method: response ? response.request.method : null,
@@ -122,7 +122,7 @@ export function throwApiStatusCodeError(
   context: StatusCodeErrorContext = {}
 ): never {
   const i18nKey = 'errors.errorTypes.api';
-  const { statusCode } = error;
+  const { status } = error;
   const { method } = error.options || {};
   const { projectName } = context;
 
@@ -152,7 +152,7 @@ export function throwApiStatusCodeError(
   }
   const isProjectMissingScopeError = isMissingScopeError(error) && projectName;
   const isProjectGatingError = isGatingError(error) && projectName;
-  switch (statusCode) {
+  switch (status) {
     case 400:
       errorMessage.push(i18n(`${i18nKey}.codes.400`, { messageDetail }));
       break;
@@ -196,11 +196,11 @@ export function throwApiStatusCodeError(
       errorMessage.push(i18n(`${i18nKey}.codes.503`, { messageDetail }));
       break;
     default:
-      if (statusCode && statusCode >= 500 && statusCode < 600) {
+      if (status && status >= 500 && status < 600) {
         errorMessage.push(
           i18n(`${i18nKey}.codes.500Generic`, { messageDetail })
         );
-      } else if (statusCode && statusCode >= 400 && statusCode < 500) {
+      } else if (status && status >= 400 && status < 500) {
         errorMessage.push(
           i18n(`${i18nKey}.codes.400Generic`, { messageDetail })
         );

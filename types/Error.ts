@@ -13,14 +13,14 @@ export interface BaseError extends Error {
   code?: string | null;
   syscall?: string | null;
   reason?: string;
-  statusCode?: number;
+  status?: number;
   error?: BaseError;
   errors?: Array<BaseError>;
 }
 
 export interface StatusCodeError extends BaseError {
   name: string;
-  statusCode?: number;
+  status?: number;
   message: string;
   category?: string;
   subCategory?: string;
@@ -38,7 +38,7 @@ export interface StatusCodeError extends BaseError {
     headers: {
       [key: string]: string;
     };
-    statusCode: number;
+    status: number;
   };
   options?: {
     method: HttpMethod;

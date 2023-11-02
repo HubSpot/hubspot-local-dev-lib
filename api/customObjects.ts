@@ -11,7 +11,7 @@ export async function batchCreateObjects(
 ): Promise<void> {
   http.post<void>(accountId, {
     url: `${CUSTOM_OBJECTS_API_PATH}/${objectTypeId}/batch/create`,
-    body: objects,
+    data: objects,
   });
 }
 
@@ -21,7 +21,7 @@ export async function createObjectSchema(
 ): Promise<Schema> {
   return http.post(accountId, {
     url: SCHEMA_API_PATH,
-    body: schema,
+    data: schema,
   });
 }
 
@@ -32,7 +32,7 @@ export async function updateObjectSchema(
 ): Promise<Schema> {
   return http.patch(accountId, {
     url: `${SCHEMA_API_PATH}/${schemaObjectType}`,
-    body: schema,
+    data: schema,
   });
 }
 

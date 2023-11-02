@@ -1,7 +1,7 @@
 import { StatusCodeError } from '../types/Error';
 
 export class HubSpotAuthError extends Error {
-  statusCode?: number;
+  status?: number;
   category?: string;
   subCategory?: string;
   constructor(
@@ -10,7 +10,7 @@ export class HubSpotAuthError extends Error {
   ) {
     super(message);
     this.name = 'HubSpotAuthError';
-    this.statusCode = cause.statusCode;
+    this.status = cause.status;
     this.category = cause?.response?.body?.category || undefined;
     this.subCategory =
       (cause.response &&
