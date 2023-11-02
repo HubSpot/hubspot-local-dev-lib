@@ -479,8 +479,9 @@ export function updateAccountConfig(
   }
 
   const env = getValidEnv(
-    environment || (accountConfig && accountConfig.env),
-    undefined
+    environment ||
+      (configOptions && configOptions.env) ||
+      (accountConfig && accountConfig.env)
   );
   const mode: Mode | undefined =
     defaultMode && (defaultMode.toLowerCase() as Mode);
