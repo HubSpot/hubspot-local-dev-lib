@@ -37,7 +37,7 @@ describe('http', () => {
     getAccountConfig.mockReset();
   });
 
-  describe('getOctetStream', () => {
+  describe('getOctetStream()', () => {
     beforeEach(() => {
       getAndLoadConfigIfNeeded.mockReturnValue({
         httpTimeout: 1000,
