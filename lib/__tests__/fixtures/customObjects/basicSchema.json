@@ -1,0 +1,26 @@
+{
+  "id": "basic-schema-id",
+  "labels": { "singular": "Schema", "plural": "Schemas" },
+  "associatedObjects": null,
+  "requiredProperties": [],
+  "searchableProperties": [],
+  "primaryDisplayProperty": "name",
+  "objectTypeId": "2-123",
+  "properties": [
+    {
+      "name": "name",
+      "label": "Name",
+      "type": "string",
+      "fieldType": "text",
+      "description": "Name Field"
+    }
+  ],
+  "associations": [
+    {
+      "id": "some-associated-object",
+      "fromObjectTypeId": "string",
+      "toObjectTypeId": "string"
+    }
+  ],
+  "name": "schema"
+}

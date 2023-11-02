@@ -3,9 +3,11 @@ import path from 'path';
 import prettier from 'prettier';
 import { getCwd } from '../lib/path';
 import { fetchObjectSchemas, fetchObjectSchema } from '../api/customObjects';
-import { Schema } from '../types/Schemas';
+import { FetchSchemasResponse, Schema } from '../types/Schemas';
+import { StatusCodeError } from '../types/Error';
+import { throwApiError } from '../errors/apiErrors';
 
-export function getResolvedPath(dest: string, name: string): string {
+export function getResolvedPath(dest?: string, name?: string): string {
   if (name) return path.resolve(getCwd(), dest || '', `${name}.json`);
 
   return path.resolve(getCwd(), dest || '');
@@ -13,7 +15,7 @@ export function getResolvedPath(dest: string, name: string): string {
 
 export async function writeSchemaToDisk(
   schema: Schema,
-  dest: string
+  dest?: string
 ): Promise<void> {
   const formattedSchema = await prettier.format(JSON.stringify(schema), {
     parser: 'json',
@@ -23,20 +25,39 @@ export async function writeSchemaToDisk(
 
 export async function downloadSchemas(
   accountId: number,
-  dest: string
-): Promise<void> {
-  const response = await fetchObjectSchemas(accountId);
+  dest?: string
+): Promise<Array<Schema>> {
+  let response: FetchSchemasResponse;
+
+  try {
+    response = await fetchObjectSchemas(accountId);
+  } catch (err) {
+    throwApiError(err as StatusCodeError);
+  }
 
   if (response.results.length) {
-    response.results.forEach((r: Schema) => writeSchemaToDisk(r, dest));
+    for (const schema of response.results) {
+      await writeSchemaToDisk(schema, dest);
+    }
   }
+
+  return response.results;
 }
 
 export async function downloadSchema(
   accountId: number,
   schemaObjectType: string,
-  dest: string
-): Promise<void> {
-  const response = await fetchObjectSchema(accountId, schemaObjectType);
-  writeSchemaToDisk(response, dest);
+  dest?: string
+): Promise<Schema> {
+  let response: Schema;
+
+  try {
+    response = await fetchObjectSchema(accountId, schemaObjectType);
+  } catch (err) {
+    throwApiError(err as StatusCodeError);
+  }
+
+  await writeSchemaToDisk(response, dest);
+
+  return response;
 }
