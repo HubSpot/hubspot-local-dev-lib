@@ -241,7 +241,8 @@ describe('lib/config', () => {
       ).toEqual(env);
     });
 
-    it('overwrites the existing env in the config if specified', () => {
+    it('overwrites the existing env in the config if specified as environment', () => {
+      // NOTE: the config now uses "env", but this is to support legacy behavior
       const previousEnv = ENVIRONMENTS.PROD;
       const newEnv = ENVIRONMENTS.QA;
       setConfig({
@@ -251,6 +252,27 @@ describe('lib/config', () => {
       const modifiedPersonalAccessKeyConfig = {
         ...PERSONAL_ACCESS_KEY_CONFIG,
         environment: newEnv,
+      };
+      updateAccountConfig(modifiedPersonalAccessKeyConfig);
+
+      expect(
+        getAccountByAuthType(
+          getConfig(),
+          modifiedPersonalAccessKeyConfig.authType
+        ).env
+      ).toEqual(newEnv);
+    });
+
+    it('overwrites the existing env in the config if specified as env', () => {
+      const previousEnv = ENVIRONMENTS.PROD;
+      const newEnv = ENVIRONMENTS.QA;
+      setConfig({
+        defaultPortal: PERSONAL_ACCESS_KEY_CONFIG.name,
+        portals: [{ ...PERSONAL_ACCESS_KEY_CONFIG, env: previousEnv }],
+      });
+      const modifiedPersonalAccessKeyConfig = {
+        ...PERSONAL_ACCESS_KEY_CONFIG,
+        env: newEnv,
       };
       updateAccountConfig(modifiedPersonalAccessKeyConfig);
 
