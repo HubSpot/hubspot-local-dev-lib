@@ -1,8 +1,8 @@
 import { configFilenameIsIgnoredByGitignore } from '../../utils/git';
 import fs from 'fs-extra';
 
-describe('lib/git', () => {
-  describe('configFilenameIsIgnoredByGitignore method', () => {
+describe('utils/cms/git', () => {
+  describe('configFilenameIsIgnoredByGitignore()', () => {
     it('returns false if the config file is not ignored', () => {
       const gitignoreContent = '';
       const configPath = `/Users/fakeuser/someproject/hubspot.config.yml`;

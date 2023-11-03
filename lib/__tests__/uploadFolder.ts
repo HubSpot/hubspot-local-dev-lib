@@ -80,7 +80,7 @@ const filesProto = [
   'folder/sample.module/module.html',
   'folder/templates/page.html',
 ];
-describe('cms/uploadFolder', () => {
+describe('lib/cms/uploadFolder', () => {
   beforeAll(() => {
     createIgnoreFilter.mockImplementation(() => () => true);
   });

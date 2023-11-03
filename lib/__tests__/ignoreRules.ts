@@ -5,8 +5,8 @@ const REPO_FOLDER = `${CWD}/repo-name-here`;
 const NODE_MODULES_FOLDER = `${REPO_FOLDER}/node_modules`;
 const NODE_MODULES_FILE = `${NODE_MODULES_FOLDER}/a-really-fake-package-name/README.md`;
 
-describe('ignoreRules', () => {
-  describe('shouldIgnoreFile', () => {
+describe('lib/ignoreRules', () => {
+  describe('shouldIgnoreFile()', () => {
     it('ignores node_modules folder', () => {
       expect(shouldIgnoreFile(NODE_MODULES_FOLDER)).toBe(true);
     });

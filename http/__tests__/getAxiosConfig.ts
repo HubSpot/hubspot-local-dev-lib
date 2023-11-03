@@ -11,7 +11,7 @@ const getAndLoadConfigIfNeeded =
 
 const url = 'https://app.hubspot.com';
 
-describe('getAxiosConfig', () => {
+describe('http/getAxiosConfig', () => {
   it('constructs baseURL as expected based on environment', () => {
     getAndLoadConfigIfNeeded.mockReturnValue({
       accounts: [],

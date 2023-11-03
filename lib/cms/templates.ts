@@ -1,6 +1,6 @@
 import fs from 'fs-extra';
 import path from 'path';
-import { downloadGithubRepoContents } from '../../lib/github';
+import { downloadGithubRepoContents } from '../github';
 import { throwErrorWithMessage } from '../../errors/standardErrors';
 import { debug, makeTypedLogger } from '../../utils/logger';
 import { LogCallbacksArg } from '../../types/LogCallbacks';

@@ -32,8 +32,8 @@ const publishTable = __publishTable as jest.MockedFunction<
   typeof __publishTable
 >;
 
-describe('hubdb', () => {
-  describe('downloadHubDbTable', () => {
+describe('lib/hubdb', () => {
+  describe('downloadHubDbTable()', () => {
     const accountId = 123;
     const tableId = '456';
     const destPath = 'tmp.json';
@@ -84,7 +84,7 @@ describe('hubdb', () => {
     });
   });
 
-  describe('createHubDbTable', () => {
+  describe('createHubDbTable()', () => {
     it('creates a table', async () => {
       const accountId = 123;
       const srcPath = 'tmp.json';
@@ -108,7 +108,7 @@ describe('hubdb', () => {
     });
   });
 
-  describe('clearHubDbTableRows', () => {
+  describe('clearHubDbTableRows()', () => {
     it('clears all of the hubdb table rows', async () => {
       fetchRows.mockResolvedValue(hubdbFetchRowResponse);
       const result = await clearHubDbTableRows(123, '456');

@@ -35,8 +35,8 @@ const fetchSandboxHubData = __fetchSandboxHubData as jest.MockedFunction<
   typeof __fetchSandboxHubData
 >;
 
-describe('personalAccessKey', () => {
-  describe('accessTokenForPersonalAccessKey', () => {
+describe('lib/personalAccessKey', () => {
+  describe('accessTokenForPersonalAccessKey()', () => {
     it('refreshes access token when access token is missing', async () => {
       const accountId = 123;
       const account = {
@@ -177,7 +177,7 @@ describe('personalAccessKey', () => {
     });
   });
 
-  describe('updateConfigWithPersonalAccessKey', () => {
+  describe('updateConfigWithPersonalAccessKey()', () => {
     beforeEach(() => {
       fetchAccessToken.mockClear();
       updateAccountConfig.mockClear();

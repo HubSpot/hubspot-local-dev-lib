@@ -21,8 +21,8 @@ export const newError = (overrides = {}): BaseError => {
   };
 };
 
-describe('standardErrors', () => {
-  describe('isSystemError', () => {
+describe('errors/standardErrors', () => {
+  describe('isSystemError()', () => {
     it('returns true for system errors', () => {
       const error = newError();
       expect(isSystemError(error)).toBe(true);
@@ -38,7 +38,7 @@ describe('standardErrors', () => {
     });
   });
 
-  describe('isFatalError', () => {
+  describe('isFatalError()', () => {
     it('returns true for fatal errors', () => {
       const cause = newError() as StatusCodeError;
       const error = new HubSpotAuthError('A fatal auth error', { cause });
@@ -51,28 +51,28 @@ describe('standardErrors', () => {
     });
   });
 
-  describe('throwErrorWithMessage', () => {
+  describe('throwErrorWithMessage()', () => {
     it('throws error with message', () => {
       const error = newError();
       expect(() => throwErrorWithMessage('', {}, error)).toThrow();
     });
   });
 
-  describe('throwTypeErrorWithMessage', () => {
+  describe('throwTypeErrorWithMessage()', () => {
     it('throws type error with message', () => {
       const error = newError();
       expect(() => throwTypeErrorWithMessage('', {}, error)).toThrow();
     });
   });
 
-  describe('throwAuthErrorWithMessage', () => {
+  describe('throwAuthErrorWithMessage()', () => {
     it('throws auth error with message', () => {
       const error = newError() as StatusCodeError;
       expect(() => throwAuthErrorWithMessage('', {}, error)).toThrow();
     });
   });
 
-  describe('throwError', () => {
+  describe('throwError()', () => {
     it('throws error', () => {
       const error = newError();
       expect(() => throwError(error)).toThrow();
