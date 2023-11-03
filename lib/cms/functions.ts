@@ -10,7 +10,7 @@ import { throwFileSystemError } from '../../errors/fileSystemErrors';
 import { BaseError } from '../../types/Error';
 import { LogCallbacksArg } from '../../types/LogCallbacks';
 
-const i18nKey = 'cms.functions';
+const i18nKey = 'lib.cms.functions';
 
 type Config = {
   runtime: string;
@@ -94,14 +94,14 @@ function updateExistingConfig(
 
   if (!isObject(config)) {
     throwErrorWithMessage(
-      `${i18nKey}.updateExistingConfig.configIsNotObjectError`,
+      `${i18nKey}.updateExistingConfig.errors.configIsNotObjectError`,
       { configFilePath }
     );
   }
   if (config.endpoints) {
     if (config.endpoints[endpointPath]) {
       throwErrorWithMessage(
-        `${i18nKey}.updateExistingConfig.endpointAreadyExistsError`,
+        `${i18nKey}.updateExistingConfig.errors.endpointAreadyExistsError`,
         {
           configFilePath,
           endpointPath,
@@ -171,9 +171,12 @@ export async function createFunction(
   });
 
   if (ancestorFunctionsConfig) {
-    throwErrorWithMessage(`${i18nKey}.createFunction.nestedConfigError`, {
-      ancestorConfigPath: path.dirname(ancestorFunctionsConfig),
-    });
+    throwErrorWithMessage(
+      `${i18nKey}.createFunction.errors.nestedConfigError`,
+      {
+        ancestorConfigPath: path.dirname(ancestorFunctionsConfig),
+      }
+    );
   }
 
   const folderName = functionsFolder.endsWith('.functions')
@@ -196,9 +199,12 @@ export async function createFunction(
   const configFilePath = path.join(destPath, 'serverless.json');
 
   if (!allowExistingFile && fs.existsSync(functionFilePath)) {
-    throwErrorWithMessage(`${i18nKey}.createFunction.jsFileConflictError`, {
-      functionFilePath,
-    });
+    throwErrorWithMessage(
+      `${i18nKey}.createFunction.errors.jsFileConflictError`,
+      {
+        functionFilePath,
+      }
+    );
   }
 
   await downloadGithubRepoContents(

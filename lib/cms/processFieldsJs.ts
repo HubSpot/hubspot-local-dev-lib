@@ -9,7 +9,7 @@ import { throwError, throwErrorWithMessage } from '../../errors/standardErrors';
 import { FieldsJs } from './handleFieldsJS';
 import { i18n } from '../../utils/lang';
 
-const i18nKey = 'processFieldsJs';
+const i18nKey = 'lib.cms.processFieldsJs';
 
 const { dirName, fieldOptions, filePath, writeDir } = process.env;
 const baseName = path.basename(filePath!);
@@ -108,7 +108,7 @@ async function dynamicImport(filePath: string): Promise<any> {
     return exported;
   } else {
     if (getExt(filePath) == 'mjs') {
-      throwErrorWithMessage(`${i18nKey}.invalidMjsFile`);
+      throwErrorWithMessage(`${i18nKey}.errors.invalidMjsFile`);
     }
     return require(filePath);
   }

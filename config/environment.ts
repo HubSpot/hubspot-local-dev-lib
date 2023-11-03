@@ -10,6 +10,8 @@ import {
 import { generateConfig } from './configUtils';
 import { getValidEnv } from '../lib/environment';
 
+const i18nKey = 'config.environment';
+
 type EnvironmentConfigVariables = {
   apiKey?: string;
   clientId?: string;
@@ -47,12 +49,12 @@ export function loadConfigFromEnvironment(): CLIConfig_NEW | null {
     env,
   } = getConfigVariablesFromEnv();
   if (!accountId) {
-    debug('environment.loadConfig.missingAccountId');
+    debug(`${i18nKey}.loadConfig.missingAccountId`);
     return null;
   }
 
   if (!env) {
-    debug('environment.loadConfig.missingEnv');
+    debug(`${i18nKey}.loadConfig.missingEnv`);
     return null;
   }
 
@@ -79,6 +81,6 @@ export function loadConfigFromEnvironment(): CLIConfig_NEW | null {
     });
   }
 
-  debug('environment.loadConfig.unknownAuthType');
+  debug(`${i18nKey}.loadConfig.unknownAuthType`);
   return null;
 }

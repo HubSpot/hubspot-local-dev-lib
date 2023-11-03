@@ -8,6 +8,8 @@ import { i18n } from '../utils/lang';
 import { throwError } from './standardErrors';
 import { HubSpotAuthError } from '../models/HubSpotAuthError';
 
+const i18nKey = 'errors.apiErrors';
+
 export function isApiStatusCodeError(err: GenericError): boolean {
   return (
     err.name === 'StatusCodeError' ||
@@ -121,7 +123,6 @@ export function throwApiStatusCodeError(
   error: StatusCodeError,
   context: StatusCodeErrorContext = {}
 ): never {
-  const i18nKey = 'errors.errorTypes.api';
   const { status } = error;
   const { method } = error.options || {};
   const { projectName } = context;

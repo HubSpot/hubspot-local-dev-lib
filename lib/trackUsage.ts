@@ -3,13 +3,14 @@ import http from '../http';
 import { getAccountConfig, getEnv } from '../config';
 import { FILE_MAPPER_API_PATH } from '../api/fileMapper';
 
+const i18nKey = 'lib.trackUsage';
+
 export async function trackUsage(
   eventName: string,
   eventClass: string,
   meta = {},
   accountId: number
 ): Promise<void> {
-  const i18nKey = 'api.filemapper.trackUsage';
   const usageEvent = {
     accountId,
     eventName,

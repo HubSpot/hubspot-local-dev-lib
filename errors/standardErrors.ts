@@ -18,7 +18,7 @@ function genericThrowErrorWithMessage(
   interpolation?: { [key: string]: string | number },
   cause?: BaseError
 ): never {
-  const message = i18n(`errors.${identifier}`, interpolation);
+  const message = i18n(identifier, interpolation);
   if (cause) {
     throw new ErrorType(message, { cause });
   }
@@ -73,7 +73,7 @@ export function throwError(error: BaseError): never {
   } else {
     // Error or Error subclass
     const name = error.name || 'Error';
-    const message = [i18n('errors.errorTypes.generic', { name })];
+    const message = [i18n('errors.generic', { name })];
     [error.message, error.reason].forEach(msg => {
       if (msg) {
         message.push(msg);

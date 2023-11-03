@@ -20,6 +20,8 @@ import { FileMapperInputOptions, Mode } from '../../types/Files';
 import { UploadFolderResults } from '../../types/Files';
 import { StatusCodeError } from '../../types/Error';
 
+const i18nKey = 'lib.cms.watch';
+
 const watchCallbackKeys = [
   'notifyOfThemePreview',
   'uploadSuccess',
@@ -40,7 +42,7 @@ function _notifyOfThemePreview(
   accountId: number,
   logCallbacks?: WatchLogCallbacks
 ): void {
-  const logger = makeLogger(logCallbacks, 'watch');
+  const logger = makeLogger(logCallbacks, i18nKey);
   if (queue.size > 0) return;
   const previewUrl = getThemePreviewUrl(filePath, accountId);
   if (!previewUrl) return;
@@ -66,7 +68,7 @@ async function uploadFile(
   mode: Mode | null = null,
   logCallbacks?: WatchLogCallbacks
 ): Promise<void> {
-  const logger = makeLogger(logCallbacks, 'watch');
+  const logger = makeLogger(logCallbacks, i18nKey);
   const src = options.src;
 
   const absoluteSrcPath = path.resolve(getCwd(), file);
@@ -82,11 +84,11 @@ async function uploadFile(
   );
 
   if (!isAllowedExtension(file) && !convertFields) {
-    debug('watch.skipUnsupportedExtension', { file });
+    debug(`${i18nKey}.skipUnsupportedExtension`, { file });
     return;
   }
   if (shouldIgnoreFile(file)) {
-    debug('watch.skipIgnoreRule', { file });
+    debug(`${i18nKey}.skipIgnoreRule`, { file });
     return;
   }
 
@@ -105,7 +107,7 @@ async function uploadFile(
   const fileToUpload =
     convertFields && fieldsJs?.outputPath ? fieldsJs.outputPath : file;
 
-  debug('watch.uploadAttempt', { file, dest });
+  debug(`${i18nKey}.uploadAttempt`, { file, dest });
   const apiOptions = getFileMapperQueryValues(mode, options);
   queue.add(() => {
     return upload(accountId, fileToUpload, dest, apiOptions)
@@ -114,11 +116,14 @@ async function uploadFile(
         notifyOfThemePreview(file, accountId, logCallbacks);
       })
       .catch(() => {
-        debug('watch.uploadFailed', { file, dest });
-        debug('watch.uploadRetry', { file, dest });
+        debug(`${i18nKey}.uploadFailed`, { file, dest });
+        debug(`${i18nKey}.uploadRetry`, { file, dest });
         return upload(accountId, file, dest, apiOptions).catch(
           (error: StatusCodeError) => {
-            debug('watch.uploadFailed', { file, dest });
+            debug(`${i18nKey}.uploadFailed`, {
+              file,
+              dest,
+            });
             throwApiUploadError(error, {
               accountId,
               request: dest,
@@ -136,13 +141,13 @@ async function deleteRemoteFile(
   remoteFilePath: string,
   logCallbacks?: WatchLogCallbacks
 ): Promise<void> {
-  const logger = makeLogger(logCallbacks, 'watch');
+  const logger = makeLogger(logCallbacks, i18nKey);
   if (shouldIgnoreFile(filePath)) {
-    debug('watch.skipIgnoreRule', { file: filePath });
+    debug(`${i18nKey}.skipIgnoreRule`, { file: filePath });
     return;
   }
 
-  debug('watch.deleteAttempt', { remoteFilePath });
+  debug(`${i18nKey}.deleteAttempt`, { remoteFilePath });
   return queue.add(() => {
     return deleteFile(accountId, remoteFilePath)
       .then(() => {
@@ -150,7 +155,9 @@ async function deleteRemoteFile(
         notifyOfThemePreview(filePath, accountId, logCallbacks);
       })
       .catch((error: StatusCodeError) => {
-        debug('watch.deleteFailed', { remoteFilePath });
+        debug(`${i18nKey}.deleteFailed`, {
+          remoteFilePath,
+        });
         throwApiError(error, {
           accountId,
           request: remoteFilePath,
@@ -191,7 +198,7 @@ export function watch(
   onQueueAddError?: ErrorHandler,
   logCallbacks?: WatchLogCallbacks
 ) {
-  const logger = makeLogger(logCallbacks, 'watch');
+  const logger = makeLogger(logCallbacks, i18nKey);
   const regex = new RegExp(`^${escapeRegExp(src)}`);
   if (notify) {
     ignoreFile(notify);
@@ -259,11 +266,11 @@ export function watch(
 
         const remotePath = getDesignManagerPath(filePath);
         if (shouldIgnoreFile(filePath)) {
-          debug('watch.skipIgnoreRule', { file: filePath });
+          debug(`${i18nKey}.skipIgnoreRule`, { file: filePath });
           return;
         }
 
-        debug('watch.deleteAttemptWithType', {
+        debug(`${i18nKey}.deleteAttemptWithType`, {
           type,
           remoteFilePath: remotePath,
         });

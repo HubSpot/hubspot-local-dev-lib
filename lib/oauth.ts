@@ -9,12 +9,14 @@ import { makeTypedLogger } from '../utils/logger';
 import { getAccountIdentifier } from '../utils/getAccountIdentifier';
 import { updateAccountConfig, writeConfig } from '../config';
 
+const i18nKey = 'lib.oauth';
+
 const oauthManagers = new Map<number, OAuth2Manager>();
 
 function writeOauthTokenInfo(accountConfig: FlatAccountFields): void {
   const accountId = getAccountIdentifier(accountConfig);
 
-  debug('oauth.writeTokenInfo', { portalId: accountId || '' });
+  debug(`${i18nKey}.writeTokenInfo`, { portalId: accountId || '' });
 
   updateAccountConfig(accountConfig);
   writeConfig();
@@ -43,7 +45,7 @@ export function addOauthToAccountConfig(
 ) {
   const logger = makeTypedLogger<typeof addOauthToAccountConfigCallbackKeys>(
     logCallbacks,
-    'oauth.addOauthToAccountConfig'
+    `${i18nKey}.addOauthToAccountConfig`
   );
   logger('init');
   try {

@@ -13,6 +13,8 @@ import {
 } from '../../utils/cms/modules';
 import { PathInput } from '../../types/Modules';
 
+const i18nKey = 'lib.cms.modules';
+
 // Ids for testing
 export const ValidationIds = {
   SRC_REQUIRED: 'SRC_REQUIRED',
@@ -119,7 +121,7 @@ export async function createModule(
 ) {
   const logger = makeTypedLogger<typeof createModuleCallbackKeys>(
     logCallbacks,
-    'modules.createModule'
+    `${i18nKey}.createModule`
   );
   const writeModuleMeta = (
     { contentTypes, moduleLabel, global }: ModuleDefinition,
@@ -164,7 +166,7 @@ export async function createModule(
     !name || name.endsWith('.module') ? name : `${name}.module`;
   const destPath = path.join(dest, folderName);
   if (!options.allowExistingDir && fs.existsSync(destPath)) {
-    throwErrorWithMessage('modules.writeModuleMeta', {
+    throwErrorWithMessage(`${i18nKey}.createModule.errors.writeModuleMeta`, {
       path: destPath,
     });
   } else {
