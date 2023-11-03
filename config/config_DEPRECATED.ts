@@ -15,6 +15,7 @@ import {
 } from '../constants/auth';
 import { MODE } from '../constants/files';
 import { getValidEnv } from '../lib/environment';
+import { logger } from '../lib/logging/logger';
 import { isConfigPathInGitRepo } from '../utils/git';
 import {
   logErrorInstance,
@@ -93,29 +94,29 @@ export function getConfigPath(path?: string | null): string | null {
 export function validateConfig(): boolean {
   const config = getConfig();
   if (!config) {
-    console.error('No config was found');
+    logger.error('No config was found');
     return false;
   }
   const accounts = getConfigAccounts();
   if (!Array.isArray(accounts)) {
-    console.error('config.portals[] is not defined');
+    logger.error('config.portals[] is not defined');
     return false;
   }
   const accountIdsHash: { [id: number]: CLIAccount_DEPRECATED } = {};
   const accountNamesHash: { [name: string]: CLIAccount_DEPRECATED } = {};
   return accounts.every(cfg => {
     if (!cfg) {
-      console.error('config.portals[] has an empty entry');
+      logger.error('config.portals[] has an empty entry');
       return false;
     }
 
     const accountId = getConfigAccountId(cfg);
     if (!accountId) {
-      console.error('config.portals[] has an entry missing portalId');
+      logger.error('config.portals[] has an entry missing portalId');
       return false;
     }
     if (accountIdsHash[accountId]) {
-      console.error(
+      logger.error(
         `config.portals[] has multiple entries with portalId=${accountId}`
       );
       return false;
@@ -123,13 +124,13 @@ export function validateConfig(): boolean {
 
     if (cfg.name) {
       if (accountNamesHash[cfg.name]) {
-        console.error(
+        logger.error(
           `config.name has multiple entries with portalId=${accountId}`
         );
         return false;
       }
       if (/\s+/.test(cfg.name)) {
-        console.error(`config.name '${cfg.name}' cannot contain spaces`);
+        logger.error(`config.name '${cfg.name}' cannot contain spaces`);
         return false;
       }
       accountNamesHash[cfg.name] = cfg;
@@ -203,7 +204,7 @@ export function writeConfig(options: WriteConfigOptions = {}): void {
   }
   const configPath = options.path || _configPath;
   try {
-    console.debug(`Writing current config to ${configPath}`);
+    logger.debug(`Writing current config to ${configPath}`);
     fs.ensureFileSync(configPath || '');
     fs.writeFileSync(configPath || '', source);
     setConfig(parseConfig(source).parsed);
@@ -226,7 +227,7 @@ function readConfigFile(): { source?: string; error?: BaseError } {
     source = fs.readFileSync(_configPath);
   } catch (err) {
     error = err as BaseError;
-    console.error('Config file could not be read "%s"', _configPath);
+    logger.error('Config file could not be read "%s"', _configPath);
     logFileSystemErrorInstance(error, { filepath: _configPath, read: true });
   }
   return { source: source && source.toString(), error };
@@ -245,7 +246,7 @@ function parseConfig(configSource?: string): {
     parsed = yaml.load(configSource) as CLIConfig_DEPRECATED;
   } catch (err) {
     error = err as BaseError;
-    console.error('Config file could not be parsed "%s"', _configPath);
+    logger.error('Config file could not be parsed "%s"', _configPath);
     logErrorInstance(err as BaseError);
   }
   return { parsed, error };
@@ -255,18 +256,18 @@ function loadConfigFromFile(path?: string, options: CLIOptions = {}) {
   setConfigPath(getConfigPath(path));
   if (!_configPath) {
     if (!options.silenceErrors) {
-      console.error(
+      logger.error(
         `A ${DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME} file could not be found. To create a new config file, use the "hs init" command.`
       );
     } else {
-      console.debug(
+      logger.debug(
         `A ${DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME} file could not be found`
       );
     }
     return;
   }
 
-  console.debug(`Reading config from ${_configPath}`);
+  logger.debug(`Reading config from ${_configPath}`);
   const { source, error: sourceError } = readConfigFile();
   if (sourceError) return;
   const { parsed, error: parseError } = parseConfig(source);
@@ -274,8 +275,8 @@ function loadConfigFromFile(path?: string, options: CLIOptions = {}) {
   setConfig(parsed);
 
   if (!getConfig()) {
-    console.debug('The config file was empty config');
-    console.debug('Initializing an empty config');
+    logger.debug('The config file was empty config');
+    logger.debug('Initializing an empty config');
     setConfig({ portals: [] });
   }
 
@@ -289,10 +290,10 @@ export function loadConfig(
   }
 ): CLIConfig_DEPRECATED | null {
   if (options.useEnv && loadEnvironmentVariableConfig(options)) {
-    console.debug('Loaded environment variable config');
+    logger.debug('Loaded environment variable config');
     environmentVariableConfigLoaded = true;
   } else {
-    path && console.debug(`Loading config from ${path}`);
+    path && logger.debug(`Loading config from ${path}`);
     loadConfigFromFile(path, options);
     environmentVariableConfigLoaded = false;
   }
@@ -424,7 +425,7 @@ export function removeSandboxAccountFromConfig(
   const accounts = getConfigAccounts(config as CLIConfig_DEPRECATED);
 
   if (accountConfig && accounts) {
-    console.debug(`Deleting config for ${accountId}`);
+    logger.debug(`Deleting config for ${accountId}`);
     const index = accounts.indexOf(accountConfig);
     accounts.splice(index, 1);
   }
@@ -501,11 +502,11 @@ export function updateAccountConfig(
 
   let accounts = getConfigAccounts(config);
   if (accountConfig && accounts) {
-    console.debug(`Updating config for ${portalId}`);
+    logger.debug(`Updating config for ${portalId}`);
     const index = accounts.indexOf(accountConfig);
     accounts[index] = nextAccountConfig;
   } else {
-    console.debug(`Adding config entry for ${portalId}`);
+    logger.debug(`Adding config entry for ${portalId}`);
     if (accounts) {
       accounts.push(nextAccountConfig);
     } else {
@@ -777,7 +778,7 @@ export function loadConfigFromEnvironment({
     'Unable to load config from environment variables.';
 
   if (!portalId) {
-    useEnv && console.error(unableToLoadEnvConfigError);
+    useEnv && logger.error(unableToLoadEnvConfigError);
     return;
   }
 
@@ -795,7 +796,7 @@ export function loadConfigFromEnvironment({
   } else if (apiKey) {
     return generateApiKeyConfig(portalId, apiKey, env);
   } else {
-    useEnv && console.error(unableToLoadEnvConfigError);
+    useEnv && logger.error(unableToLoadEnvConfigError);
     return;
   }
 }
@@ -810,7 +811,7 @@ function loadEnvironmentVariableConfig(options: {
   }
   const { portalId } = getConfigVariablesFromEnv();
 
-  console.debug(
+  logger.debug(
     `Loaded config from environment variables for account ${portalId}`
   );
 
