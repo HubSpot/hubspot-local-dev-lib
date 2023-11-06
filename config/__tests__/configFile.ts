@@ -34,7 +34,7 @@ const CONFIG = {
 } as CLIConfig_NEW;
 
 describe('config/configFile', () => {
-  describe('getConfigFilePath method', () => {
+  describe('getConfigFilePath()', () => {
     it('returns the config file path', () => {
       const configFilePath = getConfigFilePath();
       const homeDir = os.homedir();
@@ -51,7 +51,7 @@ describe('config/configFile', () => {
     });
   });
 
-  describe('configFileExists method', () => {
+  describe('configFileExists()', () => {
     it('returns true if config file exists', () => {
       existsSyncSpy.mockImplementation(() => true);
       const exists = configFileExists();
@@ -61,7 +61,7 @@ describe('config/configFile', () => {
     });
   });
 
-  describe('configFileIsBlank method', () => {
+  describe('configFileIsBlank()', () => {
     it('returns true if config file is blank', () => {
       readFileSyncSpy.mockImplementation(() => Buffer.from(''));
       const isBlank = configFileIsBlank();
@@ -78,7 +78,7 @@ describe('config/configFile', () => {
     });
   });
 
-  describe('deleteConfigFile method', () => {
+  describe('deleteConfigFile()', () => {
     it('deletes a file', () => {
       unlinkSyncSpy.mockImplementation(() => null);
       deleteConfigFile();
@@ -87,7 +87,7 @@ describe('config/configFile', () => {
     });
   });
 
-  describe('readConfigFile method', () => {
+  describe('readConfigFile()', () => {
     it('reads the config file', () => {
       readFileSyncSpy.mockImplementation(() => Buffer.from('content'));
       const result = readConfigFile('path/to/config/file');
@@ -103,7 +103,7 @@ describe('config/configFile', () => {
     });
   });
 
-  describe('parseConfig method', () => {
+  describe('parseConfig()', () => {
     it('parses the config file', () => {
       loadSpy.mockImplementation(() => ({}));
       const result = parseConfig('config-source');
@@ -119,7 +119,7 @@ describe('config/configFile', () => {
     });
   });
 
-  describe('loadConfigFromFile method', () => {
+  describe('loadConfigFromFile()', () => {
     it('loads the config from file', () => {
       readFileSyncSpy.mockImplementation(() => Buffer.from('content'));
       loadSpy.mockImplementation(() => ({}));
@@ -136,7 +136,7 @@ describe('config/configFile', () => {
     });
   });
 
-  describe('writeConfigToFile method', () => {
+  describe('writeConfigToFile()', () => {
     it('writes the config to a file', () => {
       ensureFileSyncSpy.mockImplementation(() => null);
       writeFileSyncSpy.mockImplementation(() => null);

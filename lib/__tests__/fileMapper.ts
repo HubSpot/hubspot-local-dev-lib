@@ -69,7 +69,7 @@ function testPathDeterminationFunction(
   });
 }
 
-describe('fileMapper', () => {
+describe('lib/fileMapper', () => {
   testPathDeterminationFunction(
     'isPathToFile',
     'file',
@@ -92,7 +92,7 @@ describe('fileMapper', () => {
     [...filePaths, ...folderPaths, ...modulePaths]
   );
 
-  describe('recurseFolder', () => {
+  describe('recurseFolder()', () => {
     const totalNodesInTree = 11;
     const rootNodePath = '/cms-theme-boilerplate/templates';
 
@@ -162,7 +162,7 @@ describe('fileMapper', () => {
     });
   });
 
-  describe('getTypeDataFromPath', () => {
+  describe('getTypeDataFromPath()', () => {
     it('should return file flags per the request input', () => {
       filePaths.forEach(async p => {
         const { isFile, isModule, isFolder, isRoot } = getTypeDataFromPath(p);
@@ -201,62 +201,54 @@ describe('fileMapper', () => {
     });
   });
 
-  describe('fetchFolderFromApi', () => {
+  describe('fetchFolderFromApi()', () => {
     const accountId = 67890;
     beforeEach(() => {
       download.mockClear();
     });
 
-    describe('fetch folder', () => {
+    it('folder: should execute the download client per the request input', async () => {
       const src = '1234';
 
-      it('should execute the download client per the request input', async () => {
-        await fetchFolderFromApi(accountId, src);
-        const queryParams = {
-          params: {
-            buffer: false,
-            environmentId: 1,
-            version: undefined,
-          },
-        };
-        expect(download).toHaveBeenCalledWith(accountId, src, queryParams);
-      });
+      await fetchFolderFromApi(accountId, src);
+      const queryParams = {
+        params: {
+          buffer: false,
+          environmentId: 1,
+          version: undefined,
+        },
+      };
+      expect(download).toHaveBeenCalledWith(accountId, src, queryParams);
     });
-
-    describe('fetch module (.module)', () => {
+    it('module: should execute the download client per the request input', async () => {
       const src = 'cms-theme-boilerplate/modules/Card section.module';
 
-      it('should execute the download client per the request input', async () => {
-        await fetchFolderFromApi(accountId, src);
-        const queryParams = {
-          params: {
-            buffer: false,
-            environmentId: 1,
-            version: undefined,
-          },
-        };
-        expect(download).toHaveBeenCalledWith(accountId, src, queryParams);
-      });
+      await fetchFolderFromApi(accountId, src);
+      const queryParams = {
+        params: {
+          buffer: false,
+          environmentId: 1,
+          version: undefined,
+        },
+      };
+      expect(download).toHaveBeenCalledWith(accountId, src, queryParams);
     });
-
-    describe('fetch all (/)', () => {
+    it('fetch all: should execute the download client per the request input', async () => {
       const src = '/';
 
-      it('should execute the download client per the request input', async () => {
-        await fetchFolderFromApi(accountId, src);
-        const queryParams = {
-          params: {
-            buffer: false,
-            environmentId: 1,
-            version: undefined,
-          },
-        };
-        expect(download).toHaveBeenCalledWith(accountId, '@root', queryParams);
-      });
+      await fetchFolderFromApi(accountId, src);
+      const queryParams = {
+        params: {
+          buffer: false,
+          environmentId: 1,
+          version: undefined,
+        },
+      };
+      expect(download).toHaveBeenCalledWith(accountId, '@root', queryParams);
     });
   });
 
-  describe('downloadFileOrFolder', () => {
+  describe('downloadFileOrFolder()', () => {
     const accountId = 67890;
 
     beforeEach(() => {

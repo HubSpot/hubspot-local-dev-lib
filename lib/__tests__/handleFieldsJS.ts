@@ -5,8 +5,8 @@ import child_process from 'child_process';
 jest.mock('../fs');
 jest.mock('child_process');
 
-describe('handleFieldsJs', () => {
-  describe('FieldsJs', () => {
+describe('lib/cms/handleFieldsJs', () => {
+  describe('FieldsJs()', () => {
     beforeEach(() => {
       (child_process.fork as jest.Mock).mockImplementation(() => {
         return {

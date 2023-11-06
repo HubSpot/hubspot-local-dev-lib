@@ -100,8 +100,8 @@ function getAccountByAuthType(
   return getAccounts(config).filter(portal => portal.authType === authType)[0];
 }
 
-describe('lib/config', () => {
-  describe('setConfig method', () => {
+describe('config/config', () => {
+  describe('setConfig()', () => {
     beforeEach(() => {
       setConfig(CONFIG);
     });
@@ -111,7 +111,7 @@ describe('lib/config', () => {
     });
   });
 
-  describe('getAccountId method', () => {
+  describe('getAccountId()', () => {
     beforeEach(() => {
       process.env = {};
       setConfig({
@@ -159,7 +159,7 @@ describe('lib/config', () => {
     });
   });
 
-  describe('updateDefaultAccount method', () => {
+  describe('updateDefaultAccount()', () => {
     const myPortalName = 'Foo';
 
     beforeEach(() => {
@@ -172,7 +172,7 @@ describe('lib/config', () => {
     });
   });
 
-  describe('deleteEmptyConfigFile method', () => {
+  describe('deleteEmptyConfigFile()', () => {
     it('does not delete config file if there are contents', () => {
       jest
         .spyOn(fs, 'readFileSync')
@@ -194,7 +194,7 @@ describe('lib/config', () => {
     });
   });
 
-  describe('updateAccountConfig method', () => {
+  describe('updateAccountConfig()', () => {
     const CONFIG = {
       defaultPortal: PORTALS[0].name,
       portals: PORTALS,
@@ -342,7 +342,7 @@ describe('lib/config', () => {
     });
   });
 
-  describe('validateConfig method', () => {
+  describe('validateConfig()', () => {
     const DEFAULT_PORTAL = PORTALS[0].name;
 
     it('allows valid config', () => {
@@ -406,7 +406,7 @@ describe('lib/config', () => {
     });
   });
 
-  describe('getAndLoadConfigIfNeeded method', () => {
+  describe('getAndLoadConfigIfNeeded()', () => {
     beforeEach(() => {
       setConfig(undefined);
       process.env = {};
@@ -551,7 +551,7 @@ describe('lib/config', () => {
     });
   });
 
-  describe('getConfigPath method', () => {
+  describe('getConfigPath()', () => {
     beforeAll(() => {
       setConfigPath(CONFIG_PATHS.default);
     });
@@ -610,7 +610,7 @@ describe('lib/config', () => {
     });
   });
 
-  describe('createEmptyConfigFile method', () => {
+  describe('createEmptyConfigFile()', () => {
     describe('when no config is present', () => {
       let fsExistsSyncSpy: jest.SpyInstance;
 

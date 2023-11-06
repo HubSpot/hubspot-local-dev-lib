@@ -38,8 +38,8 @@ export const newStatutsCodeError = (overrides = {}): GenericError => {
   };
 };
 
-describe('apiErrors', () => {
-  describe('isApiStatusCodeError', () => {
+describe('errors/apiErrors', () => {
+  describe('isApiStatusCodeError()', () => {
     it('returns true for api status code errors', () => {
       const error1 = newError({ status: 100 });
       const error2 = newError({ status: 599 });
@@ -57,7 +57,7 @@ describe('apiErrors', () => {
     });
   });
 
-  describe('isMissingScopeError', () => {
+  describe('isMissingScopeError()', () => {
     it('returns true for missing scope errors', () => {
       const error1 = newStatutsCodeError({
         status: 403,
@@ -77,7 +77,7 @@ describe('apiErrors', () => {
     });
   });
 
-  describe('isGatingError', () => {
+  describe('isGatingError()', () => {
     it('returns true for gating errors', () => {
       const error1 = newStatutsCodeError({
         status: 403,
@@ -97,7 +97,7 @@ describe('apiErrors', () => {
     });
   });
 
-  describe('isApiUploadValidationError', () => {
+  describe('isApiUploadValidationError()', () => {
     it('returns true for api upload validation errors', () => {
       const error1 = newStatutsCodeError({
         status: 400,
@@ -122,7 +122,7 @@ describe('apiErrors', () => {
     });
   });
 
-  describe('isSpecifiedHubSpotAuthError', () => {
+  describe('isSpecifiedHubSpotAuthError()', () => {
     it('returns true for matching HubSpot auth errors', () => {
       const error1 = newError({ name: 'HubSpotAuthError', status: 123 });
       expect(isSpecifiedHubSpotAuthError(error1, { status: 123 })).toBe(true);
@@ -134,28 +134,28 @@ describe('apiErrors', () => {
     });
   });
 
-  describe('throwStatusCodeError', () => {
+  describe('throwStatusCodeError()', () => {
     it('throws status code error', () => {
       const error = newStatutsCodeError() as StatusCodeError;
       expect(() => throwStatusCodeError(error)).toThrow();
     });
   });
 
-  describe('throwApiStatusCodeError', () => {
+  describe('throwApiStatusCodeError()', () => {
     it('throws api status code error', () => {
       const error = newStatutsCodeError() as StatusCodeError;
       expect(() => throwApiStatusCodeError(error)).toThrow();
     });
   });
 
-  describe('throwApiError', () => {
+  describe('throwApiError()', () => {
     it('throws api error', () => {
       const error = newStatutsCodeError() as StatusCodeError;
       expect(() => throwApiError(error)).toThrow();
     });
   });
 
-  describe('throwApiUploadError', () => {
+  describe('throwApiUploadError()', () => {
     it('throws api upload error', () => {
       const error = newStatutsCodeError() as StatusCodeError;
       expect(() => throwApiUploadError(error)).toThrow();

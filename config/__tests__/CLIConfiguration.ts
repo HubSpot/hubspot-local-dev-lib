@@ -2,7 +2,7 @@ import config from '../CLIConfiguration';
 
 // TODO write tests for CLIConfiguration.ts
 describe('config/CLIConfiguration', () => {
-  describe('constructor', () => {
+  describe('constructor()', () => {
     it('initializes correctly', () => {
       expect(config).toBeDefined();
       expect(config.options).toBeDefined();
