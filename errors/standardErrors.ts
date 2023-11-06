@@ -3,6 +3,7 @@ import { i18n } from '../utils/lang';
 import { throwStatusCodeError } from './apiErrors';
 
 import { BaseError, StatusCodeError } from '../types/Error';
+import { LangKey } from '../types/Lang';
 
 export function isSystemError(err: BaseError): boolean {
   return err.errno != null && err.code != null && err.syscall != null;
@@ -14,7 +15,7 @@ export function isFatalError(err: BaseError): boolean {
 
 function genericThrowErrorWithMessage(
   ErrorType: ErrorConstructor,
-  identifier: string,
+  identifier: LangKey,
   interpolation?: { [key: string]: string | number },
   cause?: BaseError
 ): never {
@@ -29,7 +30,7 @@ function genericThrowErrorWithMessage(
  * @throws
  */
 export function throwErrorWithMessage(
-  identifier: string,
+  identifier: LangKey,
   interpolation?: { [key: string]: string | number },
   cause?: BaseError
 ): never {
@@ -40,7 +41,7 @@ export function throwErrorWithMessage(
  * @throws
  */
 export function throwTypeErrorWithMessage(
-  identifier: string,
+  identifier: LangKey,
   interpolation?: { [key: string]: string | number },
   cause?: BaseError
 ): never {

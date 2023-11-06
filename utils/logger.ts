@@ -1,5 +1,6 @@
 import { i18n } from './lang';
 import { LogCallbacks } from '../types/LogCallbacks';
+import { LangKey } from '../types/Lang';
 
 export function log<T extends string>(
   key: T,
@@ -34,7 +35,7 @@ export function makeTypedLogger<T extends readonly string[]>(
 }
 
 export function debug(
-  identifier: string,
+  identifier: LangKey,
   interpolation?: { [key: string]: string | number }
 ): void {
   console.debug(i18n(identifier, interpolation));

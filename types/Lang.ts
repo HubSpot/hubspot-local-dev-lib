@@ -1,6 +1,10 @@
 import lang from '../lang/en.json';
 import { Leaves } from './Utils';
 
-type LanguageData = typeof lang.en;
+export type GenericLanguageObject = {
+  [key: string]: string | GenericLanguageObject;
+};
 
-export type LangKey = Leaves<LanguageData>;
+export type LanguageObject = typeof lang;
+
+export type LangKey = Leaves<LanguageObject>;
