@@ -2,7 +2,7 @@ import { i18n } from '../utils/lang';
 import { isSystemError } from './standardErrors';
 import { BaseError, FileSystemErrorContext } from '../types/Error';
 
-const i18nKey = 'errors.errorTypes.fileSystem';
+const i18nKey = 'errors.fileSystemErrors';
 
 /**
  * @throws

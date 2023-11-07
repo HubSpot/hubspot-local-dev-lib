@@ -127,10 +127,8 @@ class CLIConfiguration {
   validate(
     logCallbacks?: LogCallbacksArg<typeof validateLogCallbackKeys>
   ): boolean {
-    const validateLogger = makeTypedLogger<typeof validateLogCallbackKeys>(
-      logCallbacks,
-      'config.cliConfiguration.validate'
-    );
+    const validateLogger =
+      makeTypedLogger<typeof validateLogCallbackKeys>(logCallbacks);
 
     if (!this.config) {
       validateLogger('noConfig');
@@ -154,22 +152,34 @@ class CLIConfiguration {
         return false;
       }
       if (accountIdsMap[accountConfig.accountId]) {
-        validateLogger('duplicateAccountIds', {
-          accountId: accountConfig.accountId,
-        });
+        validateLogger(
+          'duplicateAccountIds',
+          `${i18nKey}.validate.duplicateAccountIds`,
+          {
+            accountId: accountConfig.accountId,
+          }
+        );
         return false;
       }
       if (accountConfig.name) {
         if (accountNamesMap[accountConfig.name]) {
-          validateLogger('duplicateAccountNames', {
-            accountName: accountConfig.name,
-          });
+          validateLogger(
+            'duplicateAccountNames',
+            `${i18nKey}.validate.duplicateAccountNames`,
+            {
+              accountName: accountConfig.name,
+            }
+          );
           return false;
         }
         if (/\s+/.test(accountConfig.name)) {
-          validateLogger('nameContainsSpaces', {
-            accountName: accountConfig.name,
-          });
+          validateLogger(
+            'nameContainsSpaces',
+            `${i18nKey}.validate.nameContainsSpaces`,
+            {
+              accountName: accountConfig.name,
+            }
+          );
           return false;
         }
         accountNamesMap[accountConfig.name] = true;
@@ -315,7 +325,9 @@ class CLIConfiguration {
     } = updatedAccountFields;
 
     if (!accountId) {
-      throwErrorWithMessage(`${i18nKey}.updateAccount`);
+      throwErrorWithMessage(
+        `${i18nKey}.updateAccount.errors.accountIdRequired`
+      );
     }
     if (!this.config) {
       debug(`${i18nKey}.updateAccount.noConfigToUpdate`);
@@ -402,13 +414,15 @@ class CLIConfiguration {
    */
   updateDefaultAccount(defaultAccount: string | number): CLIConfig_NEW | null {
     if (!this.config) {
-      throwErrorWithMessage(`${i18nKey}.noConfigLoaded`);
+      throwErrorWithMessage(`${i18nKey}.errors.noConfigLoaded`);
     }
     if (
       !defaultAccount ||
       (typeof defaultAccount !== 'number' && typeof defaultAccount !== 'string')
     ) {
-      throwErrorWithMessage(`${i18nKey}.updateDefaultAccount`);
+      throwErrorWithMessage(
+        `${i18nKey}.updateDefaultAccount.errors.invalidInput`
+      );
     }
 
     this.config.defaultAccount = defaultAccount;
@@ -420,7 +434,7 @@ class CLIConfiguration {
    */
   renameAccount(currentName: string, newName: string): void {
     if (!this.config) {
-      throwErrorWithMessage(`${i18nKey}.noConfigLoaded`);
+      throwErrorWithMessage(`${i18nKey}.errors.noConfigLoaded`);
     }
     const accountId = this.getAccountId(currentName);
     let accountConfigToRename: CLIAccount_NEW | null = null;
@@ -430,7 +444,9 @@ class CLIConfiguration {
     }
 
     if (!accountConfigToRename) {
-      throwErrorWithMessage(`${i18nKey}.renameAccount`, { currentName });
+      throwErrorWithMessage(`${i18nKey}.renameAccount.errors.invalidName`, {
+        currentName,
+      });
     }
 
     if (accountId) {
@@ -447,19 +463,22 @@ class CLIConfiguration {
    */
   removeAccountFromConfig(nameOrId: string | number): boolean {
     if (!this.config) {
-      throwErrorWithMessage(`${i18nKey}.noConfigLoaded`);
+      throwErrorWithMessage(`${i18nKey}.errors.noConfigLoaded`);
     }
     const accountId = this.getAccountId(nameOrId);
 
     if (!accountId) {
-      throwErrorWithMessage(`${i18nKey}.removeAccountFromConfig`, { nameOrId });
+      throwErrorWithMessage(
+        `${i18nKey}.removeAccountFromConfig.errors.invalidId`,
+        { nameOrId }
+      );
     }
 
     let removedAccountIsDefault = false;
     const accountConfig = this.getAccount(accountId);
 
     if (accountConfig) {
-      debug(`${i18nKey}.removeAccountFromConfig`, { accountId });
+      debug(`${i18nKey}.removeAccountFromConfig.deleting`, { accountId });
       const index = this.getConfigAccountIndex(accountId);
       this.config.accounts.splice(index, 1);
 
@@ -478,11 +497,11 @@ class CLIConfiguration {
    */
   updateDefaultMode(defaultMode: string): CLIConfig_NEW | null {
     if (!this.config) {
-      throwErrorWithMessage(`${i18nKey}.noConfigLoaded`);
+      throwErrorWithMessage(`${i18nKey}.errors.noConfigLoaded`);
     }
     const ALL_MODES = Object.values(MODE);
     if (!defaultMode || !ALL_MODES.find(m => m === defaultMode)) {
-      throwErrorWithMessage(`${i18nKey}.updateDefaultMode`, {
+      throwErrorWithMessage(`${i18nKey}.updateDefaultMode.errors.invalidMode`, {
         defaultMode,
         validModes: commaSeparatedValues(ALL_MODES),
       });
@@ -497,14 +516,17 @@ class CLIConfiguration {
    */
   updateHttpTimeout(timeout: string): CLIConfig_NEW | null {
     if (!this.config) {
-      throwErrorWithMessage(`${i18nKey}.noConfigLoaded`);
+      throwErrorWithMessage(`${i18nKey}.errors.noConfigLoaded`);
     }
     const parsedTimeout = parseInt(timeout);
     if (isNaN(parsedTimeout) || parsedTimeout < MIN_HTTP_TIMEOUT) {
-      throwErrorWithMessage(`${i18nKey}.updateHttpTimeout`, {
-        timeout,
-        minTimeout: MIN_HTTP_TIMEOUT,
-      });
+      throwErrorWithMessage(
+        `${i18nKey}.updateHttpTimeout.errors.invalidTimeout`,
+        {
+          timeout,
+          minTimeout: MIN_HTTP_TIMEOUT,
+        }
+      );
     }
 
     this.config.httpTimeout = parsedTimeout;
@@ -516,12 +538,15 @@ class CLIConfiguration {
    */
   updateAllowUsageTracking(isEnabled: boolean): CLIConfig_NEW | null {
     if (!this.config) {
-      throwErrorWithMessage(`${i18nKey}.noConfigLoaded`);
+      throwErrorWithMessage(`${i18nKey}.errors.noConfigLoaded`);
     }
     if (typeof isEnabled !== 'boolean') {
-      throwErrorWithMessage(`${i18nKey}.updateAllowUsageTracking`, {
-        isEnabled: `${isEnabled}`,
-      });
+      throwErrorWithMessage(
+        `${i18nKey}.updateAllowUsageTracking.errors.invalidInput`,
+        {
+          isEnabled: `${isEnabled}`,
+        }
+      );
     }
 
     this.config.allowUsageTracking = isEnabled;

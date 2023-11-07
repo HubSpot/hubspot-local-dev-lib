@@ -13,6 +13,8 @@ import {
   PersonalAccessKeyAccount_NEW,
 } from '../types/Accounts';
 
+const i18nKey = 'config.configUtils';
+
 export function getOrderedAccount(
   unorderedAccount: CLIAccount_NEW
 ): CLIAccount_NEW {
@@ -142,7 +144,7 @@ export function generateConfig(
       configAccount = generateOauthAccountConfig(options as OAuthOptions);
       break;
     default:
-      debug('config.configUtils.unknownType', { type });
+      debug(`${i18nKey}.unknownType`, { type });
       return null;
   }
 

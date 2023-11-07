@@ -3,6 +3,7 @@ import { i18n } from '../utils/lang';
 import { throwStatusCodeError } from './apiErrors';
 
 import { BaseError, StatusCodeError } from '../types/Error';
+import { LangKey } from '../types/Lang';
 
 export function isSystemError(err: BaseError): boolean {
   return err.errno != null && err.code != null && err.syscall != null;
@@ -14,11 +15,11 @@ export function isFatalError(err: BaseError): boolean {
 
 function genericThrowErrorWithMessage(
   ErrorType: ErrorConstructor,
-  identifier: string,
+  identifier: LangKey,
   interpolation?: { [key: string]: string | number },
   cause?: BaseError
 ): never {
-  const message = i18n(`errors.${identifier}`, interpolation);
+  const message = i18n(identifier, interpolation);
   if (cause) {
     throw new ErrorType(message, { cause });
   }
@@ -29,7 +30,7 @@ function genericThrowErrorWithMessage(
  * @throws
  */
 export function throwErrorWithMessage(
-  identifier: string,
+  identifier: LangKey,
   interpolation?: { [key: string]: string | number },
   cause?: BaseError
 ): never {
@@ -40,7 +41,7 @@ export function throwErrorWithMessage(
  * @throws
  */
 export function throwTypeErrorWithMessage(
-  identifier: string,
+  identifier: LangKey,
   interpolation?: { [key: string]: string | number },
   cause?: BaseError
 ): never {
@@ -51,7 +52,7 @@ export function throwTypeErrorWithMessage(
  * @throws
  */
 export function throwAuthErrorWithMessage(
-  identifier: string,
+  identifier: LangKey,
   interpolation?: { [key: string]: string | number },
   cause?: StatusCodeError
 ): never {
@@ -73,7 +74,7 @@ export function throwError(error: BaseError): never {
   } else {
     // Error or Error subclass
     const name = error.name || 'Error';
-    const message = [i18n('errors.errorTypes.generic', { name })];
+    const message = [i18n('errors.generic', { name })];
     [error.message, error.reason].forEach(msg => {
       if (msg) {
         message.push(msg);
