@@ -19,6 +19,8 @@ import {
   updateDefaultAccount,
 } from '../config';
 
+const i18nKey = 'lib.personalAccessKey';
+
 const refreshRequests = new Map();
 
 function getRefreshKey(personalAccessKey: string, expiration?: string): string {
@@ -45,7 +47,7 @@ export async function getAccessToken(
     const error = e as StatusCodeError;
     if (error.response && error.response.body) {
       throwAuthErrorWithMessage(
-        'personalAccessKey.invalidPersonalAccessKey',
+        `${i18nKey}.errors.invalidPersonalAccessKey`,
         { errorMessage: error.response.body.message || '' },
         error
       );
@@ -123,7 +125,7 @@ export async function accessTokenForPersonalAccessKey(
 ): Promise<string | undefined> {
   const account = getAccountConfig(accountId) as PersonalAccessKeyAccount;
   if (!account) {
-    throwErrorWithMessage('personalAccessKey.accountNotFound', { accountId });
+    throwErrorWithMessage(`${i18nKey}.errors.accountNotFound`, { accountId });
   }
   const { auth, personalAccessKey, env } = account;
   const authTokenInfo = auth && auth.tokenInfo;

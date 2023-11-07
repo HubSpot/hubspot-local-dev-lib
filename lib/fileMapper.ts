@@ -26,6 +26,8 @@ import { BaseError, StatusCodeError } from '../types/Error';
 import { LogCallbacksArg } from '../types/LogCallbacks';
 import { makeTypedLogger } from '../utils/logger';
 
+const i18nKey = 'lib.fileMapper';
+
 const queue = new PQueue({
   concurrency: 10,
 });
@@ -92,7 +94,7 @@ function validateFileMapperNode(node: FileMapperNode): void {
   } catch (err) {
     json = node;
   }
-  throwTypeErrorWithMessage('filemapper.invalidNode', {
+  throwTypeErrorWithMessage(`${i18nKey}.errors.invalidNode`, {
     json: JSON.stringify(json),
   });
 }
@@ -192,19 +194,16 @@ async function fetchAndWriteFileStream(
   options: FileMapperInputOptions = {},
   logCallbacks?: LogCallbacksArg<typeof filemapperCallbackKeys>
 ): Promise<void> {
-  const logger = makeTypedLogger<typeof filemapperCallbackKeys>(
-    logCallbacks,
-    'filemapper'
-  );
+  const logger = makeTypedLogger<typeof filemapperCallbackKeys>(logCallbacks);
   if (typeof srcPath !== 'string' || !srcPath.trim()) {
     return;
   }
   if (await skipExisting(filepath, options.overwrite)) {
-    logger('skippedExisting', { filepath });
+    logger('skippedExisting', `${i18nKey}.skippedExisting`, { filepath });
     return;
   }
   if (!isAllowedExtension(srcPath)) {
-    throwErrorWithMessage('filemapper.invalidFileType', { srcPath });
+    throwErrorWithMessage(`${i18nKey}.errors.invalidFileType`, { srcPath });
   }
   let node: FileMapperNode;
   try {
@@ -233,13 +232,12 @@ async function writeFileMapperNode(
   options: FileMapperInputOptions = {},
   logCallbacks?: LogCallbacksArg<typeof filemapperCallbackKeys>
 ): Promise<boolean> {
-  const logger = makeTypedLogger<typeof filemapperCallbackKeys>(
-    logCallbacks,
-    'filemapper'
-  );
+  const logger = makeTypedLogger<typeof filemapperCallbackKeys>(logCallbacks);
   const localFilepath = convertToLocalFileSystemPath(path.resolve(filepath));
   if (await skipExisting(localFilepath, options.overwrite)) {
-    logger('skippedExisting', { filepath: localFilepath });
+    logger('skippedExisting', `${i18nKey}.skippedExisting`, {
+      filepath: localFilepath,
+    });
     return true;
   }
   if (!node.folder) {
@@ -259,7 +257,9 @@ async function writeFileMapperNode(
   }
   try {
     await fs.ensureDir(localFilepath);
-    logger('wroteFolder', { filepath: localFilepath });
+    logger('wroteFolder', `${i18nKey}.wroteFolder`, {
+      filepath: localFilepath,
+    });
   } catch (err) {
     throwFileSystemError(err as BaseError, {
       filepath: localFilepath,
@@ -283,14 +283,11 @@ async function downloadFile(
   options: FileMapperInputOptions = {},
   logCallbacks?: LogCallbacksArg<typeof filemapperCallbackKeys>
 ): Promise<void> {
-  const logger = makeTypedLogger<typeof filemapperCallbackKeys>(
-    logCallbacks,
-    'filemapper'
-  );
+  const logger = makeTypedLogger<typeof filemapperCallbackKeys>(logCallbacks);
   const { isFile, isHubspot } = getTypeDataFromPath(src);
   try {
     if (!isFile) {
-      throw new Error(`Invalid request for file: "${src}"`);
+      throwErrorWithMessage(`${i18nKey}.errors.invalidRequest`, { src });
     }
     const dest = path.resolve(destPath);
     const cwd = getCwd();
@@ -318,7 +315,7 @@ async function downloadFile(
       logCallbacks
     );
     await queue.onIdle();
-    logger('completedFetch', {
+    logger('completedFetch', `${i18nKey}.completedFetch`, {
       src,
       version: getAssetVersionIdentifier(options.assetVersion, src),
       dest,
@@ -326,10 +323,10 @@ async function downloadFile(
   } catch (err) {
     const error = err as StatusCodeError;
     if (isHubspot && isTimeout(err as StatusCodeError)) {
-      throwErrorWithMessage('filemapper.assetTimeout', {}, error);
+      throwErrorWithMessage(`${i18nKey}.errors.assetTimeout`, {}, error);
     } else {
       throwErrorWithMessage(
-        'filemapper.failedToFetchFile',
+        `${i18nKey}.errors.failedToFetchFile`,
         { src, dest: destPath },
         error
       );
@@ -344,13 +341,12 @@ export async function fetchFolderFromApi(
   options: FileMapperInputOptions = {},
   logCallbacks?: LogCallbacksArg<typeof filemapperCallbackKeys>
 ): Promise<FileMapperNode> {
-  const logger = makeTypedLogger<typeof filemapperCallbackKeys>(
-    logCallbacks,
-    'filemapper'
-  );
+  const logger = makeTypedLogger<typeof filemapperCallbackKeys>(logCallbacks);
   const { isRoot, isFolder, isHubspot } = getTypeDataFromPath(src);
   if (!isFolder) {
-    throwErrorWithMessage('filemapper.invalidFetchFolderRequest', { src });
+    throwErrorWithMessage(`${i18nKey}.errors.invalidFetchFolderRequest`, {
+      src,
+    });
   }
   try {
     const srcPath = isRoot ? '@root' : src;
@@ -358,12 +354,12 @@ export async function fetchFolderFromApi(
     const node = isHubspot
       ? await downloadDefault(accountId, srcPath, queryValues)
       : await download(accountId, srcPath, queryValues);
-    logger('folderFetch', { src, accountId });
+    logger('folderFetch', `${i18nKey}.folderFetch`, { src, accountId });
     return node;
   } catch (err) {
     const error = err as StatusCodeError;
     if (isHubspot && isTimeout(error)) {
-      throwErrorWithMessage('filemapper.assetTimeout', {}, error);
+      throwErrorWithMessage(`${i18nKey}.errors.assetTimeout`, {}, error);
     } else {
       throwStatusCodeError(error, {
         accountId,
@@ -381,10 +377,7 @@ async function downloadFolder(
   options: FileMapperInputOptions = {},
   logCallbacks?: LogCallbacksArg<typeof filemapperCallbackKeys>
 ) {
-  const logger = makeTypedLogger<typeof filemapperCallbackKeys>(
-    logCallbacks,
-    'filemapper'
-  );
+  const logger = makeTypedLogger<typeof filemapperCallbackKeys>(logCallbacks);
   try {
     const node = await fetchFolderFromApi(
       accountId,
@@ -425,17 +418,17 @@ async function downloadFolder(
     await queue.onIdle();
 
     if (success) {
-      logger('completedFolderFetch', {
+      logger('completedFolderFetch', `${i18nKey}.completedFolderFetch`, {
         src,
         version: getAssetVersionIdentifier(options.assetVersion, src),
         dest,
       });
     } else {
-      throwErrorWithMessage('filemapper.incompleteFetch', { src });
+      throwErrorWithMessage(`${i18nKey}.errors.incompleteFetch`, { src });
     }
   } catch (err) {
     throwErrorWithMessage(
-      'filemapper.failedToFetchFolder',
+      `${i18nKey}.errors.failedToFetchFolder`,
       { src, dest: destPath },
       err as StatusCodeError
     );

@@ -66,7 +66,7 @@ export function parseConfig(configSource: string): CLIConfig_NEW {
   try {
     parsed = yaml.load(configSource) as CLIConfig_NEW;
   } catch (err) {
-    throwErrorWithMessage(`${i18nKey}.parsing`, {}, err as BaseError);
+    throwErrorWithMessage(`${i18nKey}.errors.parsing`, {}, err as BaseError);
   }
 
   return parsed;
@@ -88,7 +88,6 @@ export function loadConfigFromFile(): CLIConfig_NEW | null {
     return parseConfig(source);
   }
 
-  // TODO: Maybe use log callbacks here
   debug(`${i18nKey}.errorLoading`, { configPath });
 
   return null;

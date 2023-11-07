@@ -13,6 +13,8 @@ import { GithubReleaseData, GithubRepoFile } from '../types/Github';
 import { ValueOf } from '../types/Utils';
 import { LogCallbacksArg } from '../types/LogCallbacks';
 
+const i18nKey = 'lib.github';
+
 declare global {
   // eslint-disable-next-line no-var
   var githubToken: string;
@@ -32,7 +34,7 @@ export async function fetchJsonFromRepository(
 ): Promise<JSON> {
   try {
     const URL = `https://raw.githubusercontent.com/${repoPath}/${ref}/${filePath}`;
-    debug('github.fetchJsonFromRepository', { url: URL });
+    debug(`${i18nKey}.fetchJsonFromRepository.fetching`, { url: URL });
 
     const { data } = await axios.get<JSON>(URL, {
       headers: { ...DEFAULT_USER_AGENT_HEADERS, ...GITHUB_AUTH_HEADERS },
@@ -40,7 +42,7 @@ export async function fetchJsonFromRepository(
     return data;
   } catch (err) {
     throwErrorWithMessage(
-      'github.fetchJsonFromRepository',
+      `${i18nKey}.fetchJsonFromRepository.errors.fetchFail`,
       {},
       err as BaseError
     );
@@ -66,7 +68,7 @@ export async function fetchReleaseData(
   } catch (err) {
     const error = err as BaseError;
     throwErrorWithMessage(
-      'github.fetchReleaseData',
+      `${i18nKey}.fetchReleaseData.errors.fetchFail`,
       { tag: tag || 'latest' },
       error
     );
@@ -84,7 +86,10 @@ async function downloadGithubRepoZip(
   try {
     let zipUrl: string;
     if (releaseType === GITHUB_RELEASE_TYPES.REPOSITORY) {
-      debug('github.downloadGithubRepoZip.fetching', { releaseType, repoPath });
+      debug(`${i18nKey}.downloadGithubRepoZip.fetching`, {
+        releaseType,
+        repoPath,
+      });
       zipUrl = `https://api.github.com/repos/${repoPath}/zipball${
         ref ? `/${ref}` : ''
       }`;
@@ -92,15 +97,19 @@ async function downloadGithubRepoZip(
       const releaseData = await fetchReleaseData(repoPath, tag);
       zipUrl = releaseData.zipball_url;
       const { name } = releaseData;
-      debug('github.downloadGithubRepoZip.fetchingName', { name });
+      debug(`${i18nKey}.downloadGithubRepoZip.fetchingName`, { name });
     }
     const { data } = await axios.get<Buffer>(zipUrl, {
       headers: { ...DEFAULT_USER_AGENT_HEADERS, ...GITHUB_AUTH_HEADERS },
     });
-    debug('github.downloadGithubRepoZip.completed');
+    debug(`${i18nKey}.downloadGithubRepoZip.completed`);
     return data;
   } catch (err) {
-    throwErrorWithMessage('github.downloadGithubRepoZip', {}, err as BaseError);
+    throwErrorWithMessage(
+      `${i18nKey}.downloadGithubRepoZip.errors.fetchFail`,
+      {},
+      err as BaseError
+    );
   }
 }
 
@@ -121,10 +130,8 @@ export async function cloneGithubRepo(
   options: CloneGithubRepoOptions = {},
   logCallbacks?: LogCallbacksArg<typeof cloneGithubRepoCallbackKeys>
 ): Promise<boolean> {
-  const logger = makeTypedLogger<typeof cloneGithubRepoCallbackKeys>(
-    logCallbacks,
-    'github.cloneGithubRepo'
-  );
+  const logger =
+    makeTypedLogger<typeof cloneGithubRepoCallbackKeys>(logCallbacks);
   const { themeVersion, projectVersion, releaseType, ref } = options;
   const tag = projectVersion || themeVersion;
   const zip = await downloadGithubRepoZip(repoPath, tag, releaseType, ref);
@@ -132,7 +139,7 @@ export async function cloneGithubRepo(
   const success = await extractZipArchive(zip, repoName, dest, { sourceDir });
 
   if (success) {
-    logger('success', { type, dest });
+    logger('success', `${i18nKey}.cloneGithubRepo.success`, { type, dest });
   }
   return success;
 }
@@ -193,7 +200,7 @@ export async function downloadGithubRepoContents(
         return Promise.resolve();
       }
 
-      debug('github.downloadGithubRepoContents.downloading', {
+      debug(`${i18nKey}.downloadGithubRepoContents.downloading`, {
         contentPiecePath,
         downloadUrl: download_url,
         downloadPath,
@@ -215,7 +222,7 @@ export async function downloadGithubRepoContents(
     const error = e as BaseError;
     if (error?.error?.message) {
       throwErrorWithMessage(
-        'github.downloadGithubRepoContents',
+        `${i18nKey}.downloadGithubRepoContents.errors.fetchFail`,
         {
           errorMessage: error.error.message,
         },

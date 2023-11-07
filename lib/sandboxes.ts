@@ -19,7 +19,7 @@ import {
 import { throwErrorWithMessage } from '../errors/standardErrors';
 import { BaseError } from '../types/Error';
 
-const i18nKey = 'sandboxes';
+const i18nKey = 'lib.sandboxes';
 
 export async function createSandbox(
   accountId: number,
@@ -37,7 +37,11 @@ export async function createSandbox(
       ...resp,
     };
   } catch (err) {
-    throwErrorWithMessage(`${i18nKey}.createSandbox`, {}, err as BaseError);
+    throwErrorWithMessage(
+      `${i18nKey}.errors.createSandbox`,
+      {},
+      err as BaseError
+    );
   }
 }
 
@@ -48,7 +52,11 @@ export async function deleteSandbox(
   try {
     await _deleteSandbox(parentAccountId, sandboxAccountId);
   } catch (err) {
-    throwErrorWithMessage(`${i18nKey}.deleteSandbox`, {}, err as BaseError);
+    throwErrorWithMessage(
+      `${i18nKey}.errors.deleteSandbox`,
+      {},
+      err as BaseError
+    );
   }
 
   return {
@@ -65,7 +73,7 @@ export async function getSandboxUsageLimits(
     return resp && resp.usage;
   } catch (err) {
     throwErrorWithMessage(
-      `${i18nKey}.getSandboxUsageLimits`,
+      `${i18nKey}.errors.getSandboxUsageLimits`,
       {},
       err as BaseError
     );
@@ -81,7 +89,11 @@ export async function initiateSync(
   try {
     return await _initiateSync(fromHubId, toHubId, tasks, sandboxHubId);
   } catch (err) {
-    throwErrorWithMessage(`${i18nKey}.initiateSync`, {}, err as BaseError);
+    throwErrorWithMessage(
+      `${i18nKey}.errors.initiateSync`,
+      {},
+      err as BaseError
+    );
   }
 }
 
@@ -92,7 +104,11 @@ export async function fetchTaskStatus(
   try {
     return await _fetchTaskStatus(accountId, taskId);
   } catch (err) {
-    throwErrorWithMessage(`${i18nKey}.fetchTaskStatus`, {}, err as BaseError);
+    throwErrorWithMessage(
+      `${i18nKey}.errors.fetchTaskStatus`,
+      {},
+      err as BaseError
+    );
   }
 }
 
@@ -104,6 +120,6 @@ export async function fetchTypes(
     const resp = await _fetchTypes(accountId, toHubId);
     return resp && resp.results;
   } catch (err) {
-    throwErrorWithMessage(`${i18nKey}.fetchTypes`, {}, err as BaseError);
+    throwErrorWithMessage(`${i18nKey}.errors.fetchTypes`, {}, err as BaseError);
   }
 }

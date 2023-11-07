@@ -4,6 +4,8 @@ import { MODULE_EXTENSION } from '../../constants/extensions';
 import { throwTypeErrorWithMessage } from '../../errors/standardErrors';
 import { PathInput } from '../../types/Modules';
 
+const i18nKey = 'utils.cms.modules';
+
 const isBool = (x: boolean | undefined) => !!x === x;
 
 export function isPathInput(pathInput?: PathInput): boolean {
@@ -16,7 +18,7 @@ export function isPathInput(pathInput?: PathInput): boolean {
 
 function throwInvalidPathInput(pathInput: PathInput): void {
   if (isPathInput(pathInput)) return;
-  throwTypeErrorWithMessage('modules.throwInvalidPathInput');
+  throwTypeErrorWithMessage(`${i18nKey}.throwInvalidPathInput`);
 }
 
 export function isModuleFolder(pathInput: PathInput): boolean {

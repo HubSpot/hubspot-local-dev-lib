@@ -8,7 +8,7 @@ import { DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME } from '../../constants/config';
 
 const GITIGNORE_FILE = '.gitignore';
 
-const i18nKey = 'debug.git';
+const i18nKey = 'lib.logging.git';
 
 export function checkAndWarnGitInclusion(configPath: string): void {
   try {

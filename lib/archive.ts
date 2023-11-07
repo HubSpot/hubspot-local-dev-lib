@@ -11,6 +11,8 @@ import { BaseError } from '../types/Error';
 
 const extract = promisify(__extract);
 
+const i18nKey = 'lib.archive';
+
 type ZipData = {
   extractDir: string;
   tmpDir: string;
@@ -20,7 +22,7 @@ async function extractZip(name: string, zip: Buffer): Promise<ZipData> {
   const result: ZipData = { extractDir: '', tmpDir: '' };
 
   const TMP_FOLDER_PREFIX = `hubspot-temp-${name}-`;
-  debug('archive.extractZip.init');
+  debug(`${i18nKey}.extractZip.init`);
 
   // Write zip to disk
   let tmpZipPath = '';
@@ -38,7 +40,11 @@ async function extractZip(name: string, zip: Buffer): Promise<ZipData> {
         write: true,
       });
     } else {
-      throwErrorWithMessage('archive.extractZip.write', {}, err as BaseError);
+      throwErrorWithMessage(
+        `${i18nKey}.extractZip.errors.write`,
+        {},
+        err as BaseError
+      );
     }
     return result;
   }
@@ -48,9 +54,13 @@ async function extractZip(name: string, zip: Buffer): Promise<ZipData> {
     await extract(tmpZipPath, { dir: tmpExtractPath });
     result.extractDir = tmpExtractPath;
   } catch (err) {
-    throwErrorWithMessage('archive.extractZip.extract', {}, err as BaseError);
+    throwErrorWithMessage(
+      `${i18nKey}.extractZip.errors.extract`,
+      {},
+      err as BaseError
+    );
   }
-  debug('archive.extractZip.success');
+  debug(`${i18nKey}.extractZip.success`);
   return result;
 }
 
@@ -65,14 +75,14 @@ async function copySourceToDest(
   { sourceDir, includesRootDir = true }: CopySourceToDestOptions = {}
 ): Promise<boolean> {
   try {
-    debug('archive.copySourceToDest.init');
+    debug(`${i18nKey}.copySourceToDest.init`);
     const srcDirPath = [src];
 
     if (includesRootDir) {
       const files = await fs.readdir(src);
       const rootDir = files[0];
       if (!rootDir) {
-        debug('archive.copySourceToDest.sourceEmpty');
+        debug(`${i18nKey}.copySourceToDest.sourceEmpty`);
         // Create the dest path if it doesn't already exist
         fs.ensureDir(dest);
         // No root found so nothing to copy
@@ -88,10 +98,10 @@ async function copySourceToDest(
     const projectSrcDir = join(...srcDirPath);
 
     await fs.copy(projectSrcDir, dest);
-    debug('archive.copySourceToDest.success');
+    debug(`${i18nKey}.copySourceToDest.success`);
     return true;
   } catch (err) {
-    debug('archive.copySourceToDest.error', { dest });
+    debug(`${i18nKey}.copySourceToDest.error`, { dest });
     throwFileSystemError(err as BaseError, {
       filepath: dest,
       write: true,
@@ -105,7 +115,7 @@ function cleanupTempDir(tmpDir: string): void {
   try {
     fs.remove(tmpDir);
   } catch (e) {
-    debug('archive.cleanupTempDir.error', { tmpDir });
+    debug(`${i18nKey}.cleanupTempDir.error`, { tmpDir });
   }
 }
 

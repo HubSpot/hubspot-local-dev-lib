@@ -23,6 +23,8 @@ import { FILE_TYPES, FILE_UPLOAD_RESULT_TYPES } from '../../constants/files';
 import { FileType, UploadFolderResults } from '../../types/Files';
 import { Mode } from '../../types/Files';
 
+const i18nKey = 'lib.cms.uploadFolder';
+
 const queue = new PQueue({
   concurrency: 10,
 });
@@ -127,10 +129,7 @@ export async function uploadFolder(
   mode: Mode | null = null,
   logCallbacks?: LogCallbacksArg<typeof uploadFolderCallbackKeys>
 ): Promise<Array<UploadFolderResults>> {
-  const logger = makeTypedLogger<typeof uploadFolderCallbackKeys>(
-    logCallbacks,
-    'cms.uploadFolder'
-  );
+  const logger = makeTypedLogger<typeof uploadFolderCallbackKeys>(logCallbacks);
   const { saveOutput, convertFields } = commandOptions;
   const tmpDir = convertFields
     ? createTmpDirSync('hubspot-temp-fieldsjs-output-')
@@ -169,13 +168,13 @@ export async function uploadFolder(
     );
     const destPath = convertToUnixPath(path.join(dest, relativePath));
     return async () => {
-      debug('cms.uploadFolder.attempt', {
+      debug(`${i18nKey}.uploadFolder.attempt`, {
         file: originalFilePath || '',
         destPath,
       });
       try {
         await upload(accountId, file, destPath, apiOptions);
-        logger('success', {
+        logger('success', `${i18nKey}.uploadFolder.success`, {
           file: originalFilePath || '',
           destPath,
         });
@@ -184,7 +183,7 @@ export async function uploadFolder(
         if (isFatalError(error)) {
           throw error;
         }
-        debug('cms.uploadFolder.failed', { file, destPath });
+        debug(`${i18nKey}.uploadFolder.failed`, { file, destPath });
         if (error.response && error.response.body) {
           console.debug(error.response.body);
         } else {
@@ -207,17 +206,20 @@ export async function uploadFolder(
     .addAll(
       failures.map(({ file, destPath }) => {
         return async () => {
-          debug('cms.uploadFolder.retry', { file, destPath });
+          debug(`${i18nKey}.uploadFolder.retry`, { file, destPath });
           try {
             await upload(accountId, file, destPath, apiOptions);
-            logger('success', { file, destPath });
+            logger('success', `${i18nKey}.uploadFolder.success`, {
+              file,
+              destPath,
+            });
             return {
               resultType: FILE_UPLOAD_RESULT_TYPES.SUCCESS,
               error: null,
               file,
             };
           } catch (err) {
-            debug('cms.uploadFolder.retryFailed', { file, destPath });
+            debug(`${i18nKey}.uploadFolder.retryFailed`, { file, destPath });
             const error = err as StatusCodeError;
             if (isFatalError(error)) {
               throw error;

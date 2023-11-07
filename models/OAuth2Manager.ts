@@ -45,7 +45,7 @@ class OAuth2Manager {
 
   async accessToken(): Promise<string | undefined> {
     if (!this.account.auth.tokenInfo?.refreshToken) {
-      throwErrorWithMessage(`${i18nKey}.missingRefreshToken`, {
+      throwErrorWithMessage(`${i18nKey}.errors.missingRefreshToken`, {
         accountId: getAccountIdentifier(this.account)!,
       });
     }
@@ -118,7 +118,7 @@ class OAuth2Manager {
       const error = e as StatusCodeError;
       if (error.response) {
         throwAuthErrorWithMessage(
-          `${i18nKey}.auth`,
+          `${i18nKey}.errors.auth`,
           {
             token: error.response.body.message || '',
           },
