@@ -8,9 +8,9 @@ import { FileMapperNode, FileMapperOptions, FileTree } from '../types/Files';
 
 export const FILE_MAPPER_API_PATH = 'content/filemapper/v1';
 
-function createFileMapperNodeFromStreamResponse(
+export function createFileMapperNodeFromStreamResponse(
   filePath: string,
-  response: AxiosResponse
+  response: Partial<AxiosResponse>
 ): FileMapperNode {
   if (filePath[0] !== '/') {
     filePath = `/${filePath}`;
@@ -68,7 +68,7 @@ export async function fetchModule(
   });
 }
 
-//Fetch a file by file path.
+// Fetch a file by file path.
 export async function fetchFileStream(
   accountId: number,
   filePath: string,

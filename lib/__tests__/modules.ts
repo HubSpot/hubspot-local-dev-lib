@@ -10,7 +10,7 @@ const isHubSpot = true;
 
 // TODO: Replace two missing tests
 
-describe('modules', () => {
+describe('lib/cms/modules', () => {
   describe('validateSrcAndDestPaths()', () => {
     const emptyLocal = { isLocal, path: '' };
     const emptyHubSpot = { isHubSpot, path: '' };

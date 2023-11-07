@@ -1,27 +1,23 @@
 import { ReadStream } from 'fs';
 
-export type Body = {
-  // TODO - Return if we find a better way to represent the Body type
+export type Data = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
 };
 
+export type QueryParams = {
+  [key: string]: string | number | boolean | undefined;
+};
+
 export type AxiosConfigOptions = {
+  baseURL?: string;
   url: string;
   env?: string;
   localHostOverride?: boolean;
-  params?: {
-    portalId?: number;
-    buffer?: boolean;
-    environmentId?: number;
-    version?: string;
-  };
-  body?: Body | JSON;
+  params?: QueryParams;
+  data?: Data;
   resolveWithFullResponse?: boolean;
-};
-
-export type QueryParams = {
-  [key: string]: string | number | boolean;
+  timeout?: number;
 };
 
 export type FormData = {

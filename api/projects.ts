@@ -32,7 +32,7 @@ export async function createProject(
 ): Promise<Project> {
   return http.post(accountId, {
     url: PROJECTS_API_PATH,
-    body: {
+    data: {
       name,
     },
   });
@@ -147,7 +147,7 @@ export async function deployProject(
 ): Promise<ProjectDeployResponse> {
   return http.post(accountId, {
     url: `${PROJECTS_DEPLOY_API_PATH}/deploys/queue/async`,
-    body: {
+    data: {
       projectName,
       buildId,
     },

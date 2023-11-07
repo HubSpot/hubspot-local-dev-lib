@@ -1,16 +1,16 @@
 import http from '../http';
-import { Body, QueryParams } from '../types/Http';
+import { Data, QueryParams } from '../types/Http';
 import { GetValidationResultsResponse } from '../types/MarketplaceValidation';
 
 const VALIDATION_API_BASE = 'quality-engine/v1/validation';
 
 export function requestValidation(
   accountId: number,
-  body: Body = {}
+  data: Data = {}
 ): Promise<number> {
   return http.post(accountId, {
     url: `${VALIDATION_API_BASE}/request`,
-    body,
+    data,
   });
 }
 

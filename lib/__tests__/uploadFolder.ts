@@ -80,7 +80,7 @@ const filesProto = [
   'folder/sample.module/module.html',
   'folder/templates/page.html',
 ];
-describe('uploadFolder', () => {
+describe('lib/cms/uploadFolder', () => {
   beforeAll(() => {
     createIgnoreFilter.mockImplementation(() => () => true);
   });
@@ -94,7 +94,7 @@ describe('uploadFolder', () => {
     it('uploads files in the correct order', async () => {
       listFilesInDir.mockReturnValue(['fields.json']);
       walk.mockResolvedValue(filesProto);
-      upload.mockImplementation(() => Promise.resolve());
+      upload.mockResolvedValue();
 
       const uploadedFilesInOrder = [
         'folder/images/image.png',
@@ -130,7 +130,7 @@ describe('uploadFolder', () => {
     it('creates a temp directory if --convertFields is true', async () => {
       const tmpDirSpy = createTmpDirSync.mockImplementation(() => '');
 
-      upload.mockImplementation(() => Promise.resolve());
+      upload.mockResolvedValue();
 
       await uploadFolder(
         123,
@@ -148,7 +148,7 @@ describe('uploadFolder', () => {
       const saveOutputSpy = jest.spyOn(FieldsJs.prototype, 'saveOutput');
 
       createTmpDirSync.mockReturnValue('folder');
-      upload.mockImplementation(() => Promise.resolve());
+      upload.mockResolvedValue();
 
       await uploadFolder(
         123,
@@ -166,7 +166,7 @@ describe('uploadFolder', () => {
     it('deletes the temporary directory', async () => {
       const deleteDirSpy = cleanupTmpDirSync.mockImplementation(() => '');
 
-      upload.mockImplementation(() => Promise.resolve());
+      upload.mockResolvedValue();
 
       await uploadFolder(
         123,

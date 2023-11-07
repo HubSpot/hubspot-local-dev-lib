@@ -43,7 +43,7 @@ export async function getAccessToken(
     response = await fetchAccessToken(personalAccessKey, env, accountId);
   } catch (e) {
     const error = e as StatusCodeError;
-    if (error.response) {
+    if (error.response && error.response.body) {
       throwAuthErrorWithMessage(
         'personalAccessKey.invalidPersonalAccessKey',
         { errorMessage: error.response.body.message || '' },

@@ -53,7 +53,7 @@ const CONFIG: CLIConfig = {
 };
 
 describe('config/configUtils', () => {
-  describe('getOrderedAccount method', () => {
+  describe('getOrderedAccount()', () => {
     it('returns an ordered account', () => {
       const orderedAccount = getOrderedAccount(PAK_ACCOUNT);
       const keys = Object.keys(orderedAccount);
@@ -63,7 +63,7 @@ describe('config/configUtils', () => {
     });
   });
 
-  describe('getOrderedConfig method', () => {
+  describe('getOrderedConfig()', () => {
     it('returns an ordered config', () => {
       const orderedConfig = getOrderedConfig(CONFIG);
       const keys = Object.keys(orderedConfig);
@@ -80,7 +80,7 @@ describe('config/configUtils', () => {
     });
   });
 
-  describe('generateConfig method', () => {
+  describe('generateConfig()', () => {
     it('returns a personal access key auth account', () => {
       const pakConfig = generateConfig('personalaccesskey', {
         accountId: 111,

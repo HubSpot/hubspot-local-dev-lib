@@ -9,7 +9,7 @@ const isHubSpot = true;
 
 // TODO: Replace two missing tests
 
-describe('cli-lib/modules', () => {
+describe('utils/cms/modules', () => {
   describe('isModuleFolder()', () => {
     it('should throw on invalid input', () => {
       // @ts-expect-error testing invalid input

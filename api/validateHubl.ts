@@ -10,7 +10,7 @@ export async function validateHubl(
 ): Promise<Validation> {
   return http.post(accountId, {
     url: HUBL_VALIDATE_API_PATH,
-    body: {
+    data: {
       template_source: sourceCode,
       ...hublValidationOptions,
     },

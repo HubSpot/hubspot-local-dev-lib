@@ -1,6 +1,6 @@
 import { fieldsArrayToJson } from '../cms/fieldsJS';
 
-describe('fieldsJS', () => {
+describe('utils/cms/fieldsJS', () => {
   describe('fieldsArrayToJson()', () => {
     it('flattens nested arrays', async () => {
       const input = [

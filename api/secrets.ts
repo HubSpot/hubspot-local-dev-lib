@@ -13,7 +13,7 @@ export async function addSecret(
 ): Promise<void> {
   return http.post(accountId, {
     url: SECRETS_API_PATH,
-    body: {
+    data: {
       key,
       secret: value,
     },
@@ -27,7 +27,7 @@ export async function updateSecret(
 ): Promise<void> {
   return http.put(accountId, {
     url: SECRETS_API_PATH,
-    body: {
+    data: {
       key,
       secret: value,
     },

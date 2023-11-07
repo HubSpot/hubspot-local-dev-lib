@@ -22,7 +22,7 @@ function buildLstatMock(opts: {
   };
 }
 
-describe('read', () => {
+describe('lib/fs', () => {
   describe('getFileInfoAsync()', () => {
     it('returns filepath and type for files', async () => {
       (fs.lstat as unknown as jest.Mock).mockImplementation(

@@ -1,7 +1,6 @@
 import axios from 'axios';
 import moment from 'moment';
 
-import { ENVIRONMENTS } from '../constants/environments';
 import { getHubSpotApiOrigin } from '../lib/urls';
 import { getValidEnv } from '../lib/environment';
 import { FlatAccountFields, OAuthAccount, TokenInfo } from '../types/Accounts';
@@ -38,9 +37,10 @@ class OAuth2Manager {
   refreshTokenRequest: Promise<RefreshTokenResponse> | null;
 
   constructor(account: OAuthAccount, writeTokenInfo: WriteTokenInfoFunction) {
-    this.account = account;
     this.writeTokenInfo = writeTokenInfo;
     this.refreshTokenRequest = null;
+    this.account = account;
+    // NOTE: Potential issues by not using maskProductionValue = '' for env like in cli-lib
   }
 
   async accessToken(): Promise<string | undefined> {
@@ -142,7 +142,7 @@ class OAuth2Manager {
 
   toObj() {
     return {
-      environment: this.account.env ? ENVIRONMENTS.QA : ENVIRONMENTS.PROD,
+      env: this.account.env,
       clientSecret: this.account.auth.clientSecret,
       clientId: this.account.auth.clientId,
       scopes: this.account.auth.scopes,

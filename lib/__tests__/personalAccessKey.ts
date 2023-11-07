@@ -35,8 +35,8 @@ const fetchSandboxHubData = __fetchSandboxHubData as jest.MockedFunction<
   typeof __fetchSandboxHubData
 >;
 
-describe('personalAccessKey', () => {
-  describe('accessTokenForPersonalAccessKey', () => {
+describe('lib/personalAccessKey', () => {
+  describe('accessTokenForPersonalAccessKey()', () => {
     it('refreshes access token when access token is missing', async () => {
       const accountId = 123;
       const account = {
@@ -51,16 +51,14 @@ describe('personalAccessKey', () => {
       getAccountConfig.mockReturnValue(account);
 
       const freshAccessToken = 'fresh-token';
-      fetchAccessToken.mockReturnValue(
-        Promise.resolve({
-          oauthAccessToken: freshAccessToken,
-          expiresAtMillis: moment().add(1, 'hours').valueOf(),
-          encodedOAuthRefreshToken: 'let-me-in',
-          scopeGroups: ['content'],
-          hubId: accountId,
-          userId: 456,
-        })
-      );
+      fetchAccessToken.mockResolvedValue({
+        oauthAccessToken: freshAccessToken,
+        expiresAtMillis: moment().add(1, 'hours').valueOf(),
+        encodedOAuthRefreshToken: 'let-me-in',
+        scopeGroups: ['content'],
+        hubId: accountId,
+        userId: 456,
+      });
       const accessToken = await accessTokenForPersonalAccessKey(accountId);
       expect(accessToken).toEqual(freshAccessToken);
     });
@@ -104,16 +102,14 @@ describe('personalAccessKey', () => {
       getAccountConfig.mockReturnValue(account);
 
       const freshAccessToken = 'fresh-token';
-      fetchAccessToken.mockReturnValue(
-        Promise.resolve({
-          oauthAccessToken: freshAccessToken,
-          expiresAtMillis: moment().add(1, 'hours').valueOf(),
-          encodedOAuthRefreshToken: 'let-me-in-3',
-          scopeGroups: ['content'],
-          hubId: accountId,
-          userId: 456,
-        })
-      );
+      fetchAccessToken.mockResolvedValue({
+        oauthAccessToken: freshAccessToken,
+        expiresAtMillis: moment().add(1, 'hours').valueOf(),
+        encodedOAuthRefreshToken: 'let-me-in-3',
+        scopeGroups: ['content'],
+        hubId: accountId,
+        userId: 456,
+      });
       const accessToken = await accessTokenForPersonalAccessKey(accountId);
       expect(accessToken).toEqual(freshAccessToken);
     });
@@ -145,16 +141,14 @@ describe('personalAccessKey', () => {
       const firstAccessToken = 'fresh-token';
       const expiresAtMillis = moment().subtract(1, 'hours').valueOf();
 
-      fetchAccessToken.mockReturnValueOnce(
-        Promise.resolve({
-          oauthAccessToken: firstAccessToken,
-          expiresAtMillis,
-          encodedOAuthRefreshToken: accessKey,
-          scopeGroups: ['content'],
-          hubId: accountId,
-          userId,
-        })
-      );
+      fetchAccessToken.mockResolvedValue({
+        oauthAccessToken: firstAccessToken,
+        expiresAtMillis,
+        encodedOAuthRefreshToken: accessKey,
+        scopeGroups: ['content'],
+        hubId: accountId,
+        userId,
+      });
       const firstRefreshedAccessToken =
         await accessTokenForPersonalAccessKey(accountId);
       expect(firstRefreshedAccessToken).toEqual(firstAccessToken);
@@ -168,16 +162,14 @@ describe('personalAccessKey', () => {
       getAccountConfig.mockReturnValueOnce(updatedAccountConfig);
 
       const secondAccessToken = 'another-fresh-token';
-      fetchAccessToken.mockReturnValueOnce(
-        Promise.resolve({
-          oauthAccessToken: secondAccessToken,
-          expiresAtMillis,
-          encodedOAuthRefreshToken: accessKey,
-          scopeGroups: ['content'],
-          hubId: accountId,
-          userId,
-        })
-      );
+      fetchAccessToken.mockResolvedValue({
+        oauthAccessToken: secondAccessToken,
+        expiresAtMillis,
+        encodedOAuthRefreshToken: accessKey,
+        scopeGroups: ['content'],
+        hubId: accountId,
+        userId,
+      });
 
       const secondRefreshedAccessToken =
         await accessTokenForPersonalAccessKey(accountId);
@@ -185,22 +177,20 @@ describe('personalAccessKey', () => {
     });
   });
 
-  describe('updateConfigWithPersonalAccessKey', () => {
+  describe('updateConfigWithPersonalAccessKey()', () => {
     beforeEach(() => {
       fetchAccessToken.mockClear();
       updateAccountConfig.mockClear();
 
       const freshAccessToken = 'fresh-token';
-      fetchAccessToken.mockReturnValue(
-        Promise.resolve({
-          oauthAccessToken: freshAccessToken,
-          expiresAtMillis: moment().add(1, 'hours').valueOf(),
-          encodedOAuthRefreshToken: 'let-me-in-5',
-          scopeGroups: ['content'],
-          hubId: 123,
-          userId: 456,
-        })
-      );
+      fetchAccessToken.mockResolvedValue({
+        oauthAccessToken: freshAccessToken,
+        expiresAtMillis: moment().add(1, 'hours').valueOf(),
+        encodedOAuthRefreshToken: 'let-me-in-5',
+        scopeGroups: ['content'],
+        hubId: 123,
+        userId: 456,
+      });
     });
 
     it('updates the config with the new account', async () => {
@@ -225,12 +215,10 @@ describe('personalAccessKey', () => {
     });
 
     it('updates the config with the new account for sandbox accounts', async () => {
-      fetchSandboxHubData.mockReturnValue(
-        Promise.resolve({
-          type: 'developer',
-          parentHubId: 789,
-        })
-      );
+      fetchSandboxHubData.mockResolvedValue({
+        type: 'developer',
+        parentHubId: 789,
+      });
 
       await updateConfigWithPersonalAccessKey(
         'pak_123',

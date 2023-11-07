@@ -15,7 +15,7 @@ export async function initiateSync(
   sandboxHubId: number
 ): Promise<InitiateSyncResponse> {
   return http.post(fromHubId, {
-    body: {
+    data: {
       command: 'SYNC',
       fromHubId,
       toHubId,

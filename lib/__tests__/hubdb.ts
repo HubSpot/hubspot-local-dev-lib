@@ -32,8 +32,8 @@ const publishTable = __publishTable as jest.MockedFunction<
   typeof __publishTable
 >;
 
-describe('hubdb', () => {
-  describe('downloadHubDbTable', () => {
+describe('lib/hubdb', () => {
+  describe('downloadHubDbTable()', () => {
     const accountId = 123;
     const tableId = '456';
     const destPath = 'tmp.json';
@@ -42,8 +42,8 @@ describe('hubdb', () => {
     beforeEach(() => {
       mockedFS.outputFile.mockClear();
       getCwd.mockReturnValue(projectCwd);
-      fetchRows.mockReturnValue(Promise.resolve(hubdbFetchRowResponse));
-      fetchTable.mockReturnValue(Promise.resolve(hubdbTableResponse));
+      fetchRows.mockResolvedValue(hubdbFetchRowResponse);
+      fetchTable.mockResolvedValue(hubdbTableResponse);
     });
 
     it('fetches all results', async () => {
@@ -68,9 +68,7 @@ describe('hubdb', () => {
     });
 
     it('fetches all results with paging', async () => {
-      fetchRows.mockReturnValueOnce(
-        Promise.resolve(hubdbFetchRowsResponseWithPaging)
-      );
+      fetchRows.mockResolvedValueOnce(hubdbFetchRowsResponseWithPaging);
       await downloadHubDbTable(accountId, tableId, destPath);
       const outputFile = JSON.parse(
         mockedFS.outputFile.mock.calls[0][1] as string
@@ -86,7 +84,7 @@ describe('hubdb', () => {
     });
   });
 
-  describe('createHubDbTable', () => {
+  describe('createHubDbTable()', () => {
     it('creates a table', async () => {
       const accountId = 123;
       const srcPath = 'tmp.json';
@@ -95,9 +93,9 @@ describe('hubdb', () => {
       mockedFS.statSync.mockReturnValue({ isFile: () => true } as fs.Stats);
       mockedFS.readJsonSync.mockReturnValue(hubdbTableResponse);
 
-      createTable.mockReturnValue(Promise.resolve(hubdbTableResponse));
-      createRows.mockReturnValue(Promise.resolve(hubdbCreateRowsResponse));
-      publishTable.mockReturnValue(Promise.resolve(hubdbTableResponse));
+      createTable.mockResolvedValue(hubdbTableResponse);
+      createRows.mockResolvedValue(hubdbCreateRowsResponse);
+      publishTable.mockResolvedValue(hubdbTableResponse);
 
       const table = await createHubDbTable(
         accountId,
@@ -110,9 +108,9 @@ describe('hubdb', () => {
     });
   });
 
-  describe('clearHubDbTableRows', () => {
+  describe('clearHubDbTableRows()', () => {
     it('clears all of the hubdb table rows', async () => {
-      fetchRows.mockReturnValue(Promise.resolve(hubdbFetchRowResponse));
+      fetchRows.mockResolvedValue(hubdbFetchRowResponse);
       const result = await clearHubDbTableRows(123, '456');
 
       expect(result.deletedRowCount).toBe(3);
