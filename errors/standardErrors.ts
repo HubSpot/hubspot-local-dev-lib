@@ -52,7 +52,7 @@ export function throwTypeErrorWithMessage(
  * @throws
  */
 export function throwAuthErrorWithMessage(
-  identifier: string,
+  identifier: LangKey,
   interpolation?: { [key: string]: string | number },
   cause?: StatusCodeError
 ): never {
