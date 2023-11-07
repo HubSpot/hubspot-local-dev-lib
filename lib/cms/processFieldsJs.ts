@@ -14,11 +14,6 @@ const i18nKey = 'lib.cms.processFieldsJs';
 const { dirName, fieldOptions, filePath, writeDir } = process.env;
 const baseName = path.basename(filePath!);
 
-const FieldErrors = {
-  IsNotFunction: 'IsNotFunction',
-  DoesNotReturnArray: 'DoesNotReturnArray',
-};
-
 //TODO - Figure out agnostic logging
 console.info(
   i18n(`${i18nKey}.converting`, {
@@ -39,14 +34,16 @@ const fieldsPromise = dynamicImport(filePath!).catch(e => throwError(e));
 fieldsPromise.then(fieldsFunc => {
   const fieldsFuncType = typeof fieldsFunc;
   if (fieldsFuncType !== 'function') {
-    throwErrorWithMessage(`${i18nKey}.${FieldErrors.IsNotFunction}`, {
+    throwErrorWithMessage(`${i18nKey}.errors.notFunction`, {
       path: filePath!,
+      returned: fieldsFuncType,
     });
   }
   return Promise.resolve(fieldsFunc(fieldOptions)).then(fields => {
     if (!Array.isArray(fields)) {
-      throwErrorWithMessage(`${i18nKey}.${FieldErrors.DoesNotReturnArray}`, {
+      throwErrorWithMessage(`${i18nKey}.errors.notArray`, {
         path: filePath!,
+        returned: typeof fields,
       });
     }
 

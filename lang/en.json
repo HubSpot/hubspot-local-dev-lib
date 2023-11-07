@@ -160,7 +160,9 @@
         "converting": "Converting \"{{ src }}\" to \"{{ dest }}\".",
         "converted": "Finished converting \"{{ src }}\" to \"{{ dest }}\".",
         "errors": {
-          "invalidMjsFile": ".mjs files are only supported when using Node 13.2.0+"
+          "invalidMjsFile": ".mjs files are only supported when using Node 13.2.0+",
+          "notFunction": "There was an error loading JS file \"{{ path }}\". Expected type \"Function\" but received type \"{{ returned }}\". Make sure that your default export is a function.",
+          "notArray": "There was an error loading JS file \"{{ path }}\". Expected type \"Array\" but received type \"{{ returned }}\" . Make sure that your function returns an array"
         }
       },
       "watch": {
