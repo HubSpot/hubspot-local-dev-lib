@@ -43,18 +43,16 @@ export function addOauthToAccountConfig(
   oauth: OAuth2Manager,
   logCallbacks: LogCallbacksArg<typeof addOauthToAccountConfigCallbackKeys>
 ) {
-  const logger = makeTypedLogger<typeof addOauthToAccountConfigCallbackKeys>(
-    logCallbacks,
-    `${i18nKey}.addOauthToAccountConfig`
-  );
-  logger('init');
+  const logger =
+    makeTypedLogger<typeof addOauthToAccountConfigCallbackKeys>(logCallbacks);
+  logger('init', `${i18nKey}.addOauthToAccountConfig.init`);
   try {
     updateAccountConfig({
       ...oauth.toObj(),
       authType: AUTH_METHODS.oauth.value,
     });
     writeConfig();
-    logger('success');
+    logger('success', `${i18nKey}.addOauthToAccountConfig.success`);
   } catch (err) {
     throwError(err as BaseError);
   }

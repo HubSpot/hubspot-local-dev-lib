@@ -173,10 +173,8 @@ function createGetRequestStream(contentType: string) {
   ): Promise<AxiosResponse> => {
     const { query, ...rest } = options;
     const axiosConfig = addQueryParams(rest, query);
-    const logger = makeTypedLogger<typeof getRequestStreamCallbackKeys>(
-      logCallbacks,
-      `${i18nKey}.createGetRequestStream`
-    );
+    const logger =
+      makeTypedLogger<typeof getRequestStreamCallbackKeys>(logCallbacks);
 
     // eslint-disable-next-line no-async-promise-executor
     return new Promise<AxiosResponse>(async (resolve, reject) => {
@@ -217,7 +215,9 @@ function createGetRequestStream(contentType: string) {
             reject(err);
           });
           writeStream.on('close', async () => {
-            logger('onWrite', { filepath });
+            logger('onWrite', `${i18nKey}.createGetRequestStream.onWrite`, {
+              filepath,
+            });
             resolve(res);
           });
         } else {

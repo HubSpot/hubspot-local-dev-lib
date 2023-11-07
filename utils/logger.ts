@@ -5,7 +5,7 @@ import { LangKey } from '../types/Lang';
 export function log<T extends string>(
   key: T,
   callbacks?: LogCallbacks<T>,
-  debugKey?: string,
+  debugKey?: LangKey,
   debugInterpolation?: { [key: string]: string | number }
 ): void {
   if (callbacks && callbacks[key]) {
@@ -17,21 +17,15 @@ export function log<T extends string>(
 }
 
 export function makeTypedLogger<T extends readonly string[]>(
-  callbacks?: LogCallbacks<T[number]>,
-  debugKey?: string
+  callbacks?: LogCallbacks<T[number]>
 ) {
   type ValidateCallbackKeys = T[number];
 
   return (
     key: ValidateCallbackKeys,
+    debugKey?: LangKey,
     debugInterpolation?: { [key: string]: string | number }
-  ) =>
-    log<ValidateCallbackKeys>(
-      key,
-      callbacks,
-      `${debugKey}.${key}`,
-      debugInterpolation
-    );
+  ) => log<ValidateCallbackKeys>(key, callbacks, debugKey, debugInterpolation);
 }
 
 export function debug(

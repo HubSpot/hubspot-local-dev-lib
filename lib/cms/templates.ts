@@ -70,11 +70,10 @@ export async function createTemplate(
   debug(`${i18nKey}.createTemplate.creatingPath`, { path: dest });
   fs.mkdirp(dest);
 
-  const logger = makeTypedLogger<typeof templatesCallbackKeys>(
-    logCallbacks,
-    `${i18nKey}.createTemplate`
-  );
-  logger('creatingFile', { path: filePath });
+  const logger = makeTypedLogger<typeof templatesCallbackKeys>(logCallbacks);
+  logger('creatingFile', `${i18nKey}.createTemplate.creatingFile`, {
+    path: filePath,
+  });
 
   await downloadGithubRepoContents(
     'HubSpot/cms-sample-assets',

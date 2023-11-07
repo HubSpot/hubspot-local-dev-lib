@@ -127,10 +127,8 @@ class CLIConfiguration {
   validate(
     logCallbacks?: LogCallbacksArg<typeof validateLogCallbackKeys>
   ): boolean {
-    const validateLogger = makeTypedLogger<typeof validateLogCallbackKeys>(
-      logCallbacks,
-      `${i18nKey}.validate`
-    );
+    const validateLogger =
+      makeTypedLogger<typeof validateLogCallbackKeys>(logCallbacks);
 
     if (!this.config) {
       validateLogger('noConfig');
@@ -154,22 +152,34 @@ class CLIConfiguration {
         return false;
       }
       if (accountIdsMap[accountConfig.accountId]) {
-        validateLogger('duplicateAccountIds', {
-          accountId: accountConfig.accountId,
-        });
+        validateLogger(
+          'duplicateAccountIds',
+          `${i18nKey}.validate.duplicateAccountIds`,
+          {
+            accountId: accountConfig.accountId,
+          }
+        );
         return false;
       }
       if (accountConfig.name) {
         if (accountNamesMap[accountConfig.name]) {
-          validateLogger('duplicateAccountNames', {
-            accountName: accountConfig.name,
-          });
+          validateLogger(
+            'duplicateAccountNames',
+            `${i18nKey}.validate.duplicateAccountNames`,
+            {
+              accountName: accountConfig.name,
+            }
+          );
           return false;
         }
         if (/\s+/.test(accountConfig.name)) {
-          validateLogger('nameContainsSpaces', {
-            accountName: accountConfig.name,
-          });
+          validateLogger(
+            'nameContainsSpaces',
+            `${i18nKey}.validate.nameContainsSpaces`,
+            {
+              accountName: accountConfig.name,
+            }
+          );
           return false;
         }
         accountNamesMap[accountConfig.name] = true;

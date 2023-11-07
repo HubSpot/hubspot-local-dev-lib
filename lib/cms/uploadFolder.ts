@@ -129,10 +129,7 @@ export async function uploadFolder(
   mode: Mode | null = null,
   logCallbacks?: LogCallbacksArg<typeof uploadFolderCallbackKeys>
 ): Promise<Array<UploadFolderResults>> {
-  const logger = makeTypedLogger<typeof uploadFolderCallbackKeys>(
-    logCallbacks,
-    `${i18nKey}.uploadFolder`
-  );
+  const logger = makeTypedLogger<typeof uploadFolderCallbackKeys>(logCallbacks);
   const { saveOutput, convertFields } = commandOptions;
   const tmpDir = convertFields
     ? createTmpDirSync('hubspot-temp-fieldsjs-output-')
@@ -177,7 +174,7 @@ export async function uploadFolder(
       });
       try {
         await upload(accountId, file, destPath, apiOptions);
-        logger('success', {
+        logger('success', `${i18nKey}.uploadFolder.success`, {
           file: originalFilePath || '',
           destPath,
         });
@@ -212,7 +209,10 @@ export async function uploadFolder(
           debug(`${i18nKey}.uploadFolder.retry`, { file, destPath });
           try {
             await upload(accountId, file, destPath, apiOptions);
-            logger('success', { file, destPath });
+            logger('success', `${i18nKey}.uploadFolder.success`, {
+              file,
+              destPath,
+            });
             return {
               resultType: FILE_UPLOAD_RESULT_TYPES.SUCCESS,
               error: null,
