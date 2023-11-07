@@ -1,13 +1,130 @@
+import { ENVIRONMENTS } from '../../constants/environments';
 import config from '../CLIConfiguration';
 
-// TODO write tests for CLIConfiguration.ts
 describe('config/CLIConfiguration', () => {
+  afterAll(() => {
+    config.setActive(false);
+  });
+
   describe('constructor()', () => {
     it('initializes correctly', () => {
       expect(config).toBeDefined();
       expect(config.options).toBeDefined();
       expect(config.useEnvConfig).toBe(false);
       expect(config.config).toBe(null);
+      expect(config.active).toBe(false);
+    });
+  });
+
+  describe('isActive()', () => {
+    it('returns true when the class is being used', () => {
+      expect(config.isActive()).toBe(false);
+      config.setActive(true);
+      expect(config.isActive()).toBe(true);
+    });
+  });
+
+  describe('getAccount()', () => {
+    it('returns null when no config is loaded', () => {
+      expect(config.getAccount('account-name')).toBe(null);
+    });
+  });
+
+  describe('isConfigFlagEnabled()', () => {
+    it('returns default value when no config is loaded', () => {
+      expect(config.isConfigFlagEnabled('allowUsageTracking', false)).toBe(
+        false
+      );
+    });
+  });
+
+  describe('getAccountId()', () => {
+    it('returns null when it cannot find the account in the config', () => {
+      expect(config.getAccountId('account-name')).toBe(null);
+    });
+  });
+
+  describe('getDefaultAccount()', () => {
+    it('returns null when no config is loaded', () => {
+      expect(config.getDefaultAccount()).toBe(null);
+    });
+  });
+
+  describe('getConfigAccountIndex()', () => {
+    it('returns -1 when no config is loaded', () => {
+      expect(config.getConfigAccountIndex(123)).toBe(-1);
+    });
+  });
+
+  describe('isAccountInConfig()', () => {
+    it('returns false when no config is loaded', () => {
+      expect(config.isAccountInConfig(123)).toBe(false);
+    });
+  });
+
+  describe('getConfigForAccount()', () => {
+    it('returns null when no config is loaded', () => {
+      expect(config.getConfigForAccount(123)).toBe(null);
+    });
+  });
+
+  describe('getEnv()', () => {
+    it('returns PROD when no config is loaded', () => {
+      expect(config.getEnv(123)).toBe(ENVIRONMENTS.PROD);
+    });
+  });
+
+  describe('updateDefaultAccount()', () => {
+    it('throws when no config is loaded', () => {
+      expect(() => {
+        config.updateDefaultAccount('account-name');
+      }).toThrow();
+    });
+  });
+
+  describe('renameAccount()', () => {
+    it('throws when no config is loaded', () => {
+      expect(() => {
+        config.renameAccount('account-name', 'new-account-name');
+      }).toThrow();
+    });
+  });
+
+  describe('removeAccountFromConfig()', () => {
+    it('throws when no config is loaded', () => {
+      expect(() => {
+        config.removeAccountFromConfig('account-name');
+      }).toThrow();
+    });
+  });
+
+  describe('updateDefaultMode()', () => {
+    it('throws when no config is loaded', () => {
+      expect(() => {
+        config.updateDefaultMode('newMode');
+      }).toThrow();
+    });
+  });
+
+  describe('updateHttpTimeout()', () => {
+    it('throws when no config is loaded', () => {
+      expect(() => {
+        config.updateHttpTimeout('1000');
+      }).toThrow();
+    });
+  });
+
+  describe('updateAllowUsageTracking()', () => {
+    it('throws when no config is loaded', () => {
+      expect(() => {
+        config.updateAllowUsageTracking(true);
+      }).toThrow();
+    });
+  });
+
+  describe('isTrackingAllowed()', () => {
+    it('returns true when no config is loaded', () => {
+      expect(config.isTrackingAllowed()).toBe(true);
     });
   });
 });
