@@ -119,10 +119,7 @@ export async function createModule(
   },
   logCallbacks?: LogCallbacksArg<typeof createModuleCallbackKeys>
 ) {
-  const logger = makeTypedLogger<typeof createModuleCallbackKeys>(
-    logCallbacks,
-    `${i18nKey}.createModule`
-  );
+  const logger = makeTypedLogger<typeof createModuleCallbackKeys>(logCallbacks);
   const writeModuleMeta = (
     { contentTypes, moduleLabel, global }: ModuleDefinition,
     dest: string
@@ -170,13 +167,13 @@ export async function createModule(
       path: destPath,
     });
   } else {
-    logger('creatingPath', {
+    logger('creatingPath', `${i18nKey}.createModule.creatingPath`, {
       path: destPath,
     });
     fs.ensureDirSync(destPath);
   }
 
-  logger('creatingModule', {
+  logger('creatingModule', `${i18nKey}.createModule.creatingModule`, {
     path: destPath,
   });
 

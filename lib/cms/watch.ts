@@ -42,12 +42,14 @@ function _notifyOfThemePreview(
   accountId: number,
   logCallbacks?: WatchLogCallbacks
 ): void {
-  const logger = makeLogger(logCallbacks, i18nKey);
+  const logger = makeLogger(logCallbacks);
   if (queue.size > 0) return;
   const previewUrl = getThemePreviewUrl(filePath, accountId);
   if (!previewUrl) return;
 
-  logger('notifyOfThemePreview', { previewUrl });
+  logger('notifyOfThemePreview', `${i18nKey}.notifyOfThemePreview`, {
+    previewUrl,
+  });
 }
 
 const notifyOfThemePreview = debounce(_notifyOfThemePreview, 1000);
@@ -68,7 +70,7 @@ async function uploadFile(
   mode: Mode | null = null,
   logCallbacks?: WatchLogCallbacks
 ): Promise<void> {
-  const logger = makeLogger(logCallbacks, i18nKey);
+  const logger = makeLogger(logCallbacks);
   const src = options.src;
 
   const absoluteSrcPath = path.resolve(getCwd(), file);
@@ -112,7 +114,7 @@ async function uploadFile(
   queue.add(() => {
     return upload(accountId, fileToUpload, dest, apiOptions)
       .then(() => {
-        logger('uploadSuccess', { file, dest });
+        logger('uploadSuccess', `${i18nKey}.uploadSuccess`, { file, dest });
         notifyOfThemePreview(file, accountId, logCallbacks);
       })
       .catch(() => {
@@ -141,7 +143,7 @@ async function deleteRemoteFile(
   remoteFilePath: string,
   logCallbacks?: WatchLogCallbacks
 ): Promise<void> {
-  const logger = makeLogger(logCallbacks, i18nKey);
+  const logger = makeLogger(logCallbacks);
   if (shouldIgnoreFile(filePath)) {
     debug(`${i18nKey}.skipIgnoreRule`, { file: filePath });
     return;
@@ -151,7 +153,7 @@ async function deleteRemoteFile(
   return queue.add(() => {
     return deleteFile(accountId, remoteFilePath)
       .then(() => {
-        logger('deleteSuccess', { remoteFilePath });
+        logger('deleteSuccess', `${i18nKey}.deleteSuccess`, { remoteFilePath });
         notifyOfThemePreview(filePath, accountId, logCallbacks);
       })
       .catch((error: StatusCodeError) => {
@@ -198,7 +200,7 @@ export function watch(
   onQueueAddError?: ErrorHandler,
   logCallbacks?: WatchLogCallbacks
 ) {
-  const logger = makeLogger(logCallbacks, i18nKey);
+  const logger = makeLogger(logCallbacks);
   const regex = new RegExp(`^${escapeRegExp(src)}`);
   if (notify) {
     ignoreFile(notify);
@@ -225,7 +227,11 @@ export function watch(
       filePaths,
       mode || null
     ).then(result => {
-      logger('folderUploadSuccess', { src, dest, accountId });
+      logger('folderUploadSuccess', `${i18nKey}.folderUploadSuccess`, {
+        src,
+        dest,
+        accountId,
+      });
       if (postInitialUploadCallback) {
         postInitialUploadCallback(result);
       }
@@ -237,7 +243,7 @@ export function watch(
   }
 
   watcher.on('ready', () => {
-    logger('ready', { src });
+    logger('ready', `${i18nKey}.ready`, { src });
   });
 
   watcher.on('add', async (filePath: string) => {
@@ -281,10 +287,14 @@ export function watch(
             remotePath,
             logCallbacks
           ).then(() => {
-            logger('deleteSuccessWithType', {
-              type,
-              remoteFilePath: remotePath,
-            });
+            logger(
+              'deleteSuccessWithType',
+              `${i18nKey}.deleteSuccessWithType`,
+              {
+                type,
+                remoteFilePath: remotePath,
+              }
+            );
           });
 
           if (onQueueAddError) {

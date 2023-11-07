@@ -194,15 +194,12 @@ async function fetchAndWriteFileStream(
   options: FileMapperInputOptions = {},
   logCallbacks?: LogCallbacksArg<typeof filemapperCallbackKeys>
 ): Promise<void> {
-  const logger = makeTypedLogger<typeof filemapperCallbackKeys>(
-    logCallbacks,
-    i18nKey
-  );
+  const logger = makeTypedLogger<typeof filemapperCallbackKeys>(logCallbacks);
   if (typeof srcPath !== 'string' || !srcPath.trim()) {
     return;
   }
   if (await skipExisting(filepath, options.overwrite)) {
-    logger('skippedExisting', { filepath });
+    logger('skippedExisting', `${i18nKey}.skippedExisting`, { filepath });
     return;
   }
   if (!isAllowedExtension(srcPath)) {
@@ -235,13 +232,12 @@ async function writeFileMapperNode(
   options: FileMapperInputOptions = {},
   logCallbacks?: LogCallbacksArg<typeof filemapperCallbackKeys>
 ): Promise<boolean> {
-  const logger = makeTypedLogger<typeof filemapperCallbackKeys>(
-    logCallbacks,
-    i18nKey
-  );
+  const logger = makeTypedLogger<typeof filemapperCallbackKeys>(logCallbacks);
   const localFilepath = convertToLocalFileSystemPath(path.resolve(filepath));
   if (await skipExisting(localFilepath, options.overwrite)) {
-    logger('skippedExisting', { filepath: localFilepath });
+    logger('skippedExisting', `${i18nKey}.skippedExisting`, {
+      filepath: localFilepath,
+    });
     return true;
   }
   if (!node.folder) {
@@ -261,7 +257,9 @@ async function writeFileMapperNode(
   }
   try {
     await fs.ensureDir(localFilepath);
-    logger('wroteFolder', { filepath: localFilepath });
+    logger('wroteFolder', `${i18nKey}.wroteFolder`, {
+      filepath: localFilepath,
+    });
   } catch (err) {
     throwFileSystemError(err as BaseError, {
       filepath: localFilepath,
@@ -285,10 +283,7 @@ async function downloadFile(
   options: FileMapperInputOptions = {},
   logCallbacks?: LogCallbacksArg<typeof filemapperCallbackKeys>
 ): Promise<void> {
-  const logger = makeTypedLogger<typeof filemapperCallbackKeys>(
-    logCallbacks,
-    i18nKey
-  );
+  const logger = makeTypedLogger<typeof filemapperCallbackKeys>(logCallbacks);
   const { isFile, isHubspot } = getTypeDataFromPath(src);
   try {
     if (!isFile) {
@@ -320,7 +315,7 @@ async function downloadFile(
       logCallbacks
     );
     await queue.onIdle();
-    logger('completedFetch', {
+    logger('completedFetch', `${i18nKey}.completedFetch`, {
       src,
       version: getAssetVersionIdentifier(options.assetVersion, src),
       dest,
@@ -346,10 +341,7 @@ export async function fetchFolderFromApi(
   options: FileMapperInputOptions = {},
   logCallbacks?: LogCallbacksArg<typeof filemapperCallbackKeys>
 ): Promise<FileMapperNode> {
-  const logger = makeTypedLogger<typeof filemapperCallbackKeys>(
-    logCallbacks,
-    i18nKey
-  );
+  const logger = makeTypedLogger<typeof filemapperCallbackKeys>(logCallbacks);
   const { isRoot, isFolder, isHubspot } = getTypeDataFromPath(src);
   if (!isFolder) {
     throwErrorWithMessage(`${i18nKey}.errors.invalidFetchFolderRequest`, {
@@ -362,7 +354,7 @@ export async function fetchFolderFromApi(
     const node = isHubspot
       ? await downloadDefault(accountId, srcPath, queryValues)
       : await download(accountId, srcPath, queryValues);
-    logger('folderFetch', { src, accountId });
+    logger('folderFetch', `${i18nKey}.folderFetch`, { src, accountId });
     return node;
   } catch (err) {
     const error = err as StatusCodeError;
@@ -385,10 +377,7 @@ async function downloadFolder(
   options: FileMapperInputOptions = {},
   logCallbacks?: LogCallbacksArg<typeof filemapperCallbackKeys>
 ) {
-  const logger = makeTypedLogger<typeof filemapperCallbackKeys>(
-    logCallbacks,
-    i18nKey
-  );
+  const logger = makeTypedLogger<typeof filemapperCallbackKeys>(logCallbacks);
   try {
     const node = await fetchFolderFromApi(
       accountId,
@@ -429,7 +418,7 @@ async function downloadFolder(
     await queue.onIdle();
 
     if (success) {
-      logger('completedFolderFetch', {
+      logger('completedFolderFetch', `${i18nKey}.completedFolderFetch`, {
         src,
         version: getAssetVersionIdentifier(options.assetVersion, src),
         dest,

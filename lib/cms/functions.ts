@@ -156,10 +156,8 @@ export async function createFunction(
   options: FunctionOptions,
   logCallbacks?: LogCallbacksArg<typeof createFunctionCallbackKeys>
 ): Promise<void> {
-  const logger = makeTypedLogger<typeof createFunctionCallbackKeys>(
-    logCallbacks,
-    `${i18nKey}.createFunction`
-  );
+  const logger =
+    makeTypedLogger<typeof createFunctionCallbackKeys>(logCallbacks);
   const { functionsFolder, filename, endpointPath, endpointMethod } =
     functionInfo;
 
@@ -186,12 +184,16 @@ export async function createFunction(
 
   const destPath = path.join(dest, folderName);
   if (fs.existsSync(destPath)) {
-    logger('destPathAlreadyExists', {
-      path: destPath,
-    });
+    logger(
+      'destPathAlreadyExists',
+      `${i18nKey}.createFunction.destPathAlreadyExists`,
+      {
+        path: destPath,
+      }
+    );
   } else {
     fs.mkdirp(destPath);
-    logger('createdDest', {
+    logger('createdDest', `${i18nKey}.createFunction.createdDest`, {
       path: destPath,
     });
   }
@@ -213,9 +215,13 @@ export async function createFunction(
     functionFilePath
   );
 
-  logger('createdFunctionFile', {
-    path: functionFilePath,
-  });
+  logger(
+    'createdFunctionFile',
+    `${i18nKey}.createFunction.createdFunctionFile`,
+    {
+      path: functionFilePath,
+    }
+  );
 
   if (fs.existsSync(configFilePath)) {
     updateExistingConfig(configFilePath, {
@@ -224,10 +230,14 @@ export async function createFunction(
       functionFile,
     });
 
-    logger('createdFunctionFile', {
-      path: functionFilePath,
-    });
-    logger('success', {
+    logger(
+      'createdFunctionFile',
+      `${i18nKey}.createFunction.createdFunctionFile`,
+      {
+        path: functionFilePath,
+      }
+    );
+    logger('success', `${i18nKey}.createFunction.success`, {
       endpointPath: endpointPath,
       folderName,
     });
@@ -244,10 +254,10 @@ export async function createFunction(
         write: true,
       });
     }
-    logger('createdConfigFile', {
+    logger('createdConfigFile', `${i18nKey}.createFunction.createdConfigFile`, {
       path: configFilePath,
     });
-    logger('success', {
+    logger('success', `${i18nKey}.createFunction.success`, {
       endpointPath: endpointPath,
       folderName,
     });

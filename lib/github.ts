@@ -34,7 +34,7 @@ export async function fetchJsonFromRepository(
 ): Promise<JSON> {
   try {
     const URL = `https://raw.githubusercontent.com/${repoPath}/${ref}/${filePath}`;
-    debug(`${i18nKey}.fetchJsonFromRepository`, { url: URL });
+    debug(`${i18nKey}.fetchJsonFromRepository.fetching`, { url: URL });
 
     const { data } = await axios.get<JSON>(URL, {
       headers: { ...DEFAULT_USER_AGENT_HEADERS, ...GITHUB_AUTH_HEADERS },
@@ -130,10 +130,8 @@ export async function cloneGithubRepo(
   options: CloneGithubRepoOptions = {},
   logCallbacks?: LogCallbacksArg<typeof cloneGithubRepoCallbackKeys>
 ): Promise<boolean> {
-  const logger = makeTypedLogger<typeof cloneGithubRepoCallbackKeys>(
-    logCallbacks,
-    `${i18nKey}.cloneGithubRepo`
-  );
+  const logger =
+    makeTypedLogger<typeof cloneGithubRepoCallbackKeys>(logCallbacks);
   const { themeVersion, projectVersion, releaseType, ref } = options;
   const tag = projectVersion || themeVersion;
   const zip = await downloadGithubRepoZip(repoPath, tag, releaseType, ref);
@@ -141,7 +139,7 @@ export async function cloneGithubRepo(
   const success = await extractZipArchive(zip, repoName, dest, { sourceDir });
 
   if (success) {
-    logger('success', { type, dest });
+    logger('success', `${i18nKey}.cloneGithubRepo.success`, { type, dest });
   }
   return success;
 }
