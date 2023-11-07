@@ -1,4 +1,5 @@
 import { i18n } from './lang';
+import { logger } from '../lib/logging/logger';
 import { LogCallbacks } from '../types/LogCallbacks';
 import { LangKey } from '../types/Lang';
 
@@ -32,5 +33,5 @@ export function debug(
   identifier: LangKey,
   interpolation?: { [key: string]: string | number }
 ): void {
-  console.debug(i18n(identifier, interpolation));
+  logger.debug(i18n(identifier, interpolation));
 }
