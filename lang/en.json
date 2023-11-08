@@ -324,7 +324,7 @@
     },
     "detectPort": {
       "errors": {
-        "invalidPort": "Port must be between 1024 and 65535"
+        "invalidPort": "Port must be between {{ minPort }} and {{ maxPort }}"
       }
     },
     "PortManagerServer": {
@@ -337,7 +337,7 @@
         "duplicateInstance": "Failed to start PortManagerServer. An instance of PortManagerServer is already running.",
         "404": "Could not find a server with instanceId {{ instanceId }}",
         "409": "Failed to assign port. Server with instanceId {{ instanceId }} is already running on port {{ port }}",
-        "400": "Invalid port requested. Port must be between 1024 and 65535."
+        "400": "Invalid port requested. Port must be between {{ minPort }} and {{ maxPort }}."
       }
     }
   },

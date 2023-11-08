@@ -136,7 +136,12 @@ class PortManagerServer {
         );
         return;
       } else if (port && (port < MIN_PORT_NUMBER || port > MAX_PORT_NUMBER)) {
-        res.status(400).send(i18n(`${i18nKey}.errors.400`));
+        res.status(400).send(
+          i18n(`${i18nKey}.errors.400`, {
+            minPort: MIN_PORT_NUMBER,
+            maxPort: MAX_PORT_NUMBER,
+          })
+        );
         return;
       } else {
         const promise = new Promise<{ [instanceId: string]: number }>(

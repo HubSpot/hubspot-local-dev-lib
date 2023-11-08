@@ -39,7 +39,10 @@ const i18nKey = 'utils.detectPort';
 
 export function detectPort(port?: number | null): Promise<number> {
   if (port && (port < MIN_PORT_NUMBER || port > MAX_PORT_NUMBER)) {
-    throwErrorWithMessage(`${i18nKey}.errors.invalidPort`);
+    throwErrorWithMessage(`${i18nKey}.errors.invalidPort`, {
+      minPort: MIN_PORT_NUMBER,
+      maxPort: MAX_PORT_NUMBER,
+    });
   }
 
   const portToUse = port || 0;
