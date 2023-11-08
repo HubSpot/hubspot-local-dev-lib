@@ -5,6 +5,8 @@ import { throwErrorWithMessage } from '../../errors/standardErrors';
 import { debug, makeTypedLogger } from '../../utils/logger';
 import { LogCallbacksArg } from '../../types/LogCallbacks';
 
+const i18nKey = 'lib.cms.templates';
+
 // Matches the .html file extension, excluding module.html
 const TEMPLATE_EXTENSION_REGEX = new RegExp(/(?<!module)\.html$/);
 
@@ -61,16 +63,17 @@ export async function createTemplate(
   const filename = name.endsWith('.html') ? name : `${name}.html`;
   const filePath = path.join(dest, filename);
   if (!options.allowExisting && fs.existsSync(filePath)) {
-    throwErrorWithMessage('templates.pathExists', { path: filePath });
+    throwErrorWithMessage(`${i18nKey}.createTemplate.errors.pathExists`, {
+      path: filePath,
+    });
   }
-  debug('templates.debug.creatingPath', { path: dest });
+  debug(`${i18nKey}.createTemplate.creatingPath`, { path: dest });
   fs.mkdirp(dest);
 
-  const logger = makeTypedLogger<typeof templatesCallbackKeys>(
-    logCallbacks,
-    'templates.logging'
-  );
-  logger('creatingFile', { path: filePath });
+  const logger = makeTypedLogger<typeof templatesCallbackKeys>(logCallbacks);
+  logger('creatingFile', `${i18nKey}.createTemplate.creatingFile`, {
+    path: filePath,
+  });
 
   await downloadGithubRepoContents(
     'HubSpot/cms-sample-assets',

@@ -1,6 +1,9 @@
 import moment from 'moment';
 import chalk from 'chalk';
 import { logger, Styles } from './logger';
+import { i18n } from '../../utils/lang';
+
+const i18nKey = 'lib.logging.logs';
 
 const SEPARATOR = ' - ';
 const LOG_STATUS_COLORS = {
@@ -8,7 +11,7 @@ const LOG_STATUS_COLORS = {
   ERROR: Styles.error,
   UNHANDLED_ERROR: Styles.error,
   HANDLED_ERROR: Styles.error,
-}
+};
 
 type Log = {
   log: string;
@@ -18,20 +21,20 @@ type Log = {
   error: {
     type: string;
     message: string;
-    stackTrace: Array<Array<string>>
-  }
-}
+    stackTrace: Array<Array<string>>;
+  };
+};
 
 type Options = {
   compact: boolean;
   insertions: {
     header: string;
-  }
-}
+  };
+};
 
 type LogsResponse = {
-  results: Array<Log>
-}
+  results: Array<Log>;
+};
 
 function errorHandler(log: Log, options: Options): string {
   return `${formatLogHeader(log, options)}${formatError(log, options)}`;
@@ -44,7 +47,7 @@ const logHandler = {
   SUCCESS: (log: Log, options: Options): string => {
     return `${formatLogHeader(log, options)}${formatSuccess(log, options)}`;
   },
-}
+};
 
 function formatSuccess(log: Log, options: Options): string {
   if (!log.log || options.compact) {
@@ -93,11 +96,18 @@ function processLog(log: Log, options: Options): string | void {
   try {
     return logHandler[log.status](log, options);
   } catch (e) {
-    logger.error(`Unable to process log ${JSON.stringify(log)}`);
+    logger.error(
+      i18n(`${i18nKey}.unableToProcessLog`, {
+        log: JSON.stringify(log),
+      })
+    );
   }
 }
 
-function processLogs(logsResp: LogsResponse, options: Options): string | undefined {
+function processLogs(
+  logsResp: LogsResponse,
+  options: Options
+): string | undefined {
   if (!logsResp || (logsResp.results && !logsResp.results.length)) {
     return 'No logs found.';
   } else if (logsResp.results && logsResp.results.length) {
@@ -110,5 +120,5 @@ function processLogs(logsResp: LogsResponse, options: Options): string | undefin
 }
 
 export function outputLogs(logsResp: LogsResponse, options: Options): void {
-  logger.log(processLogs(logsResp, options))
+  logger.log(processLogs(logsResp, options));
 }

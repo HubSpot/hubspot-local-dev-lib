@@ -9,15 +9,10 @@ import { throwError, throwErrorWithMessage } from '../../errors/standardErrors';
 import { FieldsJs } from './handleFieldsJS';
 import { i18n } from '../../utils/lang';
 
-const i18nKey = 'processFieldsJs';
+const i18nKey = 'lib.cms.processFieldsJs';
 
 const { dirName, fieldOptions, filePath, writeDir } = process.env;
 const baseName = path.basename(filePath!);
-
-const FieldErrors = {
-  IsNotFunction: 'IsNotFunction',
-  DoesNotReturnArray: 'DoesNotReturnArray',
-};
 
 //TODO - Figure out agnostic logging
 console.info(
@@ -39,14 +34,16 @@ const fieldsPromise = dynamicImport(filePath!).catch(e => throwError(e));
 fieldsPromise.then(fieldsFunc => {
   const fieldsFuncType = typeof fieldsFunc;
   if (fieldsFuncType !== 'function') {
-    throwErrorWithMessage(`${i18nKey}.${FieldErrors.IsNotFunction}`, {
+    throwErrorWithMessage(`${i18nKey}.errors.notFunction`, {
       path: filePath!,
+      returned: fieldsFuncType,
     });
   }
   return Promise.resolve(fieldsFunc(fieldOptions)).then(fields => {
     if (!Array.isArray(fields)) {
-      throwErrorWithMessage(`${i18nKey}.${FieldErrors.DoesNotReturnArray}`, {
+      throwErrorWithMessage(`${i18nKey}.errors.notArray`, {
         path: filePath!,
+        returned: typeof fields,
       });
     }
 
@@ -108,7 +105,7 @@ async function dynamicImport(filePath: string): Promise<any> {
     return exported;
   } else {
     if (getExt(filePath) == 'mjs') {
-      throwErrorWithMessage(`${i18nKey}.invalidMjsFile`);
+      throwErrorWithMessage(`${i18nKey}.errors.invalidMjsFile`);
     }
     return require(filePath);
   }

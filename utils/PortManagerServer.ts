@@ -31,7 +31,7 @@ class PortManagerServer {
 
   async init(): Promise<void> {
     if (this.app) {
-      throwErrorWithMessage(`${i18nKey}.duplicateInstance`);
+      throwErrorWithMessage(`${i18nKey}.errors.duplicateInstance`);
     }
     this.app = express();
     this.app.use(express.json());
@@ -44,7 +44,7 @@ class PortManagerServer {
       const error = e as BaseError;
       if (error.code === 'EADDRINUSE') {
         throwErrorWithMessage(
-          `${i18n}.portInUse`,
+          `${i18nKey}.errors.portInUse`,
           {
             port: PORT_MANAGER_SERVER_PORT,
           },
@@ -62,7 +62,7 @@ class PortManagerServer {
           port: PORT_MANAGER_SERVER_PORT,
         });
         resolve(server);
-      }).on('error', err => {
+      }).on('error', (err: BaseError) => {
         reject(err);
       });
     });
@@ -86,7 +86,7 @@ class PortManagerServer {
   }
 
   deletePort(instanceId: string) {
-    debug(`${i18nKey}.deletePort`, {
+    debug(`${i18nKey}.deletedPort`, {
       instanceId,
       port: this.serverPortMap[instanceId],
     });
@@ -96,7 +96,7 @@ class PortManagerServer {
   send404(res: Response, instanceId: string) {
     res
       .status(404)
-      .send(i18n(`errors.${i18nKey}.404`, { instanceId: instanceId }));
+      .send(i18n(`${i18nKey}.errors.404`, { instanceId: instanceId }));
   }
 
   getServers = async (req: Request, res: Response): Promise<void> => {
@@ -129,14 +129,14 @@ class PortManagerServer {
       const { port, instanceId } = data;
       if (this.serverPortMap[instanceId]) {
         res.status(409).send(
-          i18n(`errors.${i18nKey}.409`, {
+          i18n(`${i18nKey}.errors.409`, {
             instanceId,
             port: this.serverPortMap[instanceId],
           })
         );
         return;
       } else if (port && (port < MIN_PORT_NUMBER || port > MAX_PORT_NUMBER)) {
-        res.status(400).send(i18n(`errors.${i18nKey}.400`));
+        res.status(400).send(i18n(`${i18nKey}.errors.400`));
         return;
       } else {
         const promise = new Promise<{ [instanceId: string]: number }>(

@@ -15,9 +15,11 @@ import { FetchRowsResponse, Row, Table } from '../types/Hubdb';
 import { throwErrorWithMessage } from '../errors/standardErrors';
 import { BaseError } from '../types/Error';
 
+const i18nKey = 'lib.hubdb';
+
 function validateJsonPath(src: string): void {
   if (path.extname(src) !== '.json') {
-    throwErrorWithMessage('hubdb.invalidJsonPath');
+    throwErrorWithMessage(`${i18nKey}.errors.invalidJsonPath`);
   }
 }
 
@@ -27,11 +29,15 @@ function validateJsonFile(src: string): void {
   try {
     stats = fs.statSync(src);
   } catch (err) {
-    throwErrorWithMessage('hubdb.invalidJsonFile', { src }, err as BaseError);
+    throwErrorWithMessage(
+      `${i18nKey}.errors.invalidJsonFile`,
+      { src },
+      err as BaseError
+    );
   }
 
   if (!stats.isFile()) {
-    throwErrorWithMessage('hubdb.invalidJsonFile', { src });
+    throwErrorWithMessage(`${i18nKey}.errors.invalidJsonFile`, { src });
   }
 
   validateJsonPath(src);

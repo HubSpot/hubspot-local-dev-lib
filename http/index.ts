@@ -13,6 +13,8 @@ import { throwErrorWithMessage } from '../errors/standardErrors';
 import { makeTypedLogger } from '../utils/logger';
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 
+const i18nKey = 'http.index';
+
 async function withOauth(
   accountId: number,
   accountConfig: FlatAccountFields,
@@ -22,7 +24,7 @@ async function withOauth(
   const oauth = getOauthManager(accountId, accountConfig);
 
   if (!oauth) {
-    throwErrorWithMessage('http.index.withOauth', { accountId });
+    throwErrorWithMessage(`${i18nKey}.errors.withOauth`, { accountId });
   }
 
   const accessToken = await oauth.accessToken();
@@ -72,7 +74,7 @@ async function withAuth(
   const accountConfig = getAccountConfig(accountId);
 
   if (!accountConfig) {
-    throwErrorWithMessage('http.index.withAuth', { accountId });
+    throwErrorWithMessage(`${i18nKey}.errors.withAuth`, { accountId });
   }
 
   const { env, authType, apiKey } = accountConfig;
@@ -171,10 +173,8 @@ function createGetRequestStream(contentType: string) {
   ): Promise<AxiosResponse> => {
     const { query, ...rest } = options;
     const axiosConfig = addQueryParams(rest, query);
-    const logger = makeTypedLogger<typeof getRequestStreamCallbackKeys>(
-      logCallbacks,
-      'http.index.createGetRequestStream'
-    );
+    const logger =
+      makeTypedLogger<typeof getRequestStreamCallbackKeys>(logCallbacks);
 
     // eslint-disable-next-line no-async-promise-executor
     return new Promise<AxiosResponse>(async (resolve, reject) => {
@@ -215,7 +215,9 @@ function createGetRequestStream(contentType: string) {
             reject(err);
           });
           writeStream.on('close', async () => {
-            logger('onWrite', { filepath });
+            logger('onWrite', `${i18nKey}.createGetRequestStream.onWrite`, {
+              filepath,
+            });
             resolve(res);
           });
         } else {

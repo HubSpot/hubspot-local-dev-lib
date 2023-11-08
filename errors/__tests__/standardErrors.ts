@@ -54,21 +54,27 @@ describe('errors/standardErrors', () => {
   describe('throwErrorWithMessage()', () => {
     it('throws error with message', () => {
       const error = newError();
-      expect(() => throwErrorWithMessage('', {}, error)).toThrow();
+      expect(() =>
+        throwErrorWithMessage('errors.generic', {}, error)
+      ).toThrow();
     });
   });
 
   describe('throwTypeErrorWithMessage()', () => {
     it('throws type error with message', () => {
       const error = newError();
-      expect(() => throwTypeErrorWithMessage('', {}, error)).toThrow();
+      expect(() =>
+        throwTypeErrorWithMessage('errors.generic', {}, error)
+      ).toThrow();
     });
   });
 
   describe('throwAuthErrorWithMessage()', () => {
     it('throws auth error with message', () => {
       const error = newError() as StatusCodeError;
-      expect(() => throwAuthErrorWithMessage('', {}, error)).toThrow();
+      expect(() =>
+        throwAuthErrorWithMessage('errors.generic', {}, error)
+      ).toThrow();
     });
   });
 

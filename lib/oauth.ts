@@ -9,12 +9,14 @@ import { makeTypedLogger } from '../utils/logger';
 import { getAccountIdentifier } from '../utils/getAccountIdentifier';
 import { updateAccountConfig, writeConfig } from '../config';
 
+const i18nKey = 'lib.oauth';
+
 const oauthManagers = new Map<number, OAuth2Manager>();
 
 function writeOauthTokenInfo(accountConfig: FlatAccountFields): void {
   const accountId = getAccountIdentifier(accountConfig);
 
-  debug('oauth.writeTokenInfo', { portalId: accountId || '' });
+  debug(`${i18nKey}.writeTokenInfo`, { portalId: accountId || '' });
 
   updateAccountConfig(accountConfig);
   writeConfig();
@@ -41,18 +43,16 @@ export function addOauthToAccountConfig(
   oauth: OAuth2Manager,
   logCallbacks: LogCallbacksArg<typeof addOauthToAccountConfigCallbackKeys>
 ) {
-  const logger = makeTypedLogger<typeof addOauthToAccountConfigCallbackKeys>(
-    logCallbacks,
-    'oauth.addOauthToAccountConfig'
-  );
-  logger('init');
+  const logger =
+    makeTypedLogger<typeof addOauthToAccountConfigCallbackKeys>(logCallbacks);
+  logger('init', `${i18nKey}.addOauthToAccountConfig.init`);
   try {
     updateAccountConfig({
       ...oauth.toObj(),
       authType: AUTH_METHODS.oauth.value,
     });
     writeConfig();
-    logger('success');
+    logger('success', `${i18nKey}.addOauthToAccountConfig.success`);
   } catch (err) {
     throwError(err as BaseError);
   }

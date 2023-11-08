@@ -1,42 +1,33 @@
-import { join } from 'path';
-import { existsSync, readFileSync } from 'fs-extra';
-import { load } from 'js-yaml';
+import en from '../lang/en.json';
+import { LanguageObject, GenericLanguageObject, LangKey } from '../types/Lang';
+
+const LANGUAGES: { [language: string]: LanguageObject } = {
+  en,
+};
 
 const MISSING_LANGUAGE_DATA_PREFIX = '[Missing language data]';
 
-type LanguageObject = {
-  [key: string]: LanguageObject | string;
-};
+let languageObj: GenericLanguageObject | string;
 
-let locale = '';
-let languageObj: LanguageObject;
-
-function loadLanguageFromYaml(): void {
+function loadLanguageForLocale(): void {
   if (languageObj) return;
 
   try {
     const nodeLocale = Intl.DateTimeFormat()
       .resolvedOptions()
       .locale.split('-')[0];
-    const languageFilePath = join(__dirname, `../lang/${nodeLocale}.lyaml`);
-    const languageFileExists = existsSync(languageFilePath);
 
-    // Fall back to using the default language file
-    locale = languageFileExists ? nodeLocale : 'en';
-    languageObj = load(
-      readFileSync(join(__dirname, `../lang/${locale}.lyaml`), 'utf8')
-    ) as LanguageObject;
+    languageObj = LANGUAGES[nodeLocale] || LANGUAGES.en;
   } catch (e) {
     throw new Error(`Error loading language data: ${e}`);
   }
 }
 
-function getTextValue(lookupDotNotation: string): string {
-  const lookupProps = [locale, ...lookupDotNotation.split('.')];
-  const missingTextData = `${MISSING_LANGUAGE_DATA_PREFIX}: ${lookupProps.join(
-    '.'
-  )}`;
-  let textValue = languageObj as LanguageObject | string;
+function getTextValue(lookupDotNotation: LangKey): string {
+  const lookupProps = lookupDotNotation.split('.');
+  const missingTextData = `${MISSING_LANGUAGE_DATA_PREFIX}: ${lookupDotNotation}`;
+
+  let textValue = languageObj;
   let previouslyCheckedProp = lookupProps[0];
 
   lookupProps.forEach(prop => {
@@ -115,11 +106,11 @@ export function interpolate(
 }
 
 export function i18n(
-  lookupDotNotation: string,
+  lookupDotNotation: LangKey,
   options: { [identifier: string]: string | number } = {}
 ) {
   if (!languageObj) {
-    loadLanguageFromYaml();
+    loadLanguageForLocale();
   }
 
   if (typeof lookupDotNotation !== 'string') {
@@ -135,6 +126,5 @@ export function i18n(
 }
 
 export const setLangData = (newLocale: string, newLangObj: LanguageObject) => {
-  locale = newLocale;
   languageObj = newLangObj;
 };

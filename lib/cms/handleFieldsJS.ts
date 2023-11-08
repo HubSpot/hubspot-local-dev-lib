@@ -8,7 +8,7 @@ import { debug } from '../../utils/logger';
 import { throwErrorWithMessage } from '../../errors/standardErrors';
 import { BaseError } from '../../types/Error';
 
-const i18nKey = 'cms.handleFieldsJs';
+const i18nKey = 'lib.cms.handleFieldsJs';
 
 export class FieldsJs {
   projectDir: string;
@@ -85,7 +85,11 @@ export class FieldsJs {
         });
       });
     }).catch((e: BaseError) => {
-      throwErrorWithMessage(`${i18nKey}.convertFieldsJs`, { filePath }, e);
+      throwErrorWithMessage(
+        `${i18nKey}.convertFieldsJs.errors.errorConverting`,
+        { filePath },
+        e
+      );
     });
   }
 
@@ -96,7 +100,9 @@ export class FieldsJs {
    */
   saveOutput(): void {
     if (!this.outputPath || !fs.existsSync(this.outputPath)) {
-      throwErrorWithMessage(`${i18nKey}.saveOutput`, { path: this.filePath });
+      throwErrorWithMessage(`${i18nKey}.saveOutput.errors.saveFailed`, {
+        path: this.filePath,
+      });
     }
     const relativePath = path.relative(
       this.rootWriteDir,
@@ -111,7 +117,7 @@ export class FieldsJs {
       fs.copyFileSync(this.outputPath, savePath);
     } catch (err) {
       throwErrorWithMessage(
-        `${i18nKey}.saveOutput`,
+        `${i18nKey}.saveOutput.errors.saveFailed`,
         { path: savePath },
         err as BaseError
       );
@@ -163,7 +169,11 @@ export function createTmpDirSync(prefix: string): string {
   try {
     tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), prefix));
   } catch (err) {
-    throwErrorWithMessage(`${i18nKey}.createTmpDirSync`, {}, err as BaseError);
+    throwErrorWithMessage(
+      `${i18nKey}.createTmpDirSync.errors.writeFailed`,
+      {},
+      err as BaseError
+    );
   }
   return tmpDir;
 }
@@ -173,7 +183,7 @@ export function cleanupTmpDirSync(tmpDir: string): void {
   fs.rm(tmpDir, { recursive: true }, err => {
     if (err) {
       throwErrorWithMessage(
-        `${i18nKey}.cleanupTmpDirSync`,
+        `${i18nKey}.cleanupTmpDirSync.errors.deleteFailed`,
         {},
         err as BaseError
       );

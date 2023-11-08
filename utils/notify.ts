@@ -5,6 +5,8 @@ import debounce from 'debounce';
 import { throwErrorWithMessage } from '../errors/standardErrors';
 import { BaseError } from '../types/Error';
 
+const i18nKey = 'utils.notify';
+
 const notifyQueue: Array<string> = [];
 const notifyPromises: Array<Promise<void>> = [];
 const debouncedWaitForActionsToCompleteAndWriteQueueToFile = debounce(
@@ -50,7 +52,7 @@ function notifyFilePath(filePathToNotify: string, outputToWrite: string): void {
       fs.appendFileSync(filePathToNotify, outputToWrite);
     } catch (e) {
       throwErrorWithMessage(
-        'utils.notify.filePath',
+        `${i18nKey}.errors.filePath`,
         { filePath: filePathToNotify },
         e as BaseError
       );
