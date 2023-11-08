@@ -1,5 +1,6 @@
 import net, { AddressInfo } from 'net';
 import { ip } from 'address';
+import { throwErrorWithMessage } from '../errors/standardErrors';
 
 import { MIN_PORT_NUMBER, MAX_PORT_NUMBER } from '../constants/ports';
 
@@ -9,9 +10,11 @@ type NetError = Error & {
 
 type ListenCallback = (error: NetError | null, port: number) => void;
 
+const i18nKey = 'utils.detectPort';
+
 export function detectPort(port?: number | null): Promise<number> {
   if (port && (port < MIN_PORT_NUMBER || port > MAX_PORT_NUMBER)) {
-    throw new Error('Port must be between 1024 and 65535');
+    throwErrorWithMessage(`${i18nKey}.errors.invalidPort`);
   }
 
   const portToUse = port || 0;

@@ -322,6 +322,11 @@
         "throwInvalidPathInput": "Expected Path Input"
       }
     },
+    "detectPort": {
+      "errors": {
+        "invalidPort": "Port must be between 1024 and 65535"
+      }
+    },
     "PortManagerServer": {
       "started": "PortManagerServer running on port {{ port }}",
       "setPort": "Server with instanceId {{ instanceId }} assigned to port {{ port }}",
