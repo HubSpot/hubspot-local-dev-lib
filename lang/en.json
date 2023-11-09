@@ -321,6 +321,24 @@
       "modules": {
         "throwInvalidPathInput": "Expected Path Input"
       }
+    },
+    "detectPort": {
+      "errors": {
+        "invalidPort": "Port must be between {{ minPort }} and {{ maxPort }}"
+      }
+    },
+    "PortManagerServer": {
+      "started": "PortManagerServer running on port {{ port }}",
+      "setPort": "Server with instanceId {{ instanceId }} assigned to port {{ port }}",
+      "deletedPort": "Server with instanceId {{ instanceId }} unassigned from port {{ port }}",
+      "close": "PortManagerServer shutting down.",
+      "errors": {
+        "portInUse": "Failed to start PortManagerServer. Port {{ port }} is already in use.",
+        "duplicateInstance": "Failed to start PortManagerServer. An instance of PortManagerServer is already running.",
+        "404": "Could not find a server with instanceId {{ instanceId }}",
+        "409": "Failed to assign port. Server with instanceId {{ instanceId }} is already running on port {{ port }}",
+        "400": "Invalid port requested. Port must be between {{ minPort }} and {{ maxPort }}."
+      }
     }
   },
   "http": {
