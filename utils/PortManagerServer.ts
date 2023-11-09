@@ -55,6 +55,12 @@ class PortManagerServer {
     }
   }
 
+  reset() {
+    this.app = undefined;
+    this.server = undefined;
+    this.serverPortMap = {};
+  }
+
   listen(): Promise<Server> {
     return new Promise<Server>((resolve, reject) => {
       const server = this.app!.listen(PORT_MANAGER_SERVER_PORT, () => {
@@ -146,11 +152,13 @@ class PortManagerServer {
       } else {
         const promise = new Promise<{ [instanceId: string]: number }>(
           resolve => {
-            detectPort(port).then(resolvedPort => {
-              resolve({
-                [instanceId]: resolvedPort,
-              });
-            });
+            detectPort(port, Object.values(this.serverPortMap)).then(
+              resolvedPort => {
+                resolve({
+                  [instanceId]: resolvedPort,
+                });
+              }
+            );
           }
         );
         portPromises.push(promise);
@@ -184,6 +192,7 @@ class PortManagerServer {
       debug(`${i18nKey}.close`);
       res.send(200);
       this.server.close();
+      this.reset();
     }
   };
 }
