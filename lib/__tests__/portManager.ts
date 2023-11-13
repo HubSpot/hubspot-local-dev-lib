@@ -1,5 +1,7 @@
+import { MAX_PORT_NUMBER } from '../../constants/ports';
 import PortManagerServer from '../../utils/PortManagerServer';
 import {
+  deleteServerInstance,
   requestPorts,
   startPortManagerServer,
   stopPortManagerServer,
@@ -26,6 +28,11 @@ const PORT_DATA = [
 const DUPLICATE_PORT_DATA = [
   { instanceId: INSTANCE_ID_3, port: PORT_1 },
   { instanceId: INSTANCE_ID_4, port: PORT_2 },
+];
+
+const BAD_PORT_DATA = [
+  { instanceId: INSTANCE_ID_1, port: PORT_1 },
+  { instanceId: INSTANCE_ID_2, port: MAX_PORT_NUMBER + 1 },
 ];
 
 describe('lib/portManager', () => {
@@ -92,9 +99,27 @@ describe('lib/portManager', () => {
       await requestPorts(PORT_DATA);
       await expect(requestPorts(PORT_DATA)).rejects.toThrow();
     });
+
+    it('throws an error when an invalid port is requested', async () => {
+      await expect(requestPorts(BAD_PORT_DATA)).rejects.toThrow();
+    });
   });
 
-  // describe('deleteServerInstance', () => {});
+  describe('deleteServerInstance', () => {
+    beforeEach(async () => {
+      await startPortManagerServer();
+    });
+    afterEach(async () => {
+      await stopPortManagerServer();
+    });
+
+    it('deletes port data for a server instance', async () => {
+      await requestPorts(PORT_DATA);
+      expect(PortManagerServer.serverPortMap[INSTANCE_ID_1]).toBeDefined();
+      await deleteServerInstance(INSTANCE_ID_1);
+      expect(PortManagerServer.serverPortMap[INSTANCE_ID_1]).toBeUndefined();
+    });
+  });
 
   // describe('portManagerHasActiveServers()', () => {});
 
