@@ -131,8 +131,8 @@ class PortManagerServer {
 
     const portPromises: Array<Promise<{ [instanceId: string]: number }>> = [];
 
-    portData.forEach(data => {
-      const { port, instanceId } = data;
+    for (let i = 0; i < portData.length; i++) {
+      const { port, instanceId } = portData[i];
       if (this.serverPortMap[instanceId]) {
         res.status(409).send(
           i18n(`${i18nKey}.errors.409`, {
@@ -163,7 +163,7 @@ class PortManagerServer {
         );
         portPromises.push(promise);
       }
-    });
+    }
 
     const portList = await Promise.all(portPromises);
     const ports = portList.reduce((a, c) => Object.assign(a, c));

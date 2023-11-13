@@ -87,6 +87,11 @@ describe('lib/portManager', () => {
       expect(typeof portData[INSTANCE_ID_3]).toBe('number');
       expect(typeof portData[INSTANCE_ID_4]).toBe('number');
     });
+
+    it('throws an error if requesting a port for a server instance that already has a port', async () => {
+      await requestPorts(PORT_DATA);
+      await expect(requestPorts(PORT_DATA)).rejects.toThrow();
+    });
   });
 
   // describe('deleteServerInstance', () => {});
