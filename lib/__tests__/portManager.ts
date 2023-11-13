@@ -1,10 +1,13 @@
+import axios from 'axios';
 import { MAX_PORT_NUMBER } from '../../constants/ports';
 import PortManagerServer from '../../utils/PortManagerServer';
 import {
   deleteServerInstance,
+  portManagerHasActiveServers,
   requestPorts,
   startPortManagerServer,
   stopPortManagerServer,
+  BASE_URL,
 } from '../portManager';
 
 const INSTANCE_ID_1 = 'test1';
@@ -105,7 +108,7 @@ describe('lib/portManager', () => {
     });
   });
 
-  describe('deleteServerInstance', () => {
+  describe('deleteServerInstance()', () => {
     beforeEach(async () => {
       await startPortManagerServer();
     });
@@ -119,9 +122,50 @@ describe('lib/portManager', () => {
       await deleteServerInstance(INSTANCE_ID_1);
       expect(PortManagerServer.serverPortMap[INSTANCE_ID_1]).toBeUndefined();
     });
+
+    it('throws an error when attempting to delete a server instance that does not have a port', async () => {
+      await expect(deleteServerInstance(INSTANCE_ID_1)).rejects.toThrow();
+    });
   });
 
-  // describe('portManagerHasActiveServers()', () => {});
+  describe('portManagerHasActiveServers()', () => {
+    beforeEach(async () => {
+      await startPortManagerServer();
+    });
+    afterEach(async () => {
+      await stopPortManagerServer();
+    });
 
-  // describe('getServerInstanceId()', () => {});
+    it('returns false when no servers are active', async () => {
+      const hasActiveServers = await portManagerHasActiveServers();
+      expect(hasActiveServers).toBe(false);
+    });
+
+    it('returns true when servers are active', async () => {
+      await requestPorts(PORT_DATA);
+      const hasActiveServers = await portManagerHasActiveServers();
+      expect(hasActiveServers).toBe(true);
+    });
+  });
+
+  describe('PortManagerServer:getServerPortByInstanceId', () => {
+    beforeEach(async () => {
+      await startPortManagerServer();
+    });
+    afterEach(async () => {
+      await stopPortManagerServer();
+    });
+
+    it('returns the port for known server instances', async () => {
+      await requestPorts(PORT_DATA);
+      const { data } = await axios.get(`${BASE_URL}/servers/${INSTANCE_ID_1}`);
+      expect(typeof data.port).toBe('number');
+    });
+
+    it('throws an error for unknown server instances', async () => {
+      await expect(
+        axios.get(`${BASE_URL}/servers/${INSTANCE_ID_1}`)
+      ).rejects.toThrow();
+    });
+  });
 });
