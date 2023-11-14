@@ -37,7 +37,10 @@ type ListenCallback = (error: NetError | null, port: number) => void;
 
 const i18nKey = 'utils.detectPort';
 
-export function detectPort(port?: number | null): Promise<number> {
+export function detectPort(
+  port?: number | null,
+  exclude: Array<number> = []
+): Promise<number> {
   if (port && (port < MIN_PORT_NUMBER || port > MAX_PORT_NUMBER)) {
     throwErrorWithMessage(`${i18nKey}.errors.invalidPort`, {
       minPort: MIN_PORT_NUMBER,
@@ -49,13 +52,18 @@ export function detectPort(port?: number | null): Promise<number> {
   const maxPort = Math.min(portToUse + 10, MAX_PORT_NUMBER);
 
   return new Promise(resolve => {
-    tryListen(portToUse, maxPort, (_, resolvedPort) => {
+    tryListen(portToUse, maxPort, exclude, (_, resolvedPort) => {
       resolve(resolvedPort);
     });
   });
 }
 
-function tryListen(port: number, maxPort: number, callback: ListenCallback) {
+function tryListen(
+  port: number,
+  maxPort: number,
+  exclude: Array<number>,
+  callback: ListenCallback
+) {
   const shouldGiveUp = port >= maxPort;
   const nextPort = shouldGiveUp ? 0 : port + 1;
   const nextMaxPort = shouldGiveUp ? 0 : maxPort;
@@ -66,26 +74,30 @@ function tryListen(port: number, maxPort: number, callback: ListenCallback) {
       return callback(err, realPort);
     }
 
+    if (exclude.includes(port)) {
+      return tryListen(nextPort, nextMaxPort, exclude, callback);
+    }
+
     if (err) {
-      return tryListen(nextPort, nextMaxPort, callback);
+      return tryListen(nextPort, nextMaxPort, exclude, callback);
     }
 
     // 2. check 0.0.0.0
     listen(port, '0.0.0.0', err => {
       if (err) {
-        return tryListen(nextPort, nextMaxPort, callback);
+        return tryListen(nextPort, nextMaxPort, exclude, callback);
       }
 
       // 3. check localhost
       listen(port, 'localhost', err => {
         if (err && err.code !== 'EADDRNOTAVAIL') {
-          return tryListen(nextPort, nextMaxPort, callback);
+          return tryListen(nextPort, nextMaxPort, exclude, callback);
         }
 
         // 4. check current ip
         listen(port, ip(), (err, realPort) => {
           if (err) {
-            return tryListen(nextPort, nextMaxPort, callback);
+            return tryListen(nextPort, nextMaxPort, exclude, callback);
           }
 
           callback(null, realPort);

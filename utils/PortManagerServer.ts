@@ -55,6 +55,12 @@ class PortManagerServer {
     }
   }
 
+  reset() {
+    this.app = undefined;
+    this.server = undefined;
+    this.serverPortMap = {};
+  }
+
   listen(): Promise<Server> {
     return new Promise<Server>((resolve, reject) => {
       const server = this.app!.listen(PORT_MANAGER_SERVER_PORT, () => {
@@ -125,8 +131,8 @@ class PortManagerServer {
 
     const portPromises: Array<Promise<{ [instanceId: string]: number }>> = [];
 
-    portData.forEach(data => {
-      const { port, instanceId } = data;
+    for (let i = 0; i < portData.length; i++) {
+      const { port, instanceId } = portData[i];
       if (this.serverPortMap[instanceId]) {
         res.status(409).send(
           i18n(`${i18nKey}.errors.409`, {
@@ -146,16 +152,18 @@ class PortManagerServer {
       } else {
         const promise = new Promise<{ [instanceId: string]: number }>(
           resolve => {
-            detectPort(port).then(resolvedPort => {
-              resolve({
-                [instanceId]: resolvedPort,
-              });
-            });
+            detectPort(port, Object.values(this.serverPortMap)).then(
+              resolvedPort => {
+                resolve({
+                  [instanceId]: resolvedPort,
+                });
+              }
+            );
           }
         );
         portPromises.push(promise);
       }
-    });
+    }
 
     const portList = await Promise.all(portPromises);
     const ports = portList.reduce((a, c) => Object.assign(a, c));
@@ -184,6 +192,7 @@ class PortManagerServer {
       debug(`${i18nKey}.close`);
       res.send(200);
       this.server.close();
+      this.reset();
     }
   };
 }
