@@ -4,6 +4,9 @@ import { BaseError, FileSystemErrorContext } from '../types/Error';
 
 const i18nKey = 'errors.fileSystemErrors';
 
+/**
+ * @throws
+ */
 export function throwFileSystemError(
   error: BaseError,
   context: FileSystemErrorContext

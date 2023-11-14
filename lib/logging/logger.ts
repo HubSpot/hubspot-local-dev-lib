@@ -90,8 +90,8 @@ export function setLogLevel(level: number): void {
   }
 }
 
-export function shouldLog(level: number): number {
-  return currentLogLevel & level;
+export function shouldLog(level: number): boolean {
+  return !!(currentLogLevel & level);
 }
 
 export function getLogLevel(): number {

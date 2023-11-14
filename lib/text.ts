@@ -1,6 +1,6 @@
 export function commaSeparatedValues(
   arr: Array<string>,
-  conjunction = 'and',
+  conjunction: null | string = 'and',
   ifempty = ''
 ): string {
   const l = arr.length;
