@@ -4,7 +4,7 @@ import findup from 'findup-sync';
 import { getCwd } from '../path';
 import { downloadGithubRepoContents } from '../github';
 import { debug, makeTypedLogger } from '../../utils/logger';
-import { isObject } from '../../utils/objectUtils';
+import { isObjectOrFunction } from '../../utils/objectUtils';
 import { throwErrorWithMessage } from '../../errors/standardErrors';
 import { throwFileSystemError } from '../../errors/fileSystemErrors';
 import { BaseError } from '../../types/Error';
@@ -92,7 +92,7 @@ function updateExistingConfig(
     });
   }
 
-  if (!isObject(config)) {
+  if (!isObjectOrFunction(config)) {
     throwErrorWithMessage(
       `${i18nKey}.updateExistingConfig.errors.configIsNotObjectError`,
       { configFilePath }
