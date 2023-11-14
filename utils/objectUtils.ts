@@ -1,8 +1,3 @@
-export function isObjectOrFunction(value: object): boolean {
-  const type = typeof value;
-  return value != null && (type === 'object' || type === 'function');
-}
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function isObject(item: any) {
   return item && typeof item === 'object' && !Array.isArray(item);
