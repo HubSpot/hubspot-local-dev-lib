@@ -3,12 +3,9 @@ import { mergeDeep, isObject } from '../objectUtils';
 describe('utils/objectUtils', () => {
   describe('isObject()', () => {
     it('should return false for non objects', () => {
-      // @ts-expect-error testing invalid input
       expect(isObject('foo')).toBeFalsy();
-      // @ts-expect-error testing invalid input
-      expect(isObject('foo')).toBeFalsy();
-      // @ts-expect-error testing invalid input
-      expect(isObject('foo')).toBeFalsy();
+      expect(isObject(null)).toBeFalsy();
+      expect(isObject(1)).toBeFalsy();
     });
 
     it('should return true for objects', () => {
