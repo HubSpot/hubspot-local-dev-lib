@@ -5,9 +5,10 @@ export function getValidEnv(
   env?: Environment | null,
   maskedProductionValue?: Environment
 ): Environment {
-  const prodValue = maskedProductionValue
-    ? maskedProductionValue
-    : ENVIRONMENTS.PROD;
+  const prodValue =
+    typeof maskedProductionValue === 'string'
+      ? maskedProductionValue
+      : ENVIRONMENTS.PROD;
 
   const returnVal =
     typeof env &&
