@@ -4,7 +4,6 @@ import findup from 'findup-sync';
 import { getCwd } from '../path';
 import { downloadGithubRepoContents } from '../github';
 import { debug, makeTypedLogger } from '../../utils/logger';
-import { isObject } from '../../utils/objectUtils';
 import { throwErrorWithMessage } from '../../errors/standardErrors';
 import { throwFileSystemError } from '../../errors/fileSystemErrors';
 import { BaseError } from '../../types/Error';
@@ -24,6 +23,11 @@ type Config = {
     };
   };
 };
+
+function isObjectOrFunction(value: object): boolean {
+  const type = typeof value;
+  return value != null && (type === 'object' || type === 'function');
+}
 
 function createEndpoint(
   endpointMethod: string,
@@ -92,7 +96,7 @@ function updateExistingConfig(
     });
   }
 
-  if (!isObject(config)) {
+  if (!isObjectOrFunction(config)) {
     throwErrorWithMessage(
       `${i18nKey}.updateExistingConfig.errors.configIsNotObjectError`,
       { configFilePath }
