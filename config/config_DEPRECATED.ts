@@ -331,7 +331,7 @@ export function findConfig(directory: string): string | null {
   );
 }
 
-export function getEnv(nameOrId: string | number): Environment {
+export function getEnv(nameOrId?: string | number): Environment {
   let env: Environment = ENVIRONMENTS.PROD;
   const config = getAndLoadConfigIfNeeded();
   const accountId = getAccountId(nameOrId);

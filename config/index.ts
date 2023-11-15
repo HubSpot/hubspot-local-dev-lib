@@ -199,7 +199,7 @@ export function isTrackingAllowed() {
   return config_DEPRECATED.isTrackingAllowed();
 }
 
-export function getEnv(nameOrId: string | number) {
+export function getEnv(nameOrId?: string | number) {
   if (CLIConfiguration.isActive()) {
     return CLIConfiguration.getEnv(nameOrId);
   }
