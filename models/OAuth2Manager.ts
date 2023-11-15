@@ -40,7 +40,10 @@ class OAuth2Manager {
     this.writeTokenInfo = writeTokenInfo;
     this.refreshTokenRequest = null;
     this.account = account;
-    // NOTE: Potential issues by not using maskProductionValue = '' for env like in cli-lib
+
+    if (this.account.env) {
+      this.account.env = getValidEnv(this.account.env, '');
+    }
   }
 
   async accessToken(): Promise<string | undefined> {

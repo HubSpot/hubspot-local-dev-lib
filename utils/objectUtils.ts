@@ -1,5 +1,5 @@
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function isObject(item: any) {
+export function isObject(item: any) {
   return item && typeof item === 'object' && !Array.isArray(item);
 }
 

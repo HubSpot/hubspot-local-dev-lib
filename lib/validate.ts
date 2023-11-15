@@ -1,8 +1,8 @@
 import fs from 'fs-extra';
 import { HUBL_EXTENSIONS } from '../constants/extensions';
 import { validateHubl } from '../api/validateHubl';
-import { walk } from '../lib/fs';
-import { getExt } from '../lib/path';
+import { walk } from './fs';
+import { getExt } from './path';
 import { LintResult } from '../types/HublValidation';
 
 export async function lint(
