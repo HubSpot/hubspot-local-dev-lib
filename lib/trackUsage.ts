@@ -1,3 +1,5 @@
+import axios from 'axios';
+import { getAxiosConfig } from '../http/getAxiosConfig';
 import { debug } from '../utils/logger';
 import http from '../http';
 import { getAccountConfig, getEnv } from '../config';
@@ -9,7 +11,7 @@ export async function trackUsage(
   eventName: string,
   eventClass: string,
   meta = {},
-  accountId: number
+  accountId?: number
 ): Promise<void> {
   const usageEvent = {
     accountId,
@@ -49,11 +51,12 @@ export async function trackUsage(
   }
 
   const env = getEnv(accountId);
-  debug(`${i18nKey}.sendingEventUnauthenticated`);
-  http.post<void>(accountId, {
+  const axiosConfig = getAxiosConfig({
     env,
     url: path,
     data: usageEvent,
     resolveWithFullResponse: true,
   });
+  debug(`${i18nKey}.sendingEventUnauthenticated`);
+  axios({ ...axiosConfig, method: 'post' });
 }
