@@ -1,16 +1,13 @@
 import fs from 'fs-extra';
 import { join } from 'path';
 import { tmpdir } from 'os';
-import { promisify } from 'util';
-import __extract from 'extract-zip';
+import extract from 'extract-zip';
 
 import { throwFileSystemError } from '../errors/fileSystemErrors';
 import { throwErrorWithMessage } from '../errors/standardErrors';
 import { debug, makeTypedLogger } from '../utils/logger';
 import { BaseError } from '../types/Error';
 import { LogCallbacksArg } from '../types/LogCallbacks';
-
-const extract = promisify(__extract);
 
 const i18nKey = 'lib.archive';
 
