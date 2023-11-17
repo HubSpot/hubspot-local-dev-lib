@@ -42,25 +42,25 @@ const cleanupTmpDirSync = __cleanupTmpDirSync as jest.MockedFunction<
 
 //folder/fields.js -> folder/fields.converted.js
 // We add the .converted to differentiate from a unconverted fields.json
-const defaultFieldsJsImplementation = jest.fn(
-  (projectDir: string, pathToFieldsJs: string) => {
-    const fieldsJs = Object.create(FieldsJs.prototype);
-    const outputPath =
+FieldsJs.mockImplementation(
+  (projectDir: string, pathToFieldsJs: string, fieldOptions = '') => {
+    const outputPath = (pathToFieldsJs: string) =>
       pathToFieldsJs.substring(0, pathToFieldsJs.lastIndexOf('.')) +
       '.converted.json';
-    return function () {
-      return jest.fn().mockReturnValue(
-        Object.assign(fieldsJs, {
-          projectDir,
-          pathToFieldsJs,
-          getWritePath: jest.fn().mockResolvedValue(outputPath),
-          rejected: false,
-        })
-      );
+    return {
+      projectDir,
+      pathToFieldsJs,
+      fieldOptions,
+      rejected: false,
+      convert: jest.fn().mockImplementation(() => ''),
+      getWritePath: jest
+        .fn()
+        .mockImplementation(() => outputPath(pathToFieldsJs)),
     };
   }
 );
-FieldsJs.mockImplementation(defaultFieldsJsImplementation);
+
+FieldsJs.mockImplementation();
 
 isConvertableFieldJs.mockImplementation((rootDir: string, filePath: string) => {
   const fileName = path.basename(filePath);
@@ -128,7 +128,7 @@ describe('lib/cms/uploadFolder', () => {
     });
 
     it('tries to save output of each fields file', async () => {
-      const copyFileSpy = jest.spyOn(FieldsJs.prototype, 'copyFileSpy');
+      const copyFileSpy = jest.spyOn(fs, 'copyFileSync');
 
       createTmpDirSync.mockReturnValue('folder');
       upload.mockResolvedValue();

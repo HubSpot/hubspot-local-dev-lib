@@ -108,6 +108,15 @@ export function isConvertableFieldJs(
   );
 }
 
+/**
+ * Determines if fields js is present in a directory
+ * 'fields.js' and in a root or in a module folder, and if convertFields flag is true.
+ */
+export function isFieldsJsPresent(dir: string): boolean {
+  const filesInDir = fs.readdirSync(dir);
+  return filesInDir.filter(file => isConvertableFieldJs(dir, file)).length > 0;
+}
+
 // Try creating tempdir
 export function createTmpDirSync(prefix: string): string {
   let tmpDir: string;

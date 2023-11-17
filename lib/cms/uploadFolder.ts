@@ -18,9 +18,13 @@ import { escapeRegExp } from '../../utils/escapeRegExp';
 import { debug, makeTypedLogger } from '../../utils/logger';
 import { getFileMapperQueryValues } from '../fileMapper';
 import { convertToUnixPath, getCwd, getExt } from '../path';
-import { cleanupTmpDirSync, isConvertableFieldJs } from './FieldsJs';
-import { handleMultipleFieldsJs } from './handleFieldsJs';
+import {
+  cleanupTmpDirSync,
+  isConvertableFieldJs,
+  isFieldsJsPresent,
+} from './FieldsJs';
 import { getThemeJSONPath } from './themes';
+import { handleMultipleFieldsJs } from './handleFieldsJs';
 
 const i18nKey = 'lib.cms.uploadFolder';
 
@@ -80,12 +84,19 @@ export function getFilesByType(
       filePathsByType[fileType].push(filePath);
       continue;
     }
-
+    const fileName = path.basename(filePath);
     const isFieldsJs = isConvertableFieldJs(
       projectDir,
       filePath,
       convertFields
     );
+
+    // Do not add a fields.json to the upload list if a fields.js is in the same directory.
+    if (!isFieldsJs && fileName === 'fields.json') {
+      const fileDirectory = path.dirname(filePath);
+      isFieldsJsPresent(fileDirectory);
+      continue;
+    }
 
     filePathsByType[isFieldsJs ? FILE_TYPES.fieldsJs : fileType].push(filePath);
   }
