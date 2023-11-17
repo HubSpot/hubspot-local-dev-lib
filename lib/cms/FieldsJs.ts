@@ -15,8 +15,6 @@ export class FieldsJs {
   pathToFieldsJs: string;
   rejected: boolean;
   fieldOptions: string;
-  outputPath?: string;
-  toJSON?: () => JSON;
 
   constructor(projectDir: string, pathToFieldsJs: string, fieldOptions = '') {
     this.projectDir = projectDir;
