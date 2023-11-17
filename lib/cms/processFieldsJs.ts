@@ -1,17 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import path from 'path';
-import fs from 'fs';
 import semver from 'semver';
 import { pathToFileURL } from 'url';
 import { getExt } from '../path';
 import { throwError, throwErrorWithMessage } from '../../errors/standardErrors';
-import { FieldsJs } from './handleFieldsJS';
+import { FieldsJs } from './FieldsJs';
 import { i18n } from '../../utils/lang';
 
 const i18nKey = 'lib.cms.processFieldsJs';
 
-const { dirName, fieldOptions, filePath, writeDir } = process.env;
+const { dirName, fieldOptions, filePath } = process.env;
 const baseName = path.basename(filePath!);
 
 //TODO - Figure out agnostic logging
@@ -47,14 +46,7 @@ fieldsPromise.then(fieldsFunc => {
       });
     }
 
-    const finalPath = path.join(writeDir!, '/fields.json');
-
     return fieldsArrayToJson(fields).then(json => {
-      if (!fs.existsSync(writeDir!)) {
-        fs.mkdirSync(writeDir!, { recursive: true });
-      }
-      fs.writeFileSync(finalPath, json);
-
       //TODO - Figure out agnostic logging
       console.log(
         i18n(`${i18nKey}.converted`, {
@@ -65,7 +57,7 @@ fieldsPromise.then(fieldsFunc => {
       if (process) {
         process.send!({
           action: 'COMPLETE',
-          finalPath,
+          json,
         });
       }
     });

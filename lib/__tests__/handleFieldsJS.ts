@@ -1,4 +1,4 @@
-import { FieldsJs, isConvertableFieldJs } from '../cms/handleFieldsJS';
+import { FieldsJs, isConvertableFieldJs } from '../cms/FieldsJs';
 import fs from 'fs-extra';
 import child_process from 'child_process';
 
@@ -24,52 +24,14 @@ describe('lib/cms/handleFieldsJs', () => {
     const defaultFieldsJs = new FieldsJs(projectRoot, filePath);
     jest.spyOn(fs, 'existsSync').mockReturnValue(true);
 
-    test('getOutputPathPromise() resolves to the correct path', async () => {
-      const fieldsJs = new FieldsJs(
-        'folder',
-        'folder/sample.module/fields.js',
-        'temp-dir'
-      );
-      const convertSpy = jest
-        .spyOn(FieldsJs.prototype, 'convertFieldsJs')
-        .mockResolvedValue('temp-dir/sample.module/fields.js');
-
-      const returned = fieldsJs.getOutputPathPromise();
-      await expect(returned).resolves.toBe('temp-dir/sample.module/fields.js');
-      convertSpy.mockRestore();
-    });
-
     test('getWriteDir() returns the correct path', () => {
-      const fieldsJs = new FieldsJs(
-        'folder',
-        'folder/sample.module/fields.js',
-        'temp-dir'
-      );
-      const returned = fieldsJs.getWriteDir();
-      expect(returned).toBe('temp-dir/sample.module');
+      const fieldsJs = new FieldsJs('folder', 'folder/sample.module/fields.js');
+      const returned = fieldsJs.getWritePath('temp-dir');
+      expect(returned).toBe('temp-dir/sample.module/fields.js');
     });
 
-    test('saveOutput() sets the save path correctly', () => {
-      const copyFileSpy = jest
-        .spyOn(fs, 'copyFileSync')
-        .mockImplementation(() => null);
-      const fieldsJs = new FieldsJs(
-        'folder',
-        'folder/sample.module/fields.js',
-        'writeDir'
-      );
-
-      fieldsJs.outputPath = 'folder/sample.module/fields.js';
-
-      fieldsJs.saveOutput();
-      expect(copyFileSpy).toHaveBeenCalledWith(
-        'folder/sample.module/fields.js',
-        'folder/sample.module/fields.output.json'
-      );
-    });
-
-    test('convertFieldsJs returns a Promise', () => {
-      const returned = defaultFieldsJs.convertFieldsJs('');
+    test('convert returns a Promise', () => {
+      const returned = defaultFieldsJs.convert();
       expect(returned).toBeInstanceOf(Promise);
     });
   });

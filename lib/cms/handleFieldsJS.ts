@@ -1,192 +1,58 @@
-import fs from 'fs-extra';
-import os from 'os';
-import path from 'path';
-import { fork } from 'child_process';
-import { escapeRegExp } from '../../utils/escapeRegExp';
-import { isModuleFolderChild } from '../../utils/cms/modules';
-import { debug } from '../../utils/logger';
-import { throwErrorWithMessage } from '../../errors/standardErrors';
-import { BaseError } from '../../types/Error';
+import fs from 'fs';
+import { FieldsJs, createTmpDirSync } from './FieldsJs';
 
-const i18nKey = 'lib.cms.handleFieldsJs';
+export async function handleMultipleFieldsJs(
+  filePaths: string[],
+  projectRoot: string,
+  saveOutput: boolean,
+  fieldOptions?: string
+): Promise<[string[], string]> {
+  const tempDirPath = createTmpDirSync('hubspot-temp-fieldsjs-output-');
 
-export class FieldsJs {
-  projectDir: string;
-  filePath: string;
-  rootWriteDir: string;
-  rejected: boolean;
-  fieldOptions: string;
-  outputPath?: string;
-  toJSON?: () => JSON;
-
-  constructor(
-    projectDir: string,
-    filePath: string,
-    rootWriteDir?: string | null,
-    fieldOptions = ''
-  ) {
-    this.projectDir = projectDir;
-    this.filePath = filePath;
-    this.fieldOptions = fieldOptions;
-    this.rejected = false;
-    // Create tmpDir if no writeDir is given.
-    this.rootWriteDir =
-      rootWriteDir === undefined || rootWriteDir === null
-        ? createTmpDirSync('hubspot-temp-fieldsjs-output-')
-        : rootWriteDir;
-  }
-
-  async init(): Promise<this> {
-    const outputPath = await this.getOutputPathPromise();
-    this.outputPath = this.rejected ? undefined : outputPath!;
-    return this;
-  }
-
-  // Converts a fields.js file into a fields.json file, writes, and returns of fields.json
-  convertFieldsJs(writeDir: string): Promise<string | void> {
-    const filePath = this.filePath;
-    const dirName = path.dirname(filePath);
-
-    return new Promise<string>((resolve, reject) => {
-      const convertFieldsProcess = fork(
-        path.join(__dirname, './processFieldsJs.js'),
-        [],
-        {
-          cwd: dirName,
-          env: {
-            dirName,
-            fieldOptions: this.fieldOptions,
-            filePath,
-            writeDir,
-          },
-        }
-      );
-      debug(`${i18nKey}.convertFieldsJs.creating`, {
-        pid: convertFieldsProcess.pid || '',
-      });
-      convertFieldsProcess.on(
-        'message',
-        function (message: {
-          action: string;
-          finalPath: string;
-          message: string;
-        }) {
-          if (message.action === 'ERROR') {
-            reject(message.message);
-          } else if (message.action === 'COMPLETE') {
-            resolve(message.finalPath);
-          }
-        }
-      );
-
-      convertFieldsProcess.on('close', () => {
-        debug(`${i18nKey}.convertFieldsJs.terminating`, {
-          pid: convertFieldsProcess.pid || '',
-        });
-      });
-    }).catch((e: BaseError) => {
-      throwErrorWithMessage(
-        `${i18nKey}.convertFieldsJs.errors.errorConverting`,
-        { filePath },
-        e
-      );
-    });
-  }
-
-  /**
-   * If there has been a fields.json written to the output path, then copy it from the output
-   * directory to the project directory, respecting the path within the output directory.
-   * Ex: path/to/tmp/example.module/fields.json => path/to/project/example.module/fields.output.json
-   */
-  saveOutput(): void {
-    if (!this.outputPath || !fs.existsSync(this.outputPath)) {
-      throwErrorWithMessage(`${i18nKey}.saveOutput.errors.saveFailed`, {
-        path: this.filePath,
-      });
-    }
-    const relativePath = path.relative(
-      this.rootWriteDir,
-      path.dirname(this.outputPath)
-    );
-    const savePath = path.join(
-      this.projectDir,
-      relativePath,
-      'fields.output.json'
-    );
-    try {
-      fs.copyFileSync(this.outputPath, savePath);
-    } catch (err) {
-      throwErrorWithMessage(
-        `${i18nKey}.saveOutput.errors.saveFailed`,
-        { path: savePath },
-        err as BaseError
-      );
-    }
-  }
-
-  /**
-   * Resolves the relative path to the fields.js within the project directory and returns
-   * directory name to write to in rootWriteDir directory.
-   *
-   * Ex: If rootWriteDir = 'path/to/temp', filePath = 'projectRoot/sample.module/fields.js'. Then getWriteDir() => path/to/temp/sample.module
-   */
-  getWriteDir(): string {
-    const projectDirRegex = new RegExp(`^${escapeRegExp(this.projectDir)}`);
-    const relativePath = this.filePath.replace(projectDirRegex, '');
-    return path.dirname(path.join(this.rootWriteDir, relativePath));
-  }
-
-  getOutputPathPromise(): Promise<string | void> {
-    const writeDir = this.getWriteDir();
-    return this.convertFieldsJs(writeDir).then(outputPath => outputPath);
-  }
-}
-
-/**
- * Determines if file is a convertable fields.js file i.e., if it is called
- * 'fields.js' and in a root or in a module folder, and if convertFields flag is true.
- */
-export function isConvertableFieldJs(
-  rootDir: string,
-  filePath: string,
-  convertFields = false
-): boolean {
-  const allowedFieldsNames = ['fields.js', 'fields.mjs', 'fields.cjs'];
-  const regex = new RegExp(`^${escapeRegExp(rootDir)}`);
-  const relativePath = path.dirname(filePath.replace(regex, ''));
-  const baseName = path.basename(filePath);
-  const inModuleFolder = isModuleFolderChild({ path: filePath, isLocal: true });
-  return !!(
-    convertFields &&
-    allowedFieldsNames.includes(baseName) &&
-    (inModuleFolder || relativePath == '/')
+  const fieldsJs = filePaths.map(
+    path => new FieldsJs(projectRoot, path, fieldOptions)
   );
-}
 
-// Try creating tempdir
-export function createTmpDirSync(prefix: string): string {
-  let tmpDir: string;
-  try {
-    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), prefix));
-  } catch (err) {
-    throwErrorWithMessage(
-      `${i18nKey}.createTmpDirSync.errors.writeFailed`,
-      {},
-      err as BaseError
-    );
-  }
-  return tmpDir;
-}
+  const destPaths = await Promise.all(
+    fieldsJs.map(async fjs => {
+      const jsonOutput = await fjs.convert();
+      const writePath = fjs.getWritePath(tempDirPath);
 
-// Try cleaning up resources from os's tempdir
-export function cleanupTmpDirSync(tmpDir: string): void {
-  fs.rm(tmpDir, { recursive: true }, err => {
-    if (err) {
-      throwErrorWithMessage(
-        `${i18nKey}.cleanupTmpDirSync.errors.deleteFailed`,
-        {},
-        err as BaseError
-      );
-    }
+      if (!jsonOutput) throw new Error();
+
+      fs.writeFileSync(writePath, jsonOutput);
+
+      if (saveOutput) {
+        const saveWritePath = fjs.getWritePath(projectRoot);
+        fs.copyFileSync(writePath, saveWritePath);
+      }
+      return writePath;
+    })
+  ).catch(err => {
+    throw new Error(err);
   });
+
+  if (!destPaths) {
+    throw new Error();
+  }
+
+  return [destPaths, tempDirPath];
+}
+
+export async function handleFieldsJs(
+  filePath: string,
+  projectRoot: string,
+  saveOutput: boolean,
+  fieldOptions?: string
+): Promise<[string, string]> {
+  const [destPaths, tempDirPath] = await handleMultipleFieldsJs(
+    [filePath],
+    projectRoot,
+    saveOutput,
+    fieldOptions
+  );
+  if (destPaths.length === 1) {
+    return [destPaths[0], tempDirPath];
+  }
+  throw new Error();
 }

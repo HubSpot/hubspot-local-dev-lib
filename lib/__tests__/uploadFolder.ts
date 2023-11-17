@@ -1,21 +1,21 @@
-import path from 'path';
 import fs from 'fs-extra';
-import { uploadFolder, getFilesByType } from '../cms/uploadFolder';
-import { FILE_TYPES } from '../../constants/files';
+import path from 'path';
 import { upload as __upload } from '../../api/fileMapper';
-import { walk as __walk } from '../fs';
-import { createIgnoreFilter as __createIgnoreFilter } from '../ignoreRules';
+import { FILE_TYPES } from '../../constants/files';
 import {
   FieldsJs as __FieldsJs,
-  isConvertableFieldJs as __isConvertableFields,
   cleanupTmpDirSync as __cleanupTmpDirSync,
   createTmpDirSync as __createTmpDirSync,
-} from '../cms/handleFieldsJS';
+  isConvertableFieldJs as __isConvertableFields,
+} from '../cms/FieldsJs';
+import { getFilesByType, uploadFolder } from '../cms/uploadFolder';
+import { walk as __walk } from '../fs';
+import { createIgnoreFilter as __createIgnoreFilter } from '../ignoreRules';
 
 jest.mock('../fs');
 jest.mock('../../api/fileMapper');
 jest.mock('../ignoreRules');
-jest.mock('../cms/handleFieldsJS');
+jest.mock('../cms/FieldsJs');
 
 const listFilesInDir = jest.fn((dir: string) => {
   return fs
@@ -43,26 +43,26 @@ const cleanupTmpDirSync = __cleanupTmpDirSync as jest.MockedFunction<
 //folder/fields.js -> folder/fields.converted.js
 // We add the .converted to differentiate from a unconverted fields.json
 const defaultFieldsJsImplementation = jest.fn(
-  (src: string, filePath: string, rootWriteDir: string | undefined | null) => {
+  (projectDir: string, pathToFieldsJs: string) => {
     const fieldsJs = Object.create(FieldsJs.prototype);
     const outputPath =
-      filePath.substring(0, filePath.lastIndexOf('.')) + '.converted.json';
-    return {
-      init: jest.fn().mockReturnValue(
+      pathToFieldsJs.substring(0, pathToFieldsJs.lastIndexOf('.')) +
+      '.converted.json';
+    return function () {
+      return jest.fn().mockReturnValue(
         Object.assign(fieldsJs, {
-          src,
-          outputPath,
-          rootWriteDir,
-          getOutputPathPromise: jest.fn().mockResolvedValue(outputPath),
+          projectDir,
+          pathToFieldsJs,
+          getWritePath: jest.fn().mockResolvedValue(outputPath),
           rejected: false,
         })
-      ),
+      );
     };
   }
 );
 FieldsJs.mockImplementation(defaultFieldsJsImplementation);
 
-isConvertableFieldJs.mockImplementation((src: string, filePath: string) => {
+isConvertableFieldJs.mockImplementation((rootDir: string, filePath: string) => {
   const fileName = path.basename(filePath);
   return fileName === 'fields.js';
 });
@@ -127,25 +127,8 @@ describe('lib/cms/uploadFolder', () => {
       });
     });
 
-    it('creates a temp directory if --convertFields is true', async () => {
-      const tmpDirSpy = createTmpDirSync.mockImplementation(() => '');
-
-      upload.mockResolvedValue();
-
-      await uploadFolder(
-        123,
-        'folder',
-        'folder',
-        {},
-        { saveOutput: true, convertFields: true },
-        [],
-        'publish'
-      );
-      expect(tmpDirSpy).toHaveBeenCalled();
-    });
-
     it('tries to save output of each fields file', async () => {
-      const saveOutputSpy = jest.spyOn(FieldsJs.prototype, 'saveOutput');
+      const copyFileSpy = jest.spyOn(FieldsJs.prototype, 'copyFileSpy');
 
       createTmpDirSync.mockReturnValue('folder');
       upload.mockResolvedValue();
@@ -160,7 +143,7 @@ describe('lib/cms/uploadFolder', () => {
         'publish'
       );
 
-      expect(saveOutputSpy).toHaveBeenCalledTimes(2);
+      expect(copyFileSpy).toHaveBeenCalledTimes(2);
     });
 
     it('deletes the temporary directory', async () => {
@@ -182,20 +165,6 @@ describe('lib/cms/uploadFolder', () => {
   });
 
   describe('getFilesByType()', () => {
-    const convertedFieldsObj = new FieldsJs(
-      'folder',
-      'folder/fields.json',
-      'folder'
-    ).init();
-    const convertedFilePath = convertedFieldsObj.outputPath;
-
-    const convertedModuleFieldsObj = new FieldsJs(
-      'folder',
-      'folder/sample.module/fields.json',
-      'folder'
-    ).init();
-    const convertedModuleFilePath = convertedModuleFieldsObj.outputPath;
-
     beforeEach(() => {
       FieldsJs.mockClear();
       jest.resetModules();
@@ -203,7 +172,7 @@ describe('lib/cms/uploadFolder', () => {
     it('outputs getFilesByType with no processing if convertFields is false', async () => {
       const files = [...filesProto];
       files.push('folder/sample.module/fields.js');
-      const [filesByType] = await getFilesByType(files, 'folder', 'folder', {
+      const filesByType = await getFilesByType(files, 'folder', {
         convertFields: false,
       });
 
@@ -225,78 +194,49 @@ describe('lib/cms/uploadFolder', () => {
           'folder/templates/page.html',
         ],
         [FILE_TYPES.json]: ['folder/fields.json'],
+        [FILE_TYPES.fieldsJs]: [],
       });
     });
 
-    it('finds and converts fields.js files to field.json', async () => {
+    it('finds fields.js files ', async () => {
       const files = [...filesProto];
       files.push('folder/fields.js', 'folder/sample.module/fields.js');
-      listFilesInDir.mockReturnValue(['fields.json']);
-      const [filesByType, fieldsJsObjects] = await getFilesByType(
-        files,
-        'folder',
-        'folder',
-        { convertFields: true }
-      );
+      const filesByType = await getFilesByType(files, 'folder', {
+        convertFields: true,
+      });
 
-      const filesByTypeValues = Object.values(filesByType);
-      expect(filesByTypeValues[1]).toEqual([
-        'folder/sample.module/module.css',
-        'folder/sample.module/module.js',
-        'folder/sample.module/meta.json',
-        'folder/sample.module/module.html',
-        convertedModuleFilePath,
-      ]);
-      expect(filesByTypeValues[4]).toContainEqual(convertedFilePath);
-      expect(JSON.stringify(fieldsJsObjects)).toBe(
-        JSON.stringify([convertedFieldsObj, convertedModuleFieldsObj])
-      );
+      expect(filesByType).toEqual({
+        [FILE_TYPES.other]: [
+          'folder/images/image.png',
+          'folder/images/image.jpg',
+        ],
+        [FILE_TYPES.module]: [
+          'folder/sample.module/module.css',
+          'folder/sample.module/module.js',
+          'folder/sample.module/meta.json',
+          'folder/sample.module/module.html',
+        ],
+        [FILE_TYPES.cssAndJs]: ['folder/css/file.css', 'folder/js/file.js'],
+        [FILE_TYPES.template]: [
+          'folder/templates/blog.html',
+          'folder/templates/page.html',
+        ],
+        [FILE_TYPES.json]: ['folder/fields.json'],
+        [FILE_TYPES.fieldsJs]: [
+          'folder/fields.js',
+          'folder/sample.module/fields.js',
+        ],
+      });
     });
 
     it('does not add fields.json if fields.js is present in same directory', async () => {
       const files = ['folder/fields.js', 'folder/fields.json'];
-      listFilesInDir.mockReturnValue(['fields.json', 'fields.js']);
-      const [filesByType] = await getFilesByType(files, 'folder', 'folder', {
+      const filesByType = await getFilesByType(files, 'folder', {
         convertFields: true,
       });
       expect(filesByType).not.toMatchObject({
         [FILE_TYPES.json]: ['folder/fields.json'],
       });
-    });
-
-    it('adds root fields.js to jsonFiles', async () => {
-      const files = ['folder/fields.js'];
-      const [filesByType, fieldsJsObjects] = await getFilesByType(
-        files,
-        'folder',
-        'folder',
-        { convertFields: true }
-      );
-      expect(filesByType).toMatchObject({
-        [FILE_TYPES.json]: [convertedFilePath],
-      });
-
-      expect(JSON.stringify(fieldsJsObjects)).toEqual(
-        JSON.stringify([convertedFieldsObj])
-      );
-    });
-
-    it('adds module fields.js to moduleFiles', async () => {
-      const files = ['folder/sample.module/fields.js'];
-      const [filesByType, fieldsJsObjects] = await getFilesByType(
-        files,
-        'folder',
-        'folder',
-        { convertFields: true }
-      );
-
-      expect(filesByType).toMatchObject({
-        [FILE_TYPES.module]: [convertedModuleFilePath],
-      });
-
-      expect(JSON.stringify(fieldsJsObjects)).toBe(
-        JSON.stringify([convertedModuleFieldsObj])
-      );
     });
   });
 });

@@ -22,4 +22,5 @@ export const FILE_TYPES = {
   cssAndJs: 'cssAndJsFiles',
   template: 'templateFiles',
   json: 'jsonFiles',
+  fieldsJs: 'fieldJsFiles',
 } as const;

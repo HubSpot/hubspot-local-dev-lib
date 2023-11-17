@@ -1,24 +1,27 @@
-import path from 'path';
 import chokidar from 'chokidar';
-import PQueue from 'p-queue';
 import { debounce } from 'debounce';
+import PQueue from 'p-queue';
+import path from 'path';
 
+import { deleteFile, upload } from '../../api/fileMapper';
 import { throwApiError, throwApiUploadError } from '../../errors/apiErrors';
-import { isConvertableFieldJs, FieldsJs } from './handleFieldsJS';
-import { uploadFolder } from './uploadFolder';
-import { shouldIgnoreFile, ignoreFile } from '../ignoreRules';
-import { getFileMapperQueryValues } from '../fileMapper';
-import { upload, deleteFile } from '../../api/fileMapper';
-import { escapeRegExp } from '../../utils/escapeRegExp';
-import { convertToUnixPath, isAllowedExtension, getCwd } from '../path';
-import { triggerNotify } from '../../utils/notify';
-import { getThemePreviewUrl, getThemeJSONPath } from './themes';
-import { LogCallbacksArg } from '../../types/LogCallbacks';
-import { makeTypedLogger } from '../../utils/logger';
-import { debug } from '../../utils/logger';
-import { FileMapperInputOptions, Mode } from '../../types/Files';
-import { UploadFolderResults } from '../../types/Files';
 import { StatusCodeError } from '../../types/Error';
+import {
+  FileMapperInputOptions,
+  Mode,
+  UploadFolderResults,
+} from '../../types/Files';
+import { LogCallbacksArg } from '../../types/LogCallbacks';
+import { escapeRegExp } from '../../utils/escapeRegExp';
+import { debug, makeTypedLogger } from '../../utils/logger';
+import { triggerNotify } from '../../utils/notify';
+import { getFileMapperQueryValues } from '../fileMapper';
+import { ignoreFile, shouldIgnoreFile } from '../ignoreRules';
+import { convertToUnixPath, getCwd, isAllowedExtension } from '../path';
+import { cleanupTmpDirSync, isConvertableFieldJs } from './FieldsJs';
+import { handleFieldsJs } from './handleFieldsJs';
+import { getThemeJSONPath, getThemePreviewUrl } from './themes';
+import { uploadFolder } from './uploadFolder';
 
 const i18nKey = 'lib.cms.watch';
 
@@ -79,13 +82,14 @@ async function uploadFile(
     ? path.dirname(themeJsonPath)
     : path.dirname(getCwd());
 
-  const convertFields = isConvertableFieldJs(
+  const isFieldsJs = isConvertableFieldJs(
     src,
     file,
     options.commandOptions.convertFields
   );
+  let tmpDir: string;
 
-  if (!isAllowedExtension(file) && !convertFields) {
+  if (!isAllowedExtension(file) && !isFieldsJs) {
     debug(`${i18nKey}.skipUnsupportedExtension`, { file });
     return;
   }
@@ -94,20 +98,18 @@ async function uploadFile(
     return;
   }
 
-  let fieldsJs: FieldsJs | undefined = undefined;
-  if (convertFields) {
-    fieldsJs = await new FieldsJs(
+  let fileToUpload = file;
+
+  if (isFieldsJs) {
+    [fileToUpload, tmpDir] = await handleFieldsJs(
       projectRoot,
       absoluteSrcPath,
-      undefined,
+      false,
       options.fieldOptions
-    ).init();
-    if (fieldsJs.rejected) return;
+    );
     // Ensures that the dest path is a .json. The user might pass '.js' accidentally - this ensures it just works.
     dest = convertToUnixPath(path.join(path.dirname(dest), 'fields.json'));
   }
-  const fileToUpload =
-    convertFields && fieldsJs?.outputPath ? fieldsJs.outputPath : file;
 
   debug(`${i18nKey}.uploadAttempt`, { file, dest });
   const apiOptions = getFileMapperQueryValues(mode, options);
@@ -133,6 +135,11 @@ async function uploadFile(
             });
           }
         );
+      })
+      .finally(() => {
+        if (tmpDir) {
+          cleanupTmpDirSync(tmpDir);
+        }
       });
   });
 }
