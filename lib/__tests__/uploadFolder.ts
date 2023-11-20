@@ -40,6 +40,11 @@ const cleanupTmpDirSync = __cleanupTmpDirSync as jest.MockedFunction<
   typeof __cleanupTmpDirSync
 >;
 
+jest.mock('fs-extra', () => ({
+  writeFileSync: jest.fn(),
+  copyFileSync: jest.fn(),
+}));
+
 //folder/fields.js -> folder/fields.converted.js
 // We add the .converted to differentiate from a unconverted fields.json
 FieldsJs.mockImplementation(
@@ -52,15 +57,13 @@ FieldsJs.mockImplementation(
       pathToFieldsJs,
       fieldOptions,
       rejected: false,
-      convert: jest.fn().mockImplementation(() => ''),
+      convert: jest.fn().mockImplementation(() => Promise.resolve('{}')),
       getWritePath: jest
         .fn()
         .mockImplementation(() => outputPath(pathToFieldsJs)),
     };
   }
 );
-
-FieldsJs.mockImplementation();
 
 isConvertableFieldJs.mockImplementation((rootDir: string, filePath: string) => {
   const fileName = path.basename(filePath);
@@ -221,7 +224,7 @@ describe('lib/cms/uploadFolder', () => {
           'folder/templates/blog.html',
           'folder/templates/page.html',
         ],
-        [FILE_TYPES.json]: ['folder/fields.json'],
+        [FILE_TYPES.json]: [],
         [FILE_TYPES.fieldsJs]: [
           'folder/fields.js',
           'folder/sample.module/fields.js',

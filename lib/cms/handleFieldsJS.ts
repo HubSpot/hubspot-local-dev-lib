@@ -1,4 +1,4 @@
-import fs from 'fs';
+import fs from 'fs-extra';
 import { FieldsJs, createTmpDirSync } from './FieldsJs';
 
 export async function handleMultipleFieldsJs(
@@ -29,6 +29,7 @@ export async function handleMultipleFieldsJs(
       return writePath;
     })
   ).catch(err => {
+    console.log('err', err);
     throw new Error(err);
   });
 
