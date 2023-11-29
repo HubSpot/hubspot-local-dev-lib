@@ -1,4 +1,4 @@
-export type HubSpotAccounInfo = {
+export type HubSpotAccountInfo = {
   productId: number;
   accountName: string;
   hubId: number;
