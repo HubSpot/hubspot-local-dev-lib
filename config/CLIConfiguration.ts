@@ -19,7 +19,7 @@ import {
   CLIAccount_NEW,
   OAuthAccount_NEW,
   FlatAccountFields_NEW,
-} from '../types/Accounts';
+} from '../types/CLIAccount';
 import { CLIOptions } from '../types/CLIOptions';
 import { ValueOf } from '../types/Utils';
 import { LogCallbacksArg } from '../types/LogCallbacks';

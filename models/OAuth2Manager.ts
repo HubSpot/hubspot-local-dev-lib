@@ -3,7 +3,11 @@ import moment from 'moment';
 
 import { getHubSpotApiOrigin } from '../lib/urls';
 import { getValidEnv } from '../lib/environment';
-import { FlatAccountFields, OAuthAccount, TokenInfo } from '../types/Accounts';
+import {
+  FlatAccountFields,
+  OAuthAccount,
+  TokenInfo,
+} from '../types/CLIAccount';
 import { debug } from '../utils/logger';
 import { getAccountIdentifier } from '../utils/getAccountIdentifier';
 import { AUTH_METHODS } from '../constants/auth';

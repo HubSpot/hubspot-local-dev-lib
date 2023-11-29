@@ -7,7 +7,7 @@ import {
 } from './configFile';
 import { CLIConfig_NEW, CLIConfig } from '../types/Config';
 import { CLIOptions, WriteConfigOptions } from '../types/CLIOptions';
-import { CLIAccount, FlatAccountFields } from '../types/Accounts';
+import { CLIAccount, FlatAccountFields } from '../types/CLIAccount';
 import { getAccountIdentifier } from '../utils/getAccountIdentifier';
 
 // Use new config if it exists

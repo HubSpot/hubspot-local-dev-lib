@@ -27,7 +27,7 @@ import {
   CLIAccount_DEPRECATED,
   FlatAccountFields_DEPRECATED,
   OAuthAccount_DEPRECATED,
-} from '../types/Accounts';
+} from '../types/CLIAccount';
 import { BaseError } from '../types/Error';
 import { Mode } from '../types/Files';
 import { CLIOptions, WriteConfigOptions } from '../types/CLIOptions';

@@ -11,7 +11,7 @@ import {
   APIKeyAccount_NEW,
   OAuthAccount_NEW,
   PersonalAccessKeyAccount_NEW,
-} from '../types/Accounts';
+} from '../types/CLIAccount';
 
 const i18nKey = 'config.configUtils';
 

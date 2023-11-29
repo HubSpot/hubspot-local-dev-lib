@@ -1,4 +1,4 @@
-import { CLIAccount } from '../types/Accounts';
+import { CLIAccount } from '../types/CLIAccount';
 import {
   CLIConfig,
   CLIConfig_DEPRECATED,

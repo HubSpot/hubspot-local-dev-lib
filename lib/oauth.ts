@@ -1,6 +1,6 @@
 import OAuth2Manager from '../models/OAuth2Manager';
 import { AUTH_METHODS } from '../constants/auth';
-import { FlatAccountFields } from '../types/Accounts';
+import { FlatAccountFields } from '../types/CLIAccount';
 import { throwError } from '../errors/standardErrors';
 import { debug } from '../utils/logger';
 import { BaseError } from '../types/Error';

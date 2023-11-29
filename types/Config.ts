@@ -1,5 +1,5 @@
 import { ENVIRONMENTS } from '../constants/environments';
-import { CLIAccount_NEW, CLIAccount_DEPRECATED } from './Accounts';
+import { CLIAccount_NEW, CLIAccount_DEPRECATED } from './CLIAccount';
 import { ValueOf } from './Utils';
 
 export interface CLIConfig_NEW {

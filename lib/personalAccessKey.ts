@@ -9,7 +9,7 @@ import {
 import { fetchAccessToken } from '../api/localDevAuth';
 import { fetchSandboxHubData } from '../api/sandboxHubs';
 import { BaseError, StatusCodeError } from '../types/Error';
-import { CLIAccount, PersonalAccessKeyAccount } from '../types/Accounts';
+import { CLIAccount, PersonalAccessKeyAccount } from '../types/CLIAccount';
 import { Environment } from '../types/Config';
 import {
   getAccountConfig,

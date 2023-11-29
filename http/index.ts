@@ -6,7 +6,7 @@ import { getAccountConfig } from '../config';
 import { getAxiosConfig } from './getAxiosConfig';
 import { accessTokenForPersonalAccessKey } from '../lib/personalAccessKey';
 import { getOauthManager } from '../lib/oauth';
-import { FlatAccountFields } from '../types/Accounts';
+import { FlatAccountFields } from '../types/CLIAccount';
 import { LogCallbacksArg } from '../types/LogCallbacks';
 import { AxiosConfigOptions, HttpOptions, QueryParams } from '../types/Http';
 import { throwErrorWithMessage } from '../errors/standardErrors';

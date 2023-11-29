@@ -2,7 +2,7 @@ import { getAxiosConfig } from '../http/getAxiosConfig';
 import http from '../http';
 import { ENVIRONMENTS } from '../constants/environments';
 import { Environment } from '../types/Config';
-import { ScopeData } from '../types/Accounts';
+import { ScopeData } from '../types/CLIAccount';
 import axios from 'axios';
 
 const LOCALDEVAUTH_API_AUTH_PATH = 'localdevauth/v1/auth';
