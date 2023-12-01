@@ -13,7 +13,8 @@ const fetchRepoFile = __fetchRepoFile as jest.MockedFunction<
 describe('lib/github', () => {
   describe('fetchFileFromRepository()', () => {
     beforeAll(() => {
-      fetchRepoFile.mockResolvedValue({ data: null });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      fetchRepoFile.mockResolvedValue({ data: null } as any);
     });
 
     afterAll(() => {
@@ -27,18 +28,4 @@ describe('lib/github', () => {
       );
     });
   });
-
-  // describe('fetchReleaseData()', () => {
-  //   it('downloads a github repo and writes it to a destination folder', async () => {
-  //     await cloneGithubRepo('./', 'test', 'github.com/repo', '', {});
-  //     expect(true).toBe(true);
-  //   });
-  // });
-
-  // describe('cloneGithubRepo()', () => {
-  //   it('downloads a github repo and writes it to a destination folder', async () => {
-  //     await cloneGithubRepo('./', 'test', 'github.com/repo', '', {});
-  //     expect(true).toBe(true);
-  //   });
-  // });
 });
