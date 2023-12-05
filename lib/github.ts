@@ -5,10 +5,8 @@ import { debug, makeTypedLogger } from '../utils/logger';
 import { throwError, throwErrorWithMessage } from '../errors/standardErrors';
 import { extractZipArchive } from './archive';
 
-import { GITHUB_RELEASE_TYPES } from '../constants/github';
 import { BaseError } from '../types/Error';
 import { GithubReleaseData, GithubRepoFile } from '../types/Github';
-import { ValueOf } from '../types/Utils';
 import { LogCallbacksArg } from '../types/LogCallbacks';
 import {
   GITHUB_RAW_CONTENT_API_PATH,
@@ -42,14 +40,18 @@ export async function fetchFileFromRepository(
   }
 }
 
+// Fetches information about a specific release (Defaults to latest)
 export async function fetchReleaseData(
   repoPath: RepoPath,
-  tag = ''
+  tag?: string
 ): Promise<GithubReleaseData> {
-  tag = tag.trim().toLowerCase();
-  if (tag.length && tag[0] !== 'v') {
-    tag = `v${tag}`;
+  if (tag) {
+    tag = tag.trim().toLowerCase();
+    if (tag.length && tag[0] !== 'v') {
+      tag = `v${tag}`;
+    }
   }
+
   try {
     const { data } = await fetchRepoReleaseData(repoPath, tag);
     return data;
@@ -63,29 +65,33 @@ export async function fetchReleaseData(
   }
 }
 
+type DownloadGithubRepoZipOptions = {
+  branch?: string;
+  tag?: string;
+};
+
 async function downloadGithubRepoZip(
   repoPath: RepoPath,
-  tag = '',
-  releaseType: ValueOf<
-    typeof GITHUB_RELEASE_TYPES
-  > = GITHUB_RELEASE_TYPES.RELEASE,
-  ref?: string
+  isRelease = false,
+  options: DownloadGithubRepoZipOptions = {}
 ): Promise<Buffer> {
+  const { branch, tag } = options;
   try {
     let zipUrl: string;
-    if (releaseType === GITHUB_RELEASE_TYPES.REPOSITORY) {
-      debug(`${i18nKey}.downloadGithubRepoZip.fetching`, {
-        releaseType,
-        repoPath,
-      });
-      zipUrl = `https://api.github.com/repos/${repoPath}/zipball${
-        ref ? `/${ref}` : ''
-      }`;
-    } else {
+    if (isRelease) {
+      // If downloading a release, first get the release info using fetchReleaseData().
+      // Supports a custom tag, but will default to the latest release
       const releaseData = await fetchReleaseData(repoPath, tag);
       zipUrl = releaseData.zipball_url;
       const { name } = releaseData;
       debug(`${i18nKey}.downloadGithubRepoZip.fetchingName`, { name });
+    } else {
+      // If downloading a repository, manually construct the zip url. This url supports both branches and tags as refs
+      debug(`${i18nKey}.downloadGithubRepoZip.fetching`, { repoPath });
+      const ref = branch || tag;
+      zipUrl = `https://api.github.com/repos/${repoPath}/zipball${
+        ref ? `/${ref}` : ''
+      }`;
     }
     const { data } = await fetchRepoAsZip(zipUrl);
     debug(`${i18nKey}.downloadGithubRepoZip.completed`);
@@ -100,32 +106,36 @@ async function downloadGithubRepoZip(
 }
 
 type CloneGithubRepoOptions = {
-  themeVersion?: string;
-  projectVersion?: string;
-  releaseType?: ValueOf<typeof GITHUB_RELEASE_TYPES>;
-  ref?: string;
+  isRelease?: boolean; // Download a repo release? (Default is to download the repo contents)
+  type?: string; // The type of asset being downloaded. Used for logging
+  branch?: string; // Repo branch
+  tag?: string; // Repo tag
+  sourceDir?: string; // The directory within the downloaded repo to write after extraction
 };
 
 const cloneGithubRepoCallbackKeys = ['success'];
 
 export async function cloneGithubRepo(
-  dest: string,
-  type: string,
   repoPath: RepoPath,
-  sourceDir: string,
+  dest: string,
   options: CloneGithubRepoOptions = {},
   logCallbacks?: LogCallbacksArg<typeof cloneGithubRepoCallbackKeys>
 ): Promise<boolean> {
   const logger =
     makeTypedLogger<typeof cloneGithubRepoCallbackKeys>(logCallbacks);
-  const { themeVersion, projectVersion, releaseType, ref } = options;
-  const tag = projectVersion || themeVersion;
-  const zip = await downloadGithubRepoZip(repoPath, tag, releaseType, ref);
+  const { tag, isRelease, branch, sourceDir, type } = options;
+  const zip = await downloadGithubRepoZip(repoPath, isRelease, {
+    tag,
+    branch,
+  });
   const repoName = repoPath.split('/')[1];
   const success = await extractZipArchive(zip, repoName, dest, { sourceDir });
 
   if (success) {
-    logger('success', `${i18nKey}.cloneGithubRepo.success`, { type, dest });
+    logger('success', `${i18nKey}.cloneGithubRepo.success`, {
+      type: type || '',
+      dest,
+    });
   }
   return success;
 }
