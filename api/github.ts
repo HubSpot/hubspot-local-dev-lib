@@ -57,6 +57,15 @@ export async function fetchRepoFile(
   );
 }
 
+// Returns the raw file contents via the raw.githubusercontent endpoint
+export async function fetchRepoFileByDownloadUrl(
+  downloadUrl: string
+): Promise<AxiosResponse<Buffer>> {
+  return axios.get<Buffer>(downloadUrl, {
+    headers: { ...DEFAULT_USER_AGENT_HEADERS, ...GITHUB_AUTH_HEADERS },
+  });
+}
+
 // Returns the contents of a file or directory in a repository by path
 // https://docs.github.com/en/rest/repos/contents?apiVersion=2022-11-28#get-repository-content
 export async function fetchRepoContents(

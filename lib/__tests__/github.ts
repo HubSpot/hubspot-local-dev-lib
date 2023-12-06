@@ -1,8 +1,5 @@
 import { fetchFileFromRepository } from '../github';
-import {
-  GITHUB_RAW_CONTENT_API_PATH,
-  fetchRepoFile as __fetchRepoFile,
-} from '../../api/github';
+import { fetchRepoFile as __fetchRepoFile } from '../../api/github';
 
 jest.mock('../../api/github');
 
@@ -23,9 +20,7 @@ describe('lib/github', () => {
 
     it('downloads a github repo and writes it to a destination folder', async () => {
       await fetchFileFromRepository('owner/repo', 'file', 'ref');
-      expect(fetchRepoFile).toHaveBeenCalledWith(
-        `${GITHUB_RAW_CONTENT_API_PATH}/owner/repo/ref/file`
-      );
+      expect(fetchRepoFile).toHaveBeenCalledWith('owner/repo', 'file', 'ref');
     });
   });
 });

@@ -12,6 +12,7 @@ import { ValueOf } from '../types/Utils';
 import { LogCallbacksArg } from '../types/LogCallbacks';
 import {
   fetchRepoFile,
+  fetchRepoFileByDownloadUrl,
   fetchRepoAsZip,
   fetchRepoReleaseData,
   fetchRepoContents,
@@ -134,7 +135,7 @@ async function fetchGitHubRepoContentFromDownloadUrl(
   dest: string,
   downloadUrl: string
 ): Promise<void> {
-  const resp = await fetchRepoFile(downloadUrl);
+  const resp = await fetchRepoFileByDownloadUrl(downloadUrl);
   fs.writeFileSync(dest, resp.data, 'utf8');
 }
 
