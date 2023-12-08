@@ -30,8 +30,8 @@
       }
     },
     "github": {
-      "fetchJsonFromRepository": {
-        "fetching": "Fetching {{ url }}...",
+      "fetchFileFromRepository": {
+        "fetching": "Fetching {{ path }}...",
         "errors": {
           "fetchFail": "An error occured fetching JSON file."
         }

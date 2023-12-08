@@ -1,4 +1,3 @@
-import axios from 'axios';
 import path from 'path';
 import fs from 'fs-extra';
 
@@ -7,42 +6,37 @@ import { throwError, throwErrorWithMessage } from '../errors/standardErrors';
 import { extractZipArchive } from './archive';
 
 import { GITHUB_RELEASE_TYPES } from '../constants/github';
-import { DEFAULT_USER_AGENT_HEADERS } from '../http/getAxiosConfig';
 import { BaseError } from '../types/Error';
 import { GithubReleaseData, GithubRepoFile } from '../types/Github';
 import { ValueOf } from '../types/Utils';
 import { LogCallbacksArg } from '../types/LogCallbacks';
+import {
+  fetchRepoFile,
+  fetchRepoFileByDownloadUrl,
+  fetchRepoAsZip,
+  fetchRepoReleaseData,
+  fetchRepoContents,
+} from '../api/github';
 
 const i18nKey = 'lib.github';
 
-declare global {
-  // eslint-disable-next-line no-var
-  var githubToken: string;
-}
-
 type RepoPath = `${string}/${string}`;
 
-const GITHUB_AUTH_HEADERS = {
-  authorization:
-    global && global.githubToken ? `Bearer ${global.githubToken}` : null,
-};
-
-export async function fetchJsonFromRepository(
+export async function fetchFileFromRepository(
   repoPath: RepoPath,
   filePath: string,
   ref: string
-): Promise<JSON> {
+): Promise<Buffer> {
   try {
-    const URL = `https://raw.githubusercontent.com/${repoPath}/${ref}/${filePath}`;
-    debug(`${i18nKey}.fetchJsonFromRepository.fetching`, { url: URL });
-
-    const { data } = await axios.get<JSON>(URL, {
-      headers: { ...DEFAULT_USER_AGENT_HEADERS, ...GITHUB_AUTH_HEADERS },
+    debug(`${i18nKey}.fetchFileFromRepository.fetching`, {
+      path: `${repoPath}/${ref}/${filePath}`,
     });
+
+    const { data } = await fetchRepoFile(repoPath, filePath, ref);
     return data;
   } catch (err) {
     throwErrorWithMessage(
-      `${i18nKey}.fetchJsonFromRepository.errors.fetchFail`,
+      `${i18nKey}.fetchFileFromRepository.errors.fetchFail`,
       {},
       err as BaseError
     );
@@ -57,13 +51,8 @@ export async function fetchReleaseData(
   if (tag.length && tag[0] !== 'v') {
     tag = `v${tag}`;
   }
-  const URI = tag
-    ? `https://api.github.com/repos/${repoPath}/releases/tags/${tag}`
-    : `https://api.github.com/repos/${repoPath}/releases/latest`;
   try {
-    const { data } = await axios.get<GithubReleaseData>(URI, {
-      headers: { ...DEFAULT_USER_AGENT_HEADERS, ...GITHUB_AUTH_HEADERS },
-    });
+    const { data } = await fetchRepoReleaseData(repoPath, tag);
     return data;
   } catch (err) {
     const error = err as BaseError;
@@ -99,9 +88,7 @@ async function downloadGithubRepoZip(
       const { name } = releaseData;
       debug(`${i18nKey}.downloadGithubRepoZip.fetchingName`, { name });
     }
-    const { data } = await axios.get<Buffer>(zipUrl, {
-      headers: { ...DEFAULT_USER_AGENT_HEADERS, ...GITHUB_AUTH_HEADERS },
-    });
+    const { data } = await fetchRepoAsZip(zipUrl);
     debug(`${i18nKey}.downloadGithubRepoZip.completed`);
     return data;
   } catch (err) {
@@ -144,29 +131,11 @@ export async function cloneGithubRepo(
   return success;
 }
 
-async function getGitHubRepoContentsAtPath(
-  repoPath: RepoPath,
-  path: string,
-  ref?: string
-): Promise<Array<GithubRepoFile>> {
-  const refQuery = ref ? `?ref=${ref}` : '';
-  const contentsRequestUrl = `https://api.github.com/repos/${repoPath}/contents/${path}${refQuery}`;
-
-  const response = await axios.get<Array<GithubRepoFile>>(contentsRequestUrl, {
-    headers: { ...DEFAULT_USER_AGENT_HEADERS, ...GITHUB_AUTH_HEADERS },
-  });
-
-  return response.data;
-}
-
 async function fetchGitHubRepoContentFromDownloadUrl(
   dest: string,
   downloadUrl: string
 ): Promise<void> {
-  const resp = await axios.get<Buffer>(downloadUrl, {
-    headers: { ...DEFAULT_USER_AGENT_HEADERS, ...GITHUB_AUTH_HEADERS },
-  });
-
+  const resp = await fetchRepoFileByDownloadUrl(downloadUrl);
   fs.writeFileSync(dest, resp.data, 'utf8');
 }
 
@@ -181,7 +150,7 @@ export async function downloadGithubRepoContents(
   fs.ensureDirSync(path.dirname(dest));
 
   try {
-    const contentsResp = await getGitHubRepoContentsAtPath(
+    const { data: contentsResp } = await fetchRepoContents(
       repoPath,
       contentPath,
       ref
@@ -190,7 +159,11 @@ export async function downloadGithubRepoContents(
     const downloadContent = async (
       contentPiece: GithubRepoFile
     ): Promise<void> => {
-      const { path: contentPiecePath, download_url } = contentPiece;
+      const {
+        path: contentPiecePath,
+        download_url,
+        type: contentPieceType,
+      } = contentPiece;
       const downloadPath = path.join(
         dest,
         contentPiecePath.replace(contentPath, '')
@@ -206,6 +179,16 @@ export async function downloadGithubRepoContents(
         downloadPath,
       });
 
+      if (contentPieceType === 'dir') {
+        const { data: innerDirContent } = await fetchRepoContents(
+          repoPath,
+          contentPiecePath,
+          ref
+        );
+        await Promise.all(innerDirContent.map(downloadContent));
+        return Promise.resolve();
+      }
+
       return fetchGitHubRepoContentFromDownloadUrl(downloadPath, download_url);
     };
 
@@ -217,7 +200,7 @@ export async function downloadGithubRepoContents(
       contentPromises = [downloadContent(contentsResp)];
     }
 
-    Promise.all(contentPromises);
+    await Promise.all(contentPromises);
   } catch (e) {
     const error = e as BaseError;
     if (error?.error?.message) {
