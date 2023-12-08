@@ -42,7 +42,7 @@
         }
       },
       "downloadGithubRepoZip": {
-        "fetching": "Fetching {{ releaseType }} with name {{ repoName }}...",
+        "fetching": "Fetching repository with name {{ repoPath }}...",
         "fetchingName": "Fetching {{ name }}...",
         "completed": "Completed project fetch.",
         "errors": {
