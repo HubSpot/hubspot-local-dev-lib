@@ -149,8 +149,8 @@ export async function accessTokenForPersonalAccessKey(
 // Adds an account to the config using authType: personalAccessKey
 export const updateConfigWithPersonalAccessKey = async (
   personalAccessKey: string,
-  name: string,
-  env: Environment,
+  env?: Environment,
+  name?: string,
   makeDefault = false
 ): Promise<CLIAccount | null> => {
   const accountEnv = env || getEnv(name);
@@ -192,7 +192,7 @@ export const updateConfigWithPersonalAccessKey = async (
   });
   writeConfig();
 
-  if (makeDefault) {
+  if (makeDefault && name) {
     updateDefaultAccount(name);
   }
 

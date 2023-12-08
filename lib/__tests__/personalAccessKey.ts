@@ -198,8 +198,8 @@ describe('lib/personalAccessKey', () => {
 
       await updateConfigWithPersonalAccessKey(
         'pak_123',
-        'account-name',
-        ENVIRONMENTS.QA
+        ENVIRONMENTS.QA,
+        'account-name'
       );
 
       expect(updateAccountConfig).toHaveBeenCalledWith(
@@ -222,8 +222,8 @@ describe('lib/personalAccessKey', () => {
 
       await updateConfigWithPersonalAccessKey(
         'pak_123',
-        'account-name',
-        ENVIRONMENTS.QA
+        ENVIRONMENTS.QA,
+        'account-name'
       );
 
       expect(updateAccountConfig).toHaveBeenCalledWith(
