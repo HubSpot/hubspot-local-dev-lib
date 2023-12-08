@@ -3,7 +3,7 @@ import { DEFAULT_USER_AGENT_HEADERS } from '../http/getAxiosConfig';
 import { GithubReleaseData, GithubRepoFile } from '../types/Github';
 
 const GITHUB_REPOS_API = 'https://api.github.com/repos';
-export const GITHUB_RAW_CONTENT_API_PATH = 'https://raw.githubusercontent.com';
+const GITHUB_RAW_CONTENT_API_PATH = 'https://raw.githubusercontent.com';
 
 declare global {
   // eslint-disable-next-line no-var
@@ -45,6 +45,20 @@ export async function fetchRepoAsZip(
 
 // Returns the raw file contents via the raw.githubusercontent endpoint
 export async function fetchRepoFile(
+  repoPath: RepoPath,
+  filePath: string,
+  ref: string
+): Promise<AxiosResponse<Buffer>> {
+  return axios.get<Buffer>(
+    `${GITHUB_RAW_CONTENT_API_PATH}/${repoPath}/${ref}/${filePath}`,
+    {
+      headers: { ...DEFAULT_USER_AGENT_HEADERS, ...GITHUB_AUTH_HEADERS },
+    }
+  );
+}
+
+// Returns the raw file contents via the raw.githubusercontent endpoint
+export async function fetchRepoFileByDownloadUrl(
   downloadUrl: string
 ): Promise<AxiosResponse<Buffer>> {
   return axios.get<Buffer>(downloadUrl, {

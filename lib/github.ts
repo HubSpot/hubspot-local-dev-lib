@@ -9,8 +9,8 @@ import { BaseError } from '../types/Error';
 import { GithubReleaseData, GithubRepoFile } from '../types/Github';
 import { LogCallbacksArg } from '../types/LogCallbacks';
 import {
-  GITHUB_RAW_CONTENT_API_PATH,
   fetchRepoFile,
+  fetchRepoFileByDownloadUrl,
   fetchRepoAsZip,
   fetchRepoReleaseData,
   fetchRepoContents,
@@ -26,10 +26,11 @@ export async function fetchFileFromRepository(
   ref: string
 ): Promise<Buffer> {
   try {
-    const contentPath = `${GITHUB_RAW_CONTENT_API_PATH}/${repoPath}/${ref}/${filePath}`;
-    debug(`${i18nKey}.fetchFileFromRepository.fetching`, { url: contentPath });
+    debug(`${i18nKey}.fetchFileFromRepository.fetching`, {
+      path: `${repoPath}/${ref}/${filePath}`,
+    });
 
-    const { data } = await fetchRepoFile(contentPath);
+    const { data } = await fetchRepoFile(repoPath, filePath, ref);
     return data;
   } catch (err) {
     throwErrorWithMessage(
@@ -144,7 +145,7 @@ async function fetchGitHubRepoContentFromDownloadUrl(
   dest: string,
   downloadUrl: string
 ): Promise<void> {
-  const resp = await fetchRepoFile(downloadUrl);
+  const resp = await fetchRepoFileByDownloadUrl(downloadUrl);
   fs.writeFileSync(dest, resp.data, 'utf8');
 }
 
@@ -155,7 +156,7 @@ export async function downloadGithubRepoContents(
   dest: string,
   ref?: string,
   filter?: (contentPiecePath: string, downloadPath: string) => boolean
-): Promise<void[]> {
+): Promise<void> {
   fs.ensureDirSync(path.dirname(dest));
 
   try {
@@ -209,7 +210,7 @@ export async function downloadGithubRepoContents(
       contentPromises = [downloadContent(contentsResp)];
     }
 
-    return Promise.all(contentPromises);
+    await Promise.all(contentPromises);
   } catch (e) {
     const error = e as BaseError;
     if (error?.error?.message) {
