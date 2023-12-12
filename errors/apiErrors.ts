@@ -1,47 +1,45 @@
+import { AxiosError } from 'axios';
 import {
   GenericError,
-  StatusCodeError,
-  StatusCodeErrorContext,
+  AxiosErrorContext,
+  BaseError,
+  ValidationError,
 } from '../types/Error';
 import { HTTP_METHOD_VERBS, HTTP_METHOD_PREPOSITIONS } from '../constants/api';
 import { i18n } from '../utils/lang';
 import { throwError } from './standardErrors';
 import { HubSpotAuthError } from '../models/HubSpotAuthError';
+import { HttpMethod } from '../types/Api';
 
 const i18nKey = 'errors.apiErrors';
 
-export function isApiStatusCodeError(err: GenericError): boolean {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function isMissingScopeError(err: AxiosError<any>): boolean {
   return (
-    err.name === 'StatusCodeError' ||
-    (!!err.status && err.status >= 100 && err.status < 600)
-  );
-}
-
-export function isMissingScopeError(err: GenericError): boolean {
-  return (
-    isApiStatusCodeError(err) &&
+    err.isAxiosError &&
     err.status === 403 &&
-    !!err.error &&
-    err.error.category === 'MISSING_SCOPES'
+    !!err.response &&
+    err.response.data.category === 'MISSING_SCOPES'
   );
 }
 
-export function isGatingError(err: GenericError): boolean {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function isGatingError(err: AxiosError<any>): boolean {
   return (
-    isApiStatusCodeError(err) &&
+    err.isAxiosError &&
     err.status === 403 &&
-    !!err.error &&
-    err.error.category === 'GATED'
+    !!err.response &&
+    err.response.data.category === 'GATED'
   );
 }
 
-export function isApiUploadValidationError(err: GenericError): boolean {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function isApiUploadValidationError(err: AxiosError<any>): boolean {
   return (
-    isApiStatusCodeError(err) &&
+    err.isAxiosError &&
     err.status === 400 &&
     !!err.response &&
-    !!err.response.body &&
-    !!(err.response.body.message || !!err.response.body.errors)
+    !!(err.response.data.message || !!err.response.data.errors)
   );
 }
 
@@ -50,8 +48,9 @@ export function isSpecifiedHubSpotAuthError(
   { status, category, subCategory }: Partial<HubSpotAuthError>
 ): boolean {
   const statusCodeErr = !status || err.status === status;
-  const categoryErr = !category || err.category === category;
-  const subCategoryErr = !subCategory || err.subCategory === subCategory;
+  const categoryErr = !category || err.response?.data.category === category;
+  const subCategoryErr =
+    !subCategory || err.response?.data.subCategory === subCategory;
   return Boolean(
     err.name === 'HubSpotAuthError' &&
       statusCodeErr &&
@@ -61,14 +60,14 @@ export function isSpecifiedHubSpotAuthError(
 }
 
 function parseValidationErrors(
-  responseBody: {
-    errors?: Array<StatusCodeError>;
+  responseData: {
+    errors?: Array<ValidationError>;
     message?: string;
   } = { errors: [], message: '' }
 ) {
   const errorMessages = [];
 
-  const { errors, message } = responseBody;
+  const { errors, message } = responseData;
 
   if (message) {
     errorMessages.push(message);
@@ -88,9 +87,9 @@ function parseValidationErrors(
   return errorMessages;
 }
 
-function logValidationErrors(error: StatusCodeError) {
-  const { response = { body: undefined } } = error;
-  const validationErrorMessages = parseValidationErrors(response.body);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function logValidationErrors(error: AxiosError<any>) {
+  const validationErrorMessages = parseValidationErrors(error?.response?.data);
   if (validationErrorMessages.length) {
     throwError(new Error(validationErrorMessages.join(' '), { cause: error }));
   }
@@ -99,20 +98,20 @@ function logValidationErrors(error: StatusCodeError) {
 /**
  * @throws
  */
-export function throwApiStatusCodeError(
-  error: StatusCodeError,
-  context: StatusCodeErrorContext = {}
+export function throwAxiosErrorWithContext(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  error: AxiosError<any>,
+  context: AxiosErrorContext = {}
 ): never {
   const { status } = error;
-  const { method } = error.options || {};
+  const method = error.config?.method as HttpMethod;
   const { projectName } = context;
 
-  const isPutOrPost = method === 'PUT' || method === 'POST';
-  const action =
-    method && (HTTP_METHOD_VERBS[method] || HTTP_METHOD_VERBS.DEFAULT);
+  const isPutOrPost = method === 'put' || method === 'post';
+  const action = method && (HTTP_METHOD_VERBS[method] || HTTP_METHOD_VERBS.get);
   const preposition =
     (method && HTTP_METHOD_PREPOSITIONS[method]) ||
-    HTTP_METHOD_PREPOSITIONS.DEFAULT;
+    HTTP_METHOD_PREPOSITIONS.get;
 
   const request = context.request
     ? `${action} ${preposition} "${context.request}"`
@@ -191,14 +190,14 @@ export function throwApiStatusCodeError(
       break;
   }
   if (
-    error?.error?.message &&
+    error?.response?.data?.message &&
     !isProjectMissingScopeError &&
     !isProjectGatingError
   ) {
-    errorMessage.push(error.error.message);
+    errorMessage.push(error.response.data.message);
   }
-  if (error.error && error.error.errors) {
-    error.error.errors.forEach(err => {
+  if (error?.response?.data?.errors) {
+    error.response.data.errors.forEach((err: BaseError) => {
       errorMessage.push('\n- ' + err.message);
     });
   }
@@ -209,11 +208,11 @@ export function throwApiStatusCodeError(
  * @throws
  */
 export function throwApiError(
-  error: StatusCodeError,
-  context: StatusCodeErrorContext = {}
+  error: AxiosError,
+  context: AxiosErrorContext = {}
 ): never {
-  if (isApiStatusCodeError(error)) {
-    throwApiStatusCodeError(error, context);
+  if (error.isAxiosError) {
+    throwAxiosErrorWithContext(error, context);
   }
   throwError(error);
 }
@@ -222,8 +221,8 @@ export function throwApiError(
  * @throws
  */
 export function throwApiUploadError(
-  error: StatusCodeError,
-  context: StatusCodeErrorContext = {}
+  error: AxiosError,
+  context: AxiosErrorContext = {}
 ): never {
   if (isApiUploadValidationError(error)) {
     logValidationErrors(error);

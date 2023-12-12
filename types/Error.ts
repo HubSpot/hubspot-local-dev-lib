@@ -43,11 +43,14 @@ export interface StatusCodeError extends BaseError {
   options?: {
     method: HttpMethod;
   };
+  error?: StatusCodeError;
+  errors?: Array<StatusCodeError>;
+}
+
+export interface ValidationError extends BaseError {
   errorTokens?: {
     line: number;
   };
-  error?: StatusCodeError;
-  errors?: Array<StatusCodeError>;
 }
 
 export type FileSystemErrorContext = {
@@ -57,7 +60,7 @@ export type FileSystemErrorContext = {
   accountId?: number;
 };
 
-export type StatusCodeErrorContext = {
+export type AxiosErrorContext = {
   accountId?: number;
   request?: string;
   payload?: string;
