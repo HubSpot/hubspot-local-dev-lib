@@ -9,6 +9,7 @@ import {
 } from './path';
 import { fetchFileStream, download, downloadDefault } from '../api/fileMapper';
 import {
+  throwError,
   throwErrorWithMessage,
   throwTypeErrorWithMessage,
 } from '../errors/standardErrors';
@@ -21,7 +22,6 @@ import {
   FileMapperInputOptions,
 } from '../types/Files';
 import { throwFileSystemError } from '../errors/fileSystemErrors';
-import { throwStatusCodeError } from '../errors/apiErrors';
 import { BaseError, StatusCodeError } from '../types/Error';
 import { LogCallbacksArg } from '../types/LogCallbacks';
 import { makeTypedLogger } from '../utils/logger';
@@ -214,10 +214,7 @@ async function fetchAndWriteFileStream(
       getFileMapperQueryValues(mode, options)
     );
   } catch (err) {
-    throwStatusCodeError(err as StatusCodeError, {
-      accountId,
-      request: srcPath,
-    });
+    throwError(err as BaseError);
   }
   await writeUtimes(accountId, filepath, node);
 }
@@ -271,7 +268,7 @@ async function writeFileMapperNode(
   return true;
 }
 
-function isTimeout(err: StatusCodeError): boolean {
+function isTimeout(err: BaseError): boolean {
   return !!err && (err.status === 408 || err.code === 'ESOCKETTIMEDOUT');
 }
 
@@ -357,14 +354,11 @@ export async function fetchFolderFromApi(
     logger('folderFetch', `${i18nKey}.folderFetch`, { src, accountId });
     return node;
   } catch (err) {
-    const error = err as StatusCodeError;
+    const error = err as BaseError;
     if (isHubspot && isTimeout(error)) {
       throwErrorWithMessage(`${i18nKey}.errors.assetTimeout`, {}, error);
     } else {
-      throwStatusCodeError(error, {
-        accountId,
-        request: src,
-      });
+      throwError(error);
     }
   }
 }

@@ -4,7 +4,6 @@ import {
   isGatingError,
   isApiUploadValidationError,
   isSpecifiedHubSpotAuthError,
-  throwStatusCodeError,
   throwApiStatusCodeError,
   throwApiError,
   throwApiUploadError,
@@ -131,13 +130,6 @@ describe('errors/apiErrors', () => {
     it('returns false for non matching HubSpot auth errors', () => {
       const error1 = newError({ name: 'HubSpotAuthError', status: 123 });
       expect(isSpecifiedHubSpotAuthError(error1, { status: 124 })).toBe(false);
-    });
-  });
-
-  describe('throwStatusCodeError()', () => {
-    it('throws status code error', () => {
-      const error = newStatutsCodeError() as StatusCodeError;
-      expect(() => throwStatusCodeError(error)).toThrow();
     });
   });
 

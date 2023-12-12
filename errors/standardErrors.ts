@@ -1,6 +1,5 @@
 import { HubSpotAuthError } from '../models/HubSpotAuthError';
 import { i18n } from '../utils/lang';
-import { throwStatusCodeError } from './apiErrors';
 
 import { BaseError, StatusCodeError } from '../types/Error';
 import { LangKey } from '../types/Lang';
@@ -69,17 +68,13 @@ export function throwAuthErrorWithMessage(
  * @throws
  */
 export function throwError(error: BaseError): never {
-  if (error.name === 'StatusCodeError') {
-    throwStatusCodeError(error as StatusCodeError);
-  } else {
-    // Error or Error subclass
-    const name = error.name || 'Error';
-    const message = [i18n('errors.generic', { name })];
-    [error.message, error.reason].forEach(msg => {
-      if (msg) {
-        message.push(msg);
-      }
-    });
-    throw new Error(message.join(' '), { cause: error });
-  }
+  // Error or Error subclass
+  const name = error.name || 'Error';
+  const message = [i18n('errors.generic', { name })];
+  [error.message, error.reason].forEach(msg => {
+    if (msg) {
+      message.push(msg);
+    }
+  });
+  throw new Error(message.join(' '), { cause: error });
 }

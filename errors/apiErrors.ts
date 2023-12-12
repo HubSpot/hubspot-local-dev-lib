@@ -99,26 +99,6 @@ function logValidationErrors(error: StatusCodeError) {
 /**
  * @throws
  */
-export function throwStatusCodeError(
-  error: StatusCodeError,
-  context: StatusCodeErrorContext = {}
-): never {
-  const { status, message, response } = error;
-  const errorData = JSON.stringify({
-    status,
-    message,
-    url: response ? response.request.href : null,
-    method: response ? response.request.method : null,
-    response: response ? response.body : null,
-    headers: response ? response.headers : null,
-    context,
-  });
-  throw new Error(errorData, { cause: error });
-}
-
-/**
- * @throws
- */
 export function throwApiStatusCodeError(
   error: StatusCodeError,
   context: StatusCodeErrorContext = {}
