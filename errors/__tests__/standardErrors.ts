@@ -6,8 +6,9 @@ import {
   throwAuthErrorWithMessage,
   throwError,
 } from '../standardErrors';
-import { BaseError, StatusCodeError } from '../../types/Error';
+import { BaseError } from '../../types/Error';
 import { HubSpotAuthError } from '../../models/HubSpotAuthError';
+import { AxiosError } from 'axios';
 
 export const newError = (overrides = {}): BaseError => {
   return {
@@ -40,7 +41,7 @@ describe('errors/standardErrors', () => {
 
   describe('isFatalError()', () => {
     it('returns true for fatal errors', () => {
-      const cause = newError() as StatusCodeError;
+      const cause = newError() as AxiosError;
       const error = new HubSpotAuthError('A fatal auth error', { cause });
       expect(isFatalError(error)).toBe(true);
     });
@@ -71,7 +72,7 @@ describe('errors/standardErrors', () => {
 
   describe('throwAuthErrorWithMessage()', () => {
     it('throws auth error with message', () => {
-      const error = newError() as StatusCodeError;
+      const error = newError() as AxiosError;
       expect(() =>
         throwAuthErrorWithMessage('errors.generic', {}, error)
       ).toThrow();

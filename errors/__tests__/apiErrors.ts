@@ -23,7 +23,8 @@ export const newError = (overrides = {}): BaseError => {
 export const newAxiosError = (overrides = {}): AxiosError => {
   return {
     ...newError(),
-    name: 'Axios',
+    isAxiosError: true,
+    name: 'AxiosError',
     response: {
       request: {
         href: 'http://example.com/',
@@ -55,7 +56,7 @@ describe('errors/apiErrors', () => {
         status: 400,
         response: { data: { category: 'MISSING_SCOPES' } },
       });
-      const error2 = newAxiosError({ name: 'NonStatusCodeError' });
+      const error2 = newAxiosError({ isAxiosError: false });
       expect(isMissingScopeError(error1)).toBe(false);
       expect(isMissingScopeError(error2)).toBe(false);
     });
@@ -75,7 +76,7 @@ describe('errors/apiErrors', () => {
         status: 400,
         response: { data: { category: 'GATED' } },
       });
-      const error2 = newAxiosError({ name: 'NonStatusCodeError' });
+      const error2 = newAxiosError({ isAxiosError: false });
       expect(isGatingError(error1)).toBe(false);
       expect(isGatingError(error2)).toBe(false);
     });
@@ -100,7 +101,7 @@ describe('errors/apiErrors', () => {
         status: 400,
         response: { data: null },
       });
-      const error2 = newAxiosError({ name: 'NonStatusCodeError' });
+      const error2 = newAxiosError({ isAxiosError: false });
       expect(isApiUploadValidationError(error1)).toBe(false);
       expect(isApiUploadValidationError(error2)).toBe(false);
     });
@@ -118,7 +119,7 @@ describe('errors/apiErrors', () => {
     });
   });
 
-  describe('throwApiStatusCodeError()', () => {
+  describe('throwAxiosErrorWithContext()', () => {
     it('throws api status code error', () => {
       const error = newAxiosError();
       expect(() => throwAxiosErrorWithContext(error)).toThrow();

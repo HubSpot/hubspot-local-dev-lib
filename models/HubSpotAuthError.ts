@@ -1,13 +1,10 @@
-import { StatusCodeError } from '../types/Error';
+import { AxiosError } from 'axios';
 
 export class HubSpotAuthError extends Error {
   status?: number;
   category?: string;
   subCategory?: string;
-  constructor(
-    message: string,
-    { cause = {} }: { cause?: Partial<StatusCodeError> }
-  ) {
+  constructor(message: string, { cause = {} }: { cause?: AxiosError }) {
     super(message);
     this.name = 'HubSpotAuthError';
     this.status = cause.status;
