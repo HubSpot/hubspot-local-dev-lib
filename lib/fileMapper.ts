@@ -1,6 +1,7 @@
 import fs from 'fs-extra';
 import path from 'path';
 import PQueue from 'p-queue';
+import { AxiosError } from 'axios';
 import {
   getCwd,
   getExt,
@@ -22,7 +23,7 @@ import {
   FileMapperInputOptions,
 } from '../types/Files';
 import { throwFileSystemError } from '../errors/fileSystemErrors';
-import { BaseError, StatusCodeError } from '../types/Error';
+import { BaseError } from '../types/Error';
 import { LogCallbacksArg } from '../types/LogCallbacks';
 import { makeTypedLogger } from '../utils/logger';
 
@@ -318,8 +319,8 @@ async function downloadFile(
       dest,
     });
   } catch (err) {
-    const error = err as StatusCodeError;
-    if (isHubspot && isTimeout(err as StatusCodeError)) {
+    const error = err as AxiosError;
+    if (isHubspot && isTimeout(error)) {
       throwErrorWithMessage(`${i18nKey}.errors.assetTimeout`, {}, error);
     } else {
       throwErrorWithMessage(
@@ -424,7 +425,7 @@ async function downloadFolder(
     throwErrorWithMessage(
       `${i18nKey}.errors.failedToFetchFolder`,
       { src, dest: destPath },
-      err as StatusCodeError
+      err as AxiosError
     );
   }
 }

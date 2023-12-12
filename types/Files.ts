@@ -1,3 +1,4 @@
+import { AxiosError } from 'axios';
 import { ValueOf } from '../types/Utils';
 import {
   STAT_TYPES,
@@ -6,7 +7,6 @@ import {
 } from '../constants/files';
 import { MODE } from '../constants/files';
 import { HttpOptions } from './Http';
-import { StatusCodeError } from './Error';
 
 export type StatType = ValueOf<typeof STAT_TYPES>;
 
@@ -41,7 +41,7 @@ type ResultType = ValueOf<typeof FILE_UPLOAD_RESULT_TYPES>;
 
 export type UploadFolderResults = {
   resultType: ResultType;
-  error: StatusCodeError | null;
+  error: AxiosError | null;
   file: string;
 };
 

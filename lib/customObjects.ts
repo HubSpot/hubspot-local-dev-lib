@@ -1,10 +1,10 @@
 import fs from 'fs-extra';
 import path from 'path';
 import prettier from 'prettier';
+import { AxiosError } from 'axios';
 import { getCwd } from '../lib/path';
 import { fetchObjectSchemas, fetchObjectSchema } from '../api/customObjects';
 import { FetchSchemasResponse, Schema } from '../types/Schemas';
-import { StatusCodeError } from '../types/Error';
 import { throwApiError } from '../errors/apiErrors';
 
 export function getResolvedPath(dest?: string, name?: string): string {
@@ -32,7 +32,7 @@ export async function downloadSchemas(
   try {
     response = await fetchObjectSchemas(accountId);
   } catch (err) {
-    throwApiError(err as StatusCodeError);
+    throwApiError(err as AxiosError);
   }
 
   if (response.results.length) {
@@ -54,7 +54,7 @@ export async function downloadSchema(
   try {
     response = await fetchObjectSchema(accountId, schemaObjectType);
   } catch (err) {
-    throwApiError(err as StatusCodeError);
+    throwApiError(err as AxiosError);
   }
 
   await writeSchemaToDisk(response, dest);

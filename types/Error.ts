@@ -1,5 +1,3 @@
-import { HttpMethod } from './Api';
-
 export interface GenericError extends Error {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
@@ -16,35 +14,6 @@ export interface BaseError extends Error {
   status?: number;
   error?: BaseError;
   errors?: Array<BaseError>;
-}
-
-export interface StatusCodeError extends BaseError {
-  name: string;
-  status?: number;
-  message: string;
-  category?: string;
-  subCategory?: string;
-  response: {
-    request: {
-      href: string;
-      method: string;
-    };
-    body: {
-      message?: string;
-      errors?: Array<StatusCodeError>;
-      category?: string;
-      subCategory?: string;
-    };
-    headers: {
-      [key: string]: string;
-    };
-    status: number;
-  };
-  options?: {
-    method: HttpMethod;
-  };
-  error?: StatusCodeError;
-  errors?: Array<StatusCodeError>;
 }
 
 export interface ValidationError extends BaseError {

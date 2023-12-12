@@ -1,5 +1,6 @@
 import path from 'path';
 import PQueue from 'p-queue';
+import { AxiosError } from 'axios';
 
 import {
   isConvertableFieldJs,
@@ -18,7 +19,6 @@ import { throwApiUploadError } from '../../errors/apiErrors';
 import { FileMapperInputOptions } from '../../types/Files';
 import { LogCallbacksArg } from '../../types/LogCallbacks';
 import { makeTypedLogger } from '../../utils/logger';
-import { StatusCodeError } from '../../types/Error';
 import { FILE_TYPES, FILE_UPLOAD_RESULT_TYPES } from '../../constants/files';
 import { FileType, UploadFolderResults } from '../../types/Files';
 import { Mode } from '../../types/Files';
@@ -179,13 +179,13 @@ export async function uploadFolder(
           destPath,
         });
       } catch (err) {
-        const error = err as StatusCodeError;
+        const error = err as AxiosError;
         if (isFatalError(error)) {
           throw error;
         }
         debug(`${i18nKey}.uploadFolder.failed`, { file, destPath });
-        if (error.response && error.response.body) {
-          console.debug(error.response.body);
+        if (error.response && error.response.data) {
+          console.debug(error.response.data);
         } else {
           console.debug(error.message);
         }
@@ -220,7 +220,7 @@ export async function uploadFolder(
             };
           } catch (err) {
             debug(`${i18nKey}.uploadFolder.retryFailed`, { file, destPath });
-            const error = err as StatusCodeError;
+            const error = err as AxiosError;
             if (isFatalError(error)) {
               throw error;
             }

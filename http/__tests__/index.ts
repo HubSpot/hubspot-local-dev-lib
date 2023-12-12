@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import fs from 'fs-extra';
 import moment from 'moment';
 import {
@@ -8,7 +8,6 @@ import {
 import { ENVIRONMENTS } from '../../constants/environments';
 import http from '../';
 import { version } from '../../package.json';
-import { StatusCodeError } from '../../types/Error';
 import { AuthType } from '../../types/Accounts';
 
 jest.mock('fs-extra');
@@ -101,7 +100,7 @@ describe('http/index', () => {
           'path/to/local/file'
         );
       } catch (e) {
-        const error = e as StatusCodeError;
+        const error = e as AxiosError;
         errorNotThrown = false;
 
         expect(error.status).toBe(404);
