@@ -1,8 +1,4 @@
-import {
-  BaseError,
-  FileSystemErrorContext,
-  StatusCodeError,
-} from '../types/Error';
+import { BaseError, FileSystemErrorContext } from '../types/Error';
 
 type ErrorContext = {
   accountId?: number;
@@ -13,19 +9,7 @@ function isSystemError(err: BaseError) {
 }
 
 function debugErrorAndContext(error: BaseError, context?: ErrorContext): void {
-  if (error.name === 'StatusCodeError') {
-    const { status, message, response } = error as StatusCodeError;
-    console.debug('Error: %o', {
-      status,
-      message,
-      url: response.request.href,
-      method: response.request.method,
-      response: response.body,
-      headers: response.headers,
-    });
-  } else {
-    console.debug('Error: %o', error);
-  }
+  console.debug('Error: %o', error);
   console.debug('Context: %o', context);
 }
 

@@ -1,14 +1,14 @@
+import { AxiosError } from 'axios';
 import {
-  isApiStatusCodeError,
   isMissingScopeError,
   isGatingError,
   isApiUploadValidationError,
   isSpecifiedHubSpotAuthError,
-  throwApiStatusCodeError,
+  throwAxiosErrorWithContext,
   throwApiError,
   throwApiUploadError,
 } from '../apiErrors';
-import { BaseError, GenericError, StatusCodeError } from '../../types/Error';
+import { BaseError } from '../../types/Error';
 
 export const newError = (overrides = {}): BaseError => {
   return {
@@ -20,57 +20,42 @@ export const newError = (overrides = {}): BaseError => {
   };
 };
 
-export const newStatutsCodeError = (overrides = {}): GenericError => {
+export const newAxiosError = (overrides = {}): AxiosError => {
   return {
     ...newError(),
-    name: 'StatusCodeError',
+    name: 'Axios',
     response: {
       request: {
         href: 'http://example.com/',
         method: 'GET',
       },
-      body: {},
+      data: {},
       headers: {},
       status: 200,
+      statusText: '',
+      // @ts-expect-error don't need to test headers
+      config: {},
     },
     ...overrides,
   };
 };
 
 describe('errors/apiErrors', () => {
-  describe('isApiStatusCodeError()', () => {
-    it('returns true for api status code errors', () => {
-      const error1 = newError({ status: 100 });
-      const error2 = newError({ status: 599 });
-      const error3 = newStatutsCodeError({ status: 99 });
-      expect(isApiStatusCodeError(error1)).toBe(true);
-      expect(isApiStatusCodeError(error2)).toBe(true);
-      expect(isApiStatusCodeError(error3)).toBe(true);
-    });
-
-    it('returns false for non api status code errors', () => {
-      const error1 = newError({ status: 99 });
-      const error2 = newError({ status: 600 });
-      expect(isApiStatusCodeError(error1)).toBe(false);
-      expect(isApiStatusCodeError(error2)).toBe(false);
-    });
-  });
-
   describe('isMissingScopeError()', () => {
     it('returns true for missing scope errors', () => {
-      const error1 = newStatutsCodeError({
+      const error1 = newAxiosError({
         status: 403,
-        error: { category: 'MISSING_SCOPES' },
+        response: { data: { category: 'MISSING_SCOPES' } },
       });
       expect(isMissingScopeError(error1)).toBe(true);
     });
 
     it('returns false for non missing scope errors', () => {
-      const error1 = newStatutsCodeError({
+      const error1 = newAxiosError({
         status: 400,
-        error: { category: 'MISSING_SCOPES' },
+        response: { data: { category: 'MISSING_SCOPES' } },
       });
-      const error2 = newStatutsCodeError({ name: 'NonStatusCodeError' });
+      const error2 = newAxiosError({ name: 'NonStatusCodeError' });
       expect(isMissingScopeError(error1)).toBe(false);
       expect(isMissingScopeError(error2)).toBe(false);
     });
@@ -78,19 +63,19 @@ describe('errors/apiErrors', () => {
 
   describe('isGatingError()', () => {
     it('returns true for gating errors', () => {
-      const error1 = newStatutsCodeError({
+      const error1 = newAxiosError({
         status: 403,
-        error: { category: 'GATED' },
+        response: { data: { category: 'GATED' } },
       });
       expect(isGatingError(error1)).toBe(true);
     });
 
     it('returns false for non gating errors', () => {
-      const error1 = newStatutsCodeError({
+      const error1 = newAxiosError({
         status: 400,
-        error: { category: 'GATED' },
+        response: { data: { category: 'GATED' } },
       });
-      const error2 = newStatutsCodeError({ name: 'NonStatusCodeError' });
+      const error2 = newAxiosError({ name: 'NonStatusCodeError' });
       expect(isGatingError(error1)).toBe(false);
       expect(isGatingError(error2)).toBe(false);
     });
@@ -98,24 +83,24 @@ describe('errors/apiErrors', () => {
 
   describe('isApiUploadValidationError()', () => {
     it('returns true for api upload validation errors', () => {
-      const error1 = newStatutsCodeError({
+      const error1 = newAxiosError({
         status: 400,
-        response: { body: { message: 'upload validation error' } },
+        response: { data: { message: 'upload validation error' } },
       });
-      const error2 = newStatutsCodeError({
+      const error2 = newAxiosError({
         status: 400,
-        response: { body: { errors: [] } },
+        response: { data: { errors: [] } },
       });
       expect(isApiUploadValidationError(error1)).toBe(true);
       expect(isApiUploadValidationError(error2)).toBe(true);
     });
 
     it('returns false for non api upload validation errors', () => {
-      const error1 = newStatutsCodeError({
+      const error1 = newAxiosError({
         status: 400,
-        response: { body: null },
+        response: { data: null },
       });
-      const error2 = newStatutsCodeError({ name: 'NonStatusCodeError' });
+      const error2 = newAxiosError({ name: 'NonStatusCodeError' });
       expect(isApiUploadValidationError(error1)).toBe(false);
       expect(isApiUploadValidationError(error2)).toBe(false);
     });
@@ -135,21 +120,21 @@ describe('errors/apiErrors', () => {
 
   describe('throwApiStatusCodeError()', () => {
     it('throws api status code error', () => {
-      const error = newStatutsCodeError() as StatusCodeError;
-      expect(() => throwApiStatusCodeError(error)).toThrow();
+      const error = newAxiosError();
+      expect(() => throwAxiosErrorWithContext(error)).toThrow();
     });
   });
 
   describe('throwApiError()', () => {
     it('throws api error', () => {
-      const error = newStatutsCodeError() as StatusCodeError;
+      const error = newAxiosError();
       expect(() => throwApiError(error)).toThrow();
     });
   });
 
   describe('throwApiUploadError()', () => {
     it('throws api upload error', () => {
-      const error = newStatutsCodeError() as StatusCodeError;
+      const error = newAxiosError();
       expect(() => throwApiUploadError(error)).toThrow();
     });
   });

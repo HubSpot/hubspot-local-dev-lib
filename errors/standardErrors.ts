@@ -1,8 +1,9 @@
 import { HubSpotAuthError } from '../models/HubSpotAuthError';
 import { i18n } from '../utils/lang';
 
-import { BaseError, StatusCodeError } from '../types/Error';
+import { BaseError } from '../types/Error';
 import { LangKey } from '../types/Lang';
+import { AxiosError } from 'axios';
 
 export function isSystemError(err: BaseError): boolean {
   return err.errno != null && err.code != null && err.syscall != null;
@@ -53,7 +54,7 @@ export function throwTypeErrorWithMessage(
 export function throwAuthErrorWithMessage(
   identifier: LangKey,
   interpolation?: { [key: string]: string | number },
-  cause?: StatusCodeError
+  cause?: AxiosError
 ): never {
   genericThrowErrorWithMessage(
     // @ts-expect-error HubSpotAuthError is not callable
