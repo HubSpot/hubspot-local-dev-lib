@@ -41,7 +41,10 @@ describe('errors/standardErrors', () => {
 
   describe('isFatalError()', () => {
     it('returns true for fatal errors', () => {
-      const cause = newError() as AxiosError;
+      const cause = newError() as AxiosError<{
+        category: string;
+        subcategory: string;
+      }>;
       const error = new HubSpotAuthError('A fatal auth error', { cause });
       expect(isFatalError(error)).toBe(true);
     });

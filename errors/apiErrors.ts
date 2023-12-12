@@ -39,7 +39,7 @@ export function isApiUploadValidationError(err: AxiosError<any>): boolean {
     err.isAxiosError &&
     err.status === 400 &&
     !!err.response &&
-    !!(err.response.data.message || !!err.response.data.errors)
+    !!(err.response?.data?.message || !!err.response?.data?.errors)
   );
 }
 
