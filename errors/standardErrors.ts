@@ -70,8 +70,10 @@ export function throwAuthErrorWithMessage(
  */
 export function throwError(error: BaseError): never {
   // Error or Error subclass
-  const name = error.name || 'Error';
-  const message = [i18n('errors.generic', { name })];
+  const message =
+    error.name && error.name !== 'Error'
+      ? [i18n('errors.generic', { name: error.name })]
+      : [];
   [error.message, error.reason].forEach(msg => {
     if (msg) {
       message.push(msg);

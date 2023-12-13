@@ -378,6 +378,6 @@
         "generic": "The {{ messageDetail }} failed."
       }
     },
-    "generic": "A {{ name }} has occurred"
+    "generic": "{{ name }}:"
   }
 }
