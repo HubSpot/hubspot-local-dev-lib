@@ -46,7 +46,7 @@ export async function getAccessToken(
     response = await fetchAccessToken(personalAccessKey, env, accountId);
   } catch (e) {
     const error = e as AxiosError<{ message?: string }>;
-    if (error.response && error.response.data) {
+    if (error.response) {
       throwAuthErrorWithMessage(
         `${i18nKey}.errors.invalidPersonalAccessKey`,
         { errorMessage: error.response.data.message || '' },

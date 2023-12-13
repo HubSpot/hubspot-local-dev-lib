@@ -48,9 +48,8 @@ export function isSpecifiedHubSpotAuthError(
   { status, category, subCategory }: Partial<HubSpotAuthError>
 ): boolean {
   const statusCodeErr = !status || err.status === status;
-  const categoryErr = !category || err.response?.data.category === category;
-  const subCategoryErr =
-    !subCategory || err.response?.data.subCategory === subCategory;
+  const categoryErr = !category || err.category === category;
+  const subCategoryErr = !subCategory || err.subCategory === subCategory;
   return Boolean(
     err.name === 'HubSpotAuthError' &&
       statusCodeErr &&
