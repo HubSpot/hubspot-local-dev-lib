@@ -1,4 +1,5 @@
 import moment from 'moment';
+import { AxiosError } from 'axios';
 import { ENVIRONMENTS } from '../constants/environments';
 import { PERSONAL_ACCESS_KEY_AUTH_METHOD } from '../constants/auth';
 import {
@@ -8,7 +9,7 @@ import {
 } from '../errors/standardErrors';
 import { fetchAccessToken } from '../api/localDevAuth';
 import { fetchSandboxHubData } from '../api/sandboxHubs';
-import { BaseError, StatusCodeError } from '../types/Error';
+import { BaseError } from '../types/Error';
 import { CLIAccount, PersonalAccessKeyAccount } from '../types/Accounts';
 import { Environment } from '../types/Config';
 import {
@@ -44,11 +45,11 @@ export async function getAccessToken(
   try {
     response = await fetchAccessToken(personalAccessKey, env, accountId);
   } catch (e) {
-    const error = e as StatusCodeError;
-    if (error.response && error.response.body) {
+    const error = e as AxiosError<{ message?: string }>;
+    if (error.response) {
       throwAuthErrorWithMessage(
         `${i18nKey}.errors.invalidPersonalAccessKey`,
-        { errorMessage: error.response.body.message || '' },
+        { errorMessage: error.response.data.message || '' },
         error
       );
     } else {

@@ -1,4 +1,4 @@
-import { StatusCodeError } from '../types/Error';
+import { AxiosError } from 'axios';
 
 export class HubSpotAuthError extends Error {
   status?: number;
@@ -6,16 +6,20 @@ export class HubSpotAuthError extends Error {
   subCategory?: string;
   constructor(
     message: string,
-    { cause = {} }: { cause?: Partial<StatusCodeError> }
+    {
+      cause = {},
+    }: {
+      cause?: Partial<AxiosError<{ category?: string; subCategory?: string }>>;
+    }
   ) {
     super(message);
     this.name = 'HubSpotAuthError';
-    this.status = cause.status;
-    this.category = cause?.response?.body?.category || undefined;
+    this.status = cause.response?.status;
+    this.category = cause?.response?.data?.category || undefined;
     this.subCategory =
       (cause.response &&
-        cause.response.body &&
-        cause.response.body.subCategory) ||
+        cause.response.data &&
+        cause.response.data.subCategory) ||
       undefined;
   }
 }

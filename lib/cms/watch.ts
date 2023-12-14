@@ -2,6 +2,7 @@ import path from 'path';
 import chokidar from 'chokidar';
 import PQueue from 'p-queue';
 import { debounce } from 'debounce';
+import { AxiosError } from 'axios';
 
 import { throwApiError, throwApiUploadError } from '../../errors/apiErrors';
 import { isConvertableFieldJs, FieldsJs } from './handleFieldsJS';
@@ -18,7 +19,6 @@ import { makeTypedLogger } from '../../utils/logger';
 import { debug } from '../../utils/logger';
 import { FileMapperInputOptions, Mode } from '../../types/Files';
 import { UploadFolderResults } from '../../types/Files';
-import { StatusCodeError } from '../../types/Error';
 
 const i18nKey = 'lib.cms.watch';
 
@@ -121,7 +121,7 @@ async function uploadFile(
         debug(`${i18nKey}.uploadFailed`, { file, dest });
         debug(`${i18nKey}.uploadRetry`, { file, dest });
         return upload(accountId, file, dest, apiOptions).catch(
-          (error: StatusCodeError) => {
+          (error: AxiosError) => {
             debug(`${i18nKey}.uploadFailed`, {
               file,
               dest,
@@ -156,7 +156,7 @@ async function deleteRemoteFile(
         logger('deleteSuccess', `${i18nKey}.deleteSuccess`, { remoteFilePath });
         notifyOfThemePreview(filePath, accountId, logCallbacks);
       })
-      .catch((error: StatusCodeError) => {
+      .catch((error: AxiosError) => {
         debug(`${i18nKey}.deleteFailed`, {
           remoteFilePath,
         });
@@ -179,7 +179,7 @@ type WatchOptions = {
   filePaths?: Array<string>;
 };
 
-type ErrorHandler = (error: StatusCodeError) => void;
+type ErrorHandler = (error: AxiosError) => void;
 
 export function watch(
   accountId: number,

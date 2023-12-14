@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import moment from 'moment';
 
 import { getHubSpotApiOrigin } from '../lib/urls';
@@ -12,7 +12,7 @@ import {
   throwErrorWithMessage,
   throwAuthErrorWithMessage,
 } from '../errors/standardErrors';
-import { BaseError, StatusCodeError } from '../types/Error';
+import { BaseError } from '../types/Error';
 
 type WriteTokenInfoFunction = (tokenInfo: TokenInfo) => void;
 
@@ -118,12 +118,12 @@ class OAuth2Manager {
         await this.fetchAccessToken(exchangeProof);
       }
     } catch (e) {
-      const error = e as StatusCodeError;
+      const error = e as AxiosError<{ message: string }>;
       if (error.response) {
         throwAuthErrorWithMessage(
           `${i18nKey}.errors.auth`,
           {
-            token: error.response.body.message || '',
+            token: error.response.data.message || '',
           },
           error
         );
