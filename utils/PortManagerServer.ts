@@ -181,7 +181,7 @@ class PortManagerServer {
 
     if (port) {
       this.deletePort(instanceId);
-      res.send(200);
+      res.sendStatus(200);
     } else {
       this.send404(res, instanceId);
     }
@@ -190,7 +190,7 @@ class PortManagerServer {
   closeServer = (req: Request, res: Response): void => {
     if (this.server) {
       debug(`${i18nKey}.close`);
-      res.send(200);
+      res.sendStatus(200);
       this.server.close();
       this.reset();
     }
