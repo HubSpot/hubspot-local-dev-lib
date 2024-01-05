@@ -51,7 +51,7 @@ export async function fetchStat(
 
 export async function fetchFiles(
   accountId: number,
-  folderId: number,
+  folderId: number | 'None',
   offset: number,
   archived?: boolean
 ): Promise<FetchFilesResponse> {
@@ -68,7 +68,7 @@ export async function fetchFiles(
 
 export async function fetchFolders(
   accountId: number,
-  folderId: number
+  folderId: number | 'None'
 ): Promise<FetchFolderResponse> {
   return http.get(accountId, {
     url: `${FILE_MANAGER_V2_API_PATH}/folders/`,

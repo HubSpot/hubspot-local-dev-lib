@@ -129,7 +129,7 @@ async function downloadFile(
 
 async function fetchAllPagedFiles(
   accountId: number,
-  folderId: number,
+  folderId: number | 'None',
   includeArchived?: boolean
 ): Promise<Array<File>> {
   let totalFiles: number | null = null;

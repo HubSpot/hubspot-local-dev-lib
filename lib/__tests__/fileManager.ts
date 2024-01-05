@@ -3,8 +3,8 @@ import { uploadFile } from '../../api/fileManager';
 import { walk } from '../fs';
 import { createIgnoreFilter } from '../ignoreRules';
 
-jest.mock('../lib/walk');
-jest.mock('../api/fileManager');
+jest.mock('../fs');
+jest.mock('../../api/fileManager');
 jest.mock('../ignoreRules');
 
 describe('uploadFolder', () => {
