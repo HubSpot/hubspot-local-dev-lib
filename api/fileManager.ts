@@ -50,7 +50,7 @@ export async function fetchStat(
 
 export async function fetchFiles(
   accountId: number,
-  folderId: number,
+  folderId: string,
   offset: number,
   archived?: boolean
 ): Promise<FetchFilesOrFolderResponse> {

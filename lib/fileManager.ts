@@ -1,3 +1,5 @@
+// FILE MANAGER - not to be confused with fileMapper.ts
+
 import fs from 'fs-extra';
 import path from 'path';
 
@@ -19,113 +21,120 @@ import {
 } from './path';
 
 import { throwApiError, throwApiUploadError } from '../errors/apiErrors';
-import { isFatalError, throwErrorWithMessage } from '../errors/standardErrors';
+import {
+  isFatalError,
+  throwErrorWithMessage,
+  throwError,
+} from '../errors/standardErrors';
 import { throwFileSystemError } from '../errors/fileSystemErrors';
-/**
- *
- * @param {number} accountId
- * @param {string} src
- * @param {string} dest
- * @param {object} options
- */
-async function uploadFolder(accountId, src, dest) {
+import { LogCallbacksArg } from '../types/LogCallbacks';
+import { makeTypedLogger } from '../utils/logger';
+import { BaseError } from '../types/Error';
+import { File, Folder } from '../types/FileManager';
+
+const i18nKey = 'lib.fileManager';
+
+const uploadFolderCallbackKeys = ['uploadSuccess'];
+
+async function uploadFolder(
+  accountId: number,
+  src: string,
+  dest: string,
+  logCallbacks?: LogCallbacksArg<typeof uploadFolderCallbackKeys>
+): Promise<void> {
+  const logger = makeTypedLogger<typeof uploadFolderCallbackKeys>(logCallbacks);
   const regex = new RegExp(`^${escapeRegExp(src)}`);
   const files = await walk(src);
 
-  const filesToUpload = files.filter(createIgnoreFilter());
+  const filesToUpload = files.filter(createIgnoreFilter(false));
 
   const len = filesToUpload.length;
   for (let index = 0; index < len; index++) {
     const file = filesToUpload[index];
     const relativePath = file.replace(regex, '');
     const destPath = convertToUnixPath(path.join(dest, relativePath));
-    logger.debug(
-      'Uploading files from "%s" to "%s" in the File Manager of account %s',
+    debug(`${i18nKey}.uploadStarted`, {
       file,
       destPath,
-      accountId
-    );
+      accountId,
+    });
     try {
       await uploadFile(accountId, file, destPath);
-      logger.log('Uploaded file "%s" to "%s"', file, destPath);
-    } catch (error) {
-      logger.error('Uploading file "%s" to "%s" failed', file, destPath);
+      logger('uploadSuccess', `${i18nKey}.uploadSuccess`, { file, destPath });
+    } catch (err) {
+      const error = err as BaseError;
       if (isFatalError(error)) {
-        throw error;
+        throwError(error);
       }
-      logApiUploadErrorInstance(
-        error,
-        new ApiErrorContext({
-          accountId,
-          request: destPath,
-          payload: file,
-        })
-      );
+      throwErrorWithMessage(`${i18nKey}.errors.uploadFailed`, {
+        file,
+        destPath,
+      });
     }
   }
 }
 
-/**
- * @private
- * @async
- * @param {boolean} input
- * @param {string} filepath
- * @returns {Promise<boolean}
- */
-async function skipExisting(overwrite, filepath) {
+const downloadFileCallbackKeys = ['skippedExisting'];
+
+async function skipExisting(
+  overwrite: boolean,
+  filepath: string,
+  logCallbacks?: LogCallbacksArg<typeof downloadFileCallbackKeys>
+): Promise<boolean> {
+  const logger = makeTypedLogger<typeof downloadFileCallbackKeys>(logCallbacks);
   if (overwrite) {
     return false;
   }
   if (await fs.pathExists(filepath)) {
-    logger.log('Skipped existing "%s"', filepath);
+    logger('skippedExisting', `${i18nKey}.skippedExisting`, { filepath });
     return true;
   }
   return false;
 }
 
-/**
- *
- * @param {number} accountId
- * @param {object} file
- * @param {string} dest
- * @param {object} options
- */
-async function downloadFile(accountId, file, dest, options) {
+async function downloadFile(
+  accountId: number,
+  file: File,
+  dest: string,
+  overwrite?: boolean,
+  logCallbacks?: LogCallbacksArg<typeof downloadFileCallbackKeys>
+): Promise<void> {
   const fileName = `${file.name}.${file.extension}`;
   const destPath = convertToLocalFileSystemPath(path.join(dest, fileName));
 
-  if (await skipExisting(options.overwrite, destPath)) {
+  if (await skipExisting(overwrite || false, destPath, logCallbacks)) {
     return;
   }
   try {
     await http.getOctetStream(
       accountId,
       {
-        baseUrl: file.url,
-        uri: '',
+        baseURL: file.url,
+        url: '',
       },
       destPath
     );
   } catch (err) {
-    logErrorInstance(err);
+    throwError(err as BaseError);
   }
 }
 
-/**
- *
- * @param {number} accountId
- * @param {string} folderPath
- */
-async function fetchAllPagedFiles(accountId, folderId, { includeArchived }) {
-  let totalFiles = null;
-  let files = [];
+async function fetchAllPagedFiles(
+  accountId: number,
+  folderId: string,
+  includeArchived?: boolean
+): Promise<Array<File | Folder>> {
+  let totalFiles: number | null = null;
+  let files: Array<File | Folder> = [];
   let count = 0;
   let offset = 0;
   while (totalFiles === null || count < totalFiles) {
-    const response = await fetchFiles(accountId, folderId, {
+    const response = await fetchFiles(
+      accountId,
+      folderId,
       offset,
-      archived: includeArchived,
-    });
+      includeArchived
+    );
 
     if (totalFiles === null) {
       totalFiles = response.total_count;

@@ -1,4 +1,4 @@
-type File = {
+export type File = {
   id: number;
   portal_id: number;
   name: string;
@@ -36,7 +36,7 @@ type File = {
   file_hash: string;
 };
 
-type Folder = {
+export type Folder = {
   id: number;
   portal_id: number;
   name: string;

@@ -204,6 +204,14 @@
         "success": "Configuration updated"
       }
     },
+    "fileManager": {
+      "uploadStarted": "Uploading files from \"{{ file }}\" to \"{{ destPath }}\" in the File Manager of account {{ accountId }}",
+      "uploadSuccess": "Uploaded file \"{{ file }}\" to \"{{ destPath }}\"",
+      "skippedExisting": "Skipped existing {{ filepath }}",
+      "errors": {
+        "uploadFailed": "Uploading file \"{{ file }}\" to \"{{ destPath }}\" failed"
+      }
+    },
     "fileMapper": {
       "skippedExisting": "Skipped existing {{ filepath }}",
       "wroteFolder": "Wrote folder {{ filepath }}",

@@ -1,3 +1,5 @@
+// FILE MAPPER - not to be confused with fileManager.ts
+
 import fs from 'fs-extra';
 import path from 'path';
 import PQueue from 'p-queue';
