@@ -23,10 +23,11 @@ export interface ValidationError extends BaseError {
 }
 
 export type FileSystemErrorContext = {
-  filepath: string;
+  filepath?: string;
   write?: boolean;
   read?: boolean;
   accountId?: number;
+  dest?: string;
 };
 
 export type AxiosErrorContext = {

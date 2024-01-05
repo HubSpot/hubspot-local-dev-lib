@@ -20,7 +20,7 @@ import {
   convertToLocalFileSystemPath,
 } from './path';
 
-import { throwApiError, throwApiUploadError } from '../errors/apiErrors';
+import { throwApiError } from '../errors/apiErrors';
 import {
   isFatalError,
   throwErrorWithMessage,
@@ -31,18 +31,28 @@ import { LogCallbacksArg } from '../types/LogCallbacks';
 import { makeTypedLogger } from '../utils/logger';
 import { BaseError } from '../types/Error';
 import { File, Folder } from '../types/FileManager';
+import { AxiosError } from 'axios';
+
+type SimplifiedFolder = Partial<Folder> & Pick<Folder, 'id' | 'name'>;
 
 const i18nKey = 'lib.fileManager';
 
-const uploadFolderCallbackKeys = ['uploadSuccess'];
+const uploadCallbackKeys = ['uploadSuccess'];
+const downloadCallbackKeys = [
+  'skippedExisting',
+  'fetchFolderStarted',
+  'fetchFolderSuccess',
+  'fetchFileStarted',
+  'fetchFileSuccess',
+];
 
-async function uploadFolder(
+export async function uploadFolder(
   accountId: number,
   src: string,
   dest: string,
-  logCallbacks?: LogCallbacksArg<typeof uploadFolderCallbackKeys>
+  logCallbacks?: LogCallbacksArg<typeof uploadCallbackKeys>
 ): Promise<void> {
-  const logger = makeTypedLogger<typeof uploadFolderCallbackKeys>(logCallbacks);
+  const logger = makeTypedLogger<typeof uploadCallbackKeys>(logCallbacks);
   const regex = new RegExp(`^${escapeRegExp(src)}`);
   const files = await walk(src);
 
@@ -74,14 +84,12 @@ async function uploadFolder(
   }
 }
 
-const downloadFileCallbackKeys = ['skippedExisting'];
-
 async function skipExisting(
   overwrite: boolean,
   filepath: string,
-  logCallbacks?: LogCallbacksArg<typeof downloadFileCallbackKeys>
+  logCallbacks?: LogCallbacksArg<typeof downloadCallbackKeys>
 ): Promise<boolean> {
-  const logger = makeTypedLogger<typeof downloadFileCallbackKeys>(logCallbacks);
+  const logger = makeTypedLogger<typeof downloadCallbackKeys>(logCallbacks);
   if (overwrite) {
     return false;
   }
@@ -97,7 +105,7 @@ async function downloadFile(
   file: File,
   dest: string,
   overwrite?: boolean,
-  logCallbacks?: LogCallbacksArg<typeof downloadFileCallbackKeys>
+  logCallbacks?: LogCallbacksArg<typeof downloadCallbackKeys>
 ): Promise<void> {
   const fileName = `${file.name}.${file.extension}`;
   const destPath = convertToLocalFileSystemPath(path.join(dest, fileName));
@@ -121,11 +129,11 @@ async function downloadFile(
 
 async function fetchAllPagedFiles(
   accountId: number,
-  folderId: string,
+  folderId: number,
   includeArchived?: boolean
-): Promise<Array<File | Folder>> {
+): Promise<Array<File>> {
   let totalFiles: number | null = null;
-  let files: Array<File | Folder> = [];
+  let files: Array<File> = [];
   let count = 0;
   let offset = 0;
   while (totalFiles === null || count < totalFiles) {
@@ -147,54 +155,61 @@ async function fetchAllPagedFiles(
   return files;
 }
 
-/**
- *
- * @param {number} accountId
- * @param {object} folder
- * @param {string} dest
- * @param {object} options
- */
-async function fetchFolderContents(accountId, folder, dest, options) {
+async function fetchFolderContents(
+  accountId: number,
+  folder: SimplifiedFolder,
+  dest: string,
+  overwrite?: boolean,
+  includeArchived?: boolean,
+  logCallbacks?: LogCallbacksArg<typeof downloadCallbackKeys>
+): Promise<void> {
   try {
     await fs.ensureDir(dest);
   } catch (err) {
-    logFileSystemErrorInstance(
-      err,
-      new FileSystemErrorContext({
-        dest,
-        accountId,
-        write: true,
-      })
-    );
+    throwFileSystemError(err as BaseError, {
+      dest,
+      accountId,
+      write: true,
+    });
   }
 
-  const files = await fetchAllPagedFiles(accountId, folder.id, options);
-  logger.debug(
-    `Fetching ${files.length} files from remote folder: ${folder.name}`
-  );
+  const files = await fetchAllPagedFiles(accountId, folder.id, includeArchived);
+  debug(`${i18nKey}.fetchingFiles`, {
+    fileCount: files.length,
+    folderName: folder.name || '',
+  });
+
   for (const file of files) {
-    await downloadFile(accountId, file, dest, options);
+    await downloadFile(accountId, file, dest, overwrite, logCallbacks);
   }
 
   const { objects: folders } = await fetchFolders(accountId, folder.id);
   for (const folder of folders) {
     const nestedFolder = path.join(dest, folder.name);
-    await fetchFolderContents(accountId, folder, nestedFolder, options);
+    await fetchFolderContents(
+      accountId,
+      folder,
+      nestedFolder,
+      overwrite,
+      includeArchived,
+      logCallbacks
+    );
   }
 }
 
-/**
- * Download a folder and write to local file system.
- *
- * @param {number} accountId
- * @param {string} src
- * @param {string} dest
- * @param {object} folder
- * @param {object} options
- */
-async function downloadFolder(accountId, src, dest, folder, options) {
+// Download a folder and write to local file system.
+async function downloadFolder(
+  accountId: number,
+  src: string,
+  dest: string,
+  folder: SimplifiedFolder,
+  overwrite?: boolean,
+  includeArchived?: boolean,
+  logCallbacks?: LogCallbacksArg<typeof downloadCallbackKeys>
+) {
+  const logger = makeTypedLogger<typeof downloadCallbackKeys>(logCallbacks);
   try {
-    let absolutePath;
+    let absolutePath: string;
 
     if (folder.name) {
       absolutePath = convertToLocalFileSystemPath(
@@ -204,97 +219,113 @@ async function downloadFolder(accountId, src, dest, folder, options) {
       absolutePath = convertToLocalFileSystemPath(path.resolve(getCwd(), dest));
     }
 
-    logger.log(
-      'Fetching folder from "%s" to "%s" in the File Manager of account %s',
+    logger('fetchFolderStarted', `${i18nKey}.fetchFolderStarted`, {
       src,
+      path: absolutePath,
+      accountId,
+    });
+
+    await fetchFolderContents(
+      accountId,
+      folder,
       absolutePath,
-      accountId
+      overwrite,
+      includeArchived,
+      logCallbacks
     );
-    await fetchFolderContents(accountId, folder, absolutePath, options);
-    logger.success(
-      'Completed fetch of folder "%s" to "%s" from the File Manager',
+    logger('fetchFolderSuccess', `${i18nKey}.fetchFolderSuccess`, {
       src,
-      dest
-    );
+      dest,
+    });
   } catch (err) {
-    logErrorInstance(err);
+    throwError(err as BaseError);
   }
 }
 
-/**
- * Download a single file and write to local file system.
- *
- * @param {number} accountId
- * @param {string} src
- * @param {string} dest
- * @param {object} file
- * @param {object} options
- */
-async function downloadSingleFile(accountId, src, dest, file, options) {
-  if (!options.includeArchived && file.archived) {
-    logger.error(
-      '"%s" in the File Manager is an archived file. Try fetching again with the "--include-archived" flag.',
-      src
-    );
-    return;
+// Download a single file and write to local file system.
+async function downloadSingleFile(
+  accountId: number,
+  src: string,
+  dest: string,
+  file: File,
+  overwrite?: boolean,
+  includeArchived?: boolean,
+  logCallbacks?: LogCallbacksArg<typeof downloadCallbackKeys>
+) {
+  const logger = makeTypedLogger<typeof downloadCallbackKeys>(logCallbacks);
+  if (!includeArchived && file.archived) {
+    throwErrorWithMessage(`${i18nKey}.errors.archivedFile`, { src });
   }
   if (file.hidden) {
-    logger.error('"%s" in the File Manager is a hidden file.', src);
-    return;
+    throwErrorWithMessage(`${i18nKey}.errors.hiddenFile`, { src });
   }
 
   try {
-    logger.log(
-      'Fetching file from "%s" to "%s" in the File Manager of account %s',
+    logger('fetchFileStarted', `${i18nKey}.fetchFileStarted`, {
       src,
       dest,
-      accountId
-    );
-    await downloadFile(accountId, file, dest, options);
-    logger.success(
-      'Completed fetch of file "%s" to "%s" from the File Manager',
+      accountId,
+    });
+    await downloadFile(accountId, file, dest, overwrite, logCallbacks);
+    logger('fetchFileSuccess', `${i18nKey}.fetchFileSuccess`, {
       src,
-      dest
-    );
+      dest,
+    });
   } catch (err) {
-    logErrorInstance(err);
+    throwError(err as BaseError);
   }
 }
 
-/**
- * Lookup path in file manager and initiate download
- *
- * @param {number} accountId
- * @param {string} src
- * @param {string} dest
- * @param {object} options
- */
-async function downloadFileOrFolder(accountId, src, dest, options) {
+// Lookup path in file manager and initiate download
+export async function downloadFileOrFolder(
+  accountId: number,
+  src: string,
+  dest: string,
+  overwrite?: boolean,
+  includeArchived?: boolean,
+  logCallbacks?: LogCallbacksArg<typeof downloadCallbackKeys>
+) {
   try {
     if (src == '/') {
       // Filemanager API treats 'None' as the root
-      const rootFolder = { id: 'None' };
-      await downloadFolder(accountId, src, dest, rootFolder, options);
+      const rootFolder = { id: 'None', name: '' } as const;
+      await downloadFolder(
+        accountId,
+        src,
+        dest,
+        rootFolder,
+        overwrite,
+        includeArchived,
+        logCallbacks
+      );
     } else {
       const { file, folder } = await fetchStat(accountId, src);
       if (file) {
-        await downloadSingleFile(accountId, src, dest, file, options);
+        await downloadSingleFile(
+          accountId,
+          src,
+          dest,
+          file,
+          overwrite,
+          includeArchived,
+          logCallbacks
+        );
       } else if (folder) {
-        await downloadFolder(accountId, src, dest, folder, options);
+        await downloadFolder(
+          accountId,
+          src,
+          dest,
+          folder,
+          overwrite,
+          includeArchived,
+          logCallbacks
+        );
       }
     }
   } catch (err) {
-    logApiErrorInstance(
-      err,
-      new ApiErrorContext({
-        request: src,
-        accountId,
-      })
-    );
+    throwApiError(err as AxiosError, {
+      request: src,
+      accountId,
+    });
   }
 }
-
-module.exports = {
-  uploadFolder,
-  downloadFileOrFolder,
-};

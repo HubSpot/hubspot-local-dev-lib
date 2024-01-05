@@ -208,8 +208,15 @@
       "uploadStarted": "Uploading files from \"{{ file }}\" to \"{{ destPath }}\" in the File Manager of account {{ accountId }}",
       "uploadSuccess": "Uploaded file \"{{ file }}\" to \"{{ destPath }}\"",
       "skippedExisting": "Skipped existing {{ filepath }}",
+      "fetchingFiles": "Fetching {{ fileCount }} files from remote folder: {{ folderName }}",
+      "fetchFolderStarted": "Fetching folder from \"{{ src }}\" to \"{{ path }}\" in the File Manager of account {{ accountId }}",
+      "fetchFolderSuccess": "Completed fetch of folder \"{{ src }}\" to \"{{ dest }}\" from the File Manager",
+      "fetchFileStarted": "Fetching file from \"{{ src }}\" to \"{{ dest }}\" in the File Manager of account {{ accountId }}",
+      "fetchFileSuccess": "Completed fetch of file \"{{ src }}\" to \"{{ dest }}\" from the File Manager",
       "errors": {
-        "uploadFailed": "Uploading file \"{{ file }}\" to \"{{ destPath }}\" failed"
+        "uploadFailed": "Uploading file \"{{ file }}\" to \"{{ destPath }}\" failed",
+        "archivedFile": "\"{{ src }} \" in the File Manager is an archived file. Try fetching again with the \"--include-archived\" flag",
+        "hiddenFile": "\"{{ src }}\" in the File Manager is a hidden file."
       }
     },
     "fileMapper": {

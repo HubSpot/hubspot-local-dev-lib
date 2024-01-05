@@ -37,7 +37,7 @@ export type File = {
 };
 
 export type Folder = {
-  id: number;
+  id: number | 'None';
   portal_id: number;
   name: string;
   deleted: boolean;
@@ -61,9 +61,16 @@ export type FetchStatResponse = {
   folder: Folder | null;
 };
 
-export type FetchFilesOrFolderResponse = {
+export type FetchFilesResponse = {
   limit: number;
   offset: number;
-  objects: Array<File | Folder>;
+  objects: Array<File>;
+  total_count: number;
+};
+
+export type FetchFolderResponse = {
+  limit: number;
+  offset: number;
+  objects: Array<Folder>;
   total_count: number;
 };
