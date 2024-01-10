@@ -10,7 +10,7 @@ import {
   fetchFolders,
 } from '../api/fileManager';
 import { walk } from './fs';
-import { debug } from '../utils/logger';
+import { debug, makeTypedLogger } from '../utils/logger';
 import { createIgnoreFilter } from './ignoreRules';
 import http from '../http';
 import { escapeRegExp } from '../utils/escapeRegExp';
@@ -28,8 +28,7 @@ import {
 } from '../errors/standardErrors';
 import { throwFileSystemError } from '../errors/fileSystemErrors';
 import { LogCallbacksArg } from '../types/LogCallbacks';
-import { makeTypedLogger } from '../utils/logger';
-import { BaseError } from '../types/Error';
+import { BaseError, GenericError } from '../types/Error';
 import { File, Folder } from '../types/FileManager';
 import { AxiosError } from 'axios';
 
@@ -113,18 +112,14 @@ async function downloadFile(
   if (await skipExisting(overwrite || false, destPath, logCallbacks)) {
     return;
   }
-  try {
-    await http.getOctetStream(
-      accountId,
-      {
-        baseURL: file.url,
-        url: '',
-      },
-      destPath
-    );
-  } catch (err) {
-    throwError(err as BaseError);
-  }
+  await http.getOctetStream(
+    accountId,
+    {
+      baseURL: file.url,
+      url: '',
+    },
+    destPath
+  );
 }
 
 async function fetchAllPagedFiles(
@@ -208,38 +203,34 @@ async function downloadFolder(
   logCallbacks?: LogCallbacksArg<typeof downloadCallbackKeys>
 ) {
   const logger = makeTypedLogger<typeof downloadCallbackKeys>(logCallbacks);
-  try {
-    let absolutePath: string;
+  let absolutePath: string;
 
-    if (folder.name) {
-      absolutePath = convertToLocalFileSystemPath(
-        path.resolve(getCwd(), dest, folder.name)
-      );
-    } else {
-      absolutePath = convertToLocalFileSystemPath(path.resolve(getCwd(), dest));
-    }
-
-    logger('fetchFolderStarted', `${i18nKey}.fetchFolderStarted`, {
-      src,
-      path: absolutePath,
-      accountId,
-    });
-
-    await fetchFolderContents(
-      accountId,
-      folder,
-      absolutePath,
-      overwrite,
-      includeArchived,
-      logCallbacks
+  if (folder.name) {
+    absolutePath = convertToLocalFileSystemPath(
+      path.resolve(getCwd(), dest, folder.name)
     );
-    logger('fetchFolderSuccess', `${i18nKey}.fetchFolderSuccess`, {
-      src,
-      dest,
-    });
-  } catch (err) {
-    throwError(err as BaseError);
+  } else {
+    absolutePath = convertToLocalFileSystemPath(path.resolve(getCwd(), dest));
   }
+
+  logger('fetchFolderStarted', `${i18nKey}.fetchFolderStarted`, {
+    src,
+    path: absolutePath,
+    accountId,
+  });
+
+  await fetchFolderContents(
+    accountId,
+    folder,
+    absolutePath,
+    overwrite,
+    includeArchived,
+    logCallbacks
+  );
+  logger('fetchFolderSuccess', `${i18nKey}.fetchFolderSuccess`, {
+    src,
+    dest,
+  });
 }
 
 // Download a single file and write to local file system.
@@ -260,20 +251,16 @@ async function downloadSingleFile(
     throwErrorWithMessage(`${i18nKey}.errors.hiddenFile`, { src });
   }
 
-  try {
-    logger('fetchFileStarted', `${i18nKey}.fetchFileStarted`, {
-      src,
-      dest,
-      accountId,
-    });
-    await downloadFile(accountId, file, dest, overwrite, logCallbacks);
-    logger('fetchFileSuccess', `${i18nKey}.fetchFileSuccess`, {
-      src,
-      dest,
-    });
-  } catch (err) {
-    throwError(err as BaseError);
-  }
+  logger('fetchFileStarted', `${i18nKey}.fetchFileStarted`, {
+    src,
+    dest,
+    accountId,
+  });
+  await downloadFile(accountId, file, dest, overwrite, logCallbacks);
+  logger('fetchFileSuccess', `${i18nKey}.fetchFileSuccess`, {
+    src,
+    dest,
+  });
 }
 
 // Lookup path in file manager and initiate download
@@ -323,9 +310,12 @@ export async function downloadFileOrFolder(
       }
     }
   } catch (err) {
-    throwApiError(err as AxiosError, {
-      request: src,
-      accountId,
-    });
+    const error = err as GenericError;
+    if (error.isAxiosError) {
+      throwApiError(err as AxiosError, {
+        request: src,
+        accountId,
+      });
+    } else throwError(error);
   }
 }

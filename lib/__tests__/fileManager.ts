@@ -7,7 +7,7 @@ jest.mock('../fs');
 jest.mock('../../api/fileManager');
 jest.mock('../ignoreRules');
 
-describe('uploadFolder', () => {
+describe('lib/fileManager', () => {
   describe('uploadFolder()', () => {
     it('uploads files in the folder', async () => {
       const files = [
