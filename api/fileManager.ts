@@ -4,7 +4,8 @@ import http from '../http';
 import { FormData } from '../types/Http';
 import {
   FetchStatResponse,
-  FetchFilesOrFolderResponse,
+  FetchFilesResponse,
+  FetchFolderResponse,
   UploadResponse,
 } from '../types/FileManager';
 
@@ -50,10 +51,10 @@ export async function fetchStat(
 
 export async function fetchFiles(
   accountId: number,
-  folderId: number,
+  folderId: number | 'None',
   offset: number,
   archived?: boolean
-): Promise<FetchFilesOrFolderResponse> {
+): Promise<FetchFilesResponse> {
   return http.get(accountId, {
     url: `${FILE_MANAGER_V2_API_PATH}/files/`,
     query: {
@@ -67,8 +68,8 @@ export async function fetchFiles(
 
 export async function fetchFolders(
   accountId: number,
-  folderId: number
-): Promise<FetchFilesOrFolderResponse> {
+  folderId: number | 'None'
+): Promise<FetchFolderResponse> {
   return http.get(accountId, {
     url: `${FILE_MANAGER_V2_API_PATH}/folders/`,
     query: {
