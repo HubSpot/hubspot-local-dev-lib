@@ -11,6 +11,14 @@ import { LogCallbacksArg } from '../../types/LogCallbacks';
 
 const i18nKey = 'lib.cms.functions';
 
+const createFunctionCallbackKeys = [
+  'destPathAlreadyExists',
+  'createdDest',
+  'createdFunctionFile',
+  'createdConfigFile',
+  'success',
+] as const;
+
 type Config = {
   runtime: string;
   version: string;
@@ -145,14 +153,6 @@ type FunctionInfo = {
 type FunctionOptions = {
   allowExistingFile?: boolean;
 };
-
-const createFunctionCallbackKeys = [
-  'destPathAlreadyExists',
-  'createdDest',
-  'createdFunctionFile',
-  'createdConfigFile',
-  'success',
-];
 
 export async function createFunction(
   functionInfo: FunctionInfo,

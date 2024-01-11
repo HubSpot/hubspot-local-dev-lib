@@ -16,7 +16,7 @@ type ZipData = {
   tmpDir: string;
 };
 
-const archiveCallbackKeys = ['init', 'copy'];
+const archiveCallbackKeys = ['init', 'copy'] as const;
 
 async function extractZip(
   name: string,

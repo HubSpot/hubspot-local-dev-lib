@@ -11,6 +11,8 @@ import { updateAccountConfig, writeConfig } from '../config';
 
 const i18nKey = 'lib.oauth';
 
+const addOauthToAccountConfigCallbackKeys = ['init', 'success'] as const;
+
 const oauthManagers = new Map<number, OAuth2Manager>();
 
 function writeOauthTokenInfo(accountConfig: FlatAccountFields): void {
@@ -36,8 +38,6 @@ export function getOauthManager(
   }
   return oauthManagers.get(accountId);
 }
-
-const addOauthToAccountConfigCallbackKeys = ['init', 'success'];
 
 export function addOauthToAccountConfig(
   oauth: OAuth2Manager,
