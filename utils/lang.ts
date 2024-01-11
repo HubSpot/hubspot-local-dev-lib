@@ -1,5 +1,10 @@
 import en from '../lang/en.json';
-import { LanguageObject, GenericLanguageObject, LangKey } from '../types/Lang';
+import {
+  LanguageObject,
+  GenericLanguageObject,
+  LangKey,
+  InterpolationData,
+} from '../types/Lang';
 
 const LANGUAGES: { [language: string]: LanguageObject } = {
   en,
@@ -68,10 +73,6 @@ function generateReplaceFn(
     }${currentStringValue.slice(startIndex + matchedText.length)}`;
   };
 }
-
-type InterpolationData = {
-  [identifier: string]: string | number;
-};
 
 export function interpolate(
   stringValue: string,
