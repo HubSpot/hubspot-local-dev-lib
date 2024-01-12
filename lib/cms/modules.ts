@@ -197,7 +197,7 @@ export async function createModule(
     `
         : '';
 
-      fs.readFile(`${destPath}/index.tsx`, 'utf8', function (err, data) {
+      fs.readFile(`${destPath}/index.tsx`, 'utf8', (err, data) => {
         if (err) {
           throwErrorWithMessage(
             `${i18nKey}.createModule.errors.fileReadFailure`,
@@ -211,7 +211,7 @@ export async function createModule(
           .replace(/\/\* import global styles \*\//g, globalImportString)
           .replace(/\/\* Default config \*\//g, defaultconfigString);
 
-        fs.writeFile(`${destPath}/index.tsx`, result, 'utf8', function (err) {
+        fs.writeFile(`${destPath}/index.tsx`, result, 'utf8', err => {
           if (err) return console.log(err);
         });
 
@@ -260,7 +260,9 @@ export async function createModule(
   };
 
   // Download gitHub contents to the dest directory
-  const sampleAssetPath = !isReactModule ? 'Sample.module' : 'SampleJSR';
+  const sampleAssetPath = !isReactModule
+    ? 'Sample.module'
+    : 'SampleReactModule';
 
   await downloadGithubRepoContents(
     'HubSpot/cms-sample-assets',
