@@ -18,6 +18,8 @@ import {
 
 const i18nKey = 'lib.github';
 
+const cloneGithubRepoCallbackKeys = ['success'] as const;
+
 type RepoPath = `${string}/${string}`;
 
 export async function fetchFileFromRepository(
@@ -113,8 +115,6 @@ type CloneGithubRepoOptions = {
   tag?: string; // Repo tag
   sourceDir?: string; // The directory within the downloaded repo to write after extraction
 };
-
-const cloneGithubRepoCallbackKeys = ['success'];
 
 export async function cloneGithubRepo(
   repoPath: RepoPath,

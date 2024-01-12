@@ -7,6 +7,8 @@ import { LogCallbacksArg } from '../../types/LogCallbacks';
 
 const i18nKey = 'lib.cms.templates';
 
+const templatesCallbackKeys = ['creatingFile'] as const;
+
 // Matches the .html file extension, excluding module.html
 const TEMPLATE_EXTENSION_REGEX = new RegExp(/(?<!module)\.html$/);
 
@@ -49,8 +51,6 @@ const ASSET_PATHS = {
   'search-template': 'templates/search-template.html',
   section: 'templates/section.html',
 } as const;
-
-const templatesCallbackKeys = ['creatingFile'];
 
 export async function createTemplate(
   name: string,

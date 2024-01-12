@@ -36,14 +36,14 @@ type SimplifiedFolder = Partial<Folder> & Pick<Folder, 'id' | 'name'>;
 
 const i18nKey = 'lib.fileManager';
 
-const uploadCallbackKeys = ['uploadSuccess'];
+const uploadCallbackKeys = ['uploadSuccess'] as const;
 const downloadCallbackKeys = [
   'skippedExisting',
   'fetchFolderStarted',
   'fetchFolderSuccess',
   'fetchFileStarted',
   'fetchFileSuccess',
-];
+] as const;
 
 export async function uploadFolder(
   accountId: number,
