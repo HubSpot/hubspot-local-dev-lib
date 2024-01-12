@@ -1,19 +1,19 @@
 import { i18n } from './lang';
 import { logger } from '../lib/logging/logger';
 import { LogCallbacks } from '../types/LogCallbacks';
-import { LangKey } from '../types/Lang';
+import { InterpolationData, LangKey } from '../types/Lang';
 
 export function log<T extends string>(
   key: T,
   callbacks?: LogCallbacks<T>,
   debugKey?: LangKey,
-  debugInterpolation?: { [key: string]: string | number }
+  interpolationData?: InterpolationData
 ): void {
   if (callbacks && callbacks[key]) {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    callbacks[key]!();
+    callbacks[key]!(interpolationData);
   } else if (debugKey) {
-    debug(debugKey, debugInterpolation);
+    debug(debugKey, interpolationData);
   }
 }
 
@@ -25,13 +25,13 @@ export function makeTypedLogger<T extends readonly string[]>(
   return (
     key: ValidateCallbackKeys,
     debugKey?: LangKey,
-    debugInterpolation?: { [key: string]: string | number }
-  ) => log<ValidateCallbackKeys>(key, callbacks, debugKey, debugInterpolation);
+    interpolationData?: InterpolationData
+  ) => log<ValidateCallbackKeys>(key, callbacks, debugKey, interpolationData);
 }
 
 export function debug(
   identifier: LangKey,
-  interpolation?: { [key: string]: string | number }
+  interpolationData?: InterpolationData
 ): void {
-  logger.debug(i18n(identifier, interpolation));
+  logger.debug(i18n(identifier, interpolationData));
 }
