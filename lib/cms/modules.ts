@@ -105,6 +105,7 @@ export async function validateSrcAndDestPaths(
 type ModuleDefinition = {
   contentTypes: Array<string>;
   moduleLabel: string;
+  reactType: boolean;
   global: boolean;
 };
 
@@ -114,14 +115,58 @@ export async function createModule(
   moduleDefinition: ModuleDefinition,
   name: string,
   dest: string,
+  getInternalVersion: boolean,
   options = {
     allowExistingDir: false,
   },
   logCallbacks?: LogCallbacksArg<typeof createModuleCallbackKeys>
 ) {
   const logger = makeTypedLogger<typeof createModuleCallbackKeys>(logCallbacks);
+  const { reactType: isReactModule } = moduleDefinition;
+
+  // Ascertain the module's dest path based on module type
+  const parseDestPath = (
+    name: string,
+    dest: string,
+    isReactModule: boolean
+  ) => {
+    const folderName = name.endsWith('.module') ? name : `${name}.module`;
+
+    const modulePath = !isReactModule
+      ? path.join(dest, folderName)
+      : path.join(dest, `${name}`);
+
+    return modulePath;
+  };
+
+  const destPath = parseDestPath(name, dest, isReactModule);
+
+  // Create module directory
+  const createModuleDirectory = (
+    allowExistingDir: boolean,
+    destPath: string
+  ) => {
+    if (!allowExistingDir && fs.existsSync(destPath)) {
+      throwErrorWithMessage(`${i18nKey}.createModule.errors.pathExists`, {
+        path: destPath,
+      });
+    } else {
+      logger('creatingPath', `${i18nKey}.createModule.creatingPath`, {
+        path: destPath,
+      });
+      fs.ensureDirSync(destPath);
+    }
+
+    logger('creatingModule', `${i18nKey}.createModule.creatingModule`, {
+      path: destPath,
+    });
+  };
+
+  createModuleDirectory(options.allowExistingDir, destPath);
+
+  // Write module meta
   const writeModuleMeta = (
-    { contentTypes, moduleLabel, global }: ModuleDefinition,
+    { moduleLabel, contentTypes, global, reactType }: ModuleDefinition,
     dest: string
   ) => {
     const metaData = {
@@ -138,9 +183,57 @@ export async function createModule(
       is_available_for_new_content: false,
     };
 
-    fs.writeJSONSync(dest, metaData, { spaces: 2 });
+    if (!reactType) {
+      fs.writeJSONSync(dest, metaData, { spaces: 2 });
+    } else {
+      const globalImportString = getInternalVersion
+        ? 'import "./global-samplejsr.css";'
+        : '';
+      const defaultconfigString = getInternalVersion
+        ? `export const defaultModuleConfig = {
+  moduleName: "sample_jsr",
+  version: 0,
+};
+    `
+        : '';
+
+      fs.readFile(`${destPath}/index.tsx`, 'utf8', function (err, data) {
+        if (err) {
+          throwErrorWithMessage(
+            `${i18nKey}.createModule.errors.fileReadFailure`,
+            {
+              path: `${dest}/index.tsx`,
+            }
+          );
+        }
+
+        const result = data
+          .replace(/\/\* import global styles \*\//g, globalImportString)
+          .replace(/\/\* Default config \*\//g, defaultconfigString);
+
+        fs.writeFile(`${destPath}/index.tsx`, result, 'utf8', function (err) {
+          if (err) return console.log(err);
+        });
+
+        fs.appendFile(
+          `${dest}/index.tsx`,
+          'export const meta = ' + JSON.stringify(metaData, null, ' '),
+          err => {
+            if (err) {
+              throwErrorWithMessage(
+                `${i18nKey}.createModule.errors.failedToWrite`,
+                {
+                  path: `${dest}/index.tsx`,
+                }
+              );
+            }
+          }
+        );
+      });
+    }
   };
 
+  // Filter out ceratin fetched files from the response
   const moduleFileFilter = (src: string, dest: string) => {
     const emailEnabled = moduleDefinition.contentTypes.includes('EMAIL');
 
@@ -154,34 +247,31 @@ export async function createModule(
           return false;
         }
         return true;
+      case 'global-samplejsr.css':
+      case 'stories':
+      case 'tests':
+        if (getInternalVersion) {
+          return true;
+        }
+        return false;
       default:
         return true;
     }
   };
 
-  const folderName =
-    !name || name.endsWith('.module') ? name : `${name}.module`;
-  const destPath = path.join(dest, folderName);
-  if (!options.allowExistingDir && fs.existsSync(destPath)) {
-    throwErrorWithMessage(`${i18nKey}.createModule.errors.writeModuleMeta`, {
-      path: destPath,
-    });
-  } else {
-    logger('creatingPath', `${i18nKey}.createModule.creatingPath`, {
-      path: destPath,
-    });
-    fs.ensureDirSync(destPath);
-  }
-
-  logger('creatingModule', `${i18nKey}.createModule.creatingModule`, {
-    path: destPath,
-  });
+  // Download gitHub contents to the dest directory
+  const sampleAssetPath = !isReactModule ? 'Sample.module' : 'SampleJSR';
 
   await downloadGithubRepoContents(
     'HubSpot/cms-sample-assets',
-    'modules/Sample.module',
+    `modules/${sampleAssetPath}`,
     destPath,
     '',
     moduleFileFilter
   );
+
+  // Mutating React module files after fetch
+  if (isReactModule) {
+    writeModuleMeta(moduleDefinition, destPath);
+  }
 }

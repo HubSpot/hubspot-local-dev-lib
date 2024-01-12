@@ -87,7 +87,10 @@
           "creatingModule": "Creating module at {{ path }}",
           "creatingPath": "Creating {{ path }}",
           "errors": {
-            "writeModuleMeta": "The {{ path }} path already exists"
+            "pathExists": "The {{ path }} path already exists",
+            "failedToWriteMeta": "There was an problem writing the module's meta data at {{ path }}",
+            "fileReadFailure": "Failed to read file at {{ path }}",
+            "failedToWrite": "failed to write to file at {{ path }}"
           }
         }
       },
