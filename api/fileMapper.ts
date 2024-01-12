@@ -49,9 +49,10 @@ export async function upload(
 ): Promise<void> {
   return http.post<void>(accountId, {
     url: `${FILE_MAPPER_API_PATH}/upload/${encodeURIComponent(dest)}`,
-    formData: {
+    data: {
       file: fs.createReadStream(path.resolve(getCwd(), src)),
     },
+    headers: { 'Content-Type': 'multipart/form-data' },
     ...options,
   });
 }

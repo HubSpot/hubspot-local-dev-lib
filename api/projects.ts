@@ -56,7 +56,8 @@ export async function uploadProject(
   return http.post(accountId, {
     url: `${PROJECTS_API_PATH}/upload/${encodeURIComponent(projectName)}`,
     timeout: 60000,
-    formData,
+    data: formData,
+    headers: { 'Content-Type': 'multipart/form-data' },
   });
 }
 

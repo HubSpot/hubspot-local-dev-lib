@@ -36,7 +36,8 @@ export async function uploadFile(
 
   return http.post(accountId, {
     url: `${FILE_MANAGER_V3_API_PATH}/files/upload`,
-    formData,
+    data: formData,
+    headers: { 'Content-Type': 'multipart/form-data' },
   });
 }
 
