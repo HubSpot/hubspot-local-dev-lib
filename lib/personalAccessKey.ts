@@ -45,7 +45,6 @@ export async function getAccessToken(
   let response;
   try {
     response = await fetchAccessToken(personalAccessKey, env, accountId);
-    console.log(response);
   } catch (e) {
     const error = e as AxiosError<{ message?: string }>;
     if (error.response) {
