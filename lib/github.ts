@@ -146,7 +146,11 @@ async function fetchGitHubRepoContentFromDownloadUrl(
   downloadUrl: string
 ): Promise<void> {
   const resp = await fetchRepoFileByDownloadUrl(downloadUrl);
-  fs.writeFileSync(dest, resp.data, 'utf8');
+  const fileContents =
+    typeof resp.data === 'string'
+      ? resp.data
+      : JSON.stringify(resp.data, null, 2);
+  fs.outputFileSync(dest, fileContents, 'utf8');
 }
 
 // Writes files from a public repository to the destination folder
