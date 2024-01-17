@@ -15,6 +15,7 @@ type AccessTokenResponse = {
   enabledFeatures?: { [key: string]: number };
   scopeGroups: Array<string>;
   encodedOAuthRefreshToken: string;
+  hubName: string;
 };
 
 export async function fetchAccessToken(

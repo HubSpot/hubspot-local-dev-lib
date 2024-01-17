@@ -34,6 +34,7 @@ type AccessToken = {
   expiresAt: string;
   scopeGroups: Array<string>;
   encodedOAuthRefreshToken: string;
+  hubName: string;
 };
 
 export async function getAccessToken(
@@ -44,6 +45,7 @@ export async function getAccessToken(
   let response;
   try {
     response = await fetchAccessToken(personalAccessKey, env, accountId);
+    console.log(response);
   } catch (e) {
     const error = e as AxiosError<{ message?: string }>;
     if (error.response) {
@@ -62,6 +64,7 @@ export async function getAccessToken(
     expiresAt: moment(response.expiresAtMillis).toISOString(),
     scopeGroups: response.scopeGroups,
     encodedOAuthRefreshToken: response.encodedOAuthRefreshToken,
+    hubName: response.hubName,
   };
 }
 
@@ -147,26 +150,18 @@ export async function accessTokenForPersonalAccessKey(
   return auth?.tokenInfo?.accessToken;
 }
 
-// Adds an account to the config using authType: personalAccessKey
-export const updateConfigWithPersonalAccessKey = async (
+export async function updateConfigWithAccessToken(
+  token: AccessToken,
   personalAccessKey: string,
   env?: Environment,
   name?: string,
   makeDefault = false
-): Promise<CLIAccount | null> => {
-  const accountEnv = env || getEnv(name);
-
-  let token;
-  try {
-    token = await getAccessToken(personalAccessKey, accountEnv);
-  } catch (err) {
-    throwError(err as BaseError);
-  }
+): Promise<CLIAccount | null> {
   const { portalId, accessToken, expiresAt } = token;
 
   let hubInfo;
   try {
-    hubInfo = await fetchSandboxHubData(accessToken, portalId, accountEnv);
+    hubInfo = await fetchSandboxHubData(accessToken, portalId, env);
   } catch (err) {
     // Ignore error, returns 404 if account is not a sandbox
   }
@@ -198,4 +193,28 @@ export const updateConfigWithPersonalAccessKey = async (
   }
 
   return updatedConfig;
+}
+
+// Adds an account to the config using authType: personalAccessKey
+export const updateConfigWithPersonalAccessKey = async (
+  personalAccessKey: string,
+  env?: Environment,
+  name?: string,
+  makeDefault = false
+): Promise<CLIAccount | null> => {
+  const accountEnv = env || getEnv(name);
+
+  let token: AccessToken;
+  try {
+    token = await getAccessToken(personalAccessKey, accountEnv);
+  } catch (err) {
+    throwError(err as BaseError);
+  }
+  return updateConfigWithAccessToken(
+    token,
+    personalAccessKey,
+    env,
+    name,
+    makeDefault
+  );
 };
