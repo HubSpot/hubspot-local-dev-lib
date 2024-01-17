@@ -157,7 +157,7 @@ type FunctionOptions = {
 export async function createFunction(
   functionInfo: FunctionInfo,
   dest: string,
-  options: FunctionOptions,
+  options: FunctionOptions = {},
   logCallbacks?: LogCallbacksArg<typeof createFunctionCallbackKeys>
 ): Promise<void> {
   const logger =
