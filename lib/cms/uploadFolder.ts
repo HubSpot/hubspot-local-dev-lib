@@ -25,6 +25,8 @@ import { Mode } from '../../types/Files';
 
 const i18nKey = 'lib.cms.uploadFolder';
 
+const uploadFolderCallbackKeys = ['success'] as const;
+
 const queue = new PQueue({
   concurrency: 10,
 });
@@ -116,8 +118,6 @@ export async function getFilesByType(
   }
   return [filePathsByType, fieldsJsObjects];
 }
-
-const uploadFolderCallbackKeys = ['success'];
 
 export async function uploadFolder(
   accountId: number,

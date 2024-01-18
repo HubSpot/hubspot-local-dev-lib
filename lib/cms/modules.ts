@@ -15,6 +15,8 @@ import { PathInput } from '../../types/Modules';
 
 const i18nKey = 'lib.cms.modules';
 
+const createModuleCallbackKeys = ['creatingPath', 'creatingModule'] as const;
+
 // Ids for testing
 export const ValidationIds = {
   SRC_REQUIRED: 'SRC_REQUIRED',
@@ -174,8 +176,6 @@ type ModuleDefinition = {
   reactType: boolean;
   global: boolean;
 };
-
-const createModuleCallbackKeys = ['creatingPath', 'creatingModule'] as const;
 
 export async function createModule(
   moduleDefinition: ModuleDefinition,

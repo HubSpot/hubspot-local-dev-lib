@@ -162,7 +162,7 @@ async function deleteRequest<T>(
   return data;
 }
 
-const getRequestStreamCallbackKeys = ['onWrite'];
+const getRequestStreamCallbackKeys = ['onWrite'] as const;
 
 function createGetRequestStream(contentType: string) {
   return async (

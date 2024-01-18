@@ -1,3 +1,5 @@
+// FILE MAPPER - not to be confused with fileManager.ts
+
 import fs from 'fs-extra';
 import path from 'path';
 import PQueue from 'p-queue';
@@ -28,6 +30,14 @@ import { LogCallbacksArg } from '../types/LogCallbacks';
 import { makeTypedLogger } from '../utils/logger';
 
 const i18nKey = 'lib.fileMapper';
+
+const filemapperCallbackKeys = [
+  'skippedExisting',
+  'wroteFolder',
+  'completedFetch',
+  'folderFetch',
+  'completedFolderFetch',
+] as const;
 
 const queue = new PQueue({
   concurrency: 10,
@@ -184,8 +194,6 @@ async function skipExisting(
   }
   return false;
 }
-
-const filemapperCallbackKeys = ['skippedExisting', 'wroteFolder'];
 
 async function fetchAndWriteFileStream(
   accountId: number,

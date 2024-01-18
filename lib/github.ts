@@ -18,6 +18,8 @@ import {
 
 const i18nKey = 'lib.github';
 
+const cloneGithubRepoCallbackKeys = ['success'] as const;
+
 type RepoPath = `${string}/${string}`;
 
 export async function fetchFileFromRepository(
@@ -114,8 +116,6 @@ type CloneGithubRepoOptions = {
   sourceDir?: string; // The directory within the downloaded repo to write after extraction
 };
 
-const cloneGithubRepoCallbackKeys = ['success'];
-
 export async function cloneGithubRepo(
   repoPath: RepoPath,
   dest: string,
@@ -146,7 +146,11 @@ async function fetchGitHubRepoContentFromDownloadUrl(
   downloadUrl: string
 ): Promise<void> {
   const resp = await fetchRepoFileByDownloadUrl(downloadUrl);
-  fs.writeFileSync(dest, resp.data, 'utf8');
+  const fileContents =
+    typeof resp.data === 'string'
+      ? resp.data
+      : JSON.stringify(resp.data, null, 2);
+  fs.outputFileSync(dest, fileContents, 'utf8');
 }
 
 // Writes files from a public repository to the destination folder
