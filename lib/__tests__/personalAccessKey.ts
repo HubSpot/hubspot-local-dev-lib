@@ -58,6 +58,7 @@ describe('lib/personalAccessKey', () => {
         scopeGroups: ['content'],
         hubId: accountId,
         userId: 456,
+        hubName: 'test-hub',
       });
       const accessToken = await accessTokenForPersonalAccessKey(accountId);
       expect(accessToken).toEqual(freshAccessToken);
@@ -109,6 +110,7 @@ describe('lib/personalAccessKey', () => {
         scopeGroups: ['content'],
         hubId: accountId,
         userId: 456,
+        hubName: 'test-hub',
       });
       const accessToken = await accessTokenForPersonalAccessKey(accountId);
       expect(accessToken).toEqual(freshAccessToken);
@@ -148,6 +150,7 @@ describe('lib/personalAccessKey', () => {
         scopeGroups: ['content'],
         hubId: accountId,
         userId,
+        hubName: 'test-hub',
       });
       const firstRefreshedAccessToken =
         await accessTokenForPersonalAccessKey(accountId);
@@ -169,6 +172,7 @@ describe('lib/personalAccessKey', () => {
         scopeGroups: ['content'],
         hubId: accountId,
         userId,
+        hubName: 'test-hub',
       });
 
       const secondRefreshedAccessToken =
@@ -190,6 +194,7 @@ describe('lib/personalAccessKey', () => {
         scopeGroups: ['content'],
         hubId: 123,
         userId: 456,
+        hubName: 'test-hub',
       });
     });
 
