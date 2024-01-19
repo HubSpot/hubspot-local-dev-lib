@@ -157,10 +157,11 @@ export async function updateConfigWithAccessToken(
   makeDefault = false
 ): Promise<CLIAccount | null> {
   const { portalId, accessToken, expiresAt } = token;
+  const accountEnv = env || getEnv(name);
 
   let hubInfo;
   try {
-    hubInfo = await fetchSandboxHubData(accessToken, portalId, env);
+    hubInfo = await fetchSandboxHubData(accessToken, portalId, accountEnv);
   } catch (err) {
     // Ignore error, returns 404 if account is not a sandbox
   }
@@ -193,27 +194,3 @@ export async function updateConfigWithAccessToken(
 
   return updatedConfig;
 }
-
-// Adds an account to the config using authType: personalAccessKey
-export const updateConfigWithPersonalAccessKey = async (
-  personalAccessKey: string,
-  env?: Environment,
-  name?: string,
-  makeDefault = false
-): Promise<CLIAccount | null> => {
-  const accountEnv = env || getEnv(name);
-
-  let token: AccessToken;
-  try {
-    token = await getAccessToken(personalAccessKey, accountEnv);
-  } catch (err) {
-    throwError(err as BaseError);
-  }
-  return updateConfigWithAccessToken(
-    token,
-    personalAccessKey,
-    env,
-    name,
-    makeDefault
-  );
-};
