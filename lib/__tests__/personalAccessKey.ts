@@ -9,7 +9,8 @@ import { fetchSandboxHubData as __fetchSandboxHubData } from '../../api/sandboxH
 import { ENVIRONMENTS } from '../../constants/environments';
 import {
   accessTokenForPersonalAccessKey,
-  updateConfigWithPersonalAccessKey,
+  getAccessToken,
+  updateConfigWithAccessToken,
 } from '../personalAccessKey';
 import { AuthType } from '../../types/Accounts';
 
@@ -58,6 +59,7 @@ describe('lib/personalAccessKey', () => {
         scopeGroups: ['content'],
         hubId: accountId,
         userId: 456,
+        hubName: 'test-hub',
       });
       const accessToken = await accessTokenForPersonalAccessKey(accountId);
       expect(accessToken).toEqual(freshAccessToken);
@@ -109,6 +111,7 @@ describe('lib/personalAccessKey', () => {
         scopeGroups: ['content'],
         hubId: accountId,
         userId: 456,
+        hubName: 'test-hub',
       });
       const accessToken = await accessTokenForPersonalAccessKey(accountId);
       expect(accessToken).toEqual(freshAccessToken);
@@ -148,6 +151,7 @@ describe('lib/personalAccessKey', () => {
         scopeGroups: ['content'],
         hubId: accountId,
         userId,
+        hubName: 'test-hub',
       });
       const firstRefreshedAccessToken =
         await accessTokenForPersonalAccessKey(accountId);
@@ -169,6 +173,7 @@ describe('lib/personalAccessKey', () => {
         scopeGroups: ['content'],
         hubId: accountId,
         userId,
+        hubName: 'test-hub',
       });
 
       const secondRefreshedAccessToken =
@@ -190,13 +195,17 @@ describe('lib/personalAccessKey', () => {
         scopeGroups: ['content'],
         hubId: 123,
         userId: 456,
+        hubName: 'test-hub',
       });
     });
 
     it('updates the config with the new account', async () => {
       fetchAccessToken.mockClear();
 
-      await updateConfigWithPersonalAccessKey(
+      const token = await getAccessToken('pak_123', ENVIRONMENTS.QA, 123);
+
+      await updateConfigWithAccessToken(
+        token,
         'pak_123',
         ENVIRONMENTS.QA,
         'account-name'
@@ -220,7 +229,17 @@ describe('lib/personalAccessKey', () => {
         parentHubId: 789,
       });
 
-      await updateConfigWithPersonalAccessKey(
+      const token = await getAccessToken('pak_123', ENVIRONMENTS.QA, 123);
+
+      await updateConfigWithAccessToken(
+        token,
+        'pak_123',
+        ENVIRONMENTS.QA,
+        'account-name'
+      );
+
+      await updateConfigWithAccessToken(
+        token,
         'pak_123',
         ENVIRONMENTS.QA,
         'account-name'

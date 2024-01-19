@@ -34,6 +34,7 @@ type AccessToken = {
   expiresAt: string;
   scopeGroups: Array<string>;
   encodedOAuthRefreshToken: string;
+  hubName: string;
 };
 
 export async function getAccessToken(
@@ -62,6 +63,7 @@ export async function getAccessToken(
     expiresAt: moment(response.expiresAtMillis).toISOString(),
     scopeGroups: response.scopeGroups,
     encodedOAuthRefreshToken: response.encodedOAuthRefreshToken,
+    hubName: response.hubName,
   };
 }
 
@@ -147,22 +149,15 @@ export async function accessTokenForPersonalAccessKey(
   return auth?.tokenInfo?.accessToken;
 }
 
-// Adds an account to the config using authType: personalAccessKey
-export const updateConfigWithPersonalAccessKey = async (
+export async function updateConfigWithAccessToken(
+  token: AccessToken,
   personalAccessKey: string,
   env?: Environment,
   name?: string,
   makeDefault = false
-): Promise<CLIAccount | null> => {
-  const accountEnv = env || getEnv(name);
-
-  let token;
-  try {
-    token = await getAccessToken(personalAccessKey, accountEnv);
-  } catch (err) {
-    throwError(err as BaseError);
-  }
+): Promise<CLIAccount | null> {
   const { portalId, accessToken, expiresAt } = token;
+  const accountEnv = env || getEnv(name);
 
   let hubInfo;
   try {
@@ -198,4 +193,4 @@ export const updateConfigWithPersonalAccessKey = async (
   }
 
   return updatedConfig;
-};
+}
