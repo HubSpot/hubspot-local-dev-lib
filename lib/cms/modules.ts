@@ -104,9 +104,76 @@ export async function validateSrcAndDestPaths(
   return results;
 }
 
+/* createModule() helper
+ * Takes a file and uses the constants above to transform the contents
+ */
+
+// Strings to replace in React module files
+const MODULE_STRING_TRANSFORMATIONS = [
+  {
+    regex: /\/\* import global styles \*\//g,
+    string: 'import "./global-samplejsr.css";',
+    fallback: '',
+  },
+  {
+    regex: /\/\* Default config \*\//g,
+    string:
+      'export const defaultModuleConfig = { \n  moduleName: "sample_jsr", \n  version: 0, \n};',
+    fallback: '',
+  },
+];
+
+const transformFileContents = (
+  file: string,
+  metaData: object,
+  getInternalVersion: boolean
+) => {
+  fs.readFile(file, 'utf8', (err, data) => {
+    if (err) {
+      throwErrorWithMessage(`${i18nKey}.createModule.errors.fileReadFailure`, {
+        path: file,
+      });
+    }
+
+    let results = data;
+
+    MODULE_STRING_TRANSFORMATIONS.forEach(entry => {
+      const replacementString = getInternalVersion
+        ? entry.string
+        : entry.fallback;
+
+      results = results.replace(entry.regex, replacementString);
+    });
+
+    fs.writeFile(file, results, 'utf8', err => {
+      if (err) {
+        throwErrorWithMessage(`${i18nKey}.createModule.errors.failedToWrite`, {
+          path: file,
+        });
+      }
+    });
+
+    fs.appendFile(
+      file,
+      'export const meta = ' + JSON.stringify(metaData, null, ' '),
+      err => {
+        if (err) {
+          throwErrorWithMessage(
+            `${i18nKey}.createModule.errors.failedToWrite`,
+            {
+              path: file,
+            }
+          );
+        }
+      }
+    );
+  });
+};
+
 type ModuleDefinition = {
   contentTypes: Array<string>;
   moduleLabel: string;
+  reactType: boolean;
   global: boolean;
 };
 
@@ -114,14 +181,37 @@ export async function createModule(
   moduleDefinition: ModuleDefinition,
   name: string,
   dest: string,
+  getInternalVersion: boolean,
   options = {
     allowExistingDir: false,
   },
   logCallbacks?: LogCallbacksArg<typeof createModuleCallbackKeys>
 ) {
   const logger = makeTypedLogger<typeof createModuleCallbackKeys>(logCallbacks);
+  const { reactType: isReactModule } = moduleDefinition;
+  const folderName = name.endsWith('.module') ? name : `${name}.module`;
+  const destPath = !isReactModule
+    ? path.join(dest, folderName)
+    : path.join(dest, `${name}`);
+
+  if (!options.allowExistingDir && fs.existsSync(destPath)) {
+    throwErrorWithMessage(`${i18nKey}.createModule.errors.pathExists`, {
+      path: destPath,
+    });
+  } else {
+    logger('creatingPath', `${i18nKey}.createModule.creatingPath`, {
+      path: destPath,
+    });
+    fs.ensureDirSync(destPath);
+  }
+
+  logger('creatingModule', `${i18nKey}.createModule.creatingModule`, {
+    path: destPath,
+  });
+
+  // Write module meta
   const writeModuleMeta = (
-    { contentTypes, moduleLabel, global }: ModuleDefinition,
+    { moduleLabel, contentTypes, global, reactType }: ModuleDefinition,
     dest: string
   ) => {
     const metaData = {
@@ -138,9 +228,14 @@ export async function createModule(
       is_available_for_new_content: false,
     };
 
-    fs.writeJSONSync(dest, metaData, { spaces: 2 });
+    if (!reactType) {
+      fs.writeJSONSync(dest, metaData, { spaces: 2 });
+    } else {
+      transformFileContents(`${dest}/index.tsx`, metaData, getInternalVersion);
+    }
   };
 
+  // Filter out ceratin fetched files from the response
   const moduleFileFilter = (src: string, dest: string) => {
     const emailEnabled = moduleDefinition.contentTypes.includes('EMAIL');
 
@@ -154,34 +249,33 @@ export async function createModule(
           return false;
         }
         return true;
+      case 'global-samplejsr.css':
+      case 'stories':
+      case 'tests':
+        if (getInternalVersion) {
+          return true;
+        }
+        return false;
       default:
         return true;
     }
   };
 
-  const folderName =
-    !name || name.endsWith('.module') ? name : `${name}.module`;
-  const destPath = path.join(dest, folderName);
-  if (!options.allowExistingDir && fs.existsSync(destPath)) {
-    throwErrorWithMessage(`${i18nKey}.createModule.errors.writeModuleMeta`, {
-      path: destPath,
-    });
-  } else {
-    logger('creatingPath', `${i18nKey}.createModule.creatingPath`, {
-      path: destPath,
-    });
-    fs.ensureDirSync(destPath);
-  }
-
-  logger('creatingModule', `${i18nKey}.createModule.creatingModule`, {
-    path: destPath,
-  });
+  // Download gitHub contents to the dest directory
+  const sampleAssetPath = !isReactModule
+    ? 'Sample.module'
+    : 'SampleReactModule';
 
   await downloadGithubRepoContents(
     'HubSpot/cms-sample-assets',
-    'modules/Sample.module',
+    `modules/${sampleAssetPath}`,
     destPath,
     '',
     moduleFileFilter
   );
+
+  // Mutating React module files after fetch
+  if (isReactModule) {
+    writeModuleMeta(moduleDefinition, destPath);
+  }
 }
