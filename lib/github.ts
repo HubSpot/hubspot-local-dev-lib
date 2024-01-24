@@ -236,7 +236,7 @@ export async function listGithubRepoContents(
   repoPath: RepoPath,
   contentPath: string,
   fileFilter?: 'file' | 'dir'
-): Promise<GithubRepoFile[] | undefined> {
+): Promise<GithubRepoFile[]> {
   try {
     const { data: contentsResp } = await fetchRepoContents(
       repoPath,
