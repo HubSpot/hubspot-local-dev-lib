@@ -5,7 +5,7 @@ import { debug, makeTypedLogger } from '../utils/logger';
 import { throwError, throwErrorWithMessage } from '../errors/standardErrors';
 import { extractZipArchive } from './archive';
 
-import { BaseError } from '../types/Error';
+import { GenericError, BaseError } from '../types/Error';
 import { GithubReleaseData, GithubRepoFile } from '../types/Github';
 import { LogCallbacksArg } from '../types/LogCallbacks';
 import {
@@ -224,6 +224,39 @@ export async function downloadGithubRepoContents(
           errorMessage: error.error.message,
         },
         error
+      );
+    } else {
+      throwError(error);
+    }
+  }
+}
+
+// Lists content from a public repository at the specified path
+export async function listGithubRepoContents(
+  repoPath: RepoPath,
+  contentPath: string,
+  fileFilter?: 'file' | 'dir'
+): Promise<GithubRepoFile[] | undefined> {
+  try {
+    const { data: contentsResp } = await fetchRepoContents(
+      repoPath,
+      contentPath
+    );
+
+    const filteredFiles =
+      fileFilter && fileFilter != undefined
+        ? contentsResp.filter(item => item.type === fileFilter)
+        : contentsResp;
+
+    return filteredFiles;
+  } catch (e) {
+    const error = e as GenericError;
+    if (error?.response?.data?.message) {
+      throwErrorWithMessage(
+        `${i18nKey}.downloadGithubRepoContents.errors.fetchFail`,
+        {
+          errorMessage: error.response.data.message,
+        }
       );
     } else {
       throwError(error);

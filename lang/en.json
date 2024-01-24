@@ -57,6 +57,11 @@
         "errors": {
           "fetchFail": "Failed to fetch contents: {{ errorMessage }}"
         }
+      },
+      "listGitHubRepoContents": {
+        "errors": {
+          "fetchFail": "Failed to fetch contents: {{ errorMessage }}"
+        }
       }
     },
     "hubdb": {
