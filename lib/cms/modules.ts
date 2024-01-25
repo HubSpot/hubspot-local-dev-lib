@@ -2,7 +2,7 @@ import path from 'path';
 import fs from 'fs-extra';
 import { getCwd } from '../path';
 import { walk } from '../fs';
-import { downloadGithubRepoContents } from '../github';
+import { listGithubRepoContents, downloadGithubRepoContents } from '../github';
 import { throwErrorWithMessage } from '../../errors/standardErrors';
 import { LogCallbacksArg } from '../../types/LogCallbacks';
 import { makeTypedLogger } from '../../utils/logger';
@@ -278,4 +278,24 @@ export async function createModule(
   if (isReactModule) {
     writeModuleMeta(moduleDefinition, destPath);
   }
+}
+
+export async function retrieveDefaultModule(
+  name: string | undefined,
+  dest: string
+) {
+  if (!name) {
+    const defaultReactModules = await listGithubRepoContents(
+      'HubSpot/cms-sample-assets',
+      'modules/',
+      'dir'
+    );
+    return defaultReactModules;
+  }
+
+  await downloadGithubRepoContents(
+    'HubSpot/cms-sample-assets',
+    `modules/${name}`,
+    dest
+  );
 }

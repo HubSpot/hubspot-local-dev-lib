@@ -97,6 +97,11 @@
             "fileReadFailure": "Failed to read file at {{ path }}",
             "failedToWrite": "failed to write to file at {{ path }}"
           }
+        },
+        "retrieveDefaultModule": {
+          "errors": {
+            "pathExists": "Folder already exists at \"{{ path }}\""
+          }
         }
       },
       "functions": {
