@@ -185,6 +185,7 @@ export async function updateConfigWithAccessToken(
     tokenInfo: { accessToken, expiresAt },
     sandboxAccountType,
     parentAccountId,
+    env: accountEnv,
   });
   writeConfig();
 
