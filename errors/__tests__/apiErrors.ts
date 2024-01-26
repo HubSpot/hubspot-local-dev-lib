@@ -4,7 +4,7 @@ import {
   isGatingError,
   isApiUploadValidationError,
   isSpecifiedHubSpotAuthError,
-  throwAxiosErrorWithContext,
+  getAxiosErrorWithContext,
   throwApiError,
   throwApiUploadError,
 } from '../apiErrors';
@@ -119,10 +119,12 @@ describe('errors/apiErrors', () => {
     });
   });
 
-  describe('throwAxiosErrorWithContext()', () => {
+  describe('getAxiosErrorWithContext()', () => {
     it('throws api status code error', () => {
       const error = newAxiosError();
-      expect(() => throwAxiosErrorWithContext(error)).toThrow();
+      expect(() => {
+        throw getAxiosErrorWithContext(error);
+      }).toThrow();
     });
   });
 

@@ -86,22 +86,22 @@ function parseValidationErrors(
   return errorMessages;
 }
 
+/**
+ * @throws
+ */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function logValidationErrors(error: AxiosError<any>) {
+function throwValidationErrors(error: AxiosError<any>) {
   const validationErrorMessages = parseValidationErrors(error?.response?.data);
   if (validationErrorMessages.length) {
     throwError(new Error(validationErrorMessages.join(' '), { cause: error }));
   }
 }
 
-/**
- * @throws
- */
-export function throwAxiosErrorWithContext(
+export function getAxiosErrorWithContext(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   error: AxiosError<any>,
   context: AxiosErrorContext = {}
-): never {
+): Error {
   const { status } = error;
   const method = error.config?.method as HttpMethod;
   const { projectName } = context;
@@ -200,7 +200,8 @@ export function throwAxiosErrorWithContext(
       errorMessage.push('\n- ' + err.message);
     });
   }
-  throwError(new Error(errorMessage.join(' '), { cause: error }));
+
+  return new Error(errorMessage.join(' '), { cause: error });
 }
 
 /**
@@ -211,7 +212,7 @@ export function throwApiError(
   context: AxiosErrorContext = {}
 ): never {
   if (error.isAxiosError) {
-    throwAxiosErrorWithContext(error, context);
+    throw getAxiosErrorWithContext(error, context);
   }
   throwError(error);
 }
@@ -224,7 +225,7 @@ export function throwApiUploadError(
   context: AxiosErrorContext = {}
 ): never {
   if (isApiUploadValidationError(error)) {
-    logValidationErrors(error);
+    throwValidationErrors(error);
   }
   throwApiError(error, context);
 }

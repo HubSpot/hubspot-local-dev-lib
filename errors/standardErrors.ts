@@ -40,17 +40,6 @@ export function throwErrorWithMessage(
 /**
  * @throws
  */
-export function throwTypeErrorWithMessage(
-  identifier: LangKey,
-  interpolation?: { [key: string]: string | number },
-  cause?: BaseError
-): never {
-  genericThrowErrorWithMessage(TypeError, identifier, interpolation, cause);
-}
-
-/**
- * @throws
- */
 export function throwAuthErrorWithMessage(
   identifier: LangKey,
   interpolation?: { [key: string]: string | number },

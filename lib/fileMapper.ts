@@ -11,11 +11,7 @@ import {
   isAllowedExtension,
 } from './path';
 import { fetchFileStream, download, downloadDefault } from '../api/fileMapper';
-import {
-  throwError,
-  throwErrorWithMessage,
-  throwTypeErrorWithMessage,
-} from '../errors/standardErrors';
+import { throwError, throwErrorWithMessage } from '../errors/standardErrors';
 import { MODULE_EXTENSION, FUNCTIONS_EXTENSION } from '../constants/extensions';
 import { MODE } from '../constants/files';
 import {
@@ -105,7 +101,7 @@ function validateFileMapperNode(node: FileMapperNode): void {
   } catch (err) {
     json = node;
   }
-  throwTypeErrorWithMessage(`${i18nKey}.errors.invalidNode`, {
+  throwErrorWithMessage(`${i18nKey}.errors.invalidNode`, {
     json: JSON.stringify(json),
   });
 }

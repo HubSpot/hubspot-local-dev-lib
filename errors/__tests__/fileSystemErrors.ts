@@ -19,7 +19,7 @@ const fileSystemErrorContext = {
 
 describe('errors/fileSystemErrors', () => {
   describe('throwFileSystemError()', () => {
-    it('throws a fileSystemError', () => {
+    it('returns a fileSystemError', () => {
       expect(() => {
         throwFileSystemError(newError(), fileSystemErrorContext);
       }).toThrow();
