@@ -1,6 +1,7 @@
 import path from 'path';
 import fs from 'fs-extra';
 import contentDisposition from 'content-disposition';
+import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 
 import { getAccountConfig } from '../config';
 import { getAxiosConfig } from './getAxiosConfig';
@@ -9,9 +10,10 @@ import { getOauthManager } from '../lib/oauth';
 import { FlatAccountFields } from '../types/Accounts';
 import { LogCallbacksArg } from '../types/LogCallbacks';
 import { AxiosConfigOptions, HttpOptions, QueryParams } from '../types/Http';
+import { AxiosErrorContext } from '../types/Error';
 import { throwErrorWithMessage } from '../errors/standardErrors';
+import { throwApiError } from '../errors/apiErrors';
 import { makeTypedLogger } from '../utils/logger';
-import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 
 const i18nKey = 'http.index';
 
@@ -115,50 +117,95 @@ function addQueryParams(
   };
 }
 
+async function axiosRequestWithErrorHandling<T>(
+  config: AxiosRequestConfig,
+  context: AxiosErrorContext
+) {
+  let result;
+  try {
+    result = await axios<T>(config);
+  } catch (error) {
+    throwApiError(error as AxiosError, context);
+  }
+  return result;
+}
+
 async function getRequest<T>(
   accountId: number,
-  options: HttpOptions
+  options: HttpOptions,
+  errorContext: AxiosErrorContext = {}
 ): Promise<T> {
   const { query, ...rest } = options;
   const axiosConfig = addQueryParams(rest, query);
   const configWithAuth = await withAuth(accountId, axiosConfig);
-  const { data } = await axios<T>(configWithAuth);
+  const { data } = await axiosRequestWithErrorHandling<T>(configWithAuth, {
+    accountId,
+    ...errorContext,
+  });
   return data;
 }
 
 async function postRequest<T>(
   accountId: number,
-  options: HttpOptions
+  options: HttpOptions,
+  errorContext: AxiosErrorContext = {}
 ): Promise<T> {
   const configWithAuth = await withAuth(accountId, options);
-  const { data } = await axios({ ...configWithAuth, method: 'post' });
+  const { data } = await axiosRequestWithErrorHandling<T>(
+    {
+      ...configWithAuth,
+      method: 'post',
+    },
+    { accountId, ...errorContext }
+  );
   return data;
 }
 
 async function putRequest<T>(
   accountId: number,
-  options: HttpOptions
+  options: HttpOptions,
+  errorContext: AxiosErrorContext = {}
 ): Promise<T> {
   const configWithAuth = await withAuth(accountId, options);
-  const { data } = await axios({ ...configWithAuth, method: 'put' });
+  const { data } = await axiosRequestWithErrorHandling<T>(
+    {
+      ...configWithAuth,
+      method: 'put',
+    },
+    { accountId, ...errorContext }
+  );
   return data;
 }
 
 async function patchRequest<T>(
   accountId: number,
-  options: HttpOptions
+  options: HttpOptions,
+  errorContext: AxiosErrorContext = {}
 ): Promise<T> {
   const configWithAuth = await withAuth(accountId, options);
-  const { data } = await axios({ ...configWithAuth, method: 'put' });
+  const { data } = await axiosRequestWithErrorHandling<T>(
+    {
+      ...configWithAuth,
+      method: 'put', //TODO should this be patch?
+    },
+    { accountId, ...errorContext }
+  );
   return data;
 }
 
 async function deleteRequest<T>(
   accountId: number,
-  options: HttpOptions
+  options: HttpOptions,
+  errorContext: AxiosErrorContext = {}
 ): Promise<T> {
   const configWithAuth = await withAuth(accountId, options);
-  const { data } = await axios({ ...configWithAuth, method: 'delete' });
+  const { data } = await axiosRequestWithErrorHandling<T>(
+    {
+      ...configWithAuth,
+      method: 'delete',
+    },
+    { accountId, ...errorContext }
+  );
   return data;
 }
 

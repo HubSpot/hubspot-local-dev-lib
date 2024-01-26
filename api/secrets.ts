@@ -11,13 +11,17 @@ export async function addSecret(
   key: string,
   value: string
 ): Promise<void> {
-  return http.post(accountId, {
-    url: SECRETS_API_PATH,
-    data: {
-      key,
-      secret: value,
+  return http.post(
+    accountId,
+    {
+      url: SECRETS_API_PATH,
+      data: {
+        key,
+        secret: value,
+      },
     },
-  });
+    { request: 'add secret' }
+  );
 }
 
 export async function updateSecret(
@@ -25,28 +29,40 @@ export async function updateSecret(
   key: string,
   value: string
 ): Promise<void> {
-  return http.put(accountId, {
-    url: SECRETS_API_PATH,
-    data: {
-      key,
-      secret: value,
+  return http.put(
+    accountId,
+    {
+      url: SECRETS_API_PATH,
+      data: {
+        key,
+        secret: value,
+      },
     },
-  });
+    { request: 'update secret' }
+  );
 }
 
 export async function deleteSecret(
   accountId: number,
   key: string
 ): Promise<void> {
-  return http.delete(accountId, {
-    url: `${SECRETS_API_PATH}/${key}`,
-  });
+  return http.delete(
+    accountId,
+    {
+      url: `${SECRETS_API_PATH}/${key}`,
+    },
+    { request: 'delete secret' }
+  );
 }
 
 export async function fetchSecrets(
   accountId: number
 ): Promise<FetchSecretsResponse> {
-  return http.get(accountId, {
-    url: `${SECRETS_API_PATH}`,
-  });
+  return http.get(
+    accountId,
+    {
+      url: `${SECRETS_API_PATH}`,
+    },
+    { request: 'fetch secret' }
+  );
 }

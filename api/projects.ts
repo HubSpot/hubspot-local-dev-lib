@@ -30,12 +30,16 @@ export async function createProject(
   accountId: number,
   name: string
 ): Promise<Project> {
-  return http.post(accountId, {
-    url: PROJECTS_API_PATH,
-    data: {
-      name,
+  return http.post(
+    accountId,
+    {
+      url: PROJECTS_API_PATH,
+      data: {
+        name,
+      },
     },
-  });
+    { projectName: name }
+  );
 }
 
 export async function uploadProject(
@@ -53,21 +57,29 @@ export async function uploadProject(
     formData.platformVersion = platformVersion;
   }
 
-  return http.post(accountId, {
-    url: `${PROJECTS_API_PATH}/upload/${encodeURIComponent(projectName)}`,
-    timeout: 60000,
-    data: formData,
-    headers: { 'Content-Type': 'multipart/form-data' },
-  });
+  return http.post(
+    accountId,
+    {
+      url: `${PROJECTS_API_PATH}/upload/${encodeURIComponent(projectName)}`,
+      timeout: 60000,
+      data: formData,
+      headers: { 'Content-Type': 'multipart/form-data' },
+    },
+    { projectName }
+  );
 }
 
 export async function fetchProject(
   accountId: number,
   projectName: string
 ): Promise<Project> {
-  return http.get(accountId, {
-    url: `${PROJECTS_API_PATH}/${encodeURIComponent(projectName)}`,
-  });
+  return http.get(
+    accountId,
+    {
+      url: `${PROJECTS_API_PATH}/${encodeURIComponent(projectName)}`,
+    },
+    { projectName }
+  );
 }
 
 export async function downloadProject(
@@ -75,22 +87,33 @@ export async function downloadProject(
   projectName: string,
   buildId: number
 ): Promise<Buffer> {
-  return http.get(accountId, {
-    url: `${PROJECTS_API_PATH}/${encodeURIComponent(
-      projectName
-    )}/builds/${buildId}/archive-full`,
-    encoding: null,
-    headers: { accept: 'application/zip', 'Content-Type': 'application/json' },
-  });
+  return http.get(
+    accountId,
+    {
+      url: `${PROJECTS_API_PATH}/${encodeURIComponent(
+        projectName
+      )}/builds/${buildId}/archive-full`,
+      encoding: null,
+      headers: {
+        accept: 'application/zip',
+        'Content-Type': 'application/json',
+      },
+    },
+    { projectName }
+  );
 }
 
 export async function deleteProject(
   accountId: number,
   projectName: string
 ): Promise<void> {
-  return http.delete(accountId, {
-    url: `${PROJECTS_API_PATH}/${encodeURIComponent(projectName)}`,
-  });
+  return http.delete(
+    accountId,
+    {
+      url: `${PROJECTS_API_PATH}/${encodeURIComponent(projectName)}`,
+    },
+    { projectName }
+  );
 }
 
 type FetchPlatformVersionResponse = {
@@ -111,10 +134,14 @@ export async function fetchProjectBuilds(
   projectName: string,
   query: QueryParams
 ): Promise<FetchProjectBuildsResponse> {
-  return http.get(accountId, {
-    url: `${PROJECTS_API_PATH}/${encodeURIComponent(projectName)}/builds`,
-    query,
-  });
+  return http.get(
+    accountId,
+    {
+      url: `${PROJECTS_API_PATH}/${encodeURIComponent(projectName)}/builds`,
+      query,
+    },
+    { projectName }
+  );
 }
 
 export async function getBuildStatus(
@@ -122,11 +149,15 @@ export async function getBuildStatus(
   projectName: string,
   buildId: number
 ): Promise<Build> {
-  return http.get(accountId, {
-    url: `${PROJECTS_API_PATH}/${encodeURIComponent(
-      projectName
-    )}/builds/${buildId}/status`,
-  });
+  return http.get(
+    accountId,
+    {
+      url: `${PROJECTS_API_PATH}/${encodeURIComponent(
+        projectName
+      )}/builds/${buildId}/status`,
+    },
+    { projectName }
+  );
 }
 
 export async function getBuildStructure(
@@ -134,11 +165,15 @@ export async function getBuildStructure(
   projectName: string,
   buildId: number
 ): Promise<ComponentStructureResponse> {
-  return http.get(accountId, {
-    url: `dfs/v1/builds/by-project-name/${encodeURIComponent(
-      projectName
-    )}/builds/${buildId}/structure`,
-  });
+  return http.get(
+    accountId,
+    {
+      url: `dfs/v1/builds/by-project-name/${encodeURIComponent(
+        projectName
+      )}/builds/${buildId}/structure`,
+    },
+    { projectName }
+  );
 }
 
 export async function deployProject(
@@ -146,13 +181,17 @@ export async function deployProject(
   projectName: string,
   buildId: number
 ): Promise<ProjectDeployResponse> {
-  return http.post(accountId, {
-    url: `${PROJECTS_DEPLOY_API_PATH}/deploys/queue/async`,
-    data: {
-      projectName,
-      buildId,
+  return http.post(
+    accountId,
+    {
+      url: `${PROJECTS_DEPLOY_API_PATH}/deploys/queue/async`,
+      data: {
+        projectName,
+        buildId,
+      },
     },
-  });
+    { projectName }
+  );
 }
 
 export async function getDeployStatus(
@@ -160,11 +199,15 @@ export async function getDeployStatus(
   projectName: string,
   deployId: number
 ): Promise<Deploy> {
-  return http.get(accountId, {
-    url: `${PROJECTS_DEPLOY_API_PATH}/deploy-status/projects/${encodeURIComponent(
-      projectName
-    )}/deploys/${deployId}`,
-  });
+  return http.get(
+    accountId,
+    {
+      url: `${PROJECTS_DEPLOY_API_PATH}/deploy-status/projects/${encodeURIComponent(
+        projectName
+      )}/deploys/${deployId}`,
+    },
+    { projectName }
+  );
 }
 
 export async function getDeployStructure(
@@ -172,20 +215,28 @@ export async function getDeployStructure(
   projectName: string,
   deployId: number
 ): Promise<ComponentStructureResponse> {
-  return http.get(accountId, {
-    url: `${PROJECTS_DEPLOY_API_PATH}/deploys/by-project-name/${encodeURIComponent(
-      projectName
-    )}/deploys/${deployId}/structure`,
-  });
+  return http.get(
+    accountId,
+    {
+      url: `${PROJECTS_DEPLOY_API_PATH}/deploys/by-project-name/${encodeURIComponent(
+        projectName
+      )}/deploys/${deployId}/structure`,
+    },
+    { projectName }
+  );
 }
 
 export async function fetchProjectSettings(
   accountId: number,
   projectName: string
 ): Promise<ProjectSettings> {
-  return http.get(accountId, {
-    url: `${PROJECTS_API_PATH}/${encodeURIComponent(projectName)}/settings`,
-  });
+  return http.get(
+    accountId,
+    {
+      url: `${PROJECTS_API_PATH}/${encodeURIComponent(projectName)}/settings`,
+    },
+    { projectName }
+  );
 }
 
 export async function fetchDeployComponentsMetadata(
@@ -201,9 +252,13 @@ export async function cancelStagedBuild(
   accountId: number,
   projectName: string
 ): Promise<void> {
-  return http.post(accountId, {
-    url: `${PROJECTS_API_PATH}/${encodeURIComponent(
-      projectName
-    )}/builds/staged/cancel`,
-  });
+  return http.post(
+    accountId,
+    {
+      url: `${PROJECTS_API_PATH}/${encodeURIComponent(
+        projectName
+      )}/builds/staged/cancel`,
+    },
+    { projectName }
+  );
 }
