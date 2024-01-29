@@ -106,31 +106,38 @@ export function getAxiosErrorWithContext(
   const method = error.config?.method as HttpMethod;
   const { projectName } = context;
 
-  const isPutOrPost = method === 'put' || method === 'post';
-  const action = method && (HTTP_METHOD_VERBS[method] || HTTP_METHOD_VERBS.get);
-  const preposition =
-    (method && HTTP_METHOD_PREPOSITIONS[method]) ||
-    HTTP_METHOD_PREPOSITIONS.get;
+  let messageDetail: string;
 
-  const request = context.request
-    ? `${action} ${preposition} "${context.request}"`
-    : action;
-  const messageDetail =
-    request && context.accountId
-      ? i18n(`${i18nKey}.messageDetail`, {
-          request,
-          accountId: context.accountId,
-        })
-      : 'request';
+  if (context.accountId) {
+    const action =
+      (method && HTTP_METHOD_VERBS[method]) || HTTP_METHOD_VERBS.get;
+
+    const preposition =
+      (method && HTTP_METHOD_PREPOSITIONS[method]) ||
+      HTTP_METHOD_PREPOSITIONS.get;
+
+    const requestName = context.request
+      ? `${action} ${preposition} '${context.request}'`
+      : action;
+
+    messageDetail = i18n(`${i18nKey}.messageDetail`, {
+      accountId: context.accountId,
+      requestName,
+    });
+  } else {
+    messageDetail = i18n(`${i18nKey}.genericMessageDetail`);
+  }
 
   const errorMessage: Array<string> = [];
-  if (isPutOrPost && context.payload) {
+
+  if ((method === 'put' || method === 'post') && context.payload) {
     errorMessage.push(
       i18n(`${i18nKey}.unableToUpload`, { payload: context.payload })
     );
   }
   const isProjectMissingScopeError = isMissingScopeError(error) && projectName;
   const isProjectGatingError = isGatingError(error) && projectName;
+
   switch (status) {
     case 400:
       errorMessage.push(i18n(`${i18nKey}.codes.400`, { messageDetail }));
@@ -141,13 +148,13 @@ export function getAxiosErrorWithContext(
     case 403:
       if (isProjectMissingScopeError) {
         errorMessage.push(
-          i18n(`${i18nKey}.codes.403MissingScope`, {
+          i18n(`${i18nKey}.codes.403ProjectMissingScope`, {
             accountId: context.accountId || '',
           })
         );
       } else if (isProjectGatingError) {
         errorMessage.push(
-          i18n(`${i18nKey}.codes.403Gating`, {
+          i18n(`${i18nKey}.codes.403ProjectGating`, {
             accountId: context.accountId || '',
           })
         );
@@ -156,17 +163,7 @@ export function getAxiosErrorWithContext(
       }
       break;
     case 404:
-      if (context.request) {
-        errorMessage.push(
-          i18n(`${i18nKey}.codes.404Request`, {
-            action: action || 'request',
-            request: context.request,
-            account: context.accountId || '',
-          })
-        );
-      } else {
-        errorMessage.push(i18n(`${i18nKey}.codes.404`, { messageDetail }));
-      }
+      errorMessage.push(i18n(`${i18nKey}.codes.404`, { messageDetail }));
       break;
     case 429:
       errorMessage.push(i18n(`${i18nKey}.codes.429`, { messageDetail }));
@@ -188,17 +185,21 @@ export function getAxiosErrorWithContext(
       }
       break;
   }
-  if (
-    error?.response?.data?.message &&
-    !isProjectMissingScopeError &&
-    !isProjectGatingError
-  ) {
-    errorMessage.push(error.response.data.message);
-  }
-  if (error?.response?.data?.errors) {
-    error.response.data.errors.forEach((err: BaseError) => {
-      errorMessage.push('\n- ' + err.message);
-    });
+
+  if (error?.response?.data) {
+    const { message, errors } = error.response.data;
+
+    if (message && !isProjectMissingScopeError && !isProjectGatingError) {
+      errorMessage.push(message);
+    }
+
+    if (errors) {
+      errors.forEach((err: BaseError) => {
+        if (err.message) {
+          errorMessage.push('\n- ' + err.message);
+        }
+      });
+    }
   }
 
   return new Error(errorMessage.join(' '), { cause: error });
