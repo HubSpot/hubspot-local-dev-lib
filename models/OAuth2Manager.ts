@@ -33,10 +33,10 @@ const i18nKey = 'models.OAuth2Manager';
 
 class OAuth2Manager {
   account: OAuthAccount;
-  writeTokenInfo: WriteTokenInfoFunction;
+  writeTokenInfo?: WriteTokenInfoFunction;
   refreshTokenRequest: Promise<RefreshTokenResponse> | null;
 
-  constructor(account: OAuthAccount, writeTokenInfo: WriteTokenInfoFunction) {
+  constructor(account: OAuthAccount, writeTokenInfo?: WriteTokenInfoFunction) {
     this.writeTokenInfo = writeTokenInfo;
     this.refreshTokenRequest = null;
     this.account = account;
