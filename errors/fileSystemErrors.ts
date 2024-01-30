@@ -39,5 +39,5 @@ export function throwFileSystemError(
   error: BaseError,
   context: FileSystemErrorContext
 ) {
-  throwFileSystemError(error, context);
+  throw getFileSystemError(error, context);
 }
