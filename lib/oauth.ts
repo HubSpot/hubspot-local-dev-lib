@@ -48,7 +48,7 @@ export function addOauthToAccountConfig(
   logger('init', `${i18nKey}.addOauthToAccountConfig.init`);
   try {
     updateAccountConfig({
-      ...oauth.toObj(),
+      ...oauth.account,
       authType: AUTH_METHODS.oauth.value,
     });
     writeConfig();

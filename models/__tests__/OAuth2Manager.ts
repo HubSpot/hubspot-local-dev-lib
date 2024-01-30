@@ -42,18 +42,6 @@ describe('models/Oauth2Manager', () => {
     });
   });
 
-  describe('toObj()', () => {
-    it('returns an account object', async () => {
-      const oauthManager = new OAuth2Manager(oauthAccount, () => undefined);
-
-      const accountObj = oauthManager.toObj();
-      expect(accountObj.clientSecret).toBe(oauthAccount.auth.clientSecret);
-      expect(accountObj.tokenInfo?.refreshToken).toBe(
-        oauthAccount.auth.tokenInfo.refreshToken
-      );
-    });
-  });
-
   describe('fromConfig()', () => {
     it('initializes an oauth manager instance', async () => {
       const oauthManager = OAuth2Manager.fromConfig(
