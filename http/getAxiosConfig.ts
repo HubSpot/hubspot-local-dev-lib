@@ -12,9 +12,10 @@ export const DEFAULT_USER_AGENT_HEADERS = {
 export function getAxiosConfig(
   options: AxiosConfigOptions
 ): AxiosRequestConfig {
-  const { env, localHostOverride, ...rest } = options;
+  const { env, localHostOverride, headers, ...rest } = options;
   const { httpTimeout, httpUseLocalhost } =
     getAndLoadConfigIfNeeded() as CLIConfig;
+
   return {
     baseURL: getHubSpotApiOrigin(
       env,
@@ -22,6 +23,7 @@ export function getAxiosConfig(
     ),
     headers: {
       ...DEFAULT_USER_AGENT_HEADERS,
+      ...(headers || {}),
     },
     timeout: httpTimeout || 15000,
     ...rest,
