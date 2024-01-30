@@ -114,12 +114,10 @@ export async function downloadDefault(
 // Delete a file or folder by path
 export async function deleteFile(
   accountId: number,
-  filePath: string,
-  options: FileMapperOptions = {}
+  filePath: string
 ): Promise<void> {
   return http.delete(accountId, {
     url: `${FILE_MAPPER_API_PATH}/delete/${encodeURIComponent(filePath)}`,
-    ...options,
   });
 }
 
@@ -131,6 +129,7 @@ export async function moveFile(
 ): Promise<void> {
   return http.put(accountId, {
     url: `${FILE_MAPPER_API_PATH}/rename/${srcPath}?path=${destPath}`,
+    headers: { 'Content-Type': 'application/json' },
   });
 }
 
@@ -138,7 +137,7 @@ export async function moveFile(
 export async function getDirectoryContentsByPath(
   accountId: number,
   path: string
-): Promise<void> {
+): Promise<FileMapperNode> {
   return http.get(accountId, {
     url: `${FILE_MAPPER_API_PATH}/meta/${path}`,
   });

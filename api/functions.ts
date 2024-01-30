@@ -1,11 +1,33 @@
 import http from '../http';
-// import { QueryParams } from '../types/Http';
+import { QueryParams } from '../types/Http';
 import { GetBuildStatusResponse, GetRoutesResponse } from '../types/Functions';
+
 const FUNCTION_API_PATH = 'cms/v3/functions';
 
 export async function getRoutes(accountId: number): Promise<GetRoutesResponse> {
   return http.get(accountId, {
     url: `${FUNCTION_API_PATH}/routes`,
+  });
+}
+
+export async function getFunctionLogs(
+  accountId: number,
+  route: string,
+  query: QueryParams = {}
+) {
+  const { limit = 5 } = query;
+
+  return http.get(accountId, {
+    url: `${FUNCTION_API_PATH}/results/by-route/${encodeURIComponent(route)}`,
+    query: { ...query, limit },
+  });
+}
+
+export async function getLatestFunctionLog(accountId: number, route: string) {
+  return http.get(accountId, {
+    url: `${FUNCTION_API_PATH}/results/by-route/${encodeURIComponent(
+      route
+    )}/latest`,
   });
 }
 
@@ -25,10 +47,10 @@ export async function buildPackage(
 }
 
 export async function getBuildStatus(
-  portalId: number,
+  accountId: number,
   buildId: number
 ): Promise<GetBuildStatusResponse> {
-  return http.get(portalId, {
+  return http.get(accountId, {
     url: `${FUNCTION_API_PATH}/build/${buildId}/poll`,
   });
 }
