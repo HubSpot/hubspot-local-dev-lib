@@ -72,7 +72,6 @@ describe('models/Oauth2Manager', () => {
             grant_type: 'refresh_token',
             refresh_token: initialRefreshToken,
           },
-          json: true,
         }
       );
       expect(oauthManager.account.auth?.tokenInfo?.refreshToken).toBe(

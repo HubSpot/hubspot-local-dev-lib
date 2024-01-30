@@ -86,13 +86,14 @@ class OAuth2Manager {
     });
 
     try {
-      const { data } = await axios.post(
-        `${getHubSpotApiOrigin(getValidEnv(this.account.env))}/oauth/v1/token`,
-        {
-          form: exchangeProof,
-          json: true,
-        }
-      );
+      const { data } = await axios({
+        url: `${getHubSpotApiOrigin(
+          getValidEnv(this.account.env)
+        )}/oauth/v1/token`,
+        method: 'post',
+        data: exchangeProof,
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      });
       this.refreshTokenRequest = data;
 
       const {
