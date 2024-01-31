@@ -3,7 +3,7 @@ import moment from 'moment';
 
 import { getHubSpotApiOrigin } from '../lib/urls';
 import { getValidEnv } from '../lib/environment';
-import { FlatAccountFields, OAuthAccount, TokenInfo } from '../types/Accounts';
+import { FlatAccountFields, TokenInfo } from '../types/Accounts';
 import { debug } from '../utils/logger';
 import { getAccountIdentifier } from '../utils/getAccountIdentifier';
 import { AUTH_METHODS } from '../constants/auth';
@@ -13,6 +13,19 @@ import {
   throwAuthErrorWithMessage,
 } from '../errors/standardErrors';
 import { BaseError } from '../types/Error';
+import { Environment } from '../types/Config';
+
+type OAuth2ManagerAccountConfig = {
+  name?: string;
+  accountId?: number;
+  clientId?: string;
+  clientSecret?: string;
+  scopes?: Array<string>;
+  env?: Environment;
+  environment?: Environment;
+  tokenInfo?: TokenInfo;
+  authType?: 'oauth2';
+};
 
 type WriteTokenInfoFunction = (tokenInfo: TokenInfo) => void;
 
@@ -32,11 +45,14 @@ type ExchangeProof = {
 const i18nKey = 'models.OAuth2Manager';
 
 class OAuth2Manager {
-  account: OAuthAccount;
-  writeTokenInfo: WriteTokenInfoFunction;
+  account: OAuth2ManagerAccountConfig;
+  writeTokenInfo?: WriteTokenInfoFunction;
   refreshTokenRequest: Promise<RefreshTokenResponse> | null;
 
-  constructor(account: OAuthAccount, writeTokenInfo: WriteTokenInfoFunction) {
+  constructor(
+    account: OAuth2ManagerAccountConfig,
+    writeTokenInfo?: WriteTokenInfoFunction
+  ) {
     this.writeTokenInfo = writeTokenInfo;
     this.refreshTokenRequest = null;
     this.account = account;
@@ -47,36 +63,38 @@ class OAuth2Manager {
   }
 
   async accessToken(): Promise<string | undefined> {
-    if (!this.account.auth.tokenInfo?.refreshToken) {
+    if (!this.account.tokenInfo?.refreshToken) {
       throwErrorWithMessage(`${i18nKey}.errors.missingRefreshToken`, {
         accountId: getAccountIdentifier(this.account)!,
       });
     }
+
     if (
-      !this.account.auth.tokenInfo?.accessToken ||
+      !this.account.tokenInfo?.accessToken ||
       moment()
         .add(5, 'minutes')
-        .isAfter(moment(this.account.auth?.tokenInfo.expiresAt))
+        .isAfter(moment(new Date(this.account.tokenInfo.expiresAt || '')))
     ) {
       await this.refreshAccessToken();
     }
-    return this.account.auth?.tokenInfo.accessToken;
+    return this.account.tokenInfo.accessToken;
   }
 
   async fetchAccessToken(exchangeProof: ExchangeProof): Promise<void> {
     debug(`${i18nKey}.fetchingAccessToken`, {
       accountId: getAccountIdentifier(this.account)!,
-      clientId: this.account.auth.clientId || '',
+      clientId: this.account.clientId || '',
     });
 
     try {
-      const { data } = await axios.post(
-        `${getHubSpotApiOrigin(getValidEnv(this.account.env))}/oauth/v1/token`,
-        {
-          form: exchangeProof,
-          json: true,
-        }
-      );
+      const { data } = await axios({
+        url: `${getHubSpotApiOrigin(
+          getValidEnv(this.account.env)
+        )}/oauth/v1/token`,
+        method: 'post',
+        data: exchangeProof,
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      });
       this.refreshTokenRequest = data;
 
       const {
@@ -84,20 +102,20 @@ class OAuth2Manager {
         access_token: accessToken,
         expires_in: expiresIn,
       } = data;
-      if (!this.account.auth.tokenInfo) {
-        this.account.auth.tokenInfo = {};
+      if (!this.account.tokenInfo) {
+        this.account.tokenInfo = {};
       }
-      this.account.auth.tokenInfo.refreshToken = refreshToken;
-      this.account.auth.tokenInfo.accessToken = accessToken;
-      this.account.auth.tokenInfo.expiresAt = moment()
+      this.account.tokenInfo.refreshToken = refreshToken;
+      this.account.tokenInfo.accessToken = accessToken;
+      this.account.tokenInfo.expiresAt = moment()
         .add(Math.round(parseInt(expiresIn) * 0.75), 'seconds')
         .toString();
       if (this.writeTokenInfo) {
         debug(`${i18nKey}.updatingTokenInfo`, {
           accountId: getAccountIdentifier(this.account)!,
-          clientId: this.account.auth.clientId || '',
+          clientId: this.account.clientId || '',
         });
-        this.writeTokenInfo(this.account.auth.tokenInfo);
+        this.writeTokenInfo(this.account.tokenInfo);
       }
       this.refreshTokenRequest = null;
     } catch (e) {
@@ -111,7 +129,7 @@ class OAuth2Manager {
       if (this.refreshTokenRequest) {
         debug(`${i18nKey}.refreshingAccessToken`, {
           accountId: getAccountIdentifier(this.account)!,
-          clientId: this.account.auth.clientId || '',
+          clientId: this.account.clientId || '',
         });
         await this.refreshTokenRequest;
       } else {
@@ -136,23 +154,11 @@ class OAuth2Manager {
   async refreshAccessToken(): Promise<void> {
     const refreshTokenProof = {
       grant_type: 'refresh_token',
-      client_id: this.account.auth.clientId,
-      client_secret: this.account.auth.clientSecret,
-      refresh_token: this.account.auth.tokenInfo?.refreshToken,
+      client_id: this.account.clientId,
+      client_secret: this.account.clientSecret,
+      refresh_token: this.account.tokenInfo?.refreshToken,
     };
     await this.exchangeForTokens(refreshTokenProof);
-  }
-
-  toObj() {
-    return {
-      env: this.account.env,
-      clientSecret: this.account.auth.clientSecret,
-      clientId: this.account.auth.clientId,
-      scopes: this.account.auth.scopes,
-      tokenInfo: this.account.auth.tokenInfo,
-      name: this.account.name,
-      accountId: getAccountIdentifier(this.account)!,
-    };
   }
 
   static fromConfig(
@@ -163,7 +169,7 @@ class OAuth2Manager {
       {
         ...accountConfig,
         authType: AUTH_METHODS.oauth.value,
-        auth: accountConfig.auth || {},
+        ...(accountConfig.auth || {}),
       },
       writeTokenInfo
     );

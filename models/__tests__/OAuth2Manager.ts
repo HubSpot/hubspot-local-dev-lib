@@ -5,15 +5,17 @@ import { ENVIRONMENTS } from '../../constants/environments';
 
 jest.mock('axios');
 
+const axiosMock = axios as jest.MockedFunction<typeof axios>;
+
 const mockRefreshTokenResponse = {
   refresh_token: 'new-token',
   access_token: 'new-access-token',
   expires_in: moment().add(2, 'hours').toISOString(),
 };
 
-const postSpy = jest
-  .spyOn(axios, 'post')
-  .mockResolvedValue({ data: mockRefreshTokenResponse });
+const axiosSpy = axiosMock.mockResolvedValue({
+  data: mockRefreshTokenResponse,
+});
 
 const initialRefreshToken = '84d22710-4cb7-5581-ba05-35f9945e5e8e';
 
@@ -42,18 +44,6 @@ describe('models/Oauth2Manager', () => {
     });
   });
 
-  describe('toObj()', () => {
-    it('returns an account object', async () => {
-      const oauthManager = new OAuth2Manager(oauthAccount, () => undefined);
-
-      const accountObj = oauthManager.toObj();
-      expect(accountObj.clientSecret).toBe(oauthAccount.auth.clientSecret);
-      expect(accountObj.tokenInfo?.refreshToken).toBe(
-        oauthAccount.auth.tokenInfo.refreshToken
-      );
-    });
-  });
-
   describe('fromConfig()', () => {
     it('initializes an oauth manager instance', async () => {
       const oauthManager = OAuth2Manager.fromConfig(
@@ -75,22 +65,21 @@ describe('models/Oauth2Manager', () => {
 
       await oauthManager.refreshAccessToken();
 
-      expect(postSpy).toHaveBeenCalledWith(
-        'https://api.hubapi.com/oauth/v1/token',
-        {
-          form: {
-            client_id: oauthAccount.auth.clientId,
-            client_secret: oauthAccount.auth.clientSecret,
-            grant_type: 'refresh_token',
-            refresh_token: initialRefreshToken,
-          },
-          json: true,
-        }
-      );
-      expect(oauthManager.account.auth?.tokenInfo?.refreshToken).toBe(
+      expect(axiosSpy).toHaveBeenCalledWith({
+        url: 'https://api.hubapi.com/oauth/v1/token',
+        data: {
+          client_id: oauthAccount.auth.clientId,
+          client_secret: oauthAccount.auth.clientSecret,
+          grant_type: 'refresh_token',
+          refresh_token: initialRefreshToken,
+        },
+        method: 'post',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      });
+      expect(oauthManager.account.tokenInfo?.refreshToken).toBe(
         mockRefreshTokenResponse.refresh_token
       );
-      expect(oauthManager.account.auth?.tokenInfo?.accessToken).toBe(
+      expect(oauthManager.account.tokenInfo?.accessToken).toBe(
         mockRefreshTokenResponse.access_token
       );
     });
