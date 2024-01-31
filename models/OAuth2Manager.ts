@@ -68,11 +68,14 @@ class OAuth2Manager {
         accountId: getAccountIdentifier(this.account)!,
       });
     }
+
     if (
       !this.account.tokenInfo?.accessToken ||
       moment()
         .add(5, 'minutes')
-        .isAfter(moment(this.account.tokenInfo.expiresAt))
+        .isAfter(
+          moment(this.account.tokenInfo.expiresAt, 'ddd MMM dd yyyy HH:mm:ss Z')
+        )
     ) {
       await this.refreshAccessToken();
     }
