@@ -18,6 +18,7 @@ import {
 } from '../types/Sandbox';
 import { throwErrorWithMessage } from '../errors/standardErrors';
 import { BaseError } from '../types/Error';
+import { AxiosError } from 'axios';
 
 const i18nKey = 'lib.sandboxes';
 
@@ -40,7 +41,7 @@ export async function createSandbox(
     throwErrorWithMessage(
       `${i18nKey}.errors.createSandbox`,
       {},
-      err as BaseError
+      err as AxiosError
     );
   }
 }
@@ -55,7 +56,7 @@ export async function deleteSandbox(
     throwErrorWithMessage(
       `${i18nKey}.errors.deleteSandbox`,
       {},
-      err as BaseError
+      err as AxiosError
     );
   }
 
@@ -75,7 +76,7 @@ export async function getSandboxUsageLimits(
     throwErrorWithMessage(
       `${i18nKey}.errors.getSandboxUsageLimits`,
       {},
-      err as BaseError
+      err as AxiosError
     );
   }
 }
@@ -92,7 +93,7 @@ export async function initiateSync(
     throwErrorWithMessage(
       `${i18nKey}.errors.initiateSync`,
       {},
-      err as BaseError
+      err as AxiosError
     );
   }
 }
@@ -107,7 +108,7 @@ export async function fetchTaskStatus(
     throwErrorWithMessage(
       `${i18nKey}.errors.fetchTaskStatus`,
       {},
-      err as BaseError
+      err as AxiosError
     );
   }
 }
