@@ -1,4 +1,4 @@
-import { debug } from '../utils/logger';
+import { logger } from '../lib/logging/logger';
 import {
   API_KEY_AUTH_METHOD,
   OAUTH_AUTH_METHOD,
@@ -12,6 +12,7 @@ import {
   OAuthAccount_NEW,
   PersonalAccessKeyAccount_NEW,
 } from '../types/Accounts';
+import { i18n } from '../utils/lang';
 
 const i18nKey = 'config.configUtils';
 
@@ -144,7 +145,7 @@ export function generateConfig(
       configAccount = generateOauthAccountConfig(options as OAuthOptions);
       break;
     default:
-      debug(`${i18nKey}.unknownType`, { type });
+      logger.debug(i18n(`${i18nKey}.unknownType`, { type }));
       return null;
   }
 

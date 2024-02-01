@@ -10,7 +10,7 @@ import {
   fetchFolders,
 } from '../api/fileManager';
 import { walk } from './fs';
-import { debug, makeTypedLogger } from '../utils/logger';
+import { logger } from './logging/logger';
 import { createIgnoreFilter } from './ignoreRules';
 import http from '../http';
 import { escapeRegExp } from '../utils/escapeRegExp';
@@ -27,31 +27,20 @@ import {
   throwError,
 } from '../errors/standardErrors';
 import { throwFileSystemError } from '../errors/fileSystemErrors';
-import { LogCallbacksArg } from '../types/LogCallbacks';
 import { BaseError, GenericError } from '../types/Error';
 import { File, Folder } from '../types/FileManager';
 import { AxiosError } from 'axios';
+import { i18n } from '../utils/lang';
 
 type SimplifiedFolder = Partial<Folder> & Pick<Folder, 'id' | 'name'>;
 
 const i18nKey = 'lib.fileManager';
 
-const uploadCallbackKeys = ['uploadSuccess'] as const;
-const downloadCallbackKeys = [
-  'skippedExisting',
-  'fetchFolderStarted',
-  'fetchFolderSuccess',
-  'fetchFileStarted',
-  'fetchFileSuccess',
-] as const;
-
 export async function uploadFolder(
   accountId: number,
   src: string,
-  dest: string,
-  logCallbacks?: LogCallbacksArg<typeof uploadCallbackKeys>
+  dest: string
 ): Promise<void> {
-  const logger = makeTypedLogger<typeof uploadCallbackKeys>(logCallbacks);
   const regex = new RegExp(`^${escapeRegExp(src)}`);
   const files = await walk(src);
 
@@ -62,14 +51,16 @@ export async function uploadFolder(
     const file = filesToUpload[index];
     const relativePath = file.replace(regex, '');
     const destPath = convertToUnixPath(path.join(dest, relativePath));
-    debug(`${i18nKey}.uploadStarted`, {
-      file,
-      destPath,
-      accountId,
-    });
+    logger.debug(
+      i18n(`${i18nKey}.uploadStarted`, {
+        file,
+        destPath,
+        accountId,
+      })
+    );
     try {
       await uploadFile(accountId, file, destPath);
-      logger('uploadSuccess', `${i18nKey}.uploadSuccess`, { file, destPath });
+      logger.log(i18n(`${i18nKey}.uploadSuccess`, { file, destPath }));
     } catch (err) {
       const error = err as BaseError;
       if (isFatalError(error)) {
@@ -85,15 +76,13 @@ export async function uploadFolder(
 
 async function skipExisting(
   overwrite: boolean,
-  filepath: string,
-  logCallbacks?: LogCallbacksArg<typeof downloadCallbackKeys>
+  filepath: string
 ): Promise<boolean> {
-  const logger = makeTypedLogger<typeof downloadCallbackKeys>(logCallbacks);
   if (overwrite) {
     return false;
   }
   if (await fs.pathExists(filepath)) {
-    logger('skippedExisting', `${i18nKey}.skippedExisting`, { filepath });
+    logger.log(i18n(`${i18nKey}.skippedExisting`, { filepath }));
     return true;
   }
   return false;
@@ -103,13 +92,12 @@ async function downloadFile(
   accountId: number,
   file: File,
   dest: string,
-  overwrite?: boolean,
-  logCallbacks?: LogCallbacksArg<typeof downloadCallbackKeys>
+  overwrite?: boolean
 ): Promise<void> {
   const fileName = `${file.name}.${file.extension}`;
   const destPath = convertToLocalFileSystemPath(path.join(dest, fileName));
 
-  if (await skipExisting(overwrite || false, destPath, logCallbacks)) {
+  if (await skipExisting(overwrite || false, destPath)) {
     return;
   }
   await http.getOctetStream(
@@ -155,8 +143,7 @@ async function fetchFolderContents(
   folder: SimplifiedFolder,
   dest: string,
   overwrite?: boolean,
-  includeArchived?: boolean,
-  logCallbacks?: LogCallbacksArg<typeof downloadCallbackKeys>
+  includeArchived?: boolean
 ): Promise<void> {
   try {
     await fs.ensureDir(dest);
@@ -169,13 +156,15 @@ async function fetchFolderContents(
   }
 
   const files = await fetchAllPagedFiles(accountId, folder.id, includeArchived);
-  debug(`${i18nKey}.fetchingFiles`, {
-    fileCount: files.length,
-    folderName: folder.name || '',
-  });
+  logger.debug(
+    i18n(`${i18nKey}.fetchingFiles`, {
+      fileCount: files.length,
+      folderName: folder.name || '',
+    })
+  );
 
   for (const file of files) {
-    await downloadFile(accountId, file, dest, overwrite, logCallbacks);
+    await downloadFile(accountId, file, dest, overwrite);
   }
 
   const { objects: folders } = await fetchFolders(accountId, folder.id);
@@ -186,8 +175,7 @@ async function fetchFolderContents(
       folder,
       nestedFolder,
       overwrite,
-      includeArchived,
-      logCallbacks
+      includeArchived
     );
   }
 }
@@ -199,10 +187,8 @@ async function downloadFolder(
   dest: string,
   folder: SimplifiedFolder,
   overwrite?: boolean,
-  includeArchived?: boolean,
-  logCallbacks?: LogCallbacksArg<typeof downloadCallbackKeys>
+  includeArchived?: boolean
 ) {
-  const logger = makeTypedLogger<typeof downloadCallbackKeys>(logCallbacks);
   let absolutePath: string;
 
   if (folder.name) {
@@ -213,24 +199,27 @@ async function downloadFolder(
     absolutePath = convertToLocalFileSystemPath(path.resolve(getCwd(), dest));
   }
 
-  logger('fetchFolderStarted', `${i18nKey}.fetchFolderStarted`, {
-    src,
-    path: absolutePath,
-    accountId,
-  });
+  logger.log(
+    i18n(`${i18nKey}.fetchFolderStarted`, {
+      src,
+      path: absolutePath,
+      accountId,
+    })
+  );
 
   await fetchFolderContents(
     accountId,
     folder,
     absolutePath,
     overwrite,
-    includeArchived,
-    logCallbacks
+    includeArchived
   );
-  logger('fetchFolderSuccess', `${i18nKey}.fetchFolderSuccess`, {
-    src,
-    dest,
-  });
+  logger.log(
+    i18n(`${i18nKey}.fetchFolderSuccess`, {
+      src,
+      dest,
+    })
+  );
 }
 
 // Download a single file and write to local file system.
@@ -240,10 +229,8 @@ async function downloadSingleFile(
   dest: string,
   file: File,
   overwrite?: boolean,
-  includeArchived?: boolean,
-  logCallbacks?: LogCallbacksArg<typeof downloadCallbackKeys>
+  includeArchived?: boolean
 ) {
-  const logger = makeTypedLogger<typeof downloadCallbackKeys>(logCallbacks);
   if (!includeArchived && file.archived) {
     throwErrorWithMessage(`${i18nKey}.errors.archivedFile`, { src });
   }
@@ -251,16 +238,20 @@ async function downloadSingleFile(
     throwErrorWithMessage(`${i18nKey}.errors.hiddenFile`, { src });
   }
 
-  logger('fetchFileStarted', `${i18nKey}.fetchFileStarted`, {
-    src,
-    dest,
-    accountId,
-  });
-  await downloadFile(accountId, file, dest, overwrite, logCallbacks);
-  logger('fetchFileSuccess', `${i18nKey}.fetchFileSuccess`, {
-    src,
-    dest,
-  });
+  logger.log(
+    i18n(`${i18nKey}.fetchFileStarted`, {
+      src,
+      dest,
+      accountId,
+    })
+  );
+  await downloadFile(accountId, file, dest, overwrite);
+  logger.log(
+    i18n(`${i18nKey}.fetchFileSuccess`, {
+      src,
+      dest,
+    })
+  );
 }
 
 // Lookup path in file manager and initiate download
@@ -269,8 +260,7 @@ export async function downloadFileOrFolder(
   src: string,
   dest: string,
   overwrite?: boolean,
-  includeArchived?: boolean,
-  logCallbacks?: LogCallbacksArg<typeof downloadCallbackKeys>
+  includeArchived?: boolean
 ) {
   try {
     if (src == '/') {
@@ -282,8 +272,7 @@ export async function downloadFileOrFolder(
         dest,
         rootFolder,
         overwrite,
-        includeArchived,
-        logCallbacks
+        includeArchived
       );
     } else {
       const { file, folder } = await fetchStat(accountId, src);
@@ -294,8 +283,7 @@ export async function downloadFileOrFolder(
           dest,
           file,
           overwrite,
-          includeArchived,
-          logCallbacks
+          includeArchived
         );
       } else if (folder) {
         await downloadFolder(
@@ -304,8 +292,7 @@ export async function downloadFileOrFolder(
           dest,
           folder,
           overwrite,
-          includeArchived,
-          logCallbacks
+          includeArchived
         );
       }
     }

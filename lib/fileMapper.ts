@@ -10,6 +10,7 @@ import {
   convertToLocalFileSystemPath,
   isAllowedExtension,
 } from './path';
+import { logger } from './logging/logger';
 import { fetchFileStream, download, downloadDefault } from '../api/fileMapper';
 import { throwError, throwErrorWithMessage } from '../errors/standardErrors';
 import { MODULE_EXTENSION, FUNCTIONS_EXTENSION } from '../constants/extensions';
@@ -22,18 +23,9 @@ import {
 } from '../types/Files';
 import { throwFileSystemError } from '../errors/fileSystemErrors';
 import { BaseError } from '../types/Error';
-import { LogCallbacksArg } from '../types/LogCallbacks';
-import { makeTypedLogger } from '../utils/logger';
+import { i18n } from '../utils/lang';
 
 const i18nKey = 'lib.fileMapper';
-
-const filemapperCallbackKeys = [
-  'skippedExisting',
-  'wroteFolder',
-  'completedFetch',
-  'folderFetch',
-  'completedFolderFetch',
-] as const;
 
 const queue = new PQueue({
   concurrency: 10,
@@ -196,15 +188,13 @@ async function fetchAndWriteFileStream(
   srcPath: string,
   filepath: string,
   mode?: Mode,
-  options: FileMapperInputOptions = {},
-  logCallbacks?: LogCallbacksArg<typeof filemapperCallbackKeys>
+  options: FileMapperInputOptions = {}
 ): Promise<void> {
-  const logger = makeTypedLogger<typeof filemapperCallbackKeys>(logCallbacks);
   if (typeof srcPath !== 'string' || !srcPath.trim()) {
     return;
   }
   if (await skipExisting(filepath, options.overwrite)) {
-    logger('skippedExisting', `${i18nKey}.skippedExisting`, { filepath });
+    logger.log(i18n(`${i18nKey}.skippedExisting`, { filepath }));
     return;
   }
   if (!isAllowedExtension(srcPath)) {
@@ -231,15 +221,15 @@ async function writeFileMapperNode(
   filepath: string,
   node: FileMapperNode,
   mode?: Mode,
-  options: FileMapperInputOptions = {},
-  logCallbacks?: LogCallbacksArg<typeof filemapperCallbackKeys>
+  options: FileMapperInputOptions = {}
 ): Promise<boolean> {
-  const logger = makeTypedLogger<typeof filemapperCallbackKeys>(logCallbacks);
   const localFilepath = convertToLocalFileSystemPath(path.resolve(filepath));
   if (await skipExisting(localFilepath, options.overwrite)) {
-    logger('skippedExisting', `${i18nKey}.skippedExisting`, {
-      filepath: localFilepath,
-    });
+    logger.log(
+      i18n(`${i18nKey}.skippedExisting`, {
+        filepath: localFilepath,
+      })
+    );
     return true;
   }
   if (!node.folder) {
@@ -249,8 +239,7 @@ async function writeFileMapperNode(
         node.path,
         localFilepath,
         mode,
-        options,
-        logCallbacks
+        options
       );
       return true;
     } catch (err) {
@@ -259,9 +248,11 @@ async function writeFileMapperNode(
   }
   try {
     await fs.ensureDir(localFilepath);
-    logger('wroteFolder', `${i18nKey}.wroteFolder`, {
-      filepath: localFilepath,
-    });
+    logger.log(
+      i18n(`${i18nKey}.wroteFolder`, {
+        filepath: localFilepath,
+      })
+    );
   } catch (err) {
     throwFileSystemError(err as BaseError, {
       filepath: localFilepath,
@@ -282,10 +273,8 @@ async function downloadFile(
   src: string,
   destPath: string,
   mode?: Mode,
-  options: FileMapperInputOptions = {},
-  logCallbacks?: LogCallbacksArg<typeof filemapperCallbackKeys>
+  options: FileMapperInputOptions = {}
 ): Promise<void> {
-  const logger = makeTypedLogger<typeof filemapperCallbackKeys>(logCallbacks);
   const { isFile, isHubspot } = getTypeDataFromPath(src);
   try {
     if (!isFile) {
@@ -308,20 +297,15 @@ async function downloadFile(
         : path.resolve(cwd, dest, name);
     }
     const localFsPath = convertToLocalFileSystemPath(filepath);
-    await fetchAndWriteFileStream(
-      accountId,
-      src,
-      localFsPath,
-      mode,
-      options,
-      logCallbacks
-    );
+    await fetchAndWriteFileStream(accountId, src, localFsPath, mode, options);
     await queue.onIdle();
-    logger('completedFetch', `${i18nKey}.completedFetch`, {
-      src,
-      version: getAssetVersionIdentifier(options.assetVersion, src),
-      dest,
-    });
+    logger.log(
+      i18n(`${i18nKey}.completedFetch`, {
+        src,
+        version: getAssetVersionIdentifier(options.assetVersion, src),
+        dest,
+      })
+    );
   } catch (err) {
     const error = err as AxiosError;
     if (isHubspot && isTimeout(error)) {
@@ -340,10 +324,8 @@ export async function fetchFolderFromApi(
   accountId: number,
   src: string,
   mode?: Mode,
-  options: FileMapperInputOptions = {},
-  logCallbacks?: LogCallbacksArg<typeof filemapperCallbackKeys>
+  options: FileMapperInputOptions = {}
 ): Promise<FileMapperNode> {
-  const logger = makeTypedLogger<typeof filemapperCallbackKeys>(logCallbacks);
   const { isRoot, isFolder, isHubspot } = getTypeDataFromPath(src);
   if (!isFolder) {
     throwErrorWithMessage(`${i18nKey}.errors.invalidFetchFolderRequest`, {
@@ -356,7 +338,7 @@ export async function fetchFolderFromApi(
     const node = isHubspot
       ? await downloadDefault(accountId, srcPath, queryValues)
       : await download(accountId, srcPath, queryValues);
-    logger('folderFetch', `${i18nKey}.folderFetch`, { src, accountId });
+    logger.log(i18n(`${i18nKey}.folderFetch`, { src, accountId }));
     return node;
   } catch (err) {
     const error = err as BaseError;
@@ -373,18 +355,10 @@ async function downloadFolder(
   src: string,
   destPath: string,
   mode?: Mode,
-  options: FileMapperInputOptions = {},
-  logCallbacks?: LogCallbacksArg<typeof filemapperCallbackKeys>
+  options: FileMapperInputOptions = {}
 ) {
-  const logger = makeTypedLogger<typeof filemapperCallbackKeys>(logCallbacks);
   try {
-    const node = await fetchFolderFromApi(
-      accountId,
-      src,
-      mode,
-      options,
-      logCallbacks
-    );
+    const node = await fetchFolderFromApi(accountId, src, mode, options);
     if (!node) {
       return;
     }
@@ -403,8 +377,7 @@ async function downloadFolder(
             filepath || '',
             childNode,
             mode,
-            options,
-            logCallbacks
+            options
           );
           if (succeeded === false) {
             success = false;
@@ -417,11 +390,13 @@ async function downloadFolder(
     await queue.onIdle();
 
     if (success) {
-      logger('completedFolderFetch', `${i18nKey}.completedFolderFetch`, {
-        src,
-        version: getAssetVersionIdentifier(options.assetVersion, src),
-        dest,
-      });
+      logger.log(
+        i18n(`${i18nKey}.completedFolderFetch`, {
+          src,
+          version: getAssetVersionIdentifier(options.assetVersion, src),
+          dest,
+        })
+      );
     } else {
       throwErrorWithMessage(`${i18nKey}.errors.incompleteFetch`, { src });
     }
@@ -446,16 +421,15 @@ export async function downloadFileOrFolder(
   src: string,
   dest: string,
   mode?: Mode,
-  options: FileMapperInputOptions = {},
-  logCallbacks?: LogCallbacksArg<typeof filemapperCallbackKeys>
+  options: FileMapperInputOptions = {}
 ): Promise<void> {
   if (!src) {
     return;
   }
   const { isFile } = getTypeDataFromPath(src);
   if (isFile) {
-    await downloadFile(accountId, src, dest, mode, options, logCallbacks);
+    await downloadFile(accountId, src, dest, mode, options);
   } else {
-    await downloadFolder(accountId, src, dest, mode, options, logCallbacks);
+    await downloadFolder(accountId, src, dest, mode, options);
   }
 }

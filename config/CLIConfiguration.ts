@@ -1,4 +1,4 @@
-import { debug, makeTypedLogger } from '../utils/logger';
+import { logger } from '../lib/logging/logger';
 import { throwErrorWithMessage } from '../errors/standardErrors';
 import { loadConfigFromEnvironment } from './environment';
 import { getValidEnv } from '../lib/environment';
@@ -22,19 +22,9 @@ import {
 } from '../types/Accounts';
 import { CLIOptions } from '../types/CLIOptions';
 import { ValueOf } from '../types/Utils';
-import { LogCallbacksArg } from '../types/LogCallbacks';
+import { i18n } from '../utils/lang';
 
 const i18nKey = 'config.cliConfiguration';
-
-const validateLogCallbackKeys = [
-  'noConfig',
-  'noConfigAccounts',
-  'emptyAccountConfig',
-  'noAccountId',
-  'duplicateAccountIds',
-  'duplicateAccountNames',
-  'nameContainsSpaces',
-] as const;
 
 class CLIConfiguration {
   options: CLIOptions;
@@ -68,18 +58,20 @@ class CLIConfiguration {
     if (this.options.useEnv) {
       const configFromEnv = loadConfigFromEnvironment();
       if (configFromEnv) {
-        debug(`${i18nKey}.load.configFromEnv`, {
-          accountId: configFromEnv.accounts[0].accountId,
-        });
+        logger.debug(
+          i18n(`${i18nKey}.load.configFromEnv`, {
+            accountId: configFromEnv.accounts[0].accountId,
+          })
+        );
         this.useEnvConfig = true;
         this.config = configFromEnv;
       }
     } else {
       const configFromFile = loadConfigFromFile();
-      debug(`${i18nKey}.load.configFromFile`);
+      logger.debug(i18n(`${i18nKey}.load.configFromFile`));
 
       if (!configFromFile) {
-        debug(`${i18nKey}.load.empty`);
+        logger.debug(i18n(`${i18nKey}.load.empty`));
         this.config = { accounts: [] };
       }
       this.useEnvConfig = false;
@@ -124,18 +116,13 @@ class CLIConfiguration {
     return this.config;
   }
 
-  validate(
-    logCallbacks?: LogCallbacksArg<typeof validateLogCallbackKeys>
-  ): boolean {
-    const validateLogger =
-      makeTypedLogger<typeof validateLogCallbackKeys>(logCallbacks);
-
+  validate(): boolean {
     if (!this.config) {
-      validateLogger('noConfig');
+      logger.log(i18n(`${i18nKey}.validate.noConfig`));
       return false;
     }
     if (!Array.isArray(this.config.accounts)) {
-      validateLogger('noConfigAccounts');
+      logger.log(i18n(`${i18nKey}.validate.noConfigAccounts`));
       return false;
     }
 
@@ -144,41 +131,35 @@ class CLIConfiguration {
 
     return this.config.accounts.every(accountConfig => {
       if (!accountConfig) {
-        validateLogger('emptyAccountConfig');
+        logger.log(i18n(`${i18nKey}.validate.emptyAccountConfig`));
         return false;
       }
       if (!accountConfig.accountId) {
-        validateLogger('noAccountId');
+        logger.log(i18n(`${i18nKey}.validate.noAccountId`));
         return false;
       }
       if (accountIdsMap[accountConfig.accountId]) {
-        validateLogger(
-          'duplicateAccountIds',
-          `${i18nKey}.validate.duplicateAccountIds`,
-          {
+        logger.log(
+          i18n(`${i18nKey}.validate.duplicateAccountIds`, {
             accountId: accountConfig.accountId,
-          }
+          })
         );
         return false;
       }
       if (accountConfig.name) {
         if (accountNamesMap[accountConfig.name]) {
-          validateLogger(
-            'duplicateAccountNames',
-            `${i18nKey}.validate.duplicateAccountNames`,
-            {
+          logger.log(
+            i18n(`${i18nKey}.validate.duplicateAccountNames`, {
               accountName: accountConfig.name,
-            }
+            })
           );
           return false;
         }
         if (/\s+/.test(accountConfig.name)) {
-          validateLogger(
-            'nameContainsSpaces',
-            `${i18nKey}.validate.nameContainsSpaces`,
-            {
+          logger.log(
+            i18n(`${i18nKey}.validate.nameContainsSpaces`, {
               accountName: accountConfig.name,
-            }
+            })
           );
           return false;
         }
@@ -330,7 +311,7 @@ class CLIConfiguration {
       );
     }
     if (!this.config) {
-      debug(`${i18nKey}.updateAccount.noConfigToUpdate`);
+      logger.debug(i18n(`${i18nKey}.updateAccount.noConfigToUpdate`));
       return null;
     }
 
@@ -387,14 +368,18 @@ class CLIConfiguration {
     const completedAccountConfig = nextAccountConfig as FlatAccountFields_NEW;
 
     if (currentAccountConfig) {
-      debug(`${i18nKey}.updateAccount.updating`, {
-        accountId,
-      });
+      logger.debug(
+        i18n(`${i18nKey}.updateAccount.updating`, {
+          accountId,
+        })
+      );
       const index = this.getConfigAccountIndex(accountId);
       this.config.accounts[index] = completedAccountConfig;
-      debug(`${i18nKey}.updateAccount.addingConfigEntry`, {
-        accountId,
-      });
+      logger.debug(
+        i18n(`${i18nKey}.updateAccount.addingConfigEntry`, {
+          accountId,
+        })
+      );
       if (this.config.accounts) {
         this.config.accounts.push(completedAccountConfig);
       } else {
@@ -478,7 +463,9 @@ class CLIConfiguration {
     const accountConfig = this.getAccount(accountId);
 
     if (accountConfig) {
-      debug(`${i18nKey}.removeAccountFromConfig.deleting`, { accountId });
+      logger.debug(
+        i18n(`${i18nKey}.removeAccountFromConfig.deleting`, { accountId })
+      );
       const index = this.getConfigAccountIndex(accountId);
       this.config.accounts.splice(index, 1);
 

@@ -4,9 +4,10 @@ import path from 'path';
 import { fork } from 'child_process';
 import { escapeRegExp } from '../../utils/escapeRegExp';
 import { isModuleFolderChild } from '../../utils/cms/modules';
-import { debug } from '../../utils/logger';
+import { logger } from '../logging/logger';
 import { throwErrorWithMessage } from '../../errors/standardErrors';
 import { BaseError } from '../../types/Error';
+import { i18n } from '../../utils/lang';
 
 const i18nKey = 'lib.cms.handleFieldsJs';
 
@@ -61,9 +62,11 @@ export class FieldsJs {
           },
         }
       );
-      debug(`${i18nKey}.convertFieldsJs.creating`, {
-        pid: convertFieldsProcess.pid || '',
-      });
+      logger.debug(
+        i18n(`${i18nKey}.convertFieldsJs.creating`, {
+          pid: convertFieldsProcess.pid || '',
+        })
+      );
       convertFieldsProcess.on(
         'message',
         function (message: {
@@ -80,9 +83,11 @@ export class FieldsJs {
       );
 
       convertFieldsProcess.on('close', () => {
-        debug(`${i18nKey}.convertFieldsJs.terminating`, {
-          pid: convertFieldsProcess.pid || '',
-        });
+        logger.debug(
+          i18n(`${i18nKey}.convertFieldsJs.terminating`, {
+            pid: convertFieldsProcess.pid || '',
+          })
+        );
       });
     }).catch((e: BaseError) => {
       throwErrorWithMessage(

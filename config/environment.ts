@@ -1,5 +1,5 @@
 import { CLIConfig_NEW, Environment } from '../types/Config';
-import { debug } from '../utils/logger';
+import { logger } from '../lib/logging/logger';
 import { ENVIRONMENT_VARIABLES } from '../constants/environments';
 import {
   API_KEY_AUTH_METHOD,
@@ -9,6 +9,7 @@ import {
 } from '../constants/auth';
 import { generateConfig } from './configUtils';
 import { getValidEnv } from '../lib/environment';
+import { i18n } from '../utils/lang';
 
 const i18nKey = 'config.environment';
 
@@ -49,12 +50,12 @@ export function loadConfigFromEnvironment(): CLIConfig_NEW | null {
     env,
   } = getConfigVariablesFromEnv();
   if (!accountId) {
-    debug(`${i18nKey}.loadConfig.missingAccountId`);
+    logger.debug(i18n(`${i18nKey}.loadConfig.missingAccountId`));
     return null;
   }
 
   if (!env) {
-    debug(`${i18nKey}.loadConfig.missingEnv`);
+    logger.debug(i18n(`${i18nKey}.loadConfig.missingEnv`));
     return null;
   }
 
@@ -81,6 +82,6 @@ export function loadConfigFromEnvironment(): CLIConfig_NEW | null {
     });
   }
 
-  debug(`${i18nKey}.loadConfig.unknownAuthType`);
+  logger.debug(i18n(`${i18nKey}.loadConfig.unknownAuthType`));
   return null;
 }
