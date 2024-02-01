@@ -13,19 +13,8 @@ import { HttpMethod } from '../types/Api';
 
 const i18nKey = 'errors.apiErrors';
 
-export function isMissingScopeError(err: Error): boolean {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const error = err && (err.cause as AxiosError<any>);
-  return (
-    error &&
-    error.isAxiosError &&
-    error.response?.status === 403 &&
-    error.response?.data?.category === 'MISSING_SCOPES'
-  );
-}
-
 export function isSpecifiedError(
-  err: Error,
+  err: Error | AxiosError,
   {
     statusCode,
     category,
@@ -33,7 +22,7 @@ export function isSpecifiedError(
   }: { statusCode?: number; category?: string; subCategory?: string }
 ): boolean {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const error = err && (err.cause as AxiosError<any>);
+  const error = (err && (err.cause as AxiosError<any>)) || err;
   const statusCodeErr = !statusCode || error.response?.status === statusCode;
   const categoryErr = !category || error.response?.data?.category === category;
   const subCategoryErr =
@@ -42,15 +31,12 @@ export function isSpecifiedError(
   return error.isAxiosError && statusCodeErr && categoryErr && subCategoryErr;
 }
 
-export function isGatingError(err: Error): boolean {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const error = err && (err.cause as AxiosError<any>);
-  return (
-    error &&
-    error.isAxiosError &&
-    error.response?.status === 403 &&
-    error.response?.data?.category === 'GATED'
-  );
+export function isMissingScopeError(err: Error | AxiosError): boolean {
+  return isSpecifiedError(err, { statusCode: 403, category: 'MISSING_SCOPES' });
+}
+
+export function isGatingError(err: Error | AxiosError): boolean {
+  return isSpecifiedError(err, { statusCode: 403, category: 'GATED' });
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
