@@ -53,9 +53,13 @@ export function isSpecifiedHubSpotAuthError(
   err: GenericError,
   { status, category, subCategory }: Partial<HubSpotAuthError>
 ): boolean {
-  const statusCodeErr = !status || err.status === status;
-  const categoryErr = !category || err.category === category;
-  const subCategoryErr = !subCategory || err.subCategory === subCategory;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const error = err && (err.cause as AxiosError<any>);
+  if (!error) return false;
+  const statusCodeErr = !status || err.response?.status === status;
+  const categoryErr = !category || err.response?.data?.category === category;
+  const subCategoryErr =
+    !subCategory || err.response?.data?.subCategory === subCategory;
   return Boolean(
     err.name === 'HubSpotAuthError' &&
       statusCodeErr &&
