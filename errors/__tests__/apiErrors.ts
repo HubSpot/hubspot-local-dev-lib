@@ -7,6 +7,7 @@ import {
   getAxiosErrorWithContext,
   throwApiError,
   throwApiUploadError,
+  isSpecifiedError,
 } from '../apiErrors';
 import { BaseError } from '../../types/Error';
 
@@ -42,19 +43,68 @@ export const newAxiosError = (overrides = {}): AxiosError => {
 };
 
 describe('errors/apiErrors', () => {
+  describe('isSpecifiedError()', () => {
+    it('returns true for a matching specified error', () => {
+      const error1 = newAxiosError({
+        response: {
+          status: 403,
+          data: { category: 'BANNED', subCategory: 'USER_ACCESS_NOT_ALLOWED' },
+        },
+      });
+      expect(
+        isSpecifiedError(error1, {
+          statusCode: 403,
+          category: 'BANNED',
+          subCategory: 'USER_ACCESS_NOT_ALLOWED',
+        })
+      ).toBe(true);
+    });
+
+    it('returns false for non matching specified errors', () => {
+      const error1 = newAxiosError({
+        response: {
+          status: 403,
+          data: { category: 'BANNED', subCategory: 'USER_ACCESS_NOT_ALLOWED' },
+        },
+      });
+      const error2 = newAxiosError({ isAxiosError: false });
+      expect(
+        isSpecifiedError(error1, {
+          statusCode: 400,
+          category: 'GATED',
+        })
+      ).toBe(false);
+      expect(isMissingScopeError(error2)).toBe(false);
+    });
+
+    it('handles AxiosError returned in cause property', () => {
+      const axiosError = newAxiosError({
+        response: {
+          status: 403,
+          data: { category: 'BANNED', subCategory: 'USER_ACCESS_NOT_ALLOWED' },
+        },
+      });
+      const error1 = newError({ cause: axiosError });
+      expect(
+        isSpecifiedError(error1, {
+          statusCode: 403,
+          category: 'BANNED',
+          subCategory: 'USER_ACCESS_NOT_ALLOWED',
+        })
+      ).toBe(true);
+    });
+  });
   describe('isMissingScopeError()', () => {
     it('returns true for missing scope errors', () => {
       const error1 = newAxiosError({
-        status: 403,
-        response: { data: { category: 'MISSING_SCOPES' } },
+        response: { status: 403, data: { category: 'MISSING_SCOPES' } },
       });
       expect(isMissingScopeError(error1)).toBe(true);
     });
 
     it('returns false for non missing scope errors', () => {
       const error1 = newAxiosError({
-        status: 400,
-        response: { data: { category: 'MISSING_SCOPES' } },
+        response: { status: 400, data: { category: 'MISSING_SCOPES' } },
       });
       const error2 = newAxiosError({ isAxiosError: false });
       expect(isMissingScopeError(error1)).toBe(false);
@@ -65,16 +115,14 @@ describe('errors/apiErrors', () => {
   describe('isGatingError()', () => {
     it('returns true for gating errors', () => {
       const error1 = newAxiosError({
-        status: 403,
-        response: { data: { category: 'GATED' } },
+        response: { status: 403, data: { category: 'GATED' } },
       });
       expect(isGatingError(error1)).toBe(true);
     });
 
     it('returns false for non gating errors', () => {
       const error1 = newAxiosError({
-        status: 400,
-        response: { data: { category: 'GATED' } },
+        response: { status: 400, data: { category: 'GATED' } },
       });
       const error2 = newAxiosError({ isAxiosError: false });
       expect(isGatingError(error1)).toBe(false);
@@ -98,8 +146,7 @@ describe('errors/apiErrors', () => {
 
     it('returns false for non api upload validation errors', () => {
       const error1 = newAxiosError({
-        status: 400,
-        response: { data: null },
+        response: { status: 400, data: null },
       });
       const error2 = newAxiosError({ isAxiosError: false });
       expect(isApiUploadValidationError(error1)).toBe(false);
