@@ -53,6 +53,7 @@
     "./api/*": "./api/*.js",
     "./errors/*": "./errors/*.js",
     "./http": "./http/index.js",
+    "./models/*": "./models/*.js",
     "./config": "./config/index.js",
     "./constants/*": "./constants/*.js",
     "./logger": "./lib/logging/logger.js"
