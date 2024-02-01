@@ -16,7 +16,7 @@ const SANDBOX_API_PATH_V2 = 'sandbox-hubs/v2';
 export async function createSandbox(
   accountId: number,
   name: string,
-  type: string
+  type: 1 | 2
 ): Promise<SandboxResponse> {
   return http.post(accountId, {
     data: { name, type, generatePersonalAccessKey: true }, // For CLI, generatePersonalAccessKey will always be true since we'll be saving the entry to the config

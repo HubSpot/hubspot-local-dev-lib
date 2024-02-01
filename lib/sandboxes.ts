@@ -22,7 +22,7 @@ import { throwApiError } from '../errors/apiErrors';
 export async function createSandbox(
   accountId: number,
   name: string,
-  type: string
+  type: 1 | 2
 ): Promise<{
   name: string;
   sandbox: Sandbox;
