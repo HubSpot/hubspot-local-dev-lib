@@ -10,7 +10,11 @@ import {
 import { fetchAccessToken } from '../api/localDevAuth';
 import { fetchSandboxHubData } from '../api/sandboxHubs';
 import { BaseError } from '../types/Error';
-import { CLIAccount, PersonalAccessKeyAccount } from '../types/Accounts';
+import {
+  AccountType,
+  CLIAccount,
+  PersonalAccessKeyAccount,
+} from '../types/Accounts';
 import { Environment } from '../types/Config';
 import {
   getAccountConfig,
@@ -167,7 +171,7 @@ export async function updateConfigWithAccessToken(
     // Ignore error, returns 404 if account is not a sandbox
   }
 
-  let accountType: string = HUBSPOT_ACCOUNT_TYPES.STANDARD;
+  let accountType: AccountType = HUBSPOT_ACCOUNT_TYPES.STANDARD;
   let sandboxAccountType = null;
   let parentAccountId;
   if (hubInfo) {

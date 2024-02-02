@@ -25,6 +25,7 @@ import {
 import { CLIConfig_DEPRECATED, Environment } from '../types/Config';
 import {
   APIKeyAccount_DEPRECATED,
+  AccountType,
   CLIAccount_DEPRECATED,
   FlatAccountFields_DEPRECATED,
   OAuthAccount_DEPRECATED,
@@ -350,9 +351,9 @@ export function getEnv(nameOrId?: string | number): Environment {
 
 // Deprecating sandboxAccountType in favor of accountType
 export function getAccountType(
-  accountType?: string,
+  accountType?: AccountType,
   sandboxAccountType?: string | null
-) {
+): AccountType {
   if (accountType) {
     return accountType;
   }

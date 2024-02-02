@@ -19,6 +19,7 @@ import {
   CLIAccount_NEW,
   OAuthAccount_NEW,
   FlatAccountFields_NEW,
+  AccountType,
 } from '../types/Accounts';
 import { CLIOptions } from '../types/CLIOptions';
 import { ValueOf } from '../types/Utils';
@@ -298,7 +299,10 @@ class CLIConfiguration {
   }
 
   // Deprecating sandboxAccountType in favor of accountType
-  getAccountType(accountType?: string, sandboxAccountType?: string | null) {
+  getAccountType(
+    accountType?: AccountType,
+    sandboxAccountType?: string | null
+  ): AccountType {
     if (accountType) {
       return accountType;
     }

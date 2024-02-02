@@ -7,7 +7,7 @@ import {
 } from './configFile';
 import { CLIConfig_NEW, CLIConfig } from '../types/Config';
 import { CLIOptions, WriteConfigOptions } from '../types/CLIOptions';
-import { CLIAccount, FlatAccountFields } from '../types/Accounts';
+import { AccountType, CLIAccount, FlatAccountFields } from '../types/Accounts';
 import { getAccountIdentifier } from '../utils/getAccountIdentifier';
 
 // Use new config if it exists
@@ -207,9 +207,9 @@ export function getEnv(nameOrId?: string | number) {
 }
 
 export function getAccountType(
-  accountType?: string,
+  accountType?: AccountType,
   sandboxAccountType?: string | null
-) {
+): AccountType {
   if (CLIConfiguration.isActive()) {
     return CLIConfiguration.getAccountType(accountType, sandboxAccountType);
   }
