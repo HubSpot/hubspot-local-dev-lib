@@ -206,6 +206,16 @@ export function getEnv(nameOrId?: string | number) {
   return config_DEPRECATED.getEnv(nameOrId);
 }
 
+export function getAccountType(
+  accountType?: string,
+  sandboxAccountType?: string | null
+) {
+  if (CLIConfiguration.isActive()) {
+    return CLIConfiguration.getAccountType(accountType, sandboxAccountType);
+  }
+  return config_DEPRECATED.getAccountType(accountType, sandboxAccountType);
+}
+
 // These functions are either not supported or have breaking changes with the new config setup
 export const getConfigAccounts = config_DEPRECATED.getConfigAccounts;
 export const getConfigDefaultAccount =

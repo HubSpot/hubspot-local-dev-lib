@@ -3,6 +3,7 @@ import {
   setConfig,
   getAndLoadConfigIfNeeded,
   getConfig,
+  getAccountType,
   getConfigPath,
   getAccountConfig,
   getAccountId,
@@ -19,6 +20,7 @@ import {
   getDefaultAccount,
 } from '../../utils/getAccountIdentifier';
 import { ENVIRONMENTS } from '../../constants/environments';
+import { HUBSPOT_ACCOUNT_TYPES } from '../../constants/config';
 import { CLIConfig, CLIConfig_DEPRECATED } from '../../types/Config';
 import {
   APIKeyAccount_DEPRECATED,
@@ -548,6 +550,25 @@ describe('config/config', () => {
       it('properly loads personal access key value', () => {
         expect(portalConfig?.personalAccessKey).toEqual(personalAccessKey);
       });
+    });
+  });
+
+  describe('getAccountType()', () => {
+    it('returns PERSONAL when no accountType or sandboxAccountType is specified', () => {
+      expect(getAccountType()).toBe(HUBSPOT_ACCOUNT_TYPES.PERSONAL);
+    });
+    it('handles sandboxAccountType transforms correctly', () => {
+      expect(getAccountType(undefined, 'DEVELOPER')).toBe(
+        HUBSPOT_ACCOUNT_TYPES.DEVELOPER_SANDBOX
+      );
+      expect(getAccountType(undefined, 'STANDARD')).toBe(
+        HUBSPOT_ACCOUNT_TYPES.PERSONAL_SANDBOX
+      );
+    });
+    it('handles accountType arg correctly', () => {
+      expect(getAccountType(HUBSPOT_ACCOUNT_TYPES.PERSONAL, 'DEVELOPER')).toBe(
+        HUBSPOT_ACCOUNT_TYPES.PERSONAL
+      );
     });
   });
 
