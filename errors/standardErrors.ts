@@ -17,7 +17,7 @@ function genericThrowErrorWithMessage(
   ErrorType: ErrorConstructor,
   identifier: LangKey,
   interpolation?: { [key: string]: string | number },
-  cause?: BaseError
+  cause?: BaseError | AxiosError
 ): never {
   const message = i18n(identifier, interpolation);
   if (cause) {
@@ -32,7 +32,7 @@ function genericThrowErrorWithMessage(
 export function throwErrorWithMessage(
   identifier: LangKey,
   interpolation?: { [key: string]: string | number },
-  cause?: BaseError
+  cause?: BaseError | AxiosError
 ): never {
   genericThrowErrorWithMessage(Error, identifier, interpolation, cause);
 }

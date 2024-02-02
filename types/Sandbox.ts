@@ -7,9 +7,9 @@ type User = {
   userId: number;
   firstName: string;
   lastName: string;
-  gdprDeleted: boolean;
-  removed: boolean;
-  deactivated: boolean;
+  gdprDeleted?: boolean;
+  removed?: boolean;
+  deactivated?: boolean;
 };
 
 type TaskError = {
@@ -84,15 +84,15 @@ export type Sandbox = {
   sandboxHubId: number;
   parentHubId: number;
   createdAt: string;
-  updatedAt: string | null;
-  archivedAt: string | null;
+  updatedAt?: string | null;
+  archivedAt?: string | null;
   type: string;
   archived: boolean;
   name: string;
   domain: string;
   createdByUser: User;
-  updatedByUser: User | null;
-  lastSync: {
+  updatedByUser?: User | null;
+  lastSync?: {
     id: string;
     parentHubId: number;
     sandboxHubId: number;
@@ -109,10 +109,10 @@ export type Sandbox = {
     completedAt: string;
     tasks: Array<Task>;
   };
-  currentUserHasAccess: boolean | null;
-  currentUserHasSuperAdminAccess: boolean | null;
-  requestAccessFrom: User | null;
-  superAdminsInSandbox: number | null;
+  currentUserHasAccess?: boolean;
+  currentUserHasSuperAdminAccess?: boolean;
+  requestAccessFrom?: User | null;
+  superAdminsInSandbox?: number;
 };
 
 export type SandboxResponse = {
@@ -164,10 +164,11 @@ export type InitiateSyncResponse = {
 export type SandboxType = {
   name: string;
   dependsOn: Array<string>;
-  pushToParentEnabled: boolean;
+  pushToProductionEnabled: boolean;
   isBeta: boolean;
   diffEnabled: boolean;
   groupType: string;
+  syncMandatory: boolean;
 };
 
 export type FetchTypesResponse = {
