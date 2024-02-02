@@ -307,10 +307,10 @@ class CLIConfiguration {
         return HUBSPOT_ACCOUNT_TYPES.DEVELOPER_SANDBOX;
       }
       if (sandboxAccountType.toUpperCase() === 'STANDARD') {
-        return HUBSPOT_ACCOUNT_TYPES.PERSONAL_SANDBOX;
+        return HUBSPOT_ACCOUNT_TYPES.STANDARD_SANDBOX;
       }
     }
-    return HUBSPOT_ACCOUNT_TYPES.PERSONAL;
+    return HUBSPOT_ACCOUNT_TYPES.STANDARD;
   }
 
   /*

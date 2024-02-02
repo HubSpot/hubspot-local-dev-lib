@@ -215,7 +215,7 @@ describe('lib/personalAccessKey', () => {
       expect(updateAccountConfig).toHaveBeenCalledWith(
         expect.objectContaining({
           accountId: 123,
-          accountType: HUBSPOT_ACCOUNT_TYPES.PERSONAL,
+          accountType: HUBSPOT_ACCOUNT_TYPES.STANDARD,
           personalAccessKey: 'pak_123',
           name: 'account-name',
           authType: 'personalaccesskey',

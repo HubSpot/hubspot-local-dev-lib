@@ -76,21 +76,21 @@ describe('config/CLIConfiguration', () => {
   });
 
   describe('getAccountType()', () => {
-    it('returns PERSONAL when no accountType or sandboxAccountType is specified', () => {
-      expect(config.getAccountType()).toBe(HUBSPOT_ACCOUNT_TYPES.PERSONAL);
+    it('returns STANDARD when no accountType or sandboxAccountType is specified', () => {
+      expect(config.getAccountType()).toBe(HUBSPOT_ACCOUNT_TYPES.STANDARD);
     });
     it('handles sandboxAccountType transforms correctly', () => {
       expect(config.getAccountType(undefined, 'DEVELOPER')).toBe(
         HUBSPOT_ACCOUNT_TYPES.DEVELOPER_SANDBOX
       );
       expect(config.getAccountType(undefined, 'STANDARD')).toBe(
-        HUBSPOT_ACCOUNT_TYPES.PERSONAL_SANDBOX
+        HUBSPOT_ACCOUNT_TYPES.STANDARD_SANDBOX
       );
     });
     it('handles accountType arg correctly', () => {
       expect(
-        config.getAccountType(HUBSPOT_ACCOUNT_TYPES.PERSONAL, 'DEVELOPER')
-      ).toBe(HUBSPOT_ACCOUNT_TYPES.PERSONAL);
+        config.getAccountType(HUBSPOT_ACCOUNT_TYPES.STANDARD, 'DEVELOPER')
+      ).toBe(HUBSPOT_ACCOUNT_TYPES.STANDARD);
     });
   });
 

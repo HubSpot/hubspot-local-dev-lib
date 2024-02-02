@@ -554,20 +554,20 @@ describe('config/config', () => {
   });
 
   describe('getAccountType()', () => {
-    it('returns PERSONAL when no accountType or sandboxAccountType is specified', () => {
-      expect(getAccountType()).toBe(HUBSPOT_ACCOUNT_TYPES.PERSONAL);
+    it('returns STANDARD when no accountType or sandboxAccountType is specified', () => {
+      expect(getAccountType()).toBe(HUBSPOT_ACCOUNT_TYPES.STANDARD);
     });
     it('handles sandboxAccountType transforms correctly', () => {
       expect(getAccountType(undefined, 'DEVELOPER')).toBe(
         HUBSPOT_ACCOUNT_TYPES.DEVELOPER_SANDBOX
       );
       expect(getAccountType(undefined, 'STANDARD')).toBe(
-        HUBSPOT_ACCOUNT_TYPES.PERSONAL_SANDBOX
+        HUBSPOT_ACCOUNT_TYPES.STANDARD_SANDBOX
       );
     });
     it('handles accountType arg correctly', () => {
-      expect(getAccountType(HUBSPOT_ACCOUNT_TYPES.PERSONAL, 'DEVELOPER')).toBe(
-        HUBSPOT_ACCOUNT_TYPES.PERSONAL
+      expect(getAccountType(HUBSPOT_ACCOUNT_TYPES.STANDARD, 'DEVELOPER')).toBe(
+        HUBSPOT_ACCOUNT_TYPES.STANDARD
       );
     });
   });

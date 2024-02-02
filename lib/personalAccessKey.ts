@@ -167,7 +167,7 @@ export async function updateConfigWithAccessToken(
     // Ignore error, returns 404 if account is not a sandbox
   }
 
-  let accountType: string = HUBSPOT_ACCOUNT_TYPES.PERSONAL;
+  let accountType: string = HUBSPOT_ACCOUNT_TYPES.STANDARD;
   let sandboxAccountType = null;
   let parentAccountId;
   if (hubInfo) {
@@ -179,11 +179,11 @@ export async function updateConfigWithAccessToken(
           sandboxAccountType = 'DEVELOPER';
           break;
         case 'STANDARD':
-          accountType = HUBSPOT_ACCOUNT_TYPES.PERSONAL_SANDBOX;
+          accountType = HUBSPOT_ACCOUNT_TYPES.STANDARD_SANDBOX;
           sandboxAccountType = 'STANDARD';
           break;
         default:
-          accountType = HUBSPOT_ACCOUNT_TYPES.PERSONAL_SANDBOX;
+          accountType = HUBSPOT_ACCOUNT_TYPES.STANDARD_SANDBOX;
           sandboxAccountType = 'STANDARD';
           break;
       }
