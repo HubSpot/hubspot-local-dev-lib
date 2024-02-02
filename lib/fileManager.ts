@@ -214,7 +214,7 @@ async function downloadFolder(
     overwrite,
     includeArchived
   );
-  logger.log(
+  logger.success(
     i18n(`${i18nKey}.fetchFolderSuccess`, {
       src,
       dest,
@@ -246,7 +246,7 @@ async function downloadSingleFile(
     })
   );
   await downloadFile(accountId, file, dest, overwrite);
-  logger.log(
+  logger.success(
     i18n(`${i18nKey}.fetchFileSuccess`, {
       src,
       dest,

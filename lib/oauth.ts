@@ -46,7 +46,7 @@ export function addOauthToAccountConfig(oauth: OAuth2Manager) {
       authType: AUTH_METHODS.oauth.value,
     });
     writeConfig();
-    logger.log(i18n(`${i18nKey}.addOauthToAccountConfig.success`));
+    logger.success(i18n(`${i18nKey}.addOauthToAccountConfig.success`));
   } catch (err) {
     throwError(err as BaseError);
   }

@@ -299,7 +299,7 @@ async function downloadFile(
     const localFsPath = convertToLocalFileSystemPath(filepath);
     await fetchAndWriteFileStream(accountId, src, localFsPath, mode, options);
     await queue.onIdle();
-    logger.log(
+    logger.success(
       i18n(`${i18nKey}.completedFetch`, {
         src,
         version: getAssetVersionIdentifier(options.assetVersion, src),
@@ -390,7 +390,7 @@ async function downloadFolder(
     await queue.onIdle();
 
     if (success) {
-      logger.log(
+      logger.success(
         i18n(`${i18nKey}.completedFolderFetch`, {
           src,
           version: getAssetVersionIdentifier(options.assetVersion, src),
