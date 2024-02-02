@@ -19,6 +19,7 @@ import {
   getEnv,
   updateDefaultAccount,
 } from '../config';
+import { HUBSPOT_ACCOUNT_TYPES } from '../constants/config';
 
 const i18nKey = 'lib.personalAccessKey';
 
@@ -166,12 +167,28 @@ export async function updateConfigWithAccessToken(
     // Ignore error, returns 404 if account is not a sandbox
   }
 
+  let accountType: string = HUBSPOT_ACCOUNT_TYPES.PERSONAL;
   let sandboxAccountType = null;
-  let parentAccountId = null;
+  let parentAccountId;
   if (hubInfo) {
     if (hubInfo.type !== undefined) {
-      sandboxAccountType = hubInfo.type === null ? 'STANDARD' : hubInfo.type;
+      const sandboxHubType = hubInfo.type ? hubInfo.type.toUpperCase() : null;
+      switch (sandboxHubType) {
+        case 'DEVELOPER':
+          accountType = HUBSPOT_ACCOUNT_TYPES.DEVELOPER_SANDBOX;
+          sandboxAccountType = 'DEVELOPER';
+          break;
+        case 'STANDARD':
+          accountType = HUBSPOT_ACCOUNT_TYPES.PERSONAL_SANDBOX;
+          sandboxAccountType = 'STANDARD';
+          break;
+        default:
+          accountType = HUBSPOT_ACCOUNT_TYPES.PERSONAL_SANDBOX;
+          sandboxAccountType = 'STANDARD';
+          break;
+      }
     }
+
     if (hubInfo.parentHubId) {
       parentAccountId = hubInfo.parentHubId;
     }
@@ -179,6 +196,7 @@ export async function updateConfigWithAccessToken(
 
   const updatedConfig = updateAccountConfig({
     accountId: portalId,
+    accountType,
     personalAccessKey,
     name,
     authType: PERSONAL_ACCESS_KEY_AUTH_METHOD.value,

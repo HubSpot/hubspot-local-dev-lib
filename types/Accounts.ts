@@ -6,6 +6,7 @@ export type AuthType = 'personalaccesskey' | 'apikey' | 'oauth2';
 export interface CLIAccount_NEW {
   name?: string;
   accountId: number;
+  accountType?: string;
   defaultMode?: Mode;
   env: Environment;
   authType?: AuthType;
@@ -23,6 +24,7 @@ export interface CLIAccount_DEPRECATED {
   portalId?: number;
   defaultMode?: Mode;
   env: Environment;
+  accountType?: string;
   authType?: AuthType;
   auth?: {
     tokenInfo?: TokenInfo;
