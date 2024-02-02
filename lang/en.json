@@ -71,16 +71,6 @@
         "invalidPersonalAccessKey": "Error while retrieving new access token: {{ errorMessage }}"
       }
     },
-    "sandboxes": {
-      "errors": {
-        "createSandbox": "There was an error creating your sandbox.",
-        "deleteSandbox": "There was an error deleting your sandbox.",
-        "getSandboxUsageLimits": "There was an error fetching sandbox usage limits.",
-        "initiateSync": "There was an error initiating the sandbox sync.",
-        "fetchTaskStatus": "There was an error fetching the task status while syncing sandboxes.",
-        "fetchTypes": "There was an error fetching sandbox types."
-      }
-    },
     "cms": {
       "modules": {
         "createModule": {
