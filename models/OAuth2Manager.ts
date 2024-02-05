@@ -4,7 +4,7 @@ import moment from 'moment';
 import { getHubSpotApiOrigin } from '../lib/urls';
 import { getValidEnv } from '../lib/environment';
 import { FlatAccountFields, TokenInfo } from '../types/Accounts';
-import { debug } from '../utils/logger';
+import { logger } from '../lib/logging/logger';
 import { getAccountIdentifier } from '../utils/getAccountIdentifier';
 import { AUTH_METHODS } from '../constants/auth';
 import {
@@ -14,6 +14,7 @@ import {
 } from '../errors/standardErrors';
 import { BaseError } from '../types/Error';
 import { Environment } from '../types/Config';
+import { i18n } from '../utils/lang';
 
 type OAuth2ManagerAccountConfig = {
   name?: string;
@@ -81,10 +82,12 @@ class OAuth2Manager {
   }
 
   async fetchAccessToken(exchangeProof: ExchangeProof): Promise<void> {
-    debug(`${i18nKey}.fetchingAccessToken`, {
-      accountId: getAccountIdentifier(this.account)!,
-      clientId: this.account.clientId || '',
-    });
+    logger.debug(
+      i18n(`${i18nKey}.fetchingAccessToken`, {
+        accountId: getAccountIdentifier(this.account)!,
+        clientId: this.account.clientId || '',
+      })
+    );
 
     try {
       const { data } = await axios({
@@ -111,10 +114,12 @@ class OAuth2Manager {
         .add(Math.round(parseInt(expiresIn) * 0.75), 'seconds')
         .toString();
       if (this.writeTokenInfo) {
-        debug(`${i18nKey}.updatingTokenInfo`, {
-          accountId: getAccountIdentifier(this.account)!,
-          clientId: this.account.clientId || '',
-        });
+        logger.debug(
+          i18n(`${i18nKey}.updatingTokenInfo`, {
+            accountId: getAccountIdentifier(this.account)!,
+            clientId: this.account.clientId || '',
+          })
+        );
         this.writeTokenInfo(this.account.tokenInfo);
       }
       this.refreshTokenRequest = null;
@@ -127,10 +132,12 @@ class OAuth2Manager {
   async exchangeForTokens(exchangeProof: ExchangeProof): Promise<void> {
     try {
       if (this.refreshTokenRequest) {
-        debug(`${i18nKey}.refreshingAccessToken`, {
-          accountId: getAccountIdentifier(this.account)!,
-          clientId: this.account.clientId || '',
-        });
+        logger.debug(
+          i18n(`${i18nKey}.refreshingAccessToken`, {
+            accountId: getAccountIdentifier(this.account)!,
+            clientId: this.account.clientId || '',
+          })
+        );
         await this.refreshTokenRequest;
       } else {
         await this.fetchAccessToken(exchangeProof);

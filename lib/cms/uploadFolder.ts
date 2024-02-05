@@ -12,20 +12,17 @@ import { getFileMapperQueryValues } from '../fileMapper';
 import { upload } from '../../api/fileMapper';
 import { isModuleFolderChild } from '../../utils/cms/modules';
 import { escapeRegExp } from '../../utils/escapeRegExp';
-import { debug } from '../../utils/logger';
 import { convertToUnixPath, getExt } from '../path';
 import { isFatalError } from '../../errors/standardErrors';
 import { throwApiUploadError } from '../../errors/apiErrors';
 import { FileMapperInputOptions } from '../../types/Files';
-import { LogCallbacksArg } from '../../types/LogCallbacks';
-import { makeTypedLogger } from '../../utils/logger';
+import { logger } from '../logging/logger';
 import { FILE_TYPES, FILE_UPLOAD_RESULT_TYPES } from '../../constants/files';
 import { FileType, UploadFolderResults } from '../../types/Files';
 import { Mode } from '../../types/Files';
+import { i18n } from '../../utils/lang';
 
 const i18nKey = 'lib.cms.uploadFolder';
-
-const uploadFolderCallbackKeys = ['success'] as const;
 
 const queue = new PQueue({
   concurrency: 10,
@@ -126,10 +123,8 @@ export async function uploadFolder(
   fileMapperOptions: FileMapperInputOptions,
   commandOptions: CommandOptions = {},
   filePaths: Array<string> = [],
-  mode: Mode | null = null,
-  logCallbacks?: LogCallbacksArg<typeof uploadFolderCallbackKeys>
+  mode: Mode | null = null
 ): Promise<Array<UploadFolderResults>> {
-  const logger = makeTypedLogger<typeof uploadFolderCallbackKeys>(logCallbacks);
   const { saveOutput, convertFields } = commandOptions;
   const tmpDir = convertFields
     ? createTmpDirSync('hubspot-temp-fieldsjs-output-')
@@ -168,26 +163,32 @@ export async function uploadFolder(
     );
     const destPath = convertToUnixPath(path.join(dest, relativePath));
     return async () => {
-      debug(`${i18nKey}.uploadFolder.attempt`, {
-        file: originalFilePath || '',
-        destPath,
-      });
-      try {
-        await upload(accountId, file, destPath, apiOptions);
-        logger('success', `${i18nKey}.uploadFolder.success`, {
+      logger.debug(
+        i18n(`${i18nKey}.uploadFolder.attempt`, {
           file: originalFilePath || '',
           destPath,
-        });
+        })
+      );
+      try {
+        await upload(accountId, file, destPath, apiOptions);
+        logger.log(
+          i18n(`${i18nKey}.uploadFolder.success`, {
+            file: originalFilePath || '',
+            destPath,
+          })
+        );
       } catch (err) {
         const error = err as AxiosError;
         if (isFatalError(error)) {
           throw error;
         }
-        debug(`${i18nKey}.uploadFolder.failed`, { file, destPath });
+        logger.debug(
+          i18n(`${i18nKey}.uploadFolder.failed`, { file, destPath })
+        );
         if (error.response && error.response.data) {
-          console.debug(error.response.data);
+          logger.debug(error.response.data);
         } else {
-          console.debug(error.message);
+          logger.debug(error.message);
         }
         failures.push({
           file,
@@ -206,20 +207,26 @@ export async function uploadFolder(
     .addAll(
       failures.map(({ file, destPath }) => {
         return async () => {
-          debug(`${i18nKey}.uploadFolder.retry`, { file, destPath });
+          logger.debug(
+            i18n(`${i18nKey}.uploadFolder.retry`, { file, destPath })
+          );
           try {
             await upload(accountId, file, destPath, apiOptions);
-            logger('success', `${i18nKey}.uploadFolder.success`, {
-              file,
-              destPath,
-            });
+            logger.log(
+              i18n(`${i18nKey}.uploadFolder.success`, {
+                file,
+                destPath,
+              })
+            );
             return {
               resultType: FILE_UPLOAD_RESULT_TYPES.SUCCESS,
               error: null,
               file,
             };
           } catch (err) {
-            debug(`${i18nKey}.uploadFolder.retryFailed`, { file, destPath });
+            logger.debug(
+              i18n(`${i18nKey}.uploadFolder.retryFailed`, { file, destPath })
+            );
             const error = err as AxiosError;
             if (isFatalError(error)) {
               throw error;
