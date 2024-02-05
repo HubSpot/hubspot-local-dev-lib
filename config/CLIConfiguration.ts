@@ -12,13 +12,14 @@ import {
 import { commaSeparatedValues } from '../lib/text';
 import { ENVIRONMENTS } from '../constants/environments';
 import { API_KEY_AUTH_METHOD } from '../constants/auth';
-import { MIN_HTTP_TIMEOUT } from '../constants/config';
+import { HUBSPOT_ACCOUNT_TYPES, MIN_HTTP_TIMEOUT } from '../constants/config';
 import { MODE } from '../constants/files';
 import { CLIConfig_NEW, Environment } from '../types/Config';
 import {
   CLIAccount_NEW,
   OAuthAccount_NEW,
   FlatAccountFields_NEW,
+  AccountType,
 } from '../types/Accounts';
 import { CLIOptions } from '../types/CLIOptions';
 import { ValueOf } from '../types/Utils';
@@ -278,6 +279,25 @@ class CLIConfiguration {
     return ENVIRONMENTS.PROD;
   }
 
+  // Deprecating sandboxAccountType in favor of accountType
+  getAccountType(
+    accountType?: AccountType,
+    sandboxAccountType?: string | null
+  ): AccountType {
+    if (accountType) {
+      return accountType;
+    }
+    if (typeof sandboxAccountType === 'string') {
+      if (sandboxAccountType.toUpperCase() === 'DEVELOPER') {
+        return HUBSPOT_ACCOUNT_TYPES.DEVELOPER_SANDBOX;
+      }
+      if (sandboxAccountType.toUpperCase() === 'STANDARD') {
+        return HUBSPOT_ACCOUNT_TYPES.STANDARD_SANDBOX;
+      }
+    }
+    return HUBSPOT_ACCOUNT_TYPES.STANDARD;
+  }
+
   /*
    * Config Update Utils
    */
@@ -291,6 +311,7 @@ class CLIConfiguration {
   ): FlatAccountFields_NEW | null {
     const {
       accountId,
+      accountType,
       apiKey,
       authType,
       clientId,
@@ -362,7 +383,14 @@ class CLIConfiguration {
       safelyApplyUpdates('defaultMode', MODE[updatedDefaultMode]);
     }
     safelyApplyUpdates('personalAccessKey', personalAccessKey);
+
+    // Deprecating sandboxAccountType in favor of the more generic accountType
     safelyApplyUpdates('sandboxAccountType', sandboxAccountType);
+    safelyApplyUpdates(
+      'accountType',
+      this.getAccountType(accountType, sandboxAccountType)
+    );
+
     safelyApplyUpdates('parentAccountId', parentAccountId);
 
     const completedAccountConfig = nextAccountConfig as FlatAccountFields_NEW;
@@ -445,6 +473,7 @@ class CLIConfiguration {
 
   /**
    * @throws {Error}
+   * TODO: this does not account for the special handling of sandbox account deletes
    */
   removeAccountFromConfig(nameOrId: string | number): boolean {
     if (!this.config) {
