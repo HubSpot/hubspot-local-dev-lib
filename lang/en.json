@@ -83,7 +83,7 @@
           "creatingPath": "Creating {{ path }}",
           "errors": {
             "pathExists": "The {{ path }} path already exists",
-            "fileTransformFailure": "There was a problem updating the modules files at {{ path }}: {{ errorMessage }}"
+            "fileUpdateFailure": "There was a problem updating the modules files at {{ path }}: {{ errorMessage }}"
           }
         },
         "retrieveDefaultModule": {

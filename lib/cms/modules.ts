@@ -145,13 +145,10 @@ const updateFileContents = async (
     );
   } catch (error) {
     const { message } = error as Error;
-    throwErrorWithMessage(
-      `${i18nKey}.createModule.errors.fileTransformFailure`,
-      {
-        path: file,
-        errorMessage: message,
-      }
-    );
+    throwErrorWithMessage(`${i18nKey}.createModule.errors.fileUpdateFailure`, {
+      path: file,
+      errorMessage: message,
+    });
   }
 };
 
