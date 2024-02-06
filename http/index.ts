@@ -1,17 +1,17 @@
 import path from 'path';
 import fs from 'fs-extra';
 import contentDisposition from 'content-disposition';
+import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 
 import { getAccountConfig } from '../config';
 import { getAxiosConfig } from './getAxiosConfig';
 import { accessTokenForPersonalAccessKey } from '../lib/personalAccessKey';
 import { getOauthManager } from '../lib/oauth';
 import { FlatAccountFields } from '../types/Accounts';
-import { LogCallbacksArg } from '../types/LogCallbacks';
 import { AxiosConfigOptions, HttpOptions, QueryParams } from '../types/Http';
 import { throwErrorWithMessage } from '../errors/standardErrors';
-import { makeTypedLogger } from '../utils/logger';
-import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
+import { logger } from '../lib/logging/logger';
+import { i18n } from '../utils/lang';
 
 const i18nKey = 'http.index';
 
@@ -162,19 +162,14 @@ async function deleteRequest<T>(
   return data;
 }
 
-const getRequestStreamCallbackKeys = ['onWrite'] as const;
-
 function createGetRequestStream(contentType: string) {
   return async (
     accountId: number,
     options: HttpOptions,
-    destPath: string,
-    logCallbacks?: LogCallbacksArg<typeof getRequestStreamCallbackKeys>
+    destPath: string
   ): Promise<AxiosResponse> => {
     const { query, ...rest } = options;
     const axiosConfig = addQueryParams(rest, query);
-    const logger =
-      makeTypedLogger<typeof getRequestStreamCallbackKeys>(logCallbacks);
 
     // eslint-disable-next-line no-async-promise-executor
     return new Promise<AxiosResponse>(async (resolve, reject) => {
@@ -215,9 +210,11 @@ function createGetRequestStream(contentType: string) {
             reject(err);
           });
           writeStream.on('close', async () => {
-            logger('onWrite', `${i18nKey}.createGetRequestStream.onWrite`, {
-              filepath,
-            });
+            logger.log(
+              i18n(`${i18nKey}.createGetRequestStream.onWrite`, {
+                filepath,
+              })
+            );
             resolve(res);
           });
         } else {

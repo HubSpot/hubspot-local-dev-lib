@@ -14,42 +14,27 @@ import { escapeRegExp } from '../../utils/escapeRegExp';
 import { convertToUnixPath, isAllowedExtension, getCwd } from '../path';
 import { triggerNotify } from '../../utils/notify';
 import { getThemePreviewUrl, getThemeJSONPath } from './themes';
-import { LogCallbacksArg } from '../../types/LogCallbacks';
-import { makeTypedLogger } from '../../utils/logger';
-import { debug } from '../../utils/logger';
+import { logger } from '../logging/logger';
 import { FileMapperInputOptions, Mode } from '../../types/Files';
 import { UploadFolderResults } from '../../types/Files';
+import { i18n } from '../../utils/lang';
 
 const i18nKey = 'lib.cms.watch';
-
-const watchCallbackKeys = [
-  'notifyOfThemePreview',
-  'uploadSuccess',
-  'deleteSuccess',
-  'folderUploadSuccess',
-  'ready',
-  'deleteSuccessWithType',
-] as const;
-const makeLogger = makeTypedLogger<typeof watchCallbackKeys>;
-type WatchLogCallbacks = LogCallbacksArg<typeof watchCallbackKeys>;
 
 const queue = new PQueue({
   concurrency: 10,
 });
 
-function _notifyOfThemePreview(
-  filePath: string,
-  accountId: number,
-  logCallbacks?: WatchLogCallbacks
-): void {
-  const logger = makeLogger(logCallbacks);
+function _notifyOfThemePreview(filePath: string, accountId: number): void {
   if (queue.size > 0) return;
   const previewUrl = getThemePreviewUrl(filePath, accountId);
   if (!previewUrl) return;
 
-  logger('notifyOfThemePreview', `${i18nKey}.notifyOfThemePreview`, {
-    previewUrl,
-  });
+  logger.log(
+    i18n(`${i18nKey}.notifyOfThemePreview`, {
+      previewUrl,
+    })
+  );
 }
 
 const notifyOfThemePreview = debounce(_notifyOfThemePreview, 1000);
@@ -67,10 +52,8 @@ async function uploadFile(
   file: string,
   dest: string,
   options: UploadFileOptions,
-  mode: Mode | null = null,
-  logCallbacks?: WatchLogCallbacks
+  mode: Mode | null = null
 ): Promise<void> {
-  const logger = makeLogger(logCallbacks);
   const src = options.src;
 
   const absoluteSrcPath = path.resolve(getCwd(), file);
@@ -86,11 +69,11 @@ async function uploadFile(
   );
 
   if (!isAllowedExtension(file) && !convertFields) {
-    debug(`${i18nKey}.skipUnsupportedExtension`, { file });
+    logger.debug(i18n(`${i18nKey}.skipUnsupportedExtension`, { file }));
     return;
   }
   if (shouldIgnoreFile(file)) {
-    debug(`${i18nKey}.skipIgnoreRule`, { file });
+    logger.debug(i18n(`${i18nKey}.skipIgnoreRule`, { file }));
     return;
   }
 
@@ -109,23 +92,25 @@ async function uploadFile(
   const fileToUpload =
     convertFields && fieldsJs?.outputPath ? fieldsJs.outputPath : file;
 
-  debug(`${i18nKey}.uploadAttempt`, { file, dest });
+  logger.debug(i18n(`${i18nKey}.uploadAttempt`, { file, dest }));
   const apiOptions = getFileMapperQueryValues(mode, options);
   queue.add(() => {
     return upload(accountId, fileToUpload, dest, apiOptions)
       .then(() => {
-        logger('uploadSuccess', `${i18nKey}.uploadSuccess`, { file, dest });
-        notifyOfThemePreview(file, accountId, logCallbacks);
+        logger.log(i18n(`${i18nKey}.uploadSuccess`, { file, dest }));
+        notifyOfThemePreview(file, accountId);
       })
       .catch(() => {
-        debug(`${i18nKey}.uploadFailed`, { file, dest });
-        debug(`${i18nKey}.uploadRetry`, { file, dest });
+        logger.debug(i18n(`${i18nKey}.uploadFailed`, { file, dest }));
+        logger.debug(i18n(`${i18nKey}.uploadRetry`, { file, dest }));
         return upload(accountId, file, dest, apiOptions).catch(
           (error: AxiosError) => {
-            debug(`${i18nKey}.uploadFailed`, {
-              file,
-              dest,
-            });
+            logger.debug(
+              i18n(`${i18nKey}.uploadFailed`, {
+                file,
+                dest,
+              })
+            );
             throwApiUploadError(error, {
               accountId,
               request: dest,
@@ -140,26 +125,26 @@ async function uploadFile(
 async function deleteRemoteFile(
   accountId: number,
   filePath: string,
-  remoteFilePath: string,
-  logCallbacks?: WatchLogCallbacks
+  remoteFilePath: string
 ): Promise<void> {
-  const logger = makeLogger(logCallbacks);
   if (shouldIgnoreFile(filePath)) {
-    debug(`${i18nKey}.skipIgnoreRule`, { file: filePath });
+    logger.debug(i18n(`${i18nKey}.skipIgnoreRule`, { file: filePath }));
     return;
   }
 
-  debug(`${i18nKey}.deleteAttempt`, { remoteFilePath });
+  logger.debug(i18n(`${i18nKey}.deleteAttempt`, { remoteFilePath }));
   return queue.add(() => {
     return deleteFile(accountId, remoteFilePath)
       .then(() => {
-        logger('deleteSuccess', `${i18nKey}.deleteSuccess`, { remoteFilePath });
-        notifyOfThemePreview(filePath, accountId, logCallbacks);
+        logger.log(i18n(`${i18nKey}.deleteSuccess`, { remoteFilePath }));
+        notifyOfThemePreview(filePath, accountId);
       })
       .catch((error: AxiosError) => {
-        debug(`${i18nKey}.deleteFailed`, {
-          remoteFilePath,
-        });
+        logger.debug(
+          i18n(`${i18nKey}.deleteFailed`, {
+            remoteFilePath,
+          })
+        );
         throwApiError(error, {
           accountId,
           request: remoteFilePath,
@@ -197,10 +182,8 @@ export function watch(
     | ((result: Array<UploadFolderResults>) => void)
     | null = null,
   onUploadFolderError?: ErrorHandler,
-  onQueueAddError?: ErrorHandler,
-  logCallbacks?: WatchLogCallbacks
+  onQueueAddError?: ErrorHandler
 ) {
-  const logger = makeLogger(logCallbacks);
   const regex = new RegExp(`^${escapeRegExp(src)}`);
   if (notify) {
     ignoreFile(notify);
@@ -227,11 +210,13 @@ export function watch(
       filePaths,
       mode || null
     ).then(result => {
-      logger('folderUploadSuccess', `${i18nKey}.folderUploadSuccess`, {
-        src,
-        dest,
-        accountId,
-      });
+      logger.log(
+        i18n(`${i18nKey}.folderUploadSuccess`, {
+          src,
+          dest,
+          accountId,
+        })
+      );
       if (postInitialUploadCallback) {
         postInitialUploadCallback(result);
       }
@@ -243,7 +228,7 @@ export function watch(
   }
 
   watcher.on('ready', () => {
-    logger('ready', `${i18nKey}.ready`, { src });
+    logger.log(i18n(`${i18nKey}.ready`, { src }));
   });
 
   watcher.on('add', async (filePath: string) => {
@@ -256,8 +241,7 @@ export function watch(
         src,
         commandOptions,
       },
-      mode,
-      logCallbacks
+      mode
     );
     triggerNotify(notify, 'Added', filePath, uploadPromise);
   });
@@ -272,28 +256,27 @@ export function watch(
 
         const remotePath = getDesignManagerPath(filePath);
         if (shouldIgnoreFile(filePath)) {
-          debug(`${i18nKey}.skipIgnoreRule`, { file: filePath });
+          logger.debug(i18n(`${i18nKey}.skipIgnoreRule`, { file: filePath }));
           return;
         }
 
-        debug(`${i18nKey}.deleteAttemptWithType`, {
-          type,
-          remoteFilePath: remotePath,
-        });
+        logger.debug(
+          i18n(`${i18nKey}.deleteAttemptWithType`, {
+            type,
+            remoteFilePath: remotePath,
+          })
+        );
         const queueAddPromise = queue.add(() => {
           const deletePromise = deleteRemoteFile(
             accountId,
             filePath,
-            remotePath,
-            logCallbacks
+            remotePath
           ).then(() => {
-            logger(
-              'deleteSuccessWithType',
-              `${i18nKey}.deleteSuccessWithType`,
-              {
+            logger.log(
+              i18n(`${i18nKey}.deleteSuccessWithType`, {
                 type,
                 remoteFilePath: remotePath,
-              }
+              })
             );
           });
 
@@ -319,8 +302,7 @@ export function watch(
         src,
         commandOptions,
       },
-      mode,
-      logCallbacks
+      mode
     );
     triggerNotify(notify, 'Changed', filePath, uploadPromise);
   });

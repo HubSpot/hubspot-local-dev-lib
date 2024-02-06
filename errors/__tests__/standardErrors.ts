@@ -2,7 +2,6 @@ import {
   isSystemError,
   isFatalError,
   throwErrorWithMessage,
-  throwTypeErrorWithMessage,
   throwAuthErrorWithMessage,
   throwError,
 } from '../standardErrors';
@@ -60,15 +59,6 @@ describe('errors/standardErrors', () => {
       const error = newError();
       expect(() =>
         throwErrorWithMessage('errors.generic', {}, error)
-      ).toThrow();
-    });
-  });
-
-  describe('throwTypeErrorWithMessage()', () => {
-    it('throws type error with message', () => {
-      const error = newError();
-      expect(() =>
-        throwTypeErrorWithMessage('errors.generic', {}, error)
       ).toThrow();
     });
   });

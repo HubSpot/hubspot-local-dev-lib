@@ -4,13 +4,10 @@ import { BaseError, FileSystemErrorContext } from '../types/Error';
 
 const i18nKey = 'errors.fileSystemErrors';
 
-/**
- * @throws
- */
-export function throwFileSystemError(
+export function getFileSystemError(
   error: BaseError,
   context: FileSystemErrorContext
-) {
+): Error {
   let fileAction = '';
   if (context.read) {
     fileAction = i18n(`${i18nKey}.readAction`);
@@ -32,5 +29,15 @@ export function throwFileSystemError(
     );
   }
 
-  throw new Error(message.join(' '), { cause: error });
+  return new Error(message.join(' '), { cause: error });
+}
+
+/**
+ * @throws
+ */
+export function throwFileSystemError(
+  error: BaseError,
+  context: FileSystemErrorContext
+) {
+  throw getFileSystemError(error, context);
 }

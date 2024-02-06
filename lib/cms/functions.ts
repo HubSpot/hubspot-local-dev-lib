@@ -3,21 +3,13 @@ import path from 'path';
 import findup from 'findup-sync';
 import { getCwd } from '../path';
 import { downloadGithubRepoContents } from '../github';
-import { debug, makeTypedLogger } from '../../utils/logger';
+import { logger } from '../logging/logger';
 import { throwErrorWithMessage } from '../../errors/standardErrors';
 import { throwFileSystemError } from '../../errors/fileSystemErrors';
 import { BaseError } from '../../types/Error';
-import { LogCallbacksArg } from '../../types/LogCallbacks';
+import { i18n } from '../../utils/lang';
 
 const i18nKey = 'lib.cms.functions';
-
-const createFunctionCallbackKeys = [
-  'destPathAlreadyExists',
-  'createdDest',
-  'createdFunctionFile',
-  'createdConfigFile',
-  'success',
-] as const;
 
 type Config = {
   runtime: string;
@@ -82,9 +74,11 @@ function updateExistingConfig(
   try {
     configString = fs.readFileSync(configFilePath).toString();
   } catch (err) {
-    debug(`${i18nKey}.updateExistingConfig.unableToReadFile`, {
-      configFilePath,
-    });
+    logger.debug(
+      i18n(`${i18nKey}.updateExistingConfig.unableToReadFile`, {
+        configFilePath,
+      })
+    );
     throwFileSystemError(err as BaseError, {
       filepath: configFilePath,
       read: true,
@@ -95,9 +89,11 @@ function updateExistingConfig(
   try {
     config = JSON.parse(configString) as Config;
   } catch (err) {
-    debug(`${i18nKey}.updateExistingConfig.invalidJSON`, {
-      configFilePath,
-    });
+    logger.debug(
+      i18n(`${i18nKey}.updateExistingConfig.invalidJSON`, {
+        configFilePath,
+      })
+    );
     throwFileSystemError(err as BaseError, {
       filepath: configFilePath,
       read: true,
@@ -133,9 +129,11 @@ function updateExistingConfig(
   try {
     writeConfig(configFilePath, config);
   } catch (err) {
-    debug(`${i18nKey}.updateExistingConfig.couldNotUpdateFile`, {
-      configFilePath,
-    });
+    logger.debug(
+      i18n(`${i18nKey}.updateExistingConfig.couldNotUpdateFile`, {
+        configFilePath,
+      })
+    );
     throwFileSystemError(err as BaseError, {
       filepath: configFilePath,
       write: true,
@@ -157,11 +155,8 @@ type FunctionOptions = {
 export async function createFunction(
   functionInfo: FunctionInfo,
   dest: string,
-  options: FunctionOptions = {},
-  logCallbacks?: LogCallbacksArg<typeof createFunctionCallbackKeys>
+  options: FunctionOptions = {}
 ): Promise<void> {
-  const logger =
-    makeTypedLogger<typeof createFunctionCallbackKeys>(logCallbacks);
   const { functionsFolder, filename, endpointPath, endpointMethod } =
     functionInfo;
 
@@ -188,18 +183,18 @@ export async function createFunction(
 
   const destPath = path.join(dest, folderName);
   if (fs.existsSync(destPath)) {
-    logger(
-      'destPathAlreadyExists',
-      `${i18nKey}.createFunction.destPathAlreadyExists`,
-      {
+    logger.log(
+      i18n(`${i18nKey}.createFunction.destPathAlreadyExists`, {
         path: destPath,
-      }
+      })
     );
   } else {
     fs.mkdirp(destPath);
-    logger('createdDest', `${i18nKey}.createFunction.createdDest`, {
-      path: destPath,
-    });
+    logger.log(
+      i18n(`${i18nKey}.createFunction.createdDest`, {
+        path: destPath,
+      })
+    );
   }
   const functionFilePath = path.join(destPath, functionFile);
   const configFilePath = path.join(destPath, 'serverless.json');
@@ -219,12 +214,10 @@ export async function createFunction(
     functionFilePath
   );
 
-  logger(
-    'createdFunctionFile',
-    `${i18nKey}.createFunction.createdFunctionFile`,
-    {
+  logger.log(
+    i18n(`${i18nKey}.createFunction.createdFunctionFile`, {
       path: functionFilePath,
-    }
+    })
   );
 
   if (fs.existsSync(configFilePath)) {
@@ -234,36 +227,42 @@ export async function createFunction(
       functionFile,
     });
 
-    logger(
-      'createdFunctionFile',
-      `${i18nKey}.createFunction.createdFunctionFile`,
-      {
+    logger.log(
+      i18n(`${i18nKey}.createFunction.createdFunctionFile`, {
         path: functionFilePath,
-      }
+      })
     );
-    logger('success', `${i18nKey}.createFunction.success`, {
-      endpointPath: endpointPath,
-      folderName,
-    });
+    logger.log(
+      i18n(`${i18nKey}.createFunction.success`, {
+        endpointPath: endpointPath,
+        folderName,
+      })
+    );
   } else {
     const config = createConfig({ endpointPath, endpointMethod, functionFile });
     try {
       writeConfig(configFilePath, config);
     } catch (err) {
-      debug(`${i18nKey}.createFunction.failedToCreateFile`, {
-        configFilePath,
-      });
+      logger.debug(
+        i18n(`${i18nKey}.createFunction.failedToCreateFile`, {
+          configFilePath,
+        })
+      );
       throwFileSystemError(err as BaseError, {
         filepath: configFilePath,
         write: true,
       });
     }
-    logger('createdConfigFile', `${i18nKey}.createFunction.createdConfigFile`, {
-      path: configFilePath,
-    });
-    logger('success', `${i18nKey}.createFunction.success`, {
-      endpointPath: endpointPath,
-      folderName,
-    });
+    logger.log(
+      i18n(`${i18nKey}.createFunction.createdConfigFile`, {
+        path: configFilePath,
+      })
+    );
+    logger.log(
+      i18n(`${i18nKey}.createFunction.success`, {
+        endpointPath: endpointPath,
+        folderName,
+      })
+    );
   }
 }

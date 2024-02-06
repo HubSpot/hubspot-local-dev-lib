@@ -1,9 +1,10 @@
 import axios from 'axios';
 import { getAxiosConfig } from '../http/getAxiosConfig';
-import { debug } from '../utils/logger';
+import { logger } from './logging/logger';
 import http from '../http';
 import { getAccountConfig, getEnv } from '../config';
 import { FILE_MAPPER_API_PATH } from '../api/fileMapper';
+import { i18n } from '../utils/lang';
 
 const i18nKey = 'lib.trackUsage';
 
@@ -34,7 +35,7 @@ export async function trackUsage(
       analyticsEndpoint = 'vscode-extension-usage';
       break;
     default:
-      debug(`${i18nKey}.invalidEvent`, { eventName });
+      logger.debug(i18n(`${i18nKey}.invalidEvent`, { eventName }));
   }
 
   const path = `${FILE_MAPPER_API_PATH}/${analyticsEndpoint}`;
@@ -42,7 +43,7 @@ export async function trackUsage(
   const accountConfig = accountId && getAccountConfig(accountId);
 
   if (accountConfig && accountConfig.authType === 'personalaccesskey') {
-    debug(`${i18nKey}.sendingEventAuthenticated`);
+    logger.debug(i18n(`${i18nKey}.sendingEventAuthenticated`));
     return http.post(accountId, {
       url: `${path}/authenticated`,
       data: usageEvent,
@@ -57,6 +58,6 @@ export async function trackUsage(
     data: usageEvent,
     resolveWithFullResponse: true,
   });
-  debug(`${i18nKey}.sendingEventUnauthenticated`);
+  logger.debug(i18n(`${i18nKey}.sendingEventUnauthenticated`));
   axios({ ...axiosConfig, method: 'post' });
 }
