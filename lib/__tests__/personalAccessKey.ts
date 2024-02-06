@@ -7,6 +7,7 @@ import {
 import { fetchAccessToken as __fetchAccessToken } from '../../api/localDevAuth';
 import { fetchSandboxHubData as __fetchSandboxHubData } from '../../api/sandboxHubs';
 import { ENVIRONMENTS } from '../../constants/environments';
+import { HUBSPOT_ACCOUNT_TYPES } from '../../constants/config';
 import {
   accessTokenForPersonalAccessKey,
   getAccessToken,
@@ -214,18 +215,18 @@ describe('lib/personalAccessKey', () => {
       expect(updateAccountConfig).toHaveBeenCalledWith(
         expect.objectContaining({
           accountId: 123,
+          accountType: HUBSPOT_ACCOUNT_TYPES.STANDARD,
           personalAccessKey: 'pak_123',
           name: 'account-name',
           authType: 'personalaccesskey',
           sandboxAccountType: null,
-          parentAccountId: null,
         })
       );
     });
 
     it('updates the config with the new account for sandbox accounts', async () => {
       fetchSandboxHubData.mockResolvedValue({
-        type: 'developer',
+        type: 'DEVELOPER',
         parentHubId: 789,
       });
 
@@ -248,10 +249,11 @@ describe('lib/personalAccessKey', () => {
       expect(updateAccountConfig).toHaveBeenCalledWith(
         expect.objectContaining({
           accountId: 123,
+          accountType: HUBSPOT_ACCOUNT_TYPES.DEVELOPER_SANDBOX,
           personalAccessKey: 'pak_123',
           name: 'account-name',
           authType: 'personalaccesskey',
-          sandboxAccountType: 'developer',
+          sandboxAccountType: 'DEVELOPER',
           parentAccountId: 789,
         })
       );

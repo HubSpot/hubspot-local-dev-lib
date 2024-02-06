@@ -1,13 +1,11 @@
 import path from 'path';
 import fs from 'fs-extra';
 
-import { debug, makeTypedLogger } from '../utils/logger';
 import { throwError, throwErrorWithMessage } from '../errors/standardErrors';
 import { extractZipArchive } from './archive';
-
+import { logger } from './logging/logger';
 import { GenericError, BaseError } from '../types/Error';
 import { GithubReleaseData, GithubRepoFile } from '../types/Github';
-import { LogCallbacksArg } from '../types/LogCallbacks';
 import {
   fetchRepoFile,
   fetchRepoFileByDownloadUrl,
@@ -15,10 +13,9 @@ import {
   fetchRepoReleaseData,
   fetchRepoContents,
 } from '../api/github';
+import { i18n } from '../utils/lang';
 
 const i18nKey = 'lib.github';
-
-const cloneGithubRepoCallbackKeys = ['success'] as const;
 
 type RepoPath = `${string}/${string}`;
 
@@ -28,9 +25,11 @@ export async function fetchFileFromRepository(
   ref: string
 ): Promise<Buffer> {
   try {
-    debug(`${i18nKey}.fetchFileFromRepository.fetching`, {
-      path: `${repoPath}/${ref}/${filePath}`,
-    });
+    logger.debug(
+      i18n(`${i18nKey}.fetchFileFromRepository.fetching`, {
+        path: `${repoPath}/${ref}/${filePath}`,
+      })
+    );
 
     const { data } = await fetchRepoFile(repoPath, filePath, ref);
     return data;
@@ -87,17 +86,21 @@ async function downloadGithubRepoZip(
       const releaseData = await fetchReleaseData(repoPath, tag);
       zipUrl = releaseData.zipball_url;
       const { name } = releaseData;
-      debug(`${i18nKey}.downloadGithubRepoZip.fetchingName`, { name });
+      logger.debug(
+        i18n(`${i18nKey}.downloadGithubRepoZip.fetchingName`, { name })
+      );
     } else {
       // If downloading a repository, manually construct the zip url. This url supports both branches and tags as refs
-      debug(`${i18nKey}.downloadGithubRepoZip.fetching`, { repoPath });
+      logger.debug(
+        i18n(`${i18nKey}.downloadGithubRepoZip.fetching`, { repoPath })
+      );
       const ref = branch || tag;
       zipUrl = `https://api.github.com/repos/${repoPath}/zipball${
         ref ? `/${ref}` : ''
       }`;
     }
     const { data } = await fetchRepoAsZip(zipUrl);
-    debug(`${i18nKey}.downloadGithubRepoZip.completed`);
+    logger.debug(i18n(`${i18nKey}.downloadGithubRepoZip.completed`));
     return data;
   } catch (err) {
     throwErrorWithMessage(
@@ -119,11 +122,8 @@ type CloneGithubRepoOptions = {
 export async function cloneGithubRepo(
   repoPath: RepoPath,
   dest: string,
-  options: CloneGithubRepoOptions = {},
-  logCallbacks?: LogCallbacksArg<typeof cloneGithubRepoCallbackKeys>
+  options: CloneGithubRepoOptions = {}
 ): Promise<boolean> {
-  const logger =
-    makeTypedLogger<typeof cloneGithubRepoCallbackKeys>(logCallbacks);
   const { tag, isRelease, branch, sourceDir, type } = options;
   const zip = await downloadGithubRepoZip(repoPath, isRelease, {
     tag,
@@ -133,10 +133,12 @@ export async function cloneGithubRepo(
   const success = await extractZipArchive(zip, repoName, dest, { sourceDir });
 
   if (success) {
-    logger('success', `${i18nKey}.cloneGithubRepo.success`, {
-      type: type || '',
-      dest,
-    });
+    logger.log(
+      i18n(`${i18nKey}.cloneGithubRepo.success`, {
+        type: type || '',
+        dest,
+      })
+    );
   }
   return success;
 }
@@ -187,11 +189,13 @@ export async function downloadGithubRepoContents(
         return Promise.resolve();
       }
 
-      debug(`${i18nKey}.downloadGithubRepoContents.downloading`, {
-        contentPiecePath,
-        downloadUrl: download_url,
-        downloadPath,
-      });
+      logger.debug(
+        i18n(`${i18nKey}.downloadGithubRepoContents.downloading`, {
+          contentPiecePath,
+          downloadUrl: download_url,
+          downloadPath,
+        })
+      );
 
       if (contentPieceType === 'dir') {
         const { data: innerDirContent } = await fetchRepoContents(

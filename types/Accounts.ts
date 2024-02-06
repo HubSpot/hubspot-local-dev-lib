@@ -1,11 +1,14 @@
+import { HUBSPOT_ACCOUNT_TYPES } from '../constants/config';
 import { Mode } from './Files';
 import { Environment } from './Config';
+import { ValueOf } from './Utils';
 
 export type AuthType = 'personalaccesskey' | 'apikey' | 'oauth2';
 
 export interface CLIAccount_NEW {
   name?: string;
   accountId: number;
+  accountType?: AccountType;
   defaultMode?: Mode;
   env: Environment;
   authType?: AuthType;
@@ -23,6 +26,7 @@ export interface CLIAccount_DEPRECATED {
   portalId?: number;
   defaultMode?: Mode;
   env: Environment;
+  accountType?: AccountType;
   authType?: AuthType;
   auth?: {
     tokenInfo?: TokenInfo;
@@ -34,6 +38,8 @@ export interface CLIAccount_DEPRECATED {
 }
 
 export type CLIAccount = CLIAccount_NEW | CLIAccount_DEPRECATED;
+
+export type AccountType = ValueOf<typeof HUBSPOT_ACCOUNT_TYPES>;
 
 export type TokenInfo = {
   accessToken?: string;

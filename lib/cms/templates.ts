@@ -2,12 +2,10 @@ import fs from 'fs-extra';
 import path from 'path';
 import { downloadGithubRepoContents } from '../github';
 import { throwErrorWithMessage } from '../../errors/standardErrors';
-import { debug, makeTypedLogger } from '../../utils/logger';
-import { LogCallbacksArg } from '../../types/LogCallbacks';
+import { logger } from '../logging/logger';
+import { i18n } from '../../utils/lang';
 
 const i18nKey = 'lib.cms.templates';
-
-const templatesCallbackKeys = ['creatingFile'] as const;
 
 // Matches the .html file extension, excluding module.html
 const TEMPLATE_EXTENSION_REGEX = new RegExp(/(?<!module)\.html$/);
@@ -56,8 +54,7 @@ export async function createTemplate(
   name: string,
   dest: string,
   type: keyof typeof ASSET_PATHS = 'page-template',
-  options: { allowExisting: boolean } = { allowExisting: false },
-  logCallbacks?: LogCallbacksArg<typeof templatesCallbackKeys>
+  options: { allowExisting: boolean } = { allowExisting: false }
 ): Promise<void> {
   const assetPath = ASSET_PATHS[type];
   const filename = name.endsWith('.html') ? name : `${name}.html`;
@@ -67,13 +64,14 @@ export async function createTemplate(
       path: filePath,
     });
   }
-  debug(`${i18nKey}.createTemplate.creatingPath`, { path: dest });
+  logger.debug(i18n(`${i18nKey}.createTemplate.creatingPath`, { path: dest }));
   fs.mkdirp(dest);
 
-  const logger = makeTypedLogger<typeof templatesCallbackKeys>(logCallbacks);
-  logger('creatingFile', `${i18nKey}.createTemplate.creatingFile`, {
-    path: filePath,
-  });
+  logger.log(
+    i18n(`${i18nKey}.createTemplate.creatingFile`, {
+      path: filePath,
+    })
+  );
 
   await downloadGithubRepoContents(
     'HubSpot/cms-sample-assets',

@@ -2,7 +2,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import os from 'os';
 import yaml from 'js-yaml';
-import { debug } from '../utils/logger';
+import { logger } from '../lib/logging/logger';
 import { throwFileSystemError } from '../errors/fileSystemErrors';
 import { throwError, throwErrorWithMessage } from '../errors/standardErrors';
 import {
@@ -12,6 +12,7 @@ import {
 import { getOrderedConfig } from './configUtils';
 import { CLIConfig_NEW } from '../types/Config';
 import { BaseError } from '../types/Error';
+import { i18n } from '../utils/lang';
 
 const i18nKey = 'config.configFile';
 
@@ -47,7 +48,7 @@ export function readConfigFile(configPath: string): string {
   try {
     source = fs.readFileSync(configPath).toString();
   } catch (err) {
-    debug(`${i18nKey}.errorReading`, { configPath });
+    logger.debug(i18n(`${i18nKey}.errorReading`, { configPath }));
     throwFileSystemError(err as BaseError, {
       filepath: configPath,
       read: true,
@@ -88,7 +89,7 @@ export function loadConfigFromFile(): CLIConfig_NEW | null {
     return parseConfig(source);
   }
 
-  debug(`${i18nKey}.errorLoading`, { configPath });
+  logger.debug(i18n(`${i18nKey}.errorLoading`, { configPath }));
 
   return null;
 }
@@ -110,7 +111,7 @@ export function writeConfigToFile(config: CLIConfig_NEW): void {
   try {
     fs.ensureFileSync(configPath);
     fs.writeFileSync(configPath, source);
-    debug(`${i18nKey}.writeSuccess`, { configPath });
+    logger.debug(i18n(`${i18nKey}.writeSuccess`, { configPath }));
   } catch (err) {
     throwFileSystemError(err as BaseError, {
       filepath: configPath,

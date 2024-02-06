@@ -4,18 +4,16 @@ import { getCwd } from '../path';
 import { walk } from '../fs';
 import { listGithubRepoContents, downloadGithubRepoContents } from '../github';
 import { throwErrorWithMessage } from '../../errors/standardErrors';
-import { LogCallbacksArg } from '../../types/LogCallbacks';
-import { makeTypedLogger } from '../../utils/logger';
+import { logger } from '../logging/logger';
 import {
   isPathInput,
   isModuleFolder,
   isModuleFolderChild,
 } from '../../utils/cms/modules';
 import { PathInput } from '../../types/Modules';
+import { i18n } from '../../utils/lang';
 
 const i18nKey = 'lib.cms.modules';
-
-const createModuleCallbackKeys = ['creatingPath', 'creatingModule'] as const;
 
 // Ids for testing
 export const ValidationIds = {
@@ -184,10 +182,8 @@ export async function createModule(
   getInternalVersion: boolean,
   options = {
     allowExistingDir: false,
-  },
-  logCallbacks?: LogCallbacksArg<typeof createModuleCallbackKeys>
+  }
 ) {
-  const logger = makeTypedLogger<typeof createModuleCallbackKeys>(logCallbacks);
   const { reactType: isReactModule } = moduleDefinition;
   const folderName = name.endsWith('.module') ? name : `${name}.module`;
   const destPath = !isReactModule
@@ -199,15 +195,19 @@ export async function createModule(
       path: destPath,
     });
   } else {
-    logger('creatingPath', `${i18nKey}.createModule.creatingPath`, {
-      path: destPath,
-    });
+    logger.log(
+      i18n(`${i18nKey}.createModule.creatingPath`, {
+        path: destPath,
+      })
+    );
     fs.ensureDirSync(destPath);
   }
 
-  logger('creatingModule', `${i18nKey}.createModule.creatingModule`, {
-    path: destPath,
-  });
+  logger.log(
+    i18n(`${i18nKey}.createModule.creatingModule`, {
+      path: destPath,
+    })
+  );
 
   // Write module meta
   const writeModuleMeta = (

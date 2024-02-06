@@ -1,4 +1,4 @@
-import { throwFileSystemError } from '../fileSystemErrors';
+import { throwFileSystemError, getFileSystemError } from '../fileSystemErrors';
 import { BaseError } from '../../types/Error';
 
 export const newError = (overrides = {}): BaseError => {
@@ -22,7 +22,7 @@ describe('errors/fileSystemErrors', () => {
     it('throws a fileSystemError', () => {
       expect(() => {
         throwFileSystemError(newError(), fileSystemErrorContext);
-      }).toThrow();
+      }).toThrow(getFileSystemError(newError(), fileSystemErrorContext));
     });
   });
 });
