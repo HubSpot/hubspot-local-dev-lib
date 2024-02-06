@@ -1,12 +1,14 @@
 import {
   fetchReleaseData,
   cloneGithubRepo,
+  listGithubRepoContents,
   fetchFileFromRepository,
 } from '../github';
 import {
   fetchRepoFile as __fetchRepoFile,
   fetchRepoReleaseData as __fetchRepoReleaseData,
   fetchRepoAsZip as __fetchRepoAsZip,
+  fetchRepoContents as __fetchRepoContents,
 } from '../../api/github';
 import { extractZipArchive as __extractZipArchive } from '../archive';
 
@@ -21,6 +23,9 @@ const fetchRepoReleaseData = __fetchRepoReleaseData as jest.MockedFunction<
 >;
 const fetchRepoAsZip = __fetchRepoAsZip as jest.MockedFunction<
   typeof __fetchRepoAsZip
+>;
+const fetchRepoContents = __fetchRepoContents as jest.MockedFunction<
+  typeof __fetchRepoContents
 >;
 const extractZipArchive = __extractZipArchive as jest.MockedFunction<
   typeof __extractZipArchive
@@ -150,6 +155,23 @@ describe('lib/github', () => {
         './dest/path',
         { sourceDir: undefined }
       );
+    });
+  });
+
+  describe('listRepoContents()', () => {
+    beforeAll(() => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      fetchRepoContents.mockResolvedValue({ data: null } as any);
+    });
+
+    afterAll(() => {
+      fetchRepoContents.mockReset();
+    });
+
+    it('Lists the content from a specified github repo path', async () => {
+      await listGithubRepoContents('owner/repo', 'path/');
+
+      expect(fetchRepoContents).toHaveBeenCalledWith('owner/repo', 'path/');
     });
   });
 });
