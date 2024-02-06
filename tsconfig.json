@@ -5,7 +5,8 @@
     "declaration": true,
     "strict": true,
     "esModuleInterop": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
   },
   "include": [
     "api",
@@ -17,7 +18,7 @@
     "lib",
     "models",
     "types",
-    "utils"
+    "utils",
   ],
-  "exclude": ["node_modules", "**/__tests__/*", "**/__mocks__/*"]
+  "exclude": ["node_modules", "**/__tests__/*", "**/__mocks__/*"],
 }
