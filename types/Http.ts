@@ -18,6 +18,7 @@ export type AxiosConfigOptions = {
   data?: Data;
   resolveWithFullResponse?: boolean;
   timeout?: number;
+  headers?: Data;
 };
 
 export type FormData = {

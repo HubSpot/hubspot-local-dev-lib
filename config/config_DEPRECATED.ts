@@ -5,6 +5,7 @@ import { getCwd } from '../lib/path';
 import {
   DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME,
   MIN_HTTP_TIMEOUT,
+  HUBSPOT_ACCOUNT_TYPES,
 } from '../constants/config';
 import { ENVIRONMENTS, ENVIRONMENT_VARIABLES } from '../constants/environments';
 import {
@@ -24,6 +25,7 @@ import {
 import { CLIConfig_DEPRECATED, Environment } from '../types/Config';
 import {
   APIKeyAccount_DEPRECATED,
+  AccountType,
   CLIAccount_DEPRECATED,
   FlatAccountFields_DEPRECATED,
   OAuthAccount_DEPRECATED,
@@ -347,6 +349,25 @@ export function getEnv(nameOrId?: string | number): Environment {
   return env;
 }
 
+// Deprecating sandboxAccountType in favor of accountType
+export function getAccountType(
+  accountType?: AccountType,
+  sandboxAccountType?: string | null
+): AccountType {
+  if (accountType) {
+    return accountType;
+  }
+  if (typeof sandboxAccountType === 'string') {
+    if (sandboxAccountType.toUpperCase() === 'DEVELOPER') {
+      return HUBSPOT_ACCOUNT_TYPES.DEVELOPER_SANDBOX;
+    }
+    if (sandboxAccountType.toUpperCase() === 'STANDARD') {
+      return HUBSPOT_ACCOUNT_TYPES.STANDARD_SANDBOX;
+    }
+  }
+  return HUBSPOT_ACCOUNT_TYPES.STANDARD;
+}
+
 export function getAccountConfig(
   accountId: number | undefined
 ): CLIAccount_DEPRECATED | undefined {
@@ -416,7 +437,16 @@ export function removeSandboxAccountFromConfig(
 
   const accountConfig = getAccountConfig(accountId);
 
-  if (accountConfig?.sandboxAccountType === null) return promptDefaultAccount;
+  const accountType = getAccountType(
+    accountConfig?.accountType,
+    accountConfig?.sandboxAccountType
+  );
+
+  const isSandboxAccount =
+    accountType === HUBSPOT_ACCOUNT_TYPES.DEVELOPER_SANDBOX ||
+    accountType === HUBSPOT_ACCOUNT_TYPES.STANDARD_SANDBOX;
+
+  if (!isSandboxAccount) return promptDefaultAccount;
 
   if (config.defaultPortal === accountConfig?.name) {
     promptDefaultAccount = true;
@@ -446,19 +476,20 @@ export function updateAccountConfig(
   configOptions: UpdateAccountConfigOptions
 ): FlatAccountFields_DEPRECATED {
   const {
-    portalId,
+    accountType,
+    apiKey,
     authType,
-    environment,
     clientId,
     clientSecret,
+    defaultMode,
+    environment,
+    name,
+    parentAccountId,
+    personalAccessKey,
+    portalId,
+    sandboxAccountType,
     scopes,
     tokenInfo,
-    defaultMode,
-    name,
-    apiKey,
-    personalAccessKey,
-    sandboxAccountType,
-    parentAccountId,
   } = configOptions;
 
   if (!portalId) {
@@ -493,6 +524,7 @@ export function updateAccountConfig(
     ...(portalId && { portalId }),
     authType,
     auth,
+    accountType: getAccountType(accountType, sandboxAccountType),
     apiKey,
     defaultMode: mode && Object.hasOwn(MODE, mode) ? mode : undefined,
     personalAccessKey,

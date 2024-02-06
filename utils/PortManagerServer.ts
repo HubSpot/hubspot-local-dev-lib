@@ -9,7 +9,7 @@ import {
   PORT_MANAGER_SERVER_PORT,
 } from '../constants/ports';
 import { throwErrorWithMessage } from '../errors/standardErrors';
-import { debug } from './logger';
+import { logger } from '../lib/logging/logger';
 import { i18n } from './lang';
 import { BaseError } from '../types/Error';
 import { RequestPortsData } from '../types/PortManager';
@@ -64,9 +64,11 @@ class PortManagerServer {
   listen(): Promise<Server> {
     return new Promise<Server>((resolve, reject) => {
       const server = this.app!.listen(PORT_MANAGER_SERVER_PORT, () => {
-        debug(`${i18nKey}.started`, {
-          port: PORT_MANAGER_SERVER_PORT,
-        });
+        logger.debug(
+          i18n(`${i18nKey}.started`, {
+            port: PORT_MANAGER_SERVER_PORT,
+          })
+        );
         resolve(server);
       }).on('error', (err: BaseError) => {
         reject(err);
@@ -87,15 +89,17 @@ class PortManagerServer {
   }
 
   setPort(instanceId: string, port: number) {
-    debug(`${i18nKey}.setPort`, { instanceId, port });
+    logger.debug(i18n(`${i18nKey}.setPort`, { instanceId, port }));
     this.serverPortMap[instanceId] = port;
   }
 
   deletePort(instanceId: string) {
-    debug(`${i18nKey}.deletedPort`, {
-      instanceId,
-      port: this.serverPortMap[instanceId],
-    });
+    logger.debug(
+      i18n(`${i18nKey}.deletedPort`, {
+        instanceId,
+        port: this.serverPortMap[instanceId],
+      })
+    );
     delete this.serverPortMap[instanceId];
   }
 
@@ -189,7 +193,7 @@ class PortManagerServer {
 
   closeServer = (req: Request, res: Response): void => {
     if (this.server) {
-      debug(`${i18nKey}.close`);
+      logger.debug(i18n(`${i18nKey}.close`));
       res.sendStatus(200);
       this.server.close();
       this.reset();

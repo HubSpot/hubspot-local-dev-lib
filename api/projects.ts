@@ -80,7 +80,7 @@ export async function downloadProject(
       projectName
     )}/builds/${buildId}/archive-full`,
     encoding: null,
-    headers: { accept: 'application/zip', contentType: 'application/json' },
+    headers: { accept: 'application/zip', 'Content-Type': 'application/json' },
   });
 }
 

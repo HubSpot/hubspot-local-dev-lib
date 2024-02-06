@@ -7,7 +7,7 @@ import {
 } from './configFile';
 import { CLIConfig_NEW, CLIConfig } from '../types/Config';
 import { CLIOptions, WriteConfigOptions } from '../types/CLIOptions';
-import { CLIAccount, FlatAccountFields } from '../types/Accounts';
+import { AccountType, CLIAccount, FlatAccountFields } from '../types/Accounts';
 import { getAccountIdentifier } from '../utils/getAccountIdentifier';
 
 // Use new config if it exists
@@ -204,6 +204,16 @@ export function getEnv(nameOrId?: string | number) {
     return CLIConfiguration.getEnv(nameOrId);
   }
   return config_DEPRECATED.getEnv(nameOrId);
+}
+
+export function getAccountType(
+  accountType?: AccountType,
+  sandboxAccountType?: string | null
+): AccountType {
+  if (CLIConfiguration.isActive()) {
+    return CLIConfiguration.getAccountType(accountType, sandboxAccountType);
+  }
+  return config_DEPRECATED.getAccountType(accountType, sandboxAccountType);
 }
 
 // These functions are either not supported or have breaking changes with the new config setup
