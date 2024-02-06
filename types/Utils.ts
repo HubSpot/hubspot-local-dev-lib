@@ -9,5 +9,5 @@ type Join<K, P> = K extends string | number
 export type Leaves<T> = [10] extends [never]
   ? never
   : T extends object
-    ? { [K in keyof T]-?: Join<K, Leaves<T[K]>> }[keyof T]
-    : '';
+  ? { [K in keyof T]-?: Join<K, Leaves<T[K]>> }[keyof T]
+  : '';
