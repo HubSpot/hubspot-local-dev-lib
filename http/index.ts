@@ -149,7 +149,7 @@ async function patchRequest<T>(
   options: HttpOptions
 ): Promise<T> {
   const configWithAuth = await withAuth(accountId, options);
-  const { data } = await axios({ ...configWithAuth, method: 'put' });
+  const { data } = await axios({ ...configWithAuth, method: 'patch' });
   return data;
 }
 

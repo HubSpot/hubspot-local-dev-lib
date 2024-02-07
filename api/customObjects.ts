@@ -9,7 +9,7 @@ export async function batchCreateObjects(
   objectTypeId: string,
   objects: JSON
 ): Promise<void> {
-  http.post<void>(accountId, {
+  await http.post<void>(accountId, {
     url: `${CUSTOM_OBJECTS_API_PATH}/${objectTypeId}/batch/create`,
     data: objects,
   });
