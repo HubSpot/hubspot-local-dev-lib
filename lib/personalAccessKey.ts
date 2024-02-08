@@ -24,6 +24,7 @@ import {
   updateDefaultAccount,
 } from '../config';
 import { HUBSPOT_ACCOUNT_TYPES } from '../constants/config';
+import { fetchTestAccountData } from '../api/testAccounts';
 
 const i18nKey = 'lib.personalAccessKey';
 
@@ -164,11 +165,23 @@ export async function updateConfigWithAccessToken(
   const { portalId, accessToken, expiresAt } = token;
   const accountEnv = env || getEnv(name);
 
-  let hubInfo;
+  let hubInfo = null;
   try {
     hubInfo = await fetchSandboxHubData(accessToken, portalId, accountEnv);
   } catch (err) {
     // Ignore error, returns 404 if account is not a sandbox
+  }
+  try {
+    if (hubInfo === null) {
+      const testAccountResponse = await fetchTestAccountData(
+        accessToken,
+        portalId,
+        accountEnv
+      );
+      hubInfo = { ...testAccountResponse, type: 'DEVELOPER_TEST' };
+    }
+  } catch (err) {
+    // Ignore error, returns 404 if account is not a test account
   }
 
   let accountType: AccountType = HUBSPOT_ACCOUNT_TYPES.STANDARD;
@@ -176,8 +189,8 @@ export async function updateConfigWithAccessToken(
   let parentAccountId;
   if (hubInfo) {
     if (hubInfo.type !== undefined) {
-      const sandboxHubType = hubInfo.type ? hubInfo.type.toUpperCase() : null;
-      switch (sandboxHubType) {
+      const hubType = hubInfo.type ? hubInfo.type.toUpperCase() : null;
+      switch (hubType) {
         case 'DEVELOPER':
           accountType = HUBSPOT_ACCOUNT_TYPES.DEVELOPER_SANDBOX;
           sandboxAccountType = 'DEVELOPER';
@@ -185,6 +198,9 @@ export async function updateConfigWithAccessToken(
         case 'STANDARD':
           accountType = HUBSPOT_ACCOUNT_TYPES.STANDARD_SANDBOX;
           sandboxAccountType = 'STANDARD';
+          break;
+        case 'DEVELOPER_TEST':
+          accountType = HUBSPOT_ACCOUNT_TYPES.DEVELOPER_TEST;
           break;
         default:
           accountType = HUBSPOT_ACCOUNT_TYPES.STANDARD_SANDBOX;
