@@ -5,7 +5,10 @@ import http from '../http';
 
 const HUBFILES_API_PATH = '/file-transport/v1/hubfiles';
 
-export async function createSchema(accountId: number, filepath: string) {
+export async function createSchemaFromHubFile(
+  accountId: number,
+  filepath: string
+) {
   const file = fs.createReadStream(path.resolve(getCwd(), filepath));
   return http.post(accountId, {
     url: `${HUBFILES_API_PATH}/object-schemas`,
@@ -16,7 +19,10 @@ export async function createSchema(accountId: number, filepath: string) {
   });
 }
 
-export async function updateSchema(accountId: number, filepath: string) {
+export async function updateSchemaFromHubFile(
+  accountId: number,
+  filepath: string
+) {
   const file = fs.createReadStream(path.resolve(getCwd(), filepath));
   return http.put(accountId, {
     url: `${HUBFILES_API_PATH}/object-schemas`,
@@ -27,7 +33,7 @@ export async function updateSchema(accountId: number, filepath: string) {
   });
 }
 
-export async function fetchSchema(
+export async function fetchHubFileSchema(
   accountId: number,
   objectName: string,
   path: string
