@@ -10,7 +10,7 @@ This library contains utility functionality that facilitates interactions with H
 
 - Config utils for managing HubSpot account configuration and access keys ([docs](./config/README.md))
 - Api utils to interact with HubSpot assets such as Design Manager assets and Developer Projects ([docs](./api/README.md))
-- Filesystem utils to help with navigating the local filesystem and parsing common HubSpot files ([docs](./lib/README.md))
+- Utils to help with navigating the local filesystem, parsing common HubSpot files, interacting with common HubSpot objects, Interacting with github, and more  ([docs](./lib/README.md))
 
 ## Contributing
 
