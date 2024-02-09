@@ -166,7 +166,7 @@ export async function updateConfigWithAccessToken(
   const accountEnv = env || getEnv(name);
 
   let accountType: AccountType = HUBSPOT_ACCOUNT_TYPES.STANDARD;
-  let sandboxAccountType = undefined;
+  let sandboxAccountType = null;
   let parentAccountId;
   try {
     const sandboxDataResponse = await fetchSandboxHubData(
@@ -177,7 +177,7 @@ export async function updateConfigWithAccessToken(
     if (sandboxDataResponse) {
       const hubType = sandboxDataResponse.type
         ? sandboxDataResponse.type.toUpperCase()
-        : undefined;
+        : null;
       switch (hubType) {
         case 'DEVELOPER':
           accountType = HUBSPOT_ACCOUNT_TYPES.DEVELOPER_SANDBOX;
@@ -201,7 +201,7 @@ export async function updateConfigWithAccessToken(
   }
 
   try {
-    if (sandboxAccountType === undefined) {
+    if (sandboxAccountType === null) {
       const testAccountResponse = await fetchTestAccountData(
         accessToken,
         portalId,

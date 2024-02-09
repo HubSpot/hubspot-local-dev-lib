@@ -6,6 +6,7 @@ import {
 } from '../../config';
 import { fetchAccessToken as __fetchAccessToken } from '../../api/localDevAuth';
 import { fetchSandboxHubData as __fetchSandboxHubData } from '../../api/sandboxHubs';
+import { fetchTestAccountData as __fetchTestAccountData } from '../../api/testAccounts';
 import { ENVIRONMENTS } from '../../constants/environments';
 import { HUBSPOT_ACCOUNT_TYPES } from '../../constants/config';
 import {
@@ -19,6 +20,7 @@ jest.mock('../../config');
 jest.mock('../logging/logger');
 jest.mock('../../api/localDevAuth');
 jest.mock('../../api/sandboxHubs');
+jest.mock('../../api/testAccounts');
 
 const updateAccountConfig = __updateAccountConfig as jest.MockedFunction<
   typeof __updateAccountConfig
@@ -35,6 +37,9 @@ const fetchAccessToken = __fetchAccessToken as jest.MockedFunction<
 >;
 const fetchSandboxHubData = __fetchSandboxHubData as jest.MockedFunction<
   typeof __fetchSandboxHubData
+>;
+const fetchTestAccountData = __fetchTestAccountData as jest.MockedFunction<
+  typeof __fetchTestAccountData
 >;
 
 describe('lib/personalAccessKey', () => {
@@ -255,6 +260,39 @@ describe('lib/personalAccessKey', () => {
           authType: 'personalaccesskey',
           sandboxAccountType: 'DEVELOPER',
           parentAccountId: 789,
+        })
+      );
+    });
+
+    it('updates the config with the new account for developer test accounts', async () => {
+      fetchSandboxHubData.mockRejectedValue(new Error('Not a sandbox'));
+      fetchTestAccountData.mockResolvedValue({
+        parentPortalId: 999,
+        testPortalId: 123,
+        accountName: 'Dev test portal',
+        createdAt: '123',
+        updatedAt: '123',
+        status: 'ACTIVE',
+      });
+
+      const token = await getAccessToken('pak_123', ENVIRONMENTS.QA, 123);
+
+      await updateConfigWithAccessToken(
+        token,
+        'pak_123',
+        ENVIRONMENTS.QA,
+        'Dev test portal'
+      );
+
+      expect(updateAccountConfig).toHaveBeenCalledWith(
+        expect.objectContaining({
+          accountId: 123,
+          accountType: HUBSPOT_ACCOUNT_TYPES.DEVELOPER_TEST,
+          personalAccessKey: 'pak_123',
+          name: 'Dev test portal',
+          authType: 'personalaccesskey',
+          sandboxAccountType: null,
+          parentAccountId: 999,
         })
       );
     });
