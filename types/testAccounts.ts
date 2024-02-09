@@ -1,5 +1,6 @@
 export type DeveloperTestAccount = {
-  id: number;
+  testPortalId: number;
+  parentPortalId: number;
   accountName: string;
   createdAt: string;
   updatedAt: string;

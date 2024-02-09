@@ -165,31 +165,19 @@ export async function updateConfigWithAccessToken(
   const { portalId, accessToken, expiresAt } = token;
   const accountEnv = env || getEnv(name);
 
-  let hubInfo = null;
-  try {
-    hubInfo = await fetchSandboxHubData(accessToken, portalId, accountEnv);
-  } catch (err) {
-    // Ignore error, returns 404 if account is not a sandbox
-  }
-  try {
-    if (hubInfo === null) {
-      const testAccountResponse = await fetchTestAccountData(
-        accessToken,
-        portalId,
-        accountEnv
-      );
-      hubInfo = { ...testAccountResponse, type: 'DEVELOPER_TEST' };
-    }
-  } catch (err) {
-    // Ignore error, returns 404 if account is not a test account
-  }
-
   let accountType: AccountType = HUBSPOT_ACCOUNT_TYPES.STANDARD;
-  let sandboxAccountType = null;
+  let sandboxAccountType = undefined;
   let parentAccountId;
-  if (hubInfo) {
-    if (hubInfo.type !== undefined) {
-      const hubType = hubInfo.type ? hubInfo.type.toUpperCase() : null;
+  try {
+    const sandboxDataResponse = await fetchSandboxHubData(
+      accessToken,
+      portalId,
+      accountEnv
+    );
+    if (sandboxDataResponse) {
+      const hubType = sandboxDataResponse.type
+        ? sandboxDataResponse.type.toUpperCase()
+        : undefined;
       switch (hubType) {
         case 'DEVELOPER':
           accountType = HUBSPOT_ACCOUNT_TYPES.DEVELOPER_SANDBOX;
@@ -199,19 +187,33 @@ export async function updateConfigWithAccessToken(
           accountType = HUBSPOT_ACCOUNT_TYPES.STANDARD_SANDBOX;
           sandboxAccountType = 'STANDARD';
           break;
-        case 'DEVELOPER_TEST':
-          accountType = HUBSPOT_ACCOUNT_TYPES.DEVELOPER_TEST;
-          break;
         default:
           accountType = HUBSPOT_ACCOUNT_TYPES.STANDARD_SANDBOX;
           sandboxAccountType = 'STANDARD';
           break;
       }
+      if (sandboxDataResponse.parentHubId) {
+        parentAccountId = sandboxDataResponse.parentHubId;
+      }
     }
+  } catch (err) {
+    // Ignore error, returns 404 if account is not a sandbox
+  }
 
-    if (hubInfo.parentHubId) {
-      parentAccountId = hubInfo.parentHubId;
+  try {
+    if (sandboxAccountType === undefined) {
+      const testAccountResponse = await fetchTestAccountData(
+        accessToken,
+        portalId,
+        accountEnv
+      );
+      if (testAccountResponse) {
+        accountType = HUBSPOT_ACCOUNT_TYPES.DEVELOPER_TEST;
+        parentAccountId = testAccountResponse.parentPortalId;
+      }
     }
+  } catch (err) {
+    // Ignore error, returns 404 if account is not a test account
   }
 
   const updatedConfig = updateAccountConfig({
