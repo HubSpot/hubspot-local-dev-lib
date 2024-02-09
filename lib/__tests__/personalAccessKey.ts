@@ -6,7 +6,7 @@ import {
 } from '../../config';
 import { fetchAccessToken as __fetchAccessToken } from '../../api/localDevAuth';
 import { fetchSandboxHubData as __fetchSandboxHubData } from '../../api/sandboxHubs';
-import { fetchTestAccountData as __fetchTestAccountData } from '../../api/testAccounts';
+import { fetchDeveloperTestAccountData as __fetchDeveloperTestAccountData } from '../../api/developerTestAccounts';
 import { ENVIRONMENTS } from '../../constants/environments';
 import { HUBSPOT_ACCOUNT_TYPES } from '../../constants/config';
 import {
@@ -38,9 +38,10 @@ const fetchAccessToken = __fetchAccessToken as jest.MockedFunction<
 const fetchSandboxHubData = __fetchSandboxHubData as jest.MockedFunction<
   typeof __fetchSandboxHubData
 >;
-const fetchTestAccountData = __fetchTestAccountData as jest.MockedFunction<
-  typeof __fetchTestAccountData
->;
+const fetchDeveloperTestAccountData =
+  __fetchDeveloperTestAccountData as jest.MockedFunction<
+    typeof __fetchDeveloperTestAccountData
+  >;
 
 describe('lib/personalAccessKey', () => {
   describe('accessTokenForPersonalAccessKey()', () => {
@@ -266,7 +267,7 @@ describe('lib/personalAccessKey', () => {
 
     it('updates the config with the new account for developer test accounts', async () => {
       fetchSandboxHubData.mockRejectedValue(new Error('Not a sandbox'));
-      fetchTestAccountData.mockResolvedValue({
+      fetchDeveloperTestAccountData.mockResolvedValue({
         parentPortalId: 999,
         testPortalId: 123,
         accountName: 'Dev test portal',

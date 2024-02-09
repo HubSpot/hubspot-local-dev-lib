@@ -24,7 +24,7 @@ import {
   updateDefaultAccount,
 } from '../config';
 import { HUBSPOT_ACCOUNT_TYPES } from '../constants/config';
-import { fetchTestAccountData } from '../api/testAccounts';
+import { fetchDeveloperTestAccountData } from '../api/developerTestAccounts';
 
 const i18nKey = 'lib.personalAccessKey';
 
@@ -201,15 +201,18 @@ export async function updateConfigWithAccessToken(
   }
 
   try {
-    if (sandboxAccountType === null) {
-      const testAccountResponse = await fetchTestAccountData(
+    if (
+      accountType !== HUBSPOT_ACCOUNT_TYPES.STANDARD_SANDBOX ||
+      HUBSPOT_ACCOUNT_TYPES.DEVELOPER_SANDBOX
+    ) {
+      const developerTestAccountResponse = await fetchDeveloperTestAccountData(
         accessToken,
         portalId,
         accountEnv
       );
-      if (testAccountResponse) {
+      if (developerTestAccountResponse) {
         accountType = HUBSPOT_ACCOUNT_TYPES.DEVELOPER_TEST;
-        parentAccountId = testAccountResponse.parentPortalId;
+        parentAccountId = developerTestAccountResponse.parentPortalId;
       }
     }
   } catch (err) {

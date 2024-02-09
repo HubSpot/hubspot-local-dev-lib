@@ -7,6 +7,6 @@ export type DeveloperTestAccount = {
   status: string;
 };
 
-export type FetchTestAccountsResponse = {
+export type FetchDeveloperTestAccountsResponse = {
   results: DeveloperTestAccount[];
 };

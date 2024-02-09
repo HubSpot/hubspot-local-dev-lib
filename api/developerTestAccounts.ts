@@ -4,22 +4,22 @@ import { getAxiosConfig } from '../http/getAxiosConfig';
 import { ENVIRONMENTS } from '../constants/environments';
 import {
   DeveloperTestAccount,
-  FetchTestAccountsResponse,
+  FetchDeveloperTestAccountsResponse,
 } from '../types/testAccounts';
 import { SANDBOX_TIMEOUT } from '../constants/api';
 import { Environment } from '../types/Config';
 
 const TEST_ACCOUNTS_API_PATH = 'integrators/test-portals/v2';
 
-export async function fetchTestAccounts(
+export async function fetchDeveloperTestAccounts(
   accountId: number
-): Promise<FetchTestAccountsResponse> {
+): Promise<FetchDeveloperTestAccountsResponse> {
   return http.get(accountId, {
     url: TEST_ACCOUNTS_API_PATH,
   });
 }
 
-export async function createTestAccount(
+export async function createDeveloperTestAccount(
   accountId: number,
   accountName: string
 ): Promise<DeveloperTestAccount> {
@@ -30,7 +30,7 @@ export async function createTestAccount(
   });
 }
 
-export async function deleteTestAccount(
+export async function deleteDeveloperTestAccount(
   accountId: number,
   testAccountId: number
 ): Promise<void> {
@@ -39,15 +39,15 @@ export async function deleteTestAccount(
   });
 }
 
-export async function fetchTestAccountData(
+export async function fetchDeveloperTestAccountData(
   accessToken: string,
-  portalId: number,
+  accountId: number,
   env: Environment = ENVIRONMENTS.PROD
 ): Promise<DeveloperTestAccount> {
   const axiosConfig = getAxiosConfig({
     env,
     url: `${TEST_ACCOUNTS_API_PATH}/self`,
-    params: { portalId },
+    params: { portalId: accountId },
   });
   const reqWithToken = {
     ...axiosConfig,
