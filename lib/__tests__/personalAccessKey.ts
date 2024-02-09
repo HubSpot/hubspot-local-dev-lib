@@ -20,7 +20,7 @@ jest.mock('../../config');
 jest.mock('../logging/logger');
 jest.mock('../../api/localDevAuth');
 jest.mock('../../api/sandboxHubs');
-jest.mock('../../api/testAccounts');
+jest.mock('../../api/developerTestAccounts');
 
 const updateAccountConfig = __updateAccountConfig as jest.MockedFunction<
   typeof __updateAccountConfig
