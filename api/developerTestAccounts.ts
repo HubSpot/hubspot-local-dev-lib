@@ -5,7 +5,7 @@ import { ENVIRONMENTS } from '../constants/environments';
 import {
   DeveloperTestAccount,
   FetchDeveloperTestAccountsResponse,
-} from '../types/testAccounts';
+} from '../types/developerTestAccounts';
 import { SANDBOX_TIMEOUT } from '../constants/api';
 import { Environment } from '../types/Config';
 

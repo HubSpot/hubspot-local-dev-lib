@@ -6,7 +6,7 @@ import {
 
 import { AxiosError } from 'axios';
 import { throwApiError } from '../errors/apiErrors';
-import { DeveloperTestAccount } from '../types/testAccounts';
+import { DeveloperTestAccount } from '../types/developerTestAccounts';
 
 export async function createDeveloperTestAccount(
   accountId: number,
