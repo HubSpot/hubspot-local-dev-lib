@@ -180,7 +180,7 @@ export async function updateConfigWithAccessToken(
         : null;
       switch (hubType) {
         case 'DEVELOPER':
-          accountType = HUBSPOT_ACCOUNT_TYPES.DEVELOPER_SANDBOX;
+          accountType = HUBSPOT_ACCOUNT_TYPES.DEVELOPMENT_SANDBOX;
           sandboxAccountType = 'DEVELOPER';
           break;
         case 'STANDARD':
@@ -202,8 +202,8 @@ export async function updateConfigWithAccessToken(
 
   try {
     if (
-      accountType !== HUBSPOT_ACCOUNT_TYPES.STANDARD_SANDBOX ||
-      HUBSPOT_ACCOUNT_TYPES.DEVELOPER_SANDBOX
+      accountType !== HUBSPOT_ACCOUNT_TYPES.STANDARD_SANDBOX &&
+      accountType !== HUBSPOT_ACCOUNT_TYPES.DEVELOPMENT_SANDBOX
     ) {
       const developerTestAccountResponse = await fetchDeveloperTestAccountData(
         accessToken,
