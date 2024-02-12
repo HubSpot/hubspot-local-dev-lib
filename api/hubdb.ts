@@ -46,6 +46,9 @@ export async function publishTable(
 ): Promise<Table> {
   return http.post(accountId, {
     url: `${HUBDB_API_PATH}/tables/${tableId}/draft/publish`,
+    headers: {
+      'Content-Type': 'application/json',
+    },
   });
 }
 
