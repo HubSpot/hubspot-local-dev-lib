@@ -201,10 +201,7 @@ export async function updateConfigWithAccessToken(
   }
 
   try {
-    if (
-      accountType !== HUBSPOT_ACCOUNT_TYPES.STANDARD_SANDBOX &&
-      accountType !== HUBSPOT_ACCOUNT_TYPES.DEVELOPMENT_SANDBOX
-    ) {
+    if (accountType === HUBSPOT_ACCOUNT_TYPES.STANDARD) {
       const developerTestAccountResponse = await fetchDeveloperTestAccountData(
         accessToken,
         portalId,
