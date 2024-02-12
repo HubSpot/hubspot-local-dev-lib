@@ -166,6 +166,16 @@ class CLIConfiguration {
         }
         accountNamesMap[accountConfig.name] = true;
       }
+      if (!accountConfig.accountType) {
+        this.updateAccount({
+          ...accountConfig,
+          accountId: accountConfig.accountId,
+          accountType: this.getAccountType(
+            undefined,
+            accountConfig.sandboxAccountType
+          ),
+        });
+      }
 
       accountIdsMap[accountConfig.accountId] = true;
       return true;
@@ -338,7 +348,8 @@ class CLIConfiguration {
 
     const currentAccountConfig = this.getAccount(accountId);
 
-    let auth: OAuthAccount_NEW['auth'] = {};
+    let auth: OAuthAccount_NEW['auth'] =
+      (currentAccountConfig && currentAccountConfig.auth) || {};
     if (clientId || clientSecret || scopes || tokenInfo) {
       auth = {
         ...(currentAccountConfig ? currentAccountConfig.auth : {}),
