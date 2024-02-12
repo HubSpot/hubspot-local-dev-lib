@@ -197,6 +197,58 @@ export async function fetchDeployComponentsMetadata(
   });
 }
 
+export async function provisionBuild(
+  accountId: number,
+  projectName: string,
+  platformVersion: string
+): Promise<Build> {
+  return http.post(accountId, {
+    url: `${PROJECTS_API_PATH}/${encodeURIComponent(projectName)}`,
+    query: { platformVersion },
+    timeout: 50000,
+  });
+}
+
+export async function queueBuild(
+  accountId: number,
+  projectName: string,
+  platformVersion: string
+): Promise<void> {
+  return http.post(accountId, {
+    url: `${PROJECTS_API_PATH}/${encodeURIComponent(projectName)}`,
+    query: { platformVersion },
+  });
+}
+
+export async function uploadFileToBuild(
+  accountId: number,
+  projectName: string,
+  filePath: string,
+  path: string
+): Promise<void> {
+  return http.put(accountId, {
+    url: `${PROJECTS_API_PATH}/${encodeURIComponent(
+      projectName
+    )}/builds/staged/files/${encodeURIComponent(path)}`,
+    data: {
+      file: fs.createReadStream(filePath),
+    },
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+}
+
+export async function deleteFileFromBuild(
+  accountId: number,
+  projectName: string,
+  path: string
+): Promise<void> {
+  return http.delete(accountId, {
+    url: `${PROJECTS_API_PATH}/${encodeURIComponent(
+      projectName
+    )}/builds/staged/files/${encodeURIComponent(path)}`,
+  });
+}
+
 export async function cancelStagedBuild(
   accountId: number,
   projectName: string
