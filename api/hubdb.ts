@@ -75,11 +75,11 @@ export async function createRows(
 export async function fetchRows(
   accountId: number,
   tableId: string,
-  query: QueryParams = {}
+  params: QueryParams = {}
 ): Promise<FetchRowsResponse> {
   return http.get(accountId, {
     url: `${HUBDB_API_PATH}/tables/${tableId}/rows/draft`,
-    query,
+    params,
   });
 }
 

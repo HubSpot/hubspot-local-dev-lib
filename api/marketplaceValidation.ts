@@ -16,20 +16,20 @@ export function requestValidation(
 
 export function getValidationStatus(
   accountId: number,
-  query: QueryParams = {}
+  params: QueryParams = {}
 ): Promise<string> {
   return http.get(accountId, {
     url: `${VALIDATION_API_BASE}/status`,
-    query,
+    params,
   });
 }
 
 export function getValidationResults(
   accountId: number,
-  query: QueryParams = {}
+  params: QueryParams = {}
 ): Promise<GetValidationResultsResponse> {
   return http.get(accountId, {
     url: `${VALIDATION_API_BASE}/results`,
-    query,
+    params,
   });
 }
