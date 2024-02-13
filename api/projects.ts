@@ -109,11 +109,11 @@ export async function fetchPlatformVersions(
 export async function fetchProjectBuilds(
   accountId: number,
   projectName: string,
-  query: QueryParams
+  params: QueryParams = {}
 ): Promise<FetchProjectBuildsResponse> {
   return http.get(accountId, {
     url: `${PROJECTS_API_PATH}/${encodeURIComponent(projectName)}/builds`,
-    query,
+    params,
   });
 }
 
@@ -203,8 +203,11 @@ export async function provisionBuild(
   platformVersion: string
 ): Promise<Build> {
   return http.post(accountId, {
-    url: `${PROJECTS_API_PATH}/${encodeURIComponent(projectName)}`,
-    query: { platformVersion },
+    url: `${PROJECTS_API_PATH}/${encodeURIComponent(
+      projectName
+    )}/builds/staged/provision`,
+    params: { platformVersion },
+    headers: { 'Content-Type': 'application/json' },
     timeout: 50000,
   });
 }
@@ -215,8 +218,11 @@ export async function queueBuild(
   platformVersion: string
 ): Promise<void> {
   return http.post(accountId, {
-    url: `${PROJECTS_API_PATH}/${encodeURIComponent(projectName)}`,
-    query: { platformVersion },
+    url: `${PROJECTS_API_PATH}/${encodeURIComponent(
+      projectName
+    )}/builds/staged/queue`,
+    params: { platformVersion },
+    headers: { 'Content-Type': 'application/json' },
   });
 }
 
@@ -257,5 +263,6 @@ export async function cancelStagedBuild(
     url: `${PROJECTS_API_PATH}/${encodeURIComponent(
       projectName
     )}/builds/staged/cancel`,
+    headers: { 'Content-Type': 'application/json' },
   });
 }

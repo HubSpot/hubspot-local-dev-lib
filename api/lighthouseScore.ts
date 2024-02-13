@@ -19,20 +19,20 @@ export async function requestLighthouseScore(
 
 export async function getLighthouseScoreStatus(
   accountId: number,
-  query: QueryParams = {}
+  params: QueryParams = {}
 ): Promise<string> {
   return http.get(accountId, {
     url: `${LIGHTHOUSE_SCORE_API_BASE}/status`,
-    query,
+    params,
   });
 }
 
 export async function getLighthouseScore(
   accountId: number,
-  query: QueryParams = {}
+  params: QueryParams = {}
 ): Promise<GetLighthouseScoreResponse> {
   return http.get(accountId, {
     url: `${LIGHTHOUSE_SCORE_API_BASE}/scores`,
-    query,
+    params,
   });
 }

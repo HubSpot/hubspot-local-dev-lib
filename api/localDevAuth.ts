@@ -48,8 +48,6 @@ export async function fetchScopeData(
 ): Promise<ScopeData> {
   return http.get<ScopeData>(accountId, {
     url: `localdevauth/v1/auth/check-scopes`,
-    query: {
-      scopeGroup,
-    },
+    params: { scopeGroup },
   });
 }
