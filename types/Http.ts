@@ -26,7 +26,7 @@ export type FormData = {
 };
 
 export type HttpOptions = AxiosConfigOptions & {
-  query?: QueryParams;
+  params?: QueryParams;
   timeout?: number;
   encoding?: string | null;
   headers?: { [header: string]: string | string[] | undefined };

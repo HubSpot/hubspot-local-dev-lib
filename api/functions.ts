@@ -13,13 +13,13 @@ export async function getRoutes(accountId: number): Promise<GetRoutesResponse> {
 export async function getFunctionLogs(
   accountId: number,
   route: string,
-  query: QueryParams = {}
+  params: QueryParams = {}
 ) {
-  const { limit = 5 } = query;
+  const { limit = 5 } = params;
 
   return http.get(accountId, {
     url: `${FUNCTION_API_PATH}/results/by-route/${encodeURIComponent(route)}`,
-    query: { ...query, limit },
+    params: { ...params, limit },
   });
 }
 

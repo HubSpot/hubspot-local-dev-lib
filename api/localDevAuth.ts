@@ -23,7 +23,6 @@ export async function fetchAccessToken(
   env: Environment = ENVIRONMENTS.PROD,
   portalId?: number
 ): Promise<AccessTokenResponse> {
-  const query = portalId ? { portalId } : {};
   const axiosConfig = getAxiosConfig({
     env,
     localHostOverride: true,
@@ -31,7 +30,7 @@ export async function fetchAccessToken(
     data: {
       encodedOAuthRefreshToken: personalAccessKey,
     },
-    params: query,
+    params: portalId ? { portalId } : {},
   });
 
   const { data } = await axios<AccessTokenResponse>({
@@ -48,8 +47,6 @@ export async function fetchScopeData(
 ): Promise<ScopeData> {
   return http.get<ScopeData>(accountId, {
     url: `localdevauth/v1/auth/check-scopes`,
-    query: {
-      scopeGroup,
-    },
+    params: { scopeGroup },
   });
 }

@@ -81,7 +81,7 @@ describe('config/CLIConfiguration', () => {
     });
     it('handles sandboxAccountType transforms correctly', () => {
       expect(config.getAccountType(undefined, 'DEVELOPER')).toBe(
-        HUBSPOT_ACCOUNT_TYPES.DEVELOPER_SANDBOX
+        HUBSPOT_ACCOUNT_TYPES.DEVELOPMENT_SANDBOX
       );
       expect(config.getAccountType(undefined, 'STANDARD')).toBe(
         HUBSPOT_ACCOUNT_TYPES.STANDARD_SANDBOX

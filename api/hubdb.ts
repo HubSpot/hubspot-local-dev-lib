@@ -46,6 +46,9 @@ export async function publishTable(
 ): Promise<Table> {
   return http.post(accountId, {
     url: `${HUBDB_API_PATH}/tables/${tableId}/draft/publish`,
+    headers: {
+      'Content-Type': 'application/json',
+    },
   });
 }
 
@@ -72,11 +75,11 @@ export async function createRows(
 export async function fetchRows(
   accountId: number,
   tableId: string,
-  query: QueryParams = {}
+  params: QueryParams = {}
 ): Promise<FetchRowsResponse> {
   return http.get(accountId, {
     url: `${HUBDB_API_PATH}/tables/${tableId}/rows/draft`,
-    query,
+    params,
   });
 }
 

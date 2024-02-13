@@ -1,4 +1,5 @@
 import http from '../http';
+import { QueryParams } from '../types/Http';
 
 const DESIGN_MANAGER_API_PATH = 'designmanager/v1';
 
@@ -12,11 +13,11 @@ type FetchThemesResponse = {
 
 export async function fetchThemes(
   accountId: number,
-  query = {}
+  params: QueryParams = {}
 ): Promise<FetchThemesResponse> {
   return http.get<FetchThemesResponse>(accountId, {
     url: `${DESIGN_MANAGER_API_PATH}/themes/combined`,
-    query,
+    params,
   });
 }
 

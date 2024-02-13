@@ -369,7 +369,7 @@ export function getAccountType(
   }
   if (typeof sandboxAccountType === 'string') {
     if (sandboxAccountType.toUpperCase() === 'DEVELOPER') {
-      return HUBSPOT_ACCOUNT_TYPES.DEVELOPER_SANDBOX;
+      return HUBSPOT_ACCOUNT_TYPES.DEVELOPMENT_SANDBOX;
     }
     if (sandboxAccountType.toUpperCase() === 'STANDARD') {
       return HUBSPOT_ACCOUNT_TYPES.STANDARD_SANDBOX;
@@ -453,7 +453,7 @@ export function removeSandboxAccountFromConfig(
   );
 
   const isSandboxAccount =
-    accountType === HUBSPOT_ACCOUNT_TYPES.DEVELOPER_SANDBOX ||
+    accountType === HUBSPOT_ACCOUNT_TYPES.DEVELOPMENT_SANDBOX ||
     accountType === HUBSPOT_ACCOUNT_TYPES.STANDARD_SANDBOX;
 
   if (!isSandboxAccount) return promptDefaultAccount;
