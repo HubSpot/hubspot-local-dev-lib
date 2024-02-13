@@ -200,7 +200,7 @@ export async function fetchDeployComponentsMetadata(
 export async function provisionBuild(
   accountId: number,
   projectName: string,
-  platformVersion: string
+  platformVersion?: string
 ): Promise<Build> {
   return http.post(accountId, {
     url: `${PROJECTS_API_PATH}/${encodeURIComponent(
@@ -215,7 +215,7 @@ export async function provisionBuild(
 export async function queueBuild(
   accountId: number,
   projectName: string,
-  platformVersion: string
+  platformVersion?: string
 ): Promise<void> {
   return http.post(accountId, {
     url: `${PROJECTS_API_PATH}/${encodeURIComponent(
