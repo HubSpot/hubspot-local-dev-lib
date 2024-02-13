@@ -289,7 +289,7 @@ class CLIConfiguration {
     }
     if (typeof sandboxAccountType === 'string') {
       if (sandboxAccountType.toUpperCase() === 'DEVELOPER') {
-        return HUBSPOT_ACCOUNT_TYPES.DEVELOPER_SANDBOX;
+        return HUBSPOT_ACCOUNT_TYPES.DEVELOPMENT_SANDBOX;
       }
       if (sandboxAccountType.toUpperCase() === 'STANDARD') {
         return HUBSPOT_ACCOUNT_TYPES.STANDARD_SANDBOX;

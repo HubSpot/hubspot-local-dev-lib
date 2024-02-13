@@ -559,7 +559,7 @@ describe('config/config', () => {
     });
     it('handles sandboxAccountType transforms correctly', () => {
       expect(getAccountType(undefined, 'DEVELOPER')).toBe(
-        HUBSPOT_ACCOUNT_TYPES.DEVELOPER_SANDBOX
+        HUBSPOT_ACCOUNT_TYPES.DEVELOPMENT_SANDBOX
       );
       expect(getAccountType(undefined, 'STANDARD')).toBe(
         HUBSPOT_ACCOUNT_TYPES.STANDARD_SANDBOX
