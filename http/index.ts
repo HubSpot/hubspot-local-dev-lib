@@ -119,8 +119,8 @@ async function getRequest<T>(
   accountId: number,
   options: HttpOptions
 ): Promise<T> {
-  const { query, ...rest } = options;
-  const axiosConfig = addQueryParams(rest, query);
+  const { params, ...rest } = options;
+  const axiosConfig = addQueryParams(rest, params);
   const configWithAuth = await withAuth(accountId, axiosConfig);
   const { data } = await axios<T>(configWithAuth);
   return data;
@@ -168,8 +168,8 @@ function createGetRequestStream(contentType: string) {
     options: HttpOptions,
     destPath: string
   ): Promise<AxiosResponse> => {
-    const { query, ...rest } = options;
-    const axiosConfig = addQueryParams(rest, query);
+    const { params, ...rest } = options;
+    const axiosConfig = addQueryParams(rest, params);
 
     // eslint-disable-next-line no-async-promise-executor
     return new Promise<AxiosResponse>(async (resolve, reject) => {
