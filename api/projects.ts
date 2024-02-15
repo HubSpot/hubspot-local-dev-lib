@@ -79,7 +79,7 @@ export async function downloadProject(
     url: `${PROJECTS_API_PATH}/${encodeURIComponent(
       projectName
     )}/builds/${buildId}/archive-full`,
-    encoding: null,
+    responseType: 'arraybuffer',
     headers: { accept: 'application/zip', 'Content-Type': 'application/json' },
   });
 }
