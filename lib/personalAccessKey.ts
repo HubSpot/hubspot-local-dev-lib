@@ -24,6 +24,7 @@ import {
   updateDefaultAccount,
 } from '../config';
 import { HUBSPOT_ACCOUNT_TYPES } from '../constants/config';
+import { fetchDeveloperTestAccountData } from '../api/developerTestAccounts';
 
 const i18nKey = 'lib.personalAccessKey';
 
@@ -186,22 +187,22 @@ export async function updateConfigWithAccessToken(
   const { portalId, accessToken, expiresAt } = token;
   const accountEnv = env || getEnv(name);
 
-  let hubInfo;
-  try {
-    hubInfo = await fetchSandboxHubData(accessToken, portalId, accountEnv);
-  } catch (err) {
-    // Ignore error, returns 404 if account is not a sandbox
-  }
-
   let accountType: AccountType = HUBSPOT_ACCOUNT_TYPES.STANDARD;
   let sandboxAccountType = null;
   let parentAccountId;
-  if (hubInfo) {
-    if (hubInfo.type !== undefined) {
-      const sandboxHubType = hubInfo.type ? hubInfo.type.toUpperCase() : null;
-      switch (sandboxHubType) {
+  try {
+    const sandboxDataResponse = await fetchSandboxHubData(
+      accessToken,
+      portalId,
+      accountEnv
+    );
+    if (sandboxDataResponse) {
+      const hubType = sandboxDataResponse.type
+        ? sandboxDataResponse.type.toUpperCase()
+        : null;
+      switch (hubType) {
         case 'DEVELOPER':
-          accountType = HUBSPOT_ACCOUNT_TYPES.DEVELOPER_SANDBOX;
+          accountType = HUBSPOT_ACCOUNT_TYPES.DEVELOPMENT_SANDBOX;
           sandboxAccountType = 'DEVELOPER';
           break;
         case 'STANDARD':
@@ -213,11 +214,28 @@ export async function updateConfigWithAccessToken(
           sandboxAccountType = 'STANDARD';
           break;
       }
+      if (sandboxDataResponse.parentHubId) {
+        parentAccountId = sandboxDataResponse.parentHubId;
+      }
     }
+  } catch (err) {
+    // Ignore error, returns 404 if account is not a sandbox
+  }
 
-    if (hubInfo.parentHubId) {
-      parentAccountId = hubInfo.parentHubId;
+  try {
+    if (accountType === HUBSPOT_ACCOUNT_TYPES.STANDARD) {
+      const developerTestAccountResponse = await fetchDeveloperTestAccountData(
+        accessToken,
+        portalId,
+        accountEnv
+      );
+      if (developerTestAccountResponse) {
+        accountType = HUBSPOT_ACCOUNT_TYPES.DEVELOPER_TEST;
+        parentAccountId = developerTestAccountResponse.parentPortalId;
+      }
     }
+  } catch (err) {
+    // Ignore error, returns 404 if account is not a test account
   }
 
   const updatedConfig = updateAccountConfig({

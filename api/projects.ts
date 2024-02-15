@@ -79,7 +79,7 @@ export async function downloadProject(
     url: `${PROJECTS_API_PATH}/${encodeURIComponent(
       projectName
     )}/builds/${buildId}/archive-full`,
-    encoding: null,
+    responseType: 'arraybuffer',
     headers: { accept: 'application/zip', 'Content-Type': 'application/json' },
   });
 }
@@ -109,11 +109,11 @@ export async function fetchPlatformVersions(
 export async function fetchProjectBuilds(
   accountId: number,
   projectName: string,
-  query: QueryParams
+  params: QueryParams = {}
 ): Promise<FetchProjectBuildsResponse> {
   return http.get(accountId, {
     url: `${PROJECTS_API_PATH}/${encodeURIComponent(projectName)}/builds`,
-    query,
+    params,
   });
 }
 
@@ -197,6 +197,64 @@ export async function fetchDeployComponentsMetadata(
   });
 }
 
+export async function provisionBuild(
+  accountId: number,
+  projectName: string,
+  platformVersion?: string
+): Promise<Build> {
+  return http.post(accountId, {
+    url: `${PROJECTS_API_PATH}/${encodeURIComponent(
+      projectName
+    )}/builds/staged/provision`,
+    params: { platformVersion },
+    headers: { 'Content-Type': 'application/json' },
+    timeout: 50000,
+  });
+}
+
+export async function queueBuild(
+  accountId: number,
+  projectName: string,
+  platformVersion?: string
+): Promise<void> {
+  return http.post(accountId, {
+    url: `${PROJECTS_API_PATH}/${encodeURIComponent(
+      projectName
+    )}/builds/staged/queue`,
+    params: { platformVersion },
+    headers: { 'Content-Type': 'application/json' },
+  });
+}
+
+export async function uploadFileToBuild(
+  accountId: number,
+  projectName: string,
+  filePath: string,
+  path: string
+): Promise<void> {
+  return http.put(accountId, {
+    url: `${PROJECTS_API_PATH}/${encodeURIComponent(
+      projectName
+    )}/builds/staged/files/${encodeURIComponent(path)}`,
+    data: {
+      file: fs.createReadStream(filePath),
+    },
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+}
+
+export async function deleteFileFromBuild(
+  accountId: number,
+  projectName: string,
+  path: string
+): Promise<void> {
+  return http.delete(accountId, {
+    url: `${PROJECTS_API_PATH}/${encodeURIComponent(
+      projectName
+    )}/builds/staged/files/${encodeURIComponent(path)}`,
+  });
+}
+
 export async function cancelStagedBuild(
   accountId: number,
   projectName: string
@@ -205,5 +263,6 @@ export async function cancelStagedBuild(
     url: `${PROJECTS_API_PATH}/${encodeURIComponent(
       projectName
     )}/builds/staged/cancel`,
+    headers: { 'Content-Type': 'application/json' },
   });
 }

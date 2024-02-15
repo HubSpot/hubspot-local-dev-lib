@@ -166,6 +166,16 @@ class CLIConfiguration {
         }
         accountNamesMap[accountConfig.name] = true;
       }
+      if (!accountConfig.accountType) {
+        this.updateAccount({
+          ...accountConfig,
+          accountId: accountConfig.accountId,
+          accountType: this.getAccountType(
+            undefined,
+            accountConfig.sandboxAccountType
+          ),
+        });
+      }
 
       accountIdsMap[accountConfig.accountId] = true;
       return true;
@@ -289,7 +299,7 @@ class CLIConfiguration {
     }
     if (typeof sandboxAccountType === 'string') {
       if (sandboxAccountType.toUpperCase() === 'DEVELOPER') {
-        return HUBSPOT_ACCOUNT_TYPES.DEVELOPER_SANDBOX;
+        return HUBSPOT_ACCOUNT_TYPES.DEVELOPMENT_SANDBOX;
       }
       if (sandboxAccountType.toUpperCase() === 'STANDARD') {
         return HUBSPOT_ACCOUNT_TYPES.STANDARD_SANDBOX;
@@ -338,7 +348,8 @@ class CLIConfiguration {
 
     const currentAccountConfig = this.getAccount(accountId);
 
-    let auth: OAuthAccount_NEW['auth'] = {};
+    let auth: OAuthAccount_NEW['auth'] =
+      (currentAccountConfig && currentAccountConfig.auth) || {};
     if (clientId || clientSecret || scopes || tokenInfo) {
       auth = {
         ...(currentAccountConfig ? currentAccountConfig.auth : {}),

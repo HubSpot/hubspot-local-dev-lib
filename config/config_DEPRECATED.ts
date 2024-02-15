@@ -106,6 +106,7 @@ export function validateConfig(): boolean {
   }
   const accountIdsHash: { [id: number]: CLIAccount_DEPRECATED } = {};
   const accountNamesHash: { [name: string]: CLIAccount_DEPRECATED } = {};
+
   return accounts.every(cfg => {
     if (!cfg) {
       logger.error('config.portals[] has an empty entry');
@@ -136,6 +137,15 @@ export function validateConfig(): boolean {
         return false;
       }
       accountNamesHash[cfg.name] = cfg;
+    }
+
+    if (!cfg.accountType) {
+      updateAccountConfig({
+        ...cfg,
+        portalId: accountId,
+        accountType: getAccountType(undefined, cfg.sandboxAccountType),
+      });
+      writeConfig();
     }
 
     accountIdsHash[accountId] = cfg;
@@ -359,7 +369,7 @@ export function getAccountType(
   }
   if (typeof sandboxAccountType === 'string') {
     if (sandboxAccountType.toUpperCase() === 'DEVELOPER') {
-      return HUBSPOT_ACCOUNT_TYPES.DEVELOPER_SANDBOX;
+      return HUBSPOT_ACCOUNT_TYPES.DEVELOPMENT_SANDBOX;
     }
     if (sandboxAccountType.toUpperCase() === 'STANDARD') {
       return HUBSPOT_ACCOUNT_TYPES.STANDARD_SANDBOX;
@@ -443,7 +453,7 @@ export function removeSandboxAccountFromConfig(
   );
 
   const isSandboxAccount =
-    accountType === HUBSPOT_ACCOUNT_TYPES.DEVELOPER_SANDBOX ||
+    accountType === HUBSPOT_ACCOUNT_TYPES.DEVELOPMENT_SANDBOX ||
     accountType === HUBSPOT_ACCOUNT_TYPES.STANDARD_SANDBOX;
 
   if (!isSandboxAccount) return promptDefaultAccount;
@@ -499,7 +509,8 @@ export function updateAccountConfig(
   const config = getAndLoadConfigIfNeeded() as CLIConfig_DEPRECATED;
   const accountConfig = getAccountConfig(portalId);
 
-  let auth: OAuthAccount_DEPRECATED['auth'] | undefined = undefined;
+  let auth: OAuthAccount_DEPRECATED['auth'] | undefined =
+    accountConfig && accountConfig.auth;
   if (clientId || clientSecret || scopes || tokenInfo) {
     auth = {
       ...(accountConfig ? accountConfig.auth : {}),

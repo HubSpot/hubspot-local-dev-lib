@@ -44,13 +44,13 @@ export async function getSandboxUsageLimits(
 
 export async function fetchSandboxHubData(
   accessToken: string,
-  portalId: number,
+  accountId: number,
   env: Environment = ENVIRONMENTS.PROD
 ): Promise<SandboxHubData> {
   const axiosConfig = getAxiosConfig({
     env,
     url: `${SANDBOX_API_PATH}/self`,
-    params: { portalId },
+    params: { portalId: accountId },
   });
   const reqWithToken = {
     ...axiosConfig,
