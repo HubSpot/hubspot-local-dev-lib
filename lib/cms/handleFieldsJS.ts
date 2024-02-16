@@ -4,7 +4,7 @@ import path from 'path';
 import { fork } from 'child_process';
 import { escapeRegExp } from '../../utils/escapeRegExp';
 import { isModuleFolderChild } from '../../utils/cms/modules';
-import { logger } from '../logging/logger';
+import { logger } from '../logger';
 import { throwErrorWithMessage } from '../../errors/standardErrors';
 import { BaseError } from '../../types/Error';
 import { i18n } from '../../utils/lang';

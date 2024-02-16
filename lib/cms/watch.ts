@@ -14,7 +14,7 @@ import { escapeRegExp } from '../../utils/escapeRegExp';
 import { convertToUnixPath, isAllowedExtension, getCwd } from '../path';
 import { triggerNotify } from '../../utils/notify';
 import { getThemePreviewUrl, getThemeJSONPath } from './themes';
-import { logger } from '../logging/logger';
+import { logger } from '../logger';
 import { FileMapperInputOptions, Mode } from '../../types/Files';
 import { UploadFolderResults } from '../../types/Files';
 import { i18n } from '../../utils/lang';

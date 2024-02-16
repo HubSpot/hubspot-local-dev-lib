@@ -10,7 +10,7 @@ import { getOauthManager } from '../lib/oauth';
 import { FlatAccountFields } from '../types/Accounts';
 import { AxiosConfigOptions, HttpOptions, QueryParams } from '../types/Http';
 import { throwErrorWithMessage } from '../errors/standardErrors';
-import { logger } from '../lib/logging/logger';
+import { logger } from '../lib/logger';
 import { i18n } from '../utils/lang';
 
 const i18nKey = 'http.index';

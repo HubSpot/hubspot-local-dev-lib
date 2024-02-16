@@ -2,7 +2,7 @@ import OAuth2Manager from '../models/OAuth2Manager';
 import { AUTH_METHODS } from '../constants/auth';
 import { FlatAccountFields } from '../types/Accounts';
 import { throwError } from '../errors/standardErrors';
-import { logger } from './logging/logger';
+import { logger } from './logger';
 import { BaseError } from '../types/Error';
 import { getAccountIdentifier } from '../utils/getAccountIdentifier';
 import { updateAccountConfig, writeConfig } from '../config';

@@ -10,7 +10,7 @@ import {
   convertToLocalFileSystemPath,
   isAllowedExtension,
 } from './path';
-import { logger } from './logging/logger';
+import { logger } from './logger';
 import { fetchFileStream, download, downloadDefault } from '../api/fileMapper';
 import { throwError, throwErrorWithMessage } from '../errors/standardErrors';
 import { MODULE_EXTENSION, FUNCTIONS_EXTENSION } from '../constants/extensions';

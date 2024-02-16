@@ -16,7 +16,7 @@ import {
 } from '../constants/auth';
 import { MODE } from '../constants/files';
 import { getValidEnv } from '../lib/environment';
-import { logger } from '../lib/logging/logger';
+import { logger } from '../lib/logger';
 import { isConfigPathInGitRepo } from '../utils/git';
 import {
   logErrorInstance,

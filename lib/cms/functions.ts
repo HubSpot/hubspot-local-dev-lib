@@ -3,7 +3,7 @@ import path from 'path';
 import findup from 'findup-sync';
 import { getCwd } from '../path';
 import { downloadGithubRepoContents } from '../github';
-import { logger } from '../logging/logger';
+import { logger } from '../logger';
 import { throwErrorWithMessage } from '../../errors/standardErrors';
 import { throwFileSystemError } from '../../errors/fileSystemErrors';
 import { BaseError } from '../../types/Error';

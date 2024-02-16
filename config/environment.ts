@@ -1,5 +1,5 @@
 import { CLIConfig_NEW, Environment } from '../types/Config';
-import { logger } from '../lib/logging/logger';
+import { logger } from '../lib/logger';
 import { ENVIRONMENT_VARIABLES } from '../constants/environments';
 import {
   API_KEY_AUTH_METHOD,

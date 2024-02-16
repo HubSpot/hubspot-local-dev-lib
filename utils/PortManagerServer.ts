@@ -9,7 +9,7 @@ import {
   PORT_MANAGER_SERVER_PORT,
 } from '../constants/ports';
 import { throwErrorWithMessage } from '../errors/standardErrors';
-import { logger } from '../lib/logging/logger';
+import { logger } from '../lib/logger';
 import { i18n } from './lang';
 import { BaseError } from '../types/Error';
 import { RequestPortsData } from '../types/PortManager';

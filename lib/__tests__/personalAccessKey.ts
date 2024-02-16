@@ -17,7 +17,7 @@ import {
 import { AuthType } from '../../types/Accounts';
 
 jest.mock('../../config');
-jest.mock('../logging/logger');
+jest.mock('../logger');
 jest.mock('../../api/localDevAuth');
 jest.mock('../../api/sandboxHubs');
 jest.mock('../../api/developerTestAccounts');

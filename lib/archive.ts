@@ -5,7 +5,7 @@ import extract from 'extract-zip';
 
 import { throwFileSystemError } from '../errors/fileSystemErrors';
 import { throwErrorWithMessage } from '../errors/standardErrors';
-import { logger } from './logging/logger';
+import { logger } from './logger';
 import { BaseError } from '../types/Error';
 import { i18n } from '../utils/lang';
 

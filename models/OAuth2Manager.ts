@@ -4,7 +4,7 @@ import moment from 'moment';
 import { getHubSpotApiOrigin } from '../lib/urls';
 import { getValidEnv } from '../lib/environment';
 import { FlatAccountFields, TokenInfo } from '../types/Accounts';
-import { logger } from '../lib/logging/logger';
+import { logger } from '../lib/logger';
 import { getAccountIdentifier } from '../utils/getAccountIdentifier';
 import { AUTH_METHODS } from '../constants/auth';
 import {

@@ -2,7 +2,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import os from 'os';
 import yaml from 'js-yaml';
-import { logger } from '../lib/logging/logger';
+import { logger } from '../lib/logger';
 import { throwFileSystemError } from '../errors/fileSystemErrors';
 import { throwError, throwErrorWithMessage } from '../errors/standardErrors';
 import {
