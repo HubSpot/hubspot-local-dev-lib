@@ -11,7 +11,7 @@ import {
 import { getFileMapperQueryValues } from '../fileMapper';
 import { upload } from '../../api/fileMapper';
 import { isModuleFolderChild } from '../../utils/cms/modules';
-import { escapeRegExp } from '../../utils/escapeRegExp';
+import { escapeRegExp } from '../escapeRegExp';
 import { convertToUnixPath, getExt } from '../path';
 import { isFatalError } from '../../errors/standardErrors';
 import { throwApiUploadError } from '../../errors/apiErrors';

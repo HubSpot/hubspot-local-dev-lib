@@ -2,7 +2,7 @@ import fs from 'fs-extra';
 import os from 'os';
 import path from 'path';
 import { fork } from 'child_process';
-import { escapeRegExp } from '../../utils/escapeRegExp';
+import { escapeRegExp } from '../escapeRegExp';
 import { isModuleFolderChild } from '../../utils/cms/modules';
 import { logger } from '../logging/logger';
 import { throwErrorWithMessage } from '../../errors/standardErrors';
