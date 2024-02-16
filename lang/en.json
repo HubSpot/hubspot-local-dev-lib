@@ -238,6 +238,15 @@
         "invalidFetchFolderRequest": "Invalid request for folder: \"{{ src }}\"",
         "incompleteFetch": "Not all files in folder \"{{ src }}\" were successfully fetched.  Re-run the last command to try again"
       }
+    },
+    "sandboxes": {
+      "accountType": {
+        "developmentSandbox": "development sandbox",
+        "standardSandbox": "standard sandbox",
+        "developerTest": "developer test account",
+        "appDeveloper": "app developer account",
+        "standard": "production account"
+      }
     }
   },
   "config": {

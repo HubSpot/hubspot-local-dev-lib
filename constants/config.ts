@@ -1,3 +1,5 @@
+import { i18n } from '../utils/lang';
+
 export const DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME = 'hubspot.config.yml';
 
 export const HUBSPOT_CONFIGURATION_FOLDER = '.hubspot';
@@ -11,4 +13,12 @@ export const HUBSPOT_ACCOUNT_TYPES = {
   APP_DEVELOPER: 'APP_DEVELOPER',
   STANDARD_SANDBOX: 'STANDARD_SANDBOX',
   STANDARD: 'STANDARD',
+} as const;
+
+export const HUBSPOT_ACCOUNT_TYPE_STRINGS = {
+  DEVELOPMENT_SANDBOX: i18n('lib.sandboxes.accountType.developmentSandbox'),
+  STANDARD_SANDBOX: i18n('lib.sandboxes.accountType.standardSandbox'),
+  DEVELOPER_TEST: i18n('lib.sandboxes.accountType.developerTest'),
+  APP_DEVELOPER: i18n('lib.sandboxes.accountType.appDeveloper'),
+  STANDARD: i18n('lib.sandboxes.accountType.standard'),
 } as const;
