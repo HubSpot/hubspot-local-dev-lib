@@ -268,16 +268,16 @@ export async function retrieveDefaultModule(
 ) {
   if (!name) {
     const defaultReactModules = await listGithubRepoContents(
-      'HubSpot/cms-sample-assets',
-      'modules/',
+      'HubSpot/cms-react',
+      'default-react-modules/src/components/modules/',
       'dir'
     );
     return defaultReactModules;
   }
 
   await downloadGithubRepoContents(
-    'HubSpot/cms-sample-assets',
-    `modules/${name}`,
+    'HubSpot/cms-react',
+    `default-react-modules/src/components/modules/${name}`,
     dest
   );
 }
