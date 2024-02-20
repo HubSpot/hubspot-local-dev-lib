@@ -16,9 +16,9 @@ export const HUBSPOT_ACCOUNT_TYPES = {
 } as const;
 
 export const HUBSPOT_ACCOUNT_TYPE_STRINGS = {
-  DEVELOPMENT_SANDBOX: i18n('lib.sandboxes.accountType.developmentSandbox'),
-  STANDARD_SANDBOX: i18n('lib.sandboxes.accountType.standardSandbox'),
-  DEVELOPER_TEST: i18n('lib.sandboxes.accountType.developerTest'),
-  APP_DEVELOPER: i18n('lib.sandboxes.accountType.appDeveloper'),
-  STANDARD: i18n('lib.sandboxes.accountType.standard'),
+  DEVELOPMENT_SANDBOX: i18n('lib.accountTypes.developmentSandbox'),
+  STANDARD_SANDBOX: i18n('lib.accountTypes.standardSandbox'),
+  DEVELOPER_TEST: i18n('lib.accountTypes.developerTest'),
+  APP_DEVELOPER: i18n('lib.accountTypes.appDeveloper'),
+  STANDARD: i18n('lib.accountTypes.standard'),
 } as const;
