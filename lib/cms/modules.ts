@@ -121,51 +121,35 @@ const MODULE_STRING_TRANSFORMATIONS = [
   },
 ];
 
-const transformFileContents = (
+const updateFileContents = async (
   file: string,
   metaData: object,
   getInternalVersion: boolean
 ) => {
-  fs.readFile(file, 'utf8', (err, data) => {
-    if (err) {
-      throwErrorWithMessage(`${i18nKey}.createModule.errors.fileReadFailure`, {
-        path: file,
-      });
-    }
-
-    let results = data;
+  try {
+    let fileContents = await fs.readFile(file, 'utf8'); // returns Promise
 
     MODULE_STRING_TRANSFORMATIONS.forEach(entry => {
       const replacementString = getInternalVersion
         ? entry.string
         : entry.fallback;
 
-      results = results.replace(entry.regex, replacementString);
+      fileContents = fileContents.replace(entry.regex, replacementString);
     });
 
-    fs.writeFile(file, results, 'utf8', err => {
-      if (err) {
-        throwErrorWithMessage(`${i18nKey}.createModule.errors.failedToWrite`, {
-          path: file,
-        });
-      }
-    });
+    await fs.writeFile(file, fileContents, 'utf8');
 
-    fs.appendFile(
+    await fs.appendFile(
       file,
-      'export const meta = ' + JSON.stringify(metaData, null, ' '),
-      err => {
-        if (err) {
-          throwErrorWithMessage(
-            `${i18nKey}.createModule.errors.failedToWrite`,
-            {
-              path: file,
-            }
-          );
-        }
-      }
+      'export const meta = ' + JSON.stringify(metaData, null, ' ')
     );
-  });
+  } catch (error) {
+    const { message } = error as Error;
+    throwErrorWithMessage(`${i18nKey}.createModule.errors.fileUpdateFailure`, {
+      path: file,
+      errorMessage: message,
+    });
+  }
 };
 
 type ModuleDefinition = {
@@ -184,7 +168,27 @@ export async function createModule(
     allowExistingDir: false,
   }
 ) {
-  const { reactType: isReactModule } = moduleDefinition;
+  const {
+    moduleLabel,
+    contentTypes,
+    global,
+    reactType: isReactModule,
+  } = moduleDefinition;
+
+  const moduleMetaData = {
+    label: moduleLabel,
+    css_assets: [],
+    external_js: [],
+    global: global,
+    help_text: '',
+    host_template_types: contentTypes,
+    js_assets: [],
+    other_assets: [],
+    smart_type: 'NOT_SMART',
+    tags: [],
+    is_available_for_new_content: false,
+  };
+
   const folderName = name.endsWith('.module') ? name : `${name}.module`;
   const destPath = !isReactModule
     ? path.join(dest, folderName)
@@ -209,39 +213,13 @@ export async function createModule(
     })
   );
 
-  // Write module meta
-  const writeModuleMeta = (
-    { moduleLabel, contentTypes, global, reactType }: ModuleDefinition,
-    dest: string
-  ) => {
-    const metaData = {
-      label: moduleLabel,
-      css_assets: [],
-      external_js: [],
-      global: global,
-      help_text: '',
-      host_template_types: contentTypes,
-      js_assets: [],
-      other_assets: [],
-      smart_type: 'NOT_SMART',
-      tags: [],
-      is_available_for_new_content: false,
-    };
-
-    if (!reactType) {
-      fs.writeJSONSync(dest, metaData, { spaces: 2 });
-    } else {
-      transformFileContents(`${dest}/index.tsx`, metaData, getInternalVersion);
-    }
-  };
-
-  // Filter out ceratin fetched files from the response
+  // Filter out certain fetched files from the response
   const moduleFileFilter = (src: string, dest: string) => {
     const emailEnabled = moduleDefinition.contentTypes.includes('EMAIL');
 
     switch (path.basename(src)) {
       case 'meta.json':
-        writeModuleMeta(moduleDefinition, dest);
+        fs.writeJSONSync(dest, moduleMetaData, { spaces: 2 }); // writing a meta.json file to standard HubL modules
         return false;
       case 'module.js':
       case 'module.css':
@@ -274,9 +252,13 @@ export async function createModule(
     moduleFileFilter
   );
 
-  // Mutating React module files after fetch
+  // Updating React module files after fetch
   if (isReactModule) {
-    writeModuleMeta(moduleDefinition, destPath);
+    await updateFileContents(
+      `${destPath}/index.tsx`,
+      moduleMetaData,
+      getInternalVersion
+    );
   }
 }
 
@@ -286,16 +268,16 @@ export async function retrieveDefaultModule(
 ) {
   if (!name) {
     const defaultReactModules = await listGithubRepoContents(
-      'HubSpot/cms-sample-assets',
-      'modules/',
+      'HubSpot/cms-react',
+      'default-react-modules/src/components/modules/',
       'dir'
     );
     return defaultReactModules;
   }
 
   await downloadGithubRepoContents(
-    'HubSpot/cms-sample-assets',
-    `modules/${name}`,
+    'HubSpot/cms-react',
+    `default-react-modules/src/components/modules/${name}`,
     dest
   );
 }
