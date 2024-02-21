@@ -13,7 +13,7 @@ import { walk } from './fs';
 import { logger } from './logging/logger';
 import { createIgnoreFilter } from './ignoreRules';
 import http from '../http';
-import { escapeRegExp } from '../utils/escapeRegExp';
+import { escapeRegExp } from './escapeRegExp';
 import {
   getCwd,
   convertToUnixPath,

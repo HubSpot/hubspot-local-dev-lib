@@ -39,6 +39,7 @@ type AccessToken = {
   accessToken: string;
   expiresAt: string;
   scopeGroups: Array<string>;
+  enabledFeatures?: { [key: string]: number };
   encodedOAuthRefreshToken: string;
   hubName: string;
 };
@@ -68,6 +69,7 @@ export async function getAccessToken(
     accessToken: response.oauthAccessToken,
     expiresAt: moment(response.expiresAtMillis).toISOString(),
     scopeGroups: response.scopeGroups,
+    enabledFeatures: response.enabledFeatures,
     encodedOAuthRefreshToken: response.encodedOAuthRefreshToken,
     hubName: response.hubName,
   };
@@ -77,12 +79,13 @@ async function refreshAccessToken(
   personalAccessKey: string,
   env: Environment = ENVIRONMENTS.PROD,
   accountId: number
-): Promise<string> {
-  const { accessToken, expiresAt } = await getAccessToken(
+): Promise<AccessToken> {
+  const accessTokenResponse = await getAccessToken(
     personalAccessKey,
     env,
     accountId
   );
+  const { accessToken, expiresAt } = accessTokenResponse;
   const config = getAccountConfig(accountId);
 
   updateAccountConfig({
@@ -96,7 +99,7 @@ async function refreshAccessToken(
   });
   writeConfig();
 
-  return accessToken;
+  return accessTokenResponse;
 }
 
 async function getNewAccessToken(
@@ -104,12 +107,12 @@ async function getNewAccessToken(
   personalAccessKey: string,
   expiresAt: string | undefined,
   env: Environment
-): Promise<string> {
+): Promise<AccessToken> {
   const key = getRefreshKey(personalAccessKey, expiresAt);
   if (refreshRequests.has(key)) {
     return refreshRequests.get(key);
   }
-  let accessToken;
+  let accessTokenResponse;
   try {
     const refreshAccessPromise = refreshAccessToken(
       personalAccessKey,
@@ -119,14 +122,14 @@ async function getNewAccessToken(
     if (key) {
       refreshRequests.set(key, refreshAccessPromise);
     }
-    accessToken = await refreshAccessPromise;
+    accessTokenResponse = await refreshAccessPromise;
   } catch (e) {
     if (key) {
       refreshRequests.delete(key);
     }
     throw e;
   }
-  return accessToken;
+  return accessTokenResponse;
 }
 
 export async function accessTokenForPersonalAccessKey(
@@ -149,10 +152,29 @@ export async function accessTokenForPersonalAccessKey(
       personalAccessKey,
       authTokenInfo && authTokenInfo.expiresAt,
       env
-    );
+    ).then(tokenInfo => tokenInfo.accessToken);
   }
 
   return auth?.tokenInfo?.accessToken;
+}
+
+export async function enabledFeaturesForPersonalAccessKey(
+  accountId: number
+): Promise<{ [key: string]: number } | undefined> {
+  const account = getAccountConfig(accountId) as PersonalAccessKeyAccount;
+  if (!account) {
+    throwErrorWithMessage(`${i18nKey}.errors.accountNotFound`, { accountId });
+  }
+  const { auth, personalAccessKey, env } = account;
+  const authTokenInfo = auth && auth.tokenInfo;
+
+  const accessTokenResponse = await getNewAccessToken(
+    accountId,
+    personalAccessKey,
+    authTokenInfo && authTokenInfo.expiresAt,
+    env
+  );
+  return accessTokenResponse?.enabledFeatures;
 }
 
 export async function updateConfigWithAccessToken(
