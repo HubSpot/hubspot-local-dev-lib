@@ -12,3 +12,4 @@ npm-debug.log.*
 .env
 /dist
 yarn.lock
+package-lock.json

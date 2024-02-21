@@ -83,9 +83,7 @@
           "creatingPath": "Creating {{ path }}",
           "errors": {
             "pathExists": "The {{ path }} path already exists",
-            "failedToWriteMeta": "There was an problem writing the module's meta data at {{ path }}",
-            "fileReadFailure": "Failed to read file at {{ path }}",
-            "failedToWrite": "failed to write to file at {{ path }}"
+            "fileUpdateFailure": "There was a problem updating the modules files at {{ path }}: {{ errorMessage }}"
           }
         },
         "retrieveDefaultModule": {
@@ -223,6 +221,13 @@
         "invalidFetchFolderRequest": "Invalid request for folder: \"{{ src }}\"",
         "incompleteFetch": "Not all files in folder \"{{ src }}\" were successfully fetched.  Re-run the last command to try again"
       }
+    },
+    "accountTypes": {
+      "developmentSandbox": "development sandbox",
+      "standardSandbox": "standard sandbox",
+      "developerTest": "developer test account",
+      "appDeveloper": "app developer account",
+      "standard": "production account"
     }
   },
   "config": {
