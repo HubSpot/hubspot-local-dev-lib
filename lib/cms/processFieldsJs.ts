@@ -3,7 +3,6 @@
 import path from 'path';
 import fs from 'fs';
 import semver from 'semver';
-import { pathToFileURL } from 'url';
 import { getExt } from '../path';
 import { throwError, throwErrorWithMessage } from '../../errors/standardErrors';
 import { FieldsJs } from './handleFieldsJS';
@@ -99,9 +98,7 @@ async function fieldsArrayToJson(fields: Array<FieldsJs>): Promise<string> {
  */
 async function dynamicImport(filePath: string): Promise<any> {
   if (semver.gte(process.version, '13.2.0')) {
-    const exported = await import(pathToFileURL(filePath).toString()).then(
-      content => content.default
-    );
+    const exported = await import(filePath).then(content => content.default);
     return exported;
   } else {
     if (getExt(filePath) == 'mjs') {
