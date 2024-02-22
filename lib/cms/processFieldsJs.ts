@@ -7,6 +7,8 @@ import { getExt } from '../path';
 import { throwError, throwErrorWithMessage } from '../../errors/standardErrors';
 import { FieldsJs } from './handleFieldsJS';
 import { i18n } from '../../utils/lang';
+import { pathToFileURL } from 'url';
+import { logger } from '../logging/logger';
 
 const i18nKey = 'lib.cms.processFieldsJs';
 
@@ -98,7 +100,17 @@ async function fieldsArrayToJson(fields: Array<FieldsJs>): Promise<string> {
  */
 async function dynamicImport(filePath: string): Promise<any> {
   if (semver.gte(process.version, '13.2.0')) {
-    const exported = await import(filePath).then(content => content.default);
+    let exported;
+
+    try {
+      exported = await import(pathToFileURL(filePath).toString()).then(
+        content => content.default
+      );
+    } catch (e) {
+      logger.debug(e);
+      exported = await import(filePath).then(content => content.default);
+    }
+
     return exported;
   } else {
     if (getExt(filePath) == 'mjs') {
