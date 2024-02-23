@@ -3,11 +3,11 @@
 import path from 'path';
 import fs from 'fs';
 import semver from 'semver';
+import { pathToFileURL } from 'url';
 import { getExt } from '../path';
 import { throwError, throwErrorWithMessage } from '../../errors/standardErrors';
 import { FieldsJs } from './handleFieldsJS';
 import { i18n } from '../../utils/lang';
-import { pathToFileURL } from 'url';
 
 const i18nKey = 'lib.cms.processFieldsJs';
 
