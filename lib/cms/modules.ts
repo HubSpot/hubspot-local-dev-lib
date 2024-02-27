@@ -112,13 +112,13 @@ export async function validateSrcAndDestPaths(
 const MODULE_STRING_TRANSFORMATIONS = [
   {
     regex: /\/\* import global styles \*\//g,
-    string: 'import "./global-samplejsr.css";',
+    string: 'import "./global-sample-react-module.css";',
     fallback: '',
   },
   {
     regex: /\/\* Default config \*\//g,
     string:
-      'export const defaultModuleConfig = { \n  moduleName: "sample_jsr", \n  version: 0, \n};',
+      'export const defaultModuleConfig = { \n  moduleName: "sample_react-module", \n  version: 0, \n};',
     fallback: '',
   },
 ];
@@ -249,7 +249,7 @@ export async function createModule(
           return false;
         }
         return true;
-      case 'global-samplejsr.css':
+      case 'global-sample-react-module.css':
       case 'stories':
       case 'tests':
         if (getInternalVersion) {
