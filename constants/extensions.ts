@@ -22,3 +22,4 @@ export const ALLOWED_EXTENSIONS = new Set([
 export const HUBL_EXTENSIONS = new Set(['css', 'html', 'js']);
 export const MODULE_EXTENSION = 'module';
 export const FUNCTIONS_EXTENSION = 'functions';
+export const FOLDER_DOT_EXTENSIONS = [FUNCTIONS_EXTENSION, MODULE_EXTENSION];
