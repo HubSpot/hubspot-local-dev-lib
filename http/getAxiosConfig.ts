@@ -9,6 +9,10 @@ export const DEFAULT_USER_AGENT_HEADERS = {
   'User-Agent': `HubSpot Local Dev Lib/${version}`,
 };
 
+const DEFAULT_TRANSITIONAL = {
+  clarifyTimeoutError: true,
+};
+
 export function getAxiosConfig(
   options: AxiosConfigOptions
 ): AxiosRequestConfig {
@@ -26,6 +30,7 @@ export function getAxiosConfig(
       ...(headers || {}),
     },
     timeout: httpTimeout || 15000,
+    transitional: DEFAULT_TRANSITIONAL,
     ...rest,
   };
 }

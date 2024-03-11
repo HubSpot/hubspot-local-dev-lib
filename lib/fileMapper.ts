@@ -265,7 +265,7 @@ async function writeFileMapperNode(
 }
 
 function isTimeout(err: BaseError): boolean {
-  return !!err && (err.status === 408 || err.code === 'ESOCKETTIMEDOUT');
+  return !!err && (err.status === 408 || err.code === 'ETIMEDOUT');
 }
 
 async function downloadFile(
@@ -332,22 +332,13 @@ export async function fetchFolderFromApi(
       src,
     });
   }
-  try {
-    const srcPath = isRoot ? '@root' : src;
-    const queryValues = getFileMapperQueryValues(mode, options);
-    const node = isHubspot
-      ? await downloadDefault(accountId, srcPath, queryValues)
-      : await download(accountId, srcPath, queryValues);
-    logger.log(i18n(`${i18nKey}.folderFetch`, { src, accountId }));
-    return node;
-  } catch (err) {
-    const error = err as BaseError;
-    if (isHubspot && isTimeout(error)) {
-      throwErrorWithMessage(`${i18nKey}.errors.assetTimeout`, {}, error);
-    } else {
-      throwError(error);
-    }
-  }
+  const srcPath = isRoot ? '@root' : src;
+  const queryValues = getFileMapperQueryValues(mode, options);
+  const node = isHubspot
+    ? await downloadDefault(accountId, srcPath, queryValues)
+    : await download(accountId, srcPath, queryValues);
+  logger.log(i18n(`${i18nKey}.folderFetch`, { src, accountId }));
+  return node;
 }
 
 async function downloadFolder(
@@ -401,11 +392,16 @@ async function downloadFolder(
       throwErrorWithMessage(`${i18nKey}.errors.incompleteFetch`, { src });
     }
   } catch (err) {
-    throwErrorWithMessage(
-      `${i18nKey}.errors.failedToFetchFolder`,
-      { src, dest: destPath },
-      err as AxiosError
-    );
+    const error = err as AxiosError;
+    if (isTimeout(error)) {
+      throwErrorWithMessage(`${i18nKey}.errors.assetTimeout`, {}, error);
+    } else {
+      throwErrorWithMessage(
+        `${i18nKey}.errors.failedToFetchFolder`,
+        { src, dest: destPath },
+        err as AxiosError
+      );
+    }
   }
 }
 
