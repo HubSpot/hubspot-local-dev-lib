@@ -736,6 +736,9 @@ function getConfigVariablesFromEnv() {
     personalAccessKey: env[ENVIRONMENT_VARIABLES.HUBSPOT_PERSONAL_ACCESS_KEY],
     portalId: parseInt(env[ENVIRONMENT_VARIABLES.HUBSPOT_PORTAL_ID] || '', 10),
     refreshToken: env[ENVIRONMENT_VARIABLES.HUBSPOT_REFRESH_TOKEN],
+    httpTimeout: env[ENVIRONMENT_VARIABLES.HTTP_TIMEOUT]
+      ? parseInt(env[ENVIRONMENT_VARIABLES.HTTP_TIMEOUT] || '')
+      : undefined,
     env: getValidEnv(
       env[ENVIRONMENT_VARIABLES.HUBSPOT_ENVIRONMENT] as Environment
     ),
@@ -745,8 +748,9 @@ function getConfigVariablesFromEnv() {
 function generatePersonalAccessKeyConfig(
   portalId: number,
   personalAccessKey: string,
-  env: Environment
-): { portals: Array<CLIAccount_DEPRECATED> } {
+  env: Environment,
+  httpTimeout?: number
+): { portals: Array<CLIAccount_DEPRECATED>; httpTimeout?: number } {
   return {
     portals: [
       {
@@ -756,6 +760,7 @@ function generatePersonalAccessKeyConfig(
         env,
       },
     ],
+    httpTimeout,
   };
 }
 
@@ -765,8 +770,9 @@ function generateOauthConfig(
   clientSecret: string,
   refreshToken: string,
   scopes: Array<string>,
-  env: Environment
-): { portals: Array<OAuthAccount_DEPRECATED> } {
+  env: Environment,
+  httpTimeout?: number
+): { portals: Array<OAuthAccount_DEPRECATED>; httpTimeout?: number } {
   return {
     portals: [
       {
@@ -783,6 +789,7 @@ function generateOauthConfig(
         env,
       },
     ],
+    httpTimeout,
   };
 }
 
@@ -816,6 +823,7 @@ export function loadConfigFromEnvironment({
     portalId,
     refreshToken,
     env,
+    httpTimeout,
   } = getConfigVariablesFromEnv();
   const unableToLoadEnvConfigError =
     'Unable to load config from environment variables.';
@@ -825,8 +833,19 @@ export function loadConfigFromEnvironment({
     return;
   }
 
+  if (httpTimeout && httpTimeout < MIN_HTTP_TIMEOUT) {
+    throw new Error(
+      `The HTTP timeout value ${httpTimeout} is invalid. The value must be a number greater than ${MIN_HTTP_TIMEOUT}.`
+    );
+  }
+
   if (personalAccessKey) {
-    return generatePersonalAccessKeyConfig(portalId, personalAccessKey, env);
+    return generatePersonalAccessKeyConfig(
+      portalId,
+      personalAccessKey,
+      env,
+      httpTimeout
+    );
   } else if (clientId && clientSecret && refreshToken) {
     return generateOauthConfig(
       portalId,
@@ -834,7 +853,8 @@ export function loadConfigFromEnvironment({
       clientSecret,
       refreshToken,
       OAUTH_SCOPES.map(scope => scope.value),
-      env
+      env,
+      httpTimeout
     );
   } else if (apiKey) {
     return generateApiKeyConfig(portalId, apiKey, env);
