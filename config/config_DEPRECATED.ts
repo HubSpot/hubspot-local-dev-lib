@@ -737,7 +737,7 @@ function getConfigVariablesFromEnv() {
     portalId: parseInt(env[ENVIRONMENT_VARIABLES.HUBSPOT_PORTAL_ID] || '', 10),
     refreshToken: env[ENVIRONMENT_VARIABLES.HUBSPOT_REFRESH_TOKEN],
     httpTimeout: env[ENVIRONMENT_VARIABLES.HTTP_TIMEOUT]
-      ? parseInt(env[ENVIRONMENT_VARIABLES.HTTP_TIMEOUT] || '')
+      ? parseInt(env[ENVIRONMENT_VARIABLES.HTTP_TIMEOUT] as string)
       : undefined,
     env: getValidEnv(
       env[ENVIRONMENT_VARIABLES.HUBSPOT_ENVIRONMENT] as Environment

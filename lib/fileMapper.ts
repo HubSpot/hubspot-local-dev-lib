@@ -22,6 +22,7 @@ import {
   FileMapperInputOptions,
 } from '../types/Files';
 import { throwFileSystemError } from '../errors/fileSystemErrors';
+import { isTimeoutError } from '../errors/apiErrors';
 import { BaseError } from '../types/Error';
 import { i18n } from '../utils/lang';
 
@@ -264,10 +265,6 @@ async function writeFileMapperNode(
   return true;
 }
 
-function isTimeout(err: BaseError): boolean {
-  return !!err && (err.status === 408 || err.code === 'ETIMEDOUT');
-}
-
 async function downloadFile(
   accountId: number,
   src: string,
@@ -308,7 +305,7 @@ async function downloadFile(
     );
   } catch (err) {
     const error = err as AxiosError;
-    if (isHubspot && isTimeout(error)) {
+    if (isHubspot && isTimeoutError(error)) {
       throwErrorWithMessage(`${i18nKey}.errors.assetTimeout`, {}, error);
     } else {
       throwErrorWithMessage(
@@ -393,7 +390,7 @@ async function downloadFolder(
     }
   } catch (err) {
     const error = err as AxiosError;
-    if (isTimeout(error)) {
+    if (isTimeoutError(error)) {
       throwErrorWithMessage(`${i18nKey}.errors.assetTimeout`, {}, error);
     } else {
       throwErrorWithMessage(

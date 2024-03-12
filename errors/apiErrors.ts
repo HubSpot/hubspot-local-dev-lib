@@ -19,7 +19,13 @@ export function isSpecifiedError(
     statusCode,
     category,
     subCategory,
-  }: { statusCode?: number; category?: string; subCategory?: string }
+    code,
+  }: {
+    statusCode?: number;
+    category?: string;
+    subCategory?: string;
+    code?: string;
+  }
 ): boolean {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const error = (err && (err.cause as AxiosError<any>)) || err;
@@ -27,8 +33,15 @@ export function isSpecifiedError(
   const categoryErr = !category || error.response?.data?.category === category;
   const subCategoryErr =
     !subCategory || error.response?.data?.subCategory === subCategory;
+  const codeError = !code || error.code === code;
 
-  return error.isAxiosError && statusCodeErr && categoryErr && subCategoryErr;
+  return (
+    error.isAxiosError &&
+    statusCodeErr &&
+    categoryErr &&
+    subCategoryErr &&
+    codeError
+  );
 }
 
 export function isMissingScopeError(err: Error | AxiosError): boolean {
@@ -37,6 +50,10 @@ export function isMissingScopeError(err: Error | AxiosError): boolean {
 
 export function isGatingError(err: Error | AxiosError): boolean {
   return isSpecifiedError(err, { statusCode: 403, category: 'GATED' });
+}
+
+export function isTimeoutError(err: Error | AxiosError): boolean {
+  return isSpecifiedError(err, { code: 'ETIMEDOUT' });
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
