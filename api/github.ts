@@ -39,6 +39,7 @@ export async function fetchRepoAsZip(
   zipUrl: string
 ): Promise<AxiosResponse<Buffer>> {
   return axios.get<Buffer>(zipUrl, {
+    responseType: 'arraybuffer',
     headers: { ...DEFAULT_USER_AGENT_HEADERS, ...GITHUB_AUTH_HEADERS },
   });
 }
