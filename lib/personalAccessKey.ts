@@ -10,11 +10,7 @@ import {
 import { fetchAccessToken } from '../api/localDevAuth';
 import { fetchSandboxHubData } from '../api/sandboxHubs';
 import { BaseError } from '../types/Error';
-import {
-  AccountType,
-  CLIAccount,
-  PersonalAccessKeyAccount,
-} from '../types/Accounts';
+import { CLIAccount, PersonalAccessKeyAccount } from '../types/Accounts';
 import { Environment } from '../types/Config';
 import {
   getAccountConfig,
@@ -25,6 +21,8 @@ import {
 } from '../config';
 import { HUBSPOT_ACCOUNT_TYPES } from '../constants/config';
 import { fetchDeveloperTestAccountData } from '../api/developerTestAccounts';
+import { logger } from './logging/logger';
+import { getAxiosErrorWithContext } from '../errors/apiErrors';
 
 const i18nKey = 'lib.personalAccessKey';
 
@@ -42,6 +40,7 @@ type AccessToken = {
   enabledFeatures?: { [key: string]: number };
   encodedOAuthRefreshToken: string;
   hubName: string;
+  accountType: keyof typeof HUBSPOT_ACCOUNT_TYPES;
 };
 
 export async function getAccessToken(
@@ -72,6 +71,7 @@ export async function getAccessToken(
     enabledFeatures: response.enabledFeatures,
     encodedOAuthRefreshToken: response.encodedOAuthRefreshToken,
     hubName: response.hubName,
+    accountType: response.accountType,
   };
 }
 
@@ -184,58 +184,43 @@ export async function updateConfigWithAccessToken(
   name?: string,
   makeDefault = false
 ): Promise<CLIAccount | null> {
-  const { portalId, accessToken, expiresAt } = token;
+  const { portalId, accessToken, expiresAt, accountType } = token;
   const accountEnv = env || getEnv(name);
 
-  let accountType: AccountType = HUBSPOT_ACCOUNT_TYPES.STANDARD;
-  let sandboxAccountType = null;
   let parentAccountId;
   try {
-    const sandboxDataResponse = await fetchSandboxHubData(
-      accessToken,
-      portalId,
-      accountEnv
-    );
-    if (sandboxDataResponse) {
-      const hubType = sandboxDataResponse.type
-        ? sandboxDataResponse.type.toUpperCase()
-        : null;
-      switch (hubType) {
-        case 'DEVELOPER':
-          accountType = HUBSPOT_ACCOUNT_TYPES.DEVELOPMENT_SANDBOX;
-          sandboxAccountType = 'DEVELOPER';
-          break;
-        case 'STANDARD':
-          accountType = HUBSPOT_ACCOUNT_TYPES.STANDARD_SANDBOX;
-          sandboxAccountType = 'STANDARD';
-          break;
-        default:
-          accountType = HUBSPOT_ACCOUNT_TYPES.STANDARD_SANDBOX;
-          sandboxAccountType = 'STANDARD';
-          break;
-      }
+    if (
+      accountType === HUBSPOT_ACCOUNT_TYPES.STANDARD_SANDBOX ||
+      accountType === HUBSPOT_ACCOUNT_TYPES.DEVELOPMENT_SANDBOX
+    ) {
+      const sandboxDataResponse = await fetchSandboxHubData(
+        accessToken,
+        portalId,
+        accountEnv
+      );
       if (sandboxDataResponse.parentHubId) {
         parentAccountId = sandboxDataResponse.parentHubId;
       }
     }
   } catch (err) {
-    // Ignore error, returns 404 if account is not a sandbox
+    // Log error but do not throw
+    logger.debug(getAxiosErrorWithContext(err as AxiosError).message);
   }
 
   try {
-    if (accountType === HUBSPOT_ACCOUNT_TYPES.STANDARD) {
+    if (accountType === HUBSPOT_ACCOUNT_TYPES.DEVELOPER_TEST) {
       const developerTestAccountResponse = await fetchDeveloperTestAccountData(
         accessToken,
         portalId,
         accountEnv
       );
       if (developerTestAccountResponse) {
-        accountType = HUBSPOT_ACCOUNT_TYPES.DEVELOPER_TEST;
         parentAccountId = developerTestAccountResponse.parentPortalId;
       }
     }
   } catch (err) {
-    // Ignore error, returns 404 if account is not a test account
+    // Log error but do not throw
+    logger.debug(getAxiosErrorWithContext(err as AxiosError).message);
   }
 
   const updatedConfig = updateAccountConfig({
@@ -245,7 +230,6 @@ export async function updateConfigWithAccessToken(
     name,
     authType: PERSONAL_ACCESS_KEY_AUTH_METHOD.value,
     tokenInfo: { accessToken, expiresAt },
-    sandboxAccountType,
     parentAccountId,
     env: accountEnv,
   });
