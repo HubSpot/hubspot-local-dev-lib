@@ -23,6 +23,7 @@ import { HUBSPOT_ACCOUNT_TYPES } from '../constants/config';
 import { fetchDeveloperTestAccountData } from '../api/developerTestAccounts';
 import { logger } from './logging/logger';
 import { getAxiosErrorWithContext } from '../errors/apiErrors';
+import { ValueOf } from '../types/Utils';
 
 const i18nKey = 'lib.personalAccessKey';
 
@@ -40,7 +41,7 @@ type AccessToken = {
   enabledFeatures?: { [key: string]: number };
   encodedOAuthRefreshToken: string;
   hubName: string;
-  accountType: keyof typeof HUBSPOT_ACCOUNT_TYPES;
+  accountType: ValueOf<typeof HUBSPOT_ACCOUNT_TYPES>;
 };
 
 export async function getAccessToken(
