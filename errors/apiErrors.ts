@@ -1,10 +1,5 @@
 import { AxiosError } from 'axios';
-import {
-  GenericError,
-  AxiosErrorContext,
-  BaseError,
-  ValidationError,
-} from '../types/Error';
+import { GenericError, AxiosErrorContext, BaseError } from '../types/Error';
 import { HTTP_METHOD_VERBS, HTTP_METHOD_PREPOSITIONS } from '../constants/api';
 import { i18n } from '../utils/lang';
 import { throwError } from './standardErrors';
@@ -79,45 +74,6 @@ export function isSpecifiedHubSpotAuthError(
       categoryErr &&
       subCategoryErr
   );
-}
-
-function parseValidationErrors(
-  responseData: {
-    errors?: Array<ValidationError>;
-    message?: string;
-  } = { errors: [], message: '' }
-) {
-  const errorMessages = [];
-
-  const { errors, message } = responseData;
-
-  if (message) {
-    errorMessages.push(message);
-  }
-
-  if (errors) {
-    const specificErrors = errors.map(error => {
-      let errorMessage = error.message;
-      if (error.errorTokens && error.errorTokens.line) {
-        errorMessage = `line ${error.errorTokens.line}: ${errorMessage}`;
-      }
-      return errorMessage;
-    });
-    errorMessages.push(...specificErrors);
-  }
-
-  return errorMessages;
-}
-
-/**
- * @throws
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function throwValidationErrors(error: AxiosError<any>) {
-  const validationErrorMessages = parseValidationErrors(error?.response?.data);
-  if (validationErrorMessages.length) {
-    throwError(new Error(validationErrorMessages.join(' '), { cause: error }));
-  }
 }
 
 export function getAxiosErrorWithContext(
@@ -239,17 +195,4 @@ export function throwApiError(
     throw getAxiosErrorWithContext(error, context);
   }
   throwError(error);
-}
-
-/**
- * @throws
- */
-export function throwApiUploadError(
-  error: AxiosError,
-  context: AxiosErrorContext = {}
-): never {
-  if (isApiUploadValidationError(error)) {
-    throwValidationErrors(error);
-  }
-  throwApiError(error, context);
 }
