@@ -4,7 +4,7 @@ import PQueue from 'p-queue';
 import debounce from 'debounce';
 import { AxiosError } from 'axios';
 
-import { throwApiError } from '../../errors/apiErrors';
+import { throwApiError, throwApiUploadError } from '../../errors/apiErrors';
 import { isConvertableFieldJs, FieldsJs } from './handleFieldsJS';
 import { uploadFolder } from './uploadFolder';
 import { shouldIgnoreFile, ignoreFile } from '../ignoreRules';
@@ -111,7 +111,7 @@ async function uploadFile(
                 dest,
               })
             );
-            throwApiError(error, {
+            throwApiUploadError(error, {
               accountId,
               request: dest,
               payload: file,

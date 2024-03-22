@@ -6,6 +6,7 @@ import {
   isSpecifiedHubSpotAuthError,
   getAxiosErrorWithContext,
   throwApiError,
+  throwApiUploadError,
   isSpecifiedError,
 } from '../apiErrors';
 import { BaseError } from '../../types/Error';
@@ -323,6 +324,13 @@ describe('errors/apiErrors', () => {
     it('throws api error', () => {
       const error = newAxiosError();
       expect(() => throwApiError(error)).toThrow();
+    });
+  });
+
+  describe('throwApiUploadError()', () => {
+    it('throws api upload error', () => {
+      const error = newAxiosError();
+      expect(() => throwApiUploadError(error)).toThrow();
     });
   });
 });
