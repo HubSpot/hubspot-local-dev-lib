@@ -16,6 +16,12 @@ export interface BaseError extends Error {
   errors?: Array<BaseError>;
 }
 
+export interface ValidationError extends BaseError {
+  errorTokens?: {
+    line: number;
+  };
+}
+
 export type FileSystemErrorContext = {
   filepath?: string;
   write?: boolean;
