@@ -81,7 +81,7 @@ export function isSpecifiedHubSpotAuthError(
   );
 }
 
-function parseValidationErrors(
+export function parseValidationErrors(
   responseData: {
     errors?: Array<ValidationError>;
     message?: string;
@@ -113,7 +113,7 @@ function parseValidationErrors(
  * @throws
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function getValidationError(error: AxiosError<any>) {
+function throwValidationError(error: AxiosError<any>) {
   const validationErrorMessages = parseValidationErrors(error?.response?.data);
   if (validationErrorMessages.length) {
     return new Error(validationErrorMessages.join(' '), { cause: error });
@@ -246,7 +246,7 @@ export function throwApiUploadError(
   context: AxiosErrorContext = {}
 ): never {
   if (isApiUploadValidationError(error)) {
-    throw getValidationError(error);
+    throwValidationError(error);
   }
   throwApiError(error, context);
 }
