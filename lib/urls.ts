@@ -15,8 +15,11 @@ export function getHubSpotApiOrigin(
   env?: string,
   useLocalHost?: boolean
 ): string {
-  let domain = process.env.HUBAPI_DOMAIN_OVERRIDE;
-
+  let domain;
+  const domainOverride = process.env.HUBAPI_DOMAIN_OVERRIDE;
+  if (domainOverride && typeof domainOverride === 'string') {
+    domain = `${domainOverride}${getEnvUrlString(env)}`;
+  }
   if (!domain || typeof domain !== 'string') {
     domain = `${useLocalHost ? 'local' : 'api'}.hubapi${getEnvUrlString(env)}`;
   }
