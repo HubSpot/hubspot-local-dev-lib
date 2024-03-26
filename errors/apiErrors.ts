@@ -65,7 +65,7 @@ export function isTimeoutError(err: Error | AxiosError): boolean {
 export function isApiUploadValidationError(err: AxiosError<any>): boolean {
   return (
     err.isAxiosError &&
-    err.status === 400 &&
+    (err.status === 400 || err.response?.status === 400) &&
     !!err.response &&
     !!(err.response?.data?.message || !!err.response?.data?.errors)
   );
