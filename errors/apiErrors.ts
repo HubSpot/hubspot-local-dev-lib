@@ -19,11 +19,13 @@ export function isSpecifiedError(
     statusCode,
     category,
     subCategory,
+    errorType,
     code,
   }: {
     statusCode?: number;
     category?: string;
     subCategory?: string;
+    errorType?: string;
     code?: string;
   }
 ): boolean {
@@ -33,6 +35,8 @@ export function isSpecifiedError(
   const categoryErr = !category || error.response?.data?.category === category;
   const subCategoryErr =
     !subCategory || error.response?.data?.subCategory === subCategory;
+  const errorTypeErr =
+    !errorType || error.response?.data?.errorType === errorType;
   const codeError = !code || error.code === code;
 
   return (
@@ -40,6 +44,7 @@ export function isSpecifiedError(
     statusCodeErr &&
     categoryErr &&
     subCategoryErr &&
+    errorTypeErr &&
     codeError
   );
 }
