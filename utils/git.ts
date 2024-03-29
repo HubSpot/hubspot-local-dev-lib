@@ -16,7 +16,7 @@ function getGitComparisonDir(): string | null {
 }
 
 // Get all .gitignore files since they can cascade down directory structures
-function getGitignoreFiles(configPath: string): Array<string> {
+export function getGitignoreFiles(configPath: string): Array<string> {
   const gitDir = getGitComparisonDir();
   const files = [] as Array<string>;
   if (!gitDir) {
@@ -70,29 +70,4 @@ export function configFilenameIsIgnoredByGitignore(
     }
     return false;
   });
-}
-
-type GitInclusionResult = {
-  inGit: boolean;
-  configIgnored: boolean;
-  gitignoreFiles: Array<string>;
-};
-
-export function checkGitInclusion(configPath: string): GitInclusionResult {
-  const result: GitInclusionResult = {
-    inGit: false,
-    configIgnored: false,
-    gitignoreFiles: [],
-  };
-
-  if (isConfigPathInGitRepo(configPath)) {
-    result.inGit = true;
-    result.gitignoreFiles = getGitignoreFiles(configPath);
-
-    if (configFilenameIsIgnoredByGitignore(result.gitignoreFiles, configPath)) {
-      // Found ignore statement in .gitignore that matches config filename
-      result.configIgnored = true;
-    }
-  }
-  return result;
 }

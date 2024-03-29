@@ -2,7 +2,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import { downloadGithubRepoContents } from '../github';
 import { throwErrorWithMessage } from '../../errors/standardErrors';
-import { logger } from '../logging/logger';
+import { logger } from '../logger';
 import { i18n } from '../../utils/lang';
 
 const i18nKey = 'lib.cms.templates';

@@ -10,7 +10,7 @@ import {
   fetchFolders,
 } from '../api/fileManager';
 import { walk } from './fs';
-import { logger } from './logging/logger';
+import { logger } from './logger';
 import { createIgnoreFilter } from './ignoreRules';
 import http from '../http';
 import { escapeRegExp } from './escapeRegExp';

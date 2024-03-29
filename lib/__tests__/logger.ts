@@ -7,9 +7,9 @@ import {
   LOG_LEVEL,
   logger,
   shouldLog,
-} from '../logging/logger';
+} from '../logger';
 
-describe('lib/logging/logger', () => {
+describe('lib/logger', () => {
   afterEach(() => {
     setLogLevel(LOG_LEVEL.LOG);
   });

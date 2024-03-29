@@ -3,7 +3,7 @@ import fs from 'fs-extra';
 
 import { throwError, throwErrorWithMessage } from '../errors/standardErrors';
 import { extractZipArchive } from './archive';
-import { logger } from './logging/logger';
+import { logger } from './logger';
 import { GenericError, BaseError } from '../types/Error';
 import { GithubReleaseData, GithubRepoFile } from '../types/Github';
 import {

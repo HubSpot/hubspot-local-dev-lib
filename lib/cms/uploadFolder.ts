@@ -16,7 +16,7 @@ import { convertToUnixPath, getExt } from '../path';
 import { isFatalError } from '../../errors/standardErrors';
 import { throwApiUploadError } from '../../errors/apiErrors';
 import { FileMapperInputOptions } from '../../types/Files';
-import { logger } from '../logging/logger';
+import { logger } from '../logger';
 import { FILE_TYPES, FILE_UPLOAD_RESULT_TYPES } from '../../constants/files';
 import { FileType, UploadFolderResults } from '../../types/Files';
 import { Mode } from '../../types/Files';

@@ -183,21 +183,6 @@
         "ready": "Watcher is ready and watching {{ src }}. Any changes detected will be automatically uploaded and overwrite the current version in the developer file system."
       }
     },
-    "logging": {
-      "git": {
-        "securityIssue": "Security Issue Detected",
-        "configFileTracked": "The HubSpot config file can be tracked by git.",
-        "fileName": "File: \"{{ configPath }}\"",
-        "remediate": "To remediate:",
-        "moveConfig": "- Move the config file to your home directory: '{{ homeDir }}'",
-        "addGitignore": "- Add gitignore pattern '{{ configPath }}' to a .gitignore file in root of your repository.",
-        "noRemote": "- Ensure that the config file has not already been pushed to a remote repository.",
-        "checkFailed": "Unable to determine if config file is properly ignored by git."
-      },
-      "logs": {
-        "unableToProcessLog": "Unable to process log {{ log }}"
-      }
-    },
     "oauth": {
       "writeTokenInfo": "Updating Oauth2 token info for portalId: {{ portalId }}",
       "addOauthToAccountConfig": {

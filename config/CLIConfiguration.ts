@@ -1,4 +1,4 @@
-import { logger } from '../lib/logging/logger';
+import { logger } from '../lib/logger';
 import { throwErrorWithMessage } from '../errors/standardErrors';
 import { loadConfigFromEnvironment } from './environment';
 import { getValidEnv } from '../lib/environment';

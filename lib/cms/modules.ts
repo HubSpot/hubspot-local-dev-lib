@@ -4,7 +4,7 @@ import { getCwd } from '../path';
 import { walk } from '../fs';
 import { listGithubRepoContents, downloadGithubRepoContents } from '../github';
 import { throwErrorWithMessage } from '../../errors/standardErrors';
-import { logger } from '../logging/logger';
+import { logger } from '../logger';
 import {
   isPathInput,
   isModuleFolder,

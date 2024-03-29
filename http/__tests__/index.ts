@@ -13,7 +13,7 @@ import { AuthType } from '../../types/Accounts';
 jest.mock('fs-extra');
 jest.mock('axios');
 jest.mock('../../config');
-jest.mock('../../lib/logging/logger');
+jest.mock('../../lib/logger');
 
 const mockedAxios = jest.mocked(axios);
 const getAndLoadConfigIfNeeded =

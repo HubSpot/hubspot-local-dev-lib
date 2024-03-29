@@ -1,4 +1,4 @@
-import { logger } from '../lib/logging/logger';
+import { logger } from '../lib/logger';
 import {
   API_KEY_AUTH_METHOD,
   OAUTH_AUTH_METHOD,

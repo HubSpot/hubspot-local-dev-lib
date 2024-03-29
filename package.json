@@ -55,7 +55,6 @@
     "./http": "./http/index.js",
     "./config": "./config/index.js",
     "./constants/*": "./constants/*.js",
-    "./logger": "./lib/logging/logger.js",
     "./models/*": "./models/*.js"
   },
   "dependencies": {
@@ -76,7 +75,6 @@
     "p-queue": "^6.0.2",
     "prettier": "^3.0.3",
     "semver": "^6.3.0",
-    "table": "^6.8.1",
     "unixify": "^1.0.0"
   },
   "engines": {
