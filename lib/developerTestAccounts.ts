@@ -6,7 +6,10 @@ import {
 
 import { AxiosError } from 'axios';
 import { throwApiError } from '../errors/apiErrors';
-import { DeveloperTestAccount } from '../types/developerTestAccounts';
+import {
+  DeveloperTestAccount,
+  FetchDeveloperTestAccountsResponse,
+} from '../types/developerTestAccounts';
 
 export async function createDeveloperTestAccount(
   accountId: number,
@@ -34,10 +37,10 @@ export async function deleteDeveloperTestAccount(
 
 export async function fetchDeveloperTestAccounts(
   accountId: number
-): Promise<DeveloperTestAccount[]> {
+): Promise<FetchDeveloperTestAccountsResponse> {
   try {
     const resp = await _fetchDeveloperTestAccounts(accountId);
-    return resp.results;
+    return resp;
   } catch (err) {
     throwApiError(err as AxiosError);
   }

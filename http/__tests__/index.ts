@@ -148,6 +148,9 @@ describe('http/index', () => {
         params: {
           portalId: 123,
         },
+        transitional: {
+          clarifyTimeoutError: true,
+        },
       });
     });
     it('adds authorization header when using a user token', async () => {
@@ -182,6 +185,9 @@ describe('http/index', () => {
         params: {
           portalId: 123,
         },
+        transitional: {
+          clarifyTimeoutError: true,
+        },
       });
     });
 
@@ -214,6 +220,9 @@ describe('http/index', () => {
         params: {
           portalId: 123,
           hapikey: 'abc',
+        },
+        transitional: {
+          clarifyTimeoutError: true,
         },
       });
     });

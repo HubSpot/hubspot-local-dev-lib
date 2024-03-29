@@ -4,6 +4,8 @@ import { ENVIRONMENTS } from '../constants/environments';
 import { Environment } from '../types/Config';
 import { ScopeData } from '../types/Accounts';
 import axios from 'axios';
+import { HUBSPOT_ACCOUNT_TYPES } from '../constants/config';
+import { ValueOf } from '../types/Utils';
 
 const LOCALDEVAUTH_API_AUTH_PATH = 'localdevauth/v1/auth';
 
@@ -16,6 +18,7 @@ type AccessTokenResponse = {
   scopeGroups: Array<string>;
   encodedOAuthRefreshToken: string;
   hubName: string;
+  accountType: ValueOf<typeof HUBSPOT_ACCOUNT_TYPES>;
 };
 
 export async function fetchAccessToken(

@@ -1,7 +1,7 @@
 import path from 'path';
 import chokidar from 'chokidar';
 import PQueue from 'p-queue';
-import { debounce } from 'debounce';
+import debounce from 'debounce';
 import { AxiosError } from 'axios';
 
 import { throwApiError, throwApiUploadError } from '../../errors/apiErrors';

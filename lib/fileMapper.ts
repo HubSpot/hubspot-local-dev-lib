@@ -22,6 +22,7 @@ import {
   FileMapperInputOptions,
 } from '../types/Files';
 import { throwFileSystemError } from '../errors/fileSystemErrors';
+import { isTimeoutError } from '../errors/apiErrors';
 import { BaseError } from '../types/Error';
 import { i18n } from '../utils/lang';
 
@@ -264,10 +265,6 @@ async function writeFileMapperNode(
   return true;
 }
 
-function isTimeout(err: BaseError): boolean {
-  return !!err && (err.status === 408 || err.code === 'ESOCKETTIMEDOUT');
-}
-
 async function downloadFile(
   accountId: number,
   src: string,
@@ -308,7 +305,7 @@ async function downloadFile(
     );
   } catch (err) {
     const error = err as AxiosError;
-    if (isHubspot && isTimeout(error)) {
+    if (isHubspot && isTimeoutError(error)) {
       throwErrorWithMessage(`${i18nKey}.errors.assetTimeout`, {}, error);
     } else {
       throwErrorWithMessage(
@@ -332,22 +329,13 @@ export async function fetchFolderFromApi(
       src,
     });
   }
-  try {
-    const srcPath = isRoot ? '@root' : src;
-    const queryValues = getFileMapperQueryValues(mode, options);
-    const node = isHubspot
-      ? await downloadDefault(accountId, srcPath, queryValues)
-      : await download(accountId, srcPath, queryValues);
-    logger.log(i18n(`${i18nKey}.folderFetch`, { src, accountId }));
-    return node;
-  } catch (err) {
-    const error = err as BaseError;
-    if (isHubspot && isTimeout(error)) {
-      throwErrorWithMessage(`${i18nKey}.errors.assetTimeout`, {}, error);
-    } else {
-      throwError(error);
-    }
-  }
+  const srcPath = isRoot ? '@root' : src;
+  const queryValues = getFileMapperQueryValues(mode, options);
+  const node = isHubspot
+    ? await downloadDefault(accountId, srcPath, queryValues)
+    : await download(accountId, srcPath, queryValues);
+  logger.log(i18n(`${i18nKey}.folderFetch`, { src, accountId }));
+  return node;
 }
 
 async function downloadFolder(
@@ -401,11 +389,16 @@ async function downloadFolder(
       throwErrorWithMessage(`${i18nKey}.errors.incompleteFetch`, { src });
     }
   } catch (err) {
-    throwErrorWithMessage(
-      `${i18nKey}.errors.failedToFetchFolder`,
-      { src, dest: destPath },
-      err as AxiosError
-    );
+    const error = err as AxiosError;
+    if (isTimeoutError(error)) {
+      throwErrorWithMessage(`${i18nKey}.errors.assetTimeout`, {}, error);
+    } else {
+      throwErrorWithMessage(
+        `${i18nKey}.errors.failedToFetchFolder`,
+        { src, dest: destPath },
+        err as AxiosError
+      );
+    }
   }
 }
 

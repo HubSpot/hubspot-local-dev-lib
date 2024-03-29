@@ -9,4 +9,5 @@ export type DeveloperTestAccount = {
 
 export type FetchDeveloperTestAccountsResponse = {
   results: DeveloperTestAccount[];
+  maxTestPortals: number;
 };

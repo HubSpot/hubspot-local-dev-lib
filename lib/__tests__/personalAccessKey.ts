@@ -67,6 +67,7 @@ describe('lib/personalAccessKey', () => {
         hubId: accountId,
         userId: 456,
         hubName: 'test-hub',
+        accountType: HUBSPOT_ACCOUNT_TYPES.STANDARD,
       });
       const accessToken = await accessTokenForPersonalAccessKey(accountId);
       expect(accessToken).toEqual(freshAccessToken);
@@ -119,6 +120,7 @@ describe('lib/personalAccessKey', () => {
         hubId: accountId,
         userId: 456,
         hubName: 'test-hub',
+        accountType: HUBSPOT_ACCOUNT_TYPES.STANDARD,
       });
       const accessToken = await accessTokenForPersonalAccessKey(accountId);
       expect(accessToken).toEqual(freshAccessToken);
@@ -159,6 +161,7 @@ describe('lib/personalAccessKey', () => {
         hubId: accountId,
         userId,
         hubName: 'test-hub',
+        accountType: HUBSPOT_ACCOUNT_TYPES.STANDARD,
       });
       const firstRefreshedAccessToken =
         await accessTokenForPersonalAccessKey(accountId);
@@ -181,6 +184,7 @@ describe('lib/personalAccessKey', () => {
         hubId: accountId,
         userId,
         hubName: 'test-hub',
+        accountType: HUBSPOT_ACCOUNT_TYPES.STANDARD,
       });
 
       const secondRefreshedAccessToken =
@@ -193,6 +197,10 @@ describe('lib/personalAccessKey', () => {
     beforeEach(() => {
       fetchAccessToken.mockClear();
       updateAccountConfig.mockClear();
+    });
+
+    it('updates the config with the new account', async () => {
+      fetchAccessToken.mockClear();
 
       const freshAccessToken = 'fresh-token';
       fetchAccessToken.mockResolvedValue({
@@ -203,11 +211,8 @@ describe('lib/personalAccessKey', () => {
         hubId: 123,
         userId: 456,
         hubName: 'test-hub',
+        accountType: HUBSPOT_ACCOUNT_TYPES.STANDARD,
       });
-    });
-
-    it('updates the config with the new account', async () => {
-      fetchAccessToken.mockClear();
 
       const token = await getAccessToken('pak_123', ENVIRONMENTS.QA, 123);
 
@@ -225,7 +230,6 @@ describe('lib/personalAccessKey', () => {
           personalAccessKey: 'pak_123',
           name: 'account-name',
           authType: 'personalaccesskey',
-          sandboxAccountType: null,
         })
       );
     });
@@ -236,14 +240,19 @@ describe('lib/personalAccessKey', () => {
         parentHubId: 789,
       });
 
-      const token = await getAccessToken('pak_123', ENVIRONMENTS.QA, 123);
+      const freshAccessToken = 'fresh-token';
+      fetchAccessToken.mockResolvedValue({
+        oauthAccessToken: freshAccessToken,
+        expiresAtMillis: moment().add(1, 'hours').valueOf(),
+        encodedOAuthRefreshToken: 'let-me-in-5',
+        scopeGroups: ['content'],
+        hubId: 123,
+        userId: 456,
+        hubName: 'test-hub',
+        accountType: HUBSPOT_ACCOUNT_TYPES.DEVELOPMENT_SANDBOX,
+      });
 
-      await updateConfigWithAccessToken(
-        token,
-        'pak_123',
-        ENVIRONMENTS.QA,
-        'account-name'
-      );
+      const token = await getAccessToken('pak_123', ENVIRONMENTS.QA, 123);
 
       await updateConfigWithAccessToken(
         token,
@@ -259,7 +268,6 @@ describe('lib/personalAccessKey', () => {
           personalAccessKey: 'pak_123',
           name: 'account-name',
           authType: 'personalaccesskey',
-          sandboxAccountType: 'DEVELOPER',
           parentAccountId: 789,
         })
       );
@@ -274,6 +282,18 @@ describe('lib/personalAccessKey', () => {
         createdAt: '123',
         updatedAt: '123',
         status: 'ACTIVE',
+      });
+
+      const freshAccessToken = 'fresh-token';
+      fetchAccessToken.mockResolvedValue({
+        oauthAccessToken: freshAccessToken,
+        expiresAtMillis: moment().add(1, 'hours').valueOf(),
+        encodedOAuthRefreshToken: 'let-me-in-5',
+        scopeGroups: ['content'],
+        hubId: 123,
+        userId: 456,
+        hubName: 'test-hub',
+        accountType: HUBSPOT_ACCOUNT_TYPES.DEVELOPER_TEST,
       });
 
       const token = await getAccessToken('pak_123', ENVIRONMENTS.QA, 123);
@@ -292,7 +312,6 @@ describe('lib/personalAccessKey', () => {
           personalAccessKey: 'pak_123',
           name: 'Dev test portal',
           authType: 'personalaccesskey',
-          sandboxAccountType: null,
           parentAccountId: 999,
         })
       );

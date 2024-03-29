@@ -99,10 +99,10 @@ async function fieldsArrayToJson(fields: Array<FieldsJs>): Promise<string> {
  */
 async function dynamicImport(filePath: string): Promise<any> {
   if (semver.gte(process.version, '13.2.0')) {
-    const exported = await import(pathToFileURL(filePath).toString()).then(
-      content => content.default
-    );
-    return exported;
+    const exported = await new Function(
+      `return import("${pathToFileURL(filePath)}")`
+    )();
+    return exported.default;
   } else {
     if (getExt(filePath) == 'mjs') {
       throwErrorWithMessage(`${i18nKey}.errors.invalidMjsFile`);

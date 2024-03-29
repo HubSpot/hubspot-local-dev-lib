@@ -19,7 +19,15 @@ export function isSpecifiedError(
     statusCode,
     category,
     subCategory,
-  }: { statusCode?: number; category?: string; subCategory?: string }
+    errorType,
+    code,
+  }: {
+    statusCode?: number;
+    category?: string;
+    subCategory?: string;
+    errorType?: string;
+    code?: string;
+  }
 ): boolean {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const error = (err && (err.cause as AxiosError<any>)) || err;
@@ -27,8 +35,18 @@ export function isSpecifiedError(
   const categoryErr = !category || error.response?.data?.category === category;
   const subCategoryErr =
     !subCategory || error.response?.data?.subCategory === subCategory;
+  const errorTypeErr =
+    !errorType || error.response?.data?.errorType === errorType;
+  const codeError = !code || error.code === code;
 
-  return error.isAxiosError && statusCodeErr && categoryErr && subCategoryErr;
+  return (
+    error.isAxiosError &&
+    statusCodeErr &&
+    categoryErr &&
+    subCategoryErr &&
+    errorTypeErr &&
+    codeError
+  );
 }
 
 export function isMissingScopeError(err: Error | AxiosError): boolean {
@@ -39,11 +57,15 @@ export function isGatingError(err: Error | AxiosError): boolean {
   return isSpecifiedError(err, { statusCode: 403, category: 'GATED' });
 }
 
+export function isTimeoutError(err: Error | AxiosError): boolean {
+  return isSpecifiedError(err, { code: 'ETIMEDOUT' });
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isApiUploadValidationError(err: AxiosError<any>): boolean {
   return (
     err.isAxiosError &&
-    err.status === 400 &&
+    (err.status === 400 || err.response?.status === 400) &&
     !!err.response &&
     !!(err.response?.data?.message || !!err.response?.data?.errors)
   );
@@ -64,12 +86,12 @@ export function isSpecifiedHubSpotAuthError(
   );
 }
 
-function parseValidationErrors(
+export function parseValidationErrors(
   responseData: {
     errors?: Array<ValidationError>;
     message?: string;
   } = { errors: [], message: '' }
-) {
+): Array<string> {
   const errorMessages = [];
 
   const { errors, message } = responseData;
@@ -96,10 +118,10 @@ function parseValidationErrors(
  * @throws
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function throwValidationErrors(error: AxiosError<any>) {
+function throwValidationError(error: AxiosError<any>) {
   const validationErrorMessages = parseValidationErrors(error?.response?.data);
   if (validationErrorMessages.length) {
-    throwError(new Error(validationErrorMessages.join(' '), { cause: error }));
+    return new Error(validationErrorMessages.join(' '), { cause: error });
   }
 }
 
@@ -224,15 +246,12 @@ export function throwApiError(
   throwError(error);
 }
 
-/**
- * @throws
- */
 export function throwApiUploadError(
   error: AxiosError,
   context: AxiosErrorContext = {}
 ): never {
   if (isApiUploadValidationError(error)) {
-    throwValidationErrors(error);
+    throwValidationError(error);
   }
   throwApiError(error, context);
 }
