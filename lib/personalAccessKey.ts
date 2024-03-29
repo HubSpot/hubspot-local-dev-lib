@@ -21,7 +21,7 @@ import {
 } from '../config';
 import { HUBSPOT_ACCOUNT_TYPES } from '../constants/config';
 import { fetchDeveloperTestAccountData } from '../api/developerTestAccounts';
-import { logger } from './logging/logger';
+import { logger } from './logger';
 import { getAxiosErrorWithContext } from '../errors/apiErrors';
 import { ValueOf } from '../types/Utils';
 
