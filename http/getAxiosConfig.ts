@@ -5,7 +5,7 @@ import { AxiosConfigOptions } from '../types/Http';
 import { CLIConfig } from '../types/Config';
 import { AxiosRequestConfig } from 'axios';
 
-export const DEFAULT_USER_AGENT_HEADERS = {
+export const DEFAULT_USER_AGENT_HEADERS: { [key: string]: string } = {
   'User-Agent': `HubSpot Local Dev Lib/${version}`,
 };
 
