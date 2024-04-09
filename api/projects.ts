@@ -13,9 +13,11 @@ import {
   ComponentStructureResponse,
 } from '../types/ComponentStructure';
 import { Deploy, ProjectDeployResponse } from '../types/Deploy';
+import { ProjectLog } from '../types/ProjectLog';
 
 const PROJECTS_API_PATH = 'dfs/v1/projects';
 const PROJECTS_DEPLOY_API_PATH = 'dfs/deploy/v1';
+const PROJECTS_LOGS_API_PATH = 'dfs/logging/v1';
 const DEVELOPER_PROJECTS_API_PATH = 'developer/projects/v1';
 
 export async function fetchProjects(
@@ -264,5 +266,25 @@ export async function cancelStagedBuild(
       projectName
     )}/builds/staged/cancel`,
     headers: { 'Content-Type': 'application/json' },
+  });
+}
+
+export async function fetchBuildWarnLogs(
+  accountId: number,
+  projectName: string,
+  buildId: number
+): Promise<{ logs: Array<ProjectLog> }> {
+  return http.get(accountId, {
+    url: `${PROJECTS_LOGS_API_PATH}/logs/projects/${projectName}/builds/${buildId}/combined/warn`,
+  });
+}
+
+export async function fetchDeployWarnLogs(
+  accountId: number,
+  projectName: string,
+  deployId: number
+): Promise<{ logs: Array<ProjectLog> }> {
+  return http.get(accountId, {
+    url: `${PROJECTS_LOGS_API_PATH}/logs/projects/${projectName}/deploys/${deployId}/combined/warn`,
   });
 }
