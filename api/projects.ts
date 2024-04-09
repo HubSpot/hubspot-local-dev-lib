@@ -13,6 +13,7 @@ import {
   ComponentStructureResponse,
 } from '../types/ComponentStructure';
 import { Deploy, ProjectDeployResponse } from '../types/Deploy';
+import { Log } from '../types/Log';
 
 const PROJECTS_API_PATH = 'dfs/v1/projects';
 const PROJECTS_DEPLOY_API_PATH = 'dfs/deploy/v1';
@@ -272,7 +273,7 @@ export async function fetchBuildWarnLogs(
   accountId: number,
   projectName: string,
   buildId: number
-): Promise<void> {
+): Promise<{ logs: Array<Log> }> {
   return http.get(accountId, {
     url: `${PROJECTS_LOGS_API_PATH}/logs/projects/${projectName}/builds/${buildId}/combined/warn`,
   });
@@ -282,7 +283,7 @@ export async function fetchDeployWarnLogs(
   accountId: number,
   projectName: string,
   deployId: number
-): Promise<void> {
+): Promise<{ logs: Array<Log> }> {
   return http.get(accountId, {
     url: `${PROJECTS_LOGS_API_PATH}/logs/projects/${projectName}/deploys/${deployId}/combined/warn`,
   });
