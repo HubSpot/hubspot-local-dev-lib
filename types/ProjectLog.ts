@@ -1,4 +1,4 @@
-export type Log = {
+export type ProjectLog = {
   lineNumber: number;
   logLevel: string;
   message: string;
