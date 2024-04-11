@@ -1,4 +1,6 @@
-# hubspot/local-dev-lib Lib Utils
+# hubspot/local-dev-lib
+
+## Lib utils
 
 There are several different categories of utils in this directory.
 
