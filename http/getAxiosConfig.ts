@@ -5,9 +5,23 @@ import { AxiosConfigOptions } from '../types/Http';
 import { CLIConfig } from '../types/Config';
 import { AxiosRequestConfig } from 'axios';
 
-export const DEFAULT_USER_AGENT_HEADERS: { [key: string]: string } = {
-  'User-Agent': `HubSpot Local Dev Lib/${version}`,
+export const USER_AGENTS: { [key: string]: string } = {
+  'HubSpot Local Dev Lib': version,
 };
+
+export function getDefaultUserAgentHeader(): { 'User-Agent': string } {
+  let userAgentString = '';
+
+  Object.keys(USER_AGENTS).forEach((userAgentKey, i) => {
+    userAgentString += `${i > 0 ? ', ' : ''}${userAgentKey}/${
+      USER_AGENTS[userAgentKey]
+    }`;
+  });
+
+  return {
+    'User-Agent': userAgentString,
+  };
+}
 
 const DEFAULT_TRANSITIONAL = {
   clarifyTimeoutError: true,
@@ -26,7 +40,7 @@ export function getAxiosConfig(
       localHostOverride ? false : httpUseLocalhost
     ),
     headers: {
-      ...DEFAULT_USER_AGENT_HEADERS,
+      ...getDefaultUserAgentHeader(),
       ...(headers || {}),
     },
     timeout: httpTimeout || 15000,
