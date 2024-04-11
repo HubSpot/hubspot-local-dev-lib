@@ -1,6 +1,6 @@
 # Publishing Releases
 
-Before releasing a new version, it's a good idea to get in touch with the HubSpot team to coordinate. Only contributers who are members of the HubSpot NPM organization can publish releases.
+Only contributers who are members of the HubSpot NPM organization can publish releases.
 
 ## Publishing a new version
 
