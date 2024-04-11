@@ -1,21 +1,23 @@
-# hubspot/local-dev-lib Api utils
+# hubspot/local-dev-lib
 
-These api utils are intended to simplify the process of making requests to some of HubSpot's public apis.
+## API utils
 
-To use these api utils, you have to first:
+These API utils simplify making requests to some of HubSpot's public API endpoints.
+
+To use these API utils, you need to:
 
 - Have a HubSpot configuration file, populated with valid account information
 - Parse and store the configuration file in memory using the available config file utils
 
-Once those steps are complete, you can make requests using these api utils. The http wrapper that we use will handle all of the authentication requirements like formatting the header and token refreshes.
+Once those steps are complete, you can make requests with these utils. The HTTP wrapper will handle all of the authentication requirements, such as formatting the header and token refreshes.
 
 ## Error handling
 
-This library also includes utils that can help with the handling of request errors. Check out the [Error Handling Docs](../errors/README.md) for more information on how they can be used.
+This library also includes utils that handle request errors. Check out the [Error Handling Docs](../errors/README.md) for more information on how they can be used.
 
 ## Usage Example
 
-Here is an example of what it might look like to use the `addSecret` api util.
+Here's how to use the `addSecret` API util:
 
 ```js
 const { loadConfig } = require('@hubspot/local-dev-lib/config');

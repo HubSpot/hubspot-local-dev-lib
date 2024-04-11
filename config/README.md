@@ -1,4 +1,6 @@
-# hubspot/local-dev-lib Config utils
+# hubspot/local-dev-lib
+
+## Config utils
 
 The hubspot local development tooling uses a configuration file to store information about the HubSpot accounts that it has been granted access to.
 
