@@ -1,5 +1,5 @@
 import axios, { AxiosResponse } from 'axios';
-import { DEFAULT_USER_AGENT_HEADERS } from '../http/getAxiosConfig';
+import { getDefaultUserAgentHeader } from '../http/getAxiosConfig';
 import { GithubReleaseData, GithubRepoFile } from '../types/Github';
 
 const GITHUB_REPOS_API = 'https://api.github.com/repos';
@@ -28,7 +28,7 @@ export async function fetchRepoReleaseData(
   return axios.get<GithubReleaseData>(
     `${URL}/${tag ? `tags/${tag}` : 'latest'}`,
     {
-      headers: { ...DEFAULT_USER_AGENT_HEADERS, ...GITHUB_AUTH_HEADERS },
+      headers: { ...getDefaultUserAgentHeader(), ...GITHUB_AUTH_HEADERS },
     }
   );
 }
@@ -40,7 +40,7 @@ export async function fetchRepoAsZip(
 ): Promise<AxiosResponse<Buffer>> {
   return axios.get<Buffer>(zipUrl, {
     responseType: 'arraybuffer',
-    headers: { ...DEFAULT_USER_AGENT_HEADERS, ...GITHUB_AUTH_HEADERS },
+    headers: { ...getDefaultUserAgentHeader(), ...GITHUB_AUTH_HEADERS },
   });
 }
 
@@ -53,7 +53,7 @@ export async function fetchRepoFile(
   return axios.get<Buffer>(
     `${GITHUB_RAW_CONTENT_API_PATH}/${repoPath}/${ref}/${filePath}`,
     {
-      headers: { ...DEFAULT_USER_AGENT_HEADERS, ...GITHUB_AUTH_HEADERS },
+      headers: { ...getDefaultUserAgentHeader(), ...GITHUB_AUTH_HEADERS },
     }
   );
 }
@@ -63,7 +63,7 @@ export async function fetchRepoFileByDownloadUrl(
   downloadUrl: string
 ): Promise<AxiosResponse<Buffer>> {
   return axios.get<Buffer>(downloadUrl, {
-    headers: { ...DEFAULT_USER_AGENT_HEADERS, ...GITHUB_AUTH_HEADERS },
+    headers: { ...getDefaultUserAgentHeader(), ...GITHUB_AUTH_HEADERS },
   });
 }
 
@@ -79,7 +79,7 @@ export async function fetchRepoContents(
   return axios.get<Array<GithubRepoFile>>(
     `${GITHUB_REPOS_API}/${repoPath}/contents/${path}${refQuery}`,
     {
-      headers: { ...DEFAULT_USER_AGENT_HEADERS, ...GITHUB_AUTH_HEADERS },
+      headers: { ...getDefaultUserAgentHeader(), ...GITHUB_AUTH_HEADERS },
     }
   );
 }

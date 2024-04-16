@@ -4,7 +4,7 @@ import contentDisposition from 'content-disposition';
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 
 import { getAccountConfig } from '../config';
-import { getAxiosConfig } from './getAxiosConfig';
+import { USER_AGENTS, getAxiosConfig } from './getAxiosConfig';
 import { accessTokenForPersonalAccessKey } from '../lib/personalAccessKey';
 import { getOauthManager } from '../lib/oauth';
 import { FlatAccountFields } from '../types/Accounts';
@@ -14,6 +14,10 @@ import { logger } from '../lib/logger';
 import { i18n } from '../utils/lang';
 
 const i18nKey = 'http.index';
+
+export function addUserAgentHeader(key: string, value: string) {
+  USER_AGENTS[key] = value;
+}
 
 async function withOauth(
   accountId: number,
