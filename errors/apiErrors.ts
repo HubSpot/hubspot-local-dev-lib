@@ -1,4 +1,4 @@
-import { AxiosError } from 'axios';
+import { AxiosError, AxiosResponse } from 'axios';
 import {
   GenericError,
   AxiosErrorContext,
@@ -130,7 +130,7 @@ export function getAxiosErrorWithContext(
   error: AxiosError<any>,
   context: AxiosErrorContext = {}
 ): Error {
-  const { status } = error;
+  const { status } = error.response as AxiosResponse;
   const method = error.config?.method as HttpMethod;
   const { projectName } = context;
 
@@ -163,8 +163,9 @@ export function getAxiosErrorWithContext(
       i18n(`${i18nKey}.unableToUpload`, { payload: context.payload })
     );
   }
-  const isProjectMissingScopeError = isMissingScopeError(error) && projectName;
-  const isProjectGatingError = isGatingError(error) && projectName;
+  const isProjectMissingScopeError =
+    isMissingScopeError(error) && !!projectName;
+  const isProjectGatingError = isGatingError(error) && !!projectName;
 
   switch (status) {
     case 400:
