@@ -130,10 +130,7 @@ export function getAxiosErrorWithContext(
   error: AxiosError<any>,
   context: AxiosErrorContext = {}
 ): Error {
-  let status;
-  if (error.response) {
-    status = error.response.status;
-  }
+  const status = error.response?.status;
   const method = error.config?.method as HttpMethod;
   const { projectName } = context;
 
