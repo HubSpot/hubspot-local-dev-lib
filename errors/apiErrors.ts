@@ -1,4 +1,4 @@
-import { AxiosError, AxiosResponse } from 'axios';
+import { AxiosError } from 'axios';
 import {
   GenericError,
   AxiosErrorContext,
@@ -130,7 +130,10 @@ export function getAxiosErrorWithContext(
   error: AxiosError<any>,
   context: AxiosErrorContext = {}
 ): Error {
-  const { status } = error.response as AxiosResponse;
+  let status;
+  if (error.response) {
+    status = error.response.status;
+  }
   const method = error.config?.method as HttpMethod;
   const { projectName } = context;
 
