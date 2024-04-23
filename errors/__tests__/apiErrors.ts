@@ -231,7 +231,11 @@ describe('errors/apiErrors', () => {
       });
 
       it('generates a generic 400 api status code error', () => {
-        const error = newAxiosError({ status: 499 });
+        const error = newAxiosError({
+          response: {
+            status: 499,
+          },
+        });
         const axiosErrorWithContext = getAxiosErrorWithContext(error);
         expect(axiosErrorWithContext.message).toBe(
           'The request failed due to a client error.'
@@ -239,13 +243,21 @@ describe('errors/apiErrors', () => {
       });
 
       it('generates a 400 api status code error', () => {
-        const error = newAxiosError({ status: 400 });
+        const error = newAxiosError({
+          response: {
+            status: 400,
+          },
+        });
         const axiosErrorWithContext = getAxiosErrorWithContext(error);
         expect(axiosErrorWithContext.message).toBe('The request was bad.');
       });
 
       it('generates a 401 api status code error', () => {
-        const error = newAxiosError({ status: 401 });
+        const error = newAxiosError({
+          response: {
+            status: 401,
+          },
+        });
         const axiosErrorWithContext = getAxiosErrorWithContext(error);
         expect(axiosErrorWithContext.message).toBe(
           'The request was unauthorized.'
@@ -253,7 +265,11 @@ describe('errors/apiErrors', () => {
       });
 
       it('generates a 403 api status code error', () => {
-        const error = newAxiosError({ status: 403 });
+        const error = newAxiosError({
+          response: {
+            status: 403,
+          },
+        });
         const axiosErrorWithContext = getAxiosErrorWithContext(error);
         expect(axiosErrorWithContext.message).toBe(
           'The request was forbidden.'
@@ -261,7 +277,11 @@ describe('errors/apiErrors', () => {
       });
 
       it('generates a 404 api status code error', () => {
-        const error = newAxiosError({ status: 404 });
+        const error = newAxiosError({
+          response: {
+            status: 404,
+          },
+        });
         const axiosErrorWithContext = getAxiosErrorWithContext(error);
         expect(axiosErrorWithContext.message).toBe(
           'The request was not found.'
@@ -269,7 +289,11 @@ describe('errors/apiErrors', () => {
       });
 
       it('generates a 429 api status code error', () => {
-        const error = newAxiosError({ status: 429 });
+        const error = newAxiosError({
+          response: {
+            status: 429,
+          },
+        });
         const axiosErrorWithContext = getAxiosErrorWithContext(error);
         expect(axiosErrorWithContext.message).toBe(
           'The request surpassed the rate limit. Retry in one minute.'
@@ -277,7 +301,11 @@ describe('errors/apiErrors', () => {
       });
 
       it('generates a generic 500 api status code error', () => {
-        const error = newAxiosError({ status: 599 });
+        const error = newAxiosError({
+          response: {
+            status: 599,
+          },
+        });
         const axiosErrorWithContext = getAxiosErrorWithContext(error);
         expect(axiosErrorWithContext.message).toContain(
           'The request failed due to a server error.'
@@ -285,7 +313,11 @@ describe('errors/apiErrors', () => {
       });
 
       it('generates a 503 api status code error', () => {
-        const error = newAxiosError({ status: 503 });
+        const error = newAxiosError({
+          response: {
+            status: 503,
+          },
+        });
         const axiosErrorWithContext = getAxiosErrorWithContext(error);
         expect(axiosErrorWithContext.message).toContain(
           'The request could not be handled at this time.'
