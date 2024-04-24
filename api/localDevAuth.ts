@@ -6,6 +6,7 @@ import { ScopeData } from '../types/Accounts';
 import axios from 'axios';
 import { HUBSPOT_ACCOUNT_TYPES } from '../constants/config';
 import { ValueOf } from '../types/Utils';
+import { PublicAppInstallationData } from '../types/apps';
 
 const LOCALDEVAUTH_API_AUTH_PATH = 'localdevauth/v1/auth';
 
@@ -60,8 +61,8 @@ export async function fetchAppInstallationData(
   appUid: string,
   requiredScopeGroups: Array<string>,
   optionalScopeGroups: Array<string> = []
-) {
-  return http.post(portalId, {
+): Promise<PublicAppInstallationData> {
+  return http.post<PublicAppInstallationData>(portalId, {
     url: 'localdevauth/v1/auth/install-info',
     data: {
       portalId,
