@@ -53,3 +53,22 @@ export async function fetchScopeData(
     params: { scopeGroup },
   });
 }
+
+export async function fetchAppInstallationData(
+  portalId: number,
+  projectId: number,
+  appUid: string,
+  requiredScopeGroups: Array<string>,
+  optionalScopeGroups: Array<string> = []
+) {
+  return http.post(portalId, {
+    url: 'localdevauth/v1/auth/install-info',
+    data: {
+      portalId,
+      projectId,
+      sourceId: appUid,
+      requiredScopeGroups,
+      optionalScopeGroups,
+    },
+  });
+}
