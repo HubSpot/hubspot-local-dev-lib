@@ -6,7 +6,7 @@ import { ScopeData } from '../types/Accounts';
 import axios from 'axios';
 import { HUBSPOT_ACCOUNT_TYPES } from '../constants/config';
 import { ValueOf } from '../types/Utils';
-import { PublicAppInstallationData } from '../types/apps';
+import { PublicAppInstallationData } from '../types/Apps';
 
 const LOCALDEVAUTH_API_AUTH_PATH = 'localdevauth/v1/auth';
 
