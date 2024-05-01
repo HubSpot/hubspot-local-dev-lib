@@ -50,7 +50,7 @@ export async function fetchScopeData(
   scopeGroup: string
 ): Promise<ScopeData> {
   return http.get<ScopeData>(accountId, {
-    url: `localdevauth/v1/auth/check-scopes`,
+    url: `${LOCALDEVAUTH_API_AUTH_PATH}/check-scopes`,
     params: { scopeGroup },
   });
 }
@@ -63,7 +63,7 @@ export async function fetchAppInstallationData(
   optionalScopeGroups: Array<string> = []
 ): Promise<PublicAppInstallationData> {
   return http.post<PublicAppInstallationData>(portalId, {
-    url: 'localdevauth/v1/auth/install-info',
+    url: `${LOCALDEVAUTH_API_AUTH_PATH}/install-info`,
     data: {
       portalId,
       projectId,
