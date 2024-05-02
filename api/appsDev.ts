@@ -7,10 +7,12 @@ type FetchPublicAppsForPortalResponse = {
   results: Array<PublicApp>;
 };
 
-export function fetchPublicAppsForPortal(
+export async function fetchPublicAppsForPortal(
   portalId: number
-): Promise<FetchPublicAppsForPortalResponse> {
-  return http.get<FetchPublicAppsForPortalResponse>(portalId, {
+): Promise<Array<PublicApp>> {
+  const resp = await http.get<FetchPublicAppsForPortalResponse>(portalId, {
     url: `${APPS_DEV_API_PATH}/full/portal`,
   });
+
+  return resp.results || [];
 }
