@@ -8,11 +8,11 @@ type FetchPublicAppsForPortalResponse = {
 };
 
 export async function fetchPublicAppsForPortal(
-  portalId: number
+  accountId: number
 ): Promise<Array<PublicApp>> {
-  const resp = await http.get<FetchPublicAppsForPortalResponse>(portalId, {
+  const resp = await http.get<FetchPublicAppsForPortalResponse>(accountId, {
     url: `${APPS_DEV_API_PATH}/full/portal`,
   });
 
-  return resp.results || [];
+  return resp ? resp.results : [];
 }
