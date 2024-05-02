@@ -6,6 +6,7 @@ import { ScopeData } from '../types/Accounts';
 import axios from 'axios';
 import { HUBSPOT_ACCOUNT_TYPES } from '../constants/config';
 import { ValueOf } from '../types/Utils';
+import { PublicAppInstallationData } from '../types/Apps';
 
 const LOCALDEVAUTH_API_AUTH_PATH = 'localdevauth/v1/auth';
 
@@ -49,7 +50,26 @@ export async function fetchScopeData(
   scopeGroup: string
 ): Promise<ScopeData> {
   return http.get<ScopeData>(accountId, {
-    url: `localdevauth/v1/auth/check-scopes`,
+    url: `${LOCALDEVAUTH_API_AUTH_PATH}/check-scopes`,
     params: { scopeGroup },
+  });
+}
+
+export async function fetchAppInstallationData(
+  portalId: number,
+  projectId: number,
+  appUid: string,
+  requiredScopeGroups: Array<string>,
+  optionalScopeGroups: Array<string> = []
+): Promise<PublicAppInstallationData> {
+  return http.post<PublicAppInstallationData>(portalId, {
+    url: `${LOCALDEVAUTH_API_AUTH_PATH}/install-info`,
+    data: {
+      portalId,
+      projectId,
+      sourceId: appUid,
+      requiredScopeGroups,
+      optionalScopeGroups,
+    },
   });
 }
