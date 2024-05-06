@@ -1,9 +1,9 @@
 import http from '../http';
 import {
   InitiateSyncResponse,
-  Task,
-  SyncTask,
   FetchTypesResponse,
+  TaskRequestData,
+  SyncTaskStatusType,
 } from '../types/Sandbox';
 import { SANDBOX_TIMEOUT } from '../constants/api';
 const SANDBOXES_SYNC_API_PATH = 'sandboxes-sync/v1';
@@ -11,7 +11,7 @@ const SANDBOXES_SYNC_API_PATH = 'sandboxes-sync/v1';
 export async function initiateSync(
   fromHubId: number,
   toHubId: number,
-  tasks: Array<SyncTask>,
+  tasks: Array<TaskRequestData>,
   sandboxHubId: number
 ): Promise<InitiateSyncResponse> {
   return http.post(fromHubId, {
@@ -30,9 +30,9 @@ export async function initiateSync(
 export async function fetchTaskStatus(
   accountId: number,
   taskId: number
-): Promise<Task> {
+): Promise<SyncTaskStatusType> {
   return http.get(accountId, {
-    url: `${SANDBOXES_SYNC_API_PATH}/tasks/${taskId}`,
+    url: `${SANDBOXES_SYNC_API_PATH}/tasks/${taskId}/status`,
   });
 }
 
