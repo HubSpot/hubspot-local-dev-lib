@@ -19,7 +19,7 @@ const PROJECTS_API_PATH = 'dfs/v1/projects';
 const PROJECTS_DEPLOY_API_PATH = 'dfs/deploy/v1';
 const PROJECTS_LOGS_API_PATH = 'dfs/logging/v1';
 const DEVELOPER_PROJECTS_API_PATH = 'developer/projects/v1';
-// const MIGRATIONS_API_PATH = 'dfs/migrations/v1';
+const MIGRATIONS_API_PATH = 'dfs/migrations/v1';
 
 export async function fetchProjects(
   accountId: number
@@ -295,28 +295,18 @@ export async function migrateApp(
   appId: number,
   projectName: string
 ) {
-  console.log(`Migrating ${appId} to ${projectName} in portal ${accountId}`);
-  return Promise.resolve({
-    id: 12345,
-    status: 'RUNNING',
+  return http.post(accountId, {
+    url: `${MIGRATIONS_API_PATH}/migrations`,
+    data: {
+      componentId: appId,
+      componentType: 'PUBLIC_APP_ID',
+      projectName,
+    },
   });
-  // return http.post(accountId, {
-  //   url: `${MIGRATIONS_API_PATH}/migration`,
-  //   data: {
-  //     componentId: appId,
-  //     componentType: 'PUBLIC_APP_ID',
-  //     projectName,
-  //   },
-  // });
 }
 
 export async function checkMigrationStatus(accountId: number, id: number) {
-  console.log(`Checking the status of task ${id} in portal ${accountId}`);
-  return Promise.resolve({
-    id: 12345,
-    status: 'FAILURE',
+  return http.get(accountId, {
+    url: `${MIGRATIONS_API_PATH}/migrations/${id}`,
   });
-  // return http.post(accountId, {
-  //   url: `${MIGRATIONS_API_PATH}/migration/${id}`,
-  // });
 }
