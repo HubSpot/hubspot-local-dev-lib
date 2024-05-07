@@ -12,8 +12,8 @@ import {
   InitiateSyncResponse,
   Sandbox,
   SandboxType,
-  SyncTask,
-  Task,
+  SyncTaskStatusType,
+  TaskRequestData,
   Usage,
 } from '../types/Sandbox';
 import { AxiosError } from 'axios';
@@ -69,7 +69,7 @@ export async function getSandboxUsageLimits(
 export async function initiateSync(
   fromHubId: number,
   toHubId: number,
-  tasks: Array<SyncTask>,
+  tasks: Array<TaskRequestData>,
   sandboxHubId: number
 ): Promise<InitiateSyncResponse> {
   try {
@@ -82,9 +82,10 @@ export async function initiateSync(
 export async function fetchTaskStatus(
   accountId: number,
   taskId: number
-): Promise<Task> {
+): Promise<SyncTaskStatusType> {
   try {
-    return await _fetchTaskStatus(accountId, taskId);
+    const result = await _fetchTaskStatus(accountId, taskId);
+    return result;
   } catch (err) {
     throwApiError(err as AxiosError);
   }
