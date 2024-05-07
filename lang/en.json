@@ -223,11 +223,11 @@
       }
     },
     "accountTypes": {
-      "developmentSandbox": "development sandbox",
+      "developmentSandbox": "dev sandbox",
       "standardSandbox": "standard sandbox",
-      "developerTest": "developer test account",
-      "appDeveloper": "app developer account",
-      "standard": "production account"
+      "developerTest": "test account",
+      "appDeveloper": "dev account",
+      "standard": "standard"
     }
   },
   "config": {
