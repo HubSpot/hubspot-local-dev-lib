@@ -20,7 +20,7 @@ async function extractZip(name: string, zip: Buffer): Promise<ZipData> {
   const result: ZipData = { extractDir: '', tmpDir: '' };
 
   const TMP_FOLDER_PREFIX = `hubspot-temp-${name}-`;
-  logger.log(i18n(`${i18nKey}.extractZip.init`));
+  logger.debug(i18n(`${i18nKey}.extractZip.init`));
 
   // Write zip to disk
   let tmpZipPath = '';
@@ -73,7 +73,7 @@ async function copySourceToDest(
   { sourceDir, includesRootDir = true }: CopySourceToDestOptions = {}
 ): Promise<boolean> {
   try {
-    logger.log(i18n(`${i18nKey}.copySourceToDest.init`));
+    logger.debug(i18n(`${i18nKey}.copySourceToDest.init`));
     const srcDirPath = [src];
 
     if (includesRootDir) {
