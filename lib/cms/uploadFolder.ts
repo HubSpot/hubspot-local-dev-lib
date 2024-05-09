@@ -240,6 +240,7 @@ export async function uploadFolder(
     const filesToUpload = fileList[i];
     await queue.addAll(filesToUpload.map(uploadFile));
   }
+
   const results = await queue
     .addAll(
       failures.map(({ file, destPath }) => {
