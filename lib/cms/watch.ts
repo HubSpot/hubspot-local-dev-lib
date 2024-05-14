@@ -52,7 +52,24 @@ async function uploadFile(
   file: string,
   dest: string,
   options: UploadFileOptions,
-  mode: Mode | null = null
+  mode: Mode | null = null,
+  onUploadFileError: (
+    file: string,
+    dest: string
+  ) => (error: AxiosError) => void = (file: string, dest: string) =>
+    (error: AxiosError) => {
+      logger.debug(
+        i18n(`${i18nKey}.uploadFailed`, {
+          file,
+          dest,
+        })
+      );
+      throwApiUploadError(error, {
+        accountId,
+        request: dest,
+        payload: file,
+      });
+    }
 ): Promise<void> {
   const src = options.src;
 
@@ -104,19 +121,7 @@ async function uploadFile(
         logger.debug(i18n(`${i18nKey}.uploadFailed`, { file, dest }));
         logger.debug(i18n(`${i18nKey}.uploadRetry`, { file, dest }));
         return upload(accountId, file, dest, apiOptions).catch(
-          (error: AxiosError) => {
-            logger.debug(
-              i18n(`${i18nKey}.uploadFailed`, {
-                file,
-                dest,
-              })
-            );
-            throwApiUploadError(error, {
-              accountId,
-              request: dest,
-              payload: file,
-            });
-          }
+          onUploadFileError(file, dest)
         );
       });
   });
@@ -182,7 +187,8 @@ export function watch(
     | ((result: Array<UploadFolderResults>) => void)
     | null = null,
   onUploadFolderError?: ErrorHandler,
-  onQueueAddError?: ErrorHandler
+  onQueueAddError?: ErrorHandler,
+  onUploadFileError?: (file: string, dest: string) => ErrorHandler
 ) {
   const regex = new RegExp(`^${escapeRegExp(src)}`);
   if (notify) {
@@ -241,7 +247,8 @@ export function watch(
         src,
         commandOptions,
       },
-      mode
+      mode,
+      onUploadFileError
     );
     triggerNotify(notify, 'Added', filePath, uploadPromise);
   });
@@ -302,7 +309,8 @@ export function watch(
         src,
         commandOptions,
       },
-      mode
+      mode,
+      onUploadFileError
     );
     triggerNotify(notify, 'Changed', filePath, uploadPromise);
   });
