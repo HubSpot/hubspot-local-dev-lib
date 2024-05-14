@@ -47,29 +47,27 @@ type UploadFileOptions = FileMapperInputOptions & {
   fieldOptions?: string;
 };
 
+const defaultOnUploadFileError = (file: string, dest: string, accountId: number) =>
+  (error: AxiosError) => {
+    logger.debug(
+      i18n(`${i18nKey}.uploadFailed`, {
+        file,
+        dest,
+      })
+    );
+    throwApiUploadError(error, {
+      accountId,
+      request: dest,
+      payload: file,
+    });
+  }
 async function uploadFile(
   accountId: number,
   file: string,
   dest: string,
   options: UploadFileOptions,
   mode: Mode | null = null,
-  onUploadFileError: (
-    file: string,
-    dest: string
-  ) => (error: AxiosError) => void = (file: string, dest: string) =>
-    (error: AxiosError) => {
-      logger.debug(
-        i18n(`${i18nKey}.uploadFailed`, {
-          file,
-          dest,
-        })
-      );
-      throwApiUploadError(error, {
-        accountId,
-        request: dest,
-        payload: file,
-      });
-    }
+  onUploadFileError: (file: string, dest: string, accountId: number) => ErrorHandler = defaultOnUploadFileError
 ): Promise<void> {
   const src = options.src;
 
@@ -121,7 +119,7 @@ async function uploadFile(
         logger.debug(i18n(`${i18nKey}.uploadFailed`, { file, dest }));
         logger.debug(i18n(`${i18nKey}.uploadRetry`, { file, dest }));
         return upload(accountId, file, dest, apiOptions).catch(
-          onUploadFileError(file, dest)
+          onUploadFileError(file, dest, accountId)
         );
       });
   });
@@ -188,7 +186,7 @@ export function watch(
     | null = null,
   onUploadFolderError?: ErrorHandler,
   onQueueAddError?: ErrorHandler,
-  onUploadFileError?: (file: string, dest: string) => ErrorHandler
+  onUploadFileError?: (file: string, dest: string, accountId: number) => ErrorHandler
 ) {
   const regex = new RegExp(`^${escapeRegExp(src)}`);
   if (notify) {
