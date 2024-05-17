@@ -276,7 +276,9 @@ export async function fetchBuildWarnLogs(
   buildId: number
 ): Promise<{ logs: Array<ProjectLog> }> {
   return http.get(accountId, {
-    url: `${PROJECTS_LOGS_API_PATH}/logs/projects/${projectName}/builds/${buildId}/combined/warn`,
+    url: `${PROJECTS_LOGS_API_PATH}/logs/projects/${encodeURIComponent(
+      projectName
+    )}/builds/${buildId}/combined/warn`,
   });
 }
 
@@ -286,7 +288,9 @@ export async function fetchDeployWarnLogs(
   deployId: number
 ): Promise<{ logs: Array<ProjectLog> }> {
   return http.get(accountId, {
-    url: `${PROJECTS_LOGS_API_PATH}/logs/projects/${projectName}/deploys/${deployId}/combined/warn`,
+    url: `${PROJECTS_LOGS_API_PATH}/logs/projects/${encodeURIComponent(
+      projectName
+    )}/deploys/${deployId}/combined/warn`,
   });
 }
 

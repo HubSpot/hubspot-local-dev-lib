@@ -49,14 +49,20 @@ type MutationError = {
   };
 };
 
-type TaskStatus = {
+export type SyncTaskStatusType = {
+  status: string;
+  result?: string;
+  tasks: Pick<CompositeSyncTask, 'type' | 'status'>[];
+};
+
+type SyncMutationData = {
   numRequests: number;
   numSuccesses: number;
   errors: Array<TaskError>;
   mutationErrors: Array<MutationError>;
 };
 
-export type Task = {
+export type CompositeSyncTask = {
   id: string;
   parentHubId: number;
   sandboxHubId: number;
@@ -73,11 +79,29 @@ export type Task = {
   startedAt: string;
   completedAt: string;
   error: MutationError;
-  creates: TaskStatus;
-  updates: TaskStatus;
-  deletes: TaskStatus;
+  creates: SyncMutationData;
+  updates: SyncMutationData;
+  deletes: SyncMutationData;
   diffSummary: string;
   portableKeys: Array<string>;
+};
+
+export type SyncTask = {
+  id: string;
+  parentHubId: number;
+  sandboxHubId: number;
+  fromHubId: number;
+  toHubId: number;
+  command: string;
+  status: string;
+  result: string;
+  sandboxType: string;
+  requestedAt: string;
+  requestedByUserId: number;
+  requestedByUser: User;
+  startedAt: string;
+  completedAt: string;
+  tasks: Array<CompositeSyncTask>;
 };
 
 export type Sandbox = {
@@ -92,23 +116,7 @@ export type Sandbox = {
   domain: string;
   createdByUser: User;
   updatedByUser?: User | null;
-  lastSync?: {
-    id: string;
-    parentHubId: number;
-    sandboxHubId: number;
-    fromHubId: number;
-    toHubId: number;
-    command: string;
-    status: string;
-    result: string;
-    sandboxType: string;
-    requestedAt: string;
-    requestedByUserId: number;
-    requestedByUser: User;
-    startedAt: string;
-    completedAt: string;
-    tasks: Array<Task>;
-  };
+  lastSync?: SyncTask;
   currentUserHasAccess?: boolean;
   currentUserHasSuperAdminAccess?: boolean;
   requestAccessFrom?: User | null;
@@ -137,7 +145,7 @@ export type SandboxUsageLimitsResponse = {
   usage: Usage;
 };
 
-export type SyncTask = {
+export type TaskRequestData = {
   type: string;
 };
 
@@ -145,19 +153,7 @@ export type InitiateSyncResponse = {
   links: {
     status: string;
   };
-  sync: {
-    id: string;
-    parentHubId: number;
-    sandboxHubId: number;
-    fromHubId: number;
-    toHubId: number;
-    command: string;
-    status: string;
-    sandboxType: string;
-    requestedAt: string;
-    requestedByUserId: number;
-    tasks: Array<Task>;
-  };
+  sync: SyncTask;
   id: string;
 };
 

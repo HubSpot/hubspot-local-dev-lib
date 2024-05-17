@@ -181,7 +181,7 @@ export async function createModule(
     external_js: [],
     global: global,
     help_text: '',
-    host_template_types: contentTypes,
+    content_types: contentTypes,
     js_assets: [],
     other_assets: [],
     smart_type: 'NOT_SMART',
@@ -281,3 +281,8 @@ export async function retrieveDefaultModule(
     dest
   );
 }
+
+const MODULE_HTML_EXTENSION_REGEX = new RegExp(
+  /\.module(?:\/|\\)module\.html$/
+);
+export const isModuleHTMLFile = (filePath: string) => MODULE_HTML_EXTENSION_REGEX.test(filePath);
