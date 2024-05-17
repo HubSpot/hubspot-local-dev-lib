@@ -14,6 +14,7 @@ import {
 } from '../types/ComponentStructure';
 import { Deploy, ProjectDeployResponse } from '../types/Deploy';
 import { ProjectLog } from '../types/ProjectLog';
+import { MigrateAppResponse, PollAppResponse } from '../types/Migration';
 
 const PROJECTS_API_PATH = 'dfs/v1/projects';
 const PROJECTS_DEPLOY_API_PATH = 'dfs/deploy/v1';
@@ -298,7 +299,7 @@ export async function migrateApp(
   accountId: number,
   appId: number,
   projectName: string
-) {
+): Promise<MigrateAppResponse> {
   return http.post(accountId, {
     url: `${MIGRATIONS_API_PATH}/migrations`,
     data: {
@@ -309,7 +310,10 @@ export async function migrateApp(
   });
 }
 
-export async function checkMigrationStatus(accountId: number, id: number) {
+export async function checkMigrationStatus(
+  accountId: number,
+  id: number
+): Promise<PollAppResponse> {
   return http.get(accountId, {
     url: `${MIGRATIONS_API_PATH}/migrations/${id}`,
   });
