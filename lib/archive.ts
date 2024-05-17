@@ -16,11 +16,17 @@ type ZipData = {
   tmpDir: string;
 };
 
-async function extractZip(name: string, zip: Buffer): Promise<ZipData> {
+async function extractZip(
+  name: string,
+  zip: Buffer,
+  hideLogs = false
+): Promise<ZipData> {
   const result: ZipData = { extractDir: '', tmpDir: '' };
 
   const TMP_FOLDER_PREFIX = `hubspot-temp-${name}-`;
-  logger.debug(i18n(`${i18nKey}.extractZip.init`));
+  if (!hideLogs) {
+    logger.log(i18n(`${i18nKey}.extractZip.init`));
+  }
 
   // Write zip to disk
   let tmpZipPath = '';
@@ -65,15 +71,22 @@ async function extractZip(name: string, zip: Buffer): Promise<ZipData> {
 type CopySourceToDestOptions = {
   sourceDir?: string;
   includesRootDir?: boolean;
+  hideLogs?: boolean;
 };
 
 async function copySourceToDest(
   src: string,
   dest: string,
-  { sourceDir, includesRootDir = true }: CopySourceToDestOptions = {}
+  {
+    sourceDir,
+    includesRootDir = true,
+    hideLogs = false,
+  }: CopySourceToDestOptions = {}
 ): Promise<boolean> {
   try {
-    logger.debug(i18n(`${i18nKey}.copySourceToDest.init`));
+    if (!hideLogs) {
+      logger.log(i18n(`${i18nKey}.copySourceToDest.init`));
+    }
     const srcDirPath = [src];
 
     if (includesRootDir) {
@@ -121,17 +134,18 @@ export async function extractZipArchive(
   zip: Buffer,
   name: string,
   dest: string,
-  { sourceDir, includesRootDir }: CopySourceToDestOptions = {}
+  { sourceDir, includesRootDir, hideLogs }: CopySourceToDestOptions = {}
 ): Promise<boolean> {
   let success = false;
 
   if (zip) {
-    const { extractDir, tmpDir } = await extractZip(name, zip);
+    const { extractDir, tmpDir } = await extractZip(name, zip, hideLogs);
 
     if (extractDir !== null) {
       success = await copySourceToDest(extractDir, dest, {
         sourceDir,
         includesRootDir,
+        hideLogs,
       });
     }
 
