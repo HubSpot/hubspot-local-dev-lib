@@ -7,6 +7,14 @@ export type PublicAppInstallationData = {
   }>;
 };
 
+export type DeveloperTestAccountInstallData = {
+  testPortalInstalls: Array<{
+    portalId: number;
+    accountName: string;
+  }>;
+  testPortalInstallCount: string;
+};
+
 export type PublicApp = {
   id: number;
   name: string;
