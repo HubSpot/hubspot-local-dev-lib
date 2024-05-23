@@ -39,7 +39,7 @@ export async function fetchPublicAppInstallationAccounts(
   return resp ? resp.results : [];
 }
 
-export function fetchPublicAppDeveloperTestAccountInstalls(
+export function fetchPublicAppDeveloperTestAccountInstallData(
   appId: number,
   accountId: number
 ): Promise<PublicAppDeveloperTestAccountInstallData> {
