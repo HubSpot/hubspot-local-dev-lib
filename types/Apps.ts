@@ -7,6 +7,11 @@ export type PublicAppInstallationData = {
   }>;
 };
 
+export type PublicAppInstallationAccount = {
+  portalId: number;
+  initiatingUserId: number;
+};
+
 export type PublicAppDeveloperTestAccountInstallData = {
   testPortalInstalls: Array<{
     portalId: number;
