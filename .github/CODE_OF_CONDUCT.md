@@ -41,7 +41,7 @@ Not following the guidelines above may, in some situations, result in a violatio
 
 ## Enforcement of our Code of Conduct
 
-HubSpot’s Developer Relations and DPG Developer Tooling Teams, along with select members of the HubSpot Organization and community, are responsible for clarifying and enforcing our standards of acceptable behavior and will take appropriate and fair corrective action in response to any behavior or actions that violate this code of conduct.
+HubSpot’s Developer Relations and Developer Teams, along with select members of the HubSpot Organization and community, are responsible for clarifying and enforcing our standards of acceptable behavior and will take appropriate and fair corrective action in response to any behavior or actions that violate this code of conduct.
 
 Actions we may take include but are not limited to:
 
@@ -57,7 +57,7 @@ When these actions are taken, the reasoning for moderation-based decisions will 
 
 To report violations of this code of conduct, please fill in the following form located at the link below: [HubSpot Developer Community Code of Conduct Violation Reporting](https://form.asana.com/?k=p7aM0fpd3G4JGETDL_nYXg&d=8587152060687)
 
-Contacting a member of the HubSpot Developer Relations or the DPG Developer Tooling team, members of the HubSpot Organization and/or community via unsolicited mentions or pings is strongly discouraged and may be considered a violation of our code of conduct with regards to harassment.
+Contacting a member of the HubSpot Developer Relations or HubSpot Developer teams, members of the HubSpot Organization and/or community via unsolicited mentions or pings is strongly discouraged and may be considered a violation of our code of conduct with regards to harassment.
 
 ## Attribution
 
