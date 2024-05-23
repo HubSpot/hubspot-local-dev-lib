@@ -7,7 +7,7 @@ export type PublicAppInstallationData = {
   }>;
 };
 
-export type DeveloperTestAccountInstallData = {
+export type PublicAppDeveloperTestAccountInstallData = {
   testPortalInstalls: Array<{
     portalId: number;
     accountName: string;
