@@ -25,7 +25,7 @@
     "release:major": "yarn check-main && yarn version --major && yarn build && yarn pub && yarn push",
     "release:minor": "yarn check-main && yarn version --minor && yarn build && yarn pub && yarn push",
     "release:patch": "yarn check-main && yarn version --patch && yarn build && yarn pub && yarn push",
-    "test": "node --experimental-vm-modules ./node_modules/.bin/jest"
+    "test": "NODE_NO_WARNINGS=1 node --experimental-vm-modules ./node_modules/.bin/jest"
   },
   "license": "Apache-2.0",
   "devDependencies": {

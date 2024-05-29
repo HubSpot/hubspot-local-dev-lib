@@ -46,6 +46,8 @@ jest.mock('findup-sync', () => {
   return jest.fn(() => mockedConfigPath);
 });
 
+jest.mock('../../lib/logger');
+
 const fsReadFileSyncSpy = jest.spyOn(fs, 'readFileSync');
 const fsWriteFileSyncSpy = jest.spyOn(fs, 'writeFileSync');
 
@@ -103,6 +105,16 @@ function getAccountByAuthType(
 }
 
 describe('config/config', () => {
+
+  const globalConsole = global.console;
+  beforeAll(() => {
+    global.console.error = jest.fn();
+    global.console.debug = jest.fn();
+  });
+  afterAll(() => {
+    global.console = globalConsole;
+  });
+
   describe('setConfig()', () => {
     beforeEach(() => {
       setConfig(CONFIG);
