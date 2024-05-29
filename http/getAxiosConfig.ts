@@ -4,6 +4,11 @@ import { getHubSpotApiOrigin } from '../lib/urls';
 import { AxiosConfigOptions } from '../types/Http';
 import { CLIConfig } from '../types/Config';
 import { AxiosRequestConfig } from 'axios';
+import https from 'https';
+import http from 'https';
+
+const httpAgent = new http.Agent({ keepAlive: true });
+const httpsAgent = new https.Agent({ keepAlive: true });
 
 export const USER_AGENTS: { [key: string]: string } = {
   'HubSpot Local Dev Lib': version,
@@ -45,6 +50,8 @@ export function getAxiosConfig(
     },
     timeout: httpTimeout || 15000,
     transitional: DEFAULT_TRANSITIONAL,
+    httpAgent,
+    httpsAgent,
     ...rest,
   };
 }
