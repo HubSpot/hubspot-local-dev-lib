@@ -7,8 +7,23 @@ import { AxiosRequestConfig } from 'axios';
 import https from 'https';
 import http from 'https';
 
-const httpAgent = new http.Agent({ keepAlive: true });
-const httpsAgent = new https.Agent({ keepAlive: true });
+// Total number of sockets across all hosts
+const MAX_TOTAL_SOCKETS = 50;
+
+// Total number of sockets per each host
+const MAX_SOCKETS_PER_HOST = 10;
+
+const httpAgent = new http.Agent({
+  keepAlive: true,
+  maxTotalSockets: MAX_TOTAL_SOCKETS,
+  maxSockets: MAX_SOCKETS_PER_HOST,
+});
+
+const httpsAgent = new https.Agent({
+  keepAlive: true,
+  maxTotalSockets: MAX_TOTAL_SOCKETS,
+  maxSockets: MAX_SOCKETS_PER_HOST,
+});
 
 export const USER_AGENTS: { [key: string]: string } = {
   'HubSpot Local Dev Lib': version,
@@ -38,7 +53,6 @@ export function getAxiosConfig(
   const { env, localHostOverride, headers, ...rest } = options;
   const { httpTimeout, httpUseLocalhost } =
     getAndLoadConfigIfNeeded() as CLIConfig;
-
   return {
     baseURL: getHubSpotApiOrigin(
       env,
