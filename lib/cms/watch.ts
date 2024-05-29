@@ -1,3 +1,4 @@
+import fs from 'fs';
 import path from 'path';
 import chokidar from 'chokidar';
 import PQueue from 'p-queue';
@@ -47,8 +48,8 @@ type UploadFileOptions = FileMapperInputOptions & {
   fieldOptions?: string;
 };
 
-const defaultOnUploadFileError = (file: string, dest: string, accountId: number) =>
-  (error: AxiosError) => {
+const defaultOnUploadFileError =
+  (file: string, dest: string, accountId: number) => (error: AxiosError) => {
     logger.debug(
       i18n(`${i18nKey}.uploadFailed`, {
         file,
@@ -60,14 +61,18 @@ const defaultOnUploadFileError = (file: string, dest: string, accountId: number)
       request: dest,
       payload: file,
     });
-  }
+  };
 async function uploadFile(
   accountId: number,
   file: string,
   dest: string,
   options: UploadFileOptions,
   mode: Mode | null = null,
-  onUploadFileError: (file: string, dest: string, accountId: number) => ErrorHandler = defaultOnUploadFileError
+  onUploadFileError: (
+    file: string,
+    dest: string,
+    accountId: number
+  ) => ErrorHandler = defaultOnUploadFileError
 ): Promise<void> {
   const src = options.src;
 
@@ -106,6 +111,13 @@ async function uploadFile(
   }
   const fileToUpload =
     convertFields && fieldsJs?.outputPath ? fieldsJs.outputPath : file;
+
+  if (
+    dest.endsWith('fields.json') &&
+    fs.readFileSync(fileToUpload).length == 0
+  ) {
+    fs.appendFileSync(file, '[]\n');
+  }
 
   logger.debug(i18n(`${i18nKey}.uploadAttempt`, { file, dest }));
   const apiOptions = getFileMapperQueryValues(mode, options);
@@ -186,7 +198,11 @@ export function watch(
     | null = null,
   onUploadFolderError?: ErrorHandler,
   onQueueAddError?: ErrorHandler,
-  onUploadFileError?: (file: string, dest: string, accountId: number) => ErrorHandler
+  onUploadFileError?: (
+    file: string,
+    dest: string,
+    accountId: number
+  ) => ErrorHandler
 ) {
   const regex = new RegExp(`^${escapeRegExp(src)}`);
   if (notify) {
