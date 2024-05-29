@@ -8,10 +8,10 @@ import https from 'https';
 import http from 'https';
 
 // Total number of sockets across all hosts
-const MAX_TOTAL_SOCKETS = 50;
+const MAX_TOTAL_SOCKETS = 25;
 
 // Total number of sockets per each host
-const MAX_SOCKETS_PER_HOST = 10;
+const MAX_SOCKETS_PER_HOST = 5;
 
 const httpAgent = new http.Agent({
   keepAlive: true,
