@@ -5,7 +5,7 @@ import { AxiosConfigOptions } from '../types/Http';
 import { CLIConfig } from '../types/Config';
 import { AxiosRequestConfig } from 'axios';
 import https from 'https';
-import http from 'https';
+import http from 'http';
 
 // Total number of sockets across all hosts
 const MAX_TOTAL_SOCKETS = 25;

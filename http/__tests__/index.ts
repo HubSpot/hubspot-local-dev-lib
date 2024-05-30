@@ -23,7 +23,7 @@ jest.mock('http', () => ({
 
 jest.mock('https', () => ({
   Agent: jest.fn().mockReturnValue({
-    options: { keepAlive: true, maxSockets: 5, maxTotalSockets: 25 },
+    options: { keepAlive: true, maxSockets: 6, maxTotalSockets: 26 },
   }),
 }));
 
@@ -167,7 +167,7 @@ describe('http/index', () => {
           options: { keepAlive: true, maxSockets: 5, maxTotalSockets: 25 },
         },
         httpsAgent: {
-          options: { keepAlive: true, maxSockets: 5, maxTotalSockets: 25 },
+          options: { keepAlive: true, maxSockets: 6, maxTotalSockets: 26 },
         },
       });
     });
@@ -210,7 +210,7 @@ describe('http/index', () => {
           options: { keepAlive: true, maxSockets: 5, maxTotalSockets: 25 },
         },
         httpsAgent: {
-          options: { keepAlive: true, maxSockets: 5, maxTotalSockets: 25 },
+          options: { keepAlive: true, maxSockets: 6, maxTotalSockets: 26 },
         },
       });
     });
@@ -252,7 +252,7 @@ describe('http/index', () => {
           options: { keepAlive: true, maxSockets: 5, maxTotalSockets: 25 },
         },
         httpsAgent: {
-          options: { keepAlive: true, maxSockets: 5, maxTotalSockets: 25 },
+          options: { keepAlive: true, maxSockets: 6, maxTotalSockets: 26 },
         },
       });
     });
