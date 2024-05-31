@@ -1,17 +1,21 @@
+import fs from 'fs-extra';
 import {
   fetchReleaseData,
   cloneGithubRepo,
   listGithubRepoContents,
   fetchFileFromRepository,
+  fetchGitHubRepoContentFromDownloadUrl,
 } from '../github';
 import {
   fetchRepoFile as __fetchRepoFile,
   fetchRepoReleaseData as __fetchRepoReleaseData,
   fetchRepoAsZip as __fetchRepoAsZip,
   fetchRepoContents as __fetchRepoContents,
+  fetchRepoFileByDownloadUrl as __fetchRepoFileByDownloadUrl,
 } from '../../api/github';
 import { extractZipArchive as __extractZipArchive } from '../archive';
 
+jest.mock('fs-extra');
 jest.mock('../../api/github');
 jest.mock('../archive');
 
@@ -30,6 +34,10 @@ const fetchRepoContents = __fetchRepoContents as jest.MockedFunction<
 const extractZipArchive = __extractZipArchive as jest.MockedFunction<
   typeof __extractZipArchive
 >;
+const fetchRepoFileByDownloadUrl =
+  __fetchRepoFileByDownloadUrl as jest.MockedFunction<
+    typeof __fetchRepoFileByDownloadUrl
+  >;
 
 describe('lib/github', () => {
   describe('fetchFileFromRepository()', () => {
@@ -45,6 +53,51 @@ describe('lib/github', () => {
     it('downloads a github repo and writes it to a destination folder', async () => {
       await fetchFileFromRepository('owner/repo', 'file', 'ref');
       expect(fetchRepoFile).toHaveBeenCalledWith('owner/repo', 'file', 'ref');
+    });
+  });
+
+  describe('fetchGitHubRepoContentFromDownloadUrl()', () => {
+    const dest = '/path/to/destination';
+    const downloadUrl = 'https://github.com/repo/file';
+
+    it('should write text to the destination file', async () => {
+      const resp = {
+        headers: {
+          'content-type': 'text/plain',
+        },
+        data: Buffer.from('Sample text', 'utf-8'),
+        status: 200,
+        statusText: 'OK',
+        config: {},
+      };
+
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      fetchRepoFileByDownloadUrl.mockResolvedValue(resp);
+
+      await fetchGitHubRepoContentFromDownloadUrl(dest, downloadUrl);
+
+      expect(fs.outputFileSync).toHaveBeenCalledWith(dest, 'Sample text');
+    });
+
+    it('should write binary to the destination file', async () => {
+      const resp = {
+        headers: {
+          'content-type': 'application/octet-stream',
+        },
+        data: Buffer.from([0x01, 0x02, 0x03]),
+        status: 200,
+        statusText: 'OK',
+        config: {},
+      };
+
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      fetchRepoFileByDownloadUrl.mockResolvedValue(resp);
+
+      await fetchGitHubRepoContentFromDownloadUrl(dest, downloadUrl);
+
+      expect(fs.outputFileSync).toHaveBeenCalledWith(dest, resp.data);
     });
   });
 

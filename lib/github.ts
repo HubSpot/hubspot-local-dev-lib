@@ -143,7 +143,7 @@ export async function cloneGithubRepo(
   return success;
 }
 
-async function fetchGitHubRepoContentFromDownloadUrl(
+export async function fetchGitHubRepoContentFromDownloadUrl(
   dest: string,
   downloadUrl: string
 ): Promise<void> {
