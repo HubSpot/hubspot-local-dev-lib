@@ -64,6 +64,7 @@ export async function fetchRepoFileByDownloadUrl(
 ): Promise<AxiosResponse<Buffer>> {
   return axios.get<Buffer>(downloadUrl, {
     headers: { ...getDefaultUserAgentHeader(), ...GITHUB_AUTH_HEADERS },
+    responseType: 'arraybuffer',
   });
 }
 
