@@ -85,7 +85,6 @@ describe('lib/cms/uploadFolder', () => {
     createIgnoreFilter.mockImplementation(() => () => true);
   });
   beforeEach(() => {
-    FieldsJs.mockClear();
     createTmpDirSync.mockReset();
     listFilesInDir.mockReset();
   });
@@ -198,7 +197,6 @@ describe('lib/cms/uploadFolder', () => {
     const convertedModuleFilePath = convertedModuleFieldsObj.outputPath;
 
     beforeEach(() => {
-      FieldsJs.mockClear();
       jest.resetModules();
     });
     it('outputs getFilesByType with no processing if convertFields is false', async () => {

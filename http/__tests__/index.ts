@@ -46,7 +46,6 @@ fs.createWriteStream = jest.fn().mockReturnValue({
 
 describe('http/index', () => {
   afterEach(() => {
-    jest.clearAllMocks();
     getAndLoadConfigIfNeeded.mockReset();
     getAccountConfig.mockReset();
   });

@@ -194,14 +194,7 @@ describe('lib/personalAccessKey', () => {
   });
 
   describe('updateConfigWithPersonalAccessKey()', () => {
-    beforeEach(() => {
-      fetchAccessToken.mockClear();
-      updateAccountConfig.mockClear();
-    });
-
     it('updates the config with the new account', async () => {
-      fetchAccessToken.mockClear();
-
       const freshAccessToken = 'fresh-token';
       fetchAccessToken.mockResolvedValue({
         oauthAccessToken: freshAccessToken,
