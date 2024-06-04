@@ -203,9 +203,6 @@ describe('lib/fileMapper', () => {
 
   describe('fetchFolderFromApi()', () => {
     const accountId = 67890;
-    beforeEach(() => {
-      download.mockClear();
-    });
 
     it('folder: should execute the download client per the request input', async () => {
       const src = '1234';
@@ -255,7 +252,6 @@ describe('lib/fileMapper', () => {
       utimesSpy.mockImplementationOnce(() => null);
       ensureDirSpy.mockImplementationOnce(() => true);
 
-      fetchFileStream.mockClear();
       fetchFileStream.mockResolvedValueOnce({
         name: '',
         createdAt: 1,
@@ -265,7 +261,6 @@ describe('lib/fileMapper', () => {
         folder: false,
         children: [],
       });
-      utimesSpy.mockClear();
     });
 
     it('should execute downloadFile', async () => {
