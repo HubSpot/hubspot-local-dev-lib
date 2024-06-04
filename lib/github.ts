@@ -143,16 +143,20 @@ export async function cloneGithubRepo(
   return success;
 }
 
-async function fetchGitHubRepoContentFromDownloadUrl(
+export async function fetchGitHubRepoContentFromDownloadUrl(
   dest: string,
   downloadUrl: string
 ): Promise<void> {
   const resp = await fetchRepoFileByDownloadUrl(downloadUrl);
-  const fileContents =
-    typeof resp.data === 'string'
-      ? resp.data
-      : JSON.stringify(resp.data, null, 2);
-  fs.outputFileSync(dest, fileContents, 'utf8');
+  const contentType = resp.headers['content-type'];
+  let fileContents;
+
+  if (contentType.startsWith('text')) {
+    fileContents = Buffer.from(resp.data).toString('utf8');
+  } else {
+    fileContents = resp.data;
+  }
+  await fs.outputFileSync(dest, fileContents);
 }
 
 // Writes files from a public repository to the destination folder

@@ -15,6 +15,18 @@ jest.mock('axios');
 jest.mock('../../config');
 jest.mock('../../lib/logger');
 
+jest.mock('http', () => ({
+  Agent: jest.fn().mockReturnValue({
+    options: { keepAlive: true, maxSockets: 5, maxTotalSockets: 25 },
+  }),
+}));
+
+jest.mock('https', () => ({
+  Agent: jest.fn().mockReturnValue({
+    options: { keepAlive: true, maxSockets: 6, maxTotalSockets: 26 },
+  }),
+}));
+
 const mockedAxios = jest.mocked(axios);
 const getAndLoadConfigIfNeeded =
   __getAndLoadConfigIfNeeded as jest.MockedFunction<
@@ -151,6 +163,12 @@ describe('http/index', () => {
         transitional: {
           clarifyTimeoutError: true,
         },
+        httpAgent: {
+          options: { keepAlive: true, maxSockets: 5, maxTotalSockets: 25 },
+        },
+        httpsAgent: {
+          options: { keepAlive: true, maxSockets: 6, maxTotalSockets: 26 },
+        },
       });
     });
     it('adds authorization header when using a user token', async () => {
@@ -188,6 +206,12 @@ describe('http/index', () => {
         transitional: {
           clarifyTimeoutError: true,
         },
+        httpAgent: {
+          options: { keepAlive: true, maxSockets: 5, maxTotalSockets: 25 },
+        },
+        httpsAgent: {
+          options: { keepAlive: true, maxSockets: 6, maxTotalSockets: 26 },
+        },
       });
     });
 
@@ -223,6 +247,12 @@ describe('http/index', () => {
         },
         transitional: {
           clarifyTimeoutError: true,
+        },
+        httpAgent: {
+          options: { keepAlive: true, maxSockets: 5, maxTotalSockets: 25 },
+        },
+        httpsAgent: {
+          options: { keepAlive: true, maxSockets: 6, maxTotalSockets: 26 },
         },
       });
     });
