@@ -347,6 +347,15 @@
         "409": "Failed to assign port. Server with instanceId {{ instanceId }} is already running on port {{ port }}",
         "400": "Invalid port requested. Port must be between {{ minPort }} and {{ maxPort }}."
       }
+    },
+    "PrivateAppUserTokenManager": {
+      "disabled": "Private application user tokens is not enabled for accountId~{{ accountId }}, skipping call to fetch for appId~{{ appId }}",
+      "create": "Creating new private applications user token for appId~{{ appId }}",
+      "refresh": "Updating or rereshing private application user token for appId~{{ appId }} ",
+      "refreshScheduled": "Scheduling refresh of token for appId~{{ appId }} expiring at {{ expiresAt }} to run at {{ refreshTime }} ",
+      "errors": {
+        "noScopes": "Unable to use temporary Private Application User tokens for accountId~{{ accountId }}. Please regenerate the Personal Access Key."
+      }
     }
   },
   "http": {

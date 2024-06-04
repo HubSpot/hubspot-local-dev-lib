@@ -133,6 +133,23 @@ async function getNewAccessToken(
   return accessTokenResponse;
 }
 
+async function getAccessTokenResponse(accountId: number) {
+  const account = getAccountConfig(accountId) as PersonalAccessKeyAccount;
+  if (!account) {
+    throwErrorWithMessage(`${i18nKey}.errors.accountNotFound`, { accountId });
+  }
+  const { auth, personalAccessKey, env } = account;
+  const authTokenInfo = auth && auth.tokenInfo;
+
+  const accessTokenResponse = await getNewAccessToken(
+    accountId,
+    personalAccessKey,
+    authTokenInfo && authTokenInfo.expiresAt,
+    env
+  );
+  return accessTokenResponse;
+}
+
 export async function accessTokenForPersonalAccessKey(
   accountId: number
 ): Promise<string | undefined> {
@@ -162,20 +179,14 @@ export async function accessTokenForPersonalAccessKey(
 export async function enabledFeaturesForPersonalAccessKey(
   accountId: number
 ): Promise<{ [key: string]: number } | undefined> {
-  const account = getAccountConfig(accountId) as PersonalAccessKeyAccount;
-  if (!account) {
-    throwErrorWithMessage(`${i18nKey}.errors.accountNotFound`, { accountId });
-  }
-  const { auth, personalAccessKey, env } = account;
-  const authTokenInfo = auth && auth.tokenInfo;
-
-  const accessTokenResponse = await getNewAccessToken(
-    accountId,
-    personalAccessKey,
-    authTokenInfo && authTokenInfo.expiresAt,
-    env
-  );
+  const accessTokenResponse = await getAccessTokenResponse(accountId);
   return accessTokenResponse?.enabledFeatures;
+}
+
+export async function scopeGroupsForPersonalAccessKey(
+  accountId: number
+): Promise<Array<string>> {
+  return (await getAccessTokenResponse(accountId)).scopeGroups;
 }
 
 export async function updateConfigWithAccessToken(
