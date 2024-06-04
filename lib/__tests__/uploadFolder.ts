@@ -164,6 +164,7 @@ describe('lib/cms/uploadFolder', () => {
     });
 
     it('deletes the temporary directory', async () => {
+      createTmpDirSync.mockReturnValue('folder');
       const deleteDirSpy = cleanupTmpDirSync.mockImplementation(() => '');
 
       upload.mockResolvedValue();
