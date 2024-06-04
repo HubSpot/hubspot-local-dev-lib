@@ -105,7 +105,6 @@ function getAccountByAuthType(
 }
 
 describe('config/config', () => {
-
   const globalConsole = global.console;
   beforeAll(() => {
     global.console.error = jest.fn();
