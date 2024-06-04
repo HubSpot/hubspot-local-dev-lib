@@ -59,19 +59,34 @@ export class PrivateAppUserTokenManager {
       );
       return;
     }
-
-    if (
-      this.tokenMap.has(appId) &&
-      PrivateAppUserTokenManager.doesTokenHaveAllScopes(
-        this.tokenMap.get(appId),
-        scopeGroups
-      )
-    ) {
-      return this.tokenMap.get(appId);
-    } else {
-      const token = await this.createOrGetActiveToken(appId, scopeGroups);
-      this.setCacheAndRefresh(appId, token, scopeGroups);
-      return token;
+    try {
+      if (
+        this.tokenMap.has(appId) &&
+        PrivateAppUserTokenManager.doesTokenHaveAllScopes(
+          this.tokenMap.get(appId),
+          scopeGroups
+        )
+      ) {
+        return this.tokenMap.get(appId);
+      } else {
+        const token = await this.createOrGetActiveToken(appId, scopeGroups);
+        this.setCacheAndRefresh(appId, token, scopeGroups);
+        return token;
+      }
+    } catch (err) {
+      let messageDetail = 'Unknown error';
+      if (err instanceof AxiosError) {
+        messageDetail = getAxiosErrorWithContext(err as AxiosError).message;
+      } else if (err instanceof Error) {
+        messageDetail = err.message;
+      }
+      logger.warn(
+        i18n(`${i18nKey}.errors.apiError`, {
+          accountId: this.accountId,
+          appId: appId,
+          messageDetail: messageDetail,
+        })
+      );
     }
   }
 
@@ -164,7 +179,6 @@ export class PrivateAppUserTokenManager {
       if (responseErr.status == 404) {
         return null;
       }
-      logger.debug(getAxiosErrorWithContext(err as AxiosError).message);
       throw err;
     }
   }

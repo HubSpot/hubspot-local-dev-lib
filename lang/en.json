@@ -354,7 +354,8 @@
       "refresh": "Updating or rereshing private application user token for appId~{{ appId }} ",
       "refreshScheduled": "Scheduling refresh of token for appId~{{ appId }} expiring at {{ expiresAt }} to run at {{ refreshTime }} ",
       "errors": {
-        "noScopes": "Unable to use temporary Private Application User tokens for accountId~{{ accountId }}. Please regenerate the Personal Access Key."
+        "noScopes": "Unable to use temporary private application user tokens for accountId~{{ accountId }}. Please regenerate the Personal Access Key.",
+        "apiError": "Unable to get or create tempory Private application user token for appId~{{ appId }} on accountId~{{ accountId }}. {{ messageDetail }} failed."
       }
     }
   },
