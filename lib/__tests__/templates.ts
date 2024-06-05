@@ -58,10 +58,6 @@ describe('lib/cms/templates', () => {
   });
 
   describe('createTemplate()', () => {
-    beforeEach(() => {
-      downloadGithubRepoContents.mockClear();
-    });
-
     it('downloads a template from the HubSpot/cms-sample-assets repo', async () => {
       jest.spyOn(fs, 'mkdirp').mockReturnValue();
       jest.spyOn(fs, 'existsSync').mockReturnValue(false);

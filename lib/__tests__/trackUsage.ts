@@ -43,7 +43,6 @@ const usageTrackingMeta = {
 describe('lib/trackUsage', () => {
   describe('trackUsage()', () => {
     beforeEach(() => {
-      mockedAxios.mockClear();
       getAccountConfig.mockReset();
       getAccountConfig.mockReturnValue(account);
     });

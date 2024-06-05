@@ -105,7 +105,6 @@ function getAccountByAuthType(
 }
 
 describe('config/config', () => {
-
   const globalConsole = global.console;
   beforeAll(() => {
     global.console.error = jest.fn();
@@ -655,7 +654,6 @@ describe('config/config', () => {
           .mockImplementation(() => {
             return false;
           });
-        fsWriteFileSyncSpy.mockClear();
       });
 
       afterAll(() => {
@@ -686,7 +684,6 @@ describe('config/config', () => {
 
             return false;
           });
-        fsWriteFileSyncSpy.mockClear();
       });
 
       afterAll(() => {
@@ -704,7 +701,6 @@ describe('config/config', () => {
       beforeAll(() => {
         setConfigPath(CONFIG_PATHS.none);
         mockedConfigPath = CONFIG_PATHS.none;
-        fsWriteFileSyncSpy.mockClear();
       });
 
       it('creates a config at the specified path', () => {

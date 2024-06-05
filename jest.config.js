@@ -8,4 +8,5 @@ module.exports = {
   setupFiles: ['./setupTests.ts'],
   transformIgnorePatterns: ['node_modules/(?!variables/.*)'],
   modulePathIgnorePatterns: ['<rootDir>/dist/'],
+  clearMocks: true,
 };
