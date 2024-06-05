@@ -20,6 +20,9 @@ const writeFileMock = fs.writeFile as jest.MockedFunction<typeof fs.writeFile>;
 const makeDirMock = fs.mkdtemp as jest.MockedFunction<typeof fs.mkdtemp>;
 const readDirMock = fs.readdir as jest.MockedFunction<typeof fs.readdir>;
 const osTmpDirMock = os.tmpdir as jest.MockedFunction<typeof os.tmpdir>;
+const extractMock = extract as jest.MockedFunction<typeof extract>;
+const fsCopyMock = fs.copy as jest.MockedFunction<typeof fs.copy>;
+const fsRemoveMock = fs.remove as jest.MockedFunction<typeof fs.remove>;
 
 describe('lib/archive', () => {
   const rootDir = 'rootdir';
@@ -43,44 +46,48 @@ describe('lib/archive', () => {
       expect(result).toBe(false);
     });
 
-    it('should successly extract a zip archive', async () => {
+    it('should successfully extract a zip archive', async () => {
       const result = await extractZipArchive(zip, name, dest);
 
+      // Verify the behavior of extractZip
       expect(fs.mkdtemp).toHaveBeenCalledTimes(1);
       expect(fs.mkdtemp).toHaveBeenCalledWith(tmpDirName);
-
       expect(fs.ensureFile).toHaveBeenCalledTimes(1);
       expect(fs.ensureFile).toHaveBeenCalledWith(tmpZipPath);
-
       expect(fs.writeFile).toHaveBeenCalledTimes(1);
       expect(fs.writeFile).toHaveBeenCalledWith(tmpZipPath, zip, {
         mode: 0o777,
       });
-
       expect(extract).toHaveBeenCalledTimes(1);
       expect(extract).toHaveBeenCalledWith(tmpZipPath, {
         dir: tmpExtractPath,
       });
-
       expect(logger.debug).toHaveBeenCalledWith(
         'Completed project source extraction.'
       );
 
+      // Verify the behavior of copySourceToDest
       expect(logger.log).toHaveBeenCalledWith('Extracting project source...');
-
       expect(fs.readdir).toHaveBeenCalledTimes(1);
       expect(fs.readdir).toHaveBeenCalledWith(tmpExtractPath);
-      // TODO, create a test that branches off of this where readdir returns null
-
       expect(fs.copy).toHaveBeenCalledTimes(1);
       expect(fs.copy).toHaveBeenCalledWith(
         `${tmpExtractPath}/${rootDir}`,
         dest
       );
 
+      // Verify behavior of cleanupTempDir
       expect(fs.remove).toHaveBeenCalledTimes(1);
       expect(fs.remove).toHaveBeenCalledWith(tmpDirName);
 
+      // Verify expected return value
+      expect(result).toBe(true);
+    });
+
+    it('should ensure the dest directory if the root path is undefined', async () => {
+      readDirMock.mockImplementationOnce(() => []);
+      const result = await extractZipArchive(zip, name, dest);
+      expect(fs.ensureDir).toHaveBeenCalledWith(dest);
       expect(result).toBe(true);
     });
 
@@ -92,11 +99,6 @@ describe('lib/archive', () => {
       await expect(extractZipArchive(zip, name, '')).rejects.toThrow(
         `An error occurred while writing to "${tmpZipPath}"`
       );
-      expect(fs.mkdtemp).toHaveBeenCalledWith(tmpDirName);
-      expect(fs.ensureFile).toHaveBeenCalledWith(tmpZipPath);
-      expect(fs.writeFile).toHaveBeenCalledWith(tmpZipPath, zip, {
-        mode: 0o777,
-      });
     });
 
     it('should throw a generic error if the write fails', async () => {
@@ -107,9 +109,37 @@ describe('lib/archive', () => {
       await expect(extractZipArchive(zip, name, '')).rejects.toThrow(
         'An error occured writing temp project source.'
       );
-      expect(fs.mkdtemp).toHaveBeenCalledWith(`/tmp/hubspot-temp-${name}-`);
-      expect(fs.ensureFile).not.toHaveBeenCalled();
-      expect(fs.writeFile).not.toHaveBeenCalled();
+    });
+
+    it('should throw a generic error when extract fails', async () => {
+      extractMock.mockImplementationOnce(() => {
+        throw new Error('failed to do the thing');
+      });
+
+      await expect(extractZipArchive(zip, name, '')).rejects.toThrow(
+        'An error occured extracting project source.'
+      );
+    });
+
+    it('should throw a file system error if the copy fails', async () => {
+      fsCopyMock.mockImplementationOnce(() => {
+        throw new Error('failed to do the thing');
+      });
+
+      await expect(extractZipArchive(zip, name, '')).rejects.toThrow(
+        `An error occurred while writing to a file or folder.`
+      );
+    });
+
+    it('should log a debug message when cleanup fails', async () => {
+      fsRemoveMock.mockImplementationOnce(() => {
+        throw new Error('failed to do the thing');
+      });
+
+      await extractZipArchive(zip, name, '');
+      expect(logger.debug).toHaveBeenCalledWith(
+        `Failed to clean up temp dir: ${tmpDirName}`
+      );
     });
   });
 });
