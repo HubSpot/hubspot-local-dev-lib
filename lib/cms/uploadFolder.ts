@@ -32,11 +32,20 @@ type CommandOptions = {
   convertFields?: boolean;
   fieldOptions?: string;
   saveOutput?: boolean;
-  onAttemptCallback?: (file: string | undefined, destPath: string) => void,
-  onSuccessCallback?: (file: string | undefined, destPath: string) => void,
-  onFirstErrorCallback?: (file: string, destPath: string, error: AxiosError) => void,
-  onRetryCallback?: (file: string, destPath: string) => void,
-  onFinalErrorCallback?: (accountId: number, file: string, destPath: string, error: AxiosError) => void
+  onAttemptCallback?: (file: string | undefined, destPath: string) => void;
+  onSuccessCallback?: (file: string | undefined, destPath: string) => void;
+  onFirstErrorCallback?: (
+    file: string,
+    destPath: string,
+    error: AxiosError
+  ) => void;
+  onRetryCallback?: (file: string, destPath: string) => void;
+  onFinalErrorCallback?: (
+    accountId: number,
+    file: string,
+    destPath: string,
+    error: AxiosError
+  ) => void;
 };
 
 type FilePathsByType = {
@@ -121,35 +130,47 @@ export async function getFilesByType(
   return [filePathsByType, fieldsJsObjects];
 }
 
-const defaultUploadAttemptCallback = (file: string | undefined, destPath: string) => logger.debug(
-  i18n(`${i18nKey}.uploadFolder.attempt`, {
-    file: file || '',
-    destPath,
-  })
-);
-const defaultUploadSuccessCallback = (file: string | undefined, destPath: string) => logger.log(
-  i18n(`${i18nKey}.uploadFolder.success`, {
-    file: file || '',
-    destPath,
-  })
-);
-const defaultUploadFirstErrorCallback = (file: string, destPath: string, error: AxiosError) => {
+const defaultUploadAttemptCallback = (
+  file: string | undefined,
+  destPath: string
+) =>
   logger.debug(
-    i18n(`${i18nKey}.uploadFolder.failed`, { file, destPath })
+    i18n(`${i18nKey}.uploadFolder.attempt`, {
+      file: file || '',
+      destPath,
+    })
   );
+const defaultUploadSuccessCallback = (
+  file: string | undefined,
+  destPath: string
+) =>
+  logger.log(
+    i18n(`${i18nKey}.uploadFolder.success`, {
+      file: file || '',
+      destPath,
+    })
+  );
+const defaultUploadFirstErrorCallback = (
+  file: string,
+  destPath: string,
+  error: AxiosError
+) => {
+  logger.debug(i18n(`${i18nKey}.uploadFolder.failed`, { file, destPath }));
   if (error.response && error.response.data) {
     logger.debug(error.response.data);
   } else {
     logger.debug(error.message);
   }
 };
-const defaultUploadRetryCallback = (file: string, destPath: string) => logger.debug(
-  i18n(`${i18nKey}.uploadFolder.retry`, { file, destPath })
-);
-const defaultUploadFinalErrorCallback = (accountId: number, file: string, destPath: string, error: AxiosError) => {
-  logger.debug(
-    i18n(`${i18nKey}.uploadFolder.retryFailed`, { file, destPath })
-  );
+const defaultUploadRetryCallback = (file: string, destPath: string) =>
+  logger.debug(i18n(`${i18nKey}.uploadFolder.retry`, { file, destPath }));
+const defaultUploadFinalErrorCallback = (
+  accountId: number,
+  file: string,
+  destPath: string,
+  error: AxiosError
+) => {
+  logger.debug(i18n(`${i18nKey}.uploadFolder.retryFailed`, { file, destPath }));
   throwApiUploadError(error, {
     accountId,
     request: destPath,
@@ -172,14 +193,16 @@ export async function uploadFolder(
     onSuccessCallback,
     onFirstErrorCallback,
     onRetryCallback,
-    onFinalErrorCallback
+    onFinalErrorCallback,
   } = commandOptions;
 
   const _onAttemptCallback = onAttemptCallback || defaultUploadAttemptCallback;
   const _onSuccessCallback = onSuccessCallback || defaultUploadSuccessCallback;
-  const _onFirstErrorCallback = onFirstErrorCallback || defaultUploadFirstErrorCallback;
+  const _onFirstErrorCallback =
+    onFirstErrorCallback || defaultUploadFirstErrorCallback;
   const _onRetryCallback = onRetryCallback || defaultUploadRetryCallback;
-  const _onFinalErrorCallback = onFinalErrorCallback || defaultUploadFinalErrorCallback;
+  const _onFinalErrorCallback =
+    onFinalErrorCallback || defaultUploadFinalErrorCallback;
 
   const tmpDir = convertFields
     ? createTmpDirSync('hubspot-temp-fieldsjs-output-')
@@ -248,7 +271,7 @@ export async function uploadFolder(
           _onRetryCallback(file, destPath);
           try {
             await upload(accountId, file, destPath, apiOptions);
-            _onSuccessCallback(file, destPath)
+            _onSuccessCallback(file, destPath);
             return {
               resultType: FILE_UPLOAD_RESULT_TYPES.SUCCESS,
               error: null,
