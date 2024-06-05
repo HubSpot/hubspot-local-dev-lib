@@ -1,14 +1,8 @@
 import os from 'os';
 
 jest.mock('fs-extra');
-
-jest.mock('extract-zip', () => ({
-  __esModule: true,
-  default: jest.fn().mockResolvedValue(''),
-}));
-
+jest.mock('extract-zip');
 jest.mock('os');
-
 jest.mock('../logger');
 
 import { extractZipArchive } from '../archive';
