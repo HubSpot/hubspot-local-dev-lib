@@ -101,7 +101,7 @@ describe('lib/archive', () => {
       });
 
       await expect(extractZipArchive(zip, name, '')).rejects.toThrow(
-        'An error occured writing temp project source.'
+        'An error occurred writing temp project source.'
       );
     });
 
@@ -111,7 +111,7 @@ describe('lib/archive', () => {
       });
 
       await expect(extractZipArchive(zip, name, '')).rejects.toThrow(
-        'An error occured extracting project source.'
+        'An error occurred extracting project source.'
       );
     });
 
