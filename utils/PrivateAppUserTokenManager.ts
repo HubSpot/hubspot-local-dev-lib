@@ -46,6 +46,14 @@ export class PrivateAppUserTokenManager {
     }
   }
 
+  stopRefreshes() {
+    this.tokenMapIntervalId.forEach((appId, timeoutId) =>
+      clearInterval(timeoutId)
+    );
+    this.tokenMapIntervalId.clear();
+    this.tokenMap.clear();
+  }
+
   async getToken(
     appId: number,
     scopeGroups: string[] = []
