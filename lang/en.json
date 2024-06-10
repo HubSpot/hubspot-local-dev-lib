@@ -10,15 +10,15 @@
         "init": "Extracting project source...",
         "success": "Completed project source extraction.",
         "errors": {
-          "write": "An error occured writing temp project source.",
-          "extract": "An error occured extracting project source."
+          "write": "An error occurred writing temp project source.",
+          "extract": "An error occurred extracting project source."
         }
       },
       "copySourceToDest": {
         "init": "Copying project source...",
         "sourceEmpty": "Project source is empty",
         "success": "Completed copying project source.",
-        "error": "An error occured copying project source to {{ dest }}."
+        "error": "An error occurred copying project source to {{ dest }}."
       },
       "cleanupTempDir": {
         "error": "Failed to clean up temp dir: {{ tmpDir }}"
@@ -33,7 +33,7 @@
       "fetchFileFromRepository": {
         "fetching": "Fetching {{ path }}...",
         "errors": {
-          "fetchFail": "An error occured fetching JSON file."
+          "fetchFail": "An error occurred fetching JSON file."
         }
       },
       "fetchReleaseData": {
@@ -130,7 +130,7 @@
         },
         "createTmpDirSync": {
           "errors": {
-            "writeFailed": "An error occured writing temporary project source."
+            "writeFailed": "An error occurred writing temporary project source."
           }
         },
         "cleanupTmpDirSync": {
