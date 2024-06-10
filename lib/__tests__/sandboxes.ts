@@ -1,26 +1,45 @@
 import {
   createSandbox as __createSandbox,
   getSandboxUsageLimits as __getSandboxUsageLimits,
+  deleteSandbox as __deleteSandbox,
 } from '../../api/sandboxHubs';
-import { fetchTypes as __fetchTypes } from '../../api/sandboxSync';
-import { Sandbox, Usage } from '../../types/Sandbox';
 import {
-  createSandbox as createSandboxAction,
-  deleteSandbox as deleteSandboxAction,
-  getSandboxUsageLimits as getSandboxUsageLimitsAction,
-  fetchTypes as fetchTypesAction,
+  initiateSync as __initiateSync,
+  fetchTaskStatus as __fetchTaskStatus,
+  fetchTypes as __fetchTypes,
+} from '../../api/sandboxSync';
+import { Sandbox, SyncTask, TaskRequestData, Usage } from '../../types/Sandbox';
+import {
+  createSandbox,
+  deleteSandbox,
+  getSandboxUsageLimits,
+  fetchTypes,
+  initiateSync,
+  fetchTaskStatus,
 } from '../sandboxes';
+import { AxiosError } from 'axios';
 
 jest.mock('../../api/sandboxHubs');
 jest.mock('../../api/sandboxSync');
 
-const createSandbox = __createSandbox as jest.MockedFunction<
+const createSandboxMock = __createSandbox as jest.MockedFunction<
   typeof __createSandbox
 >;
-const getSandboxUsageLimits = __getSandboxUsageLimits as jest.MockedFunction<
-  typeof __getSandboxUsageLimits
+
+const deleteSandboxMock = __deleteSandbox as jest.MockedFunction<
+  typeof __deleteSandbox
 >;
-const fetchTypes = __fetchTypes as jest.MockedFunction<typeof __fetchTypes>;
+const getSandboxUsageLimitsMock =
+  __getSandboxUsageLimits as jest.MockedFunction<
+    typeof __getSandboxUsageLimits
+  >;
+const fetchTypesMock = __fetchTypes as jest.MockedFunction<typeof __fetchTypes>;
+const initiateSyncMock = __initiateSync as jest.MockedFunction<
+  typeof __initiateSync
+>;
+const fetchTaskStatusMock = __fetchTaskStatus as jest.MockedFunction<
+  typeof __fetchTaskStatus
+>;
 
 const sandboxName = 'Mock Standard Sandbox';
 const sandboxHubId = 987654;
@@ -69,40 +88,152 @@ const MOCK_TYPES = [
 ];
 
 describe('lib/sandboxes', () => {
-  it('createSandbox()', async () => {
+  describe('createSandbox', () => {
     const personalAccessKey = 'pak-test-123';
-    createSandbox.mockResolvedValue({
-      sandbox: MOCK_SANDBOX_ACCOUNT,
-      personalAccessKey,
+    it('should create a sandbox', async () => {
+      createSandboxMock.mockResolvedValue({
+        sandbox: MOCK_SANDBOX_ACCOUNT,
+        personalAccessKey,
+      });
+
+      const response = await createSandbox(accountId, sandboxName, 1);
+      expect(createSandboxMock).toHaveBeenCalledWith(accountId, sandboxName, 1);
+      expect(response).toStrictEqual({
+        personalAccessKey,
+        name: sandboxName,
+        sandbox: MOCK_SANDBOX_ACCOUNT,
+      });
     });
 
-    const response = await createSandboxAction(accountId, sandboxName, 1);
-    expect(response.personalAccessKey).toEqual(personalAccessKey);
-    expect(response.name).toEqual(sandboxName);
-    expect(response.sandbox).toBeTruthy();
+    it('should throw an API error when an error is encountered', async () => {
+      const error = new AxiosError('OH NO');
+      createSandboxMock.mockRejectedValue(error);
+
+      await expect(async () => {
+        await createSandbox(accountId, sandboxName, 1);
+      }).rejects.toThrowError('The request failed.');
+    });
   });
 
-  it('deleteSandbox()', async () => {
-    const response = await deleteSandboxAction(accountId, sandboxHubId);
-    expect(response.parentAccountId).toEqual(accountId);
-    expect(response.sandboxAccountId).toEqual(sandboxHubId);
+  describe('deleteSandbox', () => {
+    it('should delete sandbox', async () => {
+      const response = await deleteSandbox(accountId, sandboxHubId);
+      expect(response).toStrictEqual({
+        parentAccountId: accountId,
+        sandboxAccountId: sandboxHubId,
+      });
+    });
+    it('should throw an API error when an error is encountered', async () => {
+      const error = new AxiosError('OH NO');
+      deleteSandboxMock.mockRejectedValue(error);
+
+      await expect(async () => {
+        await deleteSandbox(accountId, sandboxHubId);
+      }).rejects.toThrowError('The request failed.');
+    });
   });
 
-  it('getSandboxUsageLimits()', async () => {
-    getSandboxUsageLimits.mockResolvedValue({
-      usage: MOCK_USAGE_DATA,
+  describe('getSandboxUsageLimits', () => {
+    it('should get usage limit', async () => {
+      getSandboxUsageLimitsMock.mockResolvedValue({
+        usage: MOCK_USAGE_DATA,
+      });
+
+      const response = await getSandboxUsageLimits(accountId);
+      expect(response).toStrictEqual(MOCK_USAGE_DATA);
     });
 
-    const response = await getSandboxUsageLimitsAction(accountId);
-    expect(response).toMatchObject(MOCK_USAGE_DATA);
+    it('should throw an API error when an error is encountered', async () => {
+      const error = new AxiosError('OH NO');
+      getSandboxUsageLimitsMock.mockRejectedValue(error);
+
+      await expect(async () => {
+        await getSandboxUsageLimits(accountId);
+      }).rejects.toThrowError('The request failed.');
+    });
   });
 
-  it('fetchTypes()', async () => {
-    fetchTypes.mockResolvedValue({
-      results: MOCK_TYPES,
+  describe('initiateSync', () => {
+    const toHubId = 456789;
+    const tasks: TaskRequestData[] = [];
+    it('should initiate the sync', async () => {
+      const sync = {
+        links: {
+          status: 'some status',
+        },
+        sync: {
+          id: 'sync-id',
+        } as SyncTask, // This object is huge, I don't want to add all of it
+        id: 'this-is-an-id',
+      };
+      initiateSyncMock.mockResolvedValue(sync);
+
+      const response = await initiateSync(
+        accountId,
+        toHubId,
+        tasks,
+        sandboxHubId
+      );
+      expect(initiateSyncMock).toHaveBeenCalledWith(
+        accountId,
+        toHubId,
+        tasks,
+        sandboxHubId
+      );
+      expect(response).toStrictEqual(sync);
     });
 
-    const response = await fetchTypesAction(accountId, sandboxHubId);
-    expect(response).toMatchObject(MOCK_TYPES);
+    it('should throw an API error when an error is encountered', async () => {
+      const error = new AxiosError('OH NO');
+      initiateSyncMock.mockRejectedValue(error);
+
+      await expect(async () => {
+        await initiateSync(accountId, 234, [], 789);
+      }).rejects.toThrowError('The request failed.');
+    });
+  });
+
+  describe('fetchTaskStatus', () => {
+    const taskId = 1234567890;
+    it('should fetch the task status', async () => {
+      const status = {
+        status: 'please hold',
+        tasks: [],
+      };
+      fetchTaskStatusMock.mockResolvedValue(status);
+
+      const response = await fetchTaskStatus(accountId, taskId);
+      expect(fetchTaskStatusMock).toHaveBeenCalledWith(accountId, taskId);
+      expect(response).toStrictEqual(status);
+    });
+
+    it('should throw an API error when an error is encountered', async () => {
+      const error = new AxiosError('OH NO');
+      fetchTaskStatusMock.mockRejectedValue(error);
+
+      await expect(async () => {
+        await fetchTaskStatus(accountId, taskId);
+      }).rejects.toThrowError('The request failed.');
+    });
+  });
+
+  describe('fetchTypes', () => {
+    it('should fetch types', async () => {
+      fetchTypesMock.mockResolvedValue({
+        results: MOCK_TYPES,
+      });
+
+      const response = await fetchTypes(accountId, sandboxHubId);
+      expect(response).toStrictEqual(MOCK_TYPES);
+    });
+
+    it('should throw an API error when an error is encountered', async () => {
+      const error = new AxiosError('OH NO');
+      fetchTypesMock.mockRejectedValue(error);
+
+      await expect(async () => {
+        await fetchTypes(accountId, sandboxHubId);
+      }).rejects.toThrowError('The request failed.');
+    });
   });
 });
