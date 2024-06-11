@@ -64,7 +64,7 @@ describe('lib/notify', () => {
     it('should throw a user friendly error message when writing to filesystem fails', async () => {
       const throwErrorWithMessageMock = jest
         .spyOn(standardErrors, 'throwErrorWithMessage')
-        // @ts-expect-error chill typescript
+        // @ts-expect-error don't want this method to actually throw because it will fail this test and we can't catch it because it's debounced
         .mockReturnValue(undefined);
       const error = new Error('failed to do the thing');
       fsAppendSyncMock.mockImplementation(() => {
