@@ -4,16 +4,16 @@ import {
   updatePrivateAppUserToken,
   PrivateAppUserTokenResponse,
 } from '../api/privateAppUserToken';
-import { scopeGroupsForPersonalAccessKey } from '../lib/personalAccessKey';
-import { logger } from '../lib/logger';
-import { i18n } from './lang';
+import { scopeGroupsForPersonalAccessKey } from './personalAccessKey';
+import { logger } from './logger';
+import { i18n } from '../utils/lang';
 import moment from 'moment';
 import { AxiosError } from 'axios';
 import { getAxiosErrorWithContext } from '../errors/apiErrors';
 
 const USER_TOKEN_READ = 'developer.private_app.temporary_token.read';
 const USER_TOKEN_WRITE = 'developer.private_app.temporary_token.write';
-const i18nKey = 'utils.PrivateAppUserTokenManager';
+const i18nKey = 'lib.PrivateAppUserTokenManager';
 
 export class PrivateAppUserTokenManager {
   accountId: number;
@@ -42,22 +42,25 @@ export class PrivateAppUserTokenManager {
         })
       );
     } else {
+      logger.debug(
+        i18n(`${i18nKey}.enabled`, {
+          accountId: this.accountId,
+        })
+      );
       this.enabled = true;
     }
   }
 
-  stopRefreshes() {
-    this.tokenMapIntervalId.forEach((appId, timeoutId) =>
-      clearInterval(timeoutId)
-    );
+  cleanup() {
+    this.tokenMapIntervalId.forEach(timeoutId => clearInterval(timeoutId));
     this.tokenMapIntervalId.clear();
     this.tokenMap.clear();
   }
 
-  async getToken(
+  async getPrivateAppToken(
     appId: number,
     scopeGroups: string[] = []
-  ): Promise<PrivateAppUserTokenResponse | undefined> {
+  ): Promise<string | undefined> {
     if (!this.enabled) {
       logger.debug(
         i18n(`${i18nKey}.disabled`, {
@@ -75,17 +78,24 @@ export class PrivateAppUserTokenManager {
           scopeGroups
         )
       ) {
-        return this.tokenMap.get(appId);
+        logger.debug(
+          i18n(`${i18nKey}.cached`, {
+            appId: appId,
+          })
+        );
+        return this.tokenMap.get(appId)!.userTokenKey;
       } else {
         const token = await this.createOrGetActiveToken(appId, scopeGroups);
         this.setCacheAndRefresh(appId, token, scopeGroups);
-        return token;
+        return token.userTokenKey;
       }
     } catch (err) {
       let messageDetail = 'Unknown error';
       if (err instanceof AxiosError) {
+        logger.error(err as AxiosError);
         messageDetail = getAxiosErrorWithContext(err as AxiosError).message;
       } else if (err instanceof Error) {
+        logger.error(err as Error);
         messageDetail = err.message;
       }
       logger.warn(
@@ -183,9 +193,11 @@ export class PrivateAppUserTokenManager {
     try {
       return await fetchPrivateAppUserToken(this.accountId, appId);
     } catch (err) {
-      const responseErr = err as AxiosError;
-      if (responseErr.status == 404) {
-        return null;
+      if (err instanceof AxiosError) {
+        const axiosError = err as AxiosError;
+        if (axiosError.response?.status == 404) {
+          return null;
+        }
       }
       throw err;
     }
