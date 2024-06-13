@@ -16,6 +16,6 @@ export type MigrateAppResponse = {
 export type PollAppResponse = {
   id: number;
   project?: { id: number; name: string; buildId: number; deployId: number };
-  error: OptionalError;
+  error?: OptionalError;
   status: ValueOf<typeof MIGRATION_STATUS>;
 };
