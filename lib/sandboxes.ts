@@ -84,8 +84,7 @@ export async function fetchTaskStatus(
   taskId: number
 ): Promise<SyncTaskStatusType> {
   try {
-    const result = await _fetchTaskStatus(accountId, taskId);
-    return result;
+    return await _fetchTaskStatus(accountId, taskId);
   } catch (err) {
     throwApiError(err as AxiosError);
   }
