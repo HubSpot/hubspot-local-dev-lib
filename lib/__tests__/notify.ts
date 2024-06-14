@@ -50,7 +50,9 @@ describe('lib/notify', () => {
             resolve();
           })
         );
-        output = `${output}${new Date(now).toISOString()} ${actionType}: ${filePath}\n`;
+        output = `${output}${new Date(
+          now
+        ).toISOString()} ${actionType}: ${filePath}\n`;
       }
 
       // Advance all of the timers to trigger the debounce
