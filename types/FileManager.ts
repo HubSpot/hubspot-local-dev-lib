@@ -13,7 +13,6 @@ export type File = {
   friendly_url: string;
   meta: {
     allows_anonymous_access: boolean;
-    charset_guess: string;
     line_count: number;
     indexable: boolean;
   };
