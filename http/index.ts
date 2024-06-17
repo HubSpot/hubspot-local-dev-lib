@@ -1,7 +1,12 @@
 import path from 'path';
 import fs from 'fs-extra';
 import contentDisposition from 'content-disposition';
-import axios, { AxiosRequestConfig, AxiosResponse, isAxiosError } from 'axios';
+import axios, {
+  AxiosRequestConfig,
+  AxiosResponse,
+  InternalAxiosRequestConfig,
+  isAxiosError,
+} from 'axios';
 
 import { getAccountConfig } from '../config';
 import { USER_AGENTS, getAxiosConfig } from './getAxiosConfig';
@@ -15,18 +20,34 @@ import { i18n } from '../utils/lang';
 
 const i18nKey = 'http.index';
 
-export class HubSpotHttpError extends Error {
-  private status?: number;
+export class HubSpotHttpError<T = unknown, D = unknown> extends Error {
+  public status?: number;
+  public response?: AxiosResponse<T, D>;
+  public config?: InternalAxiosRequestConfig<D>;
+  public code?: string;
+  public request?: unknown;
+  public isHubSpotHttpError = true;
+
   constructor(message?: string, options?: ErrorOptions) {
     super(message, options);
     this.name = 'HubSpotHttpError';
-    if (options && isAxiosError(options.cause)) {
-      this.status = options.cause.status;
+
+    if (options && isAxiosError(options.cause) && options.cause.response) {
+      this.status = options.cause.response.status;
+
+      // Add these for backwards compatibility until we have updated all the checks
+      // in the CLI for the Axios implementation details and then we can remove these or
+      // keep whatever we find useful in custom fields on this object
+      const { response, request, config, code } = options.cause;
+      this.response = response;
+      this.request = request;
+      this.config = config;
+      this.code = code;
     }
   }
 }
 
-axios.interceptors.response.use(undefined, function (error) {
+axios.interceptors.response.use(undefined, error => {
   // Wrap all axios errors in our own Error class
   return Promise.reject(new HubSpotHttpError(error.message, { cause: error }));
 });
