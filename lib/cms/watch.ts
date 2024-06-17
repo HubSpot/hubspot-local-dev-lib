@@ -1,3 +1,4 @@
+import fs from 'fs';
 import path from 'path';
 import chokidar from 'chokidar';
 import PQueue from 'p-queue';
@@ -73,6 +74,12 @@ async function uploadFile(
     accountId: number
   ) => ErrorHandler = defaultOnUploadFileError
 ): Promise<void> {
+  // If fields.json is empty, make it valid and let the next change event do the upload
+  if (file.endsWith('fields.json') && fs.readFileSync(file).length == 0) {
+    fs.appendFileSync(file, '[]\n');
+    return;
+  }
+
   const src = options.src;
 
   const absoluteSrcPath = path.resolve(getCwd(), file);
