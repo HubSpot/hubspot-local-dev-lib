@@ -26,7 +26,6 @@ export class HubSpotHttpError<T = unknown, D = unknown> extends Error {
   public config?: InternalAxiosRequestConfig<D>;
   public code?: string;
   public request?: unknown;
-  public isHubSpotHttpError = true;
 
   constructor(message?: string, options?: ErrorOptions) {
     super(message, options);
@@ -45,6 +44,10 @@ export class HubSpotHttpError<T = unknown, D = unknown> extends Error {
       this.code = code;
     }
   }
+}
+
+export function isHubSpotHttpError(error?: unknown): error is HubSpotHttpError {
+  return !!error && error instanceof HubSpotHttpError;
 }
 
 axios.interceptors.response.use(undefined, error => {
