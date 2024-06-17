@@ -88,3 +88,44 @@ export function isAllowedExtension(
 export function getAbsoluteFilePath(_path: string): string {
   return path.resolve(getCwd(), _path);
 }
+
+// Reserved names (Windows specific)
+const reservedNames = /^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])$/i;
+
+// Based on the node-sanitize-filename package: https://github.com/parshap/node-sanitize-filename/blob/master/index.js
+export function sanitizeFileName(fileName: string): string {
+  // Windows invalid/control characters
+  // eslint-disable-next-line no-control-regex
+  const invalidChars = /[<>:"/|?*\x00-\x1F]/g;
+
+  //Replace invalid characters with dash
+  let sanitizedFileName = fileName.replace(invalidChars, '-');
+
+  // Removes trailing periods and spaces for Windows
+  sanitizedFileName = sanitizedFileName.replace(/[. ]+$/, '');
+
+  //Reserved names check for Windows
+  if (reservedNames.test(sanitizedFileName)) {
+    sanitizedFileName = `-${sanitizedFileName}`;
+  }
+
+  return sanitizedFileName;
+}
+
+// Based on the node-sanitize-filename package: https://github.com/parshap/node-sanitize-filename/blob/master/index.js
+export function isValidPath(_path: string): boolean {
+  // Invalid characters excluding forward slash
+  // eslint-disable-next-line no-control-regex
+  const invalidChars = /[<>:"|?*\x00-\x1F]/;
+  const baseName = path.basename(_path);
+
+  if (invalidChars.test(baseName)) {
+    return false;
+  }
+
+  if (reservedNames.test(baseName)) {
+    return false;
+  }
+
+  return true;
+}
