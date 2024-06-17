@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'fs-extra';
 import contentDisposition from 'content-disposition';
-import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios, { AxiosRequestConfig, AxiosResponse, isAxiosError } from 'axios';
 
 import { getAccountConfig } from '../config';
 import { USER_AGENTS, getAxiosConfig } from './getAxiosConfig';
@@ -14,6 +14,22 @@ import { logger } from '../lib/logger';
 import { i18n } from '../utils/lang';
 
 const i18nKey = 'http.index';
+
+export class HubSpotHttpError extends Error {
+  private status?: number;
+  constructor(message?: string, options?: ErrorOptions) {
+    super(message, options);
+    this.name = 'HubSpotHttpError';
+    if (options && isAxiosError(options.cause)) {
+      this.status = options.cause.status;
+    }
+  }
+}
+
+axios.interceptors.response.use(undefined, function (error) {
+  // Wrap all axios errors in our own Error class
+  return Promise.reject(new HubSpotHttpError(error.message, { cause: error }));
+});
 
 export function addUserAgentHeader(key: string, value: string) {
   USER_AGENTS[key] = value;
