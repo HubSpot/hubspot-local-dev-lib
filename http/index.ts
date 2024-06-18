@@ -31,8 +31,12 @@ export class HubSpotHttpError<T = unknown, D = unknown> extends Error {
     super(message, options);
     this.name = 'HubSpotHttpError';
 
-    if (options && isAxiosError(options.cause) && options.cause.response) {
-      this.status = options.cause.response.status;
+    if (options && isAxiosError(options.cause)) {
+      // Add any custom fields we feel are necessary or make our
+      // collective lives easier
+      if (options.cause.response) {
+        this.status = options.cause.response.status;
+      }
 
       // Add these for backwards compatibility until we have updated all the checks
       // in the CLI for the Axios implementation details and then we can remove these or
@@ -51,7 +55,8 @@ export function isHubSpotHttpError(error?: unknown): error is HubSpotHttpError {
 }
 
 axios.interceptors.response.use(undefined, error => {
-  // Wrap all axios errors in our own Error class
+  // Wrap all axios errors in our own Error class.  Attach the error
+  // as the cause for the new error, so we maintain the stack trace
   return Promise.reject(new HubSpotHttpError(error.message, { cause: error }));
 });
 
