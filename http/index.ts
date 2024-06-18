@@ -26,6 +26,8 @@ export class HubSpotHttpError<T = unknown, D = unknown> extends Error {
   public config?: InternalAxiosRequestConfig<D>;
   public code?: string;
   public request?: unknown;
+  public statusText?: string;
+  public data?: T;
 
   constructor(message?: string, options?: ErrorOptions) {
     super(message, options);
@@ -34,18 +36,21 @@ export class HubSpotHttpError<T = unknown, D = unknown> extends Error {
     if (options && isAxiosError(options.cause)) {
       // Add any custom fields we feel are necessary or make our
       // collective lives easier
+      this.code = options.cause.code;
       if (options.cause.response) {
-        this.status = options.cause.response.status;
+        const { response } = options.cause;
+        this.status = response.status;
+        this.statusText = response.statusText;
+        this.data = response.data;
       }
 
       // Add these for backwards compatibility until we have updated all the checks
       // in the CLI for the Axios implementation details and then we can remove these or
       // keep whatever we find useful in custom fields on this object
-      const { response, request, config, code } = options.cause;
+      const { response, request, config } = options.cause;
       this.response = response;
       this.request = request;
       this.config = config;
-      this.code = code;
     }
   }
 }
