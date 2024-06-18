@@ -17,9 +17,9 @@ const i18nKey = 'lib.PrivateAppUserTokenManager';
 
 export class PrivateAppUserTokenManager {
   accountId: number;
-  tokenMap: Map<number, PrivateAppUserTokenResponse>;
-  tokenMapIntervalId: Map<number, NodeJS.Timeout>;
-  enabled: boolean;
+  private tokenMap: Map<number, PrivateAppUserTokenResponse>;
+  private tokenMapIntervalId: Map<number, NodeJS.Timeout>;
+  private enabled: boolean;
 
   constructor(accountId: number) {
     this.accountId = accountId;
@@ -108,11 +108,24 @@ export class PrivateAppUserTokenManager {
     }
   }
 
+  isEnabled(): boolean {
+    return this.enabled;
+  }
+
   private setCacheAndRefresh(
     appId: number,
     token: PrivateAppUserTokenResponse,
     scopeGroups: string[]
   ) {
+    if (token === undefined || token === null) {
+      logger.warn(
+        i18n(`${i18nKey}.errors.refreshFailed`, {
+          accountId: this.accountId,
+          appId: appId,
+        })
+      );
+      return;
+    }
     this.tokenMap.set(appId, token);
     if (this.tokenMapIntervalId.has(appId)) {
       clearInterval(this.tokenMapIntervalId.get(appId));
@@ -154,7 +167,10 @@ export class PrivateAppUserTokenManager {
       );
       return createPrivateAppUserToken(this.accountId, appId, scopeGroups);
     } else if (
-      moment().add(5, 'minutes').isAfter(moment.utc(maybeToken.expiresAt)) ||
+      moment
+        .utc()
+        .add(5, 'minutes')
+        .isAfter(moment.utc(maybeToken.expiresAt)) ||
       !PrivateAppUserTokenManager.doesTokenHaveAllScopes(
         maybeToken,
         scopeGroups
@@ -219,6 +235,15 @@ export class PrivateAppUserTokenManager {
       userTokenKey,
       scopeGroups
     );
-    this.setCacheAndRefresh(appId, newToken, scopeGroups);
+    if (newToken) {
+      this.setCacheAndRefresh(appId, newToken, scopeGroups);
+    } else {
+      logger.warn(
+        i18n(`${i18nKey}.errors.refreshFailed`, {
+          accountId: this.accountId,
+          appId: appId,
+        })
+      );
+    }
   }
 }
