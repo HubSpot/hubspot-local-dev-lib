@@ -17,6 +17,29 @@ import {
 
 const i18nKey = 'errors.apiErrors';
 
+function extractHttpErrorFields(error: HubSpotHttpError | AxiosError): {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  data: any;
+  status?: number;
+  code?: string;
+} {
+  if (isHubSpotHttpError(error)) {
+    return {
+      data: error.data,
+      status: error.status,
+      code: error.code,
+    };
+  }
+  if (isAxiosError(error)) {
+    return {
+      data: error.response?.data,
+      status: error.response?.status,
+      code: error.code,
+    };
+  }
+  return { data: {} };
+}
+
 export function isSpecifiedError(
   err: Error | HubSpotHttpError,
   {
@@ -37,10 +60,13 @@ export function isSpecifiedError(
     return false;
   }
 
-  const error = isHubSpotHttpError(err) ? err : (err?.cause as AxiosError);
-  const { data, status } = error?.response || {
-    response: { data: {} },
-  };
+  const {
+    data,
+    status,
+    code: actualCode,
+  } = extractHttpErrorFields(
+    isHubSpotHttpError(err) ? err : (err.cause as AxiosError)
+  );
 
   const causedByAxiosError = isAxiosError(err.cause);
 
@@ -49,7 +75,7 @@ export function isSpecifiedError(
   const subCategoryMatchesError =
     !subCategory || data?.subCategory === subCategory;
   const errorTypeMatchesError = !errorType || data?.errorType === errorType;
-  const codeMatchesError = !code || error.code === code;
+  const codeMatchesError = !code || actualCode === code;
 
   return (
     causedByAxiosError &&

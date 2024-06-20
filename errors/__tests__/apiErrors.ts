@@ -174,30 +174,36 @@ describe('errors/apiErrors', () => {
   describe('getHubSpotHttpErrorWithContext()', () => {
     it('includes the original cause', () => {
       const error = newHubSpotHttpError();
-      const axiosErrorWithContext = getHubSpotHttpErrorWithContext(error);
+      const hubspotHttpErrorWithContext = getHubSpotHttpErrorWithContext(error);
 
       // @ts-expect-error cause is unknown
-      expect(axiosErrorWithContext.cause.name).toBe(error.name);
+      expect(hubspotHttpErrorWithContext.cause.name).toBe(error.name);
     });
 
     describe('context tests', () => {
       it('handles message detail context without request', () => {
         const error = newHubSpotHttpError({ status: 699 });
-        const axiosErrorWithContext = getHubSpotHttpErrorWithContext(error, {
-          accountId: 123,
-        });
-        expect(axiosErrorWithContext.message).toBe(
+        const hubspotHttpErrorWithContext = getHubSpotHttpErrorWithContext(
+          error,
+          {
+            accountId: 123,
+          }
+        );
+        expect(hubspotHttpErrorWithContext.message).toBe(
           'The request in account 123 failed.'
         );
       });
 
       it('handles message detail context with request', () => {
         const error = newHubSpotHttpError({ status: 699 });
-        const axiosErrorWithContext = getHubSpotHttpErrorWithContext(error, {
-          accountId: 123,
-          request: 'get some stuff',
-        });
-        expect(axiosErrorWithContext.message).toBe(
+        const hubspotHttpErrorWithContext = getHubSpotHttpErrorWithContext(
+          error,
+          {
+            accountId: 123,
+            request: 'get some stuff',
+          }
+        );
+        expect(hubspotHttpErrorWithContext.message).toBe(
           "The request for 'get some stuff' in account 123 failed."
         );
       });
@@ -219,11 +225,11 @@ describe('errors/apiErrors', () => {
             status: 699,
             config: { method: test.method },
           });
-          const axiosErrorWithContext = getHubSpotHttpErrorWithContext(
+          const hubspotHttpErrorWithContext = getHubSpotHttpErrorWithContext(
             error,
             errorContext
           );
-          expect(axiosErrorWithContext.message).toContain(test.expected);
+          expect(hubspotHttpErrorWithContext.message).toContain(test.expected);
         });
       });
     });
@@ -231,8 +237,9 @@ describe('errors/apiErrors', () => {
     describe('status code tests', () => {
       it('generates a generic api status code error', () => {
         const error = newHubSpotHttpError({ status: 699 });
-        const axiosErrorWithContext = getHubSpotHttpErrorWithContext(error);
-        expect(axiosErrorWithContext.message).toBe('The request failed.');
+        const hubspotHttpErrorWithContext =
+          getHubSpotHttpErrorWithContext(error);
+        expect(hubspotHttpErrorWithContext.message).toBe('The request failed.');
       });
 
       it('generates a generic 400 api status code error', () => {
@@ -241,8 +248,9 @@ describe('errors/apiErrors', () => {
             status: 499,
           },
         });
-        const axiosErrorWithContext = getHubSpotHttpErrorWithContext(error);
-        expect(axiosErrorWithContext.message).toBe(
+        const hubspotHttpErrorWithContext =
+          getHubSpotHttpErrorWithContext(error);
+        expect(hubspotHttpErrorWithContext.message).toBe(
           'The request failed due to a client error.'
         );
       });
@@ -253,8 +261,11 @@ describe('errors/apiErrors', () => {
             status: 400,
           },
         });
-        const axiosErrorWithContext = getHubSpotHttpErrorWithContext(error);
-        expect(axiosErrorWithContext.message).toBe('The request was bad.');
+        const hubspotHttpErrorWithContext =
+          getHubSpotHttpErrorWithContext(error);
+        expect(hubspotHttpErrorWithContext.message).toBe(
+          'The request was bad.'
+        );
       });
 
       it('generates a 401 api status code error', () => {
@@ -263,8 +274,9 @@ describe('errors/apiErrors', () => {
             status: 401,
           },
         });
-        const axiosErrorWithContext = getHubSpotHttpErrorWithContext(error);
-        expect(axiosErrorWithContext.message).toBe(
+        const hubspotHttpErrorWithContext =
+          getHubSpotHttpErrorWithContext(error);
+        expect(hubspotHttpErrorWithContext.message).toBe(
           'The request was unauthorized.'
         );
       });
@@ -275,8 +287,9 @@ describe('errors/apiErrors', () => {
             status: 403,
           },
         });
-        const axiosErrorWithContext = getHubSpotHttpErrorWithContext(error);
-        expect(axiosErrorWithContext.message).toBe(
+        const hubspotHttpErrorWithContext =
+          getHubSpotHttpErrorWithContext(error);
+        expect(hubspotHttpErrorWithContext.message).toBe(
           'The request was forbidden.'
         );
       });
@@ -287,8 +300,9 @@ describe('errors/apiErrors', () => {
             status: 404,
           },
         });
-        const axiosErrorWithContext = getHubSpotHttpErrorWithContext(error);
-        expect(axiosErrorWithContext.message).toBe(
+        const hubspotHttpErrorWithContext =
+          getHubSpotHttpErrorWithContext(error);
+        expect(hubspotHttpErrorWithContext.message).toBe(
           'The request was not found.'
         );
       });
@@ -299,8 +313,9 @@ describe('errors/apiErrors', () => {
             status: 429,
           },
         });
-        const axiosErrorWithContext = getHubSpotHttpErrorWithContext(error);
-        expect(axiosErrorWithContext.message).toBe(
+        const hubspotHttpErrorWithContext =
+          getHubSpotHttpErrorWithContext(error);
+        expect(hubspotHttpErrorWithContext.message).toBe(
           'The request surpassed the rate limit. Retry in one minute.'
         );
       });
@@ -311,8 +326,9 @@ describe('errors/apiErrors', () => {
             status: 599,
           },
         });
-        const axiosErrorWithContext = getHubSpotHttpErrorWithContext(error);
-        expect(axiosErrorWithContext.message).toContain(
+        const hubspotHttpErrorWithContext =
+          getHubSpotHttpErrorWithContext(error);
+        expect(hubspotHttpErrorWithContext.message).toContain(
           'The request failed due to a server error.'
         );
       });
@@ -323,8 +339,9 @@ describe('errors/apiErrors', () => {
             status: 503,
           },
         });
-        const axiosErrorWithContext = getHubSpotHttpErrorWithContext(error);
-        expect(axiosErrorWithContext.message).toContain(
+        const hubspotHttpErrorWithContext =
+          getHubSpotHttpErrorWithContext(error);
+        expect(hubspotHttpErrorWithContext.message).toContain(
           'The request could not be handled at this time.'
         );
       });
@@ -336,8 +353,9 @@ describe('errors/apiErrors', () => {
           status: 699,
           response: { data: { message: 'Our servers exploded.' } },
         });
-        const axiosErrorWithContext = getHubSpotHttpErrorWithContext(error);
-        expect(axiosErrorWithContext.message).toBe(
+        const hubspotHttpErrorWithContext =
+          getHubSpotHttpErrorWithContext(error);
+        expect(hubspotHttpErrorWithContext.message).toBe(
           'The request failed. Our servers exploded.'
         );
       });
@@ -349,8 +367,9 @@ describe('errors/apiErrors', () => {
             data: { errors: [{ message: 'We wrote bad code.' }] },
           },
         });
-        const axiosErrorWithContext = getHubSpotHttpErrorWithContext(error);
-        expect(axiosErrorWithContext.message).toBe(
+        const hubspotHttpErrorWithContext =
+          getHubSpotHttpErrorWithContext(error);
+        expect(hubspotHttpErrorWithContext.message).toBe(
           'The request failed. \n- We wrote bad code.'
         );
       });
