@@ -1,4 +1,4 @@
-import { AxiosError, isAxiosError } from 'axios';
+import { isAxiosError } from 'axios';
 import {
   GenericError,
   AxiosErrorContext,
@@ -17,7 +17,7 @@ import {
 
 const i18nKey = 'errors.apiErrors';
 
-function extractHttpErrorFields(error: HubSpotHttpError | AxiosError): {
+function extractHttpErrorFields(error: unknown): {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: any;
   status?: number;
@@ -64,9 +64,7 @@ export function isSpecifiedError(
     data,
     status,
     code: actualCode,
-  } = extractHttpErrorFields(
-    isHubSpotHttpError(err) ? err : (err.cause as AxiosError)
-  );
+  } = extractHttpErrorFields(isHubSpotHttpError(err) ? err : err.cause);
 
   const causedByAxiosError = isAxiosError(err.cause);
 
