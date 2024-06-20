@@ -1,12 +1,7 @@
 import path from 'path';
 import fs from 'fs-extra';
 import contentDisposition from 'content-disposition';
-import axios, {
-  AxiosRequestConfig,
-  AxiosResponse,
-  InternalAxiosRequestConfig,
-  isAxiosError,
-} from 'axios';
+import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 
 import { getAccountConfig } from '../config';
 import { USER_AGENTS, getAxiosConfig } from './getAxiosConfig';
@@ -17,50 +12,9 @@ import { AxiosConfigOptions, HttpOptions, QueryParams } from '../types/Http';
 import { throwErrorWithMessage } from '../errors/standardErrors';
 import { logger } from '../lib/logger';
 import { i18n } from '../utils/lang';
+import { HubSpotHttpError } from '../models/HubSpotHttpError';
 
 const i18nKey = 'http.index';
-
-export class HubSpotHttpError<T = unknown, D = unknown> extends Error {
-  public status?: number;
-  public response?: AxiosResponse<T, D>;
-  public config?: InternalAxiosRequestConfig<D>;
-  public code?: string;
-  public request?: unknown;
-  public statusText?: string;
-  public data?: T;
-
-  // Add this in so any pre-existing checks for error.isAxiosError continue to
-  // function until they can be ported over to the new error check
-  public isAxiosError = true;
-
-  constructor(message?: string, options?: ErrorOptions) {
-    super(message, options);
-    this.name = 'HubSpotHttpError';
-
-    if (options && isAxiosError(options.cause)) {
-      // Add these for backwards compatibility until we have updated all the checks
-      // in the CLI for the Axios implementation details and then we can remove these or
-      // keep whatever we find useful in custom fields on this object
-      const { response, request, config, code } = options.cause;
-      this.response = response;
-      this.request = request;
-      this.config = config;
-
-      // Add any custom fields we feel are necessary or make our
-      // collective lives easier
-      this.code = code;
-      if (response) {
-        this.status = response.status;
-        this.statusText = response.statusText;
-        this.data = response.data;
-      }
-    }
-  }
-}
-
-export function isHubSpotHttpError(error?: unknown): error is HubSpotHttpError {
-  return !!error && error instanceof HubSpotHttpError;
-}
 
 axios.interceptors.response.use(undefined, error => {
   // Wrap all axios errors in our own Error class.  Attach the error

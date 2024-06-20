@@ -1,15 +1,16 @@
-import { AxiosError } from 'axios';
 import {
   isMissingScopeError,
   isGatingError,
   isApiUploadValidationError,
   isSpecifiedHubSpotAuthError,
-  getAxiosErrorWithContext,
+  getHubSpotHttpErrorWithContext,
   throwApiError,
   throwApiUploadError,
   isSpecifiedError,
 } from '../apiErrors';
 import { BaseError } from '../../types/Error';
+import { HubSpotHttpError } from '../../models/HubSpotHttpError';
+import { AxiosError } from 'axios';
 
 export const newError = (overrides = {}): BaseError => {
   return {
@@ -21,31 +22,33 @@ export const newError = (overrides = {}): BaseError => {
   };
 };
 
-export const newAxiosError = (overrides = {}): AxiosError => {
-  return {
-    ...newError(),
-    isAxiosError: true,
-    name: 'AxiosError',
-    response: {
-      request: {
-        href: 'http://example.com/',
-        method: 'GET',
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const newHubSpotHttpError = (overrides: any = {}): HubSpotHttpError => {
+  return new HubSpotHttpError('', {
+    cause: {
+      ...newError(),
+      isAxiosError: true,
+      name: 'HubSpotHttpError',
+      response: {
+        request: {
+          href: 'http://example.com/',
+          method: 'GET',
+        },
+        data: {},
+        headers: {},
+        status: 200,
+        statusText: '',
+        config: {},
       },
-      data: {},
-      headers: {},
-      status: 200,
-      statusText: '',
-      // @ts-expect-error don't need to test headers
-      config: {},
+      ...overrides,
     },
-    ...overrides,
-  };
+  });
 };
 
 describe('errors/apiErrors', () => {
   describe('isSpecifiedError()', () => {
     it('returns true for a matching specified error', () => {
-      const error1 = newAxiosError({
+      const error1 = newHubSpotHttpError({
         response: {
           status: 403,
           data: { category: 'BANNED', subCategory: 'USER_ACCESS_NOT_ALLOWED' },
@@ -61,13 +64,13 @@ describe('errors/apiErrors', () => {
     });
 
     it('returns false for non matching specified errors', () => {
-      const error1 = newAxiosError({
+      const error1 = newHubSpotHttpError({
         response: {
           status: 403,
           data: { category: 'BANNED', subCategory: 'USER_ACCESS_NOT_ALLOWED' },
         },
       });
-      const error2 = newAxiosError({ isAxiosError: false });
+      const error2 = newHubSpotHttpError({ isAxiosError: false });
       expect(
         isSpecifiedError(error1, {
           statusCode: 400,
@@ -78,13 +81,17 @@ describe('errors/apiErrors', () => {
     });
 
     it('handles AxiosError returned in cause property', () => {
-      const axiosError = newAxiosError({
-        response: {
-          status: 403,
-          data: { category: 'BANNED', subCategory: 'USER_ACCESS_NOT_ALLOWED' },
+      const response = {
+        status: 403,
+        data: {
+          category: 'BANNED',
+          subCategory: 'USER_ACCESS_NOT_ALLOWED',
         },
+      };
+      const error1 = newError({
+        // @ts-expect-error TypeScript wants the full object
+        cause: new AxiosError('', '', undefined, {}, response),
       });
-      const error1 = newError({ cause: axiosError });
       expect(
         isSpecifiedError(error1, {
           statusCode: 403,
@@ -96,17 +103,17 @@ describe('errors/apiErrors', () => {
   });
   describe('isMissingScopeError()', () => {
     it('returns true for missing scope errors', () => {
-      const error1 = newAxiosError({
+      const error1 = newHubSpotHttpError({
         response: { status: 403, data: { category: 'MISSING_SCOPES' } },
       });
       expect(isMissingScopeError(error1)).toBe(true);
     });
 
     it('returns false for non missing scope errors', () => {
-      const error1 = newAxiosError({
+      const error1 = newHubSpotHttpError({
         response: { status: 400, data: { category: 'MISSING_SCOPES' } },
       });
-      const error2 = newAxiosError({ isAxiosError: false });
+      const error2 = newHubSpotHttpError({ isAxiosError: false });
       expect(isMissingScopeError(error1)).toBe(false);
       expect(isMissingScopeError(error2)).toBe(false);
     });
@@ -114,17 +121,17 @@ describe('errors/apiErrors', () => {
 
   describe('isGatingError()', () => {
     it('returns true for gating errors', () => {
-      const error1 = newAxiosError({
+      const error1 = newHubSpotHttpError({
         response: { status: 403, data: { category: 'GATED' } },
       });
       expect(isGatingError(error1)).toBe(true);
     });
 
     it('returns false for non gating errors', () => {
-      const error1 = newAxiosError({
+      const error1 = newHubSpotHttpError({
         response: { status: 400, data: { category: 'GATED' } },
       });
-      const error2 = newAxiosError({ isAxiosError: false });
+      const error2 = newHubSpotHttpError({ isAxiosError: false });
       expect(isGatingError(error1)).toBe(false);
       expect(isGatingError(error2)).toBe(false);
     });
@@ -132,23 +139,21 @@ describe('errors/apiErrors', () => {
 
   describe('isApiUploadValidationError()', () => {
     it('returns true for api upload validation errors', () => {
-      const error1 = newAxiosError({
-        status: 400,
-        response: { data: { message: 'upload validation error' } },
+      const error1 = newHubSpotHttpError({
+        response: { data: { message: 'upload validation error' }, status: 400 },
       });
-      const error2 = newAxiosError({
-        status: 400,
-        response: { data: { errors: [] } },
+      const error2 = newHubSpotHttpError({
+        response: { data: { errors: [] }, status: 400 },
       });
       expect(isApiUploadValidationError(error1)).toBe(true);
       expect(isApiUploadValidationError(error2)).toBe(true);
     });
 
     it('returns false for non api upload validation errors', () => {
-      const error1 = newAxiosError({
+      const error1 = newHubSpotHttpError({
         response: { status: 400, data: null },
       });
-      const error2 = newAxiosError({ isAxiosError: false });
+      const error2 = newHubSpotHttpError({ isAxiosError: false });
       expect(isApiUploadValidationError(error1)).toBe(false);
       expect(isApiUploadValidationError(error2)).toBe(false);
     });
@@ -166,10 +171,10 @@ describe('errors/apiErrors', () => {
     });
   });
 
-  describe('getAxiosErrorWithContext()', () => {
+  describe('getHubSpotHttpErrorWithContext()', () => {
     it('includes the original cause', () => {
-      const error = newAxiosError();
-      const axiosErrorWithContext = getAxiosErrorWithContext(error);
+      const error = newHubSpotHttpError();
+      const axiosErrorWithContext = getHubSpotHttpErrorWithContext(error);
 
       // @ts-expect-error cause is unknown
       expect(axiosErrorWithContext.cause.name).toBe(error.name);
@@ -177,8 +182,8 @@ describe('errors/apiErrors', () => {
 
     describe('context tests', () => {
       it('handles message detail context without request', () => {
-        const error = newAxiosError({ status: 699 });
-        const axiosErrorWithContext = getAxiosErrorWithContext(error, {
+        const error = newHubSpotHttpError({ status: 699 });
+        const axiosErrorWithContext = getHubSpotHttpErrorWithContext(error, {
           accountId: 123,
         });
         expect(axiosErrorWithContext.message).toBe(
@@ -187,8 +192,8 @@ describe('errors/apiErrors', () => {
       });
 
       it('handles message detail context with request', () => {
-        const error = newAxiosError({ status: 699 });
-        const axiosErrorWithContext = getAxiosErrorWithContext(error, {
+        const error = newHubSpotHttpError({ status: 699 });
+        const axiosErrorWithContext = getHubSpotHttpErrorWithContext(error, {
           accountId: 123,
           request: 'get some stuff',
         });
@@ -210,11 +215,11 @@ describe('errors/apiErrors', () => {
           { method: 'post', expected: 'post to' },
           { method: 'put', expected: 'update to' },
         ].forEach(test => {
-          const error = newAxiosError({
+          const error = newHubSpotHttpError({
             status: 699,
             config: { method: test.method },
           });
-          const axiosErrorWithContext = getAxiosErrorWithContext(
+          const axiosErrorWithContext = getHubSpotHttpErrorWithContext(
             error,
             errorContext
           );
@@ -225,100 +230,100 @@ describe('errors/apiErrors', () => {
 
     describe('status code tests', () => {
       it('generates a generic api status code error', () => {
-        const error = newAxiosError({ status: 699 });
-        const axiosErrorWithContext = getAxiosErrorWithContext(error);
+        const error = newHubSpotHttpError({ status: 699 });
+        const axiosErrorWithContext = getHubSpotHttpErrorWithContext(error);
         expect(axiosErrorWithContext.message).toBe('The request failed.');
       });
 
       it('generates a generic 400 api status code error', () => {
-        const error = newAxiosError({
+        const error = newHubSpotHttpError({
           response: {
             status: 499,
           },
         });
-        const axiosErrorWithContext = getAxiosErrorWithContext(error);
+        const axiosErrorWithContext = getHubSpotHttpErrorWithContext(error);
         expect(axiosErrorWithContext.message).toBe(
           'The request failed due to a client error.'
         );
       });
 
       it('generates a 400 api status code error', () => {
-        const error = newAxiosError({
+        const error = newHubSpotHttpError({
           response: {
             status: 400,
           },
         });
-        const axiosErrorWithContext = getAxiosErrorWithContext(error);
+        const axiosErrorWithContext = getHubSpotHttpErrorWithContext(error);
         expect(axiosErrorWithContext.message).toBe('The request was bad.');
       });
 
       it('generates a 401 api status code error', () => {
-        const error = newAxiosError({
+        const error = newHubSpotHttpError({
           response: {
             status: 401,
           },
         });
-        const axiosErrorWithContext = getAxiosErrorWithContext(error);
+        const axiosErrorWithContext = getHubSpotHttpErrorWithContext(error);
         expect(axiosErrorWithContext.message).toBe(
           'The request was unauthorized.'
         );
       });
 
       it('generates a 403 api status code error', () => {
-        const error = newAxiosError({
+        const error = newHubSpotHttpError({
           response: {
             status: 403,
           },
         });
-        const axiosErrorWithContext = getAxiosErrorWithContext(error);
+        const axiosErrorWithContext = getHubSpotHttpErrorWithContext(error);
         expect(axiosErrorWithContext.message).toBe(
           'The request was forbidden.'
         );
       });
 
       it('generates a 404 api status code error', () => {
-        const error = newAxiosError({
+        const error = newHubSpotHttpError({
           response: {
             status: 404,
           },
         });
-        const axiosErrorWithContext = getAxiosErrorWithContext(error);
+        const axiosErrorWithContext = getHubSpotHttpErrorWithContext(error);
         expect(axiosErrorWithContext.message).toBe(
           'The request was not found.'
         );
       });
 
       it('generates a 429 api status code error', () => {
-        const error = newAxiosError({
+        const error = newHubSpotHttpError({
           response: {
             status: 429,
           },
         });
-        const axiosErrorWithContext = getAxiosErrorWithContext(error);
+        const axiosErrorWithContext = getHubSpotHttpErrorWithContext(error);
         expect(axiosErrorWithContext.message).toBe(
           'The request surpassed the rate limit. Retry in one minute.'
         );
       });
 
       it('generates a generic 500 api status code error', () => {
-        const error = newAxiosError({
+        const error = newHubSpotHttpError({
           response: {
             status: 599,
           },
         });
-        const axiosErrorWithContext = getAxiosErrorWithContext(error);
+        const axiosErrorWithContext = getHubSpotHttpErrorWithContext(error);
         expect(axiosErrorWithContext.message).toContain(
           'The request failed due to a server error.'
         );
       });
 
       it('generates a 503 api status code error', () => {
-        const error = newAxiosError({
+        const error = newHubSpotHttpError({
           response: {
             status: 503,
           },
         });
-        const axiosErrorWithContext = getAxiosErrorWithContext(error);
+        const axiosErrorWithContext = getHubSpotHttpErrorWithContext(error);
         expect(axiosErrorWithContext.message).toContain(
           'The request could not be handled at this time.'
         );
@@ -327,24 +332,24 @@ describe('errors/apiErrors', () => {
 
     describe('backend messaging tests', () => {
       it('appends the message returned by the backend', () => {
-        const error = newAxiosError({
+        const error = newHubSpotHttpError({
           status: 699,
           response: { data: { message: 'Our servers exploded.' } },
         });
-        const axiosErrorWithContext = getAxiosErrorWithContext(error);
+        const axiosErrorWithContext = getHubSpotHttpErrorWithContext(error);
         expect(axiosErrorWithContext.message).toBe(
           'The request failed. Our servers exploded.'
         );
       });
 
       it('appends the nested error messaged returned by the backend', () => {
-        const error = newAxiosError({
+        const error = newHubSpotHttpError({
           status: 699,
           response: {
             data: { errors: [{ message: 'We wrote bad code.' }] },
           },
         });
-        const axiosErrorWithContext = getAxiosErrorWithContext(error);
+        const axiosErrorWithContext = getHubSpotHttpErrorWithContext(error);
         expect(axiosErrorWithContext.message).toBe(
           'The request failed. \n- We wrote bad code.'
         );
@@ -354,14 +359,14 @@ describe('errors/apiErrors', () => {
 
   describe('throwApiError()', () => {
     it('throws api error', () => {
-      const error = newAxiosError();
+      const error = newHubSpotHttpError();
       expect(() => throwApiError(error)).toThrow();
     });
   });
 
   describe('throwApiUploadError()', () => {
     it('throws api upload error', () => {
-      const error = newAxiosError();
+      const error = newHubSpotHttpError();
       expect(() => throwApiUploadError(error)).toThrow();
     });
   });
