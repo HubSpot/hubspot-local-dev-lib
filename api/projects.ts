@@ -145,6 +145,18 @@ export async function getBuildStructure(
   });
 }
 
+export async function getBuildDisplayStructure(
+  accountId: number,
+  projectName: string,
+  buildId: number
+): Promise<ComponentStructureResponse> {
+  return http.get(accountId, {
+    url: `dfs/v1/builds/by-project-name/${encodeURIComponent(
+      projectName
+    )}/builds/${buildId}/display-structure`,
+  });
+}
+
 export async function deployProject(
   accountId: number,
   projectName: string,
