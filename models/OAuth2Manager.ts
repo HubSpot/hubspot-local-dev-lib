@@ -12,7 +12,6 @@ import {
   throwErrorWithMessage,
   throwAuthErrorWithMessage,
 } from '../errors/standardErrors';
-import { BaseError } from '../types/Error';
 import { Environment } from '../types/Config';
 import { i18n } from '../utils/lang';
 
@@ -125,7 +124,7 @@ class OAuth2Manager {
       this.refreshTokenRequest = null;
     } catch (e) {
       this.refreshTokenRequest = null;
-      throwError(e as BaseError);
+      throwError(e);
     }
   }
 

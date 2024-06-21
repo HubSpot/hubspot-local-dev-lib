@@ -3,7 +3,6 @@ import { AUTH_METHODS } from '../constants/auth';
 import { FlatAccountFields } from '../types/Accounts';
 import { throwError } from '../errors/standardErrors';
 import { logger } from './logger';
-import { BaseError } from '../types/Error';
 import { getAccountIdentifier } from '../utils/getAccountIdentifier';
 import { updateAccountConfig, writeConfig } from '../config';
 import { i18n } from '../utils/lang';
@@ -48,6 +47,6 @@ export function addOauthToAccountConfig(oauth: OAuth2Manager) {
     writeConfig();
     logger.success(i18n(`${i18nKey}.addOauthToAccountConfig.success`));
   } catch (err) {
-    throwError(err as BaseError);
+    throwError(err);
   }
 }

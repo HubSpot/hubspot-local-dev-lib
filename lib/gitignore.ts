@@ -8,7 +8,6 @@ import {
 } from '../utils/git';
 import { DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME } from '../constants/config';
 import { throwErrorWithMessage } from '../errors/standardErrors';
-import { BaseError } from '../types/Error';
 
 const i18nKey = 'lib.gitignore';
 
@@ -31,7 +30,7 @@ export function checkAndAddConfigToGitignore(configPath: string): void {
     const updatedContents = `${gitignoreContents.trim()}\n\n# HubSpot config file\n${DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME}\n`;
     writeFileSync(gitignoreFilePath, updatedContents);
   } catch (e) {
-    throwErrorWithMessage(`${i18nKey}.errors.configIgnore`, {}, e as BaseError);
+    throwErrorWithMessage(`${i18nKey}.errors.configIgnore`, {}, e);
   }
 }
 

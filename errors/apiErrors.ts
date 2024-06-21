@@ -1,20 +1,18 @@
-import { AxiosError } from 'axios';
-import {
-  GenericError,
-  AxiosErrorContext,
-  BaseError,
-  ValidationError,
-} from '../types/Error';
+import { AxiosError, isAxiosError } from 'axios';
+import { AxiosErrorContext, BaseError, ValidationError } from '../types/Error';
 import { HTTP_METHOD_VERBS, HTTP_METHOD_PREPOSITIONS } from '../constants/api';
 import { i18n } from '../utils/lang';
 import { throwError } from './standardErrors';
-import { HubSpotAuthError } from '../models/HubSpotAuthError';
+import {
+  HubSpotAuthError,
+  isHubSpotAuthError,
+} from '../models/HubSpotAuthError';
 import { HttpMethod } from '../types/Api';
 
 const i18nKey = 'errors.apiErrors';
 
 export function isSpecifiedError(
-  err: Error | AxiosError,
+  err: unknown,
   {
     statusCode,
     category,
@@ -29,6 +27,10 @@ export function isSpecifiedError(
     code?: string;
   }
 ): boolean {
+  if (!(err instanceof Error)) {
+    return false;
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const error = (err && (err.cause as AxiosError<any>)) || err;
   const statusCodeErr = !statusCode || error.response?.status === statusCode;
@@ -49,22 +51,22 @@ export function isSpecifiedError(
   );
 }
 
-export function isMissingScopeError(err: Error | AxiosError): boolean {
+export function isMissingScopeError(err: unknown): boolean {
   return isSpecifiedError(err, { statusCode: 403, category: 'MISSING_SCOPES' });
 }
 
-export function isGatingError(err: Error | AxiosError): boolean {
+export function isGatingError(err: unknown): boolean {
   return isSpecifiedError(err, { statusCode: 403, category: 'GATED' });
 }
 
-export function isTimeoutError(err: Error | AxiosError): boolean {
+export function isTimeoutError(err: unknown): boolean {
   return isSpecifiedError(err, { code: 'ETIMEDOUT' });
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function isApiUploadValidationError(err: AxiosError<any>): boolean {
+export function isApiUploadValidationError(err: unknown): boolean {
   return (
-    err.isAxiosError &&
+    isAxiosError(err) &&
     (err.status === 400 || err.response?.status === 400) &&
     !!err.response &&
     !!(err.response?.data?.message || !!err.response?.data?.errors)
@@ -72,18 +74,16 @@ export function isApiUploadValidationError(err: AxiosError<any>): boolean {
 }
 
 export function isSpecifiedHubSpotAuthError(
-  err: GenericError,
+  err: unknown,
   { status, category, subCategory }: Partial<HubSpotAuthError>
-): boolean {
+): err is HubSpotAuthError {
+  if (!isHubSpotAuthError(err)) {
+    return false;
+  }
   const statusCodeErr = !status || err.status === status;
   const categoryErr = !category || err.category === category;
   const subCategoryErr = !subCategory || err.subCategory === subCategory;
-  return Boolean(
-    err.name === 'HubSpotAuthError' &&
-      statusCodeErr &&
-      categoryErr &&
-      subCategoryErr
-  );
+  return Boolean(statusCodeErr && categoryErr && subCategoryErr);
 }
 
 export function parseValidationErrors(
@@ -238,10 +238,10 @@ export function getAxiosErrorWithContext(
  * @throws
  */
 export function throwApiError(
-  error: AxiosError,
+  error: unknown,
   context: AxiosErrorContext = {}
 ): never {
-  if (error.isAxiosError) {
+  if (isAxiosError(error)) {
     throw getAxiosErrorWithContext(error, context);
   }
   throwError(error);

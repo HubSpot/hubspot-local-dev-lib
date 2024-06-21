@@ -37,7 +37,7 @@ export async function fetchFileFromRepository(
     throwErrorWithMessage(
       `${i18nKey}.fetchFileFromRepository.errors.fetchFail`,
       {},
-      err as BaseError
+      err
     );
   }
 }
@@ -58,11 +58,10 @@ export async function fetchReleaseData(
     const { data } = await fetchRepoReleaseData(repoPath, tag);
     return data;
   } catch (err) {
-    const error = err as BaseError;
     throwErrorWithMessage(
       `${i18nKey}.fetchReleaseData.errors.fetchFail`,
       { tag: tag || 'latest' },
-      error
+      err
     );
   }
 }
@@ -106,7 +105,7 @@ async function downloadGithubRepoZip(
     throwErrorWithMessage(
       `${i18nKey}.downloadGithubRepoZip.errors.fetchFail`,
       {},
-      err as BaseError
+      err
     );
   }
 }
