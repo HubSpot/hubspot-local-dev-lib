@@ -55,7 +55,11 @@ describe('lib/PrivateAppUserTokenManager', () => {
     });
     it('should not enable PrivateAppUserTokenManager if the personal access key does not contain scopes', async () => {
       scopeGroupsForPersonalAccessKey.mockResolvedValue(pakScopesTokenDisabled);
-      await manager.init();
+      try {
+        await manager.init();
+      } catch (e) {
+        expect(e).toBeDefined();
+      }
       expect(manager.isEnabled()).toBe(false);
     });
   });
@@ -112,7 +116,11 @@ describe('lib/PrivateAppUserTokenManager', () => {
     it('should no opt if disabled', async () => {
       scopeGroupsForPersonalAccessKey.mockResolvedValue(pakScopesTokenDisabled);
       manager = new PrivateAppUserTokenManager(accountId); // set to new instance not initialized
-      await manager.init();
+      try {
+        await manager.init();
+      } catch (e) {
+        expect(e).toBeDefined();
+      }
       const result = await manager.getPrivateAppToken(accountId);
       expect(result).toBeUndefined();
     });

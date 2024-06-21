@@ -133,7 +133,9 @@ async function getNewAccessToken(
   return accessTokenResponse;
 }
 
-async function getAccessTokenResponse(accountId: number) {
+async function getNewAccessTokenByAccountId(
+  accountId: number
+): Promise<AccessToken> {
   const account = getAccountConfig(accountId) as PersonalAccessKeyAccount;
   if (!account) {
     throwErrorWithMessage(`${i18nKey}.errors.accountNotFound`, { accountId });
@@ -179,14 +181,14 @@ export async function accessTokenForPersonalAccessKey(
 export async function enabledFeaturesForPersonalAccessKey(
   accountId: number
 ): Promise<{ [key: string]: number } | undefined> {
-  const accessTokenResponse = await getAccessTokenResponse(accountId);
+  const accessTokenResponse = await getNewAccessTokenByAccountId(accountId);
   return accessTokenResponse?.enabledFeatures;
 }
 
 export async function scopeGroupsForPersonalAccessKey(
   accountId: number
 ): Promise<Array<string>> {
-  return (await getAccessTokenResponse(accountId)).scopeGroups;
+  return (await getNewAccessTokenByAccountId(accountId)).scopeGroups;
 }
 
 export async function updateConfigWithAccessToken(

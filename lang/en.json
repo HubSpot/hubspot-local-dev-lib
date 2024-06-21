@@ -230,16 +230,16 @@
       "standard": "standard"
     },
     "PrivateAppUserTokenManager": {
-      "enabled": "Private app user tokens is enabled for accountId~{{ accountId }}",
-      "disabled": "Private app user tokens is not enabled for accountId~{{ accountId }}, skipping call to fetch for appId~{{ appId }}",
-      "create": "Creating new private app user token for appId~{{ appId }}",
-      "cached": "Using cached private app user token for appId~{{ appId }}",
-      "refresh": "Updating or rereshing private app user token for appId~{{ appId }} ",
-      "refreshScheduled": "Scheduling refresh of token for appId~{{ appId }} expiring at {{ expiresAt }} to run at {{ refreshTime }} ",
+      "enabled": "Private app user tokens is enabled for accountId {{ accountId }}",
+      "disabled": "Private app user tokens is not enabled for accountId {{ accountId }}, skipping call to fetch for appId {{ appId }}",
+      "create": "Creating new private app user token for appId {{ appId }}",
+      "cached": "Using cached private app user token for appId {{ appId }}",
+      "refresh": "Updating or rereshing private app user token for appId {{ appId }} ",
+      "refreshScheduled": "Scheduling refresh of token for appId {{ appId }} expiring at {{ expiresAt }} to run at {{ refreshTime }} ",
       "errors": {
-        "noScopes": "Unable to use private app user tokens for accountId~{{ accountId }}. Please regenerate the Personal Access Key.",
-        "apiError": "Unable to get or create private app user token for appId~{{ appId }} on accountId~{{ accountId }}. {{ messageDetail }} failed.",
-        "refreshFailed": "Unable to refresh private app user token for appId~{{ appId }} on accountId~{{ accountId }}."
+        "noScopes": "Unable to use private app user token for appId {{ appId }} since updated App function scope is missing on accountId {{ accountId }}. To add App function scope to that account, deactivate the existing Personal Access Key, and generate a new one that includes the App functions scope. Then run hs auth and reauthenticate accountId {{ accountId }}.",
+        "apiError": "Unable to get or create private app user token for appId {{ appId }} on accountId {{ accountId }}. {{ messageDetail }}",
+        "refreshFailed": "Unable to refresh private app user token for appId {{ appId }} on accountId {{ accountId }}."
       }
     }
   },

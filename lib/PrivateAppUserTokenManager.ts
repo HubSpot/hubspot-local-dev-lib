@@ -8,8 +8,10 @@ import { scopeGroupsForPersonalAccessKey } from './personalAccessKey';
 import { logger } from './logger';
 import { i18n } from '../utils/lang';
 import moment from 'moment';
-import { AxiosError } from 'axios';
+import { AxiosError, isAxiosError } from 'axios';
 import { getAxiosErrorWithContext } from '../errors/apiErrors';
+import { throwErrorWithMessage } from '../errors/standardErrors';
+import { BaseError } from '../types/Error';
 
 const USER_TOKEN_READ = 'developer.private_app.temporary_token.read';
 const USER_TOKEN_WRITE = 'developer.private_app.temporary_token.write';
@@ -36,11 +38,9 @@ export class PrivateAppUserTokenManager {
       !scopeGroups.has(USER_TOKEN_READ) ||
       !scopeGroups.has(USER_TOKEN_WRITE)
     ) {
-      logger.warn(
-        i18n(`${i18nKey}.errors.noScopes`, {
-          accountId: this.accountId,
-        })
-      );
+      throwErrorWithMessage(`${i18nKey}.errors.noScopes`, {
+        accountId: this.accountId,
+      });
     } else {
       logger.debug(
         i18n(`${i18nKey}.enabled`, {
@@ -91,19 +91,19 @@ export class PrivateAppUserTokenManager {
       }
     } catch (err) {
       let messageDetail = 'Unknown error';
-      if (err instanceof AxiosError) {
-        logger.error(err as AxiosError);
+      if (isAxiosError(err)) {
         messageDetail = getAxiosErrorWithContext(err as AxiosError).message;
       } else if (err instanceof Error) {
-        logger.error(err as Error);
         messageDetail = err.message;
       }
-      logger.warn(
-        i18n(`${i18nKey}.errors.apiError`, {
+      throwErrorWithMessage(
+        `${i18nKey}.errors.apiError`,
+        {
           accountId: this.accountId,
           appId: appId,
           messageDetail: messageDetail,
-        })
+        },
+        isAxiosError(err) ? undefined : (err as BaseError) // Only pass the error if it's not an AxiosError, api error message is good enough
       );
     }
   }
@@ -118,13 +118,10 @@ export class PrivateAppUserTokenManager {
     scopeGroups: string[]
   ) {
     if (token === undefined || token === null) {
-      logger.warn(
-        i18n(`${i18nKey}.errors.refreshFailed`, {
-          accountId: this.accountId,
-          appId: appId,
-        })
-      );
-      return;
+      throwErrorWithMessage(`${i18nKey}.errors.refreshFailed`, {
+        accountId: this.accountId,
+        appId: appId,
+      });
     }
     this.tokenMap.set(appId, token);
     if (this.tokenMapIntervalId.has(appId)) {
@@ -209,9 +206,8 @@ export class PrivateAppUserTokenManager {
     try {
       return await fetchPrivateAppUserToken(this.accountId, appId);
     } catch (err) {
-      if (err instanceof AxiosError) {
-        const axiosError = err as AxiosError;
-        if (axiosError.response?.status == 404) {
+      if (isAxiosError(err)) {
+        if (err.response?.status == 404) {
           return null;
         }
       }
@@ -238,12 +234,10 @@ export class PrivateAppUserTokenManager {
     if (newToken) {
       this.setCacheAndRefresh(appId, newToken, scopeGroups);
     } else {
-      logger.warn(
-        i18n(`${i18nKey}.errors.refreshFailed`, {
-          accountId: this.accountId,
-          appId: appId,
-        })
-      );
+      throwErrorWithMessage(`${i18nKey}.errors.refreshFailed`, {
+        accountId: this.accountId,
+        appId: appId,
+      });
     }
   }
 }
