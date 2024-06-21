@@ -1,3 +1,4 @@
+import { AxiosError, AxiosHeaders } from 'axios';
 import {
   isMissingScopeError,
   isGatingError,
@@ -9,12 +10,13 @@ import {
   isSpecifiedError,
 } from '../apiErrors';
 import { BaseError } from '../../types/Error';
+import { HubSpotAuthError } from '../../models/HubSpotAuthError';
 import { HubSpotHttpError } from '../../models/HubSpotHttpError';
 
 export const newError = (overrides = {}): BaseError => {
   return {
     name: 'Error',
-    message: 'An error ocurred',
+    message: 'An error occurred',
     status: 200,
     errors: [],
     ...overrides,
@@ -78,6 +80,23 @@ describe('errors/apiErrors', () => {
       ).toBe(false);
       expect(isMissingScopeError(error2)).toBe(false);
     });
+
+    it('handles AxiosError returned in cause property', () => {
+      const axiosError = newAxiosError({
+        response: {
+          status: 403,
+          data: { category: 'BANNED', subCategory: 'USER_ACCESS_NOT_ALLOWED' },
+        },
+      });
+      const error1 = new Error('', { cause: axiosError });
+      expect(
+        isSpecifiedError(error1, {
+          statusCode: 403,
+          category: 'BANNED',
+          subCategory: 'USER_ACCESS_NOT_ALLOWED',
+        })
+      ).toBe(true);
+    });
   });
   describe('isMissingScopeError()', () => {
     it('returns true for missing scope errors', () => {
@@ -139,7 +158,15 @@ describe('errors/apiErrors', () => {
 
   describe('isSpecifiedHubSpotAuthError()', () => {
     it('returns true for matching HubSpot auth errors', () => {
-      const error1 = newError({ name: 'HubSpotAuthError', status: 123 });
+      const error1 = new HubSpotAuthError('', {
+        cause: new AxiosError(
+          '',
+          '',
+          { headers: new AxiosHeaders() },
+          {},
+          { status: 123 }
+        ),
+      });
       expect(isSpecifiedHubSpotAuthError(error1, { status: 123 })).toBe(true);
     });
 

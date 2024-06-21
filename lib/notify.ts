@@ -3,7 +3,6 @@ import moment from 'moment';
 import debounce from 'debounce';
 
 import { throwErrorWithMessage } from '../errors/standardErrors';
-import { BaseError } from '../types/Error';
 
 const i18nKey = 'utils.notify';
 
@@ -54,7 +53,7 @@ function notifyFilePath(filePathToNotify: string, outputToWrite: string): void {
       throwErrorWithMessage(
         `${i18nKey}.errors.filePath`,
         { filePath: filePathToNotify },
-        e as BaseError
+        e
       );
     }
   }

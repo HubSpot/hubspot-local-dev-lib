@@ -27,7 +27,7 @@ import {
   throwError,
 } from '../errors/standardErrors';
 import { throwFileSystemError } from '../errors/fileSystemErrors';
-import { BaseError, GenericError } from '../types/Error';
+import { GenericError } from '../types/Error';
 import { File, Folder } from '../types/FileManager';
 import { i18n } from '../utils/lang';
 
@@ -61,9 +61,8 @@ export async function uploadFolder(
       await uploadFile(accountId, file, destPath);
       logger.log(i18n(`${i18nKey}.uploadSuccess`, { file, destPath }));
     } catch (err) {
-      const error = err as BaseError;
-      if (isFatalError(error)) {
-        throwError(error);
+      if (isFatalError(err)) {
+        throwError(err);
       }
       throwErrorWithMessage(`${i18nKey}.errors.uploadFailed`, {
         file,
@@ -147,7 +146,7 @@ async function fetchFolderContents(
   try {
     await fs.ensureDir(dest);
   } catch (err) {
-    throwFileSystemError(err as BaseError, {
+    throwFileSystemError(err, {
       dest,
       accountId,
       write: true,

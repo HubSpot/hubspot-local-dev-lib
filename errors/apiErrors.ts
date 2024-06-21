@@ -1,14 +1,12 @@
 import { isAxiosError } from 'axios';
-import {
-  GenericError,
-  AxiosErrorContext,
-  BaseError,
-  ValidationError,
-} from '../types/Error';
+import { AxiosErrorContext, BaseError, ValidationError } from '../types/Error';
 import { HTTP_METHOD_VERBS, HTTP_METHOD_PREPOSITIONS } from '../constants/api';
 import { i18n } from '../utils/lang';
 import { throwError } from './standardErrors';
-import { HubSpotAuthError } from '../models/HubSpotAuthError';
+import {
+  HubSpotAuthError,
+  isHubSpotAuthError,
+} from '../models/HubSpotAuthError';
 import { HttpMethod } from '../types/Api';
 import {
   HubSpotHttpError,
@@ -18,7 +16,7 @@ import {
 const i18nKey = 'errors.apiErrors';
 
 export function isSpecifiedError(
-  err: Error | HubSpotHttpError,
+  err: unknown,
   {
     statusCode,
     category,
@@ -58,38 +56,38 @@ export function isSpecifiedError(
   );
 }
 
-export function isMissingScopeError(err: Error | HubSpotHttpError): boolean {
+export function isMissingScopeError(err: unknown): boolean {
   return isSpecifiedError(err, { statusCode: 403, category: 'MISSING_SCOPES' });
 }
 
-export function isGatingError(err: Error | HubSpotHttpError): boolean {
+export function isGatingError(err: unknown): boolean {
   return isSpecifiedError(err, { statusCode: 403, category: 'GATED' });
 }
 
-export function isTimeoutError(err: Error | HubSpotHttpError): boolean {
+export function isTimeoutError(err: unknown): boolean {
   return isSpecifiedError(err, { code: 'ETIMEDOUT' });
 }
 
-export function isApiUploadValidationError(err: HubSpotHttpError): boolean {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function isApiUploadValidationError(err: unknown): boolean {
   return (
+    isHubSpotHttpError(err) &&
     isSpecifiedError(err, { statusCode: 400 }) &&
     !!(err?.data?.message || !!err.data?.errors)
   );
 }
 
 export function isSpecifiedHubSpotAuthError(
-  err: GenericError,
+  err: unknown,
   { status, category, subCategory }: Partial<HubSpotAuthError>
-): boolean {
+): err is HubSpotAuthError {
+  if (!isHubSpotAuthError(err)) {
+    return false;
+  }
   const statusCodeErr = !status || err.status === status;
   const categoryErr = !category || err.category === category;
   const subCategoryErr = !subCategory || err.subCategory === subCategory;
-  return Boolean(
-    err.name === 'HubSpotAuthError' &&
-      statusCodeErr &&
-      categoryErr &&
-      subCategoryErr
-  );
+  return Boolean(statusCodeErr && categoryErr && subCategoryErr);
 }
 
 export function parseValidationErrors(
