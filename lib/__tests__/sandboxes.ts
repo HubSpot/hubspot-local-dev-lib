@@ -18,6 +18,7 @@ import {
   fetchTaskStatus,
 } from '../sandboxes';
 import { AxiosError } from 'axios';
+import { HubSpotHttpError } from '../../models/HubSpotHttpError';
 
 jest.mock('../../api/sandboxHubs');
 jest.mock('../../api/sandboxSync');
@@ -88,6 +89,10 @@ const MOCK_TYPES = [
 ];
 
 describe('lib/sandboxes', () => {
+  let error: HubSpotHttpError;
+  beforeEach(() => {
+    error = new HubSpotHttpError('OH NO', { cause: new AxiosError() });
+  });
   describe('createSandbox', () => {
     const personalAccessKey = 'pak-test-123';
     it('should create a sandbox', async () => {
@@ -106,7 +111,6 @@ describe('lib/sandboxes', () => {
     });
 
     it('should throw an API error when an error is encountered', async () => {
-      const error = new AxiosError('OH NO');
       createSandboxMock.mockRejectedValue(error);
 
       await expect(async () => {
@@ -124,7 +128,6 @@ describe('lib/sandboxes', () => {
       });
     });
     it('should throw an API error when an error is encountered', async () => {
-      const error = new AxiosError('OH NO');
       deleteSandboxMock.mockRejectedValue(error);
 
       await expect(async () => {
@@ -144,7 +147,6 @@ describe('lib/sandboxes', () => {
     });
 
     it('should throw an API error when an error is encountered', async () => {
-      const error = new AxiosError('OH NO');
       getSandboxUsageLimitsMock.mockRejectedValue(error);
 
       await expect(async () => {
@@ -184,7 +186,6 @@ describe('lib/sandboxes', () => {
     });
 
     it('should throw an API error when an error is encountered', async () => {
-      const error = new AxiosError('OH NO');
       initiateSyncMock.mockRejectedValue(error);
 
       await expect(async () => {
@@ -208,7 +209,6 @@ describe('lib/sandboxes', () => {
     });
 
     it('should throw an API error when an error is encountered', async () => {
-      const error = new AxiosError('OH NO');
       fetchTaskStatusMock.mockRejectedValue(error);
 
       await expect(async () => {
@@ -228,7 +228,6 @@ describe('lib/sandboxes', () => {
     });
 
     it('should throw an API error when an error is encountered', async () => {
-      const error = new AxiosError('OH NO');
       fetchTypesMock.mockRejectedValue(error);
 
       await expect(async () => {

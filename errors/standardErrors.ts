@@ -57,16 +57,23 @@ export function throwAuthErrorWithMessage(
 /**
  * @throws
  */
-export function throwError(error: BaseError): never {
+export function throwError(error: unknown): never {
+  if (!(error instanceof Error)) {
+    throw new Error('', { cause: error });
+  }
+
   // Error or Error subclass
   const message =
     error.name && error.name !== 'Error'
       ? [i18n('errors.generic', { name: error.name })]
       : [];
-  [error.message, error.reason].forEach(msg => {
-    if (msg) {
-      message.push(msg);
-    }
-  });
+
+  if (error.message) {
+    message.push(error.message);
+  }
+  if ('reason' in error && error.reason) {
+    message.push(error.reason as string);
+  }
+
   throw new Error(message.join(' '), { cause: error });
 }

@@ -104,7 +104,7 @@ export function writeConfigToFile(config: CLIConfig_NEW): void {
       JSON.parse(JSON.stringify(getOrderedConfig(config), null, 2))
     );
   } catch (err) {
-    throwError(err as BaseError);
+    throwError(err);
   }
   const configPath = getConfigFilePath();
 

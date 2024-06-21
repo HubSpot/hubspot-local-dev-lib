@@ -10,7 +10,6 @@ import {
 } from '../apiErrors';
 import { BaseError } from '../../types/Error';
 import { HubSpotHttpError } from '../../models/HubSpotHttpError';
-import { AxiosError } from 'axios';
 
 export const newError = (overrides = {}): BaseError => {
   return {
@@ -78,27 +77,6 @@ describe('errors/apiErrors', () => {
         })
       ).toBe(false);
       expect(isMissingScopeError(error2)).toBe(false);
-    });
-
-    it('handles AxiosError returned in cause property', () => {
-      const response = {
-        status: 403,
-        data: {
-          category: 'BANNED',
-          subCategory: 'USER_ACCESS_NOT_ALLOWED',
-        },
-      };
-      const error1 = newError({
-        // @ts-expect-error TypeScript wants the full object
-        cause: new AxiosError('', '', undefined, {}, response),
-      });
-      expect(
-        isSpecifiedError(error1, {
-          statusCode: 403,
-          category: 'BANNED',
-          subCategory: 'USER_ACCESS_NOT_ALLOWED',
-        })
-      ).toBe(true);
     });
   });
   describe('isMissingScopeError()', () => {

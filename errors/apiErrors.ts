@@ -17,29 +17,6 @@ import {
 
 const i18nKey = 'errors.apiErrors';
 
-function extractHttpErrorFields(error: unknown): {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  data: any;
-  status?: number;
-  code?: string;
-} {
-  if (isHubSpotHttpError(error)) {
-    return {
-      data: error.data,
-      status: error.status,
-      code: error.code,
-    };
-  }
-  if (isAxiosError(error)) {
-    return {
-      data: error.response?.data,
-      status: error.response?.status,
-      code: error.code,
-    };
-  }
-  return { data: {} };
-}
-
 export function isSpecifiedError(
   err: Error | HubSpotHttpError,
   {
@@ -56,15 +33,11 @@ export function isSpecifiedError(
     code?: string;
   }
 ): boolean {
-  if (!isHubSpotHttpError(err) && !isAxiosError(err.cause)) {
+  if (!isHubSpotHttpError(err)) {
     return false;
   }
 
-  const {
-    data,
-    status,
-    code: actualCode,
-  } = extractHttpErrorFields(isHubSpotHttpError(err) ? err : err.cause);
+  const { data, status, code: actualCode } = err;
 
   const causedByAxiosError = isAxiosError(err.cause);
 
@@ -99,9 +72,7 @@ export function isTimeoutError(err: Error | HubSpotHttpError): boolean {
 
 export function isApiUploadValidationError(err: HubSpotHttpError): boolean {
   return (
-    err.isAxiosError &&
-    err.status === 400 &&
-    !!err.data &&
+    isSpecifiedError(err, { statusCode: 400 }) &&
     !!(err?.data?.message || !!err.data?.errors)
   );
 }
@@ -272,10 +243,10 @@ export function getHubSpotHttpErrorWithContext(
  * @throws
  */
 export function throwApiError(
-  error: HubSpotHttpError,
+  error: unknown,
   context: AxiosErrorContext = {}
 ): never {
-  if (error.isAxiosError) {
+  if (isHubSpotHttpError(error)) {
     throw getHubSpotHttpErrorWithContext(error, context);
   }
   throwError(error);

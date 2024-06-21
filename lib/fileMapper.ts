@@ -210,7 +210,7 @@ async function fetchAndWriteFileStream(
       getFileMapperQueryValues(mode, options)
     );
   } catch (err) {
-    throwError(err as BaseError);
+    throwError(err);
   }
   await writeUtimes(accountId, filepath, node);
 }

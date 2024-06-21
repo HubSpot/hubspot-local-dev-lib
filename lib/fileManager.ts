@@ -29,7 +29,6 @@ import {
 import { throwFileSystemError } from '../errors/fileSystemErrors';
 import { BaseError, GenericError } from '../types/Error';
 import { File, Folder } from '../types/FileManager';
-import { AxiosError } from 'axios';
 import { i18n } from '../utils/lang';
 
 type SimplifiedFolder = Partial<Folder> & Pick<Folder, 'id' | 'name'>;
@@ -299,7 +298,7 @@ export async function downloadFileOrFolder(
   } catch (err) {
     const error = err as GenericError;
     if (error.isAxiosError) {
-      throwApiError(err as AxiosError, {
+      throwApiError(err, {
         request: src,
         accountId,
       });
