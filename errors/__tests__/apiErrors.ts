@@ -1,4 +1,4 @@
-import { AxiosError } from 'axios';
+import { AxiosError, AxiosHeaders } from 'axios';
 import {
   isMissingScopeError,
   isGatingError,
@@ -10,23 +10,28 @@ import {
   isSpecifiedError,
 } from '../apiErrors';
 import { BaseError } from '../../types/Error';
+import { HubSpotAuthError } from '../../models/HubSpotAuthError';
 
 export const newError = (overrides = {}): BaseError => {
   return {
     name: 'Error',
-    message: 'An error ocurred',
+    message: 'An error occurred',
     status: 200,
     errors: [],
     ...overrides,
   };
 };
 
-export const newAxiosError = (overrides = {}): AxiosError => {
-  return {
-    ...newError(),
-    isAxiosError: true,
-    name: 'AxiosError',
-    response: {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const newAxiosError = (overrides: any = {}): AxiosError => {
+  return new AxiosError(
+    '',
+    overrides.code || '',
+    { headers: new AxiosHeaders(), ...overrides.config },
+    {
+      ...overrides.request,
+    },
+    {
       request: {
         href: 'http://example.com/',
         method: 'GET',
@@ -35,11 +40,10 @@ export const newAxiosError = (overrides = {}): AxiosError => {
       headers: {},
       status: 200,
       statusText: '',
-      // @ts-expect-error don't need to test headers
       config: {},
-    },
-    ...overrides,
-  };
+      ...overrides.response,
+    }
+  );
 };
 
 describe('errors/apiErrors', () => {
@@ -84,7 +88,7 @@ describe('errors/apiErrors', () => {
           data: { category: 'BANNED', subCategory: 'USER_ACCESS_NOT_ALLOWED' },
         },
       });
-      const error1 = newError({ cause: axiosError });
+      const error1 = new Error('', { cause: axiosError });
       expect(
         isSpecifiedError(error1, {
           statusCode: 403,
@@ -133,12 +137,10 @@ describe('errors/apiErrors', () => {
   describe('isApiUploadValidationError()', () => {
     it('returns true for api upload validation errors', () => {
       const error1 = newAxiosError({
-        status: 400,
-        response: { data: { message: 'upload validation error' } },
+        response: { data: { message: 'upload validation error' }, status: 400 },
       });
       const error2 = newAxiosError({
-        status: 400,
-        response: { data: { errors: [] } },
+        response: { data: { errors: [] }, status: 400 },
       });
       expect(isApiUploadValidationError(error1)).toBe(true);
       expect(isApiUploadValidationError(error2)).toBe(true);
@@ -156,7 +158,16 @@ describe('errors/apiErrors', () => {
 
   describe('isSpecifiedHubSpotAuthError()', () => {
     it('returns true for matching HubSpot auth errors', () => {
-      const error1 = newError({ name: 'HubSpotAuthError', status: 123 });
+      const error1 = new HubSpotAuthError('', {
+        cause: new AxiosError(
+          '',
+          '',
+          { headers: new AxiosHeaders() },
+          {},
+          // @ts-expect-error Not going to mock the whole thing
+          { status: 123 }
+        ),
+      });
       expect(isSpecifiedHubSpotAuthError(error1, { status: 123 })).toBe(true);
     });
 

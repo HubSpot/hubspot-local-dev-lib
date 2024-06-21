@@ -16,7 +16,6 @@ import {
   TaskRequestData,
   Usage,
 } from '../types/Sandbox';
-import { AxiosError } from 'axios';
 import { throwApiError } from '../errors/apiErrors';
 
 export async function createSandbox(
@@ -35,7 +34,7 @@ export async function createSandbox(
       ...resp,
     };
   } catch (err) {
-    throwApiError(err as AxiosError);
+    throwApiError(err);
   }
 }
 
@@ -46,7 +45,7 @@ export async function deleteSandbox(
   try {
     await _deleteSandbox(parentAccountId, sandboxAccountId);
   } catch (err) {
-    throwApiError(err as AxiosError);
+    throwApiError(err);
   }
 
   return {
@@ -62,7 +61,7 @@ export async function getSandboxUsageLimits(
     const resp = await _getSandboxUsageLimits(parentAccountId);
     return resp && resp.usage;
   } catch (err) {
-    throwApiError(err as AxiosError);
+    throwApiError(err);
   }
 }
 
@@ -75,7 +74,7 @@ export async function initiateSync(
   try {
     return await _initiateSync(fromHubId, toHubId, tasks, sandboxHubId);
   } catch (err) {
-    throwApiError(err as AxiosError);
+    throwApiError(err);
   }
 }
 
@@ -86,7 +85,7 @@ export async function fetchTaskStatus(
   try {
     return await _fetchTaskStatus(accountId, taskId);
   } catch (err) {
-    throwApiError(err as AxiosError);
+    throwApiError(err);
   }
 }
 
@@ -98,6 +97,6 @@ export async function fetchTypes(
     const resp = await _fetchTypes(accountId, toHubId);
     return resp && resp.results;
   } catch (err) {
-    throwApiError(err as AxiosError);
+    throwApiError(err);
   }
 }

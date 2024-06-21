@@ -13,7 +13,6 @@ import {
 import { getCwd } from './path';
 import { FetchRowsResponse, Row, Table } from '../types/Hubdb';
 import { throwErrorWithMessage } from '../errors/standardErrors';
-import { BaseError } from '../types/Error';
 
 const i18nKey = 'lib.hubdb';
 
@@ -29,11 +28,7 @@ function validateJsonFile(src: string): void {
   try {
     stats = fs.statSync(src);
   } catch (err) {
-    throwErrorWithMessage(
-      `${i18nKey}.errors.invalidJsonFile`,
-      { src },
-      err as BaseError
-    );
+    throwErrorWithMessage(`${i18nKey}.errors.invalidJsonFile`, { src }, err);
   }
 
   if (!stats.isFile()) {

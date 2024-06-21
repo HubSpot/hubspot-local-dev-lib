@@ -3,13 +3,20 @@ import { i18n } from '../utils/lang';
 
 import { BaseError } from '../types/Error';
 import { LangKey } from '../types/Lang';
-import { AxiosError } from 'axios';
 
-export function isSystemError(err: BaseError): boolean {
-  return err.errno != null && err.code != null && err.syscall != null;
+export function isSystemError(err: unknown): err is BaseError {
+  return (
+    err instanceof Error &&
+    'errno' in err &&
+    err.errno != null &&
+    'code' in err &&
+    err.code != null &&
+    'syscall' in err &&
+    err.syscall != null
+  );
 }
 
-export function isFatalError(err: BaseError): boolean {
+export function isFatalError(err: unknown): err is BaseError {
   return err instanceof HubSpotAuthError;
 }
 
@@ -17,7 +24,7 @@ function genericThrowErrorWithMessage(
   ErrorType: ErrorConstructor,
   identifier: LangKey,
   interpolation?: { [key: string]: string | number },
-  cause?: BaseError | AxiosError
+  cause?: unknown
 ): never {
   const message = i18n(identifier, interpolation);
   if (cause) {
@@ -32,7 +39,7 @@ function genericThrowErrorWithMessage(
 export function throwErrorWithMessage(
   identifier: LangKey,
   interpolation?: { [key: string]: string | number },
-  cause?: BaseError | AxiosError
+  cause?: unknown
 ): never {
   genericThrowErrorWithMessage(Error, identifier, interpolation, cause);
 }
@@ -43,7 +50,7 @@ export function throwErrorWithMessage(
 export function throwAuthErrorWithMessage(
   identifier: LangKey,
   interpolation?: { [key: string]: string | number },
-  cause?: AxiosError
+  cause?: unknown
 ): never {
   genericThrowErrorWithMessage(
     // @ts-expect-error HubSpotAuthError is not callable
@@ -57,16 +64,23 @@ export function throwAuthErrorWithMessage(
 /**
  * @throws
  */
-export function throwError(error: BaseError): never {
+export function throwError(error: unknown): never {
+  if (!(error instanceof Error)) {
+    throw new Error('', { cause: error });
+  }
+
   // Error or Error subclass
   const message =
     error.name && error.name !== 'Error'
       ? [i18n('errors.generic', { name: error.name })]
       : [];
-  [error.message, error.reason].forEach(msg => {
-    if (msg) {
-      message.push(msg);
-    }
-  });
+
+  if (error.message) {
+    message.push(error.message);
+  }
+  if ('reason' in error && error.reason) {
+    message.push(error.reason as string);
+  }
+
   throw new Error(message.join(' '), { cause: error });
 }

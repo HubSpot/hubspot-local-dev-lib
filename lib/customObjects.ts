@@ -1,7 +1,6 @@
 import fs from 'fs-extra';
 import path from 'path';
 import prettier from 'prettier';
-import { AxiosError } from 'axios';
 import { getCwd } from '../lib/path';
 import { fetchObjectSchemas, fetchObjectSchema } from '../api/customObjects';
 import { FetchSchemasResponse, Schema } from '../types/Schemas';
@@ -32,7 +31,7 @@ export async function downloadSchemas(
   try {
     response = await fetchObjectSchemas(accountId);
   } catch (err) {
-    throwApiError(err as AxiosError);
+    throwApiError(err);
   }
 
   if (response.results.length) {
@@ -54,7 +53,7 @@ export async function downloadSchema(
   try {
     response = await fetchObjectSchema(accountId, schemaObjectType);
   } catch (err) {
-    throwApiError(err as AxiosError);
+    throwApiError(err);
   }
 
   await writeSchemaToDisk(response, dest);

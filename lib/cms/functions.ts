@@ -6,7 +6,6 @@ import { downloadGithubRepoContents } from '../github';
 import { logger } from '../logger';
 import { throwErrorWithMessage } from '../../errors/standardErrors';
 import { throwFileSystemError } from '../../errors/fileSystemErrors';
-import { BaseError } from '../../types/Error';
 import { i18n } from '../../utils/lang';
 
 const i18nKey = 'lib.cms.functions';
@@ -79,7 +78,7 @@ function updateExistingConfig(
         configFilePath,
       })
     );
-    throwFileSystemError(err as BaseError, {
+    throwFileSystemError(err, {
       filepath: configFilePath,
       read: true,
     });
@@ -94,7 +93,7 @@ function updateExistingConfig(
         configFilePath,
       })
     );
-    throwFileSystemError(err as BaseError, {
+    throwFileSystemError(err, {
       filepath: configFilePath,
       read: true,
     });
@@ -134,7 +133,7 @@ function updateExistingConfig(
         configFilePath,
       })
     );
-    throwFileSystemError(err as BaseError, {
+    throwFileSystemError(err, {
       filepath: configFilePath,
       write: true,
     });
@@ -248,7 +247,7 @@ export async function createFunction(
           configFilePath,
         })
       );
-      throwFileSystemError(err as BaseError, {
+      throwFileSystemError(err, {
         filepath: configFilePath,
         write: true,
       });

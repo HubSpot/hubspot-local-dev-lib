@@ -124,7 +124,7 @@ export class FieldsJs {
       throwErrorWithMessage(
         `${i18nKey}.saveOutput.errors.saveFailed`,
         { path: savePath },
-        err as BaseError
+        err
       );
     }
   }
@@ -177,7 +177,7 @@ export function createTmpDirSync(prefix: string): string {
     throwErrorWithMessage(
       `${i18nKey}.createTmpDirSync.errors.writeFailed`,
       {},
-      err as BaseError
+      err
     );
   }
   return tmpDir;
@@ -190,7 +190,7 @@ export function cleanupTmpDirSync(tmpDir: string): void {
       throwErrorWithMessage(
         `${i18nKey}.cleanupTmpDirSync.errors.deleteFailed`,
         {},
-        err as BaseError
+        err
       );
     }
   });

@@ -4,7 +4,6 @@ import {
   deleteDeveloperTestAccount as _deleteDeveloperTestAccount,
 } from '../api/developerTestAccounts';
 
-import { AxiosError } from 'axios';
 import { throwApiError } from '../errors/apiErrors';
 import {
   DeveloperTestAccount,
@@ -19,7 +18,7 @@ export async function createDeveloperTestAccount(
     const resp = await _createDeveloperTestAccount(accountId, accountName);
     return resp;
   } catch (err) {
-    throwApiError(err as AxiosError);
+    throwApiError(err);
   }
 }
 
@@ -31,7 +30,7 @@ export async function deleteDeveloperTestAccount(
     const resp = await _deleteDeveloperTestAccount(accountId, testAccountId);
     return resp;
   } catch (err) {
-    throwApiError(err as AxiosError);
+    throwApiError(err);
   }
 }
 
@@ -42,6 +41,6 @@ export async function fetchDeveloperTestAccounts(
     const resp = await _fetchDeveloperTestAccounts(accountId);
     return resp;
   } catch (err) {
-    throwApiError(err as AxiosError);
+    throwApiError(err);
   }
 }

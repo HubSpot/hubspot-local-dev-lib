@@ -1,11 +1,11 @@
 import { i18n } from '../utils/lang';
 import { isSystemError } from './standardErrors';
-import { BaseError, FileSystemErrorContext } from '../types/Error';
+import { FileSystemErrorContext } from '../types/Error';
 
 const i18nKey = 'errors.fileSystemErrors';
 
 export function getFileSystemError(
-  error: BaseError,
+  error: unknown,
   context: FileSystemErrorContext
 ): Error {
   let fileAction = '';
@@ -36,7 +36,7 @@ export function getFileSystemError(
  * @throws
  */
 export function throwFileSystemError(
-  error: BaseError,
+  error: unknown,
   context: FileSystemErrorContext
 ) {
   throw getFileSystemError(error, context);

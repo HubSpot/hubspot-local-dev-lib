@@ -9,7 +9,6 @@ import {
 } from '../errors/standardErrors';
 import { fetchAccessToken } from '../api/localDevAuth';
 import { fetchSandboxHubData } from '../api/sandboxHubs';
-import { BaseError } from '../types/Error';
 import { CLIAccount, PersonalAccessKeyAccount } from '../types/Accounts';
 import { Environment } from '../types/Config';
 import {
@@ -61,7 +60,7 @@ export async function getAccessToken(
         error
       );
     } else {
-      throwError(e as BaseError);
+      throwError(e);
     }
   }
   return {
