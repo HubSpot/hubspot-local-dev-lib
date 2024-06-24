@@ -80,23 +80,6 @@ describe('errors/apiErrors', () => {
       ).toBe(false);
       expect(isMissingScopeError(error2)).toBe(false);
     });
-
-    it('handles AxiosError returned in cause property', () => {
-      const axiosError = newAxiosError({
-        response: {
-          status: 403,
-          data: { category: 'BANNED', subCategory: 'USER_ACCESS_NOT_ALLOWED' },
-        },
-      });
-      const error1 = new Error('', { cause: axiosError });
-      expect(
-        isSpecifiedError(error1, {
-          statusCode: 403,
-          category: 'BANNED',
-          subCategory: 'USER_ACCESS_NOT_ALLOWED',
-        })
-      ).toBe(true);
-    });
   });
   describe('isMissingScopeError()', () => {
     it('returns true for missing scope errors', () => {
@@ -164,6 +147,7 @@ describe('errors/apiErrors', () => {
           '',
           { headers: new AxiosHeaders() },
           {},
+          // @ts-expect-error it wants the full object
           { status: 123 }
         ),
       });

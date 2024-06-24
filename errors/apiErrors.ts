@@ -1,4 +1,3 @@
-import { isAxiosError } from 'axios';
 import { AxiosErrorContext, BaseError, ValidationError } from '../types/Error';
 import { HTTP_METHOD_VERBS, HTTP_METHOD_PREPOSITIONS } from '../constants/api';
 import { i18n } from '../utils/lang';
@@ -37,8 +36,6 @@ export function isSpecifiedError(
 
   const { data, status, code: actualCode } = err;
 
-  const causedByAxiosError = isAxiosError(err.cause);
-
   const statusCodeMatchesError = !statusCode || status === statusCode;
   const categoryMatchesError = !category || data?.category === category;
   const subCategoryMatchesError =
@@ -47,7 +44,6 @@ export function isSpecifiedError(
   const codeMatchesError = !code || actualCode === code;
 
   return (
-    causedByAxiosError &&
     statusCodeMatchesError &&
     categoryMatchesError &&
     subCategoryMatchesError &&
