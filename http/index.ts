@@ -12,8 +12,15 @@ import { AxiosConfigOptions, HttpOptions, QueryParams } from '../types/Http';
 import { throwErrorWithMessage } from '../errors/standardErrors';
 import { logger } from '../lib/logger';
 import { i18n } from '../utils/lang';
+import { HubSpotHttpError } from '../models/HubSpotHttpError';
 
 const i18nKey = 'http.index';
+
+axios.interceptors.response.use(undefined, error => {
+  // Wrap all axios errors in our own Error class.  Attach the error
+  // as the cause for the new error, so we maintain the stack trace
+  return Promise.reject(new HubSpotHttpError(error.message, { cause: error }));
+});
 
 export function addUserAgentHeader(key: string, value: string) {
   USER_AGENTS[key] = value;
