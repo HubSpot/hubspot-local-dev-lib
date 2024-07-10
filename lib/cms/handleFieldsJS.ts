@@ -45,7 +45,6 @@ export class FieldsJs {
 
   async init(): Promise<this> {
     if (this.fields) {
-      console.log(this.fields);
       const tempFilePath = await this.createTempFile(this.fields);
       this.outputPath = tempFilePath;
     } else {
