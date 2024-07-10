@@ -25,13 +25,13 @@ export async function fetchPrivateAppUserToken(
 export async function createPrivateAppUserToken(
   accountId: number,
   appId: number,
-  scopeGroups: Array<string> = [],
+  scopeGroups?: Array<string>,
   expiresAt?: string
 ): Promise<PrivateAppUserTokenResponse> {
   return http.post(accountId, {
     url: `${LOCALDEVAUTH_API_PRIVATE_APP_USER_TOKEN_PATH}/${appId}`,
     data: {
-      ...(scopeGroups.length && { scopeGroups: scopeGroups }),
+      ...(scopeGroups && { scopeGroups: scopeGroups }),
       ...(expiresAt && { expiresAt: expiresAt }),
     },
   });
@@ -41,14 +41,14 @@ export async function updatePrivateAppUserToken(
   accountId: number,
   appId: number,
   userTokenKey: string,
-  scopeGroups: Array<string> = [],
+  scopeGroups?: Array<string>,
   expiresAt?: string
 ): Promise<PrivateAppUserTokenResponse> {
   return http.put(accountId, {
     url: `${LOCALDEVAUTH_API_PRIVATE_APP_USER_TOKEN_PATH}/${appId}`,
     data: {
       privateAppUserTokenKey: userTokenKey,
-      ...(scopeGroups.length && { scopeGroups: scopeGroups }),
+      ...(scopeGroups && { scopeGroups: scopeGroups }),
       ...(expiresAt && { expiresAt: expiresAt }),
     },
   });

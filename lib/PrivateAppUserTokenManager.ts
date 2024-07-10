@@ -9,7 +9,10 @@ import { logger } from './logger';
 import { i18n } from '../utils/lang';
 import moment from 'moment';
 import { AxiosError, isAxiosError } from 'axios';
-import { getAxiosErrorWithContext } from '../errors/apiErrors';
+import {
+  getAxiosErrorWithContext,
+  isSpecifiedError,
+} from '../errors/apiErrors';
 import { throwErrorWithMessage } from '../errors/standardErrors';
 import { BaseError } from '../types/Error';
 
@@ -17,16 +20,20 @@ const USER_TOKEN_READ = 'developer.private_app.temporary_token.read';
 const USER_TOKEN_WRITE = 'developer.private_app.temporary_token.write';
 const i18nKey = 'lib.PrivateAppUserTokenManager';
 
+type CachedPrivateAppUserToken = {
+  token: PrivateAppUserTokenResponse;
+  requestedScopeGroups: string[];
+  refreshInterval: NodeJS.Timeout;
+};
+
 export class PrivateAppUserTokenManager {
   accountId: number;
-  private tokenMap: Map<number, PrivateAppUserTokenResponse>;
-  private tokenMapIntervalId: Map<number, NodeJS.Timeout>;
+  private tokenMap: Map<number, CachedPrivateAppUserToken>;
   private enabled: boolean;
 
   constructor(accountId: number) {
     this.accountId = accountId;
-    this.tokenMap = new Map<number, PrivateAppUserTokenResponse>();
-    this.tokenMapIntervalId = new Map<number, NodeJS.Timeout>();
+    this.tokenMap = new Map<number, CachedPrivateAppUserToken>();
     this.enabled = false;
   }
 
@@ -52,12 +59,13 @@ export class PrivateAppUserTokenManager {
   }
 
   cleanup() {
-    this.tokenMapIntervalId.forEach(timeoutId => clearInterval(timeoutId));
-    this.tokenMapIntervalId.clear();
+    this.tokenMap.forEach(cachedValue =>
+      clearInterval(cachedValue.refreshInterval)
+    );
     this.tokenMap.clear();
   }
 
-  async getPrivateAppToken(
+  async getPrivateAppUserToken(
     appId: number,
     scopeGroups: string[] = []
   ): Promise<string | undefined> {
@@ -72,9 +80,8 @@ export class PrivateAppUserTokenManager {
     }
     try {
       if (
-        this.tokenMap.has(appId) &&
-        PrivateAppUserTokenManager.doesTokenHaveAllScopes(
-          this.tokenMap.get(appId),
+        this.doesTokenHaveAllScopes(
+          this.tokenMap.get(appId)?.token,
           scopeGroups
         )
       ) {
@@ -83,7 +90,7 @@ export class PrivateAppUserTokenManager {
             appId: appId,
           })
         );
-        return this.tokenMap.get(appId)!.userTokenKey;
+        return this.tokenMap.get(appId)!.token.userTokenKey;
       } else {
         const token = await this.createOrGetActiveToken(appId, scopeGroups);
         this.setCacheAndRefresh(appId, token, scopeGroups);
@@ -115,33 +122,34 @@ export class PrivateAppUserTokenManager {
   private setCacheAndRefresh(
     appId: number,
     token: PrivateAppUserTokenResponse,
-    scopeGroups: string[]
+    requestedScopeGroups: string[]
   ) {
-    if (token === undefined || token === null) {
+    if (!token) {
       throwErrorWithMessage(`${i18nKey}.errors.refreshFailed`, {
         accountId: this.accountId,
         appId: appId,
       });
     }
-    this.tokenMap.set(appId, token);
-    if (this.tokenMapIntervalId.has(appId)) {
-      clearInterval(this.tokenMapIntervalId.get(appId));
+    if (this.tokenMap.has(appId)) {
+      clearInterval(this.tokenMap.get(appId)!.refreshInterval);
     }
     const now = moment.utc();
+    const refreshTime = moment.utc(token.expiresAt).subtract(5, 'minutes');
     const refreshDelayMillis = Math.max(
-      moment
-        .utc(token.expiresAt)
-        .subtract(5, 'minutes')
-        .diff(now, 'milliseconds'),
+      refreshTime.diff(now, 'milliseconds'),
       0
     );
-    this.tokenMapIntervalId.set(
-      appId,
-      setInterval(
-        () => this.refreshToken(appId, token.userTokenKey, scopeGroups),
-        refreshDelayMillis
-      )
+    const refreshInterval = setInterval(
+      () => this.refreshToken(appId, token.userTokenKey, requestedScopeGroups),
+      refreshDelayMillis
     );
+
+    const cachedValue: CachedPrivateAppUserToken = {
+      token,
+      requestedScopeGroups,
+      refreshInterval,
+    };
+    this.tokenMap.set(appId, cachedValue);
     logger.debug(
       i18n(`${i18nKey}.refreshScheduled`, {
         appId: appId,
@@ -155,8 +163,8 @@ export class PrivateAppUserTokenManager {
     appId: number,
     scopeGroups: string[]
   ): Promise<PrivateAppUserTokenResponse> {
-    const maybeToken = await this.getExistingToken(appId);
-    if (maybeToken === null) {
+    const existingToken = await this.getExistingToken(appId);
+    if (existingToken === null) {
       logger.debug(
         i18n(`${i18nKey}.create`, {
           appId: appId,
@@ -167,11 +175,8 @@ export class PrivateAppUserTokenManager {
       moment
         .utc()
         .add(5, 'minutes')
-        .isAfter(moment.utc(maybeToken.expiresAt)) ||
-      !PrivateAppUserTokenManager.doesTokenHaveAllScopes(
-        maybeToken,
-        scopeGroups
-      )
+        .isAfter(moment.utc(existingToken.expiresAt)) ||
+      !this.doesTokenHaveAllScopes(existingToken, scopeGroups)
     ) {
       logger.debug(
         i18n(`${i18nKey}.refresh`, {
@@ -181,14 +186,14 @@ export class PrivateAppUserTokenManager {
       return updatePrivateAppUserToken(
         this.accountId,
         appId,
-        maybeToken.userTokenKey,
+        existingToken.userTokenKey,
         scopeGroups
       );
     }
-    return maybeToken;
+    return existingToken;
   }
 
-  private static doesTokenHaveAllScopes(
+  private doesTokenHaveAllScopes(
     token: PrivateAppUserTokenResponse | undefined,
     requestedScopes: string[]
   ): boolean {
@@ -206,10 +211,8 @@ export class PrivateAppUserTokenManager {
     try {
       return await fetchPrivateAppUserToken(this.accountId, appId);
     } catch (err) {
-      if (isAxiosError(err)) {
-        if (err.response?.status == 404) {
-          return null;
-        }
+      if (isSpecifiedError(err as AxiosError, { statusCode: 404 })) {
+        return null;
       }
       throw err;
     }
@@ -218,7 +221,7 @@ export class PrivateAppUserTokenManager {
   private async refreshToken(
     appId: number,
     userTokenKey: string,
-    scopeGroups: string[]
+    requestedScopes: string[]
   ) {
     logger.debug(
       i18n(`${i18nKey}.refresh`, {
@@ -229,10 +232,10 @@ export class PrivateAppUserTokenManager {
       this.accountId,
       appId,
       userTokenKey,
-      scopeGroups
+      requestedScopes
     );
     if (newToken) {
-      this.setCacheAndRefresh(appId, newToken, scopeGroups);
+      this.setCacheAndRefresh(appId, newToken, requestedScopes);
     } else {
       throwErrorWithMessage(`${i18nKey}.errors.refreshFailed`, {
         accountId: this.accountId,

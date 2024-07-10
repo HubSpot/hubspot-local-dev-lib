@@ -64,7 +64,7 @@ describe('lib/PrivateAppUserTokenManager', () => {
     });
   });
 
-  describe('getPrivateAppToken()', () => {
+  describe('getPrivateAppUserToken()', () => {
     const systemTime = new Date(Date.UTC(2024, 5, 1, 0, 0, 0));
 
     const token: PrivateAppUserTokenResponse = {
@@ -110,7 +110,7 @@ describe('lib/PrivateAppUserTokenManager', () => {
 
     it('should no opt if not initialized', async () => {
       manager = new PrivateAppUserTokenManager(accountId); // set to new instance not initialized
-      const result = await manager.getPrivateAppToken(accountId);
+      const result = await manager.getPrivateAppUserToken(accountId);
       expect(result).toBeUndefined();
     });
     it('should no opt if disabled', async () => {
@@ -121,25 +121,25 @@ describe('lib/PrivateAppUserTokenManager', () => {
       } catch (e) {
         expect(e).toBeDefined();
       }
-      const result = await manager.getPrivateAppToken(accountId);
+      const result = await manager.getPrivateAppUserToken(accountId);
       expect(result).toBeUndefined();
     });
     it('should fetch a existing valid Private App User Token', async () => {
       fetchPrivateAppUserToken.mockResolvedValue(token);
-      const result = await manager.getPrivateAppToken(token.appId);
+      const result = await manager.getPrivateAppUserToken(token.appId);
       expect(result).toEqual(token.userTokenKey);
     });
     it('should used cached Private App User Token', async () => {
       fetchPrivateAppUserToken.mockResolvedValue(token);
-      await manager.getPrivateAppToken(token.appId);
-      const result = await manager.getPrivateAppToken(token.appId);
+      await manager.getPrivateAppUserToken(token.appId);
+      const result = await manager.getPrivateAppUserToken(token.appId);
       expect(result).toEqual(token.userTokenKey);
       expect(fetchPrivateAppUserToken).toHaveBeenCalledTimes(1);
     });
     it('should refresh existing expired Private App User Token', async () => {
       fetchPrivateAppUserToken.mockResolvedValue(expiredToken);
       updatePrivateAppUserToken.mockResolvedValue(token);
-      const result = await manager.getPrivateAppToken(token.appId);
+      const result = await manager.getPrivateAppUserToken(token.appId);
       expect(result).toEqual(token.userTokenKey);
       expect(updatePrivateAppUserToken).toHaveBeenCalledTimes(1);
     });
@@ -148,14 +148,14 @@ describe('lib/PrivateAppUserTokenManager', () => {
         throw notFoundError;
       });
       createPrivateAppUserToken.mockResolvedValue(token);
-      const result = await manager.getPrivateAppToken(token.appId);
+      const result = await manager.getPrivateAppUserToken(token.appId);
       expect(result).toEqual(token.userTokenKey);
       expect(createPrivateAppUserToken).toHaveBeenCalledTimes(1);
     });
     it('should refresh cached token if it is about to expire', async () => {
       fetchPrivateAppUserToken.mockResolvedValue(token);
       updatePrivateAppUserToken.mockResolvedValue(refreshedToken);
-      const tokenKey = await manager.getPrivateAppToken(token.appId);
+      const tokenKey = await manager.getPrivateAppUserToken(token.appId);
       expect(tokenKey).toEqual(token.userTokenKey);
       jest.advanceTimersByTime(60 * 60 * 1000);
       expect(updatePrivateAppUserToken).toHaveBeenCalledTimes(1);
@@ -163,8 +163,8 @@ describe('lib/PrivateAppUserTokenManager', () => {
     it('should update token is missing scopes', async () => {
       fetchPrivateAppUserToken.mockResolvedValue(token);
       updatePrivateAppUserToken.mockResolvedValue(tokenWithMoreScopes);
-      await manager.getPrivateAppToken(token.appId);
-      const tokenKey = await manager.getPrivateAppToken(
+      await manager.getPrivateAppUserToken(token.appId);
+      const tokenKey = await manager.getPrivateAppUserToken(
         token.appId,
         tokenWithMoreScopes.scopeGroups
       );
@@ -174,7 +174,7 @@ describe('lib/PrivateAppUserTokenManager', () => {
     });
     it('should clear token refresh if cleanup is called', async () => {
       fetchPrivateAppUserToken.mockResolvedValue(token);
-      await manager.getPrivateAppToken(token.appId);
+      await manager.getPrivateAppUserToken(token.appId);
       manager.cleanup();
       jest.advanceTimersByTime(60 * 60 * 1000);
       expect(updatePrivateAppUserToken).not.toHaveBeenCalled();
