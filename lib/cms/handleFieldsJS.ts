@@ -116,7 +116,6 @@ export class FieldsJs {
 
   // Create a temporary file with the fields data
   private createTempFile(data: JSON): Promise<string> {
-    console.log(data);
     const tempDir = os.tmpdir();
     const tempFilePath = path.join(tempDir, `fields-${Date.now()}.json`);
 
