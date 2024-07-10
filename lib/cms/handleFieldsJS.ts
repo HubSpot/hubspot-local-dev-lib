@@ -13,21 +13,27 @@ const i18nKey = 'lib.cms.handleFieldsJs';
 
 export class FieldsJs {
   projectDir: string;
-  filePath: string;
+  filePath?: string;
   rootWriteDir: string;
   rejected: boolean;
   fieldOptions: string;
+  fields?: JSON;
   outputPath?: string;
   toJSON?: () => JSON;
 
   constructor(
     projectDir: string,
-    filePath: string,
+    // This enables support for translations of both react and hubl modules
+    filePathOrFields: string | JSON,
     rootWriteDir?: string | null,
     fieldOptions = ''
   ) {
     this.projectDir = projectDir;
-    this.filePath = filePath;
+    if (typeof filePathOrFields === 'string') {
+      this.filePath = filePathOrFields;
+    } else {
+      this.fields = filePathOrFields;
+    }
     this.fieldOptions = fieldOptions;
     this.rejected = false;
     // Create tmpDir if no writeDir is given.
@@ -38,14 +44,24 @@ export class FieldsJs {
   }
 
   async init(): Promise<this> {
-    const outputPath = await this.getOutputPathPromise();
-    this.outputPath = this.rejected ? undefined : outputPath!;
+    if (this.fields) {
+      console.log(this.fields);
+      const tempFilePath = await this.createTempFile(this.fields);
+      this.outputPath = tempFilePath;
+    } else {
+      const outputPath = await this.getOutputPathPromise();
+      this.outputPath = this.rejected ? undefined : outputPath!;
+    }
     return this;
   }
 
   // Converts a fields.js file into a fields.json file, writes, and returns of fields.json
   convertFieldsJs(writeDir: string): Promise<string | void> {
-    const filePath = this.filePath;
+    if (this.fields) {
+      return this.createTempFile(this.fields);
+    }
+
+    const filePath = this.filePath!;
     const dirName = path.dirname(filePath);
 
     return new Promise<string>((resolve, reject) => {
@@ -98,6 +114,22 @@ export class FieldsJs {
     });
   }
 
+  // Create a temporary file with the fields data
+  private createTempFile(data: JSON): Promise<string> {
+    console.log(data);
+    const tempDir = os.tmpdir();
+    const tempFilePath = path.join(tempDir, `fields-${Date.now()}.json`);
+
+    return new Promise((resolve, reject) => {
+      fs.writeFile(tempFilePath, JSON.stringify(data, null, 2), err => {
+        if (err) {
+          return reject(err);
+        }
+        resolve(tempFilePath);
+      });
+    });
+  }
+
   /**
    * If there has been a fields.json written to the output path, then copy it from the output
    * directory to the project directory, respecting the path within the output directory.
@@ -106,7 +138,7 @@ export class FieldsJs {
   saveOutput(): void {
     if (!this.outputPath || !fs.existsSync(this.outputPath)) {
       throwErrorWithMessage(`${i18nKey}.saveOutput.errors.saveFailed`, {
-        path: this.filePath,
+        path: this.filePath || 'filePath unknown',
       });
     }
     const relativePath = path.relative(
@@ -137,7 +169,7 @@ export class FieldsJs {
    */
   getWriteDir(): string {
     const projectDirRegex = new RegExp(`^${escapeRegExp(this.projectDir)}`);
-    const relativePath = this.filePath.replace(projectDirRegex, '');
+    const relativePath = this.filePath!.replace(projectDirRegex, '') || '';
     return path.dirname(path.join(this.rootWriteDir, relativePath));
   }
 
