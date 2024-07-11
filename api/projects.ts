@@ -14,7 +14,12 @@ import {
 } from '../types/ComponentStructure';
 import { Deploy, ProjectDeployResponse } from '../types/Deploy';
 import { ProjectLog } from '../types/ProjectLog';
-import { MigrateAppResponse, PollAppResponse } from '../types/Migration';
+import {
+  MigrateAppResponse,
+  CloneAppResponse,
+  PollAppResponse,
+} from '../types/Migration';
+import { AxiosResponse } from 'axios';
 
 const PROJECTS_API_PATH = 'dfs/v1/projects';
 const PROJECTS_DEPLOY_API_PATH = 'dfs/deploy/v1';
@@ -321,41 +326,36 @@ export async function checkMigrationStatus(
 
 export async function cloneApp(
   accountId: number,
-  appId: number,
-  projectName: string,
-  projectLocation: string
-): Promise<MigrateAppResponse> {
-  console.log('cloneApp');
-  console.log('accountId:', accountId);
-  console.log('appId:', appId);
-  console.log('projectName:', projectName);
-  console.log('projectLocation:', projectLocation);
-  return Promise.resolve({
-    id: 12345,
-    status: 'SUCCESS',
+  appId: number
+): Promise<CloneAppResponse> {
+  return http.post(accountId, {
+    url: `${MIGRATIONS_API_PATH}/exports`,
+    data: {
+      componentId: appId,
+      componentType: 'PUBLIC_APP_ID',
+    },
   });
-  // return http.post(accountId, {
-  //   url: `${MIGRATIONS_API_PATH}/clones`,
-  //   data: {
-  //     componentId: appId,
-  //     componentType: 'PUBLIC_APP_ID',
-  //     projectName,
-  //   },
-  // });
 }
 
 export async function checkCloneStatus(
   accountId: number,
-  id: number
-): Promise<PollAppResponse> {
-  console.log('checkCloneStatus');
-  console.log('accountId', accountId);
-  console.log('id', id);
-  return Promise.resolve({
-    id: 12345,
-    status: 'SUCCESS',
+  exportId: number
+): Promise<CloneAppResponse> {
+  return http.get(accountId, {
+    url: `${MIGRATIONS_API_PATH}/exports/statuses/${exportId}`,
   });
-  // return http.get(accountId, {
-  //   url: `${MIGRATIONS_API_PATH}/clones/${id}`,
-  // });
+}
+
+export async function downloadClonedProject(
+  accountId: number,
+  exportId: number,
+  destination: string
+): Promise<AxiosResponse> {
+  return http.getOctetStream(
+    accountId,
+    {
+      url: `${MIGRATIONS_API_PATH}/exports/${exportId}/download-as-clone`,
+    },
+    destination
+  );
 }

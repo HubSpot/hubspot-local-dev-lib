@@ -13,6 +13,11 @@ export type MigrateAppResponse = {
   status: ValueOf<typeof MIGRATION_STATUS>;
 };
 
+export type CloneAppResponse = {
+  exportId: number;
+  status: ValueOf<typeof MIGRATION_STATUS>;
+};
+
 export type PollAppResponse = {
   id: number;
   project?: { id: number; name: string; buildId: number; deployId: number };
