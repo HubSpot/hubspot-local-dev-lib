@@ -95,7 +95,7 @@ async function copySourceToDest(
       if (!rootDir) {
         logger.debug(i18n(`${i18nKey}.copySourceToDest.sourceEmpty`));
         // Create the dest path if it doesn't already exist
-        fs.ensureDir(dest);
+        await fs.ensureDir(dest);
         // No root found so nothing to copy
         return true;
       }
@@ -121,10 +121,10 @@ async function copySourceToDest(
   return false;
 }
 
-function cleanupTempDir(tmpDir: string): void {
+async function cleanupTempDir(tmpDir: string): Promise<void> {
   if (!tmpDir) return;
   try {
-    fs.remove(tmpDir);
+    await fs.remove(tmpDir);
   } catch (e) {
     logger.debug(i18n(`${i18nKey}.cleanupTempDir.error`, { tmpDir }));
   }
@@ -149,7 +149,7 @@ export async function extractZipArchive(
       });
     }
 
-    cleanupTempDir(tmpDir);
+    await cleanupTempDir(tmpDir);
   }
   return success;
 }

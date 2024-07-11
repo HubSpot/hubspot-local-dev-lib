@@ -40,7 +40,6 @@ describe('lib/hubdb', () => {
     const projectCwd = '/home/tom/projects';
 
     beforeEach(() => {
-      mockedFS.outputFile.mockClear();
       getCwd.mockReturnValue(projectCwd);
       fetchRows.mockResolvedValue(hubdbFetchRowResponse);
       fetchTable.mockResolvedValue(hubdbTableResponse);

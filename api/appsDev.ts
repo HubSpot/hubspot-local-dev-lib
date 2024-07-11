@@ -1,5 +1,8 @@
 import http from '../http';
-import { PublicApp } from '../types/Apps';
+import {
+  PublicApp,
+  PublicAppDeveloperTestAccountInstallData,
+} from '../types/Apps';
 
 const APPS_DEV_API_PATH = 'apps-dev/external/public/v3';
 
@@ -15,4 +18,13 @@ export async function fetchPublicAppsForPortal(
   });
 
   return resp ? resp.results : [];
+}
+
+export function fetchPublicAppDeveloperTestAccountInstallData(
+  appId: number,
+  accountId: number
+): Promise<PublicAppDeveloperTestAccountInstallData> {
+  return http.get<PublicAppDeveloperTestAccountInstallData>(accountId, {
+    url: `${APPS_DEV_API_PATH}/${appId}/test-portal-installs`,
+  });
 }

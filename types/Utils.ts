@@ -6,6 +6,7 @@ type Join<K, P> = K extends string | number
     : never
   : never;
 
+// prettier-ignore
 export type Leaves<T> = [10] extends [never]
   ? never
   : T extends object

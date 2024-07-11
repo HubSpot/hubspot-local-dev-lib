@@ -46,6 +46,8 @@ jest.mock('findup-sync', () => {
   return jest.fn(() => mockedConfigPath);
 });
 
+jest.mock('../../lib/logger');
+
 const fsReadFileSyncSpy = jest.spyOn(fs, 'readFileSync');
 const fsWriteFileSyncSpy = jest.spyOn(fs, 'writeFileSync');
 
@@ -103,6 +105,15 @@ function getAccountByAuthType(
 }
 
 describe('config/config', () => {
+  const globalConsole = global.console;
+  beforeAll(() => {
+    global.console.error = jest.fn();
+    global.console.debug = jest.fn();
+  });
+  afterAll(() => {
+    global.console = globalConsole;
+  });
+
   describe('setConfig()', () => {
     beforeEach(() => {
       setConfig(CONFIG);
@@ -643,7 +654,6 @@ describe('config/config', () => {
           .mockImplementation(() => {
             return false;
           });
-        fsWriteFileSyncSpy.mockClear();
       });
 
       afterAll(() => {
@@ -674,7 +684,6 @@ describe('config/config', () => {
 
             return false;
           });
-        fsWriteFileSyncSpy.mockClear();
       });
 
       afterAll(() => {
@@ -692,7 +701,6 @@ describe('config/config', () => {
       beforeAll(() => {
         setConfigPath(CONFIG_PATHS.none);
         mockedConfigPath = CONFIG_PATHS.none;
-        fsWriteFileSyncSpy.mockClear();
       });
 
       it('creates a config at the specified path', () => {
