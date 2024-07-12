@@ -19,7 +19,6 @@ import {
   CloneAppResponse,
   PollAppResponse,
 } from '../types/Migration';
-import { AxiosResponse } from 'axios';
 
 const PROJECTS_API_PATH = 'dfs/v1/projects';
 const PROJECTS_DEPLOY_API_PATH = 'dfs/deploy/v1';
@@ -348,14 +347,10 @@ export async function checkCloneStatus(
 
 export async function downloadClonedProject(
   accountId: number,
-  exportId: number,
-  destination: string
-): Promise<AxiosResponse> {
-  return http.getOctetStream(
-    accountId,
-    {
-      url: `${MIGRATIONS_API_PATH}/exports/${exportId}/download-as-clone`,
-    },
-    destination
-  );
+  exportId: number
+): Promise<Buffer> {
+  return http.get(accountId, {
+    url: `${MIGRATIONS_API_PATH}/exports/${exportId}/download-as-clone`,
+    responseType: 'arraybuffer',
+  });
 }
