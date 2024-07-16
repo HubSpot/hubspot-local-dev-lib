@@ -11,7 +11,6 @@ import {
 } from '../constants/config';
 import { getOrderedConfig } from './configUtils';
 import { CLIConfig_NEW } from '../types/Config';
-import { BaseError } from '../types/Error';
 import { i18n } from '../utils/lang';
 
 const i18nKey = 'config.configFile';
@@ -49,7 +48,7 @@ export function readConfigFile(configPath: string): string {
     source = fs.readFileSync(configPath).toString();
   } catch (err) {
     logger.debug(i18n(`${i18nKey}.errorReading`, { configPath }));
-    throwFileSystemError(err as BaseError, {
+    throwFileSystemError(err, {
       filepath: configPath,
       read: true,
     });
@@ -67,7 +66,7 @@ export function parseConfig(configSource: string): CLIConfig_NEW {
   try {
     parsed = yaml.load(configSource) as CLIConfig_NEW;
   } catch (err) {
-    throwErrorWithMessage(`${i18nKey}.errors.parsing`, {}, err as BaseError);
+    throwErrorWithMessage(`${i18nKey}.errors.parsing`, {}, err);
   }
 
   return parsed;
@@ -104,7 +103,7 @@ export function writeConfigToFile(config: CLIConfig_NEW): void {
       JSON.parse(JSON.stringify(getOrderedConfig(config), null, 2))
     );
   } catch (err) {
-    throwError(err as BaseError);
+    throwError(err);
   }
   const configPath = getConfigFilePath();
 
@@ -113,7 +112,7 @@ export function writeConfigToFile(config: CLIConfig_NEW): void {
     fs.writeFileSync(configPath, source);
     logger.debug(i18n(`${i18nKey}.writeSuccess`, { configPath }));
   } catch (err) {
-    throwFileSystemError(err as BaseError, {
+    throwFileSystemError(err, {
       filepath: configPath,
       write: true,
     });
