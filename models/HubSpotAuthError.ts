@@ -23,7 +23,3 @@ export class HubSpotAuthError extends Error {
       undefined;
   }
 }
-
-export function isHubSpotAuthError(err: unknown): err is HubSpotAuthError {
-  return !!err && err instanceof HubSpotAuthError;
-}

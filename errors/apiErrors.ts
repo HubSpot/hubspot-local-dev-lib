@@ -3,10 +3,7 @@ import { AxiosErrorContext, BaseError, ValidationError } from '../types/Error';
 import { HTTP_METHOD_VERBS, HTTP_METHOD_PREPOSITIONS } from '../constants/api';
 import { i18n } from '../utils/lang';
 import { throwError } from './standardErrors';
-import {
-  HubSpotAuthError,
-  isHubSpotAuthError,
-} from '../models/HubSpotAuthError';
+import { HubSpotAuthError } from '../models/HubSpotAuthError';
 import { HttpMethod } from '../types/Api';
 
 const i18nKey = 'errors.apiErrors';
@@ -77,9 +74,10 @@ export function isSpecifiedHubSpotAuthError(
   err: unknown,
   { status, category, subCategory }: Partial<HubSpotAuthError>
 ): err is HubSpotAuthError {
-  if (!isHubSpotAuthError(err)) {
+  if (!err || !(err instanceof HubSpotAuthError)) {
     return false;
   }
+
   const statusCodeErr = !status || err.status === status;
   const categoryErr = !category || err.category === category;
   const subCategoryErr = !subCategory || err.subCategory === subCategory;
