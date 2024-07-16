@@ -43,9 +43,24 @@ export type PublicApp = {
   };
   redirectUrls: Array<string>;
   scopeGroupIds: Array<number>;
+  requiredScopeInfo?: Array<{ id: number; name: string }>;
   additionalScopeGroupIds: Array<number>;
+  additionalScopeInfo?: Array<{ id: number; name: string }>;
   optionalScopeGroupIds: Array<number>;
+  optionalScopeInfo?: Array<{ id: number; name: string }>;
   projectId: number | null;
   sourceId: string | null;
+  providerInfo?: {
+    domain: string;
+    isVerified: boolean;
+  };
+  listingInfo?: {
+    listingUrl: string;
+    isCertified: boolean;
+    isPublished: boolean;
+    hasDraft: boolean;
+    inReview: boolean;
+  };
   allowedExternalUrls: Array<string>;
+  preventProjectMigrations?: boolean;
 };
