@@ -28,3 +28,12 @@ export function fetchPublicAppDeveloperTestAccountInstallData(
     url: `${APPS_DEV_API_PATH}/${appId}/test-portal-installs`,
   });
 }
+
+export function fetchPublicAppMetadata(
+  appId: number,
+  accountId: number
+): Promise<PublicApp> {
+  return http.get<PublicApp>(accountId, {
+    url: `${APPS_DEV_API_PATH}/${appId}/full`,
+  });
+}

@@ -14,7 +14,11 @@ import {
 } from '../types/ComponentStructure';
 import { Deploy, ProjectDeployResponse } from '../types/Deploy';
 import { ProjectLog } from '../types/ProjectLog';
-import { MigrateAppResponse, PollAppResponse } from '../types/Migration';
+import {
+  MigrateAppResponse,
+  CloneAppResponse,
+  PollAppResponse,
+} from '../types/Migration';
 
 const PROJECTS_API_PATH = 'dfs/v1/projects';
 const PROJECTS_DEPLOY_API_PATH = 'dfs/deploy/v1';
@@ -316,5 +320,37 @@ export async function checkMigrationStatus(
 ): Promise<PollAppResponse> {
   return http.get(accountId, {
     url: `${MIGRATIONS_API_PATH}/migrations/${id}`,
+  });
+}
+
+export async function cloneApp(
+  accountId: number,
+  appId: number
+): Promise<CloneAppResponse> {
+  return http.post(accountId, {
+    url: `${MIGRATIONS_API_PATH}/exports`,
+    data: {
+      componentId: appId,
+      componentType: 'PUBLIC_APP_ID',
+    },
+  });
+}
+
+export async function checkCloneStatus(
+  accountId: number,
+  exportId: number
+): Promise<CloneAppResponse> {
+  return http.get(accountId, {
+    url: `${MIGRATIONS_API_PATH}/exports/statuses/${exportId}`,
+  });
+}
+
+export async function downloadClonedProject(
+  accountId: number,
+  exportId: number
+): Promise<Buffer> {
+  return http.get(accountId, {
+    url: `${MIGRATIONS_API_PATH}/exports/${exportId}/download-as-clone`,
+    responseType: 'arraybuffer',
   });
 }
