@@ -2,15 +2,9 @@ import { AxiosErrorContext, BaseError, ValidationError } from '../types/Error';
 import { HTTP_METHOD_VERBS, HTTP_METHOD_PREPOSITIONS } from '../constants/api';
 import { i18n } from '../utils/lang';
 import { throwError } from './standardErrors';
-import {
-  HubSpotAuthError,
-  isHubSpotAuthError,
-} from '../models/HubSpotAuthError';
+import { HubSpotAuthError } from '../models/HubSpotAuthError';
 import { HttpMethod } from '../types/Api';
-import {
-  HubSpotHttpError,
-  isHubSpotHttpError,
-} from '../models/HubSpotHttpError';
+import { HubSpotHttpError } from '../models/HubSpotHttpError';
 
 const i18nKey = 'errors.apiErrors';
 
@@ -77,7 +71,7 @@ export function isSpecifiedHubSpotAuthError(
   err: unknown,
   { status, category, subCategory }: Partial<HubSpotAuthError>
 ): err is HubSpotAuthError {
-  if (!isHubSpotAuthError(err)) {
+  if (!err || !(err instanceof HubSpotAuthError)) {
     return false;
   }
   const statusCodeErr = !status || err.status === status;
@@ -254,4 +248,11 @@ export function throwApiUploadError(
     throwValidationError(error);
   }
   throwApiError(error, context);
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function isHubSpotHttpError<T = any, D = any>(
+  error?: unknown
+): error is HubSpotHttpError<T, D> {
+  return !!error && error instanceof HubSpotHttpError;
 }

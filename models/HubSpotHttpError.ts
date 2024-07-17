@@ -39,10 +39,3 @@ export class HubSpotHttpError<T = any, D = any> extends Error {
     }
   }
 }
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function isHubSpotHttpError<T = any, D = any>(
-  error?: unknown
-): error is HubSpotHttpError<T, D> {
-  return !!error && error instanceof HubSpotHttpError;
-}
