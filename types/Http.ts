@@ -1,4 +1,5 @@
 import { ReadStream } from 'fs';
+import { Stream } from 'stream';
 
 export type Data = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -15,7 +16,14 @@ export type AxiosConfigOptions = {
   env?: string;
   localHostOverride?: boolean;
   params?: QueryParams;
-  data?: Data;
+  data?:
+    | Data
+    | string
+    | ArrayBuffer
+    | ArrayBufferView
+    | URLSearchParams
+    | Stream
+    | Buffer;
   resolveWithFullResponse?: boolean;
   timeout?: number;
   headers?: Data;
