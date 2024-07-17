@@ -20,14 +20,12 @@ import {
   convertToLocalFileSystemPath,
 } from './path';
 
-import { throwApiError } from '../errors/apiErrors';
 import {
-  isFatalError,
+  isHubSpotAuthError,
   throwErrorWithMessage,
   throwError,
 } from '../errors/standardErrors';
 import { throwFileSystemError } from '../errors/fileSystemErrors';
-import { GenericError } from '../types/Error';
 import { File, Folder } from '../types/FileManager';
 import { i18n } from '../utils/lang';
 
@@ -61,7 +59,7 @@ export async function uploadFolder(
       await uploadFile(accountId, file, destPath);
       logger.log(i18n(`${i18nKey}.uploadSuccess`, { file, destPath }));
     } catch (err) {
-      if (isFatalError(err)) {
+      if (isHubSpotAuthError(err)) {
         throwError(err);
       }
       throwErrorWithMessage(`${i18nKey}.errors.uploadFailed`, {
@@ -295,12 +293,9 @@ export async function downloadFileOrFolder(
       }
     }
   } catch (err) {
-    const error = err as GenericError;
-    if (error.isAxiosError) {
-      throwApiError(err, {
-        request: src,
-        accountId,
-      });
-    } else throwError(error);
+    throwError(err, {
+      request: src,
+      accountId,
+    });
   }
 }

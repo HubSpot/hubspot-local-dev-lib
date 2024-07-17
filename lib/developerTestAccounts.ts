@@ -4,11 +4,11 @@ import {
   deleteDeveloperTestAccount as _deleteDeveloperTestAccount,
 } from '../api/developerTestAccounts';
 
-import { throwApiError } from '../errors/apiErrors';
 import {
   DeveloperTestAccount,
   FetchDeveloperTestAccountsResponse,
 } from '../types/developerTestAccounts';
+import { throwError } from '../errors/standardErrors';
 
 export async function createDeveloperTestAccount(
   accountId: number,
@@ -18,7 +18,7 @@ export async function createDeveloperTestAccount(
     const resp = await _createDeveloperTestAccount(accountId, accountName);
     return resp;
   } catch (err) {
-    throwApiError(err);
+    throwError(err);
   }
 }
 
@@ -30,7 +30,7 @@ export async function deleteDeveloperTestAccount(
     const resp = await _deleteDeveloperTestAccount(accountId, testAccountId);
     return resp;
   } catch (err) {
-    throwApiError(err);
+    throwError(err);
   }
 }
 
@@ -41,6 +41,6 @@ export async function fetchDeveloperTestAccounts(
     const resp = await _fetchDeveloperTestAccounts(accountId);
     return resp;
   } catch (err) {
-    throwApiError(err);
+    throwError(err);
   }
 }

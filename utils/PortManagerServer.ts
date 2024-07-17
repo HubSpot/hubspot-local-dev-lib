@@ -8,7 +8,7 @@ import {
   MAX_PORT_NUMBER,
   PORT_MANAGER_SERVER_PORT,
 } from '../constants/ports';
-import { throwErrorWithMessage } from '../errors/standardErrors';
+import { isSystemError, throwErrorWithMessage } from '../errors/standardErrors';
 import { logger } from '../lib/logger';
 import { i18n } from './lang';
 import { BaseError } from '../types/Error';
@@ -41,17 +41,16 @@ class PortManagerServer {
     try {
       this.server = await this.listen();
     } catch (e) {
-      const error = e as BaseError;
-      if (error.code === 'EADDRINUSE') {
+      if (isSystemError(e) && e.code === 'EADDRINUSE') {
         throwErrorWithMessage(
           `${i18nKey}.errors.portInUse`,
           {
             port: PORT_MANAGER_SERVER_PORT,
           },
-          error
+          e
         );
       }
-      throw error;
+      throw e;
     }
   }
 

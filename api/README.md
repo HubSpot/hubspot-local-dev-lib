@@ -31,6 +31,6 @@ const accountId = 12345;
 try {
   await addSecret(accountId, 'my-secret-name', 'my-secret-value');
 } catch (e) {
-  throwApiError(e);
+  throwError(e);
 }
 ```

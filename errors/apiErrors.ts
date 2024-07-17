@@ -1,10 +1,11 @@
-import { AxiosErrorContext, BaseError, ValidationError } from '../types/Error';
+import { AxiosErrorContext, ValidationError } from '../types/Error';
 import { HTTP_METHOD_VERBS, HTTP_METHOD_PREPOSITIONS } from '../constants/api';
 import { i18n } from '../utils/lang';
 import { throwError } from './standardErrors';
 import { HubSpotAuthError } from '../models/HubSpotAuthError';
 import { HttpMethod } from '../types/Api';
 import { HubSpotHttpError } from '../models/HubSpotHttpError';
+import { AxiosError, isAxiosError } from 'axios';
 
 const i18nKey = 'errors.apiErrors';
 
@@ -46,20 +47,22 @@ export function isSpecifiedError(
   );
 }
 
-export function isMissingScopeError(err: unknown): boolean {
+export function isMissingScopeError(err: unknown): err is HubSpotHttpError {
   return isSpecifiedError(err, { statusCode: 403, category: 'MISSING_SCOPES' });
 }
 
-export function isGatingError(err: unknown): boolean {
+export function isGatingError(err: unknown): err is HubSpotHttpError {
   return isSpecifiedError(err, { statusCode: 403, category: 'GATED' });
 }
 
-export function isTimeoutError(err: unknown): boolean {
+export function isTimeoutError(err: unknown): err is HubSpotHttpError {
   return isSpecifiedError(err, { code: 'ETIMEDOUT' });
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function isApiUploadValidationError(err: unknown): boolean {
+export function isApiUploadValidationError(
+  err: unknown
+): err is HubSpotHttpError {
   return (
     isHubSpotHttpError(err) &&
     isSpecifiedError(err, { statusCode: 400 }) &&
@@ -108,21 +111,10 @@ export function parseValidationErrors(
   return errorMessages;
 }
 
-/**
- * @throws
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function throwValidationError(error: HubSpotHttpError) {
-  const validationErrorMessages = parseValidationErrors(error?.response?.data);
-  if (validationErrorMessages.length) {
-    return new Error(validationErrorMessages.join(' '), { cause: error });
-  }
-}
-
-export function getHubSpotHttpErrorWithContext(
-  error: HubSpotHttpError,
+export function joinErrorMessages(
+  error: AxiosError<{ message: string; errors: { message: string }[] }>,
   context: AxiosErrorContext = {}
-): Error {
+) {
   const status = error.response?.status;
   const method = error.config?.method as HttpMethod;
   const { projectName } = context;
@@ -216,7 +208,7 @@ export function getHubSpotHttpErrorWithContext(
     }
 
     if (errors) {
-      errors.forEach((err: BaseError) => {
+      errors.forEach(err => {
         if (err.message) {
           errorMessage.push('\n- ' + err.message);
         }
@@ -224,35 +216,35 @@ export function getHubSpotHttpErrorWithContext(
     }
   }
 
-  return new Error(errorMessage.join(' '), { cause: error });
+  return errorMessage.join(' ');
 }
-
-/**
- * @throws
- */
-export function throwApiError(
+export function getUserFriendlyHttpErrorMessage(
   error: unknown,
   context: AxiosErrorContext = {}
-): never {
+): string | undefined {
   if (isHubSpotHttpError(error)) {
-    throw getHubSpotHttpErrorWithContext(error, context);
+    return error.message;
+  } else if (isAxiosError(error)) {
+    return joinErrorMessages(error, context);
   }
-  throwError(error);
 }
 
 export function throwApiUploadError(
-  error: HubSpotHttpError,
+  error: unknown,
   context: AxiosErrorContext = {}
 ): never {
   if (isApiUploadValidationError(error)) {
-    throwValidationError(error);
+    const validationErrorMessages = parseValidationErrors(
+      error?.response?.data
+    );
+    if (validationErrorMessages.length) {
+      throw new Error(validationErrorMessages.join(' '), { cause: error });
+    }
   }
-  throwApiError(error, context);
+  throwError(error, context);
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function isHubSpotHttpError<T = any, D = any>(
-  error?: unknown
-): error is HubSpotHttpError<T, D> {
+export function isHubSpotHttpError(error?: unknown): error is HubSpotHttpError {
   return !!error && error instanceof HubSpotHttpError;
 }

@@ -4,7 +4,7 @@ import prettier from 'prettier';
 import { getCwd } from '../lib/path';
 import { fetchObjectSchemas, fetchObjectSchema } from '../api/customObjects';
 import { FetchSchemasResponse, Schema } from '../types/Schemas';
-import { throwApiError } from '../errors/apiErrors';
+import { throwError } from '../errors/standardErrors';
 
 export function getResolvedPath(dest?: string, name?: string): string {
   if (name) return path.resolve(getCwd(), dest || '', `${name}.json`);
@@ -31,7 +31,7 @@ export async function downloadSchemas(
   try {
     response = await fetchObjectSchemas(accountId);
   } catch (err) {
-    throwApiError(err);
+    throwError(err);
   }
 
   if (response.results.length) {
@@ -53,7 +53,7 @@ export async function downloadSchema(
   try {
     response = await fetchObjectSchema(accountId, schemaObjectType);
   } catch (err) {
-    throwApiError(err);
+    throwError(err);
   }
 
   await writeSchemaToDisk(response, dest);

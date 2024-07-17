@@ -1,10 +1,14 @@
 import path from 'path';
 import fs from 'fs-extra';
 
-import { throwError, throwErrorWithMessage } from '../errors/standardErrors';
+import {
+  isSystemError,
+  throwError,
+  throwErrorWithMessage,
+} from '../errors/standardErrors';
 import { extractZipArchive } from './archive';
 import { logger } from './logger';
-import { GenericError, BaseError } from '../types/Error';
+import { GenericError } from '../types/Error';
 import { GithubReleaseData, GithubRepoFile } from '../types/Github';
 import {
   fetchRepoFile,
@@ -155,7 +159,7 @@ export async function fetchGitHubRepoContentFromDownloadUrl(
   } else {
     fileContents = resp.data;
   }
-  await fs.outputFileSync(dest, fileContents);
+  fs.outputFileSync(dest, fileContents);
 }
 
 // Writes files from a public repository to the destination folder
@@ -223,17 +227,17 @@ export async function downloadGithubRepoContents(
 
     await Promise.all(contentPromises);
   } catch (e) {
-    const error = e as BaseError;
-    if (error?.error?.message) {
+    // TODO: Learn more about the type of error this should be
+    if (isSystemError(e) && e?.error?.message) {
       throwErrorWithMessage(
         `${i18nKey}.downloadGithubRepoContents.errors.fetchFail`,
         {
-          errorMessage: error.error.message,
+          errorMessage: e.error.message,
         },
-        error
+        e
       );
     } else {
-      throwError(error);
+      throwError(e);
     }
   }
 }
@@ -258,7 +262,7 @@ export async function listGithubRepoContents(
     return filteredFiles;
   } catch (e) {
     const error = e as GenericError;
-    if (error?.response?.data?.message) {
+    if (error?.data?.message) {
       throwErrorWithMessage(
         `${i18nKey}.downloadGithubRepoContents.errors.fetchFail`,
         {

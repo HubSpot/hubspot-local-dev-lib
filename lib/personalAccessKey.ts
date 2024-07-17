@@ -21,7 +21,7 @@ import {
 import { HUBSPOT_ACCOUNT_TYPES } from '../constants/config';
 import { fetchDeveloperTestAccountData } from '../api/developerTestAccounts';
 import { logger } from './logger';
-import { getHubSpotHttpErrorWithContext } from '../errors/apiErrors';
+import { getUserFriendlyHttpErrorMessage } from '../errors/apiErrors';
 import { ValueOf } from '../types/Utils';
 
 const i18nKey = 'lib.personalAccessKey';
@@ -204,7 +204,7 @@ export async function updateConfigWithAccessToken(
     }
   } catch (err) {
     // Log error but do not throw
-    logger.debug(getHubSpotHttpErrorWithContext(err as AxiosError).message);
+    logger.debug(getUserFriendlyHttpErrorMessage(err));
   }
 
   try {
@@ -220,7 +220,7 @@ export async function updateConfigWithAccessToken(
     }
   } catch (err) {
     // Log error but do not throw
-    logger.debug(getHubSpotHttpErrorWithContext(err as AxiosError).message);
+    logger.debug(getUserFriendlyHttpErrorMessage(err));
   }
 
   const updatedConfig = updateAccountConfig({

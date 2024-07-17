@@ -4,7 +4,7 @@ import PQueue from 'p-queue';
 import debounce from 'debounce';
 import { AxiosError } from 'axios';
 
-import { throwApiError, throwApiUploadError } from '../../errors/apiErrors';
+import { throwApiUploadError } from '../../errors/apiErrors';
 import { isConvertableFieldJs, FieldsJs } from './handleFieldsJS';
 import { uploadFolder } from './uploadFolder';
 import { shouldIgnoreFile, ignoreFile } from '../ignoreRules';
@@ -18,6 +18,7 @@ import { logger } from '../logger';
 import { FileMapperInputOptions, Mode } from '../../types/Files';
 import { UploadFolderResults } from '../../types/Files';
 import { i18n } from '../../utils/lang';
+import { throwError } from '../../errors/standardErrors';
 
 const i18nKey = 'lib.cms.watch';
 
@@ -152,7 +153,7 @@ async function deleteRemoteFile(
             remoteFilePath,
           })
         );
-        throwApiError(error, {
+        throwError(error, {
           accountId,
           request: remoteFilePath,
         });

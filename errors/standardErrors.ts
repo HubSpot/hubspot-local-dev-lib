@@ -1,8 +1,12 @@
 import { HubSpotAuthError } from '../models/HubSpotAuthError';
 import { i18n } from '../utils/lang';
 
-import { BaseError } from '../types/Error';
+import { AxiosErrorContext, BaseError } from '../types/Error';
 import { LangKey } from '../types/Lang';
+import {
+  getUserFriendlyHttpErrorMessage,
+  isHubSpotHttpError,
+} from './apiErrors';
 
 export function isSystemError(err: unknown): err is BaseError {
   return (
@@ -16,7 +20,7 @@ export function isSystemError(err: unknown): err is BaseError {
   );
 }
 
-export function isFatalError(err: unknown): err is BaseError {
+export function isHubSpotAuthError(err: unknown): err is HubSpotAuthError {
   return err instanceof HubSpotAuthError;
 }
 
@@ -52,21 +56,25 @@ export function throwAuthErrorWithMessage(
   interpolation?: { [key: string]: string | number },
   cause?: unknown
 ): never {
-  genericThrowErrorWithMessage(
-    // @ts-expect-error HubSpotAuthError is not callable
-    HubSpotAuthError,
-    identifier,
-    interpolation,
-    cause
-  );
+  const message = i18n(identifier, interpolation);
+  if (cause) {
+    throw new HubSpotAuthError(message, { cause });
+  }
+  throw new HubSpotAuthError(message);
 }
 
 /**
  * @throws
  */
-export function throwError(error: unknown): never {
+export function throwError(
+  error: unknown,
+  context: AxiosErrorContext = {}
+): never {
   if (!(error instanceof Error)) {
     throw new Error('', { cause: error });
+  }
+  if (isHubSpotHttpError(error)) {
+    throw getUserFriendlyHttpErrorMessage(error, context);
   }
 
   // Error or Error subclass

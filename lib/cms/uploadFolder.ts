@@ -1,6 +1,5 @@
 import path from 'path';
 import PQueue from 'p-queue';
-import { AxiosError } from 'axios';
 
 import {
   isConvertableFieldJs,
@@ -13,8 +12,11 @@ import { upload } from '../../api/fileMapper';
 import { isModuleFolderChild } from '../../utils/cms/modules';
 import { escapeRegExp } from '../escapeRegExp';
 import { convertToUnixPath, getExt } from '../path';
-import { isFatalError } from '../../errors/standardErrors';
-import { throwApiUploadError } from '../../errors/apiErrors';
+import { isHubSpotAuthError } from '../../errors/standardErrors';
+import {
+  isHubSpotHttpError,
+  throwApiUploadError,
+} from '../../errors/apiErrors';
 import { FileMapperInputOptions } from '../../types/Files';
 import { logger } from '../logger';
 import { FILE_TYPES, FILE_UPLOAD_RESULT_TYPES } from '../../constants/files';
@@ -37,14 +39,14 @@ type CommandOptions = {
   onFirstErrorCallback?: (
     file: string,
     destPath: string,
-    error: AxiosError
+    error: unknown
   ) => void;
   onRetryCallback?: (file: string, destPath: string) => void;
   onFinalErrorCallback?: (
     accountId: number,
     file: string,
     destPath: string,
-    error: AxiosError
+    error: unknown
   ) => void;
 };
 
@@ -153,12 +155,12 @@ const defaultUploadSuccessCallback = (
 const defaultUploadFirstErrorCallback = (
   file: string,
   destPath: string,
-  error: AxiosError
+  error: unknown
 ) => {
   logger.debug(i18n(`${i18nKey}.uploadFolder.failed`, { file, destPath }));
-  if (error.response && error.response.data) {
-    logger.debug(error.response.data);
-  } else {
+  if (isHubSpotHttpError(error)) {
+    logger.debug(error.data);
+  } else if (error instanceof Error) {
     logger.debug(error.message);
   }
 };
@@ -168,7 +170,7 @@ const defaultUploadFinalErrorCallback = (
   accountId: number,
   file: string,
   destPath: string,
-  error: AxiosError
+  error: unknown
 ) => {
   logger.debug(i18n(`${i18nKey}.uploadFolder.retryFailed`, { file, destPath }));
   throwApiUploadError(error, {
@@ -246,11 +248,10 @@ export async function uploadFolder(
         await upload(accountId, file, destPath, apiOptions);
         _onSuccessCallback(originalFilePath, destPath);
       } catch (err) {
-        const error = err as AxiosError;
-        if (isFatalError(error)) {
-          throw error;
+        if (isHubSpotAuthError(err)) {
+          throw err;
         }
-        _onFirstErrorCallback(file, destPath, error);
+        _onFirstErrorCallback(file, destPath, err);
         failures.push({
           file,
           destPath,
@@ -277,9 +278,8 @@ export async function uploadFolder(
               error: null,
               file,
             };
-          } catch (err) {
-            const error = err as AxiosError;
-            if (isFatalError(error)) {
+          } catch (error) {
+            if (isHubSpotAuthError(error)) {
               throw error;
             }
             _onFinalErrorCallback(accountId, file, destPath, error);

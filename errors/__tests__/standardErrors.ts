@@ -1,6 +1,6 @@
 import {
   isSystemError,
-  isFatalError,
+  isHubSpotAuthError,
   throwErrorWithMessage,
   throwAuthErrorWithMessage,
   throwError,
@@ -70,19 +70,19 @@ describe('errors/standardErrors', () => {
     });
   });
 
-  describe('isFatalError()', () => {
+  describe('isHubSpotAuthError()', () => {
     it('returns true for fatal errors', () => {
       const cause = newError() as unknown as AxiosError<{
         category: string;
         subcategory: string;
       }>;
       const error = new HubSpotAuthError('A fatal auth error', { cause });
-      expect(isFatalError(error)).toBe(true);
+      expect(isHubSpotAuthError(error)).toBe(true);
     });
 
     it('returns false for non fatal errors', () => {
       const error = newError();
-      expect(isFatalError(error)).toBe(false);
+      expect(isHubSpotAuthError(error)).toBe(false);
     });
   });
 

@@ -1,4 +1,4 @@
-import axios, { AxiosError } from 'axios';
+import axios from 'axios';
 import moment from 'moment';
 
 import { getHubSpotApiOrigin } from '../lib/urls';
@@ -14,6 +14,7 @@ import {
 } from '../errors/standardErrors';
 import { Environment } from '../types/Config';
 import { i18n } from '../utils/lang';
+import { isHubSpotHttpError } from '../errors/apiErrors';
 
 type OAuth2ManagerAccountConfig = {
   name?: string;
@@ -142,17 +143,16 @@ class OAuth2Manager {
         await this.fetchAccessToken(exchangeProof);
       }
     } catch (e) {
-      const error = e as AxiosError<{ message: string }>;
-      if (error.response) {
+      if (isHubSpotHttpError(e)) {
         throwAuthErrorWithMessage(
           `${i18nKey}.errors.auth`,
           {
-            token: error.response.data.message || '',
+            token: e.data.message || '',
           },
-          error
+          e
         );
       } else {
-        throwError(error);
+        throwError(e);
       }
     }
   }
