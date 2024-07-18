@@ -341,7 +341,7 @@ export async function checkCloneStatus(
   exportId: number
 ): Promise<CloneAppResponse> {
   return http.get(accountId, {
-    url: `${MIGRATIONS_API_PATH}/exports/statuses/${exportId}`,
+    url: `${MIGRATIONS_API_PATH}/exports/${exportId}/status`,
   });
 }
 
