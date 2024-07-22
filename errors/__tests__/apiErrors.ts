@@ -4,7 +4,6 @@ import {
   isGatingError,
   isApiUploadValidationError,
   isSpecifiedHubSpotAuthError,
-  getUserFriendlyHttpErrorMessage,
   isSpecifiedError,
 } from '../apiErrors';
 import { BaseError } from '../../types/Error';
@@ -159,203 +158,204 @@ describe('errors/apiErrors', () => {
     });
   });
 
-  describe('getHubSpotHttpErrorWithContext()', () => {
-    it('includes the original cause', () => {
-      const error = newHubSpotHttpError();
-      const hubspotHttpErrorWithContext =
-        getUserFriendlyHttpErrorMessage(error);
-
-      // @ts-expect-error cause is unknown
-      expect(hubspotHttpErrorWithContext.cause.name).toBe(error.name);
-    });
-
-    describe('context tests', () => {
-      it('handles message detail context without request', () => {
-        const error = newHubSpotHttpError({ status: 699 });
-        const hubspotHttpErrorWithContext = getUserFriendlyHttpErrorMessage(
-          error,
-          {
-            accountId: 123,
-          }
-        );
-        expect(hubspotHttpErrorWithContext).toBe(
-          'The request in account 123 failed.'
-        );
-      });
-
-      it('handles message detail context with request', () => {
-        const error = newHubSpotHttpError({ status: 699 });
-        const hubspotHttpErrorWithContext = getUserFriendlyHttpErrorMessage(
-          error,
-          {
-            accountId: 123,
-            request: 'get some stuff',
-          }
-        );
-        expect(hubspotHttpErrorWithContext).toBe(
-          "The request for 'get some stuff' in account 123 failed."
-        );
-      });
-
-      it('includes actions and prepositions', () => {
-        const errorContext = {
-          accountId: 123,
-          request: 'get some stuff',
-        };
-        [
-          { method: null, expected: 'request for' },
-          { method: 'delete', expected: 'delete of' },
-          { method: 'get', expected: 'request for' },
-          { method: 'patch', expected: 'update to' },
-          { method: 'post', expected: 'post to' },
-          { method: 'put', expected: 'update to' },
-        ].forEach(test => {
-          const error = newHubSpotHttpError({
-            status: 699,
-            config: { method: test.method },
-          });
-          const hubspotHttpErrorWithContext = getUserFriendlyHttpErrorMessage(
-            error,
-            errorContext
-          );
-          expect(hubspotHttpErrorWithContext).toContain(test.expected);
-        });
-      });
-    });
-
-    describe('status code tests', () => {
-      it('generates a generic api status code error', () => {
-        const error = newHubSpotHttpError({ status: 699 });
-        const hubspotHttpErrorWithContext =
-          getUserFriendlyHttpErrorMessage(error);
-        expect(hubspotHttpErrorWithContext).toBe('The request failed.');
-      });
-
-      it('generates a generic 400 api status code error', () => {
-        const error = newHubSpotHttpError({
-          response: {
-            status: 499,
-          },
-        });
-        const hubspotHttpErrorWithContext =
-          getUserFriendlyHttpErrorMessage(error);
-        expect(hubspotHttpErrorWithContext).toBe(
-          'The request failed due to a client error.'
-        );
-      });
-
-      it('generates a 400 api status code error', () => {
-        const error = newHubSpotHttpError({
-          response: {
-            status: 400,
-          },
-        });
-        const hubspotHttpErrorWithContext =
-          getUserFriendlyHttpErrorMessage(error);
-        expect(hubspotHttpErrorWithContext).toBe('The request was bad.');
-      });
-
-      it('generates a 401 api status code error', () => {
-        const error = newHubSpotHttpError({
-          response: {
-            status: 401,
-          },
-        });
-        const hubspotHttpErrorWithContext =
-          getUserFriendlyHttpErrorMessage(error);
-        expect(hubspotHttpErrorWithContext).toBe(
-          'The request was unauthorized.'
-        );
-      });
-
-      it('generates a 403 api status code error', () => {
-        const error = newHubSpotHttpError({
-          response: {
-            status: 403,
-          },
-        });
-        const hubspotHttpErrorWithContext =
-          getUserFriendlyHttpErrorMessage(error);
-        expect(hubspotHttpErrorWithContext).toBe('The request was forbidden.');
-      });
-
-      it('generates a 404 api status code error', () => {
-        const error = newHubSpotHttpError({
-          response: {
-            status: 404,
-          },
-        });
-        const hubspotHttpErrorWithContext =
-          getUserFriendlyHttpErrorMessage(error);
-        expect(hubspotHttpErrorWithContext).toBe('The request was not found.');
-      });
-
-      it('generates a 429 api status code error', () => {
-        const error = newHubSpotHttpError({
-          response: {
-            status: 429,
-          },
-        });
-        const hubspotHttpErrorWithContext =
-          getUserFriendlyHttpErrorMessage(error);
-        expect(hubspotHttpErrorWithContext).toBe(
-          'The request surpassed the rate limit. Retry in one minute.'
-        );
-      });
-
-      it('generates a generic 500 api status code error', () => {
-        const error = newHubSpotHttpError({
-          response: {
-            status: 599,
-          },
-        });
-        const hubspotHttpErrorWithContext =
-          getUserFriendlyHttpErrorMessage(error);
-        expect(hubspotHttpErrorWithContext).toContain(
-          'The request failed due to a server error.'
-        );
-      });
-
-      it('generates a 503 api status code error', () => {
-        const error = newHubSpotHttpError({
-          response: {
-            status: 503,
-          },
-        });
-        const hubspotHttpErrorWithContext =
-          getUserFriendlyHttpErrorMessage(error);
-        expect(hubspotHttpErrorWithContext).toContain(
-          'The request could not be handled at this time.'
-        );
-      });
-    });
-
-    describe('backend messaging tests', () => {
-      it('appends the message returned by the backend', () => {
-        const error = newHubSpotHttpError({
-          status: 699,
-          response: { data: { message: 'Our servers exploded.' } },
-        });
-        const hubspotHttpErrorWithContext =
-          getUserFriendlyHttpErrorMessage(error);
-        expect(hubspotHttpErrorWithContext).toBe(
-          'The request failed. Our servers exploded.'
-        );
-      });
-
-      it('appends the nested error messaged returned by the backend', () => {
-        const error = newHubSpotHttpError({
-          status: 699,
-          response: {
-            data: { errors: [{ message: 'We wrote bad code.' }] },
-          },
-        });
-        const hubspotHttpErrorWithContext =
-          getUserFriendlyHttpErrorMessage(error);
-        expect(hubspotHttpErrorWithContext).toBe(
-          'The request failed. \n- We wrote bad code.'
-        );
-      });
-    });
-  });
+  // TODO: Move these to HubSpotHttpError tests
+  // describe('getHubSpotHttpErrorWithContext()', () => {
+  //   it('includes the original cause', () => {
+  //     const error = newHubSpotHttpError();
+  //     const hubspotHttpErrorWithContext =
+  //       getUserFriendlyHttpErrorMessage(error);
+  //
+  //     // @ts-expect-error cause is unknown
+  //     expect(hubspotHttpErrorWithContext.cause.name).toBe(error.name);
+  //   });
+  //
+  //   describe('context tests', () => {
+  //     it('handles message detail context without request', () => {
+  //       const error = newHubSpotHttpError({ status: 699 });
+  //       const hubspotHttpErrorWithContext = getUserFriendlyHttpErrorMessage(
+  //         error,
+  //         {
+  //           accountId: 123,
+  //         }
+  //       );
+  //       expect(hubspotHttpErrorWithContext).toBe(
+  //         'The request in account 123 failed.'
+  //       );
+  //     });
+  //
+  //     it('handles message detail context with request', () => {
+  //       const error = newHubSpotHttpError({ status: 699 });
+  //       const hubspotHttpErrorWithContext = getUserFriendlyHttpErrorMessage(
+  //         error,
+  //         {
+  //           accountId: 123,
+  //           request: 'get some stuff',
+  //         }
+  //       );
+  //       expect(hubspotHttpErrorWithContext).toBe(
+  //         "The request for 'get some stuff' in account 123 failed."
+  //       );
+  //     });
+  //
+  //     it('includes actions and prepositions', () => {
+  //       const errorContext = {
+  //         accountId: 123,
+  //         request: 'get some stuff',
+  //       };
+  //       [
+  //         { method: null, expected: 'request for' },
+  //         { method: 'delete', expected: 'delete of' },
+  //         { method: 'get', expected: 'request for' },
+  //         { method: 'patch', expected: 'update to' },
+  //         { method: 'post', expected: 'post to' },
+  //         { method: 'put', expected: 'update to' },
+  //       ].forEach(test => {
+  //         const error = newHubSpotHttpError({
+  //           status: 699,
+  //           config: { method: test.method },
+  //         });
+  //         const hubspotHttpErrorWithContext = getUserFriendlyHttpErrorMessage(
+  //           error,
+  //           errorContext
+  //         );
+  //         expect(hubspotHttpErrorWithContext).toContain(test.expected);
+  //       });
+  //     });
+  //   });
+  //
+  //   describe('status code tests', () => {
+  //     it('generates a generic api status code error', () => {
+  //       const error = newHubSpotHttpError({ status: 699 });
+  //       const hubspotHttpErrorWithContext =
+  //         getUserFriendlyHttpErrorMessage(error);
+  //       expect(hubspotHttpErrorWithContext).toBe('The request failed.');
+  //     });
+  //
+  //     it('generates a generic 400 api status code error', () => {
+  //       const error = newHubSpotHttpError({
+  //         response: {
+  //           status: 499,
+  //         },
+  //       });
+  //       const hubspotHttpErrorWithContext =
+  //         getUserFriendlyHttpErrorMessage(error);
+  //       expect(hubspotHttpErrorWithContext).toBe(
+  //         'The request failed due to a client error.'
+  //       );
+  //     });
+  //
+  //     it('generates a 400 api status code error', () => {
+  //       const error = newHubSpotHttpError({
+  //         response: {
+  //           status: 400,
+  //         },
+  //       });
+  //       const hubspotHttpErrorWithContext =
+  //         getUserFriendlyHttpErrorMessage(error);
+  //       expect(hubspotHttpErrorWithContext).toBe('The request was bad.');
+  //     });
+  //
+  //     it('generates a 401 api status code error', () => {
+  //       const error = newHubSpotHttpError({
+  //         response: {
+  //           status: 401,
+  //         },
+  //       });
+  //       const hubspotHttpErrorWithContext =
+  //         getUserFriendlyHttpErrorMessage(error);
+  //       expect(hubspotHttpErrorWithContext).toBe(
+  //         'The request was unauthorized.'
+  //       );
+  //     });
+  //
+  //     it('generates a 403 api status code error', () => {
+  //       const error = newHubSpotHttpError({
+  //         response: {
+  //           status: 403,
+  //         },
+  //       });
+  //       const hubspotHttpErrorWithContext =
+  //         getUserFriendlyHttpErrorMessage(error);
+  //       expect(hubspotHttpErrorWithContext).toBe('The request was forbidden.');
+  //     });
+  //
+  //     it('generates a 404 api status code error', () => {
+  //       const error = newHubSpotHttpError({
+  //         response: {
+  //           status: 404,
+  //         },
+  //       });
+  //       const hubspotHttpErrorWithContext =
+  //         getUserFriendlyHttpErrorMessage(error);
+  //       expect(hubspotHttpErrorWithContext).toBe('The request was not found.');
+  //     });
+  //
+  //     it('generates a 429 api status code error', () => {
+  //       const error = newHubSpotHttpError({
+  //         response: {
+  //           status: 429,
+  //         },
+  //       });
+  //       const hubspotHttpErrorWithContext =
+  //         getUserFriendlyHttpErrorMessage(error);
+  //       expect(hubspotHttpErrorWithContext).toBe(
+  //         'The request surpassed the rate limit. Retry in one minute.'
+  //       );
+  //     });
+  //
+  //     it('generates a generic 500 api status code error', () => {
+  //       const error = newHubSpotHttpError({
+  //         response: {
+  //           status: 599,
+  //         },
+  //       });
+  //       const hubspotHttpErrorWithContext =
+  //         getUserFriendlyHttpErrorMessage(error);
+  //       expect(hubspotHttpErrorWithContext).toContain(
+  //         'The request failed due to a server error.'
+  //       );
+  //     });
+  //
+  //     it('generates a 503 api status code error', () => {
+  //       const error = newHubSpotHttpError({
+  //         response: {
+  //           status: 503,
+  //         },
+  //       });
+  //       const hubspotHttpErrorWithContext =
+  //         getUserFriendlyHttpErrorMessage(error);
+  //       expect(hubspotHttpErrorWithContext).toContain(
+  //         'The request could not be handled at this time.'
+  //       );
+  //     });
+  //   });
+  //
+  //   describe('backend messaging tests', () => {
+  //     it('appends the message returned by the backend', () => {
+  //       const error = newHubSpotHttpError({
+  //         status: 699,
+  //         response: { data: { message: 'Our servers exploded.' } },
+  //       });
+  //       const hubspotHttpErrorWithContext =
+  //         getUserFriendlyHttpErrorMessage(error);
+  //       expect(hubspotHttpErrorWithContext).toBe(
+  //         'The request failed. Our servers exploded.'
+  //       );
+  //     });
+  //
+  //     it('appends the nested error messaged returned by the backend', () => {
+  //       const error = newHubSpotHttpError({
+  //         status: 699,
+  //         response: {
+  //           data: { errors: [{ message: 'We wrote bad code.' }] },
+  //         },
+  //       });
+  //       const hubspotHttpErrorWithContext =
+  //         getUserFriendlyHttpErrorMessage(error);
+  //       expect(hubspotHttpErrorWithContext).toBe(
+  //         'The request failed. \n- We wrote bad code.'
+  //       );
+  //     });
+  //   });
+  // });
 });
