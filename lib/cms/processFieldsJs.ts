@@ -5,7 +5,7 @@ import fs from 'fs';
 import semver from 'semver';
 import { pathToFileURL } from 'url';
 import { getExt } from '../path';
-import { throwError, throwErrorWithMessage } from '../../errors/standardErrors';
+import { throwError } from '../../errors/standardErrors';
 import { FieldsJs } from './handleFieldsJS';
 import { i18n } from '../../utils/lang';
 
@@ -34,17 +34,21 @@ const fieldsPromise = dynamicImport(filePath!).catch(e => throwError(e));
 fieldsPromise.then(fieldsFunc => {
   const fieldsFuncType = typeof fieldsFunc;
   if (fieldsFuncType !== 'function') {
-    throwErrorWithMessage(`${i18nKey}.errors.notFunction`, {
-      path: filePath!,
-      returned: fieldsFuncType,
-    });
+    throw new Error(
+      i18n(`${i18nKey}.errors.notFunction`, {
+        path: filePath!,
+        returned: fieldsFuncType,
+      })
+    );
   }
   return Promise.resolve(fieldsFunc(fieldOptions)).then(fields => {
     if (!Array.isArray(fields)) {
-      throwErrorWithMessage(`${i18nKey}.errors.notArray`, {
-        path: filePath!,
-        returned: typeof fields,
-      });
+      throw new Error(
+        i18n(`${i18nKey}.errors.notArray`, {
+          path: filePath!,
+          returned: typeof fields,
+        })
+      );
     }
 
     const finalPath = path.join(writeDir!, '/fields.json');
@@ -105,7 +109,7 @@ async function dynamicImport(filePath: string): Promise<any> {
     return exported.default;
   } else {
     if (getExt(filePath) == 'mjs') {
-      throwErrorWithMessage(`${i18nKey}.errors.invalidMjsFile`);
+      throw new Error(i18n(`${i18nKey}.errors.invalidMjsFile`));
     }
     return require(filePath);
   }

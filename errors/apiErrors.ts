@@ -1,11 +1,10 @@
-import { AxiosErrorContext, ValidationError } from '../types/Error';
+import { HubSpotHttpErrorContext } from '../types/Error';
 import { HTTP_METHOD_VERBS, HTTP_METHOD_PREPOSITIONS } from '../constants/api';
 import { i18n } from '../utils/lang';
-import { throwError } from './standardErrors';
 import { HubSpotAuthError } from '../models/HubSpotAuthError';
 import { HttpMethod } from '../types/Api';
 import { HubSpotHttpError } from '../models/HubSpotHttpError';
-import { AxiosError, isAxiosError } from 'axios';
+import { AxiosError } from 'axios';
 
 const i18nKey = 'errors.apiErrors';
 
@@ -24,7 +23,7 @@ export function isSpecifiedError(
     errorType?: string;
     code?: string;
   }
-): boolean {
+): err is HubSpotHttpError {
   if (!isHubSpotHttpError(err)) {
     return false;
   }
@@ -64,7 +63,6 @@ export function isApiUploadValidationError(
   err: unknown
 ): err is HubSpotHttpError {
   return (
-    isHubSpotHttpError(err) &&
     isSpecifiedError(err, { statusCode: 400 }) &&
     !!(err?.data?.message || !!err.data?.errors)
   );
@@ -83,37 +81,9 @@ export function isSpecifiedHubSpotAuthError(
   return Boolean(statusCodeErr && categoryErr && subCategoryErr);
 }
 
-export function parseValidationErrors(
-  responseData: {
-    errors?: Array<ValidationError>;
-    message?: string;
-  } = { errors: [], message: '' }
-): Array<string> {
-  const errorMessages = [];
-
-  const { errors, message } = responseData;
-
-  if (message) {
-    errorMessages.push(message);
-  }
-
-  if (errors) {
-    const specificErrors = errors.map(error => {
-      let errorMessage = error.message;
-      if (error.errorTokens && error.errorTokens.line) {
-        errorMessage = `line ${error.errorTokens.line}: ${errorMessage}`;
-      }
-      return errorMessage;
-    });
-    errorMessages.push(...specificErrors);
-  }
-
-  return errorMessages;
-}
-
 export function joinErrorMessages(
   error: AxiosError<{ message: string; errors: { message: string }[] }>,
-  context: AxiosErrorContext = {}
+  context: HubSpotHttpErrorContext = {}
 ) {
   const status = error.response?.status;
   const method = error.config?.method as HttpMethod;
@@ -217,31 +187,6 @@ export function joinErrorMessages(
   }
 
   return errorMessage.join(' ');
-}
-export function getUserFriendlyHttpErrorMessage(
-  error: unknown,
-  context: AxiosErrorContext = {}
-): string | undefined {
-  if (isHubSpotHttpError(error)) {
-    return error.message;
-  } else if (isAxiosError(error)) {
-    return joinErrorMessages(error, context);
-  }
-}
-
-export function throwApiUploadError(
-  error: unknown,
-  context: AxiosErrorContext = {}
-): never {
-  if (isApiUploadValidationError(error)) {
-    const validationErrorMessages = parseValidationErrors(
-      error?.response?.data
-    );
-    if (validationErrorMessages.length) {
-      throw new Error(validationErrorMessages.join(' '), { cause: error });
-    }
-  }
-  throwError(error, context);
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

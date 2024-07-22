@@ -1,11 +1,7 @@
 import path from 'path';
 import fs from 'fs-extra';
 
-import {
-  isSystemError,
-  throwError,
-  throwErrorWithMessage,
-} from '../errors/standardErrors';
+import { isSystemError, throwError } from '../errors/standardErrors';
 import { extractZipArchive } from './archive';
 import { logger } from './logger';
 import { GenericError } from '../types/Error';
@@ -38,10 +34,11 @@ export async function fetchFileFromRepository(
     const { data } = await fetchRepoFile(repoPath, filePath, ref);
     return data;
   } catch (err) {
-    throwErrorWithMessage(
-      `${i18nKey}.fetchFileFromRepository.errors.fetchFail`,
-      {},
-      err
+    throw new Error(
+      i18n(`${i18nKey}.fetchFileFromRepository.errors.fetchFail`),
+      {
+        cause: err,
+      }
     );
   }
 }
@@ -62,10 +59,11 @@ export async function fetchReleaseData(
     const { data } = await fetchRepoReleaseData(repoPath, tag);
     return data;
   } catch (err) {
-    throwErrorWithMessage(
-      `${i18nKey}.fetchReleaseData.errors.fetchFail`,
-      { tag: tag || 'latest' },
-      err
+    throw new Error(
+      i18n(`${i18nKey}.fetchReleaseData.errors.fetchFail`, {
+        tag: tag || 'latest',
+      }),
+      { cause: err }
     );
   }
 }
@@ -106,11 +104,9 @@ async function downloadGithubRepoZip(
     logger.debug(i18n(`${i18nKey}.downloadGithubRepoZip.completed`));
     return data;
   } catch (err) {
-    throwErrorWithMessage(
-      `${i18nKey}.downloadGithubRepoZip.errors.fetchFail`,
-      {},
-      err
-    );
+    throw new Error(i18n(`${i18nKey}.downloadGithubRepoZip.errors.fetchFail`), {
+      cause: err,
+    });
   }
 }
 
@@ -229,12 +225,11 @@ export async function downloadGithubRepoContents(
   } catch (e) {
     // TODO: Learn more about the type of error this should be
     if (isSystemError(e) && e?.error?.message) {
-      throwErrorWithMessage(
-        `${i18nKey}.downloadGithubRepoContents.errors.fetchFail`,
-        {
+      throw new Error(
+        i18n(`${i18nKey}.downloadGithubRepoContents.errors.fetchFail`, {
           errorMessage: e.error.message,
-        },
-        e
+        }),
+        { cause: e }
       );
     } else {
       throwError(e);
@@ -263,11 +258,10 @@ export async function listGithubRepoContents(
   } catch (e) {
     const error = e as GenericError;
     if (error?.data?.message) {
-      throwErrorWithMessage(
-        `${i18nKey}.downloadGithubRepoContents.errors.fetchFail`,
-        {
+      throw new Error(
+        i18n(`${i18nKey}.downloadGithubRepoContents.errors.fetchFail`, {
           errorMessage: error.response.data.message,
-        }
+        })
       );
     } else {
       throwError(error);

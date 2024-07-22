@@ -13,16 +13,14 @@ import { isModuleFolderChild } from '../../utils/cms/modules';
 import { escapeRegExp } from '../escapeRegExp';
 import { convertToUnixPath, getExt } from '../path';
 import { isHubSpotAuthError } from '../../errors/standardErrors';
-import {
-  isHubSpotHttpError,
-  throwApiUploadError,
-} from '../../errors/apiErrors';
+import { isHubSpotHttpError } from '../../errors/apiErrors';
 import { FileMapperInputOptions } from '../../types/Files';
 import { logger } from '../logger';
 import { FILE_TYPES, FILE_UPLOAD_RESULT_TYPES } from '../../constants/files';
 import { FileType, UploadFolderResults } from '../../types/Files';
 import { Mode } from '../../types/Files';
 import { i18n } from '../../utils/lang';
+import { HubSpotHttpError } from '../../models/HubSpotHttpError';
 
 const i18nKey = 'lib.cms.uploadFolder';
 
@@ -173,11 +171,16 @@ const defaultUploadFinalErrorCallback = (
   error: unknown
 ) => {
   logger.debug(i18n(`${i18nKey}.uploadFolder.retryFailed`, { file, destPath }));
-  throwApiUploadError(error, {
-    accountId,
-    request: destPath,
-    payload: file,
-  });
+  throw new HubSpotHttpError(
+    // TODO: Verify proper messaging
+    '',
+    { cause: error },
+    {
+      accountId,
+      request: destPath,
+      payload: file,
+    }
+  );
 };
 export async function uploadFolder(
   accountId: number,

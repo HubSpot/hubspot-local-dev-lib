@@ -5,7 +5,6 @@ import {
   isApiUploadValidationError,
   isSpecifiedHubSpotAuthError,
   getUserFriendlyHttpErrorMessage,
-  throwApiUploadError,
   isSpecifiedError,
 } from '../apiErrors';
 import { BaseError } from '../../types/Error';
@@ -357,13 +356,6 @@ describe('errors/apiErrors', () => {
           'The request failed. \n- We wrote bad code.'
         );
       });
-    });
-  });
-
-  describe('throwApiUploadError()', () => {
-    it('throws api upload error', () => {
-      const error = newHubSpotHttpError();
-      expect(() => throwApiUploadError(error)).toThrow();
     });
   });
 });

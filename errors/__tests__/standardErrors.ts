@@ -1,8 +1,6 @@
 import {
   isSystemError,
   isHubSpotAuthError,
-  throwErrorWithMessage,
-  throwAuthErrorWithMessage,
   throwError,
 } from '../standardErrors';
 import { HubSpotAuthError } from '../../models/HubSpotAuthError';
@@ -83,22 +81,6 @@ describe('errors/standardErrors', () => {
     it('returns false for non fatal errors', () => {
       const error = newError();
       expect(isHubSpotAuthError(error)).toBe(false);
-    });
-  });
-
-  describe('throwErrorWithMessage()', () => {
-    it('throws error with message', () => {
-      expect(() =>
-        throwErrorWithMessage('errors.generic', {}, new AxiosError())
-      ).toThrow();
-    });
-  });
-
-  describe('throwAuthErrorWithMessage()', () => {
-    it('throws auth error with message', () => {
-      expect(() =>
-        throwAuthErrorWithMessage('errors.generic', {}, new AxiosError())
-      ).toThrow();
     });
   });
 

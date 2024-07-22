@@ -4,7 +4,6 @@ import PQueue from 'p-queue';
 import debounce from 'debounce';
 import { AxiosError } from 'axios';
 
-import { throwApiUploadError } from '../../errors/apiErrors';
 import { isConvertableFieldJs, FieldsJs } from './handleFieldsJS';
 import { uploadFolder } from './uploadFolder';
 import { shouldIgnoreFile, ignoreFile } from '../ignoreRules';
@@ -19,6 +18,7 @@ import { FileMapperInputOptions, Mode } from '../../types/Files';
 import { UploadFolderResults } from '../../types/Files';
 import { i18n } from '../../utils/lang';
 import { throwError } from '../../errors/standardErrors';
+import { HubSpotHttpError } from '../../models/HubSpotHttpError';
 
 const i18nKey = 'lib.cms.watch';
 
@@ -56,11 +56,18 @@ const defaultOnUploadFileError =
         dest,
       })
     );
-    throwApiUploadError(error, {
-      accountId,
-      request: dest,
-      payload: file,
-    });
+    throw new HubSpotHttpError(
+      // TODO: Give this proper messaging
+      '',
+      {
+        cause: error,
+      },
+      {
+        accountId,
+        request: dest,
+        payload: file,
+      }
+    );
   };
 async function uploadFile(
   accountId: number,

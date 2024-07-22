@@ -7,14 +7,9 @@ import { FlatAccountFields, TokenInfo } from '../types/Accounts';
 import { logger } from '../lib/logger';
 import { getAccountIdentifier } from '../utils/getAccountIdentifier';
 import { AUTH_METHODS } from '../constants/auth';
-import {
-  throwError,
-  throwErrorWithMessage,
-  throwAuthErrorWithMessage,
-} from '../errors/standardErrors';
+import { throwError } from '../errors/standardErrors';
 import { Environment } from '../types/Config';
 import { i18n } from '../utils/lang';
-import { isHubSpotHttpError } from '../errors/apiErrors';
 
 type OAuth2ManagerAccountConfig = {
   name?: string;
@@ -65,9 +60,11 @@ class OAuth2Manager {
 
   async accessToken(): Promise<string | undefined> {
     if (!this.account.tokenInfo?.refreshToken) {
-      throwErrorWithMessage(`${i18nKey}.errors.missingRefreshToken`, {
-        accountId: getAccountIdentifier(this.account)!,
-      });
+      throw new Error(
+        i18n(`${i18nKey}.errors.missingRefreshToken`, {
+          accountId: getAccountIdentifier(this.account)!,
+        })
+      );
     }
 
     if (
@@ -130,30 +127,16 @@ class OAuth2Manager {
   }
 
   async exchangeForTokens(exchangeProof: ExchangeProof): Promise<void> {
-    try {
-      if (this.refreshTokenRequest) {
-        logger.debug(
-          i18n(`${i18nKey}.refreshingAccessToken`, {
-            accountId: getAccountIdentifier(this.account)!,
-            clientId: this.account.clientId || '',
-          })
-        );
-        await this.refreshTokenRequest;
-      } else {
-        await this.fetchAccessToken(exchangeProof);
-      }
-    } catch (e) {
-      if (isHubSpotHttpError(e)) {
-        throwAuthErrorWithMessage(
-          `${i18nKey}.errors.auth`,
-          {
-            token: e.data.message || '',
-          },
-          e
-        );
-      } else {
-        throwError(e);
-      }
+    if (this.refreshTokenRequest) {
+      logger.debug(
+        i18n(`${i18nKey}.refreshingAccessToken`, {
+          accountId: getAccountIdentifier(this.account)!,
+          clientId: this.account.clientId || '',
+        })
+      );
+      await this.refreshTokenRequest;
+    } else {
+      await this.fetchAccessToken(exchangeProof);
     }
   }
 

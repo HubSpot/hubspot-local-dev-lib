@@ -30,7 +30,7 @@ export type FileSystemErrorContext = {
   dest?: string;
 };
 
-export type AxiosErrorContext = {
+export type HubSpotHttpErrorContext = {
   accountId?: number;
   request?: string;
   payload?: string;

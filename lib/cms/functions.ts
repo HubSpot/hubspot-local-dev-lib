@@ -4,7 +4,6 @@ import findup from 'findup-sync';
 import { getCwd } from '../path';
 import { downloadGithubRepoContents } from '../github';
 import { logger } from '../logger';
-import { throwErrorWithMessage } from '../../errors/standardErrors';
 import { throwFileSystemError } from '../../errors/fileSystemErrors';
 import { i18n } from '../../utils/lang';
 
@@ -100,19 +99,22 @@ function updateExistingConfig(
   }
 
   if (!isObjectOrFunction(config)) {
-    throwErrorWithMessage(
-      `${i18nKey}.updateExistingConfig.errors.configIsNotObjectError`,
-      { configFilePath }
+    throw new Error(
+      i18n(`${i18nKey}.updateExistingConfig.errors.configIsNotObjectError`, {
+        configFilePath,
+      })
     );
   }
   if (config.endpoints) {
     if (config.endpoints[endpointPath]) {
-      throwErrorWithMessage(
-        `${i18nKey}.updateExistingConfig.errors.endpointAreadyExistsError`,
-        {
-          configFilePath,
-          endpointPath,
-        }
+      throw new Error(
+        i18n(
+          `${i18nKey}.updateExistingConfig.errors.endpointAreadyExistsError`,
+          {
+            configFilePath,
+            endpointPath,
+          }
+        )
       );
     } else {
       config.endpoints[endpointPath] = createEndpoint(
@@ -167,11 +169,10 @@ export async function createFunction(
   });
 
   if (ancestorFunctionsConfig) {
-    throwErrorWithMessage(
-      `${i18nKey}.createFunction.errors.nestedConfigError`,
-      {
+    throw new Error(
+      i18n(`${i18nKey}.createFunction.errors.nestedConfigError`, {
         ancestorConfigPath: path.dirname(ancestorFunctionsConfig),
-      }
+      })
     );
   }
 
@@ -199,11 +200,10 @@ export async function createFunction(
   const configFilePath = path.join(destPath, 'serverless.json');
 
   if (!allowExistingFile && fs.existsSync(functionFilePath)) {
-    throwErrorWithMessage(
-      `${i18nKey}.createFunction.errors.jsFileConflictError`,
-      {
+    throw new Error(
+      i18n(`${i18nKey}.createFunction.errors.jsFileConflictError`, {
         functionFilePath,
-      }
+      })
     );
   }
 

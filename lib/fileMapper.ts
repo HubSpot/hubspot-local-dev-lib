@@ -12,7 +12,7 @@ import {
 } from './path';
 import { logger } from './logger';
 import { fetchFileStream, download, downloadDefault } from '../api/fileMapper';
-import { throwError, throwErrorWithMessage } from '../errors/standardErrors';
+import { throwError } from '../errors/standardErrors';
 import { MODULE_EXTENSION, FUNCTIONS_EXTENSION } from '../constants/extensions';
 import { MODE } from '../constants/files';
 import {
@@ -93,9 +93,11 @@ function validateFileMapperNode(node: FileMapperNode): void {
   } catch (err) {
     json = node;
   }
-  throwErrorWithMessage(`${i18nKey}.errors.invalidNode`, {
-    json: JSON.stringify(json),
-  });
+  throw new Error(
+    i18n(`${i18nKey}.errors.invalidNode`, {
+      json: JSON.stringify(json),
+    })
+  );
 }
 
 type PathTypeData = {
@@ -198,7 +200,7 @@ async function fetchAndWriteFileStream(
     return;
   }
   if (!isAllowedExtension(srcPath)) {
-    throwErrorWithMessage(`${i18nKey}.errors.invalidFileType`, { srcPath });
+    throw new Error(i18n(`${i18nKey}.errors.invalidFileType`, { srcPath }));
   }
   let node: FileMapperNode;
   try {
@@ -274,7 +276,8 @@ async function downloadFile(
   const { isFile, isHubspot } = getTypeDataFromPath(src);
   try {
     if (!isFile) {
-      throwErrorWithMessage(`${i18nKey}.errors.invalidRequest`, { src });
+      // TODO: Resolve locally caught exception
+      throw new Error(i18n(`${i18nKey}.errors.invalidRequest`, { src }));
     }
     const dest = path.resolve(destPath);
     const cwd = getCwd();
@@ -305,12 +308,11 @@ async function downloadFile(
   } catch (err) {
     const error = err as AxiosError;
     if (isHubspot && isTimeoutError(error)) {
-      throwErrorWithMessage(`${i18nKey}.errors.assetTimeout`, {}, error);
+      throw new Error(i18n(`${i18nKey}.errors.assetTimeout`), { cause: error });
     } else {
-      throwErrorWithMessage(
-        `${i18nKey}.errors.failedToFetchFile`,
-        { src, dest: destPath },
-        error
+      throw new Error(
+        i18n(`${i18nKey}.errors.failedToFetchFile`, { src, dest: destPath }),
+        { cause: error }
       );
     }
   }
@@ -324,9 +326,11 @@ export async function fetchFolderFromApi(
 ): Promise<FileMapperNode> {
   const { isRoot, isFolder, isHubspot } = getTypeDataFromPath(src);
   if (!isFolder) {
-    throwErrorWithMessage(`${i18nKey}.errors.invalidFetchFolderRequest`, {
-      src,
-    });
+    throw new Error(
+      i18n(`${i18nKey}.errors.invalidFetchFolderRequest`, {
+        src,
+      })
+    );
   }
   const srcPath = isRoot ? '@root' : src;
   const queryValues = getFileMapperQueryValues(mode, options);
@@ -385,17 +389,17 @@ async function downloadFolder(
         })
       );
     } else {
-      throwErrorWithMessage(`${i18nKey}.errors.incompleteFetch`, { src });
+      // TODO: Resolve locally caught exception
+      throw new Error(i18n(`${i18nKey}.errors.incompleteFetch`, { src }));
     }
   } catch (err) {
     const error = err as AxiosError;
     if (isTimeoutError(error)) {
-      throwErrorWithMessage(`${i18nKey}.errors.assetTimeout`, {}, error);
+      throw new Error(i18n(`${i18nKey}.errors.assetTimeout`), { cause: error });
     } else {
-      throwErrorWithMessage(
-        `${i18nKey}.errors.failedToFetchFolder`,
-        { src, dest: destPath },
-        err
+      throw new Error(
+        i18n(`${i18nKey}.errors.failedToFetchFolder`, { src, dest: destPath }),
+        { cause: err }
       );
     }
   }

@@ -4,7 +4,6 @@ import os from 'os';
 import yaml from 'js-yaml';
 import { logger } from '../lib/logger';
 import { throwFileSystemError } from '../errors/fileSystemErrors';
-import { throwError, throwErrorWithMessage } from '../errors/standardErrors';
 import {
   HUBSPOT_CONFIGURATION_FILE,
   HUBSPOT_CONFIGURATION_FOLDER,
@@ -66,7 +65,7 @@ export function parseConfig(configSource: string): CLIConfig_NEW {
   try {
     parsed = yaml.load(configSource) as CLIConfig_NEW;
   } catch (err) {
-    throwErrorWithMessage(`${i18nKey}.errors.parsing`, {}, err);
+    throw new Error(i18n(`${i18nKey}.errors.parsing`), { cause: err });
   }
 
   return parsed;
@@ -97,14 +96,9 @@ export function loadConfigFromFile(): CLIConfig_NEW | null {
  * @throws {Error}
  */
 export function writeConfigToFile(config: CLIConfig_NEW): void {
-  let source: string;
-  try {
-    source = yaml.dump(
-      JSON.parse(JSON.stringify(getOrderedConfig(config), null, 2))
-    );
-  } catch (err) {
-    throwError(err);
-  }
+  const source = yaml.dump(
+    JSON.parse(JSON.stringify(getOrderedConfig(config), null, 2))
+  );
   const configPath = getConfigFilePath();
 
   try {

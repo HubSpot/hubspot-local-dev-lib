@@ -1,12 +1,8 @@
 import { HubSpotAuthError } from '../models/HubSpotAuthError';
 import { i18n } from '../utils/lang';
 
-import { AxiosErrorContext, BaseError } from '../types/Error';
-import { LangKey } from '../types/Lang';
-import {
-  getUserFriendlyHttpErrorMessage,
-  isHubSpotHttpError,
-} from './apiErrors';
+import { HubSpotHttpErrorContext, BaseError } from '../types/Error';
+import { isHubSpotHttpError } from './apiErrors';
 
 export function isSystemError(err: unknown): err is BaseError {
   return (
@@ -24,57 +20,22 @@ export function isHubSpotAuthError(err: unknown): err is HubSpotAuthError {
   return err instanceof HubSpotAuthError;
 }
 
-function genericThrowErrorWithMessage(
-  ErrorType: ErrorConstructor,
-  identifier: LangKey,
-  interpolation?: { [key: string]: string | number },
-  cause?: unknown
-): never {
-  const message = i18n(identifier, interpolation);
-  if (cause) {
-    throw new ErrorType(message, { cause });
-  }
-  throw new ErrorType(message);
-}
-
-/**
- * @throws
- */
-export function throwErrorWithMessage(
-  identifier: LangKey,
-  interpolation?: { [key: string]: string | number },
-  cause?: unknown
-): never {
-  genericThrowErrorWithMessage(Error, identifier, interpolation, cause);
-}
-
-/**
- * @throws
- */
-export function throwAuthErrorWithMessage(
-  identifier: LangKey,
-  interpolation?: { [key: string]: string | number },
-  cause?: unknown
-): never {
-  const message = i18n(identifier, interpolation);
-  if (cause) {
-    throw new HubSpotAuthError(message, { cause });
-  }
-  throw new HubSpotAuthError(message);
-}
-
 /**
  * @throws
  */
 export function throwError(
   error: unknown,
-  context: AxiosErrorContext = {}
+  context: HubSpotHttpErrorContext = {}
 ): never {
   if (!(error instanceof Error)) {
+    // TODO: Give this an actual error message
     throw new Error('', { cause: error });
   }
   if (isHubSpotHttpError(error)) {
-    throw getUserFriendlyHttpErrorMessage(error, context);
+    if (context) {
+      error.context = { ...error.context, ...context };
+    }
+    throw error;
   }
 
   // Error or Error subclass

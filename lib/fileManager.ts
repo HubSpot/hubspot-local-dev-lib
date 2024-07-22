@@ -20,11 +20,7 @@ import {
   convertToLocalFileSystemPath,
 } from './path';
 
-import {
-  isHubSpotAuthError,
-  throwErrorWithMessage,
-  throwError,
-} from '../errors/standardErrors';
+import { isHubSpotAuthError, throwError } from '../errors/standardErrors';
 import { throwFileSystemError } from '../errors/fileSystemErrors';
 import { File, Folder } from '../types/FileManager';
 import { i18n } from '../utils/lang';
@@ -62,10 +58,12 @@ export async function uploadFolder(
       if (isHubSpotAuthError(err)) {
         throwError(err);
       }
-      throwErrorWithMessage(`${i18nKey}.errors.uploadFailed`, {
-        file,
-        destPath,
-      });
+      throw new Error(
+        i18n(`${i18nKey}.errors.uploadFailed`, {
+          file,
+          destPath,
+        })
+      );
     }
   }
 }
@@ -228,10 +226,10 @@ async function downloadSingleFile(
   includeArchived?: boolean
 ) {
   if (!includeArchived && file.archived) {
-    throwErrorWithMessage(`${i18nKey}.errors.archivedFile`, { src });
+    throw new Error(i18n(`${i18nKey}.errors.archivedFile`, { src }));
   }
   if (file.hidden) {
-    throwErrorWithMessage(`${i18nKey}.errors.hiddenFile`, { src });
+    throw new Error(i18n(`${i18nKey}.errors.hiddenFile`, { src }));
   }
 
   logger.log(

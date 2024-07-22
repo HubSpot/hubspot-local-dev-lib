@@ -4,7 +4,6 @@ import { tmpdir } from 'os';
 import extract from 'extract-zip';
 
 import { throwFileSystemError } from '../errors/fileSystemErrors';
-import { throwErrorWithMessage } from '../errors/standardErrors';
 import { logger } from './logger';
 import { i18n } from '../utils/lang';
 
@@ -43,7 +42,9 @@ async function extractZip(
         write: true,
       });
     } else {
-      throwErrorWithMessage(`${i18nKey}.extractZip.errors.write`, {}, err);
+      throw new Error(i18n(`${i18nKey}.extractZip.errors.write`), {
+        cause: err,
+      });
     }
     return result;
   }
@@ -53,7 +54,9 @@ async function extractZip(
     await extract(tmpZipPath, { dir: tmpExtractPath });
     result.extractDir = tmpExtractPath;
   } catch (err) {
-    throwErrorWithMessage(`${i18nKey}.extractZip.errors.extract`, {}, err);
+    throw new Error(i18n(`${i18nKey}.extractZip.errors.extract`), {
+      cause: err,
+    });
   }
   logger.debug(i18n(`${i18nKey}.extractZip.success`));
   return result;

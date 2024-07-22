@@ -1,12 +1,7 @@
 import moment from 'moment';
-import { AxiosError } from 'axios';
 import { ENVIRONMENTS } from '../constants/environments';
 import { PERSONAL_ACCESS_KEY_AUTH_METHOD } from '../constants/auth';
-import {
-  throwAuthErrorWithMessage,
-  throwErrorWithMessage,
-  throwError,
-} from '../errors/standardErrors';
+import { throwError, isHubSpotAuthError } from '../errors/standardErrors';
 import { fetchAccessToken } from '../api/localDevAuth';
 import { fetchSandboxHubData } from '../api/sandboxHubs';
 import { CLIAccount, PersonalAccessKeyAccount } from '../types/Accounts';
@@ -21,8 +16,8 @@ import {
 import { HUBSPOT_ACCOUNT_TYPES } from '../constants/config';
 import { fetchDeveloperTestAccountData } from '../api/developerTestAccounts';
 import { logger } from './logger';
-import { getUserFriendlyHttpErrorMessage } from '../errors/apiErrors';
 import { ValueOf } from '../types/Utils';
+import { i18n } from '../utils/lang';
 
 const i18nKey = 'lib.personalAccessKey';
 
@@ -52,16 +47,7 @@ export async function getAccessToken(
   try {
     response = await fetchAccessToken(personalAccessKey, env, accountId);
   } catch (e) {
-    const error = e as AxiosError<{ message?: string }>;
-    if (error.response) {
-      throwAuthErrorWithMessage(
-        `${i18nKey}.errors.invalidPersonalAccessKey`,
-        { errorMessage: error.response.data.message || '' },
-        error
-      );
-    } else {
-      throwError(e);
-    }
+    throwError(e);
   }
   return {
     portalId: response.hubId,
@@ -137,7 +123,7 @@ export async function accessTokenForPersonalAccessKey(
 ): Promise<string | undefined> {
   const account = getAccountConfig(accountId) as PersonalAccessKeyAccount;
   if (!account) {
-    throwErrorWithMessage(`${i18nKey}.errors.accountNotFound`, { accountId });
+    throw new Error(i18n(`${i18nKey}.errors.accountNotFound`, { accountId }));
   }
   const { auth, personalAccessKey, env } = account;
   const authTokenInfo = auth && auth.tokenInfo;
@@ -163,7 +149,7 @@ export async function enabledFeaturesForPersonalAccessKey(
 ): Promise<{ [key: string]: number } | undefined> {
   const account = getAccountConfig(accountId) as PersonalAccessKeyAccount;
   if (!account) {
-    throwErrorWithMessage(`${i18nKey}.errors.accountNotFound`, { accountId });
+    throw new Error(i18n(`${i18nKey}.errors.accountNotFound`, { accountId }));
   }
   const { auth, personalAccessKey, env } = account;
   const authTokenInfo = auth && auth.tokenInfo;
@@ -204,7 +190,10 @@ export async function updateConfigWithAccessToken(
     }
   } catch (err) {
     // Log error but do not throw
-    logger.debug(getUserFriendlyHttpErrorMessage(err));
+    if (isHubSpotAuthError(err)) {
+      logger.debug(err.message);
+    }
+    logger.debug(err);
   }
 
   try {
@@ -220,7 +209,10 @@ export async function updateConfigWithAccessToken(
     }
   } catch (err) {
     // Log error but do not throw
-    logger.debug(getUserFriendlyHttpErrorMessage(err));
+    if (isHubSpotAuthError(err)) {
+      logger.debug(err.message);
+    }
+    logger.debug(err);
   }
 
   const updatedConfig = updateAccountConfig({
