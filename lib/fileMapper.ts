@@ -12,7 +12,6 @@ import {
 } from './path';
 import { logger } from './logger';
 import { fetchFileStream, download, downloadDefault } from '../api/fileMapper';
-import { throwError } from '../errors/standardErrors';
 import { MODULE_EXTENSION, FUNCTIONS_EXTENSION } from '../constants/extensions';
 import { MODE } from '../constants/files';
 import {
@@ -21,9 +20,9 @@ import {
   FileMapperOptions,
   FileMapperInputOptions,
 } from '../types/Files';
-import { throwFileSystemError } from '../errors/fileSystemErrors';
-import { isTimeoutError } from '../errors/apiErrors';
+import { isTimeoutError } from '../errors';
 import { i18n } from '../utils/lang';
+import { FileSystemError } from '../models/FileSystemError';
 
 const i18nKey = 'lib.fileMapper';
 
@@ -164,11 +163,14 @@ export async function writeUtimes(
     const mtime = node.updatedAt ? new Date(node.updatedAt) : now;
     await fs.utimes(filepath, atime, mtime);
   } catch (err) {
-    throwFileSystemError(err, {
-      filepath,
-      accountId,
-      write: true,
-    });
+    throw new FileSystemError(
+      { cause: err },
+      {
+        filepath,
+        accountId,
+        operation: 'write',
+      }
+    );
   }
 }
 
@@ -202,17 +204,12 @@ async function fetchAndWriteFileStream(
   if (!isAllowedExtension(srcPath)) {
     throw new Error(i18n(`${i18nKey}.errors.invalidFileType`, { srcPath }));
   }
-  let node: FileMapperNode;
-  try {
-    node = await fetchFileStream(
-      accountId,
-      srcPath,
-      filepath,
-      getFileMapperQueryValues(mode, options)
-    );
-  } catch (err) {
-    throwError(err);
-  }
+  const node = await fetchFileStream(
+    accountId,
+    srcPath,
+    filepath,
+    getFileMapperQueryValues(mode, options)
+  );
   await writeUtimes(accountId, filepath, node);
 }
 
@@ -256,12 +253,14 @@ async function writeFileMapperNode(
       })
     );
   } catch (err) {
-    throwFileSystemError(err, {
-      filepath: localFilepath,
-      accountId,
-      write: true,
-    });
-    return false;
+    throw new FileSystemError(
+      { cause: err },
+      {
+        filepath: localFilepath,
+        accountId,
+        operation: 'write',
+      }
+    );
   }
   return true;
 }

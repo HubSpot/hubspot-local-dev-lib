@@ -1,15 +1,12 @@
-import { AxiosError, AxiosHeaders } from 'axios';
 import {
   isMissingScopeError,
   isGatingError,
-  isApiUploadValidationError,
-  isSpecifiedHubSpotAuthError,
   isSpecifiedError,
-} from '../apiErrors';
+  isApiUploadValidationError,
+  isSystemError,
+} from '../index';
 import { BaseError } from '../../types/Error';
-import { HubSpotAuthError } from '../../models/HubSpotAuthError';
 import { HubSpotHttpError } from '../../models/HubSpotHttpError';
-// import { throwError } from '../standardErrors';
 
 export const newError = (overrides = {}): BaseError => {
   return {
@@ -44,7 +41,52 @@ export const newHubSpotHttpError = (overrides: any = {}): HubSpotHttpError => {
   });
 };
 
-describe('errors/apiErrors', () => {
+class FakeSystemError extends Error {
+  private code?: string | null;
+  private syscall?: string | null;
+  private errors?: string[] | null;
+  private errno?: number | null;
+
+  constructor(
+    message: string,
+    options?: ErrorOptions,
+    errno?: number | null,
+    code?: string | null,
+    syscall?: string | null,
+    errors?: string[] | null
+  ) {
+    super(message, options);
+    this.code = code;
+    this.syscall = syscall;
+    this.errno = errno;
+    this.errors = errors;
+  }
+}
+
+export const newSystemError = (overrides?: {
+  errno?: number | null;
+  code?: string | null;
+  syscall?: string | null;
+  errors?: string[] | null;
+}): FakeSystemError => {
+  const defaults = {
+    errno: 1,
+    code: 'error_code',
+    syscall: 'error_syscall',
+    errors: [],
+  };
+  const { errno, syscall, code, errors } = { ...defaults, ...overrides };
+  return new FakeSystemError(
+    'An error ocurred',
+    {},
+    errno,
+    code,
+    syscall,
+    errors
+  );
+};
+
+describe('errors/errors', () => {
   describe('isSpecifiedError()', () => {
     it('returns true for a matching specified error', () => {
       const error1 = newHubSpotHttpError({
@@ -134,27 +176,6 @@ describe('errors/apiErrors', () => {
       const error2 = newHubSpotHttpError({ isAxiosError: false });
       expect(isApiUploadValidationError(error1)).toBe(false);
       expect(isApiUploadValidationError(error2)).toBe(false);
-    });
-  });
-
-  describe('isSpecifiedHubSpotAuthError()', () => {
-    it('returns true for matching HubSpot auth errors', () => {
-      const error1 = new HubSpotAuthError('', {
-        cause: new AxiosError(
-          '',
-          '',
-          { headers: new AxiosHeaders() },
-          {},
-          // @ts-expect-error it wants the full object
-          { status: 123 }
-        ),
-      });
-      expect(isSpecifiedHubSpotAuthError(error1, { status: 123 })).toBe(true);
-    });
-
-    it('returns false for non matching HubSpot auth errors', () => {
-      const error1 = newError({ name: 'HubSpotAuthError', status: 123 });
-      expect(isSpecifiedHubSpotAuthError(error1, { status: 124 })).toBe(false);
     });
   });
 
@@ -358,4 +379,20 @@ describe('errors/apiErrors', () => {
   //     });
   //   });
   // });
+
+  describe('isSystemError()', () => {
+    it('returns true for system errors', () => {
+      const error = newSystemError();
+      expect(isSystemError(error)).toBe(true);
+    });
+
+    it('returns false for non system errors', () => {
+      const error1 = newSystemError({ errno: null });
+      const error2 = newSystemError({ code: null });
+      const error3 = newSystemError({ syscall: null });
+      expect(isSystemError(error1)).toBe(false);
+      expect(isSystemError(error2)).toBe(false);
+      expect(isSystemError(error3)).toBe(false);
+    });
+  });
 });

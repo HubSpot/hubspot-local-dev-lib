@@ -4,7 +4,6 @@ import prettier from 'prettier';
 import { getCwd } from '../lib/path';
 import { fetchObjectSchemas, fetchObjectSchema } from '../api/customObjects';
 import { FetchSchemasResponse, Schema } from '../types/Schemas';
-import { throwError } from '../errors/standardErrors';
 
 export function getResolvedPath(dest?: string, name?: string): string {
   if (name) return path.resolve(getCwd(), dest || '', `${name}.json`);
@@ -26,13 +25,7 @@ export async function downloadSchemas(
   accountId: number,
   dest?: string
 ): Promise<Array<Schema>> {
-  let response: FetchSchemasResponse;
-
-  try {
-    response = await fetchObjectSchemas(accountId);
-  } catch (err) {
-    throwError(err);
-  }
+  const response: FetchSchemasResponse = await fetchObjectSchemas(accountId);
 
   if (response.results.length) {
     for (const schema of response.results) {
@@ -48,15 +41,7 @@ export async function downloadSchema(
   schemaObjectType: string,
   dest?: string
 ): Promise<Schema> {
-  let response: Schema;
-
-  try {
-    response = await fetchObjectSchema(accountId, schemaObjectType);
-  } catch (err) {
-    throwError(err);
-  }
-
+  const response: Schema = await fetchObjectSchema(accountId, schemaObjectType);
   await writeSchemaToDisk(response, dest);
-
   return response;
 }

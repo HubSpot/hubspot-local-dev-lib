@@ -1,7 +1,6 @@
 import moment from 'moment';
 import { ENVIRONMENTS } from '../constants/environments';
 import { PERSONAL_ACCESS_KEY_AUTH_METHOD } from '../constants/auth';
-import { throwError, isHubSpotAuthError } from '../errors/standardErrors';
 import { fetchAccessToken } from '../api/localDevAuth';
 import { fetchSandboxHubData } from '../api/sandboxHubs';
 import { CLIAccount, PersonalAccessKeyAccount } from '../types/Accounts';
@@ -18,6 +17,7 @@ import { fetchDeveloperTestAccountData } from '../api/developerTestAccounts';
 import { logger } from './logger';
 import { ValueOf } from '../types/Utils';
 import { i18n } from '../utils/lang';
+import { isHubSpotHttpError } from '../errors';
 
 const i18nKey = 'lib.personalAccessKey';
 
@@ -43,12 +43,7 @@ export async function getAccessToken(
   env: Environment = ENVIRONMENTS.PROD,
   accountId?: number
 ): Promise<AccessToken> {
-  let response;
-  try {
-    response = await fetchAccessToken(personalAccessKey, env, accountId);
-  } catch (e) {
-    throwError(e);
-  }
+  const response = await fetchAccessToken(personalAccessKey, env, accountId);
   return {
     portalId: response.hubId,
     accessToken: response.oauthAccessToken,
@@ -190,7 +185,7 @@ export async function updateConfigWithAccessToken(
     }
   } catch (err) {
     // Log error but do not throw
-    if (isHubSpotAuthError(err)) {
+    if (isHubSpotHttpError(err)) {
       logger.debug(err.message);
     }
     logger.debug(err);
@@ -209,7 +204,7 @@ export async function updateConfigWithAccessToken(
     }
   } catch (err) {
     // Log error but do not throw
-    if (isHubSpotAuthError(err)) {
+    if (isHubSpotHttpError(err)) {
       logger.debug(err.message);
     }
     logger.debug(err);

@@ -3,7 +3,6 @@ import path from 'path';
 import os from 'os';
 import yaml from 'js-yaml';
 import { logger } from '../lib/logger';
-import { throwFileSystemError } from '../errors/fileSystemErrors';
 import {
   HUBSPOT_CONFIGURATION_FILE,
   HUBSPOT_CONFIGURATION_FOLDER,
@@ -11,6 +10,7 @@ import {
 import { getOrderedConfig } from './configUtils';
 import { CLIConfig_NEW } from '../types/Config';
 import { i18n } from '../utils/lang';
+import { FileSystemError } from '../models/FileSystemError';
 
 const i18nKey = 'config.configFile';
 
@@ -47,10 +47,13 @@ export function readConfigFile(configPath: string): string {
     source = fs.readFileSync(configPath).toString();
   } catch (err) {
     logger.debug(i18n(`${i18nKey}.errorReading`, { configPath }));
-    throwFileSystemError(err, {
-      filepath: configPath,
-      read: true,
-    });
+    throw new FileSystemError(
+      { cause: err },
+      {
+        filepath: configPath,
+        operation: 'read',
+      }
+    );
   }
 
   return source;
@@ -106,9 +109,12 @@ export function writeConfigToFile(config: CLIConfig_NEW): void {
     fs.writeFileSync(configPath, source);
     logger.debug(i18n(`${i18nKey}.writeSuccess`, { configPath }));
   } catch (err) {
-    throwFileSystemError(err, {
-      filepath: configPath,
-      write: true,
-    });
+    throw new FileSystemError(
+      { cause: err },
+      {
+        filepath: configPath,
+        operation: 'write',
+      }
+    );
   }
 }

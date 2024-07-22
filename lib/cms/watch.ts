@@ -17,8 +17,8 @@ import { logger } from '../logger';
 import { FileMapperInputOptions, Mode } from '../../types/Files';
 import { UploadFolderResults } from '../../types/Files';
 import { i18n } from '../../utils/lang';
-import { throwError } from '../../errors/standardErrors';
 import { HubSpotHttpError } from '../../models/HubSpotHttpError';
+import { isHubSpotHttpError } from '../../errors';
 
 const i18nKey = 'lib.cms.watch';
 
@@ -154,16 +154,19 @@ async function deleteRemoteFile(
         logger.log(i18n(`${i18nKey}.deleteSuccess`, { remoteFilePath }));
         notifyOfThemePreview(filePath, accountId);
       })
-      .catch((error: AxiosError) => {
+      .catch(error => {
         logger.debug(
           i18n(`${i18nKey}.deleteFailed`, {
             remoteFilePath,
           })
         );
-        throwError(error, {
-          accountId,
-          request: remoteFilePath,
-        });
+        if (isHubSpotHttpError(error)) {
+          error.updateContext({
+            accountId,
+            request: remoteFilePath,
+          });
+        }
+        throw error;
       });
   });
 }

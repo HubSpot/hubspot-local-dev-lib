@@ -4,8 +4,8 @@ import findup from 'findup-sync';
 import { getCwd } from '../path';
 import { downloadGithubRepoContents } from '../github';
 import { logger } from '../logger';
-import { throwFileSystemError } from '../../errors/fileSystemErrors';
 import { i18n } from '../../utils/lang';
+import { FileSystemError } from '../../models/FileSystemError';
 
 const i18nKey = 'lib.cms.functions';
 
@@ -77,10 +77,13 @@ function updateExistingConfig(
         configFilePath,
       })
     );
-    throwFileSystemError(err, {
-      filepath: configFilePath,
-      read: true,
-    });
+    throw new FileSystemError(
+      { cause: err },
+      {
+        filepath: configFilePath,
+        operation: 'read',
+      }
+    );
   }
 
   let config!: Config;
@@ -92,10 +95,13 @@ function updateExistingConfig(
         configFilePath,
       })
     );
-    throwFileSystemError(err, {
-      filepath: configFilePath,
-      read: true,
-    });
+    throw new FileSystemError(
+      { cause: err },
+      {
+        filepath: configFilePath,
+        operation: 'read',
+      }
+    );
   }
 
   if (!isObjectOrFunction(config)) {
@@ -135,10 +141,13 @@ function updateExistingConfig(
         configFilePath,
       })
     );
-    throwFileSystemError(err, {
-      filepath: configFilePath,
-      write: true,
-    });
+    throw new FileSystemError(
+      { cause: err },
+      {
+        filepath: configFilePath,
+        operation: 'read',
+      }
+    );
   }
 }
 
@@ -247,10 +256,13 @@ export async function createFunction(
           configFilePath,
         })
       );
-      throwFileSystemError(err, {
-        filepath: configFilePath,
-        write: true,
-      });
+      throw new FileSystemError(
+        { cause: err },
+        {
+          filepath: configFilePath,
+          operation: 'write',
+        }
+      );
     }
     logger.log(
       i18n(`${i18nKey}.createFunction.createdConfigFile`, {

@@ -20,10 +20,10 @@ import {
   convertToLocalFileSystemPath,
 } from './path';
 
-import { isHubSpotAuthError, throwError } from '../errors/standardErrors';
-import { throwFileSystemError } from '../errors/fileSystemErrors';
 import { File, Folder } from '../types/FileManager';
 import { i18n } from '../utils/lang';
+import { isAuthError, isHubSpotHttpError } from '../errors';
+import { FileSystemError } from '../models/FileSystemError';
 
 type SimplifiedFolder = Partial<Folder> & Pick<Folder, 'id' | 'name'>;
 
@@ -55,8 +55,12 @@ export async function uploadFolder(
       await uploadFile(accountId, file, destPath);
       logger.log(i18n(`${i18nKey}.uploadSuccess`, { file, destPath }));
     } catch (err) {
-      if (isHubSpotAuthError(err)) {
-        throwError(err);
+      if (isHubSpotHttpError(err)) {
+        err.updateContext({
+          filepath: file,
+          dest: destPath,
+        });
+        throw err;
       }
       throw new Error(
         i18n(`${i18nKey}.errors.uploadFailed`, {
@@ -142,11 +146,14 @@ async function fetchFolderContents(
   try {
     await fs.ensureDir(dest);
   } catch (err) {
-    throwFileSystemError(err, {
-      dest,
-      accountId,
-      write: true,
-    });
+    throw new FileSystemError(
+      { cause: err },
+      {
+        dest,
+        accountId,
+        operation: 'write',
+      }
+    );
   }
 
   const files = await fetchAllPagedFiles(accountId, folder.id, includeArchived);
@@ -291,9 +298,12 @@ export async function downloadFileOrFolder(
       }
     }
   } catch (err) {
-    throwError(err, {
-      request: src,
-      accountId,
-    });
+    if (isAuthError(err)) {
+      err.updateContext({
+        request: src,
+        accountId,
+      });
+    }
+    throw err;
   }
 }

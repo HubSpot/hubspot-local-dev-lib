@@ -12,8 +12,7 @@ import { upload } from '../../api/fileMapper';
 import { isModuleFolderChild } from '../../utils/cms/modules';
 import { escapeRegExp } from '../escapeRegExp';
 import { convertToUnixPath, getExt } from '../path';
-import { isHubSpotAuthError } from '../../errors/standardErrors';
-import { isHubSpotHttpError } from '../../errors/apiErrors';
+import { isAuthError, isHubSpotHttpError } from '../../errors';
 import { FileMapperInputOptions } from '../../types/Files';
 import { logger } from '../logger';
 import { FILE_TYPES, FILE_UPLOAD_RESULT_TYPES } from '../../constants/files';
@@ -251,7 +250,7 @@ export async function uploadFolder(
         await upload(accountId, file, destPath, apiOptions);
         _onSuccessCallback(originalFilePath, destPath);
       } catch (err) {
-        if (isHubSpotAuthError(err)) {
+        if (isAuthError(err)) {
           throw err;
         }
         _onFirstErrorCallback(file, destPath, err);
@@ -282,7 +281,7 @@ export async function uploadFolder(
               file,
             };
           } catch (error) {
-            if (isHubSpotAuthError(error)) {
+            if (isAuthError(error)) {
               throw error;
             }
             _onFinalErrorCallback(accountId, file, destPath, error);

@@ -5,7 +5,6 @@ import fs from 'fs';
 import semver from 'semver';
 import { pathToFileURL } from 'url';
 import { getExt } from '../path';
-import { throwError } from '../../errors/standardErrors';
 import { FieldsJs } from './handleFieldsJS';
 import { i18n } from '../../utils/lang';
 
@@ -29,7 +28,9 @@ console.info(
  * we wrap the return value of the function in a Promise.resolve(), and then process.
  */
 
-const fieldsPromise = dynamicImport(filePath!).catch(e => throwError(e));
+const fieldsPromise = dynamicImport(filePath!).catch(e => {
+  throw e;
+});
 
 fieldsPromise.then(fieldsFunc => {
   const fieldsFuncType = typeof fieldsFunc;

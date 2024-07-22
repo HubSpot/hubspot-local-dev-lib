@@ -8,7 +8,7 @@ import {
   MAX_PORT_NUMBER,
   PORT_MANAGER_SERVER_PORT,
 } from '../constants/ports';
-import { isSystemError } from '../errors/standardErrors';
+import { isSystemError } from '../errors';
 import { logger } from '../lib/logger';
 import { i18n } from './lang';
 import { BaseError } from '../types/Error';

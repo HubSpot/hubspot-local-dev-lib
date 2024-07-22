@@ -24,8 +24,7 @@ export interface ValidationError extends BaseError {
 
 export type FileSystemErrorContext = {
   filepath?: string;
-  write?: boolean;
-  read?: boolean;
+  operation?: 'write' | 'read';
   accountId?: number;
   dest?: string;
 };

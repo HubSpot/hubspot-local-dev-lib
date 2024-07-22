@@ -7,7 +7,6 @@ import { FlatAccountFields, TokenInfo } from '../types/Accounts';
 import { logger } from '../lib/logger';
 import { getAccountIdentifier } from '../utils/getAccountIdentifier';
 import { AUTH_METHODS } from '../constants/auth';
-import { throwError } from '../errors/standardErrors';
 import { Environment } from '../types/Config';
 import { i18n } from '../utils/lang';
 
@@ -119,10 +118,8 @@ class OAuth2Manager {
         );
         this.writeTokenInfo(this.account.tokenInfo);
       }
+    } finally {
       this.refreshTokenRequest = null;
-    } catch (e) {
-      this.refreshTokenRequest = null;
-      throwError(e);
     }
   }
 

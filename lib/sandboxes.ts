@@ -16,7 +16,6 @@ import {
   TaskRequestData,
   Usage,
 } from '../types/Sandbox';
-import { throwError } from '../errors/standardErrors';
 
 export async function createSandbox(
   accountId: number,
@@ -27,26 +26,18 @@ export async function createSandbox(
   sandbox: Sandbox;
   personalAccessKey: string;
 }> {
-  try {
-    const resp = await _createSandbox(accountId, name, type);
-    return {
-      name,
-      ...resp,
-    };
-  } catch (err) {
-    throwError(err);
-  }
+  const resp = await _createSandbox(accountId, name, type);
+  return {
+    name,
+    ...resp,
+  };
 }
 
 export async function deleteSandbox(
   parentAccountId: number,
   sandboxAccountId: number
 ): Promise<{ parentAccountId: number; sandboxAccountId: number }> {
-  try {
-    await _deleteSandbox(parentAccountId, sandboxAccountId);
-  } catch (err) {
-    throwError(err);
-  }
+  await _deleteSandbox(parentAccountId, sandboxAccountId);
 
   return {
     parentAccountId,
@@ -57,12 +48,8 @@ export async function deleteSandbox(
 export async function getSandboxUsageLimits(
   parentAccountId: number
 ): Promise<Usage | void> {
-  try {
-    const resp = await _getSandboxUsageLimits(parentAccountId);
-    return resp && resp.usage;
-  } catch (err) {
-    throwError(err);
-  }
+  const resp = await _getSandboxUsageLimits(parentAccountId);
+  return resp && resp.usage;
 }
 
 export async function initiateSync(
@@ -71,32 +58,20 @@ export async function initiateSync(
   tasks: Array<TaskRequestData>,
   sandboxHubId: number
 ): Promise<InitiateSyncResponse> {
-  try {
-    return await _initiateSync(fromHubId, toHubId, tasks, sandboxHubId);
-  } catch (err) {
-    throwError(err);
-  }
+  return _initiateSync(fromHubId, toHubId, tasks, sandboxHubId);
 }
 
 export async function fetchTaskStatus(
   accountId: number,
   taskId: number
 ): Promise<SyncTaskStatusType> {
-  try {
-    return await _fetchTaskStatus(accountId, taskId);
-  } catch (err) {
-    throwError(err);
-  }
+  return _fetchTaskStatus(accountId, taskId);
 }
 
 export async function fetchTypes(
   accountId: number,
   toHubId: number
 ): Promise<Array<SandboxType> | void> {
-  try {
-    const resp = await _fetchTypes(accountId, toHubId);
-    return resp && resp.results;
-  } catch (err) {
-    throwError(err);
-  }
+  const resp = await _fetchTypes(accountId, toHubId);
+  return resp && resp.results;
 }

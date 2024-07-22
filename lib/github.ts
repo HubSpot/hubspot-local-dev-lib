@@ -1,10 +1,8 @@
 import path from 'path';
 import fs from 'fs-extra';
 
-import { isSystemError, throwError } from '../errors/standardErrors';
 import { extractZipArchive } from './archive';
 import { logger } from './logger';
-import { GenericError } from '../types/Error';
 import { GithubReleaseData, GithubRepoFile } from '../types/Github';
 import {
   fetchRepoFile,
@@ -14,6 +12,7 @@ import {
   fetchRepoContents,
 } from '../api/github';
 import { i18n } from '../utils/lang';
+import { isHubSpotHttpError, isSystemError } from '../errors';
 
 const i18nKey = 'lib.github';
 
@@ -231,9 +230,8 @@ export async function downloadGithubRepoContents(
         }),
         { cause: e }
       );
-    } else {
-      throwError(e);
     }
+    throw e;
   }
 }
 
@@ -256,15 +254,13 @@ export async function listGithubRepoContents(
 
     return filteredFiles;
   } catch (e) {
-    const error = e as GenericError;
-    if (error?.data?.message) {
+    if (isHubSpotHttpError(e) && e.data.message) {
       throw new Error(
         i18n(`${i18nKey}.downloadGithubRepoContents.errors.fetchFail`, {
-          errorMessage: error.response.data.message,
+          errorMessage: e.data.message,
         })
       );
-    } else {
-      throwError(error);
     }
+    throw e;
   }
 }

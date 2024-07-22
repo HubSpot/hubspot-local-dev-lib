@@ -3,9 +3,9 @@ import { join } from 'path';
 import { tmpdir } from 'os';
 import extract from 'extract-zip';
 
-import { throwFileSystemError } from '../errors/fileSystemErrors';
 import { logger } from './logger';
 import { i18n } from '../utils/lang';
+import { FileSystemError } from '../models/FileSystemError';
 
 const i18nKey = 'lib.archive';
 
@@ -37,16 +37,18 @@ async function extractZip(
     });
   } catch (err) {
     if (tmpZipPath || result.tmpDir) {
-      throwFileSystemError(err, {
-        filepath: tmpZipPath || result.tmpDir,
-        write: true,
-      });
+      throw new FileSystemError(
+        { cause: err },
+        {
+          filepath: tmpZipPath || result.tmpDir,
+          operation: 'write',
+        }
+      );
     } else {
       throw new Error(i18n(`${i18nKey}.extractZip.errors.write`), {
         cause: err,
       });
     }
-    return result;
   }
   // Extract zip
   try {
@@ -107,12 +109,14 @@ async function copySourceToDest(
     return true;
   } catch (err) {
     logger.debug(i18n(`${i18nKey}.copySourceToDest.error`, { dest }));
-    throwFileSystemError(err, {
-      filepath: dest,
-      write: true,
-    });
+    throw new FileSystemError(
+      { cause: err },
+      {
+        filepath: dest,
+        operation: 'write',
+      }
+    );
   }
-  return false;
 }
 
 async function cleanupTempDir(tmpDir: string): Promise<void> {
