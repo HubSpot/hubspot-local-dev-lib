@@ -140,12 +140,11 @@ async function getNewAccessTokenByAccountId(
     throwErrorWithMessage(`${i18nKey}.errors.accountNotFound`, { accountId });
   }
   const { auth, personalAccessKey, env } = account;
-  const authTokenInfo = auth && auth.tokenInfo;
 
   const accessTokenResponse = await getNewAccessToken(
     accountId,
     personalAccessKey,
-    authTokenInfo && authTokenInfo.expiresAt,
+    auth?.tokenInfo?.expiresAt,
     env
   );
   return accessTokenResponse;
