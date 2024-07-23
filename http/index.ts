@@ -121,49 +121,81 @@ function addQueryParams(
 
 async function getRequest<T>(
   accountId: number,
-  options: HttpOptions
-): Promise<T> {
+  options: HttpOptions,
+  withFullResponse = false
+): Promise<T | AxiosResponse> {
   const { params, ...rest } = options;
   const axiosConfig = addQueryParams(rest, params);
   const configWithAuth = await withAuth(accountId, axiosConfig);
-  const { data } = await axios<T>(configWithAuth);
-  return data;
+
+  const response = await axios<T>(configWithAuth);
+
+  if (withFullResponse) {
+    return response;
+  }
+
+  return response.data;
 }
 
 async function postRequest<T>(
   accountId: number,
-  options: HttpOptions
-): Promise<T> {
+  options: HttpOptions,
+  withFullResponse = false
+): Promise<T | AxiosResponse> {
   const configWithAuth = await withAuth(accountId, options);
-  const { data } = await axios({ ...configWithAuth, method: 'post' });
-  return data;
+
+  const response = await axios({ ...configWithAuth, method: 'post' });
+
+  if (withFullResponse) {
+    return response;
+  }
+
+  return response.data;
 }
 
 async function putRequest<T>(
   accountId: number,
-  options: HttpOptions
-): Promise<T> {
+  options: HttpOptions,
+  withFullResponse = false
+): Promise<T | AxiosResponse> {
   const configWithAuth = await withAuth(accountId, options);
-  const { data } = await axios({ ...configWithAuth, method: 'put' });
-  return data;
+  const response = await axios({ ...configWithAuth, method: 'put' });
+
+  if (withFullResponse) {
+    return response;
+  }
+
+  return response.data;
 }
 
 async function patchRequest<T>(
   accountId: number,
-  options: HttpOptions
-): Promise<T> {
+  options: HttpOptions,
+  withFullResponse = false
+): Promise<T | AxiosResponse> {
   const configWithAuth = await withAuth(accountId, options);
-  const { data } = await axios({ ...configWithAuth, method: 'patch' });
-  return data;
+  const response = await axios({ ...configWithAuth, method: 'patch' });
+
+  if (withFullResponse) {
+    return response;
+  }
+
+  return response.data;
 }
 
 async function deleteRequest<T>(
   accountId: number,
-  options: HttpOptions
-): Promise<T> {
+  options: HttpOptions,
+  withFullResponse = false
+): Promise<T | AxiosResponse> {
   const configWithAuth = await withAuth(accountId, options);
-  const { data } = await axios({ ...configWithAuth, method: 'delete' });
-  return data;
+  const response = await axios({ ...configWithAuth, method: 'delete' });
+
+  if (withFullResponse) {
+    return response;
+  }
+
+  return response.data;
 }
 
 function createGetRequestStream(contentType: string) {
