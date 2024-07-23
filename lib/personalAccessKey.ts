@@ -184,7 +184,7 @@ export async function enabledFeaturesForPersonalAccessKey(
   return accessTokenResponse?.enabledFeatures;
 }
 
-export async function scopeGroupsForPersonalAccessKey(
+export async function scopesOnAccessToken(
   accountId: number
 ): Promise<Array<string>> {
   return (await getNewAccessTokenByAccountId(accountId)).scopeGroups;
