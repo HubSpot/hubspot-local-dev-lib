@@ -123,7 +123,7 @@ async function getRequest<T>(
   accountId: number,
   options: HttpOptions,
   withFullResponse = false
-): Promise<T | AxiosResponse> {
+): Promise<T> {
   const { params, ...rest } = options;
   const axiosConfig = addQueryParams(rest, params);
   const configWithAuth = await withAuth(accountId, axiosConfig);
@@ -131,7 +131,7 @@ async function getRequest<T>(
   const response = await axios<T>(configWithAuth);
 
   if (withFullResponse) {
-    return response;
+    return response as T;
   }
 
   return response.data;
@@ -141,13 +141,13 @@ async function postRequest<T>(
   accountId: number,
   options: HttpOptions,
   withFullResponse = false
-): Promise<T | AxiosResponse> {
+): Promise<T> {
   const configWithAuth = await withAuth(accountId, options);
 
   const response = await axios({ ...configWithAuth, method: 'post' });
 
   if (withFullResponse) {
-    return response;
+    return response as T;
   }
 
   return response.data;
@@ -157,12 +157,12 @@ async function putRequest<T>(
   accountId: number,
   options: HttpOptions,
   withFullResponse = false
-): Promise<T | AxiosResponse> {
+): Promise<T> {
   const configWithAuth = await withAuth(accountId, options);
   const response = await axios({ ...configWithAuth, method: 'put' });
 
   if (withFullResponse) {
-    return response;
+    return response as T;
   }
 
   return response.data;
@@ -172,12 +172,12 @@ async function patchRequest<T>(
   accountId: number,
   options: HttpOptions,
   withFullResponse = false
-): Promise<T | AxiosResponse> {
+): Promise<T> {
   const configWithAuth = await withAuth(accountId, options);
   const response = await axios({ ...configWithAuth, method: 'patch' });
 
   if (withFullResponse) {
-    return response;
+    return response as T;
   }
 
   return response.data;
@@ -187,12 +187,12 @@ async function deleteRequest<T>(
   accountId: number,
   options: HttpOptions,
   withFullResponse = false
-): Promise<T | AxiosResponse> {
+): Promise<T> {
   const configWithAuth = await withAuth(accountId, options);
   const response = await axios({ ...configWithAuth, method: 'delete' });
 
   if (withFullResponse) {
-    return response;
+    return response as T;
   }
 
   return response.data;
