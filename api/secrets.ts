@@ -1,5 +1,4 @@
-import http from '../http';
-
+import { http } from '../http';
 const SECRETS_API_PATH = 'cms/v3/functions/secrets';
 
 type FetchSecretsResponse = {

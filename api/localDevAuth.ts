@@ -1,5 +1,5 @@
 import { getAxiosConfig } from '../http/getAxiosConfig';
-import http from '../http';
+import { http } from '../http';
 import { ENVIRONMENTS } from '../constants/environments';
 import { Environment } from '../types/Config';
 import { ScopeData } from '../types/Accounts';

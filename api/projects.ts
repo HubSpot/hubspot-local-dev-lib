@@ -1,4 +1,4 @@
-import http from '../http';
+import { http } from '../http';
 import fs from 'fs';
 import { FormData, QueryParams } from '../types/Http';
 import {

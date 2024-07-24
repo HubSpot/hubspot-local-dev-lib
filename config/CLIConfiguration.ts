@@ -27,7 +27,7 @@ import { i18n } from '../utils/lang';
 
 const i18nKey = 'config.cliConfiguration';
 
-class CLIConfiguration {
+class _CLIConfiguration {
   options: CLIOptions;
   useEnvConfig: boolean;
   config: CLIConfig_NEW | null;
@@ -588,4 +588,4 @@ class CLIConfiguration {
   }
 }
 
-export default new CLIConfiguration();
+export const CLIConfiguration = new _CLIConfiguration();
