@@ -1,6 +1,6 @@
 {
   "name": "@hubspot/local-dev-lib",
-  "version": "1.9.0",
+  "version": "1.9.1",
   "description": "Provides library functionality for HubSpot local development tooling, including the HubSpot CLI",
   "main": "lib/index.js",
   "repository": {
