@@ -1,5 +1,9 @@
 # hubspot/local-dev-lib
 
+```javascript
+// TODO[JOE] Update this readme
+```
+
 ## Error utils
 
 These error utils standardize the way that we handle errors in this library. Many of them will simply throw errors, but some of them have been broken up into "getError" and "throwError" utilities. This enables external packages to generate the same errors that are used in this library.
