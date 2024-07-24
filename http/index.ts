@@ -121,9 +121,18 @@ function addQueryParams(
 
 async function getRequest<T>(
   accountId: number,
+  options: HttpOptions
+): Promise<T>;
+async function getRequest<T>(
+  accountId: number,
   options: HttpOptions,
-  withFullResponse = false
-): Promise<T> {
+  withFullResponse: true
+): Promise<AxiosResponse<T>>;
+async function getRequest<T>(
+  accountId: number,
+  options: HttpOptions,
+  withFullResponse?: true
+) {
   const { params, ...rest } = options;
   const axiosConfig = addQueryParams(rest, params);
   const configWithAuth = await withAuth(accountId, axiosConfig);
@@ -131,7 +140,7 @@ async function getRequest<T>(
   const response = await axios<T>(configWithAuth);
 
   if (withFullResponse) {
-    return response as T;
+    return response;
   }
 
   return response.data;
@@ -139,15 +148,24 @@ async function getRequest<T>(
 
 async function postRequest<T>(
   accountId: number,
+  options: HttpOptions
+): Promise<T>;
+async function postRequest<T>(
+  accountId: number,
   options: HttpOptions,
-  withFullResponse = false
-): Promise<T> {
+  withFullResponse: true
+): Promise<AxiosResponse<T>>;
+async function postRequest(
+  accountId: number,
+  options: HttpOptions,
+  withFullResponse?: true
+) {
   const configWithAuth = await withAuth(accountId, options);
 
   const response = await axios({ ...configWithAuth, method: 'post' });
 
   if (withFullResponse) {
-    return response as T;
+    return response;
   }
 
   return response.data;
@@ -155,14 +173,23 @@ async function postRequest<T>(
 
 async function putRequest<T>(
   accountId: number,
+  options: HttpOptions
+): Promise<T>;
+async function putRequest<T>(
+  accountId: number,
   options: HttpOptions,
-  withFullResponse = false
-): Promise<T> {
+  withFullResponse: true
+): Promise<AxiosResponse<T>>;
+async function putRequest(
+  accountId: number,
+  options: HttpOptions,
+  withFullResponse?: true
+) {
   const configWithAuth = await withAuth(accountId, options);
   const response = await axios({ ...configWithAuth, method: 'put' });
 
   if (withFullResponse) {
-    return response as T;
+    return response;
   }
 
   return response.data;
@@ -170,14 +197,23 @@ async function putRequest<T>(
 
 async function patchRequest<T>(
   accountId: number,
+  options: HttpOptions
+): Promise<T>;
+async function patchRequest<T>(
+  accountId: number,
   options: HttpOptions,
-  withFullResponse = false
-): Promise<T> {
+  withFullResponse: true
+): Promise<AxiosResponse<T>>;
+async function patchRequest(
+  accountId: number,
+  options: HttpOptions,
+  withFullResponse?: true
+) {
   const configWithAuth = await withAuth(accountId, options);
   const response = await axios({ ...configWithAuth, method: 'patch' });
 
   if (withFullResponse) {
-    return response as T;
+    return response;
   }
 
   return response.data;
@@ -185,14 +221,23 @@ async function patchRequest<T>(
 
 async function deleteRequest<T>(
   accountId: number,
+  options: HttpOptions
+): Promise<T>;
+async function deleteRequest<T>(
+  accountId: number,
+  options: HttpOptions,
+  withFullResponse: true
+): Promise<AxiosResponse<T>>;
+async function deleteRequest(
+  accountId: number,
   options: HttpOptions,
   withFullResponse = false
-): Promise<T> {
+) {
   const configWithAuth = await withAuth(accountId, options);
   const response = await axios({ ...configWithAuth, method: 'delete' });
 
   if (withFullResponse) {
-    return response as T;
+    return response;
   }
 
   return response.data;
