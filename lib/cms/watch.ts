@@ -50,15 +50,13 @@ type UploadFileOptions = FileMapperInputOptions & {
 
 const defaultOnUploadFileError =
   (file: string, dest: string, accountId: number) => (error: AxiosError) => {
-    logger.debug(
-      i18n(`${i18nKey}.uploadFailed`, {
-        file,
-        dest,
-      })
-    );
+    const uploadFailedMessage = i18n(`${i18nKey}.uploadFailed`, {
+      file,
+      dest,
+    });
+    logger.debug(uploadFailedMessage);
     throw new HubSpotHttpError(
-      // TODO: Give this proper messaging
-      '',
+      uploadFailedMessage,
       {
         cause: error,
       },

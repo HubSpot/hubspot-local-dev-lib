@@ -18,7 +18,6 @@ const i18nKey = 'http.index';
 axios.interceptors.response.use(undefined, error => {
   // Wrap all axios errors in our own Error class.  Attach the error
   // as the cause for the new error, so we maintain the stack trace
-  // TODO: See if we can get automatic context
   return Promise.reject(new HubSpotHttpError(error.message, { cause: error }));
 });
 

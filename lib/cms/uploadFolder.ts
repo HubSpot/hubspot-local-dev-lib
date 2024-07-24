@@ -169,10 +169,13 @@ const defaultUploadFinalErrorCallback = (
   destPath: string,
   error: unknown
 ) => {
-  logger.debug(i18n(`${i18nKey}.uploadFolder.retryFailed`, { file, destPath }));
+  const retryFailed = i18n(`${i18nKey}.uploadFolder.retryFailed`, {
+    file,
+    destPath,
+  });
+  logger.debug(retryFailed);
   throw new HubSpotHttpError(
-    // TODO: Verify proper messaging
-    '',
+    retryFailed,
     { cause: error },
     {
       accountId,

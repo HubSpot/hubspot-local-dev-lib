@@ -29,11 +29,10 @@ export type FileSystemErrorContext = {
   dest?: string;
 };
 
-export type HubSpotHttpErrorContext = {
-  accountId?: number;
+export interface HubSpotHttpErrorContext extends FileSystemErrorContext {
   request?: string;
   payload?: string;
   projectName?: string;
-};
+}
 
 export type OptionalError = BaseError | null | undefined;

@@ -5,9 +5,12 @@ import { isSystemError } from '../errors';
 const i18nKey = 'errors.fileSystemErrors';
 
 export class FileSystemError extends Error {
+  private context: FileSystemErrorContext | undefined;
+
   constructor(options?: ErrorOptions, context?: FileSystemErrorContext) {
     super('', options);
     this.name = 'FileSystemError';
+    this.context = context;
 
     if (context) {
       let fileAction = '';
@@ -37,5 +40,13 @@ export class FileSystemError extends Error {
 
       this.message = messages.join(' ');
     }
+  }
+
+  public toString() {
+    let baseString = `${this.name}: ${this.message}`;
+    if (this.context) {
+      baseString = `${baseString} context: ${this.context}`;
+    }
+    return baseString;
   }
 }

@@ -7,7 +7,11 @@ import {
   Method,
   AxiosError,
 } from 'axios';
-import { isGatingError, isMissingScopeError } from '../errors';
+import {
+  extractErrorMessage,
+  isGatingError,
+  isMissingScopeError,
+} from '../errors';
 import {
   FileSystemErrorContext,
   HubSpotHttpErrorContext,
@@ -16,8 +20,9 @@ import {
 import { HttpMethod } from '../types/Api';
 import { HTTP_METHOD_PREPOSITIONS, HTTP_METHOD_VERBS } from '../constants/api';
 import { i18n } from '../utils/lang';
+import { logger } from '../lib/logger';
 
-export function parseValidationErrors(
+function parseValidationErrors(
   responseData: {
     errors?: Array<ValidationError>;
     message?: string;
@@ -49,7 +54,7 @@ export function parseValidationErrors(
   return errorMessages;
 }
 
-export function joinErrorMessages(
+function joinErrorMessages(
   error: AxiosError<{ message: string; errors: { message: string }[] }>,
   context: HubSpotHttpErrorContext = {}
 ) {
@@ -146,18 +151,17 @@ export function joinErrorMessages(
       errorMessage.push(message);
     }
 
-    if (errors) {
-      errors.forEach(err => {
-        if (err.message) {
-          errorMessage.push('\n- ' + err.message);
-        }
-      });
-    }
+    (errors || []).forEach(err => {
+      if (err.message) {
+        errorMessage.push('\n- ' + err.message);
+      }
+    });
   }
 
   return errorMessage.join(' ');
 }
 
+// TODO[JOE] Write tests for this error
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export class HubSpotHttpError<T = any, D = any> extends Error {
   public status?: number;
@@ -175,13 +179,14 @@ export class HubSpotHttpError<T = any, D = any> extends Error {
   constructor(
     message?: string,
     options?: ErrorOptions,
-    context?: HubSpotHttpErrorContext | FileSystemErrorContext
+    context?: HubSpotHttpErrorContext
   ) {
     super(message, options);
     this.name = 'HubSpotHttpError';
     this.context = context;
 
     if (options && isAxiosError(options.cause)) {
+      this.updateContextFromCause(options.cause, context);
       const { response, request, config, code } = options.cause;
       this.message = joinErrorMessages(options.cause, context);
       this.response = response;
@@ -200,24 +205,44 @@ export class HubSpotHttpError<T = any, D = any> extends Error {
         this.validationErrors = parseValidationErrors(response.data);
       }
     } else if (options && options.cause instanceof Error) {
-      const error = options?.cause;
-      const messages = error.name !== 'Error' ? [`${error.name}:`] : [];
-
-      if (error.message) {
-        messages.push(error.message);
-      }
-
-      if ('reason' in error && error.reason) {
-        messages.push(`${error.reason}`);
-      }
-
-      this.message = messages.join(' ');
+      this.message = extractErrorMessage(options.cause);
     }
   }
 
-  public updateContext(
-    context: HubSpotHttpErrorContext | FileSystemErrorContext
-  ) {
+  public updateContext(context: HubSpotHttpErrorContext) {
     this.context = { ...this.context, ...context };
+  }
+
+  public toString() {
+    let baseString = `${this.name}: \n- message: ${this.message}`;
+    if (this.validationErrors && this.validationErrors.length > 0) {
+      baseString = `${baseString} \n- errors: ${this.validationErrors.join('\n- ')}`;
+    }
+    if (this.context) {
+      baseString = `${baseString} \n- context: ${JSON.stringify(this.context, undefined, 2)}`;
+    }
+    return baseString;
+  }
+
+  private updateContextFromCause(
+    cause: AxiosError,
+    context?: HubSpotHttpErrorContext
+  ) {
+    const generatedContext: HubSpotHttpErrorContext = {};
+    if (!cause) {
+      return;
+    }
+
+    try {
+      generatedContext.accountId = cause.config?.params?.portalId;
+      generatedContext.payload = cause.config?.data;
+      // This will just be the url path
+      generatedContext.request = cause.config?.url;
+    } catch (e) {
+      logger.debug(e);
+    }
+
+    // Allow the provided context to override the generated context
+    this.context = { ...generatedContext, ...context };
   }
 }

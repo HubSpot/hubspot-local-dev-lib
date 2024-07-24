@@ -13,8 +13,6 @@ Once those steps are complete, you can make requests with these utils. The HTTP 
 
 ## Error handling
 
-// TODO UPDATE THIS JOE
-
 This library also includes utils that handle request errors. Check out the [Error Handling Docs](../errors/README.md) for more information on how they can be used.
 
 ## Usage Example
@@ -24,7 +22,6 @@ Here's how to use the `addSecret` API util:
 ```js
 const { loadConfig } = require('@hubspot/local-dev-lib/config');
 const { addSecret } = require('@hubspot/local-dev-lib/api/secrets');
-const { throwApiError } = require('@hubspot/local-dev-lib/errors/apiErrors');
 
 // Parse and store the config file information
 loadConfig();

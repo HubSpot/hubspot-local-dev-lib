@@ -1,5 +1,6 @@
 import { HubSpotHttpError } from '../models/HubSpotHttpError';
 import { BaseError } from '../types/Error';
+import { FileSystemError } from '../models/FileSystemError';
 
 export function isSpecifiedError(
   err: unknown,
@@ -58,7 +59,6 @@ export function isAuthError(err: unknown): err is HubSpotHttpError {
   );
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isApiUploadValidationError(
   err: unknown
 ): err is HubSpotHttpError {
@@ -68,7 +68,6 @@ export function isApiUploadValidationError(
   );
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isHubSpotHttpError(error?: unknown): error is HubSpotHttpError {
   return !!error && error instanceof HubSpotHttpError;
 }
@@ -83,4 +82,27 @@ export function isSystemError(err: unknown): err is BaseError {
     'syscall' in err &&
     err.syscall != null
   );
+}
+
+export function isFileSystemError(err: unknown): err is FileSystemError {
+  return err instanceof FileSystemError;
+}
+
+export function extractErrorMessage(error: unknown): string {
+  if (!(error instanceof Error)) {
+    return `${error}`;
+  }
+
+  const messages = error.name !== 'Error' ? [`${error.name}:`] : [];
+
+  if (error.message) {
+    messages.push(error.message);
+  }
+
+  if ('reason' in error && error.reason) {
+    messages.push(`${error.reason}`);
+  }
+
+  console.log(messages);
+  return messages.join(' ');
 }

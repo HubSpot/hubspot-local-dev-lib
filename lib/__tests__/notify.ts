@@ -61,35 +61,5 @@ describe('lib/notify', () => {
       expect(fsAppendSyncMock).toHaveBeenCalledTimes(1);
       expect(fsAppendSyncMock).toHaveBeenCalledWith(filePathToNotify, output);
     });
-
-    // TODO: Determine if this is still easily testable
-    // it('should throw a user friendly error message when writing to filesystem fails', async () => {
-    //   // const throwErrorWithMessageMock = jest
-    //   //   .spyOn(standardErrors, 'throwErrorWithMessage')
-    //   // .mockReturnValue(undefined);
-    //   const error = new Error('failed to do the thing');
-    //   fsAppendSyncMock.mockImplementation(() => {
-    //     throw error;
-    //   });
-    //
-    //   triggerNotify(
-    //     filePathToNotify,
-    //     actionType,
-    //     filePath,
-    //     new Promise(resolve => {
-    //       resolve();
-    //     })
-    //   );
-    //
-    //   // Advance all the timers to trigger to debounce
-    //   await jest.runAllTimersAsync();
-    //
-    //   // expect(throwErrorWithMessageMock).toHaveBeenCalledTimes(1);
-    //   // expect(throwErrorWithMessageMock).toHaveBeenCalledWith(
-    //   //   'utils.notify.errors.filePath',
-    //   //   { filePath: filePathToNotify },
-    //   //   error
-    //   // );
-    // });
   });
 });

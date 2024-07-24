@@ -222,7 +222,6 @@ export async function downloadGithubRepoContents(
 
     await Promise.all(contentPromises);
   } catch (e) {
-    // TODO: Learn more about the type of error this should be
     if (isSystemError(e) && e?.error?.message) {
       throw new Error(
         i18n(`${i18nKey}.downloadGithubRepoContents.errors.fetchFail`, {

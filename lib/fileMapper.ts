@@ -273,11 +273,12 @@ async function downloadFile(
   options: FileMapperInputOptions = {}
 ): Promise<void> {
   const { isFile, isHubspot } = getTypeDataFromPath(src);
+
+  if (!isFile) {
+    throw new Error(i18n(`${i18nKey}.errors.invalidRequest`, { src }));
+  }
+
   try {
-    if (!isFile) {
-      // TODO: Resolve locally caught exception
-      throw new Error(i18n(`${i18nKey}.errors.invalidRequest`, { src }));
-    }
     const dest = path.resolve(destPath);
     const cwd = getCwd();
     let filepath: string;
@@ -388,7 +389,7 @@ async function downloadFolder(
         })
       );
     } else {
-      // TODO: Resolve locally caught exception
+      // TODO: Fix this exception. It is triggering the catch block so this error is being rewritten
       throw new Error(i18n(`${i18nKey}.errors.incompleteFetch`, { src }));
     }
   } catch (err) {
