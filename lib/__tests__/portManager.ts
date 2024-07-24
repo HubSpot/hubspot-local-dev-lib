@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { MAX_PORT_NUMBER } from '../../constants/ports';
-import PortManagerServer from '../../utils/PortManagerServer';
+import { PortManagerServer } from '../../utils/PortManagerServer';
 import {
   deleteServerInstance,
   portManagerHasActiveServers,
