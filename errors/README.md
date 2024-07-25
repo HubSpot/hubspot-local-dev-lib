@@ -1,8 +1,6 @@
 # hubspot/local-dev-lib
 
-```javascript
-// TODO[JOE] Update this readme
-```
+[//]: # '// TODO[JOE] Update this readme'
 
 ## Error utils
 
