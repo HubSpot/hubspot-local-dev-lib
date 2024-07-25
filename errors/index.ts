@@ -87,22 +87,3 @@ export function isSystemError(err: unknown): err is BaseError {
 export function isFileSystemError(err: unknown): err is FileSystemError {
   return err instanceof FileSystemError;
 }
-
-export function extractErrorMessage(error: unknown): string {
-  if (!(error instanceof Error)) {
-    return `${error}`;
-  }
-
-  const messages = error.name !== 'Error' ? [`${error.name}:`] : [];
-
-  if (error.message) {
-    messages.push(error.message);
-  }
-
-  if ('reason' in error && error.reason) {
-    messages.push(`${error.reason}`);
-  }
-
-  console.log(messages);
-  return messages.join(' ');
-}

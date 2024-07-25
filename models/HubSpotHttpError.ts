@@ -1,16 +1,11 @@
 import { isAxiosError, AxiosError } from 'axios';
-import {
-  extractErrorMessage,
-  isGatingError,
-  isMissingScopeError,
-} from '../errors';
+import { isGatingError, isMissingScopeError } from '../errors';
 import { HubSpotHttpErrorContext, ValidationError } from '../types/Error';
 import { HttpMethod } from '../types/Api';
 import { HTTP_METHOD_PREPOSITIONS, HTTP_METHOD_VERBS } from '../constants/api';
 import { i18n } from '../utils/lang';
 import { logger } from '../lib/logger';
 
-// TODO[JOE] Write tests for this error
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export class HubSpotHttpError<T = any> extends Error {
   public status?: number;
@@ -48,7 +43,18 @@ export class HubSpotHttpError<T = any> extends Error {
         this.parseValidationErrors(response.data);
       }
     } else if (options && options.cause instanceof Error) {
-      this.message = extractErrorMessage(options.cause);
+      const messages =
+        options.cause.name !== 'Error' ? [`${options.cause.name}:`] : [];
+
+      if (options.cause.message) {
+        messages.push(options.cause.message);
+      }
+
+      if ('reason' in options.cause && options.cause.reason) {
+        messages.push(`${options.cause.reason}`);
+      }
+
+      this.message = messages.join(' ');
     }
   }
 
