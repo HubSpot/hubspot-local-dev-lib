@@ -12,7 +12,7 @@ import {
 import { walk } from './fs';
 import { logger } from './logger';
 import { createIgnoreFilter } from './ignoreRules';
-import http from '../http';
+import { http } from '../http';
 import { escapeRegExp } from './escapeRegExp';
 import {
   getCwd,

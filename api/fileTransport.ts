@@ -1,8 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { getCwd } from '../lib/path';
-import http from '../http';
-
+import { http } from '../http';
 const HUBFILES_API_PATH = '/file-transport/v1/hubfiles';
 
 export async function createSchemaFromHubFile(

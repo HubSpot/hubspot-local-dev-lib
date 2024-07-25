@@ -1,4 +1,4 @@
-import http from '../http';
+import { http } from '../http';
 import { FetchSchemasResponse, Schema } from '../types/Schemas';
 
 const CUSTOM_OBJECTS_API_PATH = 'crm/v3/objects';

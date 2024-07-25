@@ -310,7 +310,7 @@ function createGetRequestStream(contentType: string) {
 
 const getOctetStream = createGetRequestStream('application/octet-stream');
 
-const http = {
+export const http = {
   get: getRequest,
   post: postRequest,
   put: putRequest,
@@ -318,5 +318,3 @@ const http = {
   delete: deleteRequest,
   getOctetStream,
 };
-
-export default http;

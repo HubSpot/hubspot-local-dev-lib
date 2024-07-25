@@ -1,5 +1,5 @@
 import axios from 'axios';
-import http from '../http';
+import { http } from '../http';
 import { getAxiosConfig } from '../http/getAxiosConfig';
 import { ENVIRONMENTS } from '../constants/environments';
 import { SANDBOX_TIMEOUT } from '../constants/api';

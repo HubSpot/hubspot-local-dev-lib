@@ -20,7 +20,7 @@ type ServerPortMap = {
 
 const i18nKey = 'utils.PortManagerServer';
 
-class PortManagerServer {
+class _PortManagerServer {
   app?: Express;
   server?: Server;
   serverPortMap: ServerPortMap;
@@ -201,4 +201,4 @@ class PortManagerServer {
   };
 }
 
-export default new PortManagerServer();
+export const PortManagerServer = new _PortManagerServer();

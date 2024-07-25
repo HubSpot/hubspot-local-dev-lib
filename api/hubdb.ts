@@ -1,4 +1,4 @@
-import http from '../http';
+import { http } from '../http';
 import { QueryParams } from '../types/Http';
 import {
   CreateRowsResponse,

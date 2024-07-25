@@ -6,7 +6,7 @@ import {
   getAccountConfig as __getAccountConfig,
 } from '../../config';
 import { ENVIRONMENTS } from '../../constants/environments';
-import http from '../';
+import { http } from '../';
 import { version } from '../../package.json';
 import { AuthType } from '../../types/Accounts';
 
