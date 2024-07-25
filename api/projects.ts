@@ -1,4 +1,4 @@
-import http from '../http';
+import { http } from '../http';
 import fs from 'fs';
 import { FormData, QueryParams } from '../types/Http';
 import {
@@ -341,7 +341,7 @@ export async function checkCloneStatus(
   exportId: number
 ): Promise<CloneAppResponse> {
   return http.get(accountId, {
-    url: `${MIGRATIONS_API_PATH}/exports/statuses/${exportId}`,
+    url: `${MIGRATIONS_API_PATH}/exports/${exportId}/status`,
   });
 }
 

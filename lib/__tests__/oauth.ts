@@ -6,7 +6,7 @@ jest.mock('../logger');
 jest.mock('../../errors');
 
 import { updateAccountConfig, writeConfig } from '../../config';
-import OAuth2Manager from '../../models/OAuth2Manager';
+import { OAuth2Manager } from '../../models/OAuth2Manager';
 import { FlatAccountFields_NEW } from '../../types/Accounts';
 import { ENVIRONMENTS } from '../../constants/environments';
 import { AUTH_METHODS } from '../../constants/auth';

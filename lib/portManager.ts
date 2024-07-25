@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-import PortManagerServer from '../utils/PortManagerServer';
+import { PortManagerServer } from '../utils/PortManagerServer';
 import { detectPort } from '../utils/detectPort';
 import { PORT_MANAGER_SERVER_PORT } from '../constants/ports';
 

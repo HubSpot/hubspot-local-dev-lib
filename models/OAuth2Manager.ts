@@ -39,7 +39,7 @@ type ExchangeProof = {
 
 const i18nKey = 'models.OAuth2Manager';
 
-class OAuth2Manager {
+export class OAuth2Manager {
   account: OAuth2ManagerAccountConfig;
   writeTokenInfo?: WriteTokenInfoFunction;
   refreshTokenRequest: Promise<RefreshTokenResponse> | null;
@@ -161,5 +161,3 @@ class OAuth2Manager {
     );
   }
 }
-
-export default OAuth2Manager;

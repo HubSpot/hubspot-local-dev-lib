@@ -1,4 +1,4 @@
-import OAuth2Manager from '../models/OAuth2Manager';
+import { OAuth2Manager } from '../models/OAuth2Manager';
 import { AUTH_METHODS } from '../constants/auth';
 import { FlatAccountFields } from '../types/Accounts';
 import { logger } from './logger';
