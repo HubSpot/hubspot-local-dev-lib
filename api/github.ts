@@ -1,4 +1,4 @@
-import axios, { AxiosResponse } from 'axios';
+import axios, { AxiosPromise } from 'axios';
 import { getDefaultUserAgentHeader } from '../http/getAxiosConfig';
 import { GithubReleaseData, GithubRepoFile } from '../types/Github';
 
@@ -22,7 +22,7 @@ const GITHUB_AUTH_HEADERS = {
 export async function fetchRepoReleaseData(
   repoPath: RepoPath,
   tag = ''
-): Promise<AxiosResponse<GithubReleaseData>> {
+): AxiosPromise<GithubReleaseData> {
   const URL = `${GITHUB_REPOS_API}/${repoPath}/releases`;
 
   return axios.get<GithubReleaseData>(
@@ -35,9 +35,7 @@ export async function fetchRepoReleaseData(
 
 // Returns the entire repo content as a zip, using the zipball_url from fetchRepoReleaseData()
 // https://docs.github.com/en/rest/repos/contents?apiVersion=2022-11-28#download-a-repository-archive-zip
-export async function fetchRepoAsZip(
-  zipUrl: string
-): Promise<AxiosResponse<Buffer>> {
+export async function fetchRepoAsZip(zipUrl: string): AxiosPromise<Buffer> {
   return axios.get<Buffer>(zipUrl, {
     responseType: 'arraybuffer',
     headers: { ...getDefaultUserAgentHeader(), ...GITHUB_AUTH_HEADERS },
@@ -49,7 +47,7 @@ export async function fetchRepoFile(
   repoPath: RepoPath,
   filePath: string,
   ref: string
-): Promise<AxiosResponse<Buffer>> {
+): AxiosPromise<Buffer> {
   return axios.get<Buffer>(
     `${GITHUB_RAW_CONTENT_API_PATH}/${repoPath}/${ref}/${filePath}`,
     {
@@ -61,7 +59,7 @@ export async function fetchRepoFile(
 // Returns the raw file contents via the raw.githubusercontent endpoint
 export async function fetchRepoFileByDownloadUrl(
   downloadUrl: string
-): Promise<AxiosResponse<Buffer>> {
+): AxiosPromise<Buffer> {
   return axios.get<Buffer>(downloadUrl, {
     headers: { ...getDefaultUserAgentHeader(), ...GITHUB_AUTH_HEADERS },
     responseType: 'arraybuffer',
@@ -74,7 +72,7 @@ export async function fetchRepoContents(
   repoPath: RepoPath,
   path: string,
   ref?: string
-): Promise<AxiosResponse<Array<GithubRepoFile>>> {
+): AxiosPromise<Array<GithubRepoFile>> {
   const refQuery = ref ? `?ref=${ref}` : '';
 
   return axios.get<Array<GithubRepoFile>>(
