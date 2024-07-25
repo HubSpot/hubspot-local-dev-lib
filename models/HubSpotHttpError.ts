@@ -1,22 +1,10 @@
-import {
-  AxiosResponse,
-  InternalAxiosRequestConfig,
-  isAxiosError,
-  RawAxiosResponseHeaders,
-  AxiosResponseHeaders,
-  Method,
-  AxiosError,
-} from 'axios';
+import { isAxiosError, AxiosError } from 'axios';
 import {
   extractErrorMessage,
   isGatingError,
   isMissingScopeError,
 } from '../errors';
-import {
-  FileSystemErrorContext,
-  HubSpotHttpErrorContext,
-  ValidationError,
-} from '../types/Error';
+import { HubSpotHttpErrorContext, ValidationError } from '../types/Error';
 import { HttpMethod } from '../types/Api';
 import { HTTP_METHOD_PREPOSITIONS, HTTP_METHOD_VERBS } from '../constants/api';
 import { i18n } from '../utils/lang';
@@ -24,17 +12,14 @@ import { logger } from '../lib/logger';
 
 // TODO[JOE] Write tests for this error
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export class HubSpotHttpError<T = any, D = any> extends Error {
+export class HubSpotHttpError<T = any> extends Error {
   public status?: number;
-  public response?: AxiosResponse<T, D>;
-  public config?: InternalAxiosRequestConfig<D>;
   public code?: string;
-  public request?: unknown;
   public statusText?: string;
   public data?: T;
-  public headers?: RawAxiosResponseHeaders | AxiosResponseHeaders;
-  public method: Method | string | undefined;
-  public context: HubSpotHttpErrorContext | FileSystemErrorContext | undefined;
+  public headers?: { [key: string]: unknown };
+  public method: string | undefined;
+  public context: HubSpotHttpErrorContext | undefined;
   public validationErrors: string[] | undefined;
 
   constructor(
@@ -48,13 +33,10 @@ export class HubSpotHttpError<T = any, D = any> extends Error {
 
     if (options && isAxiosError(options.cause)) {
       this.updateContextFromCause(options.cause, context);
-      const { response, request, config, code } = options.cause;
+      const { response, config, code } = options.cause;
       this.joinErrorMessages(options.cause, context);
-      this.response = response;
 
-      this.config = config;
       this.code = code;
-      this.request = request;
       this.method = config?.method;
 
       // Pull the request fields to the top level

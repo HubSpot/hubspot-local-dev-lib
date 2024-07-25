@@ -59,17 +59,9 @@ describe('models/HubSpotHttpError', () => {
     expect(result.message).toStrictEqual(
       `The request was bad. ${cause.response!.data.message} \n- ${error1Message} \n- ${error2Message}`
     );
-    expect(result.response).toBeDefined();
-    expect(result.response).toBe(cause.response);
-
-    expect(result.config).toBeDefined();
-    expect(result.config).toBe(cause.config);
 
     expect(result.code).toBeDefined();
     expect(result.code).toBe(cause.code);
-
-    expect(result.request).toBeDefined();
-    expect(result.request).toBe(cause.request);
 
     expect(result.method).toBeDefined();
     expect(result.method).toBe(cause.config!.method);
