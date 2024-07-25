@@ -37,7 +37,6 @@ export const newHubSpotHttpError = (overrides: any = {}): HubSpotHttpError => {
         },
         data: {},
         headers: {},
-        status: 200,
         statusText: '',
         config: {},
       },
