@@ -4,7 +4,6 @@ import { HubSpotHttpErrorContext, ValidationError } from '../types/Error';
 import { HttpMethod } from '../types/Api';
 import { HTTP_METHOD_PREPOSITIONS, HTTP_METHOD_VERBS } from '../constants/api';
 import { i18n } from '../utils/lang';
-import { logger } from '../lib/logger';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export class HubSpotHttpError<T = any> extends Error {
@@ -16,6 +15,7 @@ export class HubSpotHttpError<T = any> extends Error {
   public method: string | undefined;
   public context: HubSpotHttpErrorContext | undefined;
   public validationErrors: string[] | undefined;
+  private internalMessage?: string;
 
   constructor(
     message?: string,
@@ -29,7 +29,13 @@ export class HubSpotHttpError<T = any> extends Error {
     if (options && isAxiosError(options.cause)) {
       this.updateContextFromCause(options.cause, this.context);
       const { response, config, code } = options.cause;
-      this.joinErrorMessages(options.cause, this.context);
+      this.message = this.joinErrorMessages(options.cause, {
+        accountId: this.context?.accountId,
+      });
+      this.internalMessage = this.joinErrorMessages(
+        options.cause,
+        this.context
+      );
 
       this.code = code;
       this.method = config?.method;
@@ -63,7 +69,7 @@ export class HubSpotHttpError<T = any> extends Error {
   }
 
   public toString() {
-    const messages = [`${this.name}: \n- message: ${this.message}`];
+    const messages = [`${this.name}: \n- message: ${this.internalMessage}`];
     ['status', 'statusText', 'method', 'code'].forEach(field => {
       if (Object.hasOwn(this, field)) {
         // @ts-expect-error this[field] exists, so we know it is a property of this
@@ -78,7 +84,7 @@ export class HubSpotHttpError<T = any> extends Error {
       messages.push(`context: ${JSON.stringify(this.context, undefined, 2)}`);
     }
 
-    return messages.join(`\n- `);
+    return messages.join('\n- ');
   }
 
   private updateContextFromCause(
@@ -90,13 +96,10 @@ export class HubSpotHttpError<T = any> extends Error {
       return;
     }
 
-    try {
-      generatedContext.accountId = cause.config?.params?.portalId;
-      // This will just be the url path
-      generatedContext.request = cause.config?.url;
-    } catch (e) {
-      logger.debug(e);
-    }
+    generatedContext.accountId = cause.config?.params?.portalId;
+    generatedContext.payload = JSON.stringify(cause.config?.data);
+    // This will just be the url path
+    generatedContext.request = cause.config?.url;
 
     // Allow the provided context to override the generated context
     this.context = { ...generatedContext, ...context };
@@ -137,7 +140,7 @@ export class HubSpotHttpError<T = any> extends Error {
   private joinErrorMessages(
     error: AxiosError<{ message: string; errors: { message: string }[] }>,
     context: HubSpotHttpErrorContext = {}
-  ): void {
+  ): string {
     const i18nKey = 'errors.apiErrors';
     const status = error.response?.status;
     const method = error.config?.method as HttpMethod;
@@ -241,6 +244,6 @@ export class HubSpotHttpError<T = any> extends Error {
       });
     }
 
-    this.message = errorMessage.join(' ');
+    return errorMessage.join(' ');
   }
 }
