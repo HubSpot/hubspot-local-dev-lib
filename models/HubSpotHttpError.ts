@@ -27,9 +27,9 @@ export class HubSpotHttpError<T = any> extends Error {
     this.context = context;
 
     if (options && isAxiosError(options.cause)) {
-      this.updateContextFromCause(options.cause, context);
+      this.updateContextFromCause(options.cause, this.context);
       const { response, config, code } = options.cause;
-      this.joinErrorMessages(options.cause, context);
+      this.joinErrorMessages(options.cause, this.context);
 
       this.code = code;
       this.method = config?.method;

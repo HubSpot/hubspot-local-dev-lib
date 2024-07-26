@@ -2,7 +2,6 @@ import {
   isMissingScopeError,
   isGatingError,
   isSpecifiedError,
-  isApiUploadValidationError,
   isSystemError,
 } from '../index';
 import { BaseError } from '../../types/Error';
@@ -154,28 +153,6 @@ describe('errors/errors', () => {
       const error2 = newHubSpotHttpError({ isAxiosError: false });
       expect(isGatingError(error1)).toBe(false);
       expect(isGatingError(error2)).toBe(false);
-    });
-  });
-
-  describe('isApiUploadValidationError()', () => {
-    it('returns true for api upload validation errors', () => {
-      const error1 = newHubSpotHttpError({
-        response: { data: { message: 'upload validation error' }, status: 400 },
-      });
-      const error2 = newHubSpotHttpError({
-        response: { data: { errors: [] }, status: 400 },
-      });
-      expect(isApiUploadValidationError(error1)).toBe(true);
-      expect(isApiUploadValidationError(error2)).toBe(true);
-    });
-
-    it('returns false for non api upload validation errors', () => {
-      const error1 = newHubSpotHttpError({
-        response: { status: 400, data: null },
-      });
-      const error2 = newHubSpotHttpError({ isAxiosError: false });
-      expect(isApiUploadValidationError(error1)).toBe(false);
-      expect(isApiUploadValidationError(error2)).toBe(false);
     });
   });
 
