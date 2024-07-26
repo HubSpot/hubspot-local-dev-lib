@@ -12,7 +12,7 @@ type FetchThemesResponse = {
   }>;
 };
 
-export async function fetchThemes(
+export function fetchThemes(
   accountId: number,
   params: QueryParams = {}
 ): AxiosPromise<FetchThemesResponse> {
@@ -26,7 +26,7 @@ type FetchBuiltinMappingResponse = {
   [key: string]: string;
 };
 
-export async function fetchBuiltinMapping(
+export function fetchBuiltinMapping(
   accountId: number
 ): AxiosPromise<FetchBuiltinMappingResponse> {
   return http.get<FetchBuiltinMappingResponse>(accountId, {

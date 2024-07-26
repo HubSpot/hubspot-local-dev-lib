@@ -11,7 +11,7 @@ import { Environment } from '../types/Config';
 
 const TEST_ACCOUNTS_API_PATH = 'integrators/test-portals/v2';
 
-export async function fetchDeveloperTestAccounts(
+export function fetchDeveloperTestAccounts(
   accountId: number
 ): AxiosPromise<FetchDeveloperTestAccountsResponse> {
   return http.get<FetchDeveloperTestAccountsResponse>(accountId, {
@@ -19,7 +19,7 @@ export async function fetchDeveloperTestAccounts(
   });
 }
 
-export async function createDeveloperTestAccount(
+export function createDeveloperTestAccount(
   accountId: number,
   accountName: string
 ): AxiosPromise<DeveloperTestAccount> {
@@ -30,7 +30,7 @@ export async function createDeveloperTestAccount(
   });
 }
 
-export async function deleteDeveloperTestAccount(
+export function deleteDeveloperTestAccount(
   accountId: number,
   testAccountId: number
 ): AxiosPromise<void> {
@@ -39,7 +39,7 @@ export async function deleteDeveloperTestAccount(
   });
 }
 
-export async function fetchDeveloperTestAccountData(
+export function fetchDeveloperTestAccountData(
   accessToken: string,
   accountId: number,
   env: Environment = ENVIRONMENTS.PROD

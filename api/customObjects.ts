@@ -19,7 +19,7 @@ type CreateObjectsResponse = {
   }>;
 };
 
-export async function batchCreateObjects(
+export function batchCreateObjects(
   accountId: number,
   objectTypeId: string,
   objects: JSON
@@ -30,7 +30,7 @@ export async function batchCreateObjects(
   });
 }
 
-export async function createObjectSchema(
+export function createObjectSchema(
   accountId: number,
   schema: JSON
 ): AxiosPromise<Schema> {
@@ -40,7 +40,7 @@ export async function createObjectSchema(
   });
 }
 
-export async function updateObjectSchema(
+export function updateObjectSchema(
   accountId: number,
   schemaObjectType: string,
   schema: Schema
@@ -51,7 +51,7 @@ export async function updateObjectSchema(
   });
 }
 
-export async function fetchObjectSchema(
+export function fetchObjectSchema(
   accountId: number,
   schemaObjectType: string
 ): AxiosPromise<Schema> {
@@ -60,7 +60,7 @@ export async function fetchObjectSchema(
   });
 }
 
-export async function fetchObjectSchemas(
+export function fetchObjectSchemas(
   accountId: number
 ): AxiosPromise<FetchSchemasResponse> {
   return http.get<FetchSchemasResponse>(accountId, {
@@ -68,7 +68,7 @@ export async function fetchObjectSchemas(
   });
 }
 
-export async function deleteObjectSchema(
+export function deleteObjectSchema(
   accountId: number,
   schemaObjectType: string
 ): AxiosPromise<void> {

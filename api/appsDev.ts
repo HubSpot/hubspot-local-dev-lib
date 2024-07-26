@@ -12,7 +12,7 @@ type FetchPublicAppsForPortalResponse = {
   results: Array<PublicApp>;
 };
 
-export async function fetchPublicAppsForPortal(
+export function fetchPublicAppsForPortal(
   accountId: number
 ): AxiosPromise<FetchPublicAppsForPortalResponse> {
   return http.get<FetchPublicAppsForPortalResponse>(accountId, {
