@@ -150,7 +150,7 @@ async function putRequest<T>(
 async function patchRequest<T>(
   accountId: number,
   options: HttpOptions
-): Promise<T> {
+): AxiosPromise<T> {
   const configWithAuth = await withAuth(accountId, options);
   return axios({ ...configWithAuth, method: 'patch' });
 }
