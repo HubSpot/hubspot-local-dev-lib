@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { getAxiosConfig } from '../http/getAxiosConfig';
 import { logger } from './logger';
-import http from '../http';
+import { http } from '../http';
 import { getAccountConfig, getEnv } from '../config';
 import { FILE_MAPPER_API_PATH } from '../api/fileMapper';
 import { i18n } from '../utils/lang';

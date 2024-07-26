@@ -1,7 +1,7 @@
 import { AxiosPromise } from 'axios';
 import fs from 'fs';
 import path from 'path';
-import http from '../http';
+import { http } from '../http';
 import { FormData } from '../types/Http';
 import {
   FetchStatResponse,

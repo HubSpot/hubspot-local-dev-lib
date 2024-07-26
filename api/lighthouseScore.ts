@@ -1,5 +1,5 @@
 import { AxiosPromise } from 'axios';
-import http from '../http';
+import { http } from '../http';
 import { Data, QueryParams } from '../types/Http';
 import {
   GetLighthouseScoreResponse,

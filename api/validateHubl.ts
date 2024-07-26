@@ -1,5 +1,5 @@
 import { AxiosPromise } from 'axios';
-import http from '../http';
+import { http } from '../http';
 import { Validation, HublValidationOptions } from '../types/HublValidation';
 
 const HUBL_VALIDATE_API_PATH = 'cos-rendering/v1/internal/validate';

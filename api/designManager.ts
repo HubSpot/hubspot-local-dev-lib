@@ -1,5 +1,5 @@
 import { AxiosPromise } from 'axios';
-import http from '../http';
+import { http } from '../http';
 import { QueryParams } from '../types/Http';
 
 const DESIGN_MANAGER_API_PATH = 'designmanager/v1';

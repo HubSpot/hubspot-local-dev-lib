@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import contentDisposition from 'content-disposition';
 import { AxiosResponse, AxiosPromise } from 'axios';
-import http from '../http';
+import { http } from '../http';
 import { getCwd } from '../lib/path';
 import { FileMapperNode, FileMapperOptions, FileTree } from '../types/Files';
 
