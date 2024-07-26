@@ -1,3 +1,4 @@
+import { AxiosPromise } from 'axios';
 import http from '../http';
 import { QueryParams } from '../types/Http';
 import {
@@ -10,41 +11,41 @@ import {
 
 const HUBDB_API_PATH = 'cms/v3/hubdb';
 
-export async function fetchTable(
+export function fetchTable(
   accountId: number,
   tableId: string
-): Promise<Table> {
-  return http.get(accountId, {
+): AxiosPromise<Table> {
+  return http.get<Table>(accountId, {
     url: `${HUBDB_API_PATH}/tables/${tableId}`,
   });
 }
 
-export async function createTable(
+export function createTable(
   accountId: number,
   schema: Schema
-): Promise<Table> {
-  return http.post(accountId, {
+): AxiosPromise<Table> {
+  return http.post<Table>(accountId, {
     url: `${HUBDB_API_PATH}/tables`,
     data: schema,
   });
 }
 
-export async function updateTable(
+export function updateTable(
   accountId: number,
   tableId: string,
   schema: Schema
-) {
-  return http.patch(accountId, {
+): AxiosPromise<Table> {
+  return http.patch<Table>(accountId, {
     url: `${HUBDB_API_PATH}/tables/${tableId}/draft`,
     data: schema,
   });
 }
 
-export async function publishTable(
+export function publishTable(
   accountId: number,
   tableId: string
-): Promise<Table> {
-  return http.post(accountId, {
+): AxiosPromise<Table> {
+  return http.post<Table>(accountId, {
     url: `${HUBDB_API_PATH}/tables/${tableId}/draft/publish`,
     headers: {
       'Content-Type': 'application/json',
@@ -52,42 +53,42 @@ export async function publishTable(
   });
 }
 
-export async function deleteTable(
+export function deleteTable(
   accountId: number,
   tableId: string
-): Promise<void> {
+): AxiosPromise<void> {
   return http.delete(accountId, {
     url: `${HUBDB_API_PATH}/tables/${tableId}`,
   });
 }
 
-export async function createRows(
+export function createRows(
   accountId: number,
   tableId: string,
   rows: Array<Row>
-): Promise<CreateRowsResponse> {
-  return http.post(accountId, {
+): AxiosPromise<CreateRowsResponse> {
+  return http.post<CreateRowsResponse>(accountId, {
     url: `${HUBDB_API_PATH}/tables/${tableId}/rows/draft/batch/create`,
     data: { inputs: rows },
   });
 }
 
-export async function fetchRows(
+export function fetchRows(
   accountId: number,
   tableId: string,
   params: QueryParams = {}
-): Promise<FetchRowsResponse> {
-  return http.get(accountId, {
+): AxiosPromise<FetchRowsResponse> {
+  return http.get<FetchRowsResponse>(accountId, {
     url: `${HUBDB_API_PATH}/tables/${tableId}/rows/draft`,
     params,
   });
 }
 
-export async function deleteRows(
+export function deleteRows(
   accountId: number,
   tableId: string,
   rowIds: Array<string>
-): Promise<void> {
+): AxiosPromise<void> {
   return http.post(accountId, {
     url: `${HUBDB_API_PATH}/tables/${tableId}/rows/draft/batch/purge`,
     data: { inputs: rowIds },
