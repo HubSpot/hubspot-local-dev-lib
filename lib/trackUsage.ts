@@ -44,7 +44,7 @@ export async function trackUsage(
 
   if (accountConfig && accountConfig.authType === 'personalaccesskey') {
     logger.debug(i18n(`${i18nKey}.sendingEventAuthenticated`));
-    return http.post(accountId, {
+    http.post(accountId, {
       url: `${path}/authenticated`,
       data: usageEvent,
       resolveWithFullResponse: true,
