@@ -1,3 +1,4 @@
+import { AxiosPromise } from 'axios';
 import http from '../http';
 import { Data, QueryParams } from '../types/Http';
 import { GetValidationResultsResponse } from '../types/MarketplaceValidation';
@@ -7,8 +8,8 @@ const VALIDATION_API_BASE = 'quality-engine/v1/validation';
 export function requestValidation(
   accountId: number,
   data: Data = {}
-): Promise<number> {
-  return http.post(accountId, {
+): AxiosPromise<number> {
+  return http.post<number>(accountId, {
     url: `${VALIDATION_API_BASE}/request`,
     data,
   });
@@ -17,8 +18,8 @@ export function requestValidation(
 export function getValidationStatus(
   accountId: number,
   params: QueryParams = {}
-): Promise<string> {
-  return http.get(accountId, {
+): AxiosPromise<string> {
+  return http.get<string>(accountId, {
     url: `${VALIDATION_API_BASE}/status`,
     params,
   });
@@ -27,8 +28,8 @@ export function getValidationStatus(
 export function getValidationResults(
   accountId: number,
   params: QueryParams = {}
-): Promise<GetValidationResultsResponse> {
-  return http.get(accountId, {
+): AxiosPromise<GetValidationResultsResponse> {
+  return http.get<GetValidationResultsResponse>(accountId, {
     url: `${VALIDATION_API_BASE}/results`,
     params,
   });

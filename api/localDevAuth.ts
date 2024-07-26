@@ -23,7 +23,7 @@ type AccessTokenResponse = {
   accountType: ValueOf<typeof HUBSPOT_ACCOUNT_TYPES>;
 };
 
-export async function fetchAccessToken(
+export function fetchAccessToken(
   personalAccessKey: string,
   env: Environment = ENVIRONMENTS.PROD,
   portalId?: number
@@ -44,7 +44,7 @@ export async function fetchAccessToken(
   });
 }
 
-export async function fetchScopeData(
+export function fetchScopeData(
   accountId: number,
   scopeGroup: string
 ): AxiosPromise<ScopeData> {
@@ -54,7 +54,7 @@ export async function fetchScopeData(
   });
 }
 
-export async function fetchAppInstallationData(
+export function fetchAppInstallationData(
   portalId: number,
   projectId: number,
   appUid: string,

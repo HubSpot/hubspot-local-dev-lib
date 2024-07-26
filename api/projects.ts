@@ -1,3 +1,4 @@
+import { AxiosPromise } from 'axios';
 import http from '../http';
 import fs from 'fs';
 import { FormData, QueryParams } from '../types/Http';
@@ -26,19 +27,19 @@ const PROJECTS_LOGS_API_PATH = 'dfs/logging/v1';
 const DEVELOPER_PROJECTS_API_PATH = 'developer/projects/v1';
 const MIGRATIONS_API_PATH = 'dfs/migrations/v1';
 
-export async function fetchProjects(
+export function fetchProjects(
   accountId: number
-): Promise<FetchProjectResponse> {
-  return http.get(accountId, {
+): AxiosPromise<FetchProjectResponse> {
+  return http.get<FetchProjectResponse>(accountId, {
     url: PROJECTS_API_PATH,
   });
 }
 
-export async function createProject(
+export function createProject(
   accountId: number,
   name: string
-): Promise<Project> {
-  return http.post(accountId, {
+): AxiosPromise<Project> {
+  return http.post<Project>(accountId, {
     url: PROJECTS_API_PATH,
     data: {
       name,
@@ -46,13 +47,13 @@ export async function createProject(
   });
 }
 
-export async function uploadProject(
+export function uploadProject(
   accountId: number,
   projectName: string,
   projectFile: string,
   uploadMessage: string,
   platformVersion?: string
-): Promise<UploadProjectResponse> {
+): AxiosPromise<UploadProjectResponse> {
   const formData: FormData = {
     file: fs.createReadStream(projectFile),
     uploadMessage,
@@ -61,7 +62,7 @@ export async function uploadProject(
     formData.platformVersion = platformVersion;
   }
 
-  return http.post(accountId, {
+  return http.post<UploadProjectResponse>(accountId, {
     url: `${PROJECTS_API_PATH}/upload/${encodeURIComponent(projectName)}`,
     timeout: 60000,
     data: formData,
@@ -69,21 +70,21 @@ export async function uploadProject(
   });
 }
 
-export async function fetchProject(
+export function fetchProject(
   accountId: number,
   projectName: string
-): Promise<Project> {
-  return http.get(accountId, {
+): AxiosPromise<Project> {
+  return http.get<Project>(accountId, {
     url: `${PROJECTS_API_PATH}/${encodeURIComponent(projectName)}`,
   });
 }
 
-export async function downloadProject(
+export function downloadProject(
   accountId: number,
   projectName: string,
   buildId: number
-): Promise<Buffer> {
-  return http.get(accountId, {
+): AxiosPromise<Buffer> {
+  return http.get<Buffer>(accountId, {
     url: `${PROJECTS_API_PATH}/${encodeURIComponent(
       projectName
     )}/builds/${buildId}/archive-full`,
@@ -92,10 +93,10 @@ export async function downloadProject(
   });
 }
 
-export async function deleteProject(
+export function deleteProject(
   accountId: number,
   projectName: string
-): Promise<void> {
+): AxiosPromise<void> {
   return http.delete(accountId, {
     url: `${PROJECTS_API_PATH}/${encodeURIComponent(projectName)}`,
   });
@@ -106,55 +107,55 @@ type FetchPlatformVersionResponse = {
   activePlatformVersions: Array<string>;
 };
 
-export async function fetchPlatformVersions(
+export function fetchPlatformVersions(
   accountId: number
-): Promise<FetchPlatformVersionResponse> {
-  return http.get(accountId, {
+): AxiosPromise<FetchPlatformVersionResponse> {
+  return http.get<FetchPlatformVersionResponse>(accountId, {
     url: `${DEVELOPER_PROJECTS_API_PATH}/platformVersion`,
   });
 }
 
-export async function fetchProjectBuilds(
+export function fetchProjectBuilds(
   accountId: number,
   projectName: string,
   params: QueryParams = {}
-): Promise<FetchProjectBuildsResponse> {
-  return http.get(accountId, {
+): AxiosPromise<FetchProjectBuildsResponse> {
+  return http.get<FetchProjectBuildsResponse>(accountId, {
     url: `${PROJECTS_API_PATH}/${encodeURIComponent(projectName)}/builds`,
     params,
   });
 }
 
-export async function getBuildStatus(
+export function getBuildStatus(
   accountId: number,
   projectName: string,
   buildId: number
-): Promise<Build> {
-  return http.get(accountId, {
+): AxiosPromise<Build> {
+  return http.get<Build>(accountId, {
     url: `${PROJECTS_API_PATH}/${encodeURIComponent(
       projectName
     )}/builds/${buildId}/status`,
   });
 }
 
-export async function getBuildStructure(
+export function getBuildStructure(
   accountId: number,
   projectName: string,
   buildId: number
-): Promise<ComponentStructureResponse> {
-  return http.get(accountId, {
+): AxiosPromise<ComponentStructureResponse> {
+  return http.get<ComponentStructureResponse>(accountId, {
     url: `dfs/v1/builds/by-project-name/${encodeURIComponent(
       projectName
     )}/builds/${buildId}/structure`,
   });
 }
 
-export async function deployProject(
+export function deployProject(
   accountId: number,
   projectName: string,
   buildId: number
-): Promise<ProjectDeployResponse> {
-  return http.post(accountId, {
+): AxiosPromise<ProjectDeployResponse> {
+  return http.post<ProjectDeployResponse>(accountId, {
     url: `${PROJECTS_DEPLOY_API_PATH}/deploys/queue/async`,
     data: {
       projectName,
@@ -163,54 +164,54 @@ export async function deployProject(
   });
 }
 
-export async function getDeployStatus(
+export function getDeployStatus(
   accountId: number,
   projectName: string,
   deployId: number
-): Promise<Deploy> {
-  return http.get(accountId, {
+): AxiosPromise<Deploy> {
+  return http.get<Deploy>(accountId, {
     url: `${PROJECTS_DEPLOY_API_PATH}/deploy-status/projects/${encodeURIComponent(
       projectName
     )}/deploys/${deployId}`,
   });
 }
 
-export async function getDeployStructure(
+export function getDeployStructure(
   accountId: number,
   projectName: string,
   deployId: number
-): Promise<ComponentStructureResponse> {
-  return http.get(accountId, {
+): AxiosPromise<ComponentStructureResponse> {
+  return http.get<ComponentStructureResponse>(accountId, {
     url: `${PROJECTS_DEPLOY_API_PATH}/deploys/by-project-name/${encodeURIComponent(
       projectName
     )}/deploys/${deployId}/structure`,
   });
 }
 
-export async function fetchProjectSettings(
+export function fetchProjectSettings(
   accountId: number,
   projectName: string
-): Promise<ProjectSettings> {
-  return http.get(accountId, {
+): AxiosPromise<ProjectSettings> {
+  return http.get<ProjectSettings>(accountId, {
     url: `${PROJECTS_API_PATH}/${encodeURIComponent(projectName)}/settings`,
   });
 }
 
-export async function fetchDeployComponentsMetadata(
+export function fetchDeployComponentsMetadata(
   accountId: number,
   projectId: number
-): Promise<ComponentMetadataResponse> {
-  return http.get(accountId, {
+): AxiosPromise<ComponentMetadataResponse> {
+  return http.get<ComponentMetadataResponse>(accountId, {
     url: `${PROJECTS_API_PATH}/by-id/${projectId}/deploy-components-metadata`,
   });
 }
 
-export async function provisionBuild(
+export function provisionBuild(
   accountId: number,
   projectName: string,
   platformVersion?: string
-): Promise<Build> {
-  return http.post(accountId, {
+): AxiosPromise<Build> {
+  return http.post<Build>(accountId, {
     url: `${PROJECTS_API_PATH}/${encodeURIComponent(
       projectName
     )}/builds/staged/provision`,
@@ -220,11 +221,11 @@ export async function provisionBuild(
   });
 }
 
-export async function queueBuild(
+export function queueBuild(
   accountId: number,
   projectName: string,
   platformVersion?: string
-): Promise<void> {
+): AxiosPromise<void> {
   return http.post(accountId, {
     url: `${PROJECTS_API_PATH}/${encodeURIComponent(
       projectName
@@ -234,12 +235,12 @@ export async function queueBuild(
   });
 }
 
-export async function uploadFileToBuild(
+export function uploadFileToBuild(
   accountId: number,
   projectName: string,
   filePath: string,
   path: string
-): Promise<void> {
+): AxiosPromise<void> {
   return http.put(accountId, {
     url: `${PROJECTS_API_PATH}/${encodeURIComponent(
       projectName
@@ -251,11 +252,11 @@ export async function uploadFileToBuild(
   });
 }
 
-export async function deleteFileFromBuild(
+export function deleteFileFromBuild(
   accountId: number,
   projectName: string,
   path: string
-): Promise<void> {
+): AxiosPromise<void> {
   return http.delete(accountId, {
     url: `${PROJECTS_API_PATH}/${encodeURIComponent(
       projectName
@@ -263,10 +264,10 @@ export async function deleteFileFromBuild(
   });
 }
 
-export async function cancelStagedBuild(
+export function cancelStagedBuild(
   accountId: number,
   projectName: string
-): Promise<void> {
+): AxiosPromise<void> {
   return http.post(accountId, {
     url: `${PROJECTS_API_PATH}/${encodeURIComponent(
       projectName
@@ -275,36 +276,40 @@ export async function cancelStagedBuild(
   });
 }
 
-export async function fetchBuildWarnLogs(
+type WarnLogsResponse = {
+  logs: Array<ProjectLog>;
+};
+
+export function fetchBuildWarnLogs(
   accountId: number,
   projectName: string,
   buildId: number
-): Promise<{ logs: Array<ProjectLog> }> {
-  return http.get(accountId, {
+): AxiosPromise<WarnLogsResponse> {
+  return http.get<WarnLogsResponse>(accountId, {
     url: `${PROJECTS_LOGS_API_PATH}/logs/projects/${encodeURIComponent(
       projectName
     )}/builds/${buildId}/combined/warn`,
   });
 }
 
-export async function fetchDeployWarnLogs(
+export function fetchDeployWarnLogs(
   accountId: number,
   projectName: string,
   deployId: number
-): Promise<{ logs: Array<ProjectLog> }> {
-  return http.get(accountId, {
+): AxiosPromise<WarnLogsResponse> {
+  return http.get<WarnLogsResponse>(accountId, {
     url: `${PROJECTS_LOGS_API_PATH}/logs/projects/${encodeURIComponent(
       projectName
     )}/deploys/${deployId}/combined/warn`,
   });
 }
 
-export async function migrateApp(
+export function migrateApp(
   accountId: number,
   appId: number,
   projectName: string
-): Promise<MigrateAppResponse> {
-  return http.post(accountId, {
+): AxiosPromise<MigrateAppResponse> {
+  return http.post<MigrateAppResponse>(accountId, {
     url: `${MIGRATIONS_API_PATH}/migrations`,
     data: {
       componentId: appId,
@@ -314,20 +319,20 @@ export async function migrateApp(
   });
 }
 
-export async function checkMigrationStatus(
+export function checkMigrationStatus(
   accountId: number,
   id: number
-): Promise<PollAppResponse> {
-  return http.get(accountId, {
+): AxiosPromise<PollAppResponse> {
+  return http.get<PollAppResponse>(accountId, {
     url: `${MIGRATIONS_API_PATH}/migrations/${id}`,
   });
 }
 
-export async function cloneApp(
+export function cloneApp(
   accountId: number,
   appId: number
-): Promise<CloneAppResponse> {
-  return http.post(accountId, {
+): AxiosPromise<CloneAppResponse> {
+  return http.post<CloneAppResponse>(accountId, {
     url: `${MIGRATIONS_API_PATH}/exports`,
     data: {
       componentId: appId,
@@ -336,20 +341,20 @@ export async function cloneApp(
   });
 }
 
-export async function checkCloneStatus(
+export function checkCloneStatus(
   accountId: number,
   exportId: number
-): Promise<CloneAppResponse> {
-  return http.get(accountId, {
+): AxiosPromise<CloneAppResponse> {
+  return http.get<CloneAppResponse>(accountId, {
     url: `${MIGRATIONS_API_PATH}/exports/${exportId}/status`,
   });
 }
 
-export async function downloadClonedProject(
+export function downloadClonedProject(
   accountId: number,
   exportId: number
-): Promise<Buffer> {
-  return http.get(accountId, {
+): AxiosPromise<Buffer> {
+  return http.get<Buffer>(accountId, {
     url: `${MIGRATIONS_API_PATH}/exports/${exportId}/download-as-clone`,
     responseType: 'arraybuffer',
   });
