@@ -1,3 +1,4 @@
+import { AxiosPromise } from 'axios';
 import { getAxiosConfig } from '../http/getAxiosConfig';
 import http from '../http';
 import { ENVIRONMENTS } from '../constants/environments';
@@ -26,7 +27,7 @@ export async function fetchAccessToken(
   personalAccessKey: string,
   env: Environment = ENVIRONMENTS.PROD,
   portalId?: number
-): Promise<AccessTokenResponse> {
+): AxiosPromise<AccessTokenResponse> {
   const axiosConfig = getAxiosConfig({
     env,
     localHostOverride: true,
@@ -37,18 +38,16 @@ export async function fetchAccessToken(
     params: portalId ? { portalId } : {},
   });
 
-  const { data } = await axios<AccessTokenResponse>({
+  return axios<AccessTokenResponse>({
     ...axiosConfig,
     method: 'post',
   });
-
-  return data;
 }
 
 export async function fetchScopeData(
   accountId: number,
   scopeGroup: string
-): Promise<ScopeData> {
+): AxiosPromise<ScopeData> {
   return http.get<ScopeData>(accountId, {
     url: `${LOCALDEVAUTH_API_AUTH_PATH}/check-scopes`,
     params: { scopeGroup },
@@ -61,7 +60,7 @@ export async function fetchAppInstallationData(
   appUid: string,
   requiredScopeGroups: Array<string>,
   optionalScopeGroups: Array<string> = []
-): Promise<PublicAppInstallationData> {
+): AxiosPromise<PublicAppInstallationData> {
   return http.post<PublicAppInstallationData>(portalId, {
     url: `${LOCALDEVAUTH_API_AUTH_PATH}/install-info`,
     data: {
