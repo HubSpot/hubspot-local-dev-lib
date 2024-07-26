@@ -15,6 +15,7 @@ import {
   updateConfigWithAccessToken,
 } from '../personalAccessKey';
 import { AuthType } from '../../types/Accounts';
+import { mockAxiosResponse } from './__utils__/mockAxiosResponse';
 
 jest.mock('../../config');
 jest.mock('../logger');
@@ -59,16 +60,18 @@ describe('lib/personalAccessKey', () => {
       getAccountConfig.mockReturnValue(account);
 
       const freshAccessToken = 'fresh-token';
-      fetchAccessToken.mockResolvedValue({
-        oauthAccessToken: freshAccessToken,
-        expiresAtMillis: moment().add(1, 'hours').valueOf(),
-        encodedOAuthRefreshToken: 'let-me-in',
-        scopeGroups: ['content'],
-        hubId: accountId,
-        userId: 456,
-        hubName: 'test-hub',
-        accountType: HUBSPOT_ACCOUNT_TYPES.STANDARD,
-      });
+      fetchAccessToken.mockResolvedValue(
+        mockAxiosResponse({
+          oauthAccessToken: freshAccessToken,
+          expiresAtMillis: moment().add(1, 'hours').valueOf(),
+          encodedOAuthRefreshToken: 'let-me-in',
+          scopeGroups: ['content'],
+          hubId: accountId,
+          userId: 456,
+          hubName: 'test-hub',
+          accountType: HUBSPOT_ACCOUNT_TYPES.STANDARD,
+        })
+      );
       const accessToken = await accessTokenForPersonalAccessKey(accountId);
       expect(accessToken).toEqual(freshAccessToken);
     });
@@ -112,16 +115,18 @@ describe('lib/personalAccessKey', () => {
       getAccountConfig.mockReturnValue(account);
 
       const freshAccessToken = 'fresh-token';
-      fetchAccessToken.mockResolvedValue({
-        oauthAccessToken: freshAccessToken,
-        expiresAtMillis: moment().add(1, 'hours').valueOf(),
-        encodedOAuthRefreshToken: 'let-me-in-3',
-        scopeGroups: ['content'],
-        hubId: accountId,
-        userId: 456,
-        hubName: 'test-hub',
-        accountType: HUBSPOT_ACCOUNT_TYPES.STANDARD,
-      });
+      fetchAccessToken.mockResolvedValue(
+        mockAxiosResponse({
+          oauthAccessToken: freshAccessToken,
+          expiresAtMillis: moment().add(1, 'hours').valueOf(),
+          encodedOAuthRefreshToken: 'let-me-in-3',
+          scopeGroups: ['content'],
+          hubId: accountId,
+          userId: 456,
+          hubName: 'test-hub',
+          accountType: HUBSPOT_ACCOUNT_TYPES.STANDARD,
+        })
+      );
       const accessToken = await accessTokenForPersonalAccessKey(accountId);
       expect(accessToken).toEqual(freshAccessToken);
     });
@@ -153,16 +158,18 @@ describe('lib/personalAccessKey', () => {
       const firstAccessToken = 'fresh-token';
       const expiresAtMillis = moment().subtract(1, 'hours').valueOf();
 
-      fetchAccessToken.mockResolvedValue({
-        oauthAccessToken: firstAccessToken,
-        expiresAtMillis,
-        encodedOAuthRefreshToken: accessKey,
-        scopeGroups: ['content'],
-        hubId: accountId,
-        userId,
-        hubName: 'test-hub',
-        accountType: HUBSPOT_ACCOUNT_TYPES.STANDARD,
-      });
+      fetchAccessToken.mockResolvedValue(
+        mockAxiosResponse({
+          oauthAccessToken: firstAccessToken,
+          expiresAtMillis,
+          encodedOAuthRefreshToken: accessKey,
+          scopeGroups: ['content'],
+          hubId: accountId,
+          userId,
+          hubName: 'test-hub',
+          accountType: HUBSPOT_ACCOUNT_TYPES.STANDARD,
+        })
+      );
       const firstRefreshedAccessToken =
         await accessTokenForPersonalAccessKey(accountId);
       expect(firstRefreshedAccessToken).toEqual(firstAccessToken);
@@ -176,16 +183,18 @@ describe('lib/personalAccessKey', () => {
       getAccountConfig.mockReturnValueOnce(updatedAccountConfig);
 
       const secondAccessToken = 'another-fresh-token';
-      fetchAccessToken.mockResolvedValue({
-        oauthAccessToken: secondAccessToken,
-        expiresAtMillis,
-        encodedOAuthRefreshToken: accessKey,
-        scopeGroups: ['content'],
-        hubId: accountId,
-        userId,
-        hubName: 'test-hub',
-        accountType: HUBSPOT_ACCOUNT_TYPES.STANDARD,
-      });
+      fetchAccessToken.mockResolvedValue(
+        mockAxiosResponse({
+          oauthAccessToken: secondAccessToken,
+          expiresAtMillis,
+          encodedOAuthRefreshToken: accessKey,
+          scopeGroups: ['content'],
+          hubId: accountId,
+          userId,
+          hubName: 'test-hub',
+          accountType: HUBSPOT_ACCOUNT_TYPES.STANDARD,
+        })
+      );
 
       const secondRefreshedAccessToken =
         await accessTokenForPersonalAccessKey(accountId);
@@ -196,16 +205,18 @@ describe('lib/personalAccessKey', () => {
   describe('updateConfigWithPersonalAccessKey()', () => {
     it('updates the config with the new account', async () => {
       const freshAccessToken = 'fresh-token';
-      fetchAccessToken.mockResolvedValue({
-        oauthAccessToken: freshAccessToken,
-        expiresAtMillis: moment().add(1, 'hours').valueOf(),
-        encodedOAuthRefreshToken: 'let-me-in-5',
-        scopeGroups: ['content'],
-        hubId: 123,
-        userId: 456,
-        hubName: 'test-hub',
-        accountType: HUBSPOT_ACCOUNT_TYPES.STANDARD,
-      });
+      fetchAccessToken.mockResolvedValue(
+        mockAxiosResponse({
+          oauthAccessToken: freshAccessToken,
+          expiresAtMillis: moment().add(1, 'hours').valueOf(),
+          encodedOAuthRefreshToken: 'let-me-in-5',
+          scopeGroups: ['content'],
+          hubId: 123,
+          userId: 456,
+          hubName: 'test-hub',
+          accountType: HUBSPOT_ACCOUNT_TYPES.STANDARD,
+        })
+      );
 
       const token = await getAccessToken('pak_123', ENVIRONMENTS.QA, 123);
 
@@ -228,22 +239,26 @@ describe('lib/personalAccessKey', () => {
     });
 
     it('updates the config with the new account for sandbox accounts', async () => {
-      fetchSandboxHubData.mockResolvedValue({
-        type: 'DEVELOPER',
-        parentHubId: 789,
-      });
+      fetchSandboxHubData.mockResolvedValue(
+        mockAxiosResponse({
+          type: 'DEVELOPER',
+          parentHubId: 789,
+        })
+      );
 
       const freshAccessToken = 'fresh-token';
-      fetchAccessToken.mockResolvedValue({
-        oauthAccessToken: freshAccessToken,
-        expiresAtMillis: moment().add(1, 'hours').valueOf(),
-        encodedOAuthRefreshToken: 'let-me-in-5',
-        scopeGroups: ['content'],
-        hubId: 123,
-        userId: 456,
-        hubName: 'test-hub',
-        accountType: HUBSPOT_ACCOUNT_TYPES.DEVELOPMENT_SANDBOX,
-      });
+      fetchAccessToken.mockResolvedValue(
+        mockAxiosResponse({
+          oauthAccessToken: freshAccessToken,
+          expiresAtMillis: moment().add(1, 'hours').valueOf(),
+          encodedOAuthRefreshToken: 'let-me-in-5',
+          scopeGroups: ['content'],
+          hubId: 123,
+          userId: 456,
+          hubName: 'test-hub',
+          accountType: HUBSPOT_ACCOUNT_TYPES.DEVELOPMENT_SANDBOX,
+        })
+      );
 
       const token = await getAccessToken('pak_123', ENVIRONMENTS.QA, 123);
 
@@ -268,26 +283,30 @@ describe('lib/personalAccessKey', () => {
 
     it('updates the config with the new account for developer test accounts', async () => {
       fetchSandboxHubData.mockRejectedValue(new Error('Not a sandbox'));
-      fetchDeveloperTestAccountData.mockResolvedValue({
-        parentPortalId: 999,
-        testPortalId: 123,
-        accountName: 'Dev test portal',
-        createdAt: '123',
-        updatedAt: '123',
-        status: 'ACTIVE',
-      });
+      fetchDeveloperTestAccountData.mockResolvedValue(
+        mockAxiosResponse({
+          parentPortalId: 999,
+          testPortalId: 123,
+          accountName: 'Dev test portal',
+          createdAt: '123',
+          updatedAt: '123',
+          status: 'ACTIVE',
+        })
+      );
 
       const freshAccessToken = 'fresh-token';
-      fetchAccessToken.mockResolvedValue({
-        oauthAccessToken: freshAccessToken,
-        expiresAtMillis: moment().add(1, 'hours').valueOf(),
-        encodedOAuthRefreshToken: 'let-me-in-5',
-        scopeGroups: ['content'],
-        hubId: 123,
-        userId: 456,
-        hubName: 'test-hub',
-        accountType: HUBSPOT_ACCOUNT_TYPES.DEVELOPER_TEST,
-      });
+      fetchAccessToken.mockResolvedValue(
+        mockAxiosResponse({
+          oauthAccessToken: freshAccessToken,
+          expiresAtMillis: moment().add(1, 'hours').valueOf(),
+          encodedOAuthRefreshToken: 'let-me-in-5',
+          scopeGroups: ['content'],
+          hubId: 123,
+          userId: 456,
+          hubName: 'test-hub',
+          accountType: HUBSPOT_ACCOUNT_TYPES.DEVELOPER_TEST,
+        })
+      );
 
       const token = await getAccessToken('pak_123', ENVIRONMENTS.QA, 123);
 
