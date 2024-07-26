@@ -63,14 +63,22 @@ export class HubSpotHttpError<T = any> extends Error {
   }
 
   public toString() {
-    let baseString = `${this.name}: \n- message: ${this.message}`;
+    const messages = [`${this.name}: \n- message: ${this.message}`];
+    ['status', 'statusText', 'method', 'code'].forEach(field => {
+      if (Object.hasOwn(this, field)) {
+        // @ts-expect-error this[field] exists, so we know it is a property of this
+        messages.push(`${field}: ${this[field]}`);
+      }
+    });
+
     if (this.validationErrors && this.validationErrors.length > 0) {
-      baseString = `${baseString} \n- errors: ${this.validationErrors.join('\n- ')}`;
+      messages.push(`errors: ${this.validationErrors.join('\n- ')}`);
     }
     if (this.context) {
-      baseString = `${baseString} \n- context: ${JSON.stringify(this.context, undefined, 2)}`;
+      messages.push(`context: ${JSON.stringify(this.context, undefined, 2)}`);
     }
-    return baseString;
+
+    return messages.join(`\n- `);
   }
 
   private updateContextFromCause(
@@ -84,7 +92,6 @@ export class HubSpotHttpError<T = any> extends Error {
 
     try {
       generatedContext.accountId = cause.config?.params?.portalId;
-      generatedContext.payload = JSON.stringify(cause.config?.data);
       // This will just be the url path
       generatedContext.request = cause.config?.url;
     } catch (e) {
