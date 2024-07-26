@@ -29,7 +29,8 @@ export async function downloadSchemas(
   let response: FetchSchemasResponse;
 
   try {
-    response = await fetchObjectSchemas(accountId);
+    const axiosResponse = await fetchObjectSchemas(accountId);
+    response = axiosResponse.data;
   } catch (err) {
     throwApiError(err);
   }
@@ -51,7 +52,8 @@ export async function downloadSchema(
   let response: Schema;
 
   try {
-    response = await fetchObjectSchema(accountId, schemaObjectType);
+    const axiosResponse = await fetchObjectSchema(accountId, schemaObjectType);
+    response = axiosResponse.data;
   } catch (err) {
     throwApiError(err);
   }
