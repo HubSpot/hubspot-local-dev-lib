@@ -3,6 +3,7 @@ import path from 'path';
 
 import { STAT_TYPES } from '../constants/files';
 import { StatType, FileData } from '../types/Files';
+import { FileSystemError } from '../models/FileSystemError';
 
 export function getFileInfoAsync(dir: string, file: string): Promise<FileData> {
   return new Promise((resolve, reject) => {
@@ -68,6 +69,6 @@ export async function walk(dir: string): Promise<Array<string>> {
     .then(processFiles)
     .then(flattenAndRemoveSymlinks)
     .catch(err => {
-      throw err;
+      throw new FileSystemError({ cause: err });
     });
 }

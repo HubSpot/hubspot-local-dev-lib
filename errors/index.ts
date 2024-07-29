@@ -59,6 +59,14 @@ export function isAuthError(err: unknown): err is HubSpotHttpError {
   );
 }
 
+export function isValidationError(err: unknown): boolean {
+  return (
+    isHubSpotHttpError(err) &&
+    isSpecifiedError(err, { statusCode: 400 }) &&
+    !!(err?.data?.message || !!err.data?.errors)
+  );
+}
+
 export function isHubSpotHttpError(error?: unknown): error is HubSpotHttpError {
   return !!error && error instanceof HubSpotHttpError;
 }

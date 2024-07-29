@@ -78,13 +78,20 @@ export class HubSpotHttpError<T = any> extends Error {
     });
 
     if (this.validationErrors && this.validationErrors.length > 0) {
-      messages.push(`errors: ${this.validationErrors.join('\n- ')}`);
+      messages.push(`errors: ${this.formattedValidationErrors()}`);
     }
     if (this.context) {
       messages.push(`context: ${JSON.stringify(this.context, undefined, 2)}`);
     }
 
     return messages.join('\n- ');
+  }
+
+  public formattedValidationErrors(): string {
+    if (!this.validationErrors || this.validationErrors?.length === 0) {
+      return '';
+    }
+    return this.validationErrors?.join('\n- ');
   }
 
   private updateContextFromCause(
