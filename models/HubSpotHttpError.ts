@@ -15,7 +15,7 @@ export class HubSpotHttpError<T = any> extends Error {
   public method: string | undefined;
   public context: HubSpotHttpErrorContext | undefined;
   public validationErrors: string[] | undefined;
-  private internalMessage?: string;
+  public detailedMessage?: string;
 
   constructor(
     message?: string,
@@ -32,7 +32,7 @@ export class HubSpotHttpError<T = any> extends Error {
       this.message = this.joinErrorMessages(options.cause, {
         accountId: this.context?.accountId,
       });
-      this.internalMessage = this.joinErrorMessages(
+      this.detailedMessage = this.joinErrorMessages(
         options.cause,
         this.context
       );
@@ -69,7 +69,7 @@ export class HubSpotHttpError<T = any> extends Error {
   }
 
   public toString() {
-    const messages = [`${this.name}: \n- message: ${this.internalMessage}`];
+    const messages = [`${this.name}: \n- message: ${this.detailedMessage}`];
     ['status', 'statusText', 'method', 'code'].forEach(field => {
       if (Object.hasOwn(this, field)) {
         // @ts-expect-error this[field] exists, so we know it is a property of this
