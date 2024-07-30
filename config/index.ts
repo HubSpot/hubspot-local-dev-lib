@@ -5,7 +5,7 @@ import {
   getConfigFilePath,
   deleteConfigFile as newDeleteConfigFile,
 } from './configFile';
-import { CLIConfig_NEW, CLIConfig } from '../types/Config';
+import { CLIConfig } from '../types/Config';
 import { CLIOptions, WriteConfigOptions } from '../types/CLIOptions';
 import { AccountType, CLIAccount, FlatAccountFields } from '../types/Accounts';
 import { getAccountIdentifier } from '../utils/getAccountIdentifier';
@@ -72,20 +72,17 @@ export function getConfig(): CLIConfig | null {
 
 export function writeConfig(options: WriteConfigOptions = {}): void {
   if (CLIConfiguration.isActive()) {
-    const config = options.source
-      ? (JSON.parse(options.source) as CLIConfig_NEW)
-      : undefined;
+    const config = options.source ? options.source : undefined;
     CLIConfiguration.write(config);
   } else {
     config_DEPRECATED.writeConfig(options);
   }
 }
 
-export function getConfigPath(path?: string): string | null {
-  if (CLIConfiguration.isActive()) {
-    return getConfigFilePath();
-  }
-  return config_DEPRECATED.getConfigPath(path);
+// Need to rewrite this not to rely on CLIConfiguration.
+// We fetch the path before we call CLIConfiguration.init.
+export function getConfigPath(): string | null {
+  return getConfigFilePath();
 }
 
 export function getAccountConfig(accountId?: number): CLIAccount | null {

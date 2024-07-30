@@ -245,7 +245,7 @@ export async function updateConfigWithAccessToken(
     parentAccountId,
     env: accountEnv,
   });
-  writeConfig();
+  writeConfig({ source: updatedConfig });
 
   if (makeDefault && name) {
     updateDefaultAccount(name);

@@ -346,10 +346,13 @@ class CLIConfiguration {
       return null;
     }
 
+    // Check whether the account is already listed in the config.yml file.
     const currentAccountConfig = this.getAccount(accountId);
 
+    // For accounts that are already in the config.yml file, sets the auth property.
     let auth: OAuthAccount_NEW['auth'] =
       (currentAccountConfig && currentAccountConfig.auth) || {};
+    // For accounts not already in the config.yml file, sets the auth property.
     if (clientId || clientSecret || scopes || tokenInfo) {
       auth = {
         ...(currentAccountConfig ? currentAccountConfig.auth : {}),
@@ -419,11 +422,12 @@ class CLIConfiguration {
           accountId,
         })
       );
-      if (this.config.accounts) {
-        this.config.accounts.push(completedAccountConfig);
-      } else {
-        this.config.accounts = [completedAccountConfig];
-      }
+    }
+
+    if (this.config.accounts) {
+      this.config.accounts.push(completedAccountConfig);
+    } else {
+      this.config.accounts = [completedAccountConfig];
     }
 
     if (writeUpdate) {
