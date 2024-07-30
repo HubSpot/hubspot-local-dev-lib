@@ -15,8 +15,8 @@ export async function createDeveloperTestAccount(
   accountName: string
 ): Promise<DeveloperTestAccount> {
   try {
-    const resp = await _createDeveloperTestAccount(accountId, accountName);
-    return resp;
+    const { data } = await _createDeveloperTestAccount(accountId, accountName);
+    return data;
   } catch (err) {
     throwApiError(err);
   }
@@ -27,8 +27,11 @@ export async function deleteDeveloperTestAccount(
   testAccountId: number
 ): Promise<void> {
   try {
-    const resp = await _deleteDeveloperTestAccount(accountId, testAccountId);
-    return resp;
+    const { data } = await _deleteDeveloperTestAccount(
+      accountId,
+      testAccountId
+    );
+    return data;
   } catch (err) {
     throwApiError(err);
   }
@@ -38,8 +41,8 @@ export async function fetchDeveloperTestAccounts(
   accountId: number
 ): Promise<FetchDeveloperTestAccountsResponse> {
   try {
-    const resp = await _fetchDeveloperTestAccounts(accountId);
-    return resp;
+    const { data } = await _fetchDeveloperTestAccounts(accountId);
+    return data;
   } catch (err) {
     throwApiError(err);
   }

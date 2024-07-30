@@ -1,20 +1,21 @@
+import { AxiosPromise } from 'axios';
 import { http } from '../http';
 import { QueryParams } from '../types/Http';
 import { GetBuildStatusResponse, GetRoutesResponse } from '../types/Functions';
 
 const FUNCTION_API_PATH = 'cms/v3/functions';
 
-export async function getRoutes(accountId: number): Promise<GetRoutesResponse> {
+export function getRoutes(accountId: number): AxiosPromise<GetRoutesResponse> {
   return http.get(accountId, {
     url: `${FUNCTION_API_PATH}/routes`,
   });
 }
 
-export async function getFunctionLogs(
+export function getFunctionLogs(
   accountId: number,
   route: string,
   params: QueryParams = {}
-) {
+): AxiosPromise {
   const { limit = 5 } = params;
 
   return http.get(accountId, {
@@ -23,7 +24,10 @@ export async function getFunctionLogs(
   });
 }
 
-export async function getLatestFunctionLog(accountId: number, route: string) {
+export function getLatestFunctionLog(
+  accountId: number,
+  route: string
+): AxiosPromise {
   return http.get(accountId, {
     url: `${FUNCTION_API_PATH}/results/by-route/${encodeURIComponent(
       route
@@ -31,10 +35,10 @@ export async function getLatestFunctionLog(accountId: number, route: string) {
   });
 }
 
-export async function buildPackage(
+export function buildPackage(
   accountId: number,
   folderPath: string
-): Promise<string> {
+): AxiosPromise<string> {
   return http.post(accountId, {
     url: `${FUNCTION_API_PATH}/build/async`,
     headers: {
@@ -46,10 +50,10 @@ export async function buildPackage(
   });
 }
 
-export async function getBuildStatus(
+export function getBuildStatus(
   accountId: number,
   buildId: number
-): Promise<GetBuildStatusResponse> {
+): AxiosPromise<GetBuildStatusResponse> {
   return http.get(accountId, {
     url: `${FUNCTION_API_PATH}/build/${buildId}/poll`,
   });

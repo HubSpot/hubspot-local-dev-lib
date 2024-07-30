@@ -1,3 +1,4 @@
+import { AxiosPromise } from 'axios';
 import fs from 'fs';
 import path from 'path';
 import { http } from '../http';
@@ -12,11 +13,11 @@ import {
 const FILE_MANAGER_V2_API_PATH = 'filemanager/api/v2';
 const FILE_MANAGER_V3_API_PATH = 'filemanager/api/v3';
 
-export async function uploadFile(
+export function uploadFile(
   accountId: number,
   src: string,
   dest: string
-): Promise<UploadResponse> {
+): AxiosPromise<UploadResponse> {
   const directory = path.dirname(dest);
   const filename = path.basename(dest);
   const formData: FormData = {
@@ -34,29 +35,29 @@ export async function uploadFile(
     formData.folderPath = '/';
   }
 
-  return http.post(accountId, {
+  return http.post<UploadResponse>(accountId, {
     url: `${FILE_MANAGER_V3_API_PATH}/files/upload`,
     data: formData,
     headers: { 'Content-Type': 'multipart/form-data' },
   });
 }
 
-export async function fetchStat(
+export function fetchStat(
   accountId: number,
   src: string
-): Promise<FetchStatResponse> {
-  return http.get(accountId, {
+): AxiosPromise<FetchStatResponse> {
+  return http.get<FetchStatResponse>(accountId, {
     url: `${FILE_MANAGER_V2_API_PATH}/files/stat/${src}`,
   });
 }
 
-export async function fetchFiles(
+export function fetchFiles(
   accountId: number,
   folderId: number | 'None',
   offset: number,
   archived?: boolean
-): Promise<FetchFilesResponse> {
-  return http.get(accountId, {
+): AxiosPromise<FetchFilesResponse> {
+  return http.get<FetchFilesResponse>(accountId, {
     url: `${FILE_MANAGER_V2_API_PATH}/files/`,
     params: {
       hidden: 0,
@@ -67,11 +68,11 @@ export async function fetchFiles(
   });
 }
 
-export async function fetchFolders(
+export function fetchFolders(
   accountId: number,
   folderId: number | 'None'
-): Promise<FetchFolderResponse> {
-  return http.get(accountId, {
+): AxiosPromise<FetchFolderResponse> {
+  return http.get<FetchFolderResponse>(accountId, {
     url: `${FILE_MANAGER_V2_API_PATH}/folders/`,
     params: {
       hidden: 0,

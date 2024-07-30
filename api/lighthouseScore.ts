@@ -1,3 +1,4 @@
+import { AxiosPromise } from 'axios';
 import { http } from '../http';
 import { Data, QueryParams } from '../types/Http';
 import {
@@ -7,31 +8,31 @@ import {
 
 const LIGHTHOUSE_SCORE_API_BASE = 'quality-engine/v1/lighthouse';
 
-export async function requestLighthouseScore(
+export function requestLighthouseScore(
   accountId: number,
   data: Data = {}
-): Promise<RequestLighthouseScoreResponse> {
-  return http.post(accountId, {
+): AxiosPromise<RequestLighthouseScoreResponse> {
+  return http.post<RequestLighthouseScoreResponse>(accountId, {
     url: `${LIGHTHOUSE_SCORE_API_BASE}/request`,
     data,
   });
 }
 
-export async function getLighthouseScoreStatus(
+export function getLighthouseScoreStatus(
   accountId: number,
   params: QueryParams = {}
-): Promise<string> {
-  return http.get(accountId, {
+): AxiosPromise<string> {
+  return http.get<string>(accountId, {
     url: `${LIGHTHOUSE_SCORE_API_BASE}/status`,
     params,
   });
 }
 
-export async function getLighthouseScore(
+export function getLighthouseScore(
   accountId: number,
   params: QueryParams = {}
-): Promise<GetLighthouseScoreResponse> {
-  return http.get(accountId, {
+): AxiosPromise<GetLighthouseScoreResponse> {
+  return http.get<GetLighthouseScoreResponse>(accountId, {
     url: `${LIGHTHOUSE_SCORE_API_BASE}/scores`,
     params,
   });

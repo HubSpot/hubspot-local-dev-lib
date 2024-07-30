@@ -50,7 +50,12 @@ export async function getAccessToken(
 ): Promise<AccessToken> {
   let response;
   try {
-    response = await fetchAccessToken(personalAccessKey, env, accountId);
+    const axiosResponse = await fetchAccessToken(
+      personalAccessKey,
+      env,
+      accountId
+    );
+    response = axiosResponse.data;
   } catch (e) {
     const error = e as AxiosError<{ message?: string }>;
     if (error.response) {
@@ -112,7 +117,7 @@ async function getNewAccessToken(
   if (refreshRequests.has(key)) {
     return refreshRequests.get(key);
   }
-  let accessTokenResponse;
+  let accessTokenResponse: AccessToken;
   try {
     const refreshAccessPromise = refreshAccessToken(
       personalAccessKey,
@@ -193,7 +198,7 @@ export async function updateConfigWithAccessToken(
       accountType === HUBSPOT_ACCOUNT_TYPES.STANDARD_SANDBOX ||
       accountType === HUBSPOT_ACCOUNT_TYPES.DEVELOPMENT_SANDBOX
     ) {
-      const sandboxDataResponse = await fetchSandboxHubData(
+      const { data: sandboxDataResponse } = await fetchSandboxHubData(
         accessToken,
         portalId,
         accountEnv
@@ -209,11 +214,8 @@ export async function updateConfigWithAccessToken(
 
   try {
     if (accountType === HUBSPOT_ACCOUNT_TYPES.DEVELOPER_TEST) {
-      const developerTestAccountResponse = await fetchDeveloperTestAccountData(
-        accessToken,
-        portalId,
-        accountEnv
-      );
+      const { data: developerTestAccountResponse } =
+        await fetchDeveloperTestAccountData(accessToken, portalId, accountEnv);
       if (developerTestAccountResponse) {
         parentAccountId = developerTestAccountResponse.parentPortalId;
       }
