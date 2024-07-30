@@ -34,7 +34,6 @@ export type AxiosErrorContext = {
   accountId?: number;
   request?: string;
   payload?: string;
-  projectName?: string;
 };
 
 export type OptionalError = BaseError | null | undefined;
