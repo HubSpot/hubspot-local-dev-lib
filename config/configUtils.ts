@@ -47,8 +47,8 @@ export function getOrderedConfig(
     defaultMode,
     httpTimeout,
     allowUsageTracking,
+    accounts,
     ...rest,
-    accounts: accounts.map(getOrderedAccount),
   };
 }
 

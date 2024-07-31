@@ -5,7 +5,7 @@ import {
   getConfigFilePath,
   deleteConfigFile as newDeleteConfigFile,
 } from './configFile';
-import { CLIConfig } from '../types/Config';
+import { CLIConfig_NEW, CLIConfig } from '../types/Config';
 import { CLIOptions, WriteConfigOptions } from '../types/CLIOptions';
 import { AccountType, CLIAccount, FlatAccountFields } from '../types/Accounts';
 import { getAccountIdentifier } from '../utils/getAccountIdentifier';
@@ -72,7 +72,9 @@ export function getConfig(): CLIConfig | null {
 
 export function writeConfig(options: WriteConfigOptions = {}): void {
   if (CLIConfiguration.isActive()) {
-    const config = options.source ? options.source : undefined;
+    const config = options.source
+      ? (JSON.parse(options.source) as CLIConfig_NEW)
+      : undefined;
     CLIConfiguration.write(config);
   } else {
     config_DEPRECATED.writeConfig(options);
