@@ -334,7 +334,7 @@ export async function fetchFolderFromApi(
   }
   const srcPath = isRoot ? '@root' : src;
   const queryValues = getFileMapperQueryValues(mode, options);
-  const node = isHubspot
+  const { data: node } = isHubspot
     ? await downloadDefault(accountId, srcPath, queryValues)
     : await download(accountId, srcPath, queryValues);
   logger.log(i18n(`${i18nKey}.folderFetch`, { src, accountId }));

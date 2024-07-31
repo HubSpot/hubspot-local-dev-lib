@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'fs-extra';
 import contentDisposition from 'content-disposition';
-import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios, { AxiosRequestConfig, AxiosResponse, AxiosPromise } from 'axios';
 
 import { getAccountConfig } from '../config';
 import { USER_AGENTS, getAxiosConfig } from './getAxiosConfig';
@@ -128,125 +128,45 @@ function addQueryParams(
 async function getRequest<T>(
   accountId: number,
   options: HttpOptions
-): Promise<T>;
-async function getRequest<T>(
-  accountId: number,
-  options: HttpOptions,
-  withFullResponse: true
-): Promise<AxiosResponse<T>>;
-async function getRequest<T>(
-  accountId: number,
-  options: HttpOptions,
-  withFullResponse?: true
-) {
+): AxiosPromise<T> {
   const { params, ...rest } = options;
   const axiosConfig = addQueryParams(rest, params);
   const configWithAuth = await withAuth(accountId, axiosConfig);
 
-  const response = await axios<T>(configWithAuth);
-
-  if (withFullResponse) {
-    return response;
-  }
-
-  return response.data;
+  return axios<T>(configWithAuth);
 }
 
 async function postRequest<T>(
   accountId: number,
   options: HttpOptions
-): Promise<T>;
-async function postRequest<T>(
-  accountId: number,
-  options: HttpOptions,
-  withFullResponse: true
-): Promise<AxiosResponse<T>>;
-async function postRequest(
-  accountId: number,
-  options: HttpOptions,
-  withFullResponse?: true
-) {
+): AxiosPromise<T> {
   const configWithAuth = await withAuth(accountId, options);
 
-  const response = await axios({ ...configWithAuth, method: 'post' });
-
-  if (withFullResponse) {
-    return response;
-  }
-
-  return response.data;
+  return axios({ ...configWithAuth, method: 'post' });
 }
 
 async function putRequest<T>(
   accountId: number,
   options: HttpOptions
-): Promise<T>;
-async function putRequest<T>(
-  accountId: number,
-  options: HttpOptions,
-  withFullResponse: true
-): Promise<AxiosResponse<T>>;
-async function putRequest(
-  accountId: number,
-  options: HttpOptions,
-  withFullResponse?: true
-) {
+): AxiosPromise<T> {
   const configWithAuth = await withAuth(accountId, options);
-  const response = await axios({ ...configWithAuth, method: 'put' });
-
-  if (withFullResponse) {
-    return response;
-  }
-
-  return response.data;
+  return axios({ ...configWithAuth, method: 'put' });
 }
 
 async function patchRequest<T>(
   accountId: number,
   options: HttpOptions
-): Promise<T>;
-async function patchRequest<T>(
-  accountId: number,
-  options: HttpOptions,
-  withFullResponse: true
-): Promise<AxiosResponse<T>>;
-async function patchRequest(
-  accountId: number,
-  options: HttpOptions,
-  withFullResponse?: true
-) {
+): AxiosPromise<T> {
   const configWithAuth = await withAuth(accountId, options);
-  const response = await axios({ ...configWithAuth, method: 'patch' });
-
-  if (withFullResponse) {
-    return response;
-  }
-
-  return response.data;
+  return axios({ ...configWithAuth, method: 'patch' });
 }
 
 async function deleteRequest<T>(
   accountId: number,
   options: HttpOptions
-): Promise<T>;
-async function deleteRequest<T>(
-  accountId: number,
-  options: HttpOptions,
-  withFullResponse: true
-): Promise<AxiosResponse<T>>;
-async function deleteRequest(
-  accountId: number,
-  options: HttpOptions,
-  withFullResponse = false
-) {
+): AxiosPromise<T> {
   const configWithAuth = await withAuth(accountId, options);
-  const response = await axios({ ...configWithAuth, method: 'delete' });
-
-  if (withFullResponse) {
-    return response;
-  }
-
-  return response.data;
+  return axios({ ...configWithAuth, method: 'delete' });
 }
 
 function createGetRequestStream(contentType: string) {
@@ -254,7 +174,7 @@ function createGetRequestStream(contentType: string) {
     accountId: number,
     options: HttpOptions,
     destPath: string
-  ): Promise<AxiosResponse> => {
+  ): AxiosPromise => {
     const { params, ...rest } = options;
     const axiosConfig = addQueryParams(rest, params);
 

@@ -26,10 +26,10 @@ export async function createSandbox(
   sandbox: Sandbox;
   personalAccessKey: string;
 }> {
-  const resp = await _createSandbox(accountId, name, type);
+  const { data } = await _createSandbox(accountId, name, type);
   return {
     name,
-    ...resp,
+    ...data,
   };
 }
 
@@ -48,8 +48,8 @@ export async function deleteSandbox(
 export async function getSandboxUsageLimits(
   parentAccountId: number
 ): Promise<Usage | void> {
-  const resp = await _getSandboxUsageLimits(parentAccountId);
-  return resp && resp.usage;
+  const { data } = await _getSandboxUsageLimits(parentAccountId);
+  return data && data.usage;
 }
 
 export async function initiateSync(
@@ -58,20 +58,22 @@ export async function initiateSync(
   tasks: Array<TaskRequestData>,
   sandboxHubId: number
 ): Promise<InitiateSyncResponse> {
-  return _initiateSync(fromHubId, toHubId, tasks, sandboxHubId);
+  const { data } = await _initiateSync(fromHubId, toHubId, tasks, sandboxHubId);
+  return data;
 }
 
 export async function fetchTaskStatus(
   accountId: number,
   taskId: number
 ): Promise<SyncTaskStatusType> {
-  return _fetchTaskStatus(accountId, taskId);
+  const { data } = await _fetchTaskStatus(accountId, taskId);
+  return data;
 }
 
 export async function fetchTypes(
   accountId: number,
   toHubId: number
 ): Promise<Array<SandboxType> | void> {
-  const resp = await _fetchTypes(accountId, toHubId);
-  return resp && resp.results;
+  const { data } = await _fetchTypes(accountId, toHubId);
+  return data && data.results;
 }

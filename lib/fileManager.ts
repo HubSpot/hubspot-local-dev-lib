@@ -118,7 +118,7 @@ async function fetchAllPagedFiles(
   let count = 0;
   let offset = 0;
   while (totalFiles === null || count < totalFiles) {
-    const response = await fetchFiles(
+    const { data: response } = await fetchFiles(
       accountId,
       folderId,
       offset,
@@ -168,7 +168,9 @@ async function fetchFolderContents(
     await downloadFile(accountId, file, dest, overwrite);
   }
 
-  const { objects: folders } = await fetchFolders(accountId, folder.id);
+  const {
+    data: { objects: folders },
+  } = await fetchFolders(accountId, folder.id);
   for (const folder of folders) {
     const nestedFolder = path.join(dest, folder.name);
     await fetchFolderContents(
@@ -276,7 +278,9 @@ export async function downloadFileOrFolder(
         includeArchived
       );
     } else {
-      const { file, folder } = await fetchStat(accountId, src);
+      const {
+        data: { file, folder },
+      } = await fetchStat(accountId, src);
       if (file) {
         await downloadSingleFile(
           accountId,

@@ -13,18 +13,21 @@ export async function createDeveloperTestAccount(
   accountId: number,
   accountName: string
 ): Promise<DeveloperTestAccount> {
-  return _createDeveloperTestAccount(accountId, accountName);
+  const { data } = await _createDeveloperTestAccount(accountId, accountName);
+  return data;
 }
 
 export async function deleteDeveloperTestAccount(
   accountId: number,
   testAccountId: number
 ): Promise<void> {
-  return _deleteDeveloperTestAccount(accountId, testAccountId);
+  const { data } = await _deleteDeveloperTestAccount(accountId, testAccountId);
+  return data;
 }
 
 export async function fetchDeveloperTestAccounts(
   accountId: number
 ): Promise<FetchDeveloperTestAccountsResponse> {
-  return _fetchDeveloperTestAccounts(accountId);
+  const { data } = await _fetchDeveloperTestAccounts(accountId);
+  return data;
 }
