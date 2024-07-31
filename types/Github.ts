@@ -64,3 +64,5 @@ export interface GithubSourceData {
   repositoryName: string;
   source: string;
 }
+
+export type RepoPath = `${string}/${string}`;

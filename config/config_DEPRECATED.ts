@@ -475,10 +475,6 @@ export function removeSandboxAccountFromConfig(
   return promptDefaultAccount;
 }
 
-type UpdateAccountConfigOptions = Partial<FlatAccountFields_DEPRECATED> & {
-  environment?: Environment;
-};
-
 /**
  * @throws {Error}
  */

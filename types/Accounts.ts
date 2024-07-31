@@ -122,3 +122,20 @@ export type ScopeData = {
   portalScopesInGroup: Array<string>;
   userScopesInGroup: Array<string>;
 };
+
+export type AccessTokenResponse = {
+  hubId: number;
+  userId: number;
+  oauthAccessToken: string;
+  expiresAtMillis: number;
+  enabledFeatures?: { [key: string]: number };
+  scopeGroups: Array<string>;
+  encodedOAuthRefreshToken: string;
+  hubName: string;
+  accountType: ValueOf<typeof HUBSPOT_ACCOUNT_TYPES>;
+};
+
+export type UpdateAccountConfigOptions =
+  Partial<FlatAccountFields_DEPRECATED> & {
+    environment?: Environment;
+  };
