@@ -285,4 +285,5 @@ export async function retrieveDefaultModule(
 const MODULE_HTML_EXTENSION_REGEX = new RegExp(
   /\.module(?:\/|\\)module\.html$/
 );
-export const isModuleHTMLFile = (filePath: string) => MODULE_HTML_EXTENSION_REGEX.test(filePath);
+export const isModuleHTMLFile = (filePath: string) =>
+  MODULE_HTML_EXTENSION_REGEX.test(filePath);

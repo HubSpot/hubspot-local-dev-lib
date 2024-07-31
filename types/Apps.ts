@@ -7,6 +7,20 @@ export type PublicAppInstallationData = {
   }>;
 };
 
+export type PublicAppDeveloperTestAccountInstallData = {
+  testPortalInstalls: Array<{
+    portalId: number;
+    accountName: string;
+  }>;
+  testPortalInstallCount: string;
+};
+
+export type PublicApInstallCounts = {
+  uniquePortalInstallCount: number;
+  uniqueUserInstallCount: number;
+  uniqueBusinessUnitInstallCount: number;
+};
+
 export type PublicApp = {
   id: number;
   name: string;
@@ -28,16 +42,27 @@ export type PublicApp = {
   supportPhone: string | null;
   extensionIconUrl: string | null;
   isAdvancedScopesSettingEnabled: boolean;
-  publicApplicationInstallCounts: {
-    uniquePortalInstallCount: number;
-    uniqueUserInstallCount: number;
-    uniqueBusinessUnitInstallCount: number;
-  };
+  publicApplicationInstallCounts: PublicApInstallCounts;
   redirectUrls: Array<string>;
   scopeGroupIds: Array<number>;
+  requiredScopeInfo?: Array<{ id: number; name: string }>;
   additionalScopeGroupIds: Array<number>;
+  additionalScopeInfo?: Array<{ id: number; name: string }>;
   optionalScopeGroupIds: Array<number>;
+  optionalScopeInfo?: Array<{ id: number; name: string }>;
   projectId: number | null;
   sourceId: string | null;
+  providerInfo?: {
+    domain: string;
+    isVerified: boolean;
+  };
+  listingInfo?: {
+    listingUrl: string;
+    isCertified: boolean;
+    isPublished: boolean;
+    hasDraft: boolean;
+    inReview: boolean;
+  };
   allowedExternalUrls: Array<string>;
+  preventProjectMigrations?: boolean;
 };

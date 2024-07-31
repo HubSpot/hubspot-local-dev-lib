@@ -1,6 +1,6 @@
 {
   "name": "@hubspot/local-dev-lib",
-  "version": "1.3.0",
+  "version": "1.9.1",
   "description": "Provides library functionality for HubSpot local development tooling, including the HubSpot CLI",
   "main": "lib/index.js",
   "repository": {
@@ -16,16 +16,16 @@
     "check-main": "branch=$(git rev-parse --abbrev-ref HEAD) && [ $branch = main ] || (echo 'Error: New release can only be published on main branch' && exit 1)",
     "clear-postinstall": "cd dist && npm pkg delete scripts.postinstall",
     "copy-files": "cp -r lang dist/lang",
-    "lint": "eslint --max-warnings=0 . && prettier --check ./**/*.ts",
+    "lint": "eslint --max-warnings=0 . && prettier . --check",
     "local-dev": "yarn build && cd dist && yarn link && cd .. && tsc --watch --rootDir . --outdir dist",
     "postinstall": "husky install",
-    "prettier:write": "prettier --write ./**/*.{ts,js,json}",
+    "prettier:write": "prettier . --write",
     "pub": "cd dist && npm publish --tag latest && cd ..",
     "push": "git push --atomic origin main v$npm_package_version",
     "release:major": "yarn check-main && yarn version --major && yarn build && yarn pub && yarn push",
     "release:minor": "yarn check-main && yarn version --minor && yarn build && yarn pub && yarn push",
     "release:patch": "yarn check-main && yarn version --patch && yarn build && yarn pub && yarn push",
-    "test": "node --experimental-vm-modules ./node_modules/.bin/jest"
+    "test": "NODE_NO_WARNINGS=1 node --experimental-vm-modules ./node_modules/.bin/jest"
   },
   "license": "Apache-2.0",
   "devDependencies": {
@@ -38,7 +38,6 @@
     "@types/jest": "^29.5.0",
     "@types/js-yaml": "^4.0.5",
     "@types/node": "^18.14.2",
-    "@types/prettier": "^3.0.0",
     "@types/unixify": "^1.0.0",
     "@typescript-eslint/eslint-plugin": "^5.54.0",
     "@typescript-eslint/parser": "^5.59.7",
@@ -53,6 +52,7 @@
     "./api/*": "./api/*.js",
     "./errors/*": "./errors/*.js",
     "./http": "./http/index.js",
+    "./http/*": "./http/*.js",
     "./config": "./config/index.js",
     "./constants/*": "./constants/*.js",
     "./models/*": "./models/*.js"
@@ -73,7 +73,7 @@
     "js-yaml": "^4.1.0",
     "moment": "^2.29.4",
     "p-queue": "^6.0.2",
-    "prettier": "^3.0.3",
+    "prettier": "^3.3.0",
     "semver": "^6.3.0",
     "unixify": "^1.0.0"
   },

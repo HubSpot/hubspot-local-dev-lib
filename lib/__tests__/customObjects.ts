@@ -25,10 +25,6 @@ const fetchObjectSchemas = __fetchObjectSchemas as jest.MockedFunction<
 >;
 
 describe('lib/customObjects', () => {
-  beforeEach(() => {
-    outputFileSyncSpy.mockClear();
-  });
-
   describe('writeSchemaToDisk()', () => {
     it('writes schema to disk', async () => {
       await writeSchemaToDisk(basicSchema);

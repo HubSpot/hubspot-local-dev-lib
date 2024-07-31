@@ -14,11 +14,17 @@ import {
 } from '../types/ComponentStructure';
 import { Deploy, ProjectDeployResponse } from '../types/Deploy';
 import { ProjectLog } from '../types/ProjectLog';
+import {
+  MigrateAppResponse,
+  CloneAppResponse,
+  PollAppResponse,
+} from '../types/Migration';
 
 const PROJECTS_API_PATH = 'dfs/v1/projects';
 const PROJECTS_DEPLOY_API_PATH = 'dfs/deploy/v1';
 const PROJECTS_LOGS_API_PATH = 'dfs/logging/v1';
 const DEVELOPER_PROJECTS_API_PATH = 'developer/projects/v1';
+const MIGRATIONS_API_PATH = 'dfs/migrations/v1';
 
 export async function fetchProjects(
   accountId: number
@@ -290,5 +296,61 @@ export async function fetchDeployWarnLogs(
     url: `${PROJECTS_LOGS_API_PATH}/logs/projects/${encodeURIComponent(
       projectName
     )}/deploys/${deployId}/combined/warn`,
+  });
+}
+
+export async function migrateApp(
+  accountId: number,
+  appId: number,
+  projectName: string
+): Promise<MigrateAppResponse> {
+  return http.post(accountId, {
+    url: `${MIGRATIONS_API_PATH}/migrations`,
+    data: {
+      componentId: appId,
+      componentType: 'PUBLIC_APP_ID',
+      projectName,
+    },
+  });
+}
+
+export async function checkMigrationStatus(
+  accountId: number,
+  id: number
+): Promise<PollAppResponse> {
+  return http.get(accountId, {
+    url: `${MIGRATIONS_API_PATH}/migrations/${id}`,
+  });
+}
+
+export async function cloneApp(
+  accountId: number,
+  appId: number
+): Promise<CloneAppResponse> {
+  return http.post(accountId, {
+    url: `${MIGRATIONS_API_PATH}/exports`,
+    data: {
+      componentId: appId,
+      componentType: 'PUBLIC_APP_ID',
+    },
+  });
+}
+
+export async function checkCloneStatus(
+  accountId: number,
+  exportId: number
+): Promise<CloneAppResponse> {
+  return http.get(accountId, {
+    url: `${MIGRATIONS_API_PATH}/exports/${exportId}/status`,
+  });
+}
+
+export async function downloadClonedProject(
+  accountId: number,
+  exportId: number
+): Promise<Buffer> {
+  return http.get(accountId, {
+    url: `${MIGRATIONS_API_PATH}/exports/${exportId}/download-as-clone`,
+    responseType: 'arraybuffer',
   });
 }

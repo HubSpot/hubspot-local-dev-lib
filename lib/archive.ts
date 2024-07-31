@@ -6,7 +6,6 @@ import extract from 'extract-zip';
 import { throwFileSystemError } from '../errors/fileSystemErrors';
 import { throwErrorWithMessage } from '../errors/standardErrors';
 import { logger } from './logger';
-import { BaseError } from '../types/Error';
 import { i18n } from '../utils/lang';
 
 const i18nKey = 'lib.archive';
@@ -16,11 +15,17 @@ type ZipData = {
   tmpDir: string;
 };
 
-async function extractZip(name: string, zip: Buffer): Promise<ZipData> {
+async function extractZip(
+  name: string,
+  zip: Buffer,
+  hideLogs = false
+): Promise<ZipData> {
   const result: ZipData = { extractDir: '', tmpDir: '' };
 
   const TMP_FOLDER_PREFIX = `hubspot-temp-${name}-`;
-  logger.log(i18n(`${i18nKey}.extractZip.init`));
+  if (!hideLogs) {
+    logger.log(i18n(`${i18nKey}.extractZip.init`));
+  }
 
   // Write zip to disk
   let tmpZipPath = '';
@@ -33,16 +38,12 @@ async function extractZip(name: string, zip: Buffer): Promise<ZipData> {
     });
   } catch (err) {
     if (tmpZipPath || result.tmpDir) {
-      throwFileSystemError(err as BaseError, {
+      throwFileSystemError(err, {
         filepath: tmpZipPath || result.tmpDir,
         write: true,
       });
     } else {
-      throwErrorWithMessage(
-        `${i18nKey}.extractZip.errors.write`,
-        {},
-        err as BaseError
-      );
+      throwErrorWithMessage(`${i18nKey}.extractZip.errors.write`, {}, err);
     }
     return result;
   }
@@ -52,11 +53,7 @@ async function extractZip(name: string, zip: Buffer): Promise<ZipData> {
     await extract(tmpZipPath, { dir: tmpExtractPath });
     result.extractDir = tmpExtractPath;
   } catch (err) {
-    throwErrorWithMessage(
-      `${i18nKey}.extractZip.errors.extract`,
-      {},
-      err as BaseError
-    );
+    throwErrorWithMessage(`${i18nKey}.extractZip.errors.extract`, {}, err);
   }
   logger.debug(i18n(`${i18nKey}.extractZip.success`));
   return result;
@@ -65,15 +62,22 @@ async function extractZip(name: string, zip: Buffer): Promise<ZipData> {
 type CopySourceToDestOptions = {
   sourceDir?: string;
   includesRootDir?: boolean;
+  hideLogs?: boolean;
 };
 
 async function copySourceToDest(
   src: string,
   dest: string,
-  { sourceDir, includesRootDir = true }: CopySourceToDestOptions = {}
+  {
+    sourceDir,
+    includesRootDir = true,
+    hideLogs = false,
+  }: CopySourceToDestOptions = {}
 ): Promise<boolean> {
   try {
-    logger.log(i18n(`${i18nKey}.copySourceToDest.init`));
+    if (!hideLogs) {
+      logger.log(i18n(`${i18nKey}.copySourceToDest.init`));
+    }
     const srcDirPath = [src];
 
     if (includesRootDir) {
@@ -82,7 +86,7 @@ async function copySourceToDest(
       if (!rootDir) {
         logger.debug(i18n(`${i18nKey}.copySourceToDest.sourceEmpty`));
         // Create the dest path if it doesn't already exist
-        fs.ensureDir(dest);
+        await fs.ensureDir(dest);
         // No root found so nothing to copy
         return true;
       }
@@ -100,7 +104,7 @@ async function copySourceToDest(
     return true;
   } catch (err) {
     logger.debug(i18n(`${i18nKey}.copySourceToDest.error`, { dest }));
-    throwFileSystemError(err as BaseError, {
+    throwFileSystemError(err, {
       filepath: dest,
       write: true,
     });
@@ -108,10 +112,10 @@ async function copySourceToDest(
   return false;
 }
 
-function cleanupTempDir(tmpDir: string): void {
+async function cleanupTempDir(tmpDir: string): Promise<void> {
   if (!tmpDir) return;
   try {
-    fs.remove(tmpDir);
+    await fs.remove(tmpDir);
   } catch (e) {
     logger.debug(i18n(`${i18nKey}.cleanupTempDir.error`, { tmpDir }));
   }
@@ -121,21 +125,22 @@ export async function extractZipArchive(
   zip: Buffer,
   name: string,
   dest: string,
-  { sourceDir, includesRootDir }: CopySourceToDestOptions = {}
+  { sourceDir, includesRootDir, hideLogs }: CopySourceToDestOptions = {}
 ): Promise<boolean> {
   let success = false;
 
   if (zip) {
-    const { extractDir, tmpDir } = await extractZip(name, zip);
+    const { extractDir, tmpDir } = await extractZip(name, zip, hideLogs);
 
     if (extractDir !== null) {
       success = await copySourceToDest(extractDir, dest, {
         sourceDir,
         includesRootDir,
+        hideLogs,
       });
     }
 
-    cleanupTempDir(tmpDir);
+    await cleanupTempDir(tmpDir);
   }
   return success;
 }

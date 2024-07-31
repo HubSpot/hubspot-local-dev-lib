@@ -4,6 +4,26 @@ import { getHubSpotApiOrigin } from '../lib/urls';
 import { AxiosConfigOptions } from '../types/Http';
 import { CLIConfig } from '../types/Config';
 import { AxiosRequestConfig } from 'axios';
+import https from 'https';
+import http from 'http';
+
+// Total number of sockets across all hosts
+const MAX_TOTAL_SOCKETS = 25;
+
+// Total number of sockets per each host
+const MAX_SOCKETS_PER_HOST = 5;
+
+const httpAgent = new http.Agent({
+  keepAlive: true,
+  maxTotalSockets: MAX_TOTAL_SOCKETS,
+  maxSockets: MAX_SOCKETS_PER_HOST,
+});
+
+const httpsAgent = new https.Agent({
+  keepAlive: true,
+  maxTotalSockets: MAX_TOTAL_SOCKETS,
+  maxSockets: MAX_SOCKETS_PER_HOST,
+});
 
 export const USER_AGENTS: { [key: string]: string } = {
   'HubSpot Local Dev Lib': version,
@@ -33,7 +53,6 @@ export function getAxiosConfig(
   const { env, localHostOverride, headers, ...rest } = options;
   const { httpTimeout, httpUseLocalhost } =
     getAndLoadConfigIfNeeded() as CLIConfig;
-
   return {
     baseURL: getHubSpotApiOrigin(
       env,
@@ -45,6 +64,8 @@ export function getAxiosConfig(
     },
     timeout: httpTimeout || 15000,
     transitional: DEFAULT_TRANSITIONAL,
+    httpAgent,
+    httpsAgent,
     ...rest,
   };
 }

@@ -23,7 +23,6 @@ import {
 } from '../types/Files';
 import { throwFileSystemError } from '../errors/fileSystemErrors';
 import { isTimeoutError } from '../errors/apiErrors';
-import { BaseError } from '../types/Error';
 import { i18n } from '../utils/lang';
 
 const i18nKey = 'lib.fileMapper';
@@ -163,7 +162,7 @@ export async function writeUtimes(
     const mtime = node.updatedAt ? new Date(node.updatedAt) : now;
     await fs.utimes(filepath, atime, mtime);
   } catch (err) {
-    throwFileSystemError(err as BaseError, {
+    throwFileSystemError(err, {
       filepath,
       accountId,
       write: true,
@@ -210,7 +209,7 @@ async function fetchAndWriteFileStream(
       getFileMapperQueryValues(mode, options)
     );
   } catch (err) {
-    throwError(err as BaseError);
+    throwError(err);
   }
   await writeUtimes(accountId, filepath, node);
 }
@@ -255,7 +254,7 @@ async function writeFileMapperNode(
       })
     );
   } catch (err) {
-    throwFileSystemError(err as BaseError, {
+    throwFileSystemError(err, {
       filepath: localFilepath,
       accountId,
       write: true,
@@ -396,7 +395,7 @@ async function downloadFolder(
       throwErrorWithMessage(
         `${i18nKey}.errors.failedToFetchFolder`,
         { src, dest: destPath },
-        err as AxiosError
+        err
       );
     }
   }

@@ -5,6 +5,8 @@ module.exports = {
   transform: {
     'node_modules/variables/.+\\.(j|t)sx?$': 'ts-jest',
   },
+  setupFiles: ['./setupTests.ts'],
   transformIgnorePatterns: ['node_modules/(?!variables/.*)'],
   modulePathIgnorePatterns: ['<rootDir>/dist/'],
+  clearMocks: true,
 };
