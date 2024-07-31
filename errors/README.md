@@ -1,23 +1,23 @@
 # hubspot/local-dev-lib
 
-[//]: # '// TODO[JOE] Update this readme'
-
 ## Error utils
 
-These error utils standardize the way that we handle errors in this library. Many of them will simply throw errors, but some of them have been broken up into "getError" and "throwError" utilities. This enables external packages to generate the same errors that are used in this library.
+These error utils standardize the way that we handle errors in this library.
 
-Generally, this library throws errors rather than logging them to the console. It is up the the consuming packages to catch the errors and do what they want with them.
+Generally, this library throws errors rather than logging them to the console. It is up the consuming packages to catch the errors and handle them.
 
-All of the error utils will include the original error as the `cause` of the returned error.
+## Error Type Predicates
 
-## Standard Errors
+There are several type predicates exposed in the error module to make life easier. They help to determine the type of error that occurred and to check for common error types such as timeouts, auth errors, and missing scopes.
 
-Generic errors that the library needs to throw. `throwError` should be used when the error already contains a useful message, or if we are unable to include a more useful error message. `throwErrorWithMessage` enables you to include a custom message with the error.
+## Custom Errors
 
-## File System Errors
+We have a few custom error objects that we use to throw in specific situations. All the these errors will include the original error as the `cause`
 
-Errors related to file system interactions. These utils should be used when handling errors thrown by `fs`. These errors support a `context` that enables you to include a filepath as well as read vs. write information.
+### HubSpotHttpError
 
-## API Errors
+This will be thrown anytime there is an error making a HTTP request. It has all the necessary metadata about the HTTP request, such as status code, method, payload, etc. It also uses these fields to generate a user facing message in the `message` prop as well as more detailed messaging. It exposes a `toString` method that logs all the details of the error.
 
-The API error utils handle `axios` errors. They build the most useful error message possible given the original `axios` error response as well as some optional context.
+### FileSystemError
+
+This will be thrown anytime there is an issue with a file system operation. It can contain data about if the operation was a read/write and what file path the error occured for.
