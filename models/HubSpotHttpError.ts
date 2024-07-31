@@ -16,6 +16,7 @@ export class HubSpotHttpError<T = any> extends Error {
   public context: HubSpotHttpErrorContext | undefined;
   public validationErrors: string[] | undefined;
   public detailedMessage?: string;
+  private divider = `\n- `;
 
   constructor(
     message?: string,
@@ -27,7 +28,7 @@ export class HubSpotHttpError<T = any> extends Error {
     this.context = context;
 
     if (options && isAxiosError(options.cause)) {
-      this.updateContextFromCause(options.cause, this.context);
+      this.updateContextFromCause(options.cause);
       const { response, config, code } = options.cause;
       this.message = this.joinErrorMessages(options.cause, {
         accountId: this.context?.accountId,
@@ -69,7 +70,9 @@ export class HubSpotHttpError<T = any> extends Error {
   }
 
   public toString() {
-    const messages = [`${this.name}: \n- message: ${this.detailedMessage}`];
+    const messages = [
+      `${this.name}: ${this.divider}message: ${this.detailedMessage}`,
+    ];
     ['status', 'statusText', 'method', 'code'].forEach(field => {
       if (Object.hasOwn(this, field)) {
         // @ts-expect-error this[field] exists, so we know it is a property of this
@@ -84,20 +87,17 @@ export class HubSpotHttpError<T = any> extends Error {
       messages.push(`context: ${JSON.stringify(this.context, undefined, 2)}`);
     }
 
-    return messages.join('\n- ');
+    return messages.join(this.divider);
   }
 
   public formattedValidationErrors(): string {
     if (!this.validationErrors || this.validationErrors?.length === 0) {
       return '';
     }
-    return this.validationErrors?.join('\n- ');
+    return this.validationErrors?.join(this.divider);
   }
 
-  private updateContextFromCause(
-    cause: AxiosError,
-    context?: HubSpotHttpErrorContext
-  ) {
+  private updateContextFromCause(cause: AxiosError) {
     const generatedContext: HubSpotHttpErrorContext = {};
     if (!cause) {
       return;
@@ -109,7 +109,7 @@ export class HubSpotHttpError<T = any> extends Error {
     generatedContext.request = cause.config?.url;
 
     // Allow the provided context to override the generated context
-    this.context = { ...generatedContext, ...context };
+    this.context = { ...generatedContext, ...this.context };
   }
 
   private parseValidationErrors(
@@ -246,7 +246,7 @@ export class HubSpotHttpError<T = any> extends Error {
 
       (errors || []).forEach(err => {
         if (err.message) {
-          errorMessage.push('\n- ' + err.message);
+          errorMessage.push(`${this.divider}${err.message}`);
         }
       });
     }
