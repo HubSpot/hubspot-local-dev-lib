@@ -1,17 +1,12 @@
-import { CLIAccount } from '../types/Accounts';
+import { CLIAccount, GenericAccount } from '../types/Accounts';
 import {
   CLIConfig,
   CLIConfig_DEPRECATED,
   CLIConfig_NEW,
 } from '../types/Config';
 
-type Account = {
-  portalId?: number;
-  accountId?: number;
-};
-
 export function getAccountIdentifier(
-  account?: Account | null
+  account?: GenericAccount | null
 ): number | undefined {
   if (!account) {
     return undefined;

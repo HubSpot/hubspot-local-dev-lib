@@ -39,6 +39,11 @@ export interface CLIAccount_DEPRECATED {
 
 export type CLIAccount = CLIAccount_NEW | CLIAccount_DEPRECATED;
 
+export type GenericAccount = {
+  portalId?: number;
+  accountId?: number;
+};
+
 export type AccountType = ValueOf<typeof HUBSPOT_ACCOUNT_TYPES>;
 
 export type TokenInfo = {
@@ -170,4 +175,31 @@ export type AccessToken = {
   encodedOAuthRefreshToken: string;
   hubName: string;
   accountType: ValueOf<typeof HUBSPOT_ACCOUNT_TYPES>;
+};
+
+export type OAuth2ManagerAccountConfig = {
+  name?: string;
+  accountId?: number;
+  clientId?: string;
+  clientSecret?: string;
+  scopes?: Array<string>;
+  env?: Environment;
+  environment?: Environment;
+  tokenInfo?: TokenInfo;
+  authType?: 'oauth2';
+};
+
+export type WriteTokenInfoFunction = (tokenInfo: TokenInfo) => void;
+
+export type RefreshTokenResponse = {
+  refresh_token: string;
+  access_token: string;
+  expires_in: string;
+};
+
+export type ExchangeProof = {
+  grant_type: string;
+  client_id?: string;
+  client_secret?: string;
+  refresh_token?: string;
 };

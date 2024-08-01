@@ -64,3 +64,48 @@ export type RecursiveFileMapperCallback = (
   filepath?: string,
   depth?: number
 ) => boolean;
+
+export type CommandOptions = {
+  convertFields?: boolean;
+  fieldOptions?: string;
+  saveOutput?: boolean;
+  onAttemptCallback?: (file: string | undefined, destPath: string) => void;
+  onSuccessCallback?: (file: string | undefined, destPath: string) => void;
+  onFirstErrorCallback?: (
+    file: string,
+    destPath: string,
+    error: AxiosError
+  ) => void;
+  onRetryCallback?: (file: string, destPath: string) => void;
+  onFinalErrorCallback?: (
+    accountId: number,
+    file: string,
+    destPath: string,
+    error: AxiosError
+  ) => void;
+};
+
+export type FilePathsByType = {
+  [key: string]: Array<string>;
+};
+
+export type UploadFileOptions = FileMapperInputOptions & {
+  src: string;
+  commandOptions: {
+    convertFields?: boolean;
+  };
+  fieldOptions?: string;
+};
+
+export type WatchOptions = {
+  mode?: Mode;
+  remove?: boolean;
+  disableInitial?: boolean;
+  notify?: string;
+  commandOptions: {
+    convertFields?: boolean;
+  };
+  filePaths?: Array<string>;
+};
+
+export type WatchErrorHandler = (error: AxiosError) => void;
