@@ -22,15 +22,9 @@ Here's how to use the `addSecret` API util:
 ```js
 const { loadConfig } = require('@hubspot/local-dev-lib/config');
 const { addSecret } = require('@hubspot/local-dev-lib/api/secrets');
-const { throwApiError } = require('@hubspot/local-dev-lib/errors/apiErrors');
 
 // Parse and store the config file information
 loadConfig();
 const accountId = 12345;
-
-try {
-  await addSecret(accountId, 'my-secret-name', 'my-secret-value');
-} catch (e) {
-  throwApiError(e);
-}
+await addSecret(accountId, 'my-secret-name', 'my-secret-value');
 ```

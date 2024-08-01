@@ -16,7 +16,6 @@ import {
   TaskRequestData,
   Usage,
 } from '../types/Sandbox';
-import { throwApiError } from '../errors/apiErrors';
 
 export async function createSandbox(
   accountId: number,
@@ -27,26 +26,18 @@ export async function createSandbox(
   sandbox: Sandbox;
   personalAccessKey: string;
 }> {
-  try {
-    const { data } = await _createSandbox(accountId, name, type);
-    return {
-      name,
-      ...data,
-    };
-  } catch (err) {
-    throwApiError(err);
-  }
+  const { data } = await _createSandbox(accountId, name, type);
+  return {
+    name,
+    ...data,
+  };
 }
 
 export async function deleteSandbox(
   parentAccountId: number,
   sandboxAccountId: number
 ): Promise<{ parentAccountId: number; sandboxAccountId: number }> {
-  try {
-    await _deleteSandbox(parentAccountId, sandboxAccountId);
-  } catch (err) {
-    throwApiError(err);
-  }
+  await _deleteSandbox(parentAccountId, sandboxAccountId);
 
   return {
     parentAccountId,
@@ -57,12 +48,8 @@ export async function deleteSandbox(
 export async function getSandboxUsageLimits(
   parentAccountId: number
 ): Promise<Usage | void> {
-  try {
-    const { data } = await _getSandboxUsageLimits(parentAccountId);
-    return data && data.usage;
-  } catch (err) {
-    throwApiError(err);
-  }
+  const { data } = await _getSandboxUsageLimits(parentAccountId);
+  return data && data.usage;
 }
 
 export async function initiateSync(
@@ -71,39 +58,22 @@ export async function initiateSync(
   tasks: Array<TaskRequestData>,
   sandboxHubId: number
 ): Promise<InitiateSyncResponse> {
-  try {
-    const { data } = await _initiateSync(
-      fromHubId,
-      toHubId,
-      tasks,
-      sandboxHubId
-    );
-    return data;
-  } catch (err) {
-    throwApiError(err);
-  }
+  const { data } = await _initiateSync(fromHubId, toHubId, tasks, sandboxHubId);
+  return data;
 }
 
 export async function fetchTaskStatus(
   accountId: number,
   taskId: number
 ): Promise<SyncTaskStatusType> {
-  try {
-    const { data } = await _fetchTaskStatus(accountId, taskId);
-    return data;
-  } catch (err) {
-    throwApiError(err);
-  }
+  const { data } = await _fetchTaskStatus(accountId, taskId);
+  return data;
 }
 
 export async function fetchTypes(
   accountId: number,
   toHubId: number
 ): Promise<Array<SandboxType> | void> {
-  try {
-    const { data } = await _fetchTypes(accountId, toHubId);
-    return data && data.results;
-  } catch (err) {
-    throwApiError(err);
-  }
+  const { data } = await _fetchTypes(accountId, toHubId);
+  return data && data.results;
 }

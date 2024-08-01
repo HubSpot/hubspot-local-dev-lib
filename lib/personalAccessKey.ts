@@ -1,12 +1,6 @@
 import moment from 'moment';
-import { AxiosError } from 'axios';
 import { ENVIRONMENTS } from '../constants/environments';
 import { PERSONAL_ACCESS_KEY_AUTH_METHOD } from '../constants/auth';
-import {
-  throwAuthErrorWithMessage,
-  throwErrorWithMessage,
-  throwError,
-} from '../errors/standardErrors';
 import { fetchAccessToken } from '../api/localDevAuth';
 import { fetchSandboxHubData } from '../api/sandboxHubs';
 import { CLIAccount, PersonalAccessKeyAccount } from '../types/Accounts';
@@ -21,8 +15,9 @@ import {
 import { HUBSPOT_ACCOUNT_TYPES } from '../constants/config';
 import { fetchDeveloperTestAccountData } from '../api/developerTestAccounts';
 import { logger } from './logger';
-import { getHubSpotHttpErrorWithContext } from '../errors/apiErrors';
 import { ValueOf } from '../types/Utils';
+import { i18n } from '../utils/lang';
+import { isHubSpotHttpError } from '../errors';
 
 const i18nKey = 'lib.personalAccessKey';
 
@@ -48,26 +43,13 @@ export async function getAccessToken(
   env: Environment = ENVIRONMENTS.PROD,
   accountId?: number
 ): Promise<AccessToken> {
-  let response;
-  try {
-    const axiosResponse = await fetchAccessToken(
-      personalAccessKey,
-      env,
-      accountId
-    );
-    response = axiosResponse.data;
-  } catch (e) {
-    const error = e as AxiosError<{ message?: string }>;
-    if (error.response) {
-      throwAuthErrorWithMessage(
-        `${i18nKey}.errors.invalidPersonalAccessKey`,
-        { errorMessage: error.response.data.message || '' },
-        error
-      );
-    } else {
-      throwError(e);
-    }
-  }
+  const axiosResponse = await fetchAccessToken(
+    personalAccessKey,
+    env,
+    accountId
+  );
+  const response = axiosResponse.data;
+
   return {
     portalId: response.hubId,
     accessToken: response.oauthAccessToken,
@@ -142,7 +124,7 @@ export async function accessTokenForPersonalAccessKey(
 ): Promise<string | undefined> {
   const account = getAccountConfig(accountId) as PersonalAccessKeyAccount;
   if (!account) {
-    throwErrorWithMessage(`${i18nKey}.errors.accountNotFound`, { accountId });
+    throw new Error(i18n(`${i18nKey}.errors.accountNotFound`, { accountId }));
   }
   const { auth, personalAccessKey, env } = account;
   const authTokenInfo = auth && auth.tokenInfo;
@@ -168,7 +150,7 @@ export async function enabledFeaturesForPersonalAccessKey(
 ): Promise<{ [key: string]: number } | undefined> {
   const account = getAccountConfig(accountId) as PersonalAccessKeyAccount;
   if (!account) {
-    throwErrorWithMessage(`${i18nKey}.errors.accountNotFound`, { accountId });
+    throw new Error(i18n(`${i18nKey}.errors.accountNotFound`, { accountId }));
   }
   const { auth, personalAccessKey, env } = account;
   const authTokenInfo = auth && auth.tokenInfo;
@@ -209,7 +191,10 @@ export async function updateConfigWithAccessToken(
     }
   } catch (err) {
     // Log error but do not throw
-    logger.debug(getHubSpotHttpErrorWithContext(err as AxiosError).message);
+    if (isHubSpotHttpError(err)) {
+      logger.debug(err.message);
+    }
+    logger.debug(err);
   }
 
   try {
@@ -222,7 +207,10 @@ export async function updateConfigWithAccessToken(
     }
   } catch (err) {
     // Log error but do not throw
-    logger.debug(getHubSpotHttpErrorWithContext(err as AxiosError).message);
+    if (isHubSpotHttpError(err)) {
+      logger.debug(err.message);
+    }
+    logger.debug(err);
   }
 
   const updatedConfig = updateAccountConfig({

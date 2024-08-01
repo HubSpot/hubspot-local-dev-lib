@@ -20,16 +20,10 @@ import {
   convertToLocalFileSystemPath,
 } from './path';
 
-import { throwApiError } from '../errors/apiErrors';
-import {
-  isFatalError,
-  throwErrorWithMessage,
-  throwError,
-} from '../errors/standardErrors';
-import { throwFileSystemError } from '../errors/fileSystemErrors';
-import { GenericError } from '../types/Error';
 import { File, Folder } from '../types/FileManager';
 import { i18n } from '../utils/lang';
+import { isAuthError, isHubSpotHttpError } from '../errors';
+import { FileSystemError } from '../models/FileSystemError';
 
 type SimplifiedFolder = Partial<Folder> & Pick<Folder, 'id' | 'name'>;
 
@@ -61,13 +55,19 @@ export async function uploadFolder(
       await uploadFile(accountId, file, destPath);
       logger.log(i18n(`${i18nKey}.uploadSuccess`, { file, destPath }));
     } catch (err) {
-      if (isFatalError(err)) {
-        throwError(err);
+      if (isHubSpotHttpError(err)) {
+        err.updateContext({
+          filepath: file,
+          dest: destPath,
+        });
+        throw err;
       }
-      throwErrorWithMessage(`${i18nKey}.errors.uploadFailed`, {
-        file,
-        destPath,
-      });
+      throw new Error(
+        i18n(`${i18nKey}.errors.uploadFailed`, {
+          file,
+          destPath,
+        })
+      );
     }
   }
 }
@@ -146,11 +146,14 @@ async function fetchFolderContents(
   try {
     await fs.ensureDir(dest);
   } catch (err) {
-    throwFileSystemError(err, {
-      dest,
-      accountId,
-      write: true,
-    });
+    throw new FileSystemError(
+      { cause: err },
+      {
+        dest,
+        accountId,
+        operation: 'write',
+      }
+    );
   }
 
   const files = await fetchAllPagedFiles(accountId, folder.id, includeArchived);
@@ -232,10 +235,10 @@ async function downloadSingleFile(
   includeArchived?: boolean
 ) {
   if (!includeArchived && file.archived) {
-    throwErrorWithMessage(`${i18nKey}.errors.archivedFile`, { src });
+    throw new Error(i18n(`${i18nKey}.errors.archivedFile`, { src }));
   }
   if (file.hidden) {
-    throwErrorWithMessage(`${i18nKey}.errors.hiddenFile`, { src });
+    throw new Error(i18n(`${i18nKey}.errors.hiddenFile`, { src }));
   }
 
   logger.log(
@@ -299,12 +302,12 @@ export async function downloadFileOrFolder(
       }
     }
   } catch (err) {
-    const error = err as GenericError;
-    if (error.isAxiosError) {
-      throwApiError(err, {
+    if (isAuthError(err)) {
+      err.updateContext({
         request: src,
         accountId,
       });
-    } else throwError(error);
+    }
+    throw err;
   }
 }

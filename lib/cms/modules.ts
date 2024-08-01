@@ -3,7 +3,6 @@ import fs from 'fs-extra';
 import { getCwd } from '../path';
 import { walk } from '../fs';
 import { listGithubRepoContents, downloadGithubRepoContents } from '../github';
-import { throwErrorWithMessage } from '../../errors/standardErrors';
 import { logger } from '../logger';
 import {
   isPathInput,
@@ -145,10 +144,12 @@ const updateFileContents = async (
     );
   } catch (error) {
     const { message } = error as Error;
-    throwErrorWithMessage(`${i18nKey}.createModule.errors.fileUpdateFailure`, {
-      path: file,
-      errorMessage: message,
-    });
+    throw new Error(
+      i18n(`${i18nKey}.createModule.errors.fileUpdateFailure`, {
+        path: file,
+        errorMessage: message,
+      })
+    );
   }
 };
 
@@ -195,9 +196,11 @@ export async function createModule(
     : path.join(dest, `${name}`);
 
   if (!options.allowExistingDir && fs.existsSync(destPath)) {
-    throwErrorWithMessage(`${i18nKey}.createModule.errors.pathExists`, {
-      path: destPath,
-    });
+    throw new Error(
+      i18n(`${i18nKey}.createModule.errors.pathExists`, {
+        path: destPath,
+      })
+    );
   } else {
     logger.log(
       i18n(`${i18nKey}.createModule.creatingPath`, {

@@ -4,7 +4,6 @@ import PQueue from 'p-queue';
 import debounce from 'debounce';
 import { AxiosError } from 'axios';
 
-import { throwApiError, throwApiUploadError } from '../../errors/apiErrors';
 import { isConvertableFieldJs, FieldsJs } from './handleFieldsJS';
 import { uploadFolder } from './uploadFolder';
 import { shouldIgnoreFile, ignoreFile } from '../ignoreRules';
@@ -18,6 +17,8 @@ import { logger } from '../logger';
 import { FileMapperInputOptions, Mode } from '../../types/Files';
 import { UploadFolderResults } from '../../types/Files';
 import { i18n } from '../../utils/lang';
+import { HubSpotHttpError } from '../../models/HubSpotHttpError';
+import { isHubSpotHttpError } from '../../errors';
 
 const i18nKey = 'lib.cms.watch';
 
@@ -49,17 +50,22 @@ type UploadFileOptions = FileMapperInputOptions & {
 
 const defaultOnUploadFileError =
   (file: string, dest: string, accountId: number) => (error: AxiosError) => {
-    logger.debug(
-      i18n(`${i18nKey}.uploadFailed`, {
-        file,
-        dest,
-      })
-    );
-    throwApiUploadError(error, {
-      accountId,
-      request: dest,
-      payload: file,
+    const uploadFailedMessage = i18n(`${i18nKey}.uploadFailed`, {
+      file,
+      dest,
     });
+    logger.debug(uploadFailedMessage);
+    throw new HubSpotHttpError(
+      uploadFailedMessage,
+      {
+        cause: error,
+      },
+      {
+        accountId,
+        request: dest,
+        payload: file,
+      }
+    );
   };
 async function uploadFile(
   accountId: number,
@@ -146,16 +152,19 @@ async function deleteRemoteFile(
         logger.log(i18n(`${i18nKey}.deleteSuccess`, { remoteFilePath }));
         notifyOfThemePreview(filePath, accountId);
       })
-      .catch((error: AxiosError) => {
+      .catch(error => {
         logger.debug(
           i18n(`${i18nKey}.deleteFailed`, {
             remoteFilePath,
           })
         );
-        throwApiError(error, {
-          accountId,
-          request: remoteFilePath,
-        });
+        if (isHubSpotHttpError(error)) {
+          error.updateContext({
+            accountId,
+            request: remoteFilePath,
+          });
+        }
+        throw error;
       });
   });
 }

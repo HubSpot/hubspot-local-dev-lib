@@ -1,4 +1,4 @@
-import axios, { AxiosError } from 'axios';
+import axios from 'axios';
 import moment from 'moment';
 
 import { getHubSpotApiOrigin } from '../lib/urls';
@@ -7,11 +7,6 @@ import { FlatAccountFields, TokenInfo } from '../types/Accounts';
 import { logger } from '../lib/logger';
 import { getAccountIdentifier } from '../utils/getAccountIdentifier';
 import { AUTH_METHODS } from '../constants/auth';
-import {
-  throwError,
-  throwErrorWithMessage,
-  throwAuthErrorWithMessage,
-} from '../errors/standardErrors';
 import { Environment } from '../types/Config';
 import { i18n } from '../utils/lang';
 
@@ -64,9 +59,11 @@ export class OAuth2Manager {
 
   async accessToken(): Promise<string | undefined> {
     if (!this.account.tokenInfo?.refreshToken) {
-      throwErrorWithMessage(`${i18nKey}.errors.missingRefreshToken`, {
-        accountId: getAccountIdentifier(this.account)!,
-      });
+      throw new Error(
+        i18n(`${i18nKey}.errors.missingRefreshToken`, {
+          accountId: getAccountIdentifier(this.account)!,
+        })
+      );
     }
 
     if (
@@ -121,39 +118,22 @@ export class OAuth2Manager {
         );
         this.writeTokenInfo(this.account.tokenInfo);
       }
+    } finally {
       this.refreshTokenRequest = null;
-    } catch (e) {
-      this.refreshTokenRequest = null;
-      throwError(e);
     }
   }
 
   async exchangeForTokens(exchangeProof: ExchangeProof): Promise<void> {
-    try {
-      if (this.refreshTokenRequest) {
-        logger.debug(
-          i18n(`${i18nKey}.refreshingAccessToken`, {
-            accountId: getAccountIdentifier(this.account)!,
-            clientId: this.account.clientId || '',
-          })
-        );
-        await this.refreshTokenRequest;
-      } else {
-        await this.fetchAccessToken(exchangeProof);
-      }
-    } catch (e) {
-      const error = e as AxiosError<{ message: string }>;
-      if (error.response) {
-        throwAuthErrorWithMessage(
-          `${i18nKey}.errors.auth`,
-          {
-            token: error.response.data.message || '',
-          },
-          error
-        );
-      } else {
-        throwError(error);
-      }
+    if (this.refreshTokenRequest) {
+      logger.debug(
+        i18n(`${i18nKey}.refreshingAccessToken`, {
+          accountId: getAccountIdentifier(this.account)!,
+          clientId: this.account.clientId || '',
+        })
+      );
+      await this.refreshTokenRequest;
+    } else {
+      await this.fetchAccessToken(exchangeProof);
     }
   }
 

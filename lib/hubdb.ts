@@ -13,13 +13,13 @@ import {
 } from '../api/hubdb';
 import { getCwd } from './path';
 import { FetchRowsResponse, Row, Table } from '../types/Hubdb';
-import { throwErrorWithMessage } from '../errors/standardErrors';
+import { i18n } from '../utils/lang';
 
 const i18nKey = 'lib.hubdb';
 
 function validateJsonPath(src: string): void {
   if (path.extname(src) !== '.json') {
-    throwErrorWithMessage(`${i18nKey}.errors.invalidJsonPath`);
+    throw new Error(i18n(`${i18nKey}.errors.invalidJsonPath`));
   }
 }
 
@@ -29,11 +29,13 @@ function validateJsonFile(src: string): void {
   try {
     stats = fs.statSync(src);
   } catch (err) {
-    throwErrorWithMessage(`${i18nKey}.errors.invalidJsonFile`, { src }, err);
+    throw new Error(i18n(`${i18nKey}.errors.invalidJsonFile`, { src }), {
+      cause: err,
+    });
   }
 
   if (!stats.isFile()) {
-    throwErrorWithMessage(`${i18nKey}.errors.invalidJsonFile`, { src });
+    throw new Error(i18n(`${i18nKey}.errors.invalidJsonFile`, { src }));
   }
 
   validateJsonPath(src);

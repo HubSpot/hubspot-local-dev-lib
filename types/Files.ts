@@ -1,4 +1,3 @@
-import { AxiosError } from 'axios';
 import { ValueOf } from '../types/Utils';
 import {
   STAT_TYPES,
@@ -41,7 +40,7 @@ type ResultType = ValueOf<typeof FILE_UPLOAD_RESULT_TYPES>;
 
 export type UploadFolderResults = {
   resultType: ResultType;
-  error: AxiosError | null;
+  error: unknown;
   file: string;
 };
 

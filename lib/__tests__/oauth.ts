@@ -3,7 +3,7 @@ import { addOauthToAccountConfig, getOauthManager } from '../oauth';
 jest.mock('../../utils/getAccountIdentifier');
 jest.mock('../../config');
 jest.mock('../logger');
-jest.mock('../../errors/standardErrors');
+jest.mock('../../errors');
 
 import { updateAccountConfig, writeConfig } from '../../config';
 import { OAuth2Manager } from '../../models/OAuth2Manager';
@@ -11,9 +11,7 @@ import { FlatAccountFields_NEW } from '../../types/Accounts';
 import { ENVIRONMENTS } from '../../constants/environments';
 import { AUTH_METHODS } from '../../constants/auth';
 import { logger } from '../logger';
-import { throwError } from '../../errors/standardErrors';
 
-const writeConfigMock = writeConfig as jest.MockedFunction<typeof writeConfig>;
 const OAuth2ManagerFromConfigMock = jest.spyOn(OAuth2Manager, 'fromConfig');
 
 describe('lib/oauth', () => {
@@ -67,15 +65,6 @@ describe('lib/oauth', () => {
       expect(logger.log).toHaveBeenCalledWith('Updating configuration');
       expect(logger.success).toHaveBeenCalledTimes(1);
       expect(logger.success).toHaveBeenCalledWith('Configuration updated');
-    });
-
-    it('should an error when an error is encountered', () => {
-      const error = new Error('OH NO');
-      writeConfigMock.mockImplementationOnce(() => {
-        throw error;
-      });
-      addOauthToAccountConfig(new OAuth2Manager(account));
-      expect(throwError).toHaveBeenCalledWith(error);
     });
   });
 });

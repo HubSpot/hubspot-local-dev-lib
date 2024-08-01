@@ -9,7 +9,6 @@ import { accessTokenForPersonalAccessKey } from '../lib/personalAccessKey';
 import { getOauthManager } from '../lib/oauth';
 import { FlatAccountFields } from '../types/Accounts';
 import { AxiosConfigOptions, HttpOptions, QueryParams } from '../types/Http';
-import { throwErrorWithMessage } from '../errors/standardErrors';
 import { logger } from '../lib/logger';
 import { i18n } from '../utils/lang';
 import { HubSpotHttpError } from '../models/HubSpotHttpError';
@@ -35,7 +34,7 @@ async function withOauth(
   const oauth = getOauthManager(accountId, accountConfig);
 
   if (!oauth) {
-    throwErrorWithMessage(`${i18nKey}.errors.withOauth`, { accountId });
+    throw new Error(i18n(`${i18nKey}.errors.withOauth`, { accountId }));
   }
 
   const accessToken = await oauth.accessToken();
@@ -85,7 +84,7 @@ async function withAuth(
   const accountConfig = getAccountConfig(accountId);
 
   if (!accountConfig) {
-    throwErrorWithMessage(`${i18nKey}.errors.withAuth`, { accountId });
+    throw new Error(i18n(`${i18nKey}.errors.withAuth`, { accountId }));
   }
 
   const { env, authType, apiKey } = accountConfig;

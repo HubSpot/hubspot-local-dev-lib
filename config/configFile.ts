@@ -3,8 +3,6 @@ import path from 'path';
 import os from 'os';
 import yaml from 'js-yaml';
 import { logger } from '../lib/logger';
-import { throwFileSystemError } from '../errors/fileSystemErrors';
-import { throwError, throwErrorWithMessage } from '../errors/standardErrors';
 import {
   HUBSPOT_CONFIGURATION_FILE,
   HUBSPOT_CONFIGURATION_FOLDER,
@@ -12,6 +10,7 @@ import {
 import { getOrderedConfig } from './configUtils';
 import { CLIConfig_NEW } from '../types/Config';
 import { i18n } from '../utils/lang';
+import { FileSystemError } from '../models/FileSystemError';
 
 const i18nKey = 'config.configFile';
 
@@ -48,10 +47,13 @@ export function readConfigFile(configPath: string): string {
     source = fs.readFileSync(configPath).toString();
   } catch (err) {
     logger.debug(i18n(`${i18nKey}.errorReading`, { configPath }));
-    throwFileSystemError(err, {
-      filepath: configPath,
-      read: true,
-    });
+    throw new FileSystemError(
+      { cause: err },
+      {
+        filepath: configPath,
+        operation: 'read',
+      }
+    );
   }
 
   return source;
@@ -66,7 +68,7 @@ export function parseConfig(configSource: string): CLIConfig_NEW {
   try {
     parsed = yaml.load(configSource) as CLIConfig_NEW;
   } catch (err) {
-    throwErrorWithMessage(`${i18nKey}.errors.parsing`, {}, err);
+    throw new Error(i18n(`${i18nKey}.errors.parsing`), { cause: err });
   }
 
   return parsed;
@@ -97,14 +99,9 @@ export function loadConfigFromFile(): CLIConfig_NEW | null {
  * @throws {Error}
  */
 export function writeConfigToFile(config: CLIConfig_NEW): void {
-  let source: string;
-  try {
-    source = yaml.dump(
-      JSON.parse(JSON.stringify(getOrderedConfig(config), null, 2))
-    );
-  } catch (err) {
-    throwError(err);
-  }
+  const source = yaml.dump(
+    JSON.parse(JSON.stringify(getOrderedConfig(config), null, 2))
+  );
   const configPath = getConfigFilePath();
 
   try {
@@ -112,9 +109,12 @@ export function writeConfigToFile(config: CLIConfig_NEW): void {
     fs.writeFileSync(configPath, source);
     logger.debug(i18n(`${i18nKey}.writeSuccess`, { configPath }));
   } catch (err) {
-    throwFileSystemError(err, {
-      filepath: configPath,
-      write: true,
-    });
+    throw new FileSystemError(
+      { cause: err },
+      {
+        filepath: configPath,
+        operation: 'write',
+      }
+    );
   }
 }
