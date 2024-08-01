@@ -68,7 +68,7 @@ async function uploadFile(
     file: string,
     dest: string,
     accountId: number
-  ) => ErrorHandler = defaultOnUploadFileError
+  ) => WatchErrorHandler = defaultOnUploadFileError
 ): Promise<void> {
   const src = options.src;
 

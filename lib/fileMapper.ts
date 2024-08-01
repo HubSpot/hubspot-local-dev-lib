@@ -21,6 +21,7 @@ import {
   FileMapperOptions,
   FileMapperInputOptions,
   PathTypeData,
+  RecursiveFileMapperCallback,
 } from '../types/Files';
 import { throwFileSystemError } from '../errors/fileSystemErrors';
 import { isTimeoutError } from '../errors/apiErrors';
