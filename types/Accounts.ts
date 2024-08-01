@@ -139,3 +139,24 @@ export type UpdateAccountConfigOptions =
   Partial<FlatAccountFields_DEPRECATED> & {
     environment?: Environment;
   };
+
+export type PersonalAccessKeyOptions = {
+  accountId: number;
+  personalAccessKey: string;
+  env: Environment;
+};
+
+export type OAuthOptions = {
+  accountId: number;
+  clientId: string;
+  clientSecret: string;
+  refreshToken: string;
+  scopes: Array<string>;
+  env: Environment;
+};
+
+export type APIKeyOptions = {
+  accountId: number;
+  apiKey: string;
+  env: Environment;
+};

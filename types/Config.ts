@@ -25,3 +25,13 @@ export interface CLIConfig_DEPRECATED {
 export type CLIConfig = CLIConfig_NEW | CLIConfig_DEPRECATED;
 
 export type Environment = ValueOf<typeof ENVIRONMENTS> | '';
+
+export type EnvironmentConfigVariables = {
+  apiKey?: string;
+  clientId?: string;
+  clientSecret?: string;
+  personalAccessKey?: string;
+  accountId?: number;
+  refreshToken?: string;
+  env?: Environment;
+};
