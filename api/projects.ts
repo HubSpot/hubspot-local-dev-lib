@@ -196,15 +196,6 @@ export async function fetchProjectSettings(
   });
 }
 
-export async function fetchDeployComponentsMetadata(
-  accountId: number,
-  projectId: number
-): Promise<ComponentMetadataResponse> {
-  return http.get(accountId, {
-    url: `${PROJECTS_API_PATH}/by-id/${projectId}/deploy-components-metadata`,
-  });
-}
-
 export async function provisionBuild(
   accountId: number,
   projectName: string,

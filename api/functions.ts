@@ -31,6 +31,32 @@ export async function getLatestFunctionLog(accountId: number, route: string) {
   });
 }
 
+export async function getAppFunctionLogs(
+  accountId: number,
+  functionName: string,
+  projectName: string,
+  appPath: string,
+  params: QueryParams = {}
+) {
+  const { limit = 5 } = params;
+  return http.get(accountId, {
+    url: `${FUNCTION_API_PATH}/app-function/logs/project/${projectName}/function/${functionName}`,
+    params: { appPath, ...params, limit },
+  });
+}
+
+export async function getLatestAppFunctionLogs(
+  accountId: number,
+  functionName: string,
+  projectName: string,
+  appPath: string
+) {
+  return http.get(accountId, {
+    url: `${FUNCTION_API_PATH}/app-function/logs/project/${projectName}/function/${functionName}/latest`,
+    params: { appPath },
+  });
+}
+
 export async function buildPackage(
   accountId: number,
   folderPath: string
