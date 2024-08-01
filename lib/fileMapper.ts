@@ -20,6 +20,7 @@ import {
   Mode,
   FileMapperOptions,
   FileMapperInputOptions,
+  PathTypeData,
 } from '../types/Files';
 import { throwFileSystemError } from '../errors/fileSystemErrors';
 import { isTimeoutError } from '../errors/apiErrors';
@@ -98,14 +99,6 @@ function validateFileMapperNode(node: FileMapperNode): void {
   });
 }
 
-type PathTypeData = {
-  isModule: boolean;
-  isHubspot: boolean;
-  isFile: boolean;
-  isRoot: boolean;
-  isFolder: boolean;
-};
-
 export function getTypeDataFromPath(src: string): PathTypeData {
   const isModule = isPathToModule(src);
   const isHubspot = isPathToHubspot(src);
@@ -120,12 +113,6 @@ export function getTypeDataFromPath(src: string): PathTypeData {
     isFolder,
   };
 }
-
-type RecursiveFileMapperCallback = (
-  node: FileMapperNode,
-  filepath?: string,
-  depth?: number
-) => boolean;
 
 export function recurseFolder(
   node: FileMapperNode,

@@ -160,3 +160,14 @@ export type APIKeyOptions = {
   apiKey: string;
   env: Environment;
 };
+
+export type AccessToken = {
+  portalId: number;
+  accessToken: string;
+  expiresAt: string;
+  scopeGroups: Array<string>;
+  enabledFeatures?: { [key: string]: number };
+  encodedOAuthRefreshToken: string;
+  hubName: string;
+  accountType: ValueOf<typeof HUBSPOT_ACCOUNT_TYPES>;
+};

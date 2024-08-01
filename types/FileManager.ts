@@ -73,3 +73,5 @@ export type FetchFolderResponse = {
   objects: Array<Folder>;
   total_count: number;
 };
+
+export type SimplifiedFolder = Partial<Folder> & Pick<Folder, 'id' | 'name'>;

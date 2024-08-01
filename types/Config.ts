@@ -35,3 +35,9 @@ export type EnvironmentConfigVariables = {
   refreshToken?: string;
   env?: Environment;
 };
+
+export type GitInclusionResult = {
+  inGit: boolean;
+  configIgnored: boolean;
+  gitignoreFiles: Array<string>;
+};

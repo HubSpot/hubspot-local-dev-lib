@@ -50,3 +50,17 @@ export type FileTree = {
   path: string;
   children: Array<FileTree>;
 };
+
+export type PathTypeData = {
+  isModule: boolean;
+  isHubspot: boolean;
+  isFile: boolean;
+  isRoot: boolean;
+  isFolder: boolean;
+};
+
+export type RecursiveFileMapperCallback = (
+  node: FileMapperNode,
+  filepath?: string,
+  depth?: number
+) => boolean;
