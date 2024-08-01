@@ -23,6 +23,7 @@ import { fetchDeveloperTestAccountData } from '../api/developerTestAccounts';
 import { logger } from './logger';
 import { getAxiosErrorWithContext } from '../errors/apiErrors';
 import { ValueOf } from '../types/Utils';
+import CLIConfiguration from '../config/CLIConfiguration';
 
 const i18nKey = 'lib.personalAccessKey';
 
@@ -245,7 +246,11 @@ export async function updateConfigWithAccessToken(
     parentAccountId,
     env: accountEnv,
   });
-  writeConfig({ source: JSON.stringify(updatedConfig) });
+  if (CLIConfiguration.isActive()) {
+    writeConfig({ source: JSON.stringify(updatedConfig) });
+  } else {
+    writeConfig();
+  }
 
   if (makeDefault && name) {
     updateDefaultAccount(name);

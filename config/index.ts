@@ -83,8 +83,11 @@ export function writeConfig(options: WriteConfigOptions = {}): void {
 
 // Need to rewrite this not to rely on CLIConfiguration.
 // We fetch the path before we call CLIConfiguration.init.
-export function getConfigPath(): string | null {
-  return getConfigFilePath();
+export function getConfigPath(useNewConfig = false): string | null {
+  if (useNewConfig) {
+    return getConfigFilePath();
+  }
+  return config_DEPRECATED.getConfigPath();
 }
 
 export function getAccountConfig(accountId?: number): CLIAccount | null {

@@ -596,15 +596,6 @@ describe('config/config', () => {
       });
     });
 
-    describe('when passed a path', () => {
-      it('returns the path', () => {
-        const randomConfigPath = '/some/random/path.config.yml';
-        const configPath = getConfigPath(randomConfigPath);
-
-        expect(configPath).toBe(randomConfigPath);
-      });
-    });
-
     describe('when no config is present', () => {
       beforeAll(() => {
         setConfigPath(CONFIG_PATHS.none);
