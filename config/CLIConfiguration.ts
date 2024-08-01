@@ -318,7 +318,7 @@ class CLIConfiguration {
   updateAccount(
     updatedAccountFields: Partial<FlatAccountFields_NEW>,
     writeUpdate = true
-  ): FlatAccountFields_NEW | null {
+  ): CLIConfig_NEW | null {
     const {
       accountId,
       accountType,
@@ -424,7 +424,7 @@ class CLIConfiguration {
       );
     }
 
-    if (this.config.accounts) {
+    if (this.config.accounts.length) {
       this.config.accounts.push(completedAccountConfig);
     } else {
       this.config.accounts = [completedAccountConfig];
@@ -434,7 +434,7 @@ class CLIConfiguration {
       this.write();
     }
 
-    return completedAccountConfig;
+    return this.config;
   }
 
   /**

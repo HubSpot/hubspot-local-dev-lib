@@ -10,7 +10,7 @@ import {
 import { fetchAccessToken } from '../api/localDevAuth';
 import { fetchSandboxHubData } from '../api/sandboxHubs';
 import { CLIAccount, PersonalAccessKeyAccount } from '../types/Accounts';
-import { Environment } from '../types/Config';
+import { CLIConfig_NEW, Environment } from '../types/Config';
 import {
   getAccountConfig,
   updateAccountConfig,
@@ -195,7 +195,7 @@ export async function updateConfigWithAccessToken(
   env?: Environment,
   name?: string,
   makeDefault = false
-): Promise<CLIAccount | null> {
+): Promise<CLIConfig_NEW | CLIAccount | null> {
   const { portalId, accessToken, expiresAt, accountType } = token;
   const accountEnv = env || getEnv(name);
 

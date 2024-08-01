@@ -103,7 +103,7 @@ export function accountNameExistsInConfig(name: string): boolean {
 
 export function updateAccountConfig(
   configOptions: Partial<FlatAccountFields>
-): FlatAccountFields | null {
+): CLIConfig_NEW | FlatAccountFields | null {
   const accountIdentifier = getAccountIdentifier(configOptions);
   if (CLIConfiguration.isActive()) {
     return CLIConfiguration.updateAccount({
