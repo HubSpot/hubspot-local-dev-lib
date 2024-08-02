@@ -255,5 +255,71 @@ describe('http/index', () => {
         },
       });
     });
+
+    it('supports making unauthed requests with config present', async () => {
+      getAndLoadConfigIfNeeded.mockReturnValue({
+        httpTimeout: 1000,
+        accounts: [
+          {
+            accountId: 123,
+            apiKey: 'abc',
+            env: ENVIRONMENTS.PROD,
+          },
+        ],
+      });
+      getAccountConfig.mockReturnValue({
+        accountId: 123,
+        apiKey: 'abc',
+        env: ENVIRONMENTS.PROD,
+      });
+
+      await http.get(123, { url: 'some/endpoint/path', unauthed: true });
+
+      expect(mockedAxios).toHaveBeenCalledWith({
+        baseURL: `https://api.hubapi.com`,
+        url: 'some/endpoint/path',
+        headers: {
+          'User-Agent': `HubSpot Local Dev Lib/${version}`,
+        },
+        timeout: 1000,
+        params: {},
+        transitional: {
+          clarifyTimeoutError: true,
+        },
+        httpAgent: {
+          options: { keepAlive: true, maxSockets: 5, maxTotalSockets: 25 },
+        },
+        httpsAgent: {
+          options: { keepAlive: true, maxSockets: 6, maxTotalSockets: 26 },
+        },
+      });
+    });
+
+    it('supports making unauthed requests without config present', async () => {
+      await http.get(123, {
+        url: 'some/endpoint/path',
+        unauthed: true,
+        env: 'qa',
+      });
+
+      expect(mockedAxios).toHaveBeenCalledWith({
+        baseURL: `https://api.hubapiqa.com`,
+        url: 'some/endpoint/path',
+        headers: {
+          'User-Agent': `HubSpot Local Dev Lib/${version}`,
+        },
+        timeout: 15000,
+        params: {},
+        transitional: {
+          clarifyTimeoutError: true,
+        },
+        httpAgent: {
+          options: { keepAlive: true, maxSockets: 5, maxTotalSockets: 25 },
+        },
+        httpsAgent: {
+          options: { keepAlive: true, maxSockets: 6, maxTotalSockets: 26 },
+        },
+      });
+    });
   });
 });

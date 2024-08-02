@@ -129,11 +129,12 @@ async function getAxiosRequestConfigFromOptions(
   accountId: number,
   options: HttpOptions
 ): Promise<AxiosRequestConfig> {
-  if (options.unauthed) {
+  const { unauthed, ...httpOptions } = options;
+  if (unauthed) {
     const accountConfig = getAccountConfig(accountId);
-    return getAxiosConfig({ env: accountConfig?.env, ...options });
+    return getAxiosConfig({ env: accountConfig?.env, ...httpOptions });
   } else {
-    return withAuth(accountId, options);
+    return withAuth(accountId, httpOptions);
   }
 }
 
