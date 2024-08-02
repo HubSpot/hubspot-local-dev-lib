@@ -1,7 +1,7 @@
 import { version } from '../package.json';
 import { getAndLoadConfigIfNeeded } from '../config';
 import { getHubSpotApiOrigin } from '../lib/urls';
-import { AxiosConfigOptions } from '../types/Http';
+import { HttpOptions } from '../types/Http';
 import { CLIConfig } from '../types/Config';
 import { AxiosRequestConfig } from 'axios';
 import https from 'https';
@@ -47,9 +47,7 @@ const DEFAULT_TRANSITIONAL = {
   clarifyTimeoutError: true,
 };
 
-export function getAxiosConfig(
-  options: AxiosConfigOptions
-): AxiosRequestConfig {
+export function getAxiosConfig(options: HttpOptions): AxiosRequestConfig {
   const { env, localHostOverride, headers, ...rest } = options;
   const { httpTimeout, httpUseLocalhost } =
     getAndLoadConfigIfNeeded() as CLIConfig;

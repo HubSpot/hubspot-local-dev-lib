@@ -8,7 +8,7 @@ import { USER_AGENTS, getAxiosConfig } from './getAxiosConfig';
 import { accessTokenForPersonalAccessKey } from '../lib/personalAccessKey';
 import { getOauthManager } from '../lib/oauth';
 import { FlatAccountFields } from '../types/Accounts';
-import { AxiosConfigOptions, HttpOptions, QueryParams } from '../types/Http';
+import { HttpOptions, QueryParams } from '../types/Http';
 import { logger } from '../lib/logger';
 import { i18n } from '../utils/lang';
 import { HubSpotHttpError } from '../models/HubSpotHttpError';
@@ -79,7 +79,7 @@ function withPortalId(
 
 async function withAuth(
   accountId: number,
-  options: AxiosConfigOptions
+  options: HttpOptions
 ): Promise<AxiosRequestConfig> {
   const accountConfig = getAccountConfig(accountId);
 
@@ -112,9 +112,9 @@ async function withAuth(
 }
 
 function addQueryParams(
-  configOptions: AxiosConfigOptions,
+  configOptions: HttpOptions,
   queryParams: QueryParams = {}
-): AxiosConfigOptions {
+): HttpOptions {
   const { params } = configOptions;
   return {
     ...configOptions,
@@ -125,11 +125,16 @@ function addQueryParams(
   };
 }
 
+// async function getAxiosRequestConfigFromOptions(
+//   accountId: number,
+//   options: HttpOptions
+// ): Promise<AxiosRequestConfig> {}
+
 async function getRequest<T>(
   accountId: number,
   options: HttpOptions
 ): AxiosPromise<T> {
-  const { params, ...rest } = options;
+  const { params, unauthed, ...rest } = options;
   const axiosConfig = addQueryParams(rest, params);
   const configWithAuth = await withAuth(accountId, axiosConfig);
 

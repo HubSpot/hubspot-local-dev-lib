@@ -1,3 +1,4 @@
+import { ResponseType } from 'axios';
 import { ReadStream } from 'fs';
 import { Stream } from 'stream';
 
@@ -10,12 +11,15 @@ export type QueryParams = {
   [key: string]: string | number | boolean | undefined;
 };
 
-export type AxiosConfigOptions = {
+export type FormData = {
+  [key: string]: string | ReadStream;
+};
+
+export type HttpOptions = {
   baseURL?: string;
   url: string;
   env?: string;
   localHostOverride?: boolean;
-  params?: QueryParams;
   data?:
     | Data
     | string
@@ -25,17 +29,9 @@ export type AxiosConfigOptions = {
     | Stream
     | Buffer;
   resolveWithFullResponse?: boolean;
-  timeout?: number;
-  headers?: Data;
-};
-
-export type FormData = {
-  [key: string]: string | ReadStream;
-};
-
-export type HttpOptions = AxiosConfigOptions & {
   params?: QueryParams;
   timeout?: number;
-  responseType?: string;
+  responseType?: ResponseType;
   headers?: { [header: string]: string | string[] | undefined };
+  unauthed?: boolean;
 };
