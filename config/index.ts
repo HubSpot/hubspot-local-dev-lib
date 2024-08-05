@@ -84,7 +84,7 @@ export function writeConfig(options: WriteConfigOptions = {}): void {
 // Need to rewrite this not to rely on CLIConfiguration.
 // We fetch the path before we call CLIConfiguration.init.
 export function getConfigPath(useNewConfig = false): string | null {
-  if (useNewConfig) {
+  if (useNewConfig || CLIConfiguration.isActive()) {
     return getConfigFilePath();
   }
   return config_DEPRECATED.getConfigPath();
@@ -106,7 +106,7 @@ export function accountNameExistsInConfig(name: string): boolean {
 
 export function updateAccountConfig(
   configOptions: Partial<FlatAccountFields>
-): CLIConfig_NEW | FlatAccountFields | null {
+): FlatAccountFields | null {
   const accountIdentifier = getAccountIdentifier(configOptions);
   if (CLIConfiguration.isActive()) {
     return CLIConfiguration.updateAccount({

@@ -318,7 +318,7 @@ class CLIConfiguration {
   updateAccount(
     updatedAccountFields: Partial<FlatAccountFields_NEW>,
     writeUpdate = true
-  ): CLIConfig_NEW | null {
+  ): FlatAccountFields_NEW | null {
     const {
       accountId,
       accountType,
@@ -408,7 +408,7 @@ class CLIConfiguration {
     safelyApplyUpdates('parentAccountId', parentAccountId);
 
     const completedAccountConfig = nextAccountConfig as FlatAccountFields_NEW;
-
+    if (!Object.hasOwn(this.config, 'accounts')) this.config.accounts = [];
     if (currentAccountConfig) {
       logger.debug(
         i18n(`${i18nKey}.updateAccount.updating`, {
@@ -416,25 +416,22 @@ class CLIConfiguration {
         })
       );
       const index = this.getConfigAccountIndex(accountId);
-      this.config.accounts[index] = completedAccountConfig;
+      if (index < 0) this.config.accounts.push(completedAccountConfig);
+      else this.config.accounts[index] = completedAccountConfig;
       logger.debug(
         i18n(`${i18nKey}.updateAccount.addingConfigEntry`, {
           accountId,
         })
       );
-    }
-
-    if (this.config.accounts.length) {
-      this.config.accounts.push(completedAccountConfig);
     } else {
-      this.config.accounts = [completedAccountConfig];
+      this.config.accounts.push(completedAccountConfig);
     }
 
     if (writeUpdate) {
       this.write();
     }
 
-    return this.config;
+    return completedAccountConfig;
   }
 
   /**

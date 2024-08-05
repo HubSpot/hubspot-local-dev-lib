@@ -10,7 +10,7 @@ import {
 import { fetchAccessToken } from '../api/localDevAuth';
 import { fetchSandboxHubData } from '../api/sandboxHubs';
 import { CLIAccount, PersonalAccessKeyAccount } from '../types/Accounts';
-import { CLIConfig_NEW, Environment } from '../types/Config';
+import { Environment } from '../types/Config';
 import {
   getAccountConfig,
   updateAccountConfig,
@@ -196,7 +196,7 @@ export async function updateConfigWithAccessToken(
   env?: Environment,
   name?: string,
   makeDefault = false
-): Promise<CLIConfig_NEW | CLIAccount | null> {
+): Promise<CLIAccount | null> {
   const { portalId, accessToken, expiresAt, accountType } = token;
   const accountEnv = env || getEnv(name);
 
@@ -236,7 +236,7 @@ export async function updateConfigWithAccessToken(
     logger.debug(getAxiosErrorWithContext(err as AxiosError).message);
   }
 
-  const updatedConfig = updateAccountConfig({
+  const updatedAccount = updateAccountConfig({
     accountId: portalId,
     accountType,
     personalAccessKey,
@@ -246,9 +246,7 @@ export async function updateConfigWithAccessToken(
     parentAccountId,
     env: accountEnv,
   });
-  if (CLIConfiguration.isActive()) {
-    writeConfig({ source: JSON.stringify(updatedConfig) });
-  } else {
+  if (!CLIConfiguration.isActive()) {
     writeConfig();
   }
 
@@ -256,5 +254,5 @@ export async function updateConfigWithAccessToken(
     updateDefaultAccount(name);
   }
 
-  return updatedConfig;
+  return updatedAccount;
 }
