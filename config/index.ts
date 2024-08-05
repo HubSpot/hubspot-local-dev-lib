@@ -81,11 +81,11 @@ export function writeConfig(options: WriteConfigOptions = {}): void {
   }
 }
 
-export function getConfigPath(path?: string): string | null {
-  if (CLIConfiguration.isActive()) {
+export function getConfigPath(useNewConfig = false): string | null {
+  if (useNewConfig || CLIConfiguration.isActive()) {
     return getConfigFilePath();
   }
-  return config_DEPRECATED.getConfigPath(path);
+  return config_DEPRECATED.getConfigPath();
 }
 
 export function getAccountConfig(accountId?: number): CLIAccount | null {

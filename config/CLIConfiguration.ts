@@ -346,10 +346,13 @@ class CLIConfiguration {
       return null;
     }
 
+    // Check whether the account is already listed in the config.yml file.
     const currentAccountConfig = this.getAccount(accountId);
 
+    // For accounts that are already in the config.yml file, sets the auth property.
     let auth: OAuthAccount_NEW['auth'] =
       (currentAccountConfig && currentAccountConfig.auth) || {};
+    // For accounts not already in the config.yml file, sets the auth property.
     if (clientId || clientSecret || scopes || tokenInfo) {
       auth = {
         ...(currentAccountConfig ? currentAccountConfig.auth : {}),
@@ -405,7 +408,7 @@ class CLIConfiguration {
     safelyApplyUpdates('parentAccountId', parentAccountId);
 
     const completedAccountConfig = nextAccountConfig as FlatAccountFields_NEW;
-
+    if (!Object.hasOwn(this.config, 'accounts')) this.config.accounts = [];
     if (currentAccountConfig) {
       logger.debug(
         i18n(`${i18nKey}.updateAccount.updating`, {
@@ -413,17 +416,15 @@ class CLIConfiguration {
         })
       );
       const index = this.getConfigAccountIndex(accountId);
-      this.config.accounts[index] = completedAccountConfig;
+      if (index < 0) this.config.accounts.push(completedAccountConfig);
+      else this.config.accounts[index] = completedAccountConfig;
       logger.debug(
         i18n(`${i18nKey}.updateAccount.addingConfigEntry`, {
           accountId,
         })
       );
-      if (this.config.accounts) {
-        this.config.accounts.push(completedAccountConfig);
-      } else {
-        this.config.accounts = [completedAccountConfig];
-      }
+    } else {
+      this.config.accounts.push(completedAccountConfig);
     }
 
     if (writeUpdate) {

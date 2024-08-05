@@ -23,6 +23,7 @@ import { fetchDeveloperTestAccountData } from '../api/developerTestAccounts';
 import { logger } from './logger';
 import { getAxiosErrorWithContext } from '../errors/apiErrors';
 import { ValueOf } from '../types/Utils';
+import CLIConfiguration from '../config/CLIConfiguration';
 
 const i18nKey = 'lib.personalAccessKey';
 
@@ -235,7 +236,7 @@ export async function updateConfigWithAccessToken(
     logger.debug(getAxiosErrorWithContext(err as AxiosError).message);
   }
 
-  const updatedConfig = updateAccountConfig({
+  const updatedAccount = updateAccountConfig({
     accountId: portalId,
     accountType,
     personalAccessKey,
@@ -245,11 +246,13 @@ export async function updateConfigWithAccessToken(
     parentAccountId,
     env: accountEnv,
   });
-  writeConfig();
+  if (!CLIConfiguration.isActive()) {
+    writeConfig();
+  }
 
   if (makeDefault && name) {
     updateDefaultAccount(name);
   }
 
-  return updatedConfig;
+  return updatedAccount;
 }
