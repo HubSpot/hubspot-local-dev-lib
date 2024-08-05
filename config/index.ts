@@ -81,8 +81,6 @@ export function writeConfig(options: WriteConfigOptions = {}): void {
   }
 }
 
-// Need to rewrite this not to rely on CLIConfiguration.
-// We fetch the path before we call CLIConfiguration.init.
 export function getConfigPath(useNewConfig = false): string | null {
   if (useNewConfig || CLIConfiguration.isActive()) {
     return getConfigFilePath();
