@@ -1,10 +1,7 @@
 import http from '../http';
+import { FetchSecretsResponse } from '../types/Secrets';
 
 const SECRETS_API_PATH = 'cms/v3/functions/secrets';
-
-type FetchSecretsResponse = {
-  results: Array<string>;
-};
 
 export async function addSecret(
   accountId: number,
