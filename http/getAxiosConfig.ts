@@ -70,7 +70,7 @@ export function getAxiosConfig(options: HttpOptions): AxiosRequestConfig {
       ...getDefaultUserAgentHeader(),
       ...(headers || {}),
     },
-    timeout: httpTimeout || 15000,
+    timeout: httpTimeout,
     transitional: DEFAULT_TRANSITIONAL,
     httpAgent,
     httpsAgent,
