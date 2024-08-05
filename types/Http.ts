@@ -33,5 +33,4 @@ export type HttpOptions = {
   timeout?: number;
   responseType?: ResponseType;
   headers?: { [header: string]: string | string[] | undefined };
-  unauthed?: boolean;
 };

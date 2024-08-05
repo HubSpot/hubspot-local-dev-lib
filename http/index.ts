@@ -125,29 +125,21 @@ function addQueryParams(
   };
 }
 
-async function getAxiosRequestConfigFromOptions(
-  accountId: number,
-  options: HttpOptions
-): Promise<AxiosRequestConfig> {
-  const { unauthed, ...httpOptions } = options;
-  if (unauthed) {
-    const accountConfig = getAccountConfig(accountId);
-    return getAxiosConfig({ env: accountConfig?.env, ...httpOptions });
-  } else {
-    return withAuth(accountId, httpOptions);
-  }
-}
-
 async function getRequest<T>(
   accountId: number,
   options: HttpOptions
 ): AxiosPromise<T> {
   const { params, ...rest } = options;
   const optionsWithParams = addQueryParams(rest, params);
-  const requestConfig = await getAxiosRequestConfigFromOptions(
-    accountId,
-    optionsWithParams
-  );
+  const requestConfig = await withAuth(accountId, optionsWithParams);
+
+  return axios<T>(requestConfig);
+}
+
+async function unauthedGetRequest<T>(options: HttpOptions): AxiosPromise<T> {
+  const { params, ...rest } = options;
+  const optionsWithParams = addQueryParams(rest, params);
+  const requestConfig = await getAxiosConfig(optionsWithParams);
 
   return axios<T>(requestConfig);
 }
@@ -156,11 +148,12 @@ async function postRequest<T>(
   accountId: number,
   options: HttpOptions
 ): AxiosPromise<T> {
-  const requestConfig = await getAxiosRequestConfigFromOptions(
-    accountId,
-    options
-  );
+  const requestConfig = await withAuth(accountId, options);
+  return axios({ ...requestConfig, method: 'post' });
+}
 
+async function unauthedPostRequest<T>(options: HttpOptions): AxiosPromise<T> {
+  const requestConfig = await getAxiosConfig(options);
   return axios({ ...requestConfig, method: 'post' });
 }
 
@@ -168,10 +161,12 @@ async function putRequest<T>(
   accountId: number,
   options: HttpOptions
 ): AxiosPromise<T> {
-  const requestConfig = await getAxiosRequestConfigFromOptions(
-    accountId,
-    options
-  );
+  const requestConfig = await withAuth(accountId, options);
+  return axios({ ...requestConfig, method: 'put' });
+}
+
+async function unauthedPutRequest<T>(options: HttpOptions): AxiosPromise<T> {
+  const requestConfig = await getAxiosConfig(options);
   return axios({ ...requestConfig, method: 'put' });
 }
 
@@ -179,10 +174,12 @@ async function patchRequest<T>(
   accountId: number,
   options: HttpOptions
 ): AxiosPromise<T> {
-  const requestConfig = await getAxiosRequestConfigFromOptions(
-    accountId,
-    options
-  );
+  const requestConfig = await withAuth(accountId, options);
+  return axios({ ...requestConfig, method: 'patch' });
+}
+
+async function unauthedPatchRequest<T>(options: HttpOptions): AxiosPromise<T> {
+  const requestConfig = await getAxiosConfig(options);
   return axios({ ...requestConfig, method: 'patch' });
 }
 
@@ -190,10 +187,12 @@ async function deleteRequest<T>(
   accountId: number,
   options: HttpOptions
 ): AxiosPromise<T> {
-  const requestConfig = await getAxiosRequestConfigFromOptions(
-    accountId,
-    options
-  );
+  const requestConfig = await withAuth(accountId, options);
+  return axios({ ...requestConfig, method: 'delete' });
+}
+
+async function unauthedDeleteRequest<T>(options: HttpOptions): AxiosPromise<T> {
+  const requestConfig = await getAxiosConfig(options);
   return axios({ ...requestConfig, method: 'delete' });
 }
 
@@ -266,9 +265,14 @@ const getOctetStream = createGetRequestStream('application/octet-stream');
 
 export const http = {
   get: getRequest,
+  getUnauthed: unauthedGetRequest,
   post: postRequest,
+  postUnauthed: unauthedPostRequest,
   put: putRequest,
+  putUnauthed: unauthedPutRequest,
   patch: patchRequest,
+  patchUnauthed: unauthedPatchRequest,
   delete: deleteRequest,
+  deleteUnauthed: unauthedDeleteRequest,
   getOctetStream,
 };
