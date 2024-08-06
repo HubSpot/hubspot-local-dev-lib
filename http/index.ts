@@ -5,10 +5,11 @@ import axios, { AxiosRequestConfig, AxiosResponse, AxiosPromise } from 'axios';
 
 import { getAccountConfig } from '../config';
 import { USER_AGENTS, getAxiosConfig } from './getAxiosConfig';
+import { addQueryParams } from './addQueryParams';
 import { accessTokenForPersonalAccessKey } from '../lib/personalAccessKey';
 import { getOauthManager } from '../lib/oauth';
 import { FlatAccountFields } from '../types/Accounts';
-import { AxiosConfigOptions, HttpOptions, QueryParams } from '../types/Http';
+import { HttpOptions } from '../types/Http';
 import { logger } from '../lib/logger';
 import { i18n } from '../utils/lang';
 import { HubSpotHttpError } from '../models/HubSpotHttpError';
@@ -79,7 +80,7 @@ function withPortalId(
 
 async function withAuth(
   accountId: number,
-  options: AxiosConfigOptions
+  options: HttpOptions
 ): Promise<AxiosRequestConfig> {
   const accountConfig = getAccountConfig(accountId);
 
@@ -111,62 +112,47 @@ async function withAuth(
   };
 }
 
-function addQueryParams(
-  configOptions: AxiosConfigOptions,
-  queryParams: QueryParams = {}
-): AxiosConfigOptions {
-  const { params } = configOptions;
-  return {
-    ...configOptions,
-    params: {
-      ...queryParams,
-      ...params,
-    },
-  };
-}
-
 async function getRequest<T>(
   accountId: number,
   options: HttpOptions
 ): AxiosPromise<T> {
   const { params, ...rest } = options;
-  const axiosConfig = addQueryParams(rest, params);
-  const configWithAuth = await withAuth(accountId, axiosConfig);
+  const optionsWithParams = addQueryParams(rest, params);
+  const requestConfig = await withAuth(accountId, optionsWithParams);
 
-  return axios<T>(configWithAuth);
+  return axios<T>(requestConfig);
 }
 
 async function postRequest<T>(
   accountId: number,
   options: HttpOptions
 ): AxiosPromise<T> {
-  const configWithAuth = await withAuth(accountId, options);
-
-  return axios({ ...configWithAuth, method: 'post' });
+  const requestConfig = await withAuth(accountId, options);
+  return axios<T>({ ...requestConfig, method: 'post' });
 }
 
 async function putRequest<T>(
   accountId: number,
   options: HttpOptions
 ): AxiosPromise<T> {
-  const configWithAuth = await withAuth(accountId, options);
-  return axios({ ...configWithAuth, method: 'put' });
+  const requestConfig = await withAuth(accountId, options);
+  return axios<T>({ ...requestConfig, method: 'put' });
 }
 
 async function patchRequest<T>(
   accountId: number,
   options: HttpOptions
 ): AxiosPromise<T> {
-  const configWithAuth = await withAuth(accountId, options);
-  return axios({ ...configWithAuth, method: 'patch' });
+  const requestConfig = await withAuth(accountId, options);
+  return axios<T>({ ...requestConfig, method: 'patch' });
 }
 
 async function deleteRequest<T>(
   accountId: number,
   options: HttpOptions
 ): AxiosPromise<T> {
-  const configWithAuth = await withAuth(accountId, options);
-  return axios({ ...configWithAuth, method: 'delete' });
+  const requestConfig = await withAuth(accountId, options);
+  return axios<T>({ ...requestConfig, method: 'delete' });
 }
 
 function createGetRequestStream(contentType: string) {
