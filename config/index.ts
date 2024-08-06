@@ -88,6 +88,18 @@ export function getConfigPath(useNewConfig = false): string | null {
   return config_DEPRECATED.getConfigPath();
 }
 
+export function bothConfigFilesExist(useNewConfig?: boolean): boolean {
+  if (configFileExists() && config_DEPRECATED.getConfigPath()) {
+    return true;
+  }
+
+  if (useNewConfig && config_DEPRECATED.getConfigPath()) {
+    return true;
+  }
+
+  return false;
+}
+
 export function getAccountConfig(accountId?: number): CLIAccount | null {
   if (CLIConfiguration.isActive()) {
     return CLIConfiguration.getConfigForAccount(accountId);
