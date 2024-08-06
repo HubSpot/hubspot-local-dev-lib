@@ -5,14 +5,10 @@ import extract from 'extract-zip';
 
 import { logger } from './logger';
 import { i18n } from '../utils/lang';
+import { ZipData, CopySourceToDestOptions } from '../types/Archive';
 import { FileSystemError } from '../models/FileSystemError';
 
 const i18nKey = 'lib.archive';
-
-type ZipData = {
-  extractDir: string;
-  tmpDir: string;
-};
 
 async function extractZip(
   name: string,
@@ -63,12 +59,6 @@ async function extractZip(
   logger.debug(i18n(`${i18nKey}.extractZip.success`));
   return result;
 }
-
-type CopySourceToDestOptions = {
-  sourceDir?: string;
-  includesRootDir?: boolean;
-  hideLogs?: boolean;
-};
 
 async function copySourceToDest(
   src: string,

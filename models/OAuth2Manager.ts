@@ -3,39 +3,17 @@ import moment from 'moment';
 
 import { getHubSpotApiOrigin } from '../lib/urls';
 import { getValidEnv } from '../lib/environment';
-import { FlatAccountFields, TokenInfo } from '../types/Accounts';
+import {
+  FlatAccountFields,
+  OAuth2ManagerAccountConfig,
+  WriteTokenInfoFunction,
+  RefreshTokenResponse,
+  ExchangeProof,
+} from '../types/Accounts';
 import { logger } from '../lib/logger';
 import { getAccountIdentifier } from '../utils/getAccountIdentifier';
 import { AUTH_METHODS } from '../constants/auth';
-import { Environment } from '../types/Config';
 import { i18n } from '../utils/lang';
-
-type OAuth2ManagerAccountConfig = {
-  name?: string;
-  accountId?: number;
-  clientId?: string;
-  clientSecret?: string;
-  scopes?: Array<string>;
-  env?: Environment;
-  environment?: Environment;
-  tokenInfo?: TokenInfo;
-  authType?: 'oauth2';
-};
-
-type WriteTokenInfoFunction = (tokenInfo: TokenInfo) => void;
-
-type RefreshTokenResponse = {
-  refresh_token: string;
-  access_token: string;
-  expires_in: string;
-};
-
-type ExchangeProof = {
-  grant_type: string;
-  client_id?: string;
-  client_secret?: string;
-  refresh_token?: string;
-};
 
 const i18nKey = 'models.OAuth2Manager';
 

@@ -40,3 +40,8 @@ export type UploadProjectResponse = {
 export type ProjectSettings = {
   isAutoDeployEnabled: boolean;
 };
+
+export type FetchPlatformVersionResponse = {
+  defaultPlatformVersion: string;
+  activePlatformVersions: Array<string>;
+};

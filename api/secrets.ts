@@ -1,11 +1,8 @@
 import { AxiosPromise } from 'axios';
 import { http } from '../http';
+import { FetchSecretsResponse } from '../types/Secrets';
 
 const SECRETS_API_PATH = 'cms/v3/functions/secrets';
-
-type FetchSecretsResponse = {
-  results: Array<string>;
-};
 
 export function addSecret(
   accountId: number,

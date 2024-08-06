@@ -14,7 +14,12 @@ import { convertToUnixPath, isAllowedExtension, getCwd } from '../path';
 import { triggerNotify } from '../notify';
 import { getThemePreviewUrl, getThemeJSONPath } from './themes';
 import { logger } from '../logger';
-import { FileMapperInputOptions, Mode } from '../../types/Files';
+import {
+  UploadFileOptions,
+  Mode,
+  WatchOptions,
+  WatchErrorHandler,
+} from '../../types/Files';
 import { UploadFolderResults } from '../../types/Files';
 import { i18n } from '../../utils/lang';
 import { HubSpotHttpError } from '../../models/HubSpotHttpError';
@@ -39,14 +44,6 @@ function _notifyOfThemePreview(filePath: string, accountId: number): void {
 }
 
 const notifyOfThemePreview = debounce(_notifyOfThemePreview, 1000);
-
-type UploadFileOptions = FileMapperInputOptions & {
-  src: string;
-  commandOptions: {
-    convertFields?: boolean;
-  };
-  fieldOptions?: string;
-};
 
 const defaultOnUploadFileError =
   (file: string, dest: string, accountId: number) => (error: AxiosError) => {
@@ -77,7 +74,7 @@ async function uploadFile(
     file: string,
     dest: string,
     accountId: number
-  ) => ErrorHandler = defaultOnUploadFileError
+  ) => WatchErrorHandler = defaultOnUploadFileError
 ): Promise<void> {
   const src = options.src;
 
@@ -169,19 +166,6 @@ async function deleteRemoteFile(
   });
 }
 
-type WatchOptions = {
-  mode?: Mode;
-  remove?: boolean;
-  disableInitial?: boolean;
-  notify?: string;
-  commandOptions: {
-    convertFields?: boolean;
-  };
-  filePaths?: Array<string>;
-};
-
-type ErrorHandler = (error: AxiosError) => void;
-
 export function watch(
   accountId: number,
   src: string,
@@ -197,13 +181,13 @@ export function watch(
   postInitialUploadCallback:
     | ((result: Array<UploadFolderResults>) => void)
     | null = null,
-  onUploadFolderError?: ErrorHandler,
-  onQueueAddError?: ErrorHandler,
+  onUploadFolderError?: WatchErrorHandler,
+  onQueueAddError?: WatchErrorHandler,
   onUploadFileError?: (
     file: string,
     dest: string,
     accountId: number
-  ) => ErrorHandler
+  ) => WatchErrorHandler
 ) {
   const regex = new RegExp(`^${escapeRegExp(src)}`);
   if (notify) {

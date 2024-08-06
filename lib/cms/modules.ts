@@ -9,7 +9,11 @@ import {
   isModuleFolder,
   isModuleFolderChild,
 } from '../../utils/cms/modules';
-import { PathInput } from '../../types/Modules';
+import {
+  PathInput,
+  ValidationResult,
+  ModuleDefinition,
+} from '../../types/Modules';
 import { i18n } from '../../utils/lang';
 
 const i18nKey = 'lib.cms.modules';
@@ -21,11 +25,6 @@ export const ValidationIds = {
   MODULE_FOLDER_REQUIRED: 'MODULE_FOLDER_REQUIRED',
   MODULE_TO_MODULE_NESTING: 'MODULE_TO_MODULE_NESTING',
   MODULE_NESTING: 'MODULE_NESTING',
-};
-
-type ValidationResult = {
-  id: string;
-  message: string;
 };
 
 const getValidationResult = (
@@ -151,13 +150,6 @@ const updateFileContents = async (
       })
     );
   }
-};
-
-type ModuleDefinition = {
-  contentTypes: Array<string>;
-  moduleLabel: string;
-  reactType: boolean;
-  global: boolean;
 };
 
 export async function createModule(

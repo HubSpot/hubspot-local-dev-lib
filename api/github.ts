@@ -1,6 +1,6 @@
 import axios, { AxiosPromise } from 'axios';
 import { getDefaultUserAgentHeader } from '../http/getAxiosConfig';
-import { GithubReleaseData, GithubRepoFile } from '../types/Github';
+import { GithubReleaseData, GithubRepoFile, RepoPath } from '../types/Github';
 
 const GITHUB_REPOS_API = 'https://api.github.com/repos';
 const GITHUB_RAW_CONTENT_API_PATH = 'https://raw.githubusercontent.com';
@@ -9,8 +9,6 @@ declare global {
   // eslint-disable-next-line no-var
   var githubToken: string;
 }
-
-type RepoPath = `${string}/${string}`;
 
 const GITHUB_AUTH_HEADERS = {
   authorization:

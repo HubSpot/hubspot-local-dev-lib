@@ -3,7 +3,13 @@ import fs from 'fs-extra';
 
 import { extractZipArchive } from './archive';
 import { logger } from './logger';
-import { GithubReleaseData, GithubRepoFile } from '../types/Github';
+import {
+  GithubReleaseData,
+  GithubRepoFile,
+  RepoPath,
+  DownloadGithubRepoZipOptions,
+  CloneGithubRepoOptions,
+} from '../types/Github';
 import {
   fetchRepoFile,
   fetchRepoFileByDownloadUrl,
@@ -15,8 +21,6 @@ import { i18n } from '../utils/lang';
 import { isHubSpotHttpError, isSystemError } from '../errors';
 
 const i18nKey = 'lib.github';
-
-type RepoPath = `${string}/${string}`;
 
 export async function fetchFileFromRepository(
   repoPath: RepoPath,
@@ -67,11 +71,6 @@ export async function fetchReleaseData(
   }
 }
 
-type DownloadGithubRepoZipOptions = {
-  branch?: string;
-  tag?: string;
-};
-
 async function downloadGithubRepoZip(
   repoPath: RepoPath,
   isRelease = false,
@@ -108,14 +107,6 @@ async function downloadGithubRepoZip(
     });
   }
 }
-
-type CloneGithubRepoOptions = {
-  isRelease?: boolean; // Download a repo release? (Default is to download the repo contents)
-  type?: string; // The type of asset being downloaded. Used for logging
-  branch?: string; // Repo branch
-  tag?: string; // Repo tag
-  sourceDir?: string; // The directory within the downloaded repo to write after extraction
-};
 
 export async function cloneGithubRepo(
   repoPath: RepoPath,

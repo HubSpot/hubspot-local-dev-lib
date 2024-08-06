@@ -16,7 +16,12 @@ import { isAuthError, isHubSpotHttpError } from '../../errors';
 import { FileMapperInputOptions } from '../../types/Files';
 import { logger } from '../logger';
 import { FILE_TYPES, FILE_UPLOAD_RESULT_TYPES } from '../../constants/files';
-import { FileType, UploadFolderResults } from '../../types/Files';
+import {
+  FileType,
+  UploadFolderResults,
+  CommandOptions,
+  FilePathsByType,
+} from '../../types/Files';
 import { Mode } from '../../types/Files';
 import { i18n } from '../../utils/lang';
 import { HubSpotHttpError } from '../../models/HubSpotHttpError';
@@ -26,30 +31,6 @@ const i18nKey = 'lib.cms.uploadFolder';
 const queue = new PQueue({
   concurrency: 10,
 });
-
-type CommandOptions = {
-  convertFields?: boolean;
-  fieldOptions?: string;
-  saveOutput?: boolean;
-  onAttemptCallback?: (file: string | undefined, destPath: string) => void;
-  onSuccessCallback?: (file: string | undefined, destPath: string) => void;
-  onFirstErrorCallback?: (
-    file: string,
-    destPath: string,
-    error: unknown
-  ) => void;
-  onRetryCallback?: (file: string, destPath: string) => void;
-  onFinalErrorCallback?: (
-    accountId: number,
-    file: string,
-    destPath: string,
-    error: unknown
-  ) => void;
-};
-
-type FilePathsByType = {
-  [key: string]: Array<string>;
-};
 
 function getFileType(filePath: string): FileType {
   const extension = getExt(filePath);

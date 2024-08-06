@@ -15,9 +15,9 @@ import {
 import { HUBSPOT_ACCOUNT_TYPES } from '../constants/config';
 import { fetchDeveloperTestAccountData } from '../api/developerTestAccounts';
 import { logger } from './logger';
-import { ValueOf } from '../types/Utils';
 import { i18n } from '../utils/lang';
 import { isHubSpotHttpError } from '../errors';
+import { AccessToken } from '../types/Accounts';
 
 const i18nKey = 'lib.personalAccessKey';
 
@@ -26,17 +26,6 @@ const refreshRequests = new Map();
 function getRefreshKey(personalAccessKey: string, expiration?: string): string {
   return `${personalAccessKey}-${expiration || 'fresh'}`;
 }
-
-type AccessToken = {
-  portalId: number;
-  accessToken: string;
-  expiresAt: string;
-  scopeGroups: Array<string>;
-  enabledFeatures?: { [key: string]: number };
-  encodedOAuthRefreshToken: string;
-  hubName: string;
-  accountType: ValueOf<typeof HUBSPOT_ACCOUNT_TYPES>;
-};
 
 export async function getAccessToken(
   personalAccessKey: string,
@@ -119,6 +108,24 @@ async function getNewAccessToken(
   return accessTokenResponse;
 }
 
+async function getNewAccessTokenByAccountId(
+  accountId: number
+): Promise<AccessToken> {
+  const account = getAccountConfig(accountId) as PersonalAccessKeyAccount;
+  if (!account) {
+    throw new Error(i18n(`${i18nKey}.errors.accountNotFound`, { accountId }));
+  }
+  const { auth, personalAccessKey, env } = account;
+
+  const accessTokenResponse = await getNewAccessToken(
+    accountId,
+    personalAccessKey,
+    auth?.tokenInfo?.expiresAt,
+    env
+  );
+  return accessTokenResponse;
+}
+
 export async function accessTokenForPersonalAccessKey(
   accountId: number
 ): Promise<string | undefined> {
@@ -148,20 +155,14 @@ export async function accessTokenForPersonalAccessKey(
 export async function enabledFeaturesForPersonalAccessKey(
   accountId: number
 ): Promise<{ [key: string]: number } | undefined> {
-  const account = getAccountConfig(accountId) as PersonalAccessKeyAccount;
-  if (!account) {
-    throw new Error(i18n(`${i18nKey}.errors.accountNotFound`, { accountId }));
-  }
-  const { auth, personalAccessKey, env } = account;
-  const authTokenInfo = auth && auth.tokenInfo;
-
-  const accessTokenResponse = await getNewAccessToken(
-    accountId,
-    personalAccessKey,
-    authTokenInfo && authTokenInfo.expiresAt,
-    env
-  );
+  const accessTokenResponse = await getNewAccessTokenByAccountId(accountId);
   return accessTokenResponse?.enabledFeatures;
+}
+
+export async function scopesOnAccessToken(
+  accountId: number
+): Promise<Array<string>> {
+  return (await getNewAccessTokenByAccountId(accountId)).scopeGroups;
 }
 
 export async function updateConfigWithAccessToken(

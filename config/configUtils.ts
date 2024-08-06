@@ -4,13 +4,16 @@ import {
   OAUTH_AUTH_METHOD,
   PERSONAL_ACCESS_KEY_AUTH_METHOD,
 } from '../constants/auth';
-import { CLIConfig_NEW, Environment } from '../types/Config';
+import { CLIConfig_NEW } from '../types/Config';
 import {
   AuthType,
   CLIAccount_NEW,
   APIKeyAccount_NEW,
   OAuthAccount_NEW,
   PersonalAccessKeyAccount_NEW,
+  PersonalAccessKeyOptions,
+  OAuthOptions,
+  APIKeyOptions,
 } from '../types/Accounts';
 import { i18n } from '../utils/lang';
 
@@ -52,12 +55,6 @@ export function getOrderedConfig(
   };
 }
 
-type PersonalAccessKeyOptions = {
-  accountId: number;
-  personalAccessKey: string;
-  env: Environment;
-};
-
 function generatePersonalAccessKeyAccountConfig({
   accountId,
   personalAccessKey,
@@ -70,15 +67,6 @@ function generatePersonalAccessKeyAccountConfig({
     env,
   };
 }
-
-type OAuthOptions = {
-  accountId: number;
-  clientId: string;
-  clientSecret: string;
-  refreshToken: string;
-  scopes: Array<string>;
-  env: Environment;
-};
 
 function generateOauthAccountConfig({
   accountId,
@@ -102,12 +90,6 @@ function generateOauthAccountConfig({
     env,
   };
 }
-
-type APIKeyOptions = {
-  accountId: number;
-  apiKey: string;
-  env: Environment;
-};
 
 function generateApiKeyAccountConfig({
   accountId,

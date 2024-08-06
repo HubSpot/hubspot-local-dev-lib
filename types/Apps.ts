@@ -66,3 +66,7 @@ export type PublicApp = {
   allowedExternalUrls: Array<string>;
   preventProjectMigrations?: boolean;
 };
+
+export type FetchPublicAppsForPortalResponse = {
+  results: Array<PublicApp>;
+};

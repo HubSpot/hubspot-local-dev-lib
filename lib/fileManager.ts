@@ -20,12 +20,10 @@ import {
   convertToLocalFileSystemPath,
 } from './path';
 
-import { File, Folder } from '../types/FileManager';
+import { File, SimplifiedFolder } from '../types/FileManager';
 import { i18n } from '../utils/lang';
 import { isAuthError, isHubSpotHttpError } from '../errors';
 import { FileSystemError } from '../models/FileSystemError';
-
-type SimplifiedFolder = Partial<Folder> & Pick<Folder, 'id' | 'name'>;
 
 const i18nKey = 'lib.fileManager';
 

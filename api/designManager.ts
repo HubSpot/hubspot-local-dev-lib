@@ -1,16 +1,12 @@
 import { AxiosPromise } from 'axios';
 import { http } from '../http';
 import { QueryParams } from '../types/Http';
+import {
+  FetchThemesResponse,
+  FetchBuiltinMappingResponse,
+} from '../types/DesignManager';
 
 const DESIGN_MANAGER_API_PATH = 'designmanager/v1';
-
-type FetchThemesResponse = {
-  objects: Array<{
-    theme: {
-      path: string;
-    };
-  }>;
-};
 
 export function fetchThemes(
   accountId: number,
@@ -21,10 +17,6 @@ export function fetchThemes(
     params,
   });
 }
-
-type FetchBuiltinMappingResponse = {
-  [key: string]: string;
-};
 
 export function fetchBuiltinMapping(
   accountId: number
