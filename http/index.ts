@@ -128,7 +128,7 @@ async function postRequest<T>(
   options: HttpOptions
 ): AxiosPromise<T> {
   const requestConfig = await withAuth(accountId, options);
-  return axios({ ...requestConfig, method: 'post' });
+  return axios<T>({ ...requestConfig, method: 'post' });
 }
 
 async function putRequest<T>(
@@ -136,7 +136,7 @@ async function putRequest<T>(
   options: HttpOptions
 ): AxiosPromise<T> {
   const requestConfig = await withAuth(accountId, options);
-  return axios({ ...requestConfig, method: 'put' });
+  return axios<T>({ ...requestConfig, method: 'put' });
 }
 
 async function patchRequest<T>(
@@ -144,7 +144,7 @@ async function patchRequest<T>(
   options: HttpOptions
 ): AxiosPromise<T> {
   const requestConfig = await withAuth(accountId, options);
-  return axios({ ...requestConfig, method: 'patch' });
+  return axios<T>({ ...requestConfig, method: 'patch' });
 }
 
 async function deleteRequest<T>(
@@ -152,7 +152,7 @@ async function deleteRequest<T>(
   options: HttpOptions
 ): AxiosPromise<T> {
   const requestConfig = await withAuth(accountId, options);
-  return axios({ ...requestConfig, method: 'delete' });
+  return axios<T>({ ...requestConfig, method: 'delete' });
 }
 
 function createGetRequestStream(contentType: string) {
