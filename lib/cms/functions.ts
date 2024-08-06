@@ -4,9 +4,8 @@ import findup from 'findup-sync';
 import { getCwd } from '../path';
 import { downloadGithubRepoContents } from '../github';
 import { logger } from '../logger';
-import { throwErrorWithMessage } from '../../errors/standardErrors';
-import { throwFileSystemError } from '../../errors/fileSystemErrors';
 import { i18n } from '../../utils/lang';
+import { FileSystemError } from '../../models/FileSystemError';
 
 import {
   FunctionConfig,
@@ -65,10 +64,13 @@ function updateExistingConfig(
         configFilePath,
       })
     );
-    throwFileSystemError(err, {
-      filepath: configFilePath,
-      read: true,
-    });
+    throw new FileSystemError(
+      { cause: err },
+      {
+        filepath: configFilePath,
+        operation: 'read',
+      }
+    );
   }
 
   let config!: FunctionConfig;
@@ -80,26 +82,32 @@ function updateExistingConfig(
         configFilePath,
       })
     );
-    throwFileSystemError(err, {
-      filepath: configFilePath,
-      read: true,
-    });
+    throw new FileSystemError(
+      { cause: err },
+      {
+        filepath: configFilePath,
+        operation: 'read',
+      }
+    );
   }
 
   if (!isObjectOrFunction(config)) {
-    throwErrorWithMessage(
-      `${i18nKey}.updateExistingConfig.errors.configIsNotObjectError`,
-      { configFilePath }
+    throw new Error(
+      i18n(`${i18nKey}.updateExistingConfig.errors.configIsNotObjectError`, {
+        configFilePath,
+      })
     );
   }
   if (config.endpoints) {
     if (config.endpoints[endpointPath]) {
-      throwErrorWithMessage(
-        `${i18nKey}.updateExistingConfig.errors.endpointAreadyExistsError`,
-        {
-          configFilePath,
-          endpointPath,
-        }
+      throw new Error(
+        i18n(
+          `${i18nKey}.updateExistingConfig.errors.endpointAreadyExistsError`,
+          {
+            configFilePath,
+            endpointPath,
+          }
+        )
       );
     } else {
       config.endpoints[endpointPath] = createEndpoint(
@@ -120,10 +128,13 @@ function updateExistingConfig(
         configFilePath,
       })
     );
-    throwFileSystemError(err, {
-      filepath: configFilePath,
-      write: true,
-    });
+    throw new FileSystemError(
+      { cause: err },
+      {
+        filepath: configFilePath,
+        operation: 'read',
+      }
+    );
   }
 }
 
@@ -143,11 +154,10 @@ export async function createFunction(
   });
 
   if (ancestorFunctionsConfig) {
-    throwErrorWithMessage(
-      `${i18nKey}.createFunction.errors.nestedConfigError`,
-      {
+    throw new Error(
+      i18n(`${i18nKey}.createFunction.errors.nestedConfigError`, {
         ancestorConfigPath: path.dirname(ancestorFunctionsConfig),
-      }
+      })
     );
   }
 
@@ -175,11 +185,10 @@ export async function createFunction(
   const configFilePath = path.join(destPath, 'serverless.json');
 
   if (!allowExistingFile && fs.existsSync(functionFilePath)) {
-    throwErrorWithMessage(
-      `${i18nKey}.createFunction.errors.jsFileConflictError`,
-      {
+    throw new Error(
+      i18n(`${i18nKey}.createFunction.errors.jsFileConflictError`, {
         functionFilePath,
-      }
+      })
     );
   }
 
@@ -223,10 +232,13 @@ export async function createFunction(
           configFilePath,
         })
       );
-      throwFileSystemError(err, {
-        filepath: configFilePath,
-        write: true,
-      });
+      throw new FileSystemError(
+        { cause: err },
+        {
+          filepath: configFilePath,
+          operation: 'write',
+        }
+      );
     }
     logger.log(
       i18n(`${i18nKey}.createFunction.createdConfigFile`, {

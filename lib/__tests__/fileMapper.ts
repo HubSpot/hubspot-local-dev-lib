@@ -14,6 +14,7 @@ import {
   fetchFileStream as __fetchFileStream,
 } from '../../api/fileMapper';
 import folderWithoutSources from './fixtures/fileMapper/folderWithoutSources.json';
+import { mockAxiosResponse } from './__utils__/mockAxiosResponse';
 
 jest.mock('../../api/fileMapper');
 const utimesSpy = jest.spyOn(fs, 'utimes');
@@ -206,6 +207,7 @@ describe('lib/fileMapper', () => {
 
     it('folder: should execute the download client per the request input', async () => {
       const src = '1234';
+      download.mockResolvedValueOnce(mockAxiosResponse());
 
       await fetchFolderFromApi(accountId, src);
       const queryParams = {
@@ -219,6 +221,7 @@ describe('lib/fileMapper', () => {
     });
     it('module: should execute the download client per the request input', async () => {
       const src = 'cms-theme-boilerplate/modules/Card section.module';
+      download.mockResolvedValueOnce(mockAxiosResponse());
 
       await fetchFolderFromApi(accountId, src);
       const queryParams = {
@@ -232,6 +235,7 @@ describe('lib/fileMapper', () => {
     });
     it('fetch all: should execute the download client per the request input', async () => {
       const src = '/';
+      download.mockResolvedValueOnce(mockAxiosResponse());
 
       await fetchFolderFromApi(accountId, src);
       const queryParams = {
@@ -270,15 +274,17 @@ describe('lib/fileMapper', () => {
     });
     it('should execute downloadFolder', async () => {
       pathExistsSpy.mockImplementationOnce(() => false);
-      download.mockResolvedValueOnce({
-        name: '',
-        createdAt: 1,
-        updatedAt: 1,
-        source: null,
-        path: '',
-        folder: true,
-        children: [],
-      });
+      download.mockResolvedValueOnce(
+        mockAxiosResponse({
+          name: '',
+          createdAt: 1,
+          updatedAt: 1,
+          source: null,
+          path: '',
+          folder: true,
+          children: [],
+        })
+      );
       await downloadFileOrFolder(accountId, '/a/b/c', './');
       expect(ensureDirSpy).toHaveBeenCalled();
     });

@@ -1,13 +1,14 @@
-import http from '../http';
+import { AxiosPromise } from 'axios';
+import { http } from '../http';
 import { FetchSecretsResponse } from '../types/Secrets';
 
 const SECRETS_API_PATH = 'cms/v3/functions/secrets';
 
-export async function addSecret(
+export function addSecret(
   accountId: number,
   key: string,
   value: string
-): Promise<void> {
+): AxiosPromise<void> {
   return http.post(accountId, {
     url: SECRETS_API_PATH,
     data: {
@@ -17,11 +18,11 @@ export async function addSecret(
   });
 }
 
-export async function updateSecret(
+export function updateSecret(
   accountId: number,
   key: string,
   value: string
-): Promise<void> {
+): AxiosPromise<void> {
   return http.put(accountId, {
     url: SECRETS_API_PATH,
     data: {
@@ -31,19 +32,19 @@ export async function updateSecret(
   });
 }
 
-export async function deleteSecret(
+export function deleteSecret(
   accountId: number,
   key: string
-): Promise<void> {
+): AxiosPromise<void> {
   return http.delete(accountId, {
     url: `${SECRETS_API_PATH}/${key}`,
   });
 }
 
-export async function fetchSecrets(
+export function fetchSecrets(
   accountId: number
-): Promise<FetchSecretsResponse> {
-  return http.get(accountId, {
+): AxiosPromise<FetchSecretsResponse> {
+  return http.get<FetchSecretsResponse>(accountId, {
     url: `${SECRETS_API_PATH}`,
   });
 }

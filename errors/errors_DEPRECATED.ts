@@ -46,9 +46,9 @@ export function logFileSystemErrorInstance(
   context: FileSystemErrorContext
 ) {
   let fileAction = '';
-  if (context.read) {
+  if (context.operation === 'read') {
     fileAction = 'reading from';
-  } else if (context.write) {
+  } else if (context.operation === 'write') {
     fileAction = 'writing to';
   } else {
     fileAction = 'accessing';

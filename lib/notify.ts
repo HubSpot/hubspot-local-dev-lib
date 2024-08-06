@@ -1,8 +1,7 @@
 import fs from 'fs';
 import moment from 'moment';
 import debounce from 'debounce';
-
-import { throwErrorWithMessage } from '../errors/standardErrors';
+import { i18n } from '../utils/lang';
 
 const i18nKey = 'utils.notify';
 
@@ -50,10 +49,9 @@ function notifyFilePath(filePathToNotify: string, outputToWrite: string): void {
     try {
       fs.appendFileSync(filePathToNotify, outputToWrite);
     } catch (e) {
-      throwErrorWithMessage(
-        `${i18nKey}.errors.filePath`,
-        { filePath: filePathToNotify },
-        e
+      throw new Error(
+        i18n(`${i18nKey}.errors.filePath`, { filePath: filePathToNotify }),
+        { cause: e }
       );
     }
   }

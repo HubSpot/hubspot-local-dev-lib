@@ -11,6 +11,7 @@ import {
 import basicSchema from './fixtures/customObjects/basicSchema.json';
 import fullSchema from './fixtures/customObjects/fullSchema.json';
 import multipleSchemas from './fixtures/customObjects/multipleSchemas.json';
+import { mockAxiosResponse } from './__utils__/mockAxiosResponse';
 
 jest.mock('fs-extra');
 jest.mock('../../api/customObjects');
@@ -38,7 +39,7 @@ describe('lib/customObjects', () => {
 
   describe('downloadSchema()', () => {
     it('downloads a schema and writes it to disk', async () => {
-      fetchObjectSchema.mockResolvedValue(fullSchema);
+      fetchObjectSchema.mockResolvedValue(mockAxiosResponse(fullSchema));
 
       const result = await downloadSchema(123, '');
       const outputFileArgs = outputFileSyncSpy.mock.lastCall;
@@ -70,7 +71,9 @@ describe('lib/customObjects', () => {
 
   describe('downloadSchemas()', () => {
     it('downloads schemas and writes them to disk', async () => {
-      fetchObjectSchemas.mockResolvedValue({ results: multipleSchemas });
+      fetchObjectSchemas.mockResolvedValue(
+        mockAxiosResponse({ results: multipleSchemas })
+      );
 
       const result = await downloadSchemas(123);
       expect(result).toEqual(expect.objectContaining(multipleSchemas));

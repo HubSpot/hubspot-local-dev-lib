@@ -1,7 +1,6 @@
 import fs from 'fs-extra';
 import path from 'path';
 import { downloadGithubRepoContents } from '../github';
-import { throwErrorWithMessage } from '../../errors/standardErrors';
 import { logger } from '../logger';
 import { i18n } from '../../utils/lang';
 
@@ -60,9 +59,11 @@ export async function createTemplate(
   const filename = name.endsWith('.html') ? name : `${name}.html`;
   const filePath = path.join(dest, filename);
   if (!options.allowExisting && fs.existsSync(filePath)) {
-    throwErrorWithMessage(`${i18nKey}.createTemplate.errors.pathExists`, {
-      path: filePath,
-    });
+    throw new Error(
+      i18n(`${i18nKey}.createTemplate.errors.pathExists`, {
+        path: filePath,
+      })
+    );
   }
   logger.debug(i18n(`${i18nKey}.createTemplate.creatingPath`, { path: dest }));
   fs.mkdirp(dest);

@@ -1,5 +1,5 @@
-import axios from 'axios';
-import http from '../http';
+import axios, { AxiosPromise } from 'axios';
+import { http } from '../http';
 import { getAxiosConfig } from '../http/getAxiosConfig';
 import { ENVIRONMENTS } from '../constants/environments';
 import { SANDBOX_TIMEOUT } from '../constants/api';
@@ -13,40 +13,40 @@ import {
 const SANDBOX_API_PATH = 'sandbox-hubs/v1';
 const SANDBOX_API_PATH_V2 = 'sandbox-hubs/v2';
 
-export async function createSandbox(
+export function createSandbox(
   accountId: number,
   name: string,
   type: 1 | 2
-): Promise<SandboxResponse> {
-  return http.post(accountId, {
+): AxiosPromise<SandboxResponse> {
+  return http.post<SandboxResponse>(accountId, {
     data: { name, type, generatePersonalAccessKey: true }, // For CLI, generatePersonalAccessKey will always be true since we'll be saving the entry to the config
     timeout: SANDBOX_TIMEOUT,
     url: SANDBOX_API_PATH_V2, // Create uses v2 for sandbox type and PAK generation support
   });
 }
 
-export async function deleteSandbox(
+export function deleteSandbox(
   parentAccountId: number,
   sandboxAccountId: number
-): Promise<void> {
+): AxiosPromise<void> {
   return http.delete(parentAccountId, {
     url: `${SANDBOX_API_PATH}/${sandboxAccountId}`,
   });
 }
 
-export async function getSandboxUsageLimits(
+export function getSandboxUsageLimits(
   parentAccountId: number
-): Promise<SandboxUsageLimitsResponse> {
-  return http.get(parentAccountId, {
+): AxiosPromise<SandboxUsageLimitsResponse> {
+  return http.get<SandboxUsageLimitsResponse>(parentAccountId, {
     url: `${SANDBOX_API_PATH}/parent/${parentAccountId}/usage`,
   });
 }
 
-export async function fetchSandboxHubData(
+export function fetchSandboxHubData(
   accessToken: string,
   accountId: number,
   env: Environment = ENVIRONMENTS.PROD
-): Promise<SandboxHubData> {
+): AxiosPromise<SandboxHubData> {
   const axiosConfig = getAxiosConfig({
     env,
     url: `${SANDBOX_API_PATH}/self`,
@@ -60,7 +60,5 @@ export async function fetchSandboxHubData(
     },
   };
 
-  const { data } = await axios<SandboxHubData>(reqWithToken);
-
-  return data;
+  return axios<SandboxHubData>(reqWithToken);
 }

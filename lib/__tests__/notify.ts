@@ -1,7 +1,6 @@
 jest.mock('fs');
 import { triggerNotify } from '../notify';
 import fs from 'fs';
-import * as standardErrors from '../../errors/standardErrors';
 const fsAppendSyncMock = fs.appendFileSync as jest.MockedFunction<
   typeof fs.appendFileSync
 >;
@@ -61,36 +60,6 @@ describe('lib/notify', () => {
       // Make sure the 10 calls still only lead to 1 write
       expect(fsAppendSyncMock).toHaveBeenCalledTimes(1);
       expect(fsAppendSyncMock).toHaveBeenCalledWith(filePathToNotify, output);
-    });
-
-    it('should throw a user friendly error message when writing to filesystem fails', async () => {
-      const throwErrorWithMessageMock = jest
-        .spyOn(standardErrors, 'throwErrorWithMessage')
-        // @ts-expect-error don't want this method to actually throw because it will fail this test and we can't catch it because it's debounced
-        .mockReturnValue(undefined);
-      const error = new Error('failed to do the thing');
-      fsAppendSyncMock.mockImplementation(() => {
-        throw error;
-      });
-
-      triggerNotify(
-        filePathToNotify,
-        actionType,
-        filePath,
-        new Promise(resolve => {
-          resolve();
-        })
-      );
-
-      // Advance all of the timers to trigger the debounce
-      await jest.runAllTimersAsync();
-
-      expect(throwErrorWithMessageMock).toHaveBeenCalledTimes(1);
-      expect(throwErrorWithMessageMock).toHaveBeenCalledWith(
-        'utils.notify.errors.filePath',
-        { filePath: filePathToNotify },
-        error
-      );
     });
   });
 });

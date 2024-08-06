@@ -1,6 +1,6 @@
 import axios from 'axios';
 import moment from 'moment';
-import OAuth2Manager from '../OAuth2Manager';
+import { OAuth2Manager } from '../OAuth2Manager';
 import { ENVIRONMENTS } from '../../constants/environments';
 
 jest.mock('axios');

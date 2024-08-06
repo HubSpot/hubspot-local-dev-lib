@@ -25,10 +25,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import net, { AddressInfo } from 'net';
 import { ip } from 'address';
-import { throwErrorWithMessage } from '../errors/standardErrors';
 import { NetError, ListenCallback } from '../types/PortManager';
 
 import { MIN_PORT_NUMBER, MAX_PORT_NUMBER } from '../constants/ports';
+import { i18n } from './lang';
 
 const i18nKey = 'utils.detectPort';
 
@@ -37,10 +37,12 @@ export function detectPort(
   exclude: Array<number> = []
 ): Promise<number> {
   if (port && (port < MIN_PORT_NUMBER || port > MAX_PORT_NUMBER)) {
-    throwErrorWithMessage(`${i18nKey}.errors.invalidPort`, {
-      minPort: MIN_PORT_NUMBER,
-      maxPort: MAX_PORT_NUMBER,
-    });
+    throw new Error(
+      i18n(`${i18nKey}.errors.invalidPort`, {
+        minPort: MIN_PORT_NUMBER,
+        maxPort: MAX_PORT_NUMBER,
+      })
+    );
   }
 
   const portToUse = port || 0;

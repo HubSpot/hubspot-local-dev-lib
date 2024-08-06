@@ -1,8 +1,8 @@
 import path from 'path';
 import { getExt, splitHubSpotPath, splitLocalPath } from '../../lib/path';
 import { MODULE_EXTENSION } from '../../constants/extensions';
-import { throwErrorWithMessage } from '../../errors/standardErrors';
 import { PathInput } from '../../types/Modules';
+import { i18n } from '../lang';
 
 const i18nKey = 'utils.cms.modules';
 
@@ -18,7 +18,7 @@ export function isPathInput(pathInput?: PathInput): boolean {
 
 function throwInvalidPathInput(pathInput: PathInput): void {
   if (isPathInput(pathInput)) return;
-  throwErrorWithMessage(`${i18nKey}.throwInvalidPathInput`);
+  throw new Error(i18n(`${i18nKey}.throwInvalidPathInput`));
 }
 
 export function isModuleFolder(pathInput: PathInput): boolean {

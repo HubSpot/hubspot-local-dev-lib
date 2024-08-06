@@ -1,19 +1,26 @@
 import path from 'path';
 import fs from 'fs-extra';
 import contentDisposition from 'content-disposition';
-import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios, { AxiosRequestConfig, AxiosResponse, AxiosPromise } from 'axios';
 
 import { getAccountConfig } from '../config';
 import { USER_AGENTS, getAxiosConfig } from './getAxiosConfig';
+import { addQueryParams } from './addQueryParams';
 import { accessTokenForPersonalAccessKey } from '../lib/personalAccessKey';
 import { getOauthManager } from '../lib/oauth';
 import { FlatAccountFields } from '../types/Accounts';
-import { AxiosConfigOptions, HttpOptions, QueryParams } from '../types/Http';
-import { throwErrorWithMessage } from '../errors/standardErrors';
+import { HttpOptions } from '../types/Http';
 import { logger } from '../lib/logger';
 import { i18n } from '../utils/lang';
+import { HubSpotHttpError } from '../models/HubSpotHttpError';
 
 const i18nKey = 'http.index';
+
+axios.interceptors.response.use(undefined, error => {
+  // Wrap all axios errors in our own Error class.  Attach the error
+  // as the cause for the new error, so we maintain the stack trace
+  return Promise.reject(new HubSpotHttpError(error.message, { cause: error }));
+});
 
 export function addUserAgentHeader(key: string, value: string) {
   USER_AGENTS[key] = value;
@@ -28,7 +35,7 @@ async function withOauth(
   const oauth = getOauthManager(accountId, accountConfig);
 
   if (!oauth) {
-    throwErrorWithMessage(`${i18nKey}.errors.withOauth`, { accountId });
+    throw new Error(i18n(`${i18nKey}.errors.withOauth`, { accountId }));
   }
 
   const accessToken = await oauth.accessToken();
@@ -73,12 +80,12 @@ function withPortalId(
 
 async function withAuth(
   accountId: number,
-  options: AxiosConfigOptions
+  options: HttpOptions
 ): Promise<AxiosRequestConfig> {
   const accountConfig = getAccountConfig(accountId);
 
   if (!accountConfig) {
-    throwErrorWithMessage(`${i18nKey}.errors.withAuth`, { accountId });
+    throw new Error(i18n(`${i18nKey}.errors.withAuth`, { accountId }));
   }
 
   const { env, authType, apiKey } = accountConfig;
@@ -105,142 +112,47 @@ async function withAuth(
   };
 }
 
-function addQueryParams(
-  configOptions: AxiosConfigOptions,
-  queryParams: QueryParams = {}
-): AxiosConfigOptions {
-  const { params } = configOptions;
-  return {
-    ...configOptions,
-    params: {
-      ...queryParams,
-      ...params,
-    },
-  };
-}
-
 async function getRequest<T>(
   accountId: number,
   options: HttpOptions
-): Promise<T>;
-async function getRequest<T>(
-  accountId: number,
-  options: HttpOptions,
-  withFullResponse: true
-): Promise<AxiosResponse<T>>;
-async function getRequest<T>(
-  accountId: number,
-  options: HttpOptions,
-  withFullResponse?: true
-) {
+): AxiosPromise<T> {
   const { params, ...rest } = options;
-  const axiosConfig = addQueryParams(rest, params);
-  const configWithAuth = await withAuth(accountId, axiosConfig);
+  const optionsWithParams = addQueryParams(rest, params);
+  const requestConfig = await withAuth(accountId, optionsWithParams);
 
-  const response = await axios<T>(configWithAuth);
-
-  if (withFullResponse) {
-    return response;
-  }
-
-  return response.data;
+  return axios<T>(requestConfig);
 }
 
 async function postRequest<T>(
   accountId: number,
   options: HttpOptions
-): Promise<T>;
-async function postRequest<T>(
-  accountId: number,
-  options: HttpOptions,
-  withFullResponse: true
-): Promise<AxiosResponse<T>>;
-async function postRequest(
-  accountId: number,
-  options: HttpOptions,
-  withFullResponse?: true
-) {
-  const configWithAuth = await withAuth(accountId, options);
-
-  const response = await axios({ ...configWithAuth, method: 'post' });
-
-  if (withFullResponse) {
-    return response;
-  }
-
-  return response.data;
+): AxiosPromise<T> {
+  const requestConfig = await withAuth(accountId, options);
+  return axios<T>({ ...requestConfig, method: 'post' });
 }
 
 async function putRequest<T>(
   accountId: number,
   options: HttpOptions
-): Promise<T>;
-async function putRequest<T>(
-  accountId: number,
-  options: HttpOptions,
-  withFullResponse: true
-): Promise<AxiosResponse<T>>;
-async function putRequest(
-  accountId: number,
-  options: HttpOptions,
-  withFullResponse?: true
-) {
-  const configWithAuth = await withAuth(accountId, options);
-  const response = await axios({ ...configWithAuth, method: 'put' });
-
-  if (withFullResponse) {
-    return response;
-  }
-
-  return response.data;
+): AxiosPromise<T> {
+  const requestConfig = await withAuth(accountId, options);
+  return axios<T>({ ...requestConfig, method: 'put' });
 }
 
 async function patchRequest<T>(
   accountId: number,
   options: HttpOptions
-): Promise<T>;
-async function patchRequest<T>(
-  accountId: number,
-  options: HttpOptions,
-  withFullResponse: true
-): Promise<AxiosResponse<T>>;
-async function patchRequest(
-  accountId: number,
-  options: HttpOptions,
-  withFullResponse?: true
-) {
-  const configWithAuth = await withAuth(accountId, options);
-  const response = await axios({ ...configWithAuth, method: 'patch' });
-
-  if (withFullResponse) {
-    return response;
-  }
-
-  return response.data;
+): AxiosPromise<T> {
+  const requestConfig = await withAuth(accountId, options);
+  return axios<T>({ ...requestConfig, method: 'patch' });
 }
 
 async function deleteRequest<T>(
   accountId: number,
   options: HttpOptions
-): Promise<T>;
-async function deleteRequest<T>(
-  accountId: number,
-  options: HttpOptions,
-  withFullResponse: true
-): Promise<AxiosResponse<T>>;
-async function deleteRequest(
-  accountId: number,
-  options: HttpOptions,
-  withFullResponse = false
-) {
-  const configWithAuth = await withAuth(accountId, options);
-  const response = await axios({ ...configWithAuth, method: 'delete' });
-
-  if (withFullResponse) {
-    return response;
-  }
-
-  return response.data;
+): AxiosPromise<T> {
+  const requestConfig = await withAuth(accountId, options);
+  return axios<T>({ ...requestConfig, method: 'delete' });
 }
 
 function createGetRequestStream(contentType: string) {
@@ -248,7 +160,7 @@ function createGetRequestStream(contentType: string) {
     accountId: number,
     options: HttpOptions,
     destPath: string
-  ): Promise<AxiosResponse> => {
+  ): AxiosPromise => {
     const { params, ...rest } = options;
     const axiosConfig = addQueryParams(rest, params);
 
@@ -310,7 +222,7 @@ function createGetRequestStream(contentType: string) {
 
 const getOctetStream = createGetRequestStream('application/octet-stream');
 
-const http = {
+export const http = {
   get: getRequest,
   post: postRequest,
   put: putRequest,
@@ -318,5 +230,3 @@ const http = {
   delete: deleteRequest,
   getOctetStream,
 };
-
-export default http;

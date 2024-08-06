@@ -5,7 +5,6 @@ import { fork } from 'child_process';
 import { escapeRegExp } from '../escapeRegExp';
 import { isModuleFolderChild } from '../../utils/cms/modules';
 import { logger } from '../logger';
-import { throwErrorWithMessage } from '../../errors/standardErrors';
 import { BaseError } from '../../types/Error';
 import { i18n } from '../../utils/lang';
 
@@ -90,10 +89,9 @@ export class FieldsJs {
         );
       });
     }).catch((e: BaseError) => {
-      throwErrorWithMessage(
-        `${i18nKey}.convertFieldsJs.errors.errorConverting`,
-        { filePath },
-        e
+      throw new Error(
+        i18n(`${i18nKey}.convertFieldsJs.errors.errorConverting`, { filePath }),
+        { cause: e }
       );
     });
   }
@@ -105,9 +103,11 @@ export class FieldsJs {
    */
   saveOutput(): void {
     if (!this.outputPath || !fs.existsSync(this.outputPath)) {
-      throwErrorWithMessage(`${i18nKey}.saveOutput.errors.saveFailed`, {
-        path: this.filePath,
-      });
+      throw new Error(
+        i18n(`${i18nKey}.saveOutput.errors.saveFailed`, {
+          path: this.filePath,
+        })
+      );
     }
     const relativePath = path.relative(
       this.rootWriteDir,
@@ -121,10 +121,9 @@ export class FieldsJs {
     try {
       fs.copyFileSync(this.outputPath, savePath);
     } catch (err) {
-      throwErrorWithMessage(
-        `${i18nKey}.saveOutput.errors.saveFailed`,
-        { path: savePath },
-        err
+      throw new Error(
+        i18n(`${i18nKey}.saveOutput.errors.saveFailed`, { path: savePath }),
+        { cause: err }
       );
     }
   }
@@ -174,11 +173,9 @@ export function createTmpDirSync(prefix: string): string {
   try {
     tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), prefix));
   } catch (err) {
-    throwErrorWithMessage(
-      `${i18nKey}.createTmpDirSync.errors.writeFailed`,
-      {},
-      err
-    );
+    throw new Error(i18n(`${i18nKey}.createTmpDirSync.errors.writeFailed`), {
+      cause: err,
+    });
   }
   return tmpDir;
 }
@@ -187,10 +184,9 @@ export function createTmpDirSync(prefix: string): string {
 export function cleanupTmpDirSync(tmpDir: string): void {
   fs.rm(tmpDir, { recursive: true }, err => {
     if (err) {
-      throwErrorWithMessage(
-        `${i18nKey}.cleanupTmpDirSync.errors.deleteFailed`,
-        {},
-        err
+      throw new Error(
+        i18n(`${i18nKey}.cleanupTmpDirSync.errors.deleteFailed`),
+        { cause: err }
       );
     }
   });

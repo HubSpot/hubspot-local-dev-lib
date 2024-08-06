@@ -1,6 +1,7 @@
 import path from 'path';
 import fs from 'fs-extra';
 import prettier from 'prettier';
+import { AxiosResponse } from 'axios';
 import {
   createTable,
   updateTable,
@@ -12,13 +13,13 @@ import {
 } from '../api/hubdb';
 import { getCwd } from './path';
 import { FetchRowsResponse, Row, Table } from '../types/Hubdb';
-import { throwErrorWithMessage } from '../errors/standardErrors';
+import { i18n } from '../utils/lang';
 
 const i18nKey = 'lib.hubdb';
 
 function validateJsonPath(src: string): void {
   if (path.extname(src) !== '.json') {
-    throwErrorWithMessage(`${i18nKey}.errors.invalidJsonPath`);
+    throw new Error(i18n(`${i18nKey}.errors.invalidJsonPath`));
   }
 }
 
@@ -28,11 +29,13 @@ function validateJsonFile(src: string): void {
   try {
     stats = fs.statSync(src);
   } catch (err) {
-    throwErrorWithMessage(`${i18nKey}.errors.invalidJsonFile`, { src }, err);
+    throw new Error(i18n(`${i18nKey}.errors.invalidJsonFile`, { src }), {
+      cause: err,
+    });
   }
 
   if (!stats.isFile()) {
-    throwErrorWithMessage(`${i18nKey}.errors.invalidJsonFile`, { src });
+    throw new Error(i18n(`${i18nKey}.errors.invalidJsonFile`, { src }));
   }
 
   validateJsonPath(src);
@@ -58,7 +61,9 @@ export async function addRowsToHubDbTable(
     await createRows(accountId, tableId, rowsToUpdate);
   }
 
-  const { rowCount } = await publishTable(accountId, tableId);
+  const {
+    data: { rowCount },
+  } = await publishTable(accountId, tableId);
 
   return {
     tableId,
@@ -74,7 +79,9 @@ export async function createHubDbTable(
 
   const table: Table = fs.readJsonSync(src);
   const { rows, ...schema } = table;
-  const { id } = await createTable(accountId, schema);
+  const {
+    data: { id },
+  } = await createTable(accountId, schema);
 
   return addRowsToHubDbTable(accountId, id, rows);
 }
@@ -147,13 +154,13 @@ async function fetchAllRows(
   let rows: Array<Row> = [];
   let after: string | null = null;
   do {
-    const response: FetchRowsResponse = await fetchRows(
+    const axiosResponse: AxiosResponse<FetchRowsResponse> = await fetchRows(
       accountId,
       tableId,
       after ? { after } : undefined
     );
 
-    const { paging, results } = response;
+    const { paging, results } = axiosResponse.data;
 
     rows = rows.concat(results);
     after = paging && paging.next ? paging.next.after : null;
@@ -167,7 +174,7 @@ export async function downloadHubDbTable(
   tableId: string,
   dest: string
 ): Promise<{ filePath: string }> {
-  const table = await fetchTable(accountId, tableId);
+  const { data: table } = await fetchTable(accountId, tableId);
 
   dest = path.resolve(getCwd(), dest || `${table.name}.hubdb.json`) as string;
 

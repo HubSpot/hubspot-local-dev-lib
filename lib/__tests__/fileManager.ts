@@ -2,6 +2,7 @@ import { uploadFolder } from '../fileManager';
 import { uploadFile } from '../../api/fileManager';
 import { walk } from '../fs';
 import { createIgnoreFilter } from '../ignoreRules';
+import { mockAxiosResponse } from './__utils__/mockAxiosResponse';
 
 jest.mock('../fs');
 jest.mock('../../api/fileManager');
@@ -23,7 +24,7 @@ describe('lib/fileManager', () => {
 
       mockedWalk.mockResolvedValue(files);
       mockedUploadFile.mockImplementation(() =>
-        Promise.resolve({ objects: [] })
+        Promise.resolve(mockAxiosResponse({ objects: [] }))
       );
       mockedCreateIgnoreFilter.mockImplementation(() => () => true);
 

@@ -24,18 +24,16 @@ export interface ValidationError extends BaseError {
 
 export type FileSystemErrorContext = {
   filepath?: string;
-  write?: boolean;
-  read?: boolean;
+  operation?: 'write' | 'read';
   accountId?: number;
   dest?: string;
 };
 
-export type AxiosErrorContext = {
-  accountId?: number;
+export interface HubSpotHttpErrorContext extends FileSystemErrorContext {
   request?: string;
   payload?: string;
   projectName?: string;
-};
+}
 
 export type OptionalError = BaseError | null | undefined;
 

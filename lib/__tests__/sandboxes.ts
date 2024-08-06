@@ -18,6 +18,8 @@ import {
   fetchTaskStatus,
 } from '../sandboxes';
 import { AxiosError } from 'axios';
+import { mockAxiosResponse } from './__utils__/mockAxiosResponse';
+import { HubSpotHttpError } from '../../models/HubSpotHttpError';
 
 jest.mock('../../api/sandboxHubs');
 jest.mock('../../api/sandboxSync');
@@ -88,13 +90,19 @@ const MOCK_TYPES = [
 ];
 
 describe('lib/sandboxes', () => {
+  let error: HubSpotHttpError;
+  beforeEach(() => {
+    error = new HubSpotHttpError('OH NO', { cause: new AxiosError() });
+  });
   describe('createSandbox', () => {
     const personalAccessKey = 'pak-test-123';
     it('should create a sandbox', async () => {
-      createSandboxMock.mockResolvedValue({
-        sandbox: MOCK_SANDBOX_ACCOUNT,
-        personalAccessKey,
-      });
+      createSandboxMock.mockResolvedValue(
+        mockAxiosResponse({
+          sandbox: MOCK_SANDBOX_ACCOUNT,
+          personalAccessKey,
+        })
+      );
 
       const response = await createSandbox(accountId, sandboxName, 1);
       expect(createSandboxMock).toHaveBeenCalledWith(accountId, sandboxName, 1);
@@ -106,7 +114,6 @@ describe('lib/sandboxes', () => {
     });
 
     it('should throw an API error when an error is encountered', async () => {
-      const error = new AxiosError('OH NO');
       createSandboxMock.mockRejectedValue(error);
 
       await expect(async () => {
@@ -124,7 +131,6 @@ describe('lib/sandboxes', () => {
       });
     });
     it('should throw an API error when an error is encountered', async () => {
-      const error = new AxiosError('OH NO');
       deleteSandboxMock.mockRejectedValue(error);
 
       await expect(async () => {
@@ -135,16 +141,17 @@ describe('lib/sandboxes', () => {
 
   describe('getSandboxUsageLimits', () => {
     it('should get usage limit', async () => {
-      getSandboxUsageLimitsMock.mockResolvedValue({
-        usage: MOCK_USAGE_DATA,
-      });
+      getSandboxUsageLimitsMock.mockResolvedValue(
+        mockAxiosResponse({
+          usage: MOCK_USAGE_DATA,
+        })
+      );
 
       const response = await getSandboxUsageLimits(accountId);
       expect(response).toStrictEqual(MOCK_USAGE_DATA);
     });
 
     it('should throw an API error when an error is encountered', async () => {
-      const error = new AxiosError('OH NO');
       getSandboxUsageLimitsMock.mockRejectedValue(error);
 
       await expect(async () => {
@@ -166,7 +173,7 @@ describe('lib/sandboxes', () => {
         } as SyncTask, // This object is huge, I don't want to add all of it
         id: 'this-is-an-id',
       };
-      initiateSyncMock.mockResolvedValue(sync);
+      initiateSyncMock.mockResolvedValue(mockAxiosResponse(sync));
 
       const response = await initiateSync(
         accountId,
@@ -184,7 +191,6 @@ describe('lib/sandboxes', () => {
     });
 
     it('should throw an API error when an error is encountered', async () => {
-      const error = new AxiosError('OH NO');
       initiateSyncMock.mockRejectedValue(error);
 
       await expect(async () => {
@@ -200,7 +206,7 @@ describe('lib/sandboxes', () => {
         status: 'please hold',
         tasks: [],
       };
-      fetchTaskStatusMock.mockResolvedValue(status);
+      fetchTaskStatusMock.mockResolvedValue(mockAxiosResponse(status));
 
       const response = await fetchTaskStatus(accountId, taskId);
       expect(fetchTaskStatusMock).toHaveBeenCalledWith(accountId, taskId);
@@ -208,7 +214,6 @@ describe('lib/sandboxes', () => {
     });
 
     it('should throw an API error when an error is encountered', async () => {
-      const error = new AxiosError('OH NO');
       fetchTaskStatusMock.mockRejectedValue(error);
 
       await expect(async () => {
@@ -219,16 +224,17 @@ describe('lib/sandboxes', () => {
 
   describe('fetchTypes', () => {
     it('should fetch types', async () => {
-      fetchTypesMock.mockResolvedValue({
-        results: MOCK_TYPES,
-      });
+      fetchTypesMock.mockResolvedValue(
+        mockAxiosResponse({
+          results: MOCK_TYPES,
+        })
+      );
 
       const response = await fetchTypes(accountId, sandboxHubId);
       expect(response).toStrictEqual(MOCK_TYPES);
     });
 
     it('should throw an API error when an error is encountered', async () => {
-      const error = new AxiosError('OH NO');
       fetchTypesMock.mockRejectedValue(error);
 
       await expect(async () => {

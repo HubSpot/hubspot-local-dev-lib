@@ -1,8 +1,7 @@
 import { version } from '../package.json';
 import { getAndLoadConfigIfNeeded } from '../config';
 import { getHubSpotApiOrigin } from '../lib/urls';
-import { AxiosConfigOptions } from '../types/Http';
-import { CLIConfig } from '../types/Config';
+import { HttpOptions } from '../types/Http';
 import { AxiosRequestConfig } from 'axios';
 import https from 'https';
 import http from 'http';
@@ -47,12 +46,21 @@ const DEFAULT_TRANSITIONAL = {
   clarifyTimeoutError: true,
 };
 
-export function getAxiosConfig(
-  options: AxiosConfigOptions
-): AxiosRequestConfig {
+export function getAxiosConfig(options: HttpOptions): AxiosRequestConfig {
   const { env, localHostOverride, headers, ...rest } = options;
-  const { httpTimeout, httpUseLocalhost } =
-    getAndLoadConfigIfNeeded() as CLIConfig;
+  const config = getAndLoadConfigIfNeeded();
+
+  let httpTimeout = 15000;
+  let httpUseLocalhost = false;
+
+  if (config && config.httpTimeout) {
+    httpTimeout = config.httpTimeout;
+  }
+
+  if (config && config.httpUseLocalhost) {
+    httpUseLocalhost = config.httpUseLocalhost;
+  }
+
   return {
     baseURL: getHubSpotApiOrigin(
       env,
@@ -62,7 +70,7 @@ export function getAxiosConfig(
       ...getDefaultUserAgentHeader(),
       ...(headers || {}),
     },
-    timeout: httpTimeout || 15000,
+    timeout: httpTimeout,
     transitional: DEFAULT_TRANSITIONAL,
     httpAgent,
     httpsAgent,

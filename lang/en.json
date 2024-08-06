@@ -385,7 +385,6 @@
         "400Generic": "The {{ messageDetail }} failed due to a client error.",
         "generic": "The {{ messageDetail }} failed."
       }
-    },
-    "generic": "{{ name }}:"
+    }
   }
 }

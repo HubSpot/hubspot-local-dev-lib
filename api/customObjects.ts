@@ -1,4 +1,5 @@
-import http from '../http';
+import { AxiosPromise } from 'axios';
+import { http } from '../http';
 import {
   FetchSchemasResponse,
   Schema,
@@ -8,59 +9,59 @@ import {
 const CUSTOM_OBJECTS_API_PATH = 'crm/v3/objects';
 const SCHEMA_API_PATH = 'crm-object-schemas/v3/schemas';
 
-export async function batchCreateObjects(
+export function batchCreateObjects(
   accountId: number,
   objectTypeId: string,
   objects: JSON
-): Promise<CreateObjectsResponse> {
+): AxiosPromise<CreateObjectsResponse> {
   return http.post<CreateObjectsResponse>(accountId, {
     url: `${CUSTOM_OBJECTS_API_PATH}/${objectTypeId}/batch/create`,
     data: objects,
   });
 }
 
-export async function createObjectSchema(
+export function createObjectSchema(
   accountId: number,
   schema: JSON
-): Promise<Schema> {
-  return http.post(accountId, {
+): AxiosPromise<Schema> {
+  return http.post<Schema>(accountId, {
     url: SCHEMA_API_PATH,
     data: schema,
   });
 }
 
-export async function updateObjectSchema(
+export function updateObjectSchema(
   accountId: number,
   schemaObjectType: string,
   schema: Schema
-): Promise<Schema> {
-  return http.patch(accountId, {
+): AxiosPromise<Schema> {
+  return http.patch<Schema>(accountId, {
     url: `${SCHEMA_API_PATH}/${schemaObjectType}`,
     data: schema,
   });
 }
 
-export async function fetchObjectSchema(
+export function fetchObjectSchema(
   accountId: number,
   schemaObjectType: string
-): Promise<Schema> {
-  return http.get(accountId, {
+): AxiosPromise<Schema> {
+  return http.get<Schema>(accountId, {
     url: `${SCHEMA_API_PATH}/${schemaObjectType}`,
   });
 }
 
-export async function fetchObjectSchemas(
+export function fetchObjectSchemas(
   accountId: number
-): Promise<FetchSchemasResponse> {
-  return http.get(accountId, {
+): AxiosPromise<FetchSchemasResponse> {
+  return http.get<FetchSchemasResponse>(accountId, {
     url: SCHEMA_API_PATH,
   });
 }
 
-export async function deleteObjectSchema(
+export function deleteObjectSchema(
   accountId: number,
   schemaObjectType: string
-): Promise<void> {
+): AxiosPromise<void> {
   return http.delete(accountId, {
     url: `${SCHEMA_API_PATH}/${schemaObjectType}`,
   });

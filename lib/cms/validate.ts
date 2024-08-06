@@ -27,7 +27,7 @@ export async function lint(
           }
           return result;
         }
-        const validation = await validateHubl(accountId, source);
+        const { data: validation } = await validateHubl(accountId, source);
         const result = {
           file,
           validation,
