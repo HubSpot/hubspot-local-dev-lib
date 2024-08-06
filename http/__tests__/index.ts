@@ -255,31 +255,5 @@ describe('http/index', () => {
         },
       });
     });
-
-    it('supports making unauthed requests', async () => {
-      await http.getUnauthed({
-        url: 'some/endpoint/path',
-        env: 'qa',
-      });
-
-      expect(mockedAxios).toHaveBeenCalledWith({
-        baseURL: `https://api.hubapiqa.com`,
-        url: 'some/endpoint/path',
-        headers: {
-          'User-Agent': `HubSpot Local Dev Lib/${version}`,
-        },
-        timeout: 15000,
-        params: {},
-        transitional: {
-          clarifyTimeoutError: true,
-        },
-        httpAgent: {
-          options: { keepAlive: true, maxSockets: 5, maxTotalSockets: 25 },
-        },
-        httpsAgent: {
-          options: { keepAlive: true, maxSockets: 6, maxTotalSockets: 26 },
-        },
-      });
-    });
   });
 });
