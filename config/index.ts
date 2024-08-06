@@ -119,7 +119,7 @@ export function updateAccountConfig(
 ): FlatAccountFields | null {
   const accountIdentifier = getAccountIdentifier(configOptions);
   if (CLIConfiguration.isActive()) {
-    return CLIConfiguration.updateAccount({
+    return CLIConfiguration.addOrUpdateAccount({
       ...configOptions,
       accountId: accountIdentifier,
     });

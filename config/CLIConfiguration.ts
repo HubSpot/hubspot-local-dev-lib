@@ -167,7 +167,7 @@ class CLIConfiguration {
         accountNamesMap[accountConfig.name] = true;
       }
       if (!accountConfig.accountType) {
-        this.updateAccount({
+        this.addOrUpdateAccount({
           ...accountConfig,
           accountId: accountConfig.accountId,
           accountType: this.getAccountType(
@@ -315,7 +315,7 @@ class CLIConfiguration {
   /**
    * @throws {Error}
    */
-  updateAccount(
+  addOrUpdateAccount(
     updatedAccountFields: Partial<FlatAccountFields_NEW>,
     writeUpdate = true
   ): FlatAccountFields_NEW | null {
@@ -408,7 +408,9 @@ class CLIConfiguration {
     safelyApplyUpdates('parentAccountId', parentAccountId);
 
     const completedAccountConfig = nextAccountConfig as FlatAccountFields_NEW;
-    if (!Object.hasOwn(this.config, 'accounts')) this.config.accounts = [];
+    if (!Object.hasOwn(this.config, 'accounts')) {
+      this.config.accounts = [];
+    }
     if (currentAccountConfig) {
       logger.debug(
         i18n(`${i18nKey}.updateAccount.updating`, {
@@ -416,8 +418,11 @@ class CLIConfiguration {
         })
       );
       const index = this.getConfigAccountIndex(accountId);
-      if (index < 0) this.config.accounts.push(completedAccountConfig);
-      else this.config.accounts[index] = completedAccountConfig;
+      if (index < 0) {
+        this.config.accounts.push(completedAccountConfig);
+      } else {
+        this.config.accounts[index] = completedAccountConfig;
+      }
       logger.debug(
         i18n(`${i18nKey}.updateAccount.addingConfigEntry`, {
           accountId,
@@ -475,7 +480,7 @@ class CLIConfiguration {
     }
 
     if (accountId) {
-      this.updateAccount({ accountId, name: newName, env: this.getEnv() });
+      this.addOrUpdateAccount({ accountId, name: newName, env: this.getEnv() });
     }
 
     if (accountConfigToRename.name === this.getDefaultAccount()) {

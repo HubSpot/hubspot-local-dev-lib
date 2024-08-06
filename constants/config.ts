@@ -2,7 +2,7 @@ import { i18n } from '../utils/lang';
 
 export const DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME = 'hubspot.config.yml';
 
-// Changed for easier debugging.
+// Temporary change for easier debugging.
 export const HUBSPOT_CONFIGURATION_FOLDER = 'hubspot';
 export const HUBSPOT_CONFIGURATION_FILE = 'config.yml';
 
