@@ -5,7 +5,8 @@ import {
   PublicAppDeveloperTestAccountInstallData,
 } from '../types/Apps';
 
-const APPS_DEV_API_PATH = 'apps-dev/external/public/v3';
+const PUBLIC_APPS_DEV_API_PATH = 'apps-dev/external/public/v3';
+const PRIVATE_APPS_DEV_API_PATH = 'apps-dev/private/v3';
 
 type FetchPublicAppsForPortalResponse = {
   results: Array<PublicApp>;
@@ -15,7 +16,17 @@ export async function fetchPublicAppsForPortal(
   accountId: number
 ): Promise<Array<PublicApp>> {
   const resp = await http.get<FetchPublicAppsForPortalResponse>(accountId, {
-    url: `${APPS_DEV_API_PATH}/full/portal`,
+    url: `${PUBLIC_APPS_DEV_API_PATH}/full/portal`,
+  });
+
+  return resp ? resp.results : [];
+}
+
+export async function fetchPrivateAppsForPortal(
+  accountId: number
+): Promise<Array<PublicApp>> {
+  const resp = await http.get<FetchPublicAppsForPortalResponse>(accountId, {
+    url: `${PRIVATE_APPS_DEV_API_PATH}/portal/full`,
   });
 
   return resp ? resp.results : [];
@@ -26,7 +37,7 @@ export function fetchPublicAppDeveloperTestAccountInstallData(
   accountId: number
 ): Promise<PublicAppDeveloperTestAccountInstallData> {
   return http.get<PublicAppDeveloperTestAccountInstallData>(accountId, {
-    url: `${APPS_DEV_API_PATH}/${appId}/test-portal-installs`,
+    url: `${PUBLIC_APPS_DEV_API_PATH}/${appId}/test-portal-installs`,
   });
 }
 
@@ -35,7 +46,7 @@ export function fetchPublicAppProductionInstallCounts(
   accountId: number
 ): Promise<PublicApInstallCounts> {
   return http.get<PublicApInstallCounts>(accountId, {
-    url: `${APPS_DEV_API_PATH}/${appId}/install-counts-without-test-portals`,
+    url: `${PUBLIC_APPS_DEV_API_PATH}/${appId}/install-counts-without-test-portals`,
   });
 }
 
@@ -44,6 +55,6 @@ export function fetchPublicAppMetadata(
   accountId: number
 ): Promise<PublicApp> {
   return http.get<PublicApp>(accountId, {
-    url: `${APPS_DEV_API_PATH}/${appId}/full`,
+    url: `${PUBLIC_APPS_DEV_API_PATH}/${appId}/full`,
   });
 }

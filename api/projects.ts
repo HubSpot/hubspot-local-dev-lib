@@ -8,10 +8,7 @@ import {
   ProjectSettings,
 } from '../types/Project';
 import { Build, FetchProjectBuildsResponse } from '../types/Build';
-import {
-  ComponentMetadataResponse,
-  ComponentStructureResponse,
-} from '../types/ComponentStructure';
+import { ComponentStructureResponse } from '../types/ComponentStructure';
 import { Deploy, ProjectDeployResponse } from '../types/Deploy';
 import { ProjectLog } from '../types/ProjectLog';
 import {
