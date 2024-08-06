@@ -1,7 +1,7 @@
 import http from '../http';
 import {
   PublicApp,
-  PublicApInstallCounts,
+  PublicAppInstallCounts,
   PublicAppDeveloperTestAccountInstallData,
   FetchPublicAppsForPortalResponse,
 } from '../types/Apps';
@@ -30,8 +30,8 @@ export function fetchPublicAppDeveloperTestAccountInstallData(
 export function fetchPublicAppProductionInstallCounts(
   appId: number,
   accountId: number
-): Promise<PublicApInstallCounts> {
-  return http.get<PublicApInstallCounts>(accountId, {
+): Promise<PublicAppInstallCounts> {
+  return http.get<PublicAppInstallCounts>(accountId, {
     url: `${APPS_DEV_API_PATH}/${appId}/install-counts-without-test-portals`,
   });
 }
