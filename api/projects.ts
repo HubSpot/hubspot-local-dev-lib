@@ -32,7 +32,7 @@ export async function fetchProjects(
   accountId: number
 ): Promise<FetchProjectResponse> {
   return http.get(accountId, {
-    url: DEVELOPER_PROJECTS_API_PATH,
+    url: PROJECTS_API_PATH,
   });
 }
 
@@ -41,7 +41,7 @@ export async function createProject(
   name: string
 ): Promise<Project> {
   return http.post(accountId, {
-    url: DEVELOPER_PROJECTS_API_PATH,
+    url: PROJECTS_API_PATH,
     data: {
       name,
     },
@@ -76,7 +76,7 @@ export async function fetchProject(
   projectName: string
 ): Promise<Project> {
   return http.get(accountId, {
-    url: `${DEVELOPER_PROJECTS_API_PATH}/${encodeURIComponent(projectName)}`,
+    url: `${PROJECTS_API_PATH}/${encodeURIComponent(projectName)}`,
   });
 }
 
@@ -198,7 +198,7 @@ export async function fetchProjectSettings(
   projectName: string
 ): Promise<ProjectSettings> {
   return http.get(accountId, {
-    url: `${DEVELOPER_PROJECTS_API_PATH}/${encodeURIComponent(projectName)}/settings`,
+    url: `${PROJECTS_API_PATH}/${encodeURIComponent(projectName)}/settings`,
   });
 }
 
