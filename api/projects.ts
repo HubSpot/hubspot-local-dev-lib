@@ -8,7 +8,10 @@ import {
   ProjectSettings,
 } from '../types/Project';
 import { Build, FetchProjectBuildsResponse } from '../types/Build';
-import { ComponentStructureResponse } from '../types/ComponentStructure';
+import {
+  ComponentStructureResponse,
+  ProjectComponentsMetadata,
+} from '../types/ComponentStructure';
 import { Deploy, ProjectDeployResponse } from '../types/Deploy';
 import { ProjectLog } from '../types/ProjectLog';
 import {
@@ -18,6 +21,7 @@ import {
 } from '../types/Migration';
 
 const PROJECTS_API_PATH = 'dfs/v1/projects';
+const DEVELOPER_FILE_SYSTEM_PATH = 'dfs/v1';
 const PROJECTS_DEPLOY_API_PATH = 'dfs/deploy/v1';
 const PROJECTS_LOGS_API_PATH = 'dfs/logging/v1';
 const DEVELOPER_PROJECTS_API_PATH = 'developer/projects/v1';
@@ -72,6 +76,15 @@ export async function fetchProject(
 ): Promise<Project> {
   return http.get(accountId, {
     url: `${PROJECTS_API_PATH}/${encodeURIComponent(projectName)}`,
+  });
+}
+
+export async function fetchProjectComponentsMetadata(
+  accountId: number,
+  projectId: number
+): Promise<ProjectComponentsMetadata> {
+  return http.get(accountId, {
+    url: `${DEVELOPER_FILE_SYSTEM_PATH}/projects-deployed-build/${projectId}`,
   });
 }
 

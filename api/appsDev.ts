@@ -6,7 +6,6 @@ import {
 } from '../types/Apps';
 
 const PUBLIC_APPS_DEV_API_PATH = 'apps-dev/external/public/v3';
-const PRIVATE_APPS_DEV_API_PATH = 'apps-dev/private/v3';
 
 type FetchPublicAppsForPortalResponse = {
   results: Array<PublicApp>;
@@ -17,16 +16,6 @@ export async function fetchPublicAppsForPortal(
 ): Promise<Array<PublicApp>> {
   const resp = await http.get<FetchPublicAppsForPortalResponse>(accountId, {
     url: `${PUBLIC_APPS_DEV_API_PATH}/full/portal`,
-  });
-
-  return resp ? resp.results : [];
-}
-
-export async function fetchPrivateAppsForPortal(
-  accountId: number
-): Promise<Array<PublicApp>> {
-  const resp = await http.get<FetchPublicAppsForPortalResponse>(accountId, {
-    url: `${PRIVATE_APPS_DEV_API_PATH}/portal/full`,
   });
 
   return resp ? resp.results : [];
