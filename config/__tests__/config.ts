@@ -13,6 +13,8 @@ import {
   deleteEmptyConfigFile,
   setConfigPath,
   createEmptyConfigFile,
+  getRootOrDeprecatedConfigPath,
+  bothConfigFilesExist,
 } from '../index';
 import {
   getAccountIdentifier,
@@ -32,6 +34,7 @@ import {
   PersonalAccessKeyAccount,
   PersonalAccessKeyAccount_DEPRECATED,
 } from '../../types/Accounts';
+import * as configFile from '../configFile';
 
 const CONFIG_PATHS = {
   none: null,
@@ -47,6 +50,8 @@ jest.mock('findup-sync', () => {
 });
 
 jest.mock('../../lib/logger');
+
+jest.mock('../configFile');
 
 const fsReadFileSyncSpy = jest.spyOn(fs, 'readFileSync');
 const fsWriteFileSyncSpy = jest.spyOn(fs, 'writeFileSync');
@@ -709,6 +714,56 @@ describe('config/config', () => {
 
         expect(fsWriteFileSyncSpy).not.toHaveBeenCalledWith(specifiedPath);
       });
+    });
+  });
+
+  describe('getRootOrDeprecatedConfigPath', () => {
+    beforeEach(() => {
+      jest.resetAllMocks();
+    });
+
+    it('returns root config path when useRootConfig is true', () => {
+      const mockRootPath = '/Users/anonymous/config.yml';
+      jest.spyOn(configFile, 'getConfigFilePath').mockReturnValue(mockRootPath);
+
+      const result = getRootOrDeprecatedConfigPath(true);
+
+      expect(result).toBe(mockRootPath);
+      expect(configFile.getConfigFilePath).toHaveBeenCalled();
+    });
+
+    it('returns root config path when CLIConfiguration is active', () => {
+      const mockRootPath = '/Users/anonymous/config.yml';
+      jest.spyOn(configFile, 'getConfigFilePath').mockReturnValue(mockRootPath);
+
+      const result = getRootOrDeprecatedConfigPath(true);
+
+      expect(result).toBe(mockRootPath);
+      expect(configFile.getConfigFilePath).toHaveBeenCalled();
+    });
+  });
+
+  describe('bothConfigFilesExist', () => {
+    beforeEach(() => {
+      jest.resetAllMocks();
+    });
+
+    it('returns false when only root config file exists', () => {
+      jest.spyOn(configFile, 'configFileExists').mockReturnValue(true);
+
+      const result = bothConfigFilesExist();
+
+      expect(result).toBe(false);
+      expect(configFile.configFileExists).toHaveBeenCalled();
+    });
+
+    it('returns false when only no config files exist', () => {
+      jest.spyOn(configFile, 'configFileExists').mockReturnValue(false);
+
+      const result = bothConfigFilesExist();
+
+      expect(result).toBe(false);
+      expect(configFile.configFileExists).toHaveBeenCalled();
     });
   });
 });
