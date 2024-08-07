@@ -188,7 +188,7 @@ export async function fetchProjectSettings(
   projectName: string
 ): Promise<ProjectSettings> {
   return http.get(accountId, {
-    url: `${PROJECTS_API_PATH}/${encodeURIComponent(projectName)}/settings`,
+    url: `${DEVELOPER_PROJECTS_API_PATH}/${encodeURIComponent(projectName)}/settings`,
   });
 }
 
