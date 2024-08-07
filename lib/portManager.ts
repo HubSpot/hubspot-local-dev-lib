@@ -3,6 +3,7 @@ import axios from 'axios';
 import PortManagerServer from '../utils/PortManagerServer';
 import { detectPort } from '../utils/detectPort';
 import { PORT_MANAGER_SERVER_PORT } from '../constants/ports';
+import { RequestPortsData } from '../types/PortManager';
 
 export const BASE_URL = `http://localhost:${PORT_MANAGER_SERVER_PORT}`;
 
@@ -26,11 +27,6 @@ export async function stopPortManagerServer(): Promise<void> {
     await axios.post(`${BASE_URL}/close`);
   }
 }
-
-type RequestPortsData = {
-  instanceId: string;
-  port?: number;
-};
 
 export async function requestPorts(
   portData: Array<RequestPortsData>

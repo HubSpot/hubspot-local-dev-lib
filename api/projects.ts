@@ -6,6 +6,7 @@ import {
   FetchProjectResponse,
   UploadProjectResponse,
   ProjectSettings,
+  FetchPlatformVersionResponse,
 } from '../types/Project';
 import { Build, FetchProjectBuildsResponse } from '../types/Build';
 import {
@@ -31,7 +32,7 @@ export async function fetchProjects(
   accountId: number
 ): Promise<FetchProjectResponse> {
   return http.get(accountId, {
-    url: PROJECTS_API_PATH,
+    url: DEVELOPER_PROJECTS_API_PATH,
   });
 }
 
@@ -40,7 +41,7 @@ export async function createProject(
   name: string
 ): Promise<Project> {
   return http.post(accountId, {
-    url: PROJECTS_API_PATH,
+    url: DEVELOPER_PROJECTS_API_PATH,
     data: {
       name,
     },
@@ -75,7 +76,7 @@ export async function fetchProject(
   projectName: string
 ): Promise<Project> {
   return http.get(accountId, {
-    url: `${PROJECTS_API_PATH}/${encodeURIComponent(projectName)}`,
+    url: `${DEVELOPER_PROJECTS_API_PATH}/${encodeURIComponent(projectName)}`,
   });
 }
 
@@ -110,11 +111,6 @@ export async function deleteProject(
     url: `${PROJECTS_API_PATH}/${encodeURIComponent(projectName)}`,
   });
 }
-
-type FetchPlatformVersionResponse = {
-  defaultPlatformVersion: string;
-  activePlatformVersions: Array<string>;
-};
 
 export async function fetchPlatformVersions(
   accountId: number
@@ -202,7 +198,7 @@ export async function fetchProjectSettings(
   projectName: string
 ): Promise<ProjectSettings> {
   return http.get(accountId, {
-    url: `${PROJECTS_API_PATH}/${encodeURIComponent(projectName)}/settings`,
+    url: `${DEVELOPER_PROJECTS_API_PATH}/${encodeURIComponent(projectName)}/settings`,
   });
 }
 

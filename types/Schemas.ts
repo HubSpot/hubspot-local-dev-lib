@@ -26,3 +26,17 @@ export type Schema = {
 };
 
 export type FetchSchemasResponse = { results: Array<Schema> };
+
+export type CreateObjectsResponse = {
+  status: string;
+  startedAt: string;
+  completedAt: string;
+  results: Array<{
+    id: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    properties: Array<any>;
+    createdAt: string;
+    updatedAt: string;
+    archived: boolean;
+  }>;
+};
