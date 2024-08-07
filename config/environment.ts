@@ -1,4 +1,8 @@
-import { CLIConfig_NEW, Environment } from '../types/Config';
+import {
+  CLIConfig_NEW,
+  Environment,
+  EnvironmentConfigVariables,
+} from '../types/Config';
 import { logger } from '../lib/logger';
 import { ENVIRONMENT_VARIABLES } from '../constants/environments';
 import {
@@ -12,16 +16,6 @@ import { getValidEnv } from '../lib/environment';
 import { i18n } from '../utils/lang';
 
 const i18nKey = 'config.environment';
-
-type EnvironmentConfigVariables = {
-  apiKey?: string;
-  clientId?: string;
-  clientSecret?: string;
-  personalAccessKey?: string;
-  accountId?: number;
-  refreshToken?: string;
-  env?: Environment;
-};
 
 function getConfigVariablesFromEnv(): EnvironmentConfigVariables {
   const env = process.env;

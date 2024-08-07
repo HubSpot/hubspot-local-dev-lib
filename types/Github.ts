@@ -64,3 +64,18 @@ export interface GithubSourceData {
   repositoryName: string;
   source: string;
 }
+
+export type RepoPath = `${string}/${string}`;
+
+export type DownloadGithubRepoZipOptions = {
+  branch?: string;
+  tag?: string;
+};
+
+export type CloneGithubRepoOptions = {
+  isRelease?: boolean; // Download a repo release? (Default is to download the repo contents)
+  type?: string; // The type of asset being downloaded. Used for logging
+  branch?: string; // Repo branch
+  tag?: string; // Repo tag
+  sourceDir?: string; // The directory within the downloaded repo to write after extraction
+};

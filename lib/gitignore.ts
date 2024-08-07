@@ -8,6 +8,7 @@ import {
 } from '../utils/git';
 import { DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME } from '../constants/config';
 import { throwErrorWithMessage } from '../errors/standardErrors';
+import { GitInclusionResult } from '../types/Config';
 
 const i18nKey = 'lib.gitignore';
 
@@ -33,12 +34,6 @@ export function checkAndAddConfigToGitignore(configPath: string): void {
     throwErrorWithMessage(`${i18nKey}.errors.configIgnore`, {}, e);
   }
 }
-
-type GitInclusionResult = {
-  inGit: boolean;
-  configIgnored: boolean;
-  gitignoreFiles: Array<string>;
-};
 
 export function checkGitInclusion(configPath: string): GitInclusionResult {
   const result: GitInclusionResult = {

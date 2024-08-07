@@ -6,6 +6,7 @@ import {
   FetchProjectResponse,
   UploadProjectResponse,
   ProjectSettings,
+  FetchPlatformVersionResponse,
 } from '../types/Project';
 import { Build, FetchProjectBuildsResponse } from '../types/Build';
 import {
@@ -100,11 +101,6 @@ export async function deleteProject(
     url: `${PROJECTS_API_PATH}/${encodeURIComponent(projectName)}`,
   });
 }
-
-type FetchPlatformVersionResponse = {
-  defaultPlatformVersion: string;
-  activePlatformVersions: Array<string>;
-};
 
 export async function fetchPlatformVersions(
   accountId: number

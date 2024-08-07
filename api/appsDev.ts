@@ -3,13 +3,10 @@ import {
   PublicApp,
   PublicApInstallCounts,
   PublicAppDeveloperTestAccountInstallData,
+  FetchPublicAppsForPortalResponse,
 } from '../types/Apps';
 
 const APPS_DEV_API_PATH = 'apps-dev/external/public/v3';
-
-type FetchPublicAppsForPortalResponse = {
-  results: Array<PublicApp>;
-};
 
 export async function fetchPublicAppsForPortal(
   accountId: number
