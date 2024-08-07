@@ -81,11 +81,20 @@ export function writeConfig(options: WriteConfigOptions = {}): void {
   }
 }
 
-export function getConfigPath(useRootConfig = false): string | null {
+export function getRootOrDeprecatedConfigPath(
+  useRootConfig = false
+): string | null {
   if (useRootConfig || CLIConfiguration.isActive()) {
     return getConfigFilePath();
   }
   return config_DEPRECATED.getConfigPath();
+}
+
+export function getConfigPath(path?: string): string | null {
+  if (CLIConfiguration.isActive()) {
+    return getConfigFilePath();
+  }
+  return config_DEPRECATED.getConfigPath(path);
 }
 
 export function bothConfigFilesExist(useRootConfig?: boolean): boolean {
