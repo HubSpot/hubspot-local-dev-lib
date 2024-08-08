@@ -106,6 +106,10 @@ export function bothConfigFilesExist(useRootConfig?: boolean): boolean {
     return true;
   }
 
+  if (!useRootConfig && configFileExists()) {
+    return true;
+  }
+
   return false;
 }
 
