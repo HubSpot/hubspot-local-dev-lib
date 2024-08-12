@@ -47,9 +47,9 @@ export function loadConfigFromEnvironment(): boolean {
 
 export function createEmptyConfigFile(
   options: { path?: string } = {},
-  useRootConfig = false
+  useHiddenConfig = false
 ): void {
-  if (useRootConfig) {
+  if (useHiddenConfig) {
     CLIConfiguration.write({ accounts: [] });
   } else {
     return config_DEPRECATED.createEmptyConfigFile(options);
@@ -81,10 +81,10 @@ export function writeConfig(options: WriteConfigOptions = {}): void {
   }
 }
 
-export function getRootOrDeprecatedConfigPath(
-  useRootConfig = false
+export function getHiddenOrDeprecatedConfigPath(
+  useHiddenConfig = false
 ): string | null {
-  if (useRootConfig || CLIConfiguration.isActive()) {
+  if (useHiddenConfig || CLIConfiguration.isActive()) {
     return getConfigFilePath();
   }
   return config_DEPRECATED.getConfigPath();
@@ -97,20 +97,14 @@ export function getConfigPath(path?: string): string | null {
   return config_DEPRECATED.getConfigPath(path);
 }
 
-export function bothConfigFilesExist(useRootConfig?: boolean): boolean {
-  if (configFileExists() && config_DEPRECATED.getConfigPath()) {
-    return true;
-  }
+export function otherConfigFileExists(useHiddenConfig?: boolean): boolean {
+  return useHiddenConfig
+    ? Boolean(config_DEPRECATED.getConfigPath())
+    : configFileExists();
+}
 
-  if (useRootConfig && config_DEPRECATED.getConfigPath()) {
-    return true;
-  }
-
-  if (!useRootConfig && configFileExists()) {
-    return true;
-  }
-
-  return false;
+export function bothConfigFilesExist(): boolean {
+  return Boolean(config_DEPRECATED.getConfigPath()) && configFileExists();
 }
 
 export function getAccountConfig(accountId?: number): CLIAccount | null {
