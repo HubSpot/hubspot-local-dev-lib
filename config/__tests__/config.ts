@@ -15,6 +15,7 @@ import {
   createEmptyConfigFile,
   getHiddenOrDeprecatedConfigPath,
   otherConfigFileExists,
+  bothConfigFilesExist,
 } from '../index';
 import {
   getAccountIdentifier,
@@ -809,6 +810,51 @@ describe('config/config', () => {
       expect(result).toBe(true);
       expect(configFile.configFileExists).toHaveBeenCalled();
       expect(config_DEPRECATED.getConfigPath).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('bothConfigFilesExist', () => {
+    beforeEach(() => {
+      jest.resetAllMocks();
+    });
+
+    it('returns true when a hidden config and deprecated config both exist', () => {
+      const mockDeprecatedPath = '/hubspot.config.yml';
+      jest.spyOn(configFile, 'configFileExists').mockReturnValue(true);
+      jest
+        .spyOn(config_DEPRECATED, 'getConfigPath')
+        .mockReturnValue(mockDeprecatedPath);
+
+      const result = bothConfigFilesExist();
+
+      expect(result).toBe(true);
+      expect(configFile.configFileExists).toHaveBeenCalled();
+      expect(config_DEPRECATED.getConfigPath).toHaveBeenCalled();
+    });
+
+    it('returns false when a hidden config exists and a deprecated config does not exist', () => {
+      jest.spyOn(configFile, 'configFileExists').mockReturnValue(true);
+      jest.spyOn(config_DEPRECATED, 'getConfigPath').mockReturnValue(null);
+
+      const result = bothConfigFilesExist();
+
+      expect(result).toBe(false);
+      expect(configFile.configFileExists).not.toHaveBeenCalled();
+      expect(config_DEPRECATED.getConfigPath).toHaveBeenCalled();
+    });
+
+    it('returns false when a hidden config does not exist and a deprecated config does exist', () => {
+      const mockDeprecatedPath = '/hubspot.config.yml';
+      jest.spyOn(configFile, 'configFileExists').mockReturnValue(false);
+      jest
+        .spyOn(config_DEPRECATED, 'getConfigPath')
+        .mockReturnValue(mockDeprecatedPath);
+
+      const result = bothConfigFilesExist();
+
+      expect(result).toBe(false);
+      expect(configFile.configFileExists).toHaveBeenCalled();
+      expect(config_DEPRECATED.getConfigPath).toHaveBeenCalled();
     });
   });
 });
