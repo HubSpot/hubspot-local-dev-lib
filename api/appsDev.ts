@@ -2,7 +2,7 @@ import { AxiosPromise } from 'axios';
 import { http } from '../http';
 import {
   PublicApp,
-  PublicApInstallCounts,
+  PublicAppInstallCounts,
   PublicAppDeveloperTestAccountInstallData,
   FetchPublicAppsForPortalResponse,
 } from '../types/Apps';
@@ -29,8 +29,8 @@ export function fetchPublicAppDeveloperTestAccountInstallData(
 export function fetchPublicAppProductionInstallCounts(
   appId: number,
   accountId: number
-): AxiosPromise<PublicApInstallCounts> {
-  return http.get<PublicApInstallCounts>(accountId, {
+): AxiosPromise<PublicAppInstallCounts> {
+  return http.get<PublicAppInstallCounts>(accountId, {
     url: `${APPS_DEV_API_PATH}/${appId}/install-counts-without-test-portals`,
   });
 }
