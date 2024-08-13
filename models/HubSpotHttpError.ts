@@ -17,6 +17,7 @@ export class HubSpotHttpError<T = any> extends Error {
   public validationErrors: string[] | undefined;
   public detailedMessage?: string;
   private divider = `\n- `;
+  public cause: ErrorOptions['cause'];
 
   constructor(
     message?: string,
@@ -26,6 +27,7 @@ export class HubSpotHttpError<T = any> extends Error {
     super(message, options);
     this.name = 'HubSpotHttpError';
     this.context = context;
+    this.cause = options?.cause;
 
     if (options && isAxiosError(options.cause)) {
       this.updateContextFromCause(options.cause);
@@ -67,6 +69,11 @@ export class HubSpotHttpError<T = any> extends Error {
 
   public updateContext(context: Partial<HubSpotHttpErrorContext>) {
     this.context = { ...this.context, ...context };
+    // Update the error messages when the context is updated
+    if (isAxiosError(this.cause)) {
+      this.message = this.joinErrorMessages(this.cause, this.context);
+      this.detailedMessage = this.joinErrorMessages(this.cause, this.context);
+    }
   }
 
   public toString() {
