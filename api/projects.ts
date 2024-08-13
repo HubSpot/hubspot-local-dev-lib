@@ -32,7 +32,7 @@ export function fetchProjects(
   accountId: number
 ): AxiosPromise<FetchProjectResponse> {
   return http.get<FetchProjectResponse>(accountId, {
-    url: PROJECTS_API_PATH,
+    url: DEVELOPER_PROJECTS_API_PATH,
   });
 }
 
@@ -41,7 +41,7 @@ export function createProject(
   name: string
 ): AxiosPromise<Project> {
   return http.post<Project>(accountId, {
-    url: PROJECTS_API_PATH,
+    url: DEVELOPER_PROJECTS_API_PATH,
     data: {
       name,
     },
@@ -76,7 +76,7 @@ export function fetchProject(
   projectName: string
 ): AxiosPromise<Project> {
   return http.get<Project>(accountId, {
-    url: `${PROJECTS_API_PATH}/${encodeURIComponent(projectName)}`,
+    url: `${DEVELOPER_PROJECTS_API_PATH}/by-name/${encodeURIComponent(projectName)}`,
   });
 }
 
@@ -99,7 +99,7 @@ export function deleteProject(
   projectName: string
 ): AxiosPromise<void> {
   return http.delete(accountId, {
-    url: `${PROJECTS_API_PATH}/${encodeURIComponent(projectName)}`,
+    url: `${DEVELOPER_PROJECTS_API_PATH}/${encodeURIComponent(projectName)}`,
   });
 }
 
@@ -189,7 +189,7 @@ export function fetchProjectSettings(
   projectName: string
 ): AxiosPromise<ProjectSettings> {
   return http.get<ProjectSettings>(accountId, {
-    url: `${PROJECTS_API_PATH}/${encodeURIComponent(projectName)}/settings`,
+    url: `${DEVELOPER_PROJECTS_API_PATH}/${encodeURIComponent(projectName)}/settings`,
   });
 }
 
