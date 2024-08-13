@@ -15,7 +15,7 @@ export type PublicAppDeveloperTestAccountInstallData = {
   testPortalInstallCount: string;
 };
 
-export type PublicApInstallCounts = {
+export type PublicAppInstallCounts = {
   uniquePortalInstallCount: number;
   uniqueUserInstallCount: number;
   uniqueBusinessUnitInstallCount: number;
@@ -42,7 +42,7 @@ export type PublicApp = {
   supportPhone: string | null;
   extensionIconUrl: string | null;
   isAdvancedScopesSettingEnabled: boolean;
-  publicApplicationInstallCounts: PublicApInstallCounts;
+  publicApplicationInstallCounts: PublicAppInstallCounts;
   redirectUrls: Array<string>;
   scopeGroupIds: Array<number>;
   requiredScopeInfo?: Array<{ id: number; name: string }>;
