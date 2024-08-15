@@ -197,7 +197,7 @@ async function fetchAndWriteFileStream(
     logger.log(i18n(`${i18nKey}.skippedExisting`, { filepath }));
     return;
   }
-  if (!isAllowedExtension(srcPath, ['tsx', 'jsx', 'ts'])) {
+  if (!isAllowedExtension(srcPath, ['tsx', 'ts', 'jsx'])) {
     throwErrorWithMessage(`${i18nKey}.errors.invalidFileType`, { srcPath });
   }
   let node: FileMapperNode;
@@ -368,6 +368,12 @@ async function downloadFolder(
           );
           if (succeeded === false) {
             success = false;
+            logger.debug(
+              i18n(`${i18nKey}.errors.failedToFetchFile`, {
+                src: childNode.path,
+                dest: filepath || '',
+              })
+            );
           }
         });
         return success;
