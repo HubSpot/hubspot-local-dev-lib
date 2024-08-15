@@ -197,7 +197,7 @@ async function fetchAndWriteFileStream(
     logger.log(i18n(`${i18nKey}.skippedExisting`, { filepath }));
     return;
   }
-  if (!isAllowedExtension(srcPath)) {
+  if (!isAllowedExtension(srcPath, ['tsx', 'jsx', 'ts'])) {
     throwErrorWithMessage(`${i18nKey}.errors.invalidFileType`, { srcPath });
   }
   let node: FileMapperNode;
