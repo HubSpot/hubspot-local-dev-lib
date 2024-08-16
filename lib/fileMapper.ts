@@ -13,7 +13,11 @@ import {
 import { logger } from './logger';
 import { fetchFileStream, download, downloadDefault } from '../api/fileMapper';
 import { throwError, throwErrorWithMessage } from '../errors/standardErrors';
-import { MODULE_EXTENSION, FUNCTIONS_EXTENSION } from '../constants/extensions';
+import {
+  MODULE_EXTENSION,
+  FUNCTIONS_EXTENSION,
+  JSR_ALLOWED_EXTENSIONS,
+} from '../constants/extensions';
 import { MODE } from '../constants/files';
 import {
   FileMapperNode,
@@ -197,7 +201,7 @@ async function fetchAndWriteFileStream(
     logger.log(i18n(`${i18nKey}.skippedExisting`, { filepath }));
     return;
   }
-  if (!isAllowedExtension(srcPath, ['tsx', 'ts', 'jsx'])) {
+  if (!isAllowedExtension(srcPath, Array.from(JSR_ALLOWED_EXTENSIONS))) {
     throwErrorWithMessage(`${i18nKey}.errors.invalidFileType`, { srcPath });
   }
   let node: FileMapperNode;
