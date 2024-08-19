@@ -190,7 +190,6 @@ export class HubSpotHttpError<T = any> extends Error {
     const errorMessage: Array<string> = [];
 
     if ((method === 'put' || method === 'post') && context.payload) {
-      console.log(context);
       errorMessage.push(
         i18n(`${i18nKey}.unableToUpload`, { payload: context.payload })
       );
