@@ -14,6 +14,7 @@ export class HubSpotHttpError<T = any> extends Error {
   public headers?: { [key: string]: unknown };
   public method: string | undefined;
   public context: HubSpotHttpErrorContext | undefined;
+  public derivedContext: HubSpotHttpErrorContext | undefined;
   public validationErrors: string[] | undefined;
   public detailedMessage?: string;
   private divider = `\n- `;
@@ -30,10 +31,10 @@ export class HubSpotHttpError<T = any> extends Error {
     this.cause = options?.cause;
 
     if (options && isAxiosError(options.cause)) {
-      this.updateContextFromCause(options.cause);
+      this.extractDerivedContext(options.cause);
       const { response, config, code } = options.cause;
       this.message = this.joinErrorMessages(options.cause, {
-        accountId: this.context?.accountId,
+        accountId: this.context?.accountId || this.derivedContext?.accountId,
       });
       this.detailedMessage = this.joinErrorMessages(
         options.cause,
@@ -72,7 +73,6 @@ export class HubSpotHttpError<T = any> extends Error {
     // Update the error messages when the context is updated
     if (isAxiosError(this.cause)) {
       this.message = this.joinErrorMessages(this.cause, this.context);
-      this.detailedMessage = this.joinErrorMessages(this.cause, this.context);
     }
   }
 
@@ -93,6 +93,11 @@ export class HubSpotHttpError<T = any> extends Error {
     if (this.context) {
       messages.push(`context: ${JSON.stringify(this.context, undefined, 2)}`);
     }
+    if (this.derivedContext) {
+      messages.push(
+        `derivedContext: ${JSON.stringify(this.derivedContext, undefined, 2)}`
+      );
+    }
 
     return messages.join(this.divider);
   }
@@ -104,7 +109,7 @@ export class HubSpotHttpError<T = any> extends Error {
     return this.validationErrors?.join(this.divider);
   }
 
-  private updateContextFromCause(cause: AxiosError) {
+  private extractDerivedContext(cause: AxiosError) {
     const generatedContext: HubSpotHttpErrorContext = {};
     if (!cause) {
       return;
@@ -116,7 +121,7 @@ export class HubSpotHttpError<T = any> extends Error {
     generatedContext.request = cause.config?.url;
 
     // Allow the provided context to override the generated context
-    this.context = { ...generatedContext, ...this.context };
+    this.derivedContext = { ...this.derivedContext, ...generatedContext };
   }
 
   private parseValidationErrors(
@@ -185,6 +190,7 @@ export class HubSpotHttpError<T = any> extends Error {
     const errorMessage: Array<string> = [];
 
     if ((method === 'put' || method === 'post') && context.payload) {
+      console.log(context);
       errorMessage.push(
         i18n(`${i18nKey}.unableToUpload`, { payload: context.payload })
       );
