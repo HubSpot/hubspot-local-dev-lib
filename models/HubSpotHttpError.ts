@@ -140,7 +140,14 @@ export class HubSpotHttpError<T = any> extends Error {
     if (errors) {
       const specificErrors = errors.map(error => {
         let errorMessage = error.message;
-        if (error.errorTokens && error.errorTokens.line) {
+
+        if (error.context?.requiredScopes) {
+          // Sometimes the scopes come back with duplicates
+          const scopes = new Set<string>(error.context.requiredScopes);
+          scopes.forEach(item => {
+            errorMessage = `${errorMessage}\n  - ${item}`;
+          });
+        } else if (error.errorTokens && error.errorTokens.line) {
           errorMessage = `line ${error.errorTokens.line}: ${errorMessage}`;
         }
         return errorMessage;
