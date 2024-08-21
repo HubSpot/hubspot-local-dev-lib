@@ -20,6 +20,7 @@ export interface ValidationError extends BaseError {
   errorTokens?: {
     line: number;
   };
+  context?: { requiredScopes?: string[] };
 }
 
 export type FileSystemErrorContext = {

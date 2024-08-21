@@ -68,7 +68,7 @@ describe('models/HubSpotHttpError', () => {
       const result = new HubSpotHttpError('OH NO', { cause });
       const error1Message = result.validationErrors?.[1];
       const error2Message = result.validationErrors?.[2];
-      expect(result.context).toStrictEqual({
+      expect(result.derivedContext).toStrictEqual({
         accountId: portalId,
         payload: JSON.stringify(cause.config!.data),
         request: cause.config!.url,
@@ -138,13 +138,13 @@ describe('models/HubSpotHttpError', () => {
   describe('toString', () => {
     let cause: Error;
     const div = `\n- `;
-    const message = `HubSpotHttpError: ${div}message: The request for '/some/path' in account 123456 was bad. Something awful happened with the request ${div}Item 1 was incorrect ${div}Item 2 was incorrect`;
+    const message = `HubSpotHttpError: ${div}message: The request was bad. Something awful happened with the request ${div}Item 1 was incorrect ${div}Item 2 was incorrect`;
     const statusMessage = `${div}status: 400`;
     const statusTextMessage = `${div}statusText: Client error`;
     const methodMessage = `${div}method: GET`;
     const codeMessage = `${div}code: CODE`;
     const validationMessage = `${div}errors: Something awful happened with the request\n- Item 1 was incorrect\n- Item 2 was incorrect`;
-    const contextMessage = `${div}context: {\n  "accountId": 123456,\n  "payload": "{\\"foo\\":\\"bar\\"}",\n  "request": "/some/path"\n}`;
+    const contextMessage = `${div}derivedContext: {\n  "accountId": 123456,\n  "payload": "{\\"foo\\":\\"bar\\"}",\n  "request": "/some/path"\n}`;
 
     beforeEach(() => {
       cause = newAxiosError();
@@ -177,7 +177,7 @@ describe('models/HubSpotHttpError', () => {
       });
       hubspotHttpError.context = undefined;
       expect(hubspotHttpError.toString()).toStrictEqual(
-        `${message}${statusMessage}${statusTextMessage}${methodMessage}${codeMessage}${validationMessage}`
+        `${message}${statusMessage}${statusTextMessage}${methodMessage}${codeMessage}${validationMessage}${contextMessage}`
       );
     });
   });
@@ -206,8 +206,8 @@ describe('models/HubSpotHttpError', () => {
         cause: newAxiosError(),
       });
       // @ts-expect-error private method
-      hubspotHttpError.updateContextFromCause(null);
-      expect(hubspotHttpError.context).toStrictEqual({
+      hubspotHttpError.extractDerivedContext(null);
+      expect(hubspotHttpError.derivedContext).toStrictEqual({
         accountId: portalId,
         payload: '{"foo":"bar"}',
         request: '/some/path',
@@ -232,8 +232,8 @@ describe('models/HubSpotHttpError', () => {
         }
       );
       // @ts-expect-error private method
-      hubspotHttpError.updateContextFromCause(newCause);
-      expect(hubspotHttpError.context).toStrictEqual({
+      hubspotHttpError.extractDerivedContext(newCause);
+      expect(hubspotHttpError.derivedContext).toStrictEqual({
         accountId: 888888,
         payload: '"Yooooooo"',
         request: '/some/different/path',
