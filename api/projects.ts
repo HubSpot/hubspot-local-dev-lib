@@ -213,7 +213,7 @@ export async function provisionBuild(
     )}/builds/staged/provision`,
     params: { platformVersion },
     headers: { 'Content-Type': 'application/json' },
-    timeout: 50000,
+    timeout: 50_000,
   });
 }
 
