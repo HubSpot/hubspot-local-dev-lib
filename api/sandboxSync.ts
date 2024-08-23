@@ -3,7 +3,6 @@ import {
   InitiateSyncResponse,
   FetchTypesResponse,
   TaskRequestData,
-  SyncTaskStatusType,
 } from '../types/Sandbox';
 import { SANDBOX_TIMEOUT } from '../constants/api';
 const SANDBOXES_SYNC_API_PATH = 'sandboxes-sync/v1';
@@ -24,15 +23,6 @@ export async function initiateSync(
     },
     timeout: SANDBOX_TIMEOUT,
     url: `${SANDBOXES_SYNC_API_PATH}/tasks/initiate/async`,
-  });
-}
-
-export async function fetchTaskStatus(
-  accountId: number,
-  taskId: number
-): Promise<SyncTaskStatusType> {
-  return http.get(accountId, {
-    url: `${SANDBOXES_SYNC_API_PATH}/tasks/${taskId}/status`,
   });
 }
 
