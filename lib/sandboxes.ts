@@ -5,14 +5,12 @@ import {
 } from '../api/sandboxHubs';
 import {
   initiateSync as _initiateSync,
-  fetchTaskStatus as _fetchTaskStatus,
   fetchTypes as _fetchTypes,
 } from '../api/sandboxSync';
 import {
   InitiateSyncResponse,
   Sandbox,
   SandboxType,
-  SyncTaskStatusType,
   TaskRequestData,
   Usage,
 } from '../types/Sandbox';
@@ -73,17 +71,6 @@ export async function initiateSync(
 ): Promise<InitiateSyncResponse> {
   try {
     return await _initiateSync(fromHubId, toHubId, tasks, sandboxHubId);
-  } catch (err) {
-    throwApiError(err);
-  }
-}
-
-export async function fetchTaskStatus(
-  accountId: number,
-  taskId: number
-): Promise<SyncTaskStatusType> {
-  try {
-    return await _fetchTaskStatus(accountId, taskId);
   } catch (err) {
     throwApiError(err);
   }

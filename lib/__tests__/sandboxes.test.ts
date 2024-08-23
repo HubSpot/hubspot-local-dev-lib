@@ -5,7 +5,6 @@ import {
 } from '../../api/sandboxHubs';
 import {
   initiateSync as __initiateSync,
-  fetchTaskStatus as __fetchTaskStatus,
   fetchTypes as __fetchTypes,
 } from '../../api/sandboxSync';
 import { Sandbox, SyncTask, TaskRequestData, Usage } from '../../types/Sandbox';
@@ -15,7 +14,6 @@ import {
   getSandboxUsageLimits,
   fetchTypes,
   initiateSync,
-  fetchTaskStatus,
 } from '../sandboxes';
 import { AxiosError } from 'axios';
 
@@ -36,9 +34,6 @@ const getSandboxUsageLimitsMock =
 const fetchTypesMock = __fetchTypes as jest.MockedFunction<typeof __fetchTypes>;
 const initiateSyncMock = __initiateSync as jest.MockedFunction<
   typeof __initiateSync
->;
-const fetchTaskStatusMock = __fetchTaskStatus as jest.MockedFunction<
-  typeof __fetchTaskStatus
 >;
 
 const sandboxName = 'Mock Standard Sandbox';
@@ -189,30 +184,6 @@ describe('lib/sandboxes', () => {
 
       await expect(async () => {
         await initiateSync(accountId, 234, [], 789);
-      }).rejects.toThrowError('The request failed.');
-    });
-  });
-
-  describe('fetchTaskStatus', () => {
-    const taskId = 1234567890;
-    it('should fetch the task status', async () => {
-      const status = {
-        status: 'please hold',
-        tasks: [],
-      };
-      fetchTaskStatusMock.mockResolvedValue(status);
-
-      const response = await fetchTaskStatus(accountId, taskId);
-      expect(fetchTaskStatusMock).toHaveBeenCalledWith(accountId, taskId);
-      expect(response).toStrictEqual(status);
-    });
-
-    it('should throw an API error when an error is encountered', async () => {
-      const error = new AxiosError('OH NO');
-      fetchTaskStatusMock.mockRejectedValue(error);
-
-      await expect(async () => {
-        await fetchTaskStatus(accountId, taskId);
       }).rejects.toThrowError('The request failed.');
     });
   });
