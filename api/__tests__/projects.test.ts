@@ -45,7 +45,7 @@ describe('api/projects', () => {
   const formData = 'this is the form data that we are sending';
 
   beforeEach(() => {
-    // @ts-expect-error It's a mock, I promise
+    // @ts-expect-error Method signature mismatch
     createReadStreamMock.mockImplementationOnce(() => {
       return formData;
     });
