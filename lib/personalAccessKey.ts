@@ -140,7 +140,8 @@ async function getNewAccessTokenByAccountId(
 }
 
 export async function accessTokenForPersonalAccessKey(
-  accountId: number
+  accountId: number,
+  forceRefresh = false
 ): Promise<string | undefined> {
   const account = getAccountConfig(accountId) as PersonalAccessKeyAccount;
   if (!account) {
@@ -152,6 +153,7 @@ export async function accessTokenForPersonalAccessKey(
 
   if (
     !authDataExists ||
+    forceRefresh ||
     moment().add(5, 'minutes').isAfter(moment(authTokenInfo.expiresAt))
   ) {
     return getNewAccessToken(
