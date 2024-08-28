@@ -10,8 +10,8 @@ import {
 } from '../types/Project';
 import { Build, FetchProjectBuildsResponse } from '../types/Build';
 import {
-  ComponentMetadataResponse,
   ComponentStructureResponse,
+  ProjectComponentsMetadata,
 } from '../types/ComponentStructure';
 import { Deploy, ProjectDeployResponse } from '../types/Deploy';
 import { ProjectLog } from '../types/ProjectLog';
@@ -22,6 +22,7 @@ import {
 } from '../types/Migration';
 
 const PROJECTS_API_PATH = 'dfs/v1/projects';
+const DEVELOPER_FILE_SYSTEM_PATH = 'dfs/v1';
 const PROJECTS_DEPLOY_API_PATH = 'dfs/deploy/v1';
 const PROJECTS_LOGS_API_PATH = 'dfs/logging/v1';
 const DEVELOPER_PROJECTS_API_PATH = 'developer/projects/v1';
@@ -64,7 +65,7 @@ export async function uploadProject(
 
   return http.post(accountId, {
     url: `${PROJECTS_API_PATH}/upload/${encodeURIComponent(projectName)}`,
-    timeout: 60000,
+    timeout: 60_000,
     data: formData,
     headers: { 'Content-Type': 'multipart/form-data' },
   });
@@ -76,6 +77,15 @@ export async function fetchProject(
 ): Promise<Project> {
   return http.get(accountId, {
     url: `${DEVELOPER_PROJECTS_API_PATH}/by-name/${encodeURIComponent(projectName)}`,
+  });
+}
+
+export async function fetchProjectComponentsMetadata(
+  accountId: number,
+  projectId: number
+): Promise<ProjectComponentsMetadata> {
+  return http.get(accountId, {
+    url: `${DEVELOPER_FILE_SYSTEM_PATH}/projects-deployed-build/${projectId}`,
   });
 }
 
@@ -192,15 +202,6 @@ export async function fetchProjectSettings(
   });
 }
 
-export async function fetchDeployComponentsMetadata(
-  accountId: number,
-  projectId: number
-): Promise<ComponentMetadataResponse> {
-  return http.get(accountId, {
-    url: `${PROJECTS_API_PATH}/by-id/${projectId}/deploy-components-metadata`,
-  });
-}
-
 export async function provisionBuild(
   accountId: number,
   projectName: string,
@@ -212,7 +213,7 @@ export async function provisionBuild(
     )}/builds/staged/provision`,
     params: { platformVersion },
     headers: { 'Content-Type': 'application/json' },
-    timeout: 50000,
+    timeout: 50_000,
   });
 }
 
