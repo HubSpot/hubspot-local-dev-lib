@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { getAxiosConfig } from '../http/getAxiosConfig';
 import { logger } from './logger';
-import http from '../http';
+import { http } from '../http';
 import { getAccountConfig, getEnv } from '../config';
 import { FILE_MAPPER_API_PATH } from '../api/fileMapper';
 import { i18n } from '../utils/lang';
@@ -44,20 +44,20 @@ export async function trackUsage(
 
   if (accountConfig && accountConfig.authType === 'personalaccesskey') {
     logger.debug(i18n(`${i18nKey}.sendingEventAuthenticated`));
-    return http.post(accountId, {
+    await http.post(accountId, {
       url: `${path}/authenticated`,
       data: usageEvent,
       resolveWithFullResponse: true,
     });
+  } else {
+    const env = getEnv(accountId);
+    const axiosConfig = getAxiosConfig({
+      env,
+      url: path,
+      data: usageEvent,
+      resolveWithFullResponse: true,
+    });
+    logger.debug(i18n(`${i18nKey}.sendingEventUnauthenticated`));
+    axios({ ...axiosConfig, method: 'post' });
   }
-
-  const env = getEnv(accountId);
-  const axiosConfig = getAxiosConfig({
-    env,
-    url: path,
-    data: usageEvent,
-    resolveWithFullResponse: true,
-  });
-  logger.debug(i18n(`${i18nKey}.sendingEventUnauthenticated`));
-  axios({ ...axiosConfig, method: 'post' });
 }

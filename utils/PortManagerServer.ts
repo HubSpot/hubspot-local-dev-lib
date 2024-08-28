@@ -8,7 +8,7 @@ import {
   MAX_PORT_NUMBER,
   PORT_MANAGER_SERVER_PORT,
 } from '../constants/ports';
-import { throwErrorWithMessage } from '../errors/standardErrors';
+import { isSystemError } from '../errors';
 import { logger } from '../lib/logger';
 import { i18n } from './lang';
 import { BaseError } from '../types/Error';
@@ -16,7 +16,7 @@ import { RequestPortsData, ServerPortMap } from '../types/PortManager';
 
 const i18nKey = 'utils.PortManagerServer';
 
-class PortManagerServer {
+class _PortManagerServer {
   app?: Express;
   server?: Server;
   serverPortMap: ServerPortMap;
@@ -27,7 +27,7 @@ class PortManagerServer {
 
   async init(): Promise<void> {
     if (this.app) {
-      throwErrorWithMessage(`${i18nKey}.errors.duplicateInstance`);
+      throw new Error(i18n(`${i18nKey}.errors.duplicateInstance`));
     }
     this.app = express();
     this.app.use(express.json());
@@ -37,17 +37,15 @@ class PortManagerServer {
     try {
       this.server = await this.listen();
     } catch (e) {
-      const error = e as BaseError;
-      if (error.code === 'EADDRINUSE') {
-        throwErrorWithMessage(
-          `${i18nKey}.errors.portInUse`,
-          {
+      if (isSystemError(e) && e.code === 'EADDRINUSE') {
+        throw new Error(
+          i18n(`${i18nKey}.errors.portInUse`, {
             port: PORT_MANAGER_SERVER_PORT,
-          },
-          error
+          }),
+          { cause: e }
         );
       }
-      throw error;
+      throw e;
     }
   }
 
@@ -197,4 +195,4 @@ class PortManagerServer {
   };
 }
 
-export default new PortManagerServer();
+export const PortManagerServer = new _PortManagerServer();

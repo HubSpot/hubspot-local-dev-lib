@@ -11,6 +11,7 @@ import {
   cleanupTmpDirSync as __cleanupTmpDirSync,
   createTmpDirSync as __createTmpDirSync,
 } from '../cms/handleFieldsJS';
+import { mockAxiosResponse } from './__utils__/mockAxiosResponse';
 
 jest.mock('../fs');
 jest.mock('../../api/fileMapper');
@@ -93,7 +94,7 @@ describe('lib/cms/uploadFolder', () => {
     it('uploads files in the correct order', async () => {
       listFilesInDir.mockReturnValue(['fields.json']);
       walk.mockResolvedValue(filesProto);
-      upload.mockResolvedValue();
+      upload.mockResolvedValue(mockAxiosResponse());
 
       const uploadedFilesInOrder = [
         'folder/images/image.png',
@@ -129,7 +130,7 @@ describe('lib/cms/uploadFolder', () => {
     it('creates a temp directory if --convertFields is true', async () => {
       const tmpDirSpy = createTmpDirSync.mockImplementation(() => '');
 
-      upload.mockResolvedValue();
+      upload.mockResolvedValue(mockAxiosResponse());
 
       await uploadFolder(
         123,
@@ -147,7 +148,7 @@ describe('lib/cms/uploadFolder', () => {
       const saveOutputSpy = jest.spyOn(FieldsJs.prototype, 'saveOutput');
 
       createTmpDirSync.mockReturnValue('folder');
-      upload.mockResolvedValue();
+      upload.mockResolvedValue(mockAxiosResponse());
 
       await uploadFolder(
         123,
@@ -166,7 +167,7 @@ describe('lib/cms/uploadFolder', () => {
       createTmpDirSync.mockReturnValue('folder');
       const deleteDirSpy = cleanupTmpDirSync.mockImplementation(() => '');
 
-      upload.mockResolvedValue();
+      upload.mockResolvedValue(mockAxiosResponse());
 
       await uploadFolder(
         123,

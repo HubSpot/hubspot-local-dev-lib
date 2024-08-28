@@ -12,11 +12,12 @@ module.exports = {
   parserOptions: {
     ecmaVersion: 2022,
   },
-  plugins: ['@typescript-eslint'],
+  plugins: ['@typescript-eslint', 'import'],
   rules: {
     'no-console': 'off',
     'no-return-await': 'error',
     '@typescript-eslint/no-non-null-assertion': 'off',
+    'import/no-default-export': 'error',
   },
   overrides: [
     {
