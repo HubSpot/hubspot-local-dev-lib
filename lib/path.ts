@@ -1,6 +1,7 @@
 import path from 'path';
 import unixify from 'unixify';
 import { ALLOWED_EXTENSIONS } from '../constants/extensions';
+import os from 'os';
 
 export function convertToUnixPath(_path: string): string {
   return unixify(path.normalize(_path));
@@ -128,4 +129,16 @@ export function isValidPath(_path: string): boolean {
   }
 
   return true;
+}
+
+// Based on the untildify package: https://github.com/sindresorhus/untildify/blob/main/index.js
+export function untildify(pathWithTilde: string): string {
+  const homeDirectory = os.homedir();
+  if (typeof pathWithTilde !== 'string') {
+    throw new TypeError(`Expected a string, got ${typeof pathWithTilde}`);
+  }
+
+  return homeDirectory
+    ? pathWithTilde.replace(/^~(?=$|\/|\\)/, homeDirectory)
+    : pathWithTilde;
 }
