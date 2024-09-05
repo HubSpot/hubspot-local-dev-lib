@@ -141,7 +141,7 @@ export type AccessTokenResponse = {
 };
 
 export type EnabledFeaturesResponse = {
-  enabledFeatures?: { [key: string]: number };
+  enabledFeatures: { [key: string]: boolean };
 };
 
 export type UpdateAccountConfigOptions =
