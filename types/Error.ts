@@ -37,3 +37,7 @@ export type AxiosErrorContext = {
 };
 
 export type OptionalError = BaseError | null | undefined;
+
+export type ErrorContext = {
+  accountId?: number;
+};

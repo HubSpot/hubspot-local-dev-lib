@@ -2,25 +2,15 @@ import { getAxiosConfig } from '../http/getAxiosConfig';
 import http from '../http';
 import { ENVIRONMENTS } from '../constants/environments';
 import { Environment } from '../types/Config';
-import { ScopeData } from '../types/Accounts';
+import {
+  ScopeData,
+  AccessTokenResponse,
+  EnabledFeaturesResponse,
+} from '../types/Accounts';
 import axios from 'axios';
-import { HUBSPOT_ACCOUNT_TYPES } from '../constants/config';
-import { ValueOf } from '../types/Utils';
 import { PublicAppInstallationData } from '../types/Apps';
 
 const LOCALDEVAUTH_API_AUTH_PATH = 'localdevauth/v1/auth';
-
-type AccessTokenResponse = {
-  hubId: number;
-  userId: number;
-  oauthAccessToken: string;
-  expiresAtMillis: number;
-  enabledFeatures?: { [key: string]: number };
-  scopeGroups: Array<string>;
-  encodedOAuthRefreshToken: string;
-  hubName: string;
-  accountType: ValueOf<typeof HUBSPOT_ACCOUNT_TYPES>;
-};
 
 export async function fetchAccessToken(
   personalAccessKey: string,
@@ -71,5 +61,11 @@ export async function fetchAppInstallationData(
       requiredScopeGroups,
       optionalScopeGroups,
     },
+  });
+}
+
+export async function fetchEnabledFeatures(accountId: number) {
+  return http.get<EnabledFeaturesResponse>(accountId, {
+    url: `${LOCALDEVAUTH_API_AUTH_PATH}/enabled-features`,
   });
 }

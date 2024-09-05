@@ -28,10 +28,8 @@ import {
 } from '../errors/standardErrors';
 import { throwFileSystemError } from '../errors/fileSystemErrors';
 import { GenericError } from '../types/Error';
-import { File, Folder } from '../types/FileManager';
+import { File, SimplifiedFolder } from '../types/FileManager';
 import { i18n } from '../utils/lang';
-
-type SimplifiedFolder = Partial<Folder> & Pick<Folder, 'id' | 'name'>;
 
 const i18nKey = 'lib.fileManager';
 

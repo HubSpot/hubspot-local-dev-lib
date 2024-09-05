@@ -29,6 +29,7 @@ import {
   CLIAccount_DEPRECATED,
   FlatAccountFields_DEPRECATED,
   OAuthAccount_DEPRECATED,
+  UpdateAccountConfigOptions,
 } from '../types/Accounts';
 import { BaseError } from '../types/Error';
 import { Mode } from '../types/Files';
@@ -474,10 +475,6 @@ export function removeSandboxAccountFromConfig(
 
   return promptDefaultAccount;
 }
-
-type UpdateAccountConfigOptions = Partial<FlatAccountFields_DEPRECATED> & {
-  environment?: Environment;
-};
 
 /**
  * @throws {Error}
