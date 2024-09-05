@@ -4,7 +4,6 @@ import {
   InitiateSyncResponse,
   FetchTypesResponse,
   TaskRequestData,
-  SyncTaskStatusType,
 } from '../types/Sandbox';
 import { SANDBOX_TIMEOUT } from '../constants/api';
 const SANDBOXES_SYNC_API_PATH = 'sandboxes-sync/v1';
@@ -28,16 +27,7 @@ export function initiateSync(
   });
 }
 
-export function fetchTaskStatus(
-  accountId: number,
-  taskId: number
-): AxiosPromise<SyncTaskStatusType> {
-  return http.get<SyncTaskStatusType>(accountId, {
-    url: `${SANDBOXES_SYNC_API_PATH}/tasks/${taskId}/status`,
-  });
-}
-
-export function fetchTypes(
+export async function fetchTypes(
   accountId: number,
   toHubId: number
 ): AxiosPromise<FetchTypesResponse> {
