@@ -102,9 +102,7 @@ describe('api/projects', () => {
       );
       expect(http.post).toHaveBeenCalledTimes(1);
       expect(http.post).toHaveBeenCalledWith(accountId, {
-        url: `dfs/v1/projects/upload/${encodeURIComponent(
-          projectNameIllegalChars
-        )}`,
+        url: `dfs/v1/projects/upload/${encodeURIComponent(projectNameIllegalChars)}`,
         timeout: 60_000,
         data: {
           file: formData,
@@ -150,9 +148,7 @@ describe('api/projects', () => {
       await fetchProject(accountId, projectNameIllegalChars);
       expect(http.get).toHaveBeenCalledTimes(1);
       expect(http.get).toHaveBeenCalledWith(accountId, {
-        url: `developer/projects/v1/by-name/${encodeURIComponent(
-          projectNameIllegalChars
-        )}`,
+        url: `developer/projects/v1/by-name/${encodeURIComponent(projectNameIllegalChars)}`,
       });
     });
   });
@@ -187,9 +183,7 @@ describe('api/projects', () => {
       await downloadProject(accountId, projectNameIllegalChars, buildId);
       expect(http.get).toHaveBeenCalledTimes(1);
       expect(http.get).toHaveBeenCalledWith(accountId, {
-        url: `dfs/v1/projects/${encodeURIComponent(
-          projectNameIllegalChars
-        )}/builds/${buildId}/archive-full`,
+        url: `dfs/v1/projects/${encodeURIComponent(projectNameIllegalChars)}/builds/${buildId}/archive-full`,
         responseType: 'arraybuffer',
         headers: {
           accept: 'application/zip',
@@ -212,9 +206,7 @@ describe('api/projects', () => {
       await deleteProject(accountId, projectNameIllegalChars);
       expect(http.delete).toHaveBeenCalledTimes(1);
       expect(http.delete).toHaveBeenCalledWith(accountId, {
-        url: `developer/projects/v1/${encodeURIComponent(
-          projectNameIllegalChars
-        )}`,
+        url: `developer/projects/v1/${encodeURIComponent(projectNameIllegalChars)}`,
       });
     });
   });
@@ -246,9 +238,7 @@ describe('api/projects', () => {
       await fetchProjectBuilds(accountId, projectNameIllegalChars);
       expect(http.get).toHaveBeenCalledTimes(1);
       expect(http.get).toHaveBeenCalledWith(accountId, {
-        url: `dfs/v1/projects/${encodeURIComponent(
-          projectNameIllegalChars
-        )}/builds`,
+        url: `dfs/v1/projects/${encodeURIComponent(projectNameIllegalChars)}/builds`,
         params: {},
       });
     });
@@ -268,9 +258,7 @@ describe('api/projects', () => {
       await getBuildStatus(accountId, projectNameIllegalChars, buildId);
       expect(http.get).toHaveBeenCalledTimes(1);
       expect(http.get).toHaveBeenCalledWith(accountId, {
-        url: `dfs/v1/projects/${encodeURIComponent(
-          projectNameIllegalChars
-        )}/builds/${buildId}/status`,
+        url: `dfs/v1/projects/${encodeURIComponent(projectNameIllegalChars)}/builds/${buildId}/status`,
       });
     });
   });
@@ -289,9 +277,7 @@ describe('api/projects', () => {
       await getBuildStructure(accountId, projectNameIllegalChars, buildId);
       expect(http.get).toHaveBeenCalledTimes(1);
       expect(http.get).toHaveBeenCalledWith(accountId, {
-        url: `dfs/v1/builds/by-project-name/${encodeURIComponent(
-          projectNameIllegalChars
-        )}/builds/${buildId}/structure`,
+        url: `dfs/v1/builds/by-project-name/${encodeURIComponent(projectNameIllegalChars)}/builds/${buildId}/structure`,
       });
     });
   });
@@ -325,9 +311,7 @@ describe('api/projects', () => {
       await getDeployStatus(accountId, projectNameIllegalChars, deployId);
       expect(http.get).toHaveBeenCalledTimes(1);
       expect(http.get).toHaveBeenCalledWith(accountId, {
-        url: `dfs/deploy/v1/deploy-status/projects/${encodeURIComponent(
-          projectNameIllegalChars
-        )}/deploys/${deployId}`,
+        url: `dfs/deploy/v1/deploy-status/projects/${encodeURIComponent(projectNameIllegalChars)}/deploys/${deployId}`,
       });
     });
   });
@@ -346,9 +330,7 @@ describe('api/projects', () => {
       await getDeployStructure(accountId, projectNameIllegalChars, deployId);
       expect(http.get).toHaveBeenCalledTimes(1);
       expect(http.get).toHaveBeenCalledWith(accountId, {
-        url: `dfs/deploy/v1/deploys/by-project-name/${encodeURIComponent(
-          projectNameIllegalChars
-        )}/deploys/${deployId}/structure`,
+        url: `dfs/deploy/v1/deploys/by-project-name/${encodeURIComponent(projectNameIllegalChars)}/deploys/${deployId}/structure`,
       });
     });
   });
@@ -366,9 +348,7 @@ describe('api/projects', () => {
       await fetchProjectSettings(accountId, projectNameIllegalChars);
       expect(http.get).toHaveBeenCalledTimes(1);
       expect(http.get).toHaveBeenCalledWith(accountId, {
-        url: `developer/projects/v1/${encodeURIComponent(
-          projectNameIllegalChars
-        )}/settings`,
+        url: `developer/projects/v1/${encodeURIComponent(projectNameIllegalChars)}/settings`,
       });
     });
   });
@@ -390,9 +370,7 @@ describe('api/projects', () => {
       await provisionBuild(accountId, projectNameIllegalChars);
       expect(http.post).toHaveBeenCalledTimes(1);
       expect(http.post).toHaveBeenCalledWith(accountId, {
-        url: `dfs/v1/projects/${encodeURIComponent(
-          projectNameIllegalChars
-        )}/builds/staged/provision`,
+        url: `dfs/v1/projects/${encodeURIComponent(projectNameIllegalChars)}/builds/staged/provision`,
         params: {},
         headers: { 'Content-Type': 'application/json' },
         timeout: 50_000,
@@ -416,9 +394,7 @@ describe('api/projects', () => {
       await queueBuild(accountId, projectNameIllegalChars);
       expect(http.post).toHaveBeenCalledTimes(1);
       expect(http.post).toHaveBeenCalledWith(accountId, {
-        url: `dfs/v1/projects/${encodeURIComponent(
-          projectNameIllegalChars
-        )}/builds/staged/queue`,
+        url: `dfs/v1/projects/${encodeURIComponent(projectNameIllegalChars)}/builds/staged/queue`,
         params: {},
         headers: { 'Content-Type': 'application/json' },
       });
@@ -432,9 +408,7 @@ describe('api/projects', () => {
       await uploadFileToBuild(accountId, projectName, filePath, path);
       expect(http.put).toHaveBeenCalledTimes(1);
       expect(http.put).toHaveBeenCalledWith(accountId, {
-        url: `dfs/v1/projects/${projectName}/builds/staged/files/${encodeURIComponent(
-          path
-        )}`,
+        url: `dfs/v1/projects/${projectName}/builds/staged/files/${encodeURIComponent(path)}`,
         data: { file: formData },
         headers: { 'Content-Type': 'multipart/form-data' },
       });
@@ -451,9 +425,7 @@ describe('api/projects', () => {
       );
       expect(http.put).toHaveBeenCalledTimes(1);
       expect(http.put).toHaveBeenCalledWith(accountId, {
-        url: `dfs/v1/projects/${encodeURIComponent(
-          projectNameIllegalChars
-        )}/builds/staged/files/${encodeURIComponent(path)}`,
+        url: `dfs/v1/projects/${encodeURIComponent(projectNameIllegalChars)}/builds/staged/files/${encodeURIComponent(path)}`,
         data: { file: formData },
         headers: { 'Content-Type': 'multipart/form-data' },
       });
@@ -466,9 +438,7 @@ describe('api/projects', () => {
       await deleteFileFromBuild(accountId, projectName, path);
       expect(http.delete).toHaveBeenCalledTimes(1);
       expect(http.delete).toHaveBeenCalledWith(accountId, {
-        url: `dfs/v1/projects/${projectName}/builds/staged/files/${encodeURIComponent(
-          path
-        )}`,
+        url: `dfs/v1/projects/${projectName}/builds/staged/files/${encodeURIComponent(path)}`,
       });
     });
 
@@ -477,9 +447,7 @@ describe('api/projects', () => {
       await deleteFileFromBuild(accountId, projectNameIllegalChars, filePath);
       expect(http.delete).toHaveBeenCalledTimes(1);
       expect(http.delete).toHaveBeenCalledWith(accountId, {
-        url: `dfs/v1/projects/${encodeURIComponent(
-          projectNameIllegalChars
-        )}/builds/staged/files/${encodeURIComponent(filePath)}`,
+        url: `dfs/v1/projects/${encodeURIComponent(projectNameIllegalChars)}/builds/staged/files/${encodeURIComponent(filePath)}`,
       });
     });
   });
@@ -498,9 +466,7 @@ describe('api/projects', () => {
       await cancelStagedBuild(accountId, projectNameIllegalChars);
       expect(http.post).toHaveBeenCalledTimes(1);
       expect(http.post).toHaveBeenCalledWith(accountId, {
-        url: `dfs/v1/projects/${encodeURIComponent(
-          projectNameIllegalChars
-        )}/builds/staged/cancel`,
+        url: `dfs/v1/projects/${encodeURIComponent(projectNameIllegalChars)}/builds/staged/cancel`,
         headers: { 'Content-Type': 'application/json' },
       });
     });
@@ -520,9 +486,7 @@ describe('api/projects', () => {
       await fetchBuildWarnLogs(accountId, projectNameIllegalChars, buildId);
       expect(http.get).toHaveBeenCalledTimes(1);
       expect(http.get).toHaveBeenCalledWith(accountId, {
-        url: `dfs/logging/v1/logs/projects/${encodeURIComponent(
-          projectNameIllegalChars
-        )}/builds/${buildId}/combined/warn`,
+        url: `dfs/logging/v1/logs/projects/${encodeURIComponent(projectNameIllegalChars)}/builds/${buildId}/combined/warn`,
       });
     });
   });
@@ -541,9 +505,7 @@ describe('api/projects', () => {
       await fetchDeployWarnLogs(accountId, projectNameIllegalChars, deployId);
       expect(http.get).toHaveBeenCalledTimes(1);
       expect(http.get).toHaveBeenCalledWith(accountId, {
-        url: `dfs/logging/v1/logs/projects/${encodeURIComponent(
-          projectNameIllegalChars
-        )}/deploys/${deployId}/combined/warn`,
+        url: `dfs/logging/v1/logs/projects/${encodeURIComponent(projectNameIllegalChars)}/deploys/${deployId}/combined/warn`,
       });
     });
   });

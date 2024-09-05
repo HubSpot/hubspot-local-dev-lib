@@ -164,7 +164,7 @@ export function isConvertableFieldJs(
   return !!(
     convertFields &&
     allowedFieldsNames.includes(baseName) &&
-    (inModuleFolder || relativePath == path.sep)
+    (inModuleFolder || relativePath == '/')
   );
 }
 
