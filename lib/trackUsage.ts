@@ -59,5 +59,5 @@ export async function trackUsage(
     resolveWithFullResponse: true,
   });
   logger.debug(i18n(`${i18nKey}.sendingEventUnauthenticated`));
-  axios({ ...axiosConfig, method: 'post' });
+  return axios({ ...axiosConfig, method: 'post' });
 }
