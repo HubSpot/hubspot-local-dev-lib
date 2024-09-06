@@ -13,13 +13,19 @@ import {
 import { logger } from './logger';
 import { fetchFileStream, download, downloadDefault } from '../api/fileMapper';
 import { throwError, throwErrorWithMessage } from '../errors/standardErrors';
-import { MODULE_EXTENSION, FUNCTIONS_EXTENSION } from '../constants/extensions';
+import {
+  MODULE_EXTENSION,
+  FUNCTIONS_EXTENSION,
+  JSR_ALLOWED_EXTENSIONS,
+} from '../constants/extensions';
 import { MODE } from '../constants/files';
 import {
   FileMapperNode,
   Mode,
   FileMapperOptions,
   FileMapperInputOptions,
+  PathTypeData,
+  RecursiveFileMapperCallback,
 } from '../types/Files';
 import { throwFileSystemError } from '../errors/fileSystemErrors';
 import { isTimeoutError } from '../errors/apiErrors';
@@ -98,14 +104,6 @@ function validateFileMapperNode(node: FileMapperNode): void {
   });
 }
 
-type PathTypeData = {
-  isModule: boolean;
-  isHubspot: boolean;
-  isFile: boolean;
-  isRoot: boolean;
-  isFolder: boolean;
-};
-
 export function getTypeDataFromPath(src: string): PathTypeData {
   const isModule = isPathToModule(src);
   const isHubspot = isPathToHubspot(src);
@@ -120,12 +118,6 @@ export function getTypeDataFromPath(src: string): PathTypeData {
     isFolder,
   };
 }
-
-type RecursiveFileMapperCallback = (
-  node: FileMapperNode,
-  filepath?: string,
-  depth?: number
-) => boolean;
 
 export function recurseFolder(
   node: FileMapperNode,
@@ -197,7 +189,7 @@ async function fetchAndWriteFileStream(
     logger.log(i18n(`${i18nKey}.skippedExisting`, { filepath }));
     return;
   }
-  if (!isAllowedExtension(srcPath)) {
+  if (!isAllowedExtension(srcPath, Array.from(JSR_ALLOWED_EXTENSIONS))) {
     throwErrorWithMessage(`${i18nKey}.errors.invalidFileType`, { srcPath });
   }
   let node: FileMapperNode;
@@ -368,6 +360,12 @@ async function downloadFolder(
           );
           if (succeeded === false) {
             success = false;
+            logger.debug(
+              i18n(`${i18nKey}.errors.failedToFetchFile`, {
+                src: childNode.path,
+                dest: filepath || '',
+              })
+            );
           }
         });
         return success;

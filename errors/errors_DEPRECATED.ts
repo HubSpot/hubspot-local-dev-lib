@@ -1,8 +1,8 @@
-import { BaseError, FileSystemErrorContext } from '../types/Error';
-
-type ErrorContext = {
-  accountId?: number;
-};
+import {
+  BaseError,
+  FileSystemErrorContext,
+  ErrorContext,
+} from '../types/Error';
 
 function isSystemError(err: BaseError) {
   return err.errno != null && err.code != null && err.syscall != null;

@@ -39,6 +39,11 @@ export interface CLIAccount_DEPRECATED {
 
 export type CLIAccount = CLIAccount_NEW | CLIAccount_DEPRECATED;
 
+export type GenericAccount = {
+  portalId?: number;
+  accountId?: number;
+};
+
 export type AccountType = ValueOf<typeof HUBSPOT_ACCOUNT_TYPES>;
 
 export type TokenInfo = {
@@ -121,4 +126,84 @@ export type FlatAccountFields =
 export type ScopeData = {
   portalScopesInGroup: Array<string>;
   userScopesInGroup: Array<string>;
+};
+
+export type AccessTokenResponse = {
+  hubId: number;
+  userId: number;
+  oauthAccessToken: string;
+  expiresAtMillis: number;
+  enabledFeatures?: { [key: string]: number };
+  scopeGroups: Array<string>;
+  encodedOAuthRefreshToken: string;
+  hubName: string;
+  accountType: ValueOf<typeof HUBSPOT_ACCOUNT_TYPES>;
+};
+
+export type EnabledFeaturesResponse = {
+  enabledFeatures: { [key: string]: boolean };
+};
+
+export type UpdateAccountConfigOptions =
+  Partial<FlatAccountFields_DEPRECATED> & {
+    environment?: Environment;
+  };
+
+export type PersonalAccessKeyOptions = {
+  accountId: number;
+  personalAccessKey: string;
+  env: Environment;
+};
+
+export type OAuthOptions = {
+  accountId: number;
+  clientId: string;
+  clientSecret: string;
+  refreshToken: string;
+  scopes: Array<string>;
+  env: Environment;
+};
+
+export type APIKeyOptions = {
+  accountId: number;
+  apiKey: string;
+  env: Environment;
+};
+
+export type AccessToken = {
+  portalId: number;
+  accessToken: string;
+  expiresAt: string;
+  scopeGroups: Array<string>;
+  enabledFeatures?: { [key: string]: number };
+  encodedOAuthRefreshToken: string;
+  hubName: string;
+  accountType: ValueOf<typeof HUBSPOT_ACCOUNT_TYPES>;
+};
+
+export type OAuth2ManagerAccountConfig = {
+  name?: string;
+  accountId?: number;
+  clientId?: string;
+  clientSecret?: string;
+  scopes?: Array<string>;
+  env?: Environment;
+  environment?: Environment;
+  tokenInfo?: TokenInfo;
+  authType?: 'oauth2';
+};
+
+export type WriteTokenInfoFunction = (tokenInfo: TokenInfo) => void;
+
+export type RefreshTokenResponse = {
+  refresh_token: string;
+  access_token: string;
+  expires_in: string;
+};
+
+export type ExchangeProof = {
+  grant_type: string;
+  client_id?: string;
+  client_secret?: string;
+  refresh_token?: string;
 };

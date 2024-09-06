@@ -22,8 +22,8 @@ import { HUBSPOT_ACCOUNT_TYPES } from '../constants/config';
 import { fetchDeveloperTestAccountData } from '../api/developerTestAccounts';
 import { logger } from './logger';
 import { getAxiosErrorWithContext } from '../errors/apiErrors';
-import { ValueOf } from '../types/Utils';
 import CLIConfiguration from '../config/CLIConfiguration';
+import { AccessToken } from '../types/Accounts';
 
 const i18nKey = 'lib.personalAccessKey';
 
@@ -32,17 +32,6 @@ const refreshRequests = new Map();
 function getRefreshKey(personalAccessKey: string, expiration?: string): string {
   return `${personalAccessKey}-${expiration || 'fresh'}`;
 }
-
-type AccessToken = {
-  portalId: number;
-  accessToken: string;
-  expiresAt: string;
-  scopeGroups: Array<string>;
-  enabledFeatures?: { [key: string]: number };
-  encodedOAuthRefreshToken: string;
-  hubName: string;
-  accountType: ValueOf<typeof HUBSPOT_ACCOUNT_TYPES>;
-};
 
 export async function getAccessToken(
   personalAccessKey: string,
@@ -152,7 +141,8 @@ async function getNewAccessTokenByAccountId(
 }
 
 export async function accessTokenForPersonalAccessKey(
-  accountId: number
+  accountId: number,
+  forceRefresh = false
 ): Promise<string | undefined> {
   const account = getAccountConfig(accountId) as PersonalAccessKeyAccount;
   if (!account) {
@@ -164,6 +154,7 @@ export async function accessTokenForPersonalAccessKey(
 
   if (
     !authDataExists ||
+    forceRefresh ||
     moment().add(5, 'minutes').isAfter(moment(authTokenInfo.expiresAt))
   ) {
     return getNewAccessToken(
