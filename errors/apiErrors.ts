@@ -130,7 +130,6 @@ export function getAxiosErrorWithContext(
 ): Error {
   const status = error.response?.status;
   const method = error.config?.method as HttpMethod;
-  const { projectName } = context;
 
   let messageDetail: string;
 
@@ -161,9 +160,6 @@ export function getAxiosErrorWithContext(
       i18n(`${i18nKey}.unableToUpload`, { payload: context.payload })
     );
   }
-  const isProjectMissingScopeError =
-    isMissingScopeError(error) && !!projectName;
-  const isProjectGatingError = isGatingError(error) && !!projectName;
 
   switch (status) {
     case 400:
@@ -173,21 +169,7 @@ export function getAxiosErrorWithContext(
       errorMessage.push(i18n(`${i18nKey}.codes.401`, { messageDetail }));
       break;
     case 403:
-      if (isProjectMissingScopeError) {
-        errorMessage.push(
-          i18n(`${i18nKey}.codes.403ProjectMissingScope`, {
-            accountId: context.accountId || '',
-          })
-        );
-      } else if (isProjectGatingError) {
-        errorMessage.push(
-          i18n(`${i18nKey}.codes.403ProjectGating`, {
-            accountId: context.accountId || '',
-          })
-        );
-      } else {
-        errorMessage.push(i18n(`${i18nKey}.codes.403`, { messageDetail }));
-      }
+      errorMessage.push(i18n(`${i18nKey}.codes.403`, { messageDetail }));
       break;
     case 404:
       errorMessage.push(i18n(`${i18nKey}.codes.404`, { messageDetail }));
@@ -216,7 +198,7 @@ export function getAxiosErrorWithContext(
   if (error?.response?.data) {
     const { message, errors } = error.response.data;
 
-    if (message && !isProjectMissingScopeError && !isProjectGatingError) {
+    if (message) {
       errorMessage.push(message);
     }
 
