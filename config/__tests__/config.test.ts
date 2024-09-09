@@ -13,8 +13,7 @@ import {
   deleteEmptyConfigFile,
   setConfigPath,
   createEmptyConfigFile,
-  // otherConfigFileExists,
-  // bothConfigFilesExist,
+  configFileExists,
 } from '../index';
 import {
   getAccountIdentifier,
@@ -35,7 +34,7 @@ import {
   PersonalAccessKeyAccount_DEPRECATED,
 } from '../../types/Accounts';
 import * as configFile from '../configFile';
-// import * as config_DEPRECATED from '../config_DEPRECATED';
+import * as config_DEPRECATED from '../config_DEPRECATED';
 
 const CONFIG_PATHS = {
   none: null,
@@ -58,6 +57,7 @@ const fsWriteFileSyncSpy = jest.spyOn(fs, 'writeFileSync');
 
 jest.mock('../configFile', () => ({
   getConfigFilePath: jest.fn(),
+  configFileExists: jest.fn(),
 }));
 
 const API_KEY_CONFIG: APIKeyAccount_DEPRECATED = {
@@ -748,101 +748,64 @@ describe('config/config', () => {
     });
   });
 
-  // describe('otherConfigFileExists', () => {
-  //   beforeEach(() => {
-  //     jest.resetAllMocks();
-  //   });
+  describe('configFileExists', () => {
+    let getConfigPathSpy: jest.SpyInstance;
 
-  //   it('returns false when hidden config is being created and no deprecated config exists', () => {
-  //     jest.spyOn(configFile, 'configFileExists');
-  //     jest.spyOn(config_DEPRECATED, 'getConfigPath').mockReturnValue(null);
+    beforeAll(() => {
+      getConfigPathSpy = jest.spyOn(config_DEPRECATED, 'getConfigPath');
+    });
 
-  //     const result = otherConfigFileExists(true);
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
 
-  //     expect(result).toBe(false);
-  //     expect(configFile.configFileExists).not.toHaveBeenCalled();
-  //     expect(config_DEPRECATED.getConfigPath).toHaveBeenCalled();
-  //   });
+    afterAll(() => {
+      getConfigPathSpy.mockRestore();
+    });
 
-  //   it('returns true when hidden config is being created and a deprecated config does exist', () => {
-  //     const mockDeprecatedPath = '/hubspot.config.yml';
-  //     jest.spyOn(configFile, 'configFileExists');
-  //     jest
-  //       .spyOn(config_DEPRECATED, 'getConfigPath')
-  //       .mockReturnValue(mockDeprecatedPath);
+    it('returns true when useHiddenConfig is true and newConfigFileExists returns true', () => {
+      (configFile.configFileExists as jest.Mock).mockReturnValue(true);
 
-  //     const result = otherConfigFileExists(true);
+      const result = configFileExists(true);
 
-  //     expect(result).toBe(true);
-  //     expect(configFile.configFileExists).not.toHaveBeenCalled();
-  //     expect(config_DEPRECATED.getConfigPath).toHaveBeenCalled();
-  //   });
+      expect(configFile.configFileExists).toHaveBeenCalled();
+      expect(result).toBe(true);
+    });
 
-  //   it('returns false when deprecated config is being created and no hidden config exists', () => {
-  //     jest.spyOn(configFile, 'configFileExists').mockReturnValue(false);
-  //     jest.spyOn(config_DEPRECATED, 'getConfigPath');
+    it('returns false when useHiddenConfig is true and newConfigFileExists returns false', () => {
+      (configFile.configFileExists as jest.Mock).mockReturnValue(false);
 
-  //     const result = otherConfigFileExists(false);
+      const result = configFileExists(true);
 
-  //     expect(result).toBe(false);
-  //     expect(configFile.configFileExists).toHaveBeenCalled();
-  //     expect(config_DEPRECATED.getConfigPath).not.toHaveBeenCalled();
-  //   });
+      expect(configFile.configFileExists).toHaveBeenCalled();
+      expect(result).toBe(false);
+    });
 
-  //   it('returns true when deprecated config is being created and a hidden config exists', () => {
-  //     jest.spyOn(configFile, 'configFileExists').mockReturnValue(true);
-  //     jest.spyOn(config_DEPRECATED, 'getConfigPath');
+    it('returns true when useHiddenConfig is false and config_DEPRECATED.getConfigPath returns a valid path', () => {
+      getConfigPathSpy.mockReturnValue(CONFIG_PATHS.default);
 
-  //     const result = otherConfigFileExists(false);
+      const result = configFileExists(false);
 
-  //     expect(result).toBe(true);
-  //     expect(configFile.configFileExists).toHaveBeenCalled();
-  //     expect(config_DEPRECATED.getConfigPath).not.toHaveBeenCalled();
-  //   });
-  // });
+      expect(getConfigPathSpy).toHaveBeenCalled();
+      expect(result).toBe(true);
+    });
 
-  // describe('bothConfigFilesExist', () => {
-  //   beforeEach(() => {
-  //     jest.resetAllMocks();
-  //   });
+    it('returns false when useHiddenConfig is false and config_DEPRECATED.getConfigPath returns an empty path', () => {
+      getConfigPathSpy.mockReturnValue('');
 
-  //   it('returns true when a hidden config and deprecated config both exist', () => {
-  //     const mockDeprecatedPath = '/hubspot.config.yml';
-  //     jest.spyOn(configFile, 'configFileExists').mockReturnValue(true);
-  //     jest
-  //       .spyOn(config_DEPRECATED, 'getConfigPath')
-  //       .mockReturnValue(mockDeprecatedPath);
+      const result = configFileExists(false);
 
-  //     const result = bothConfigFilesExist();
+      expect(getConfigPathSpy).toHaveBeenCalled();
+      expect(result).toBe(false);
+    });
 
-  //     expect(result).toBe(true);
-  //     expect(configFile.configFileExists).toHaveBeenCalled();
-  //     expect(config_DEPRECATED.getConfigPath).toHaveBeenCalled();
-  //   });
+    it('defaults to useHiddenConfig as false when not provided', () => {
+      getConfigPathSpy.mockReturnValue(CONFIG_PATHS.default);
 
-  //   it('returns false when a hidden config exists and a deprecated config does not exist', () => {
-  //     jest.spyOn(configFile, 'configFileExists').mockReturnValue(true);
-  //     jest.spyOn(config_DEPRECATED, 'getConfigPath').mockReturnValue(null);
+      const result = configFileExists();
 
-  //     const result = bothConfigFilesExist();
-
-  //     expect(result).toBe(false);
-  //     expect(configFile.configFileExists).not.toHaveBeenCalled();
-  //     expect(config_DEPRECATED.getConfigPath).toHaveBeenCalled();
-  //   });
-
-  //   it('returns false when a hidden config does not exist and a deprecated config does exist', () => {
-  //     const mockDeprecatedPath = '/hubspot.config.yml';
-  //     jest.spyOn(configFile, 'configFileExists').mockReturnValue(false);
-  //     jest
-  //       .spyOn(config_DEPRECATED, 'getConfigPath')
-  //       .mockReturnValue(mockDeprecatedPath);
-
-  //     const result = bothConfigFilesExist();
-
-  //     expect(result).toBe(false);
-  //     expect(configFile.configFileExists).toHaveBeenCalled();
-  //     expect(config_DEPRECATED.getConfigPath).toHaveBeenCalled();
-  //   });
-  // });
+      expect(getConfigPathSpy).toHaveBeenCalled();
+      expect(result).toBe(true);
+    });
+  });
 });
