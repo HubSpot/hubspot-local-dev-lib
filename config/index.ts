@@ -81,17 +81,11 @@ export function writeConfig(options: WriteConfigOptions = {}): void {
   }
 }
 
-export function getHiddenOrDeprecatedConfigPath(
+export function getConfigPath(
+  path?: string,
   useHiddenConfig = false
 ): string | null {
   if (useHiddenConfig || CLIConfiguration.isActive()) {
-    return getConfigFilePath();
-  }
-  return config_DEPRECATED.getConfigPath();
-}
-
-export function getConfigPath(path?: string): string | null {
-  if (CLIConfiguration.isActive()) {
     return getConfigFilePath();
   }
   return config_DEPRECATED.getConfigPath(path);
