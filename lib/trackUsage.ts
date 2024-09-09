@@ -60,4 +60,14 @@ export async function trackUsage(
     logger.debug(i18n(`${i18nKey}.sendingEventUnauthenticated`));
     axios({ ...axiosConfig, method: 'post' });
   }
+
+  const env = getEnv(accountId);
+  const axiosConfig = getAxiosConfig({
+    env,
+    url: path,
+    data: usageEvent,
+    resolveWithFullResponse: true,
+  });
+  logger.debug(i18n(`${i18nKey}.sendingEventUnauthenticated`));
+  return axios({ ...axiosConfig, method: 'post' });
 }

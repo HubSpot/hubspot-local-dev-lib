@@ -3,7 +3,11 @@ import { getAxiosConfig } from '../http/getAxiosConfig';
 import { http } from '../http';
 import { ENVIRONMENTS } from '../constants/environments';
 import { Environment } from '../types/Config';
-import { ScopeData, AccessTokenResponse } from '../types/Accounts';
+import {
+  ScopeData,
+  AccessTokenResponse,
+  EnabledFeaturesResponse,
+} from '../types/Accounts';
 import axios from 'axios';
 import { PublicAppInstallationData } from '../types/Apps';
 
@@ -56,5 +60,11 @@ export function fetchAppInstallationData(
       requiredScopeGroups,
       optionalScopeGroups,
     },
+  });
+}
+
+export async function fetchEnabledFeatures(accountId: number) {
+  return http.get<EnabledFeaturesResponse>(accountId, {
+    url: `${LOCALDEVAUTH_API_AUTH_PATH}/enabled-features`,
   });
 }
