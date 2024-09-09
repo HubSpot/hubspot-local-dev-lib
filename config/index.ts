@@ -1,7 +1,7 @@
 import * as config_DEPRECATED from './config_DEPRECATED';
 import CLIConfiguration from './CLIConfiguration';
 import {
-  configFileExists,
+  configFileExists as newConfigFileExists,
   getConfigFilePath,
   deleteConfigFile as newDeleteConfigFile,
 } from './configFile';
@@ -16,7 +16,7 @@ export function loadConfig(
   options: CLIOptions = {}
 ): CLIConfig | null {
   // Attempt to load the root config
-  if (configFileExists()) {
+  if (newConfigFileExists()) {
     return CLIConfiguration.init(options);
   }
   return config_DEPRECATED.loadConfig(path, options);
@@ -91,14 +91,10 @@ export function getConfigPath(
   return config_DEPRECATED.getConfigPath(path);
 }
 
-export function otherConfigFileExists(useHiddenConfig?: boolean): boolean {
+export function configFileExists(useHiddenConfig?: boolean) {
   return useHiddenConfig
-    ? Boolean(config_DEPRECATED.getConfigPath())
-    : configFileExists();
-}
-
-export function bothConfigFilesExist(): boolean {
-  return Boolean(config_DEPRECATED.getConfigPath()) && configFileExists();
+    ? newConfigFileExists()
+    : Boolean(config_DEPRECATED.getConfigPath());
 }
 
 export function getAccountConfig(accountId?: number): CLIAccount | null {
