@@ -266,9 +266,9 @@ class CLIConfiguration {
     return null;
   }
 
-  getConfigDefaultAccount(): string | number | null {
+  getConfigAccounts(): Array<CLIAccount_NEW> | null {
     if (this.config) {
-      return this.config.defaultAccount || null;
+      return this.config.accounts || null;
     }
     return null;
   }
