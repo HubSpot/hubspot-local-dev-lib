@@ -225,10 +225,15 @@ export function getAccountType(
   return config_DEPRECATED.getAccountType(accountType, sandboxAccountType);
 }
 
+export function getConfigDefaultAccount(): string | number | null | undefined {
+  if (CLIConfiguration.isActive()) {
+    return CLIConfiguration.getConfigDefaultAccount();
+  }
+  return config_DEPRECATED.getConfigDefaultAccount();
+}
+
 // These functions are either not supported or have breaking changes with the new config setup
 export const getConfigAccounts = config_DEPRECATED.getConfigAccounts;
-export const getConfigDefaultAccount =
-  config_DEPRECATED.getConfigDefaultAccount;
 export const getConfigAccountId = config_DEPRECATED.getConfigAccountId;
 export const getOrderedAccount = config_DEPRECATED.getOrderedAccount;
 export const getOrderedConfig = config_DEPRECATED.getOrderedConfig;

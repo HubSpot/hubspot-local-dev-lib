@@ -258,8 +258,17 @@ class CLIConfiguration {
 
   getConfigForAccount(accountId?: number): CLIAccount_NEW | null {
     if (this.config) {
-      this.config.accounts.find(account => account.accountId === accountId) ||
-        null;
+      return (
+        this.config.accounts.find(account => account.accountId === accountId) ||
+        null
+      );
+    }
+    return null;
+  }
+
+  getConfigDefaultAccount(): string | number | null {
+    if (this.config) {
+      return this.config.defaultAccount || null;
     }
     return null;
   }
