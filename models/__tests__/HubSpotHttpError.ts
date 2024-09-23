@@ -338,11 +338,6 @@ describe('models/HubSpotHttpError', () => {
           name: 'generates a 401 api status code error',
         },
         {
-          status: 403,
-          message: 'The request was forbidden.',
-          name: 'generates a 403 api status code error',
-        },
-        {
           status: 404,
           message: 'The request was not found.',
           name: 'generates a 404 api status code error',

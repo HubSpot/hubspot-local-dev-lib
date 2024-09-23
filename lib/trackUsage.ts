@@ -45,12 +45,12 @@ export async function trackUsage(
   if (accountConfig && accountConfig.authType === 'personalaccesskey') {
     logger.debug(i18n(`${i18nKey}.sendingEventAuthenticated`));
     try {
-      const result: void = await http.post(accountId, {
+      await http.post(accountId, {
         url: `${path}/authenticated`,
         data: usageEvent,
         resolveWithFullResponse: true,
       });
-      return result;
+      return;
     } catch (e) {
       logger.debug(i18n(`${i18nKey}.retryingEventUnauthenticated`));
     }
