@@ -1,5 +1,4 @@
 import { isAxiosError, AxiosError } from 'axios';
-import { isGatingError, isMissingScopeError } from '../errors';
 import { HubSpotHttpErrorContext, ValidationError } from '../types/Error';
 import { HttpMethod } from '../types/Api';
 import { HTTP_METHOD_PREPOSITIONS, HTTP_METHOD_VERBS } from '../constants/api';
@@ -170,7 +169,6 @@ export class HubSpotHttpError<T = any> extends Error {
     const i18nKey = 'errors.apiErrors';
     const status = error.response?.status;
     const method = error.config?.method as HttpMethod;
-    const { projectName } = context;
 
     let messageDetail: string;
 
@@ -201,9 +199,6 @@ export class HubSpotHttpError<T = any> extends Error {
         i18n(`${i18nKey}.unableToUpload`, { payload: context.payload })
       );
     }
-    const isProjectMissingScopeError =
-      isMissingScopeError(error) && !!projectName;
-    const isProjectGatingError = isGatingError(error) && !!projectName;
 
     switch (status) {
       case 400:
@@ -213,22 +208,6 @@ export class HubSpotHttpError<T = any> extends Error {
         errorMessage.push(i18n(`${i18nKey}.codes.401`, { messageDetail }));
         break;
       case 403:
-        // TODO: Move projects specific errors to CLI in follow up
-        if (isProjectMissingScopeError) {
-          errorMessage.push(
-            i18n(`${i18nKey}.codes.403ProjectMissingScope`, {
-              accountId: context.accountId || '',
-            })
-          );
-        } else if (isProjectGatingError) {
-          errorMessage.push(
-            i18n(`${i18nKey}.codes.403ProjectGating`, {
-              accountId: context.accountId || '',
-            })
-          );
-        } else {
-          errorMessage.push(i18n(`${i18nKey}.codes.403`, { messageDetail }));
-        }
         break;
       case 404:
         errorMessage.push(i18n(`${i18nKey}.codes.404`, { messageDetail }));
@@ -259,7 +238,7 @@ export class HubSpotHttpError<T = any> extends Error {
     if (error?.response?.data) {
       const { message, errors } = error.response.data;
 
-      if (message && !isProjectMissingScopeError && !isProjectGatingError) {
+      if (message) {
         errorMessage.push(message);
       }
 
