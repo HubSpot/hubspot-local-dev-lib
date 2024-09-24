@@ -1,7 +1,7 @@
 import * as config_DEPRECATED from './config_DEPRECATED';
 import CLIConfiguration from './CLIConfiguration';
 import {
-  configFileExists,
+  configFileExists as newConfigFileExists,
   getConfigFilePath,
   deleteConfigFile as newDeleteConfigFile,
 } from './configFile';
@@ -16,7 +16,7 @@ export function loadConfig(
   options: CLIOptions = {}
 ): CLIConfig | null {
   // Attempt to load the root config
-  if (configFileExists()) {
+  if (newConfigFileExists()) {
     return CLIConfiguration.init(options);
   }
   return config_DEPRECATED.loadConfig(path, options);
@@ -47,9 +47,9 @@ export function loadConfigFromEnvironment(): boolean {
 
 export function createEmptyConfigFile(
   options: { path?: string } = {},
-  useRootConfig = false
+  useHiddenConfig = false
 ): void {
-  if (useRootConfig) {
+  if (useHiddenConfig) {
     CLIConfiguration.write({ accounts: [] });
   } else {
     return config_DEPRECATED.createEmptyConfigFile(options);
@@ -81,11 +81,20 @@ export function writeConfig(options: WriteConfigOptions = {}): void {
   }
 }
 
-export function getConfigPath(path?: string): string | null {
-  if (CLIConfiguration.isActive()) {
+export function getConfigPath(
+  path?: string,
+  useHiddenConfig = false
+): string | null {
+  if (useHiddenConfig || CLIConfiguration.isActive()) {
     return getConfigFilePath();
   }
   return config_DEPRECATED.getConfigPath(path);
+}
+
+export function configFileExists(useHiddenConfig?: boolean) {
+  return useHiddenConfig
+    ? newConfigFileExists()
+    : Boolean(config_DEPRECATED.getConfigPath());
 }
 
 export function getAccountConfig(accountId?: number): CLIAccount | null {
@@ -107,7 +116,7 @@ export function updateAccountConfig(
 ): FlatAccountFields | null {
   const accountIdentifier = getAccountIdentifier(configOptions);
   if (CLIConfiguration.isActive()) {
-    return CLIConfiguration.updateAccount({
+    return CLIConfiguration.addOrUpdateAccount({
       ...configOptions,
       accountId: accountIdentifier,
     });
