@@ -6,11 +6,12 @@ import {
   FetchProjectResponse,
   UploadProjectResponse,
   ProjectSettings,
+  FetchPlatformVersionResponse,
 } from '../types/Project';
 import { Build, FetchProjectBuildsResponse } from '../types/Build';
 import {
-  ComponentMetadataResponse,
   ComponentStructureResponse,
+  ProjectComponentsMetadata,
 } from '../types/ComponentStructure';
 import { Deploy, ProjectDeployResponse } from '../types/Deploy';
 import { ProjectLog } from '../types/ProjectLog';
@@ -21,6 +22,7 @@ import {
 } from '../types/Migration';
 
 const PROJECTS_API_PATH = 'dfs/v1/projects';
+const DEVELOPER_FILE_SYSTEM_PATH = 'dfs/v1';
 const PROJECTS_DEPLOY_API_PATH = 'dfs/deploy/v1';
 const PROJECTS_LOGS_API_PATH = 'dfs/logging/v1';
 const DEVELOPER_PROJECTS_API_PATH = 'developer/projects/v1';
@@ -30,7 +32,7 @@ export async function fetchProjects(
   accountId: number
 ): Promise<FetchProjectResponse> {
   return http.get(accountId, {
-    url: PROJECTS_API_PATH,
+    url: DEVELOPER_PROJECTS_API_PATH,
   });
 }
 
@@ -39,7 +41,7 @@ export async function createProject(
   name: string
 ): Promise<Project> {
   return http.post(accountId, {
-    url: PROJECTS_API_PATH,
+    url: DEVELOPER_PROJECTS_API_PATH,
     data: {
       name,
     },
@@ -63,7 +65,7 @@ export async function uploadProject(
 
   return http.post(accountId, {
     url: `${PROJECTS_API_PATH}/upload/${encodeURIComponent(projectName)}`,
-    timeout: 60000,
+    timeout: 60_000,
     data: formData,
     headers: { 'Content-Type': 'multipart/form-data' },
   });
@@ -74,7 +76,16 @@ export async function fetchProject(
   projectName: string
 ): Promise<Project> {
   return http.get(accountId, {
-    url: `${PROJECTS_API_PATH}/${encodeURIComponent(projectName)}`,
+    url: `${DEVELOPER_PROJECTS_API_PATH}/by-name/${encodeURIComponent(projectName)}`,
+  });
+}
+
+export async function fetchProjectComponentsMetadata(
+  accountId: number,
+  projectId: number
+): Promise<ProjectComponentsMetadata> {
+  return http.get(accountId, {
+    url: `${DEVELOPER_FILE_SYSTEM_PATH}/projects-deployed-build/${projectId}`,
   });
 }
 
@@ -97,14 +108,9 @@ export async function deleteProject(
   projectName: string
 ): Promise<void> {
   return http.delete(accountId, {
-    url: `${PROJECTS_API_PATH}/${encodeURIComponent(projectName)}`,
+    url: `${DEVELOPER_PROJECTS_API_PATH}/${encodeURIComponent(projectName)}`,
   });
 }
-
-type FetchPlatformVersionResponse = {
-  defaultPlatformVersion: string;
-  activePlatformVersions: Array<string>;
-};
 
 export async function fetchPlatformVersions(
   accountId: number
@@ -192,16 +198,7 @@ export async function fetchProjectSettings(
   projectName: string
 ): Promise<ProjectSettings> {
   return http.get(accountId, {
-    url: `${PROJECTS_API_PATH}/${encodeURIComponent(projectName)}/settings`,
-  });
-}
-
-export async function fetchDeployComponentsMetadata(
-  accountId: number,
-  projectId: number
-): Promise<ComponentMetadataResponse> {
-  return http.get(accountId, {
-    url: `${PROJECTS_API_PATH}/by-id/${projectId}/deploy-components-metadata`,
+    url: `${DEVELOPER_PROJECTS_API_PATH}/${encodeURIComponent(projectName)}/settings`,
   });
 }
 
@@ -216,7 +213,7 @@ export async function provisionBuild(
     )}/builds/staged/provision`,
     params: { platformVersion },
     headers: { 'Content-Type': 'application/json' },
-    timeout: 50000,
+    timeout: 50_000,
   });
 }
 

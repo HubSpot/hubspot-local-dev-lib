@@ -26,14 +26,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 import net, { AddressInfo } from 'net';
 import { ip } from 'address';
 import { throwErrorWithMessage } from '../errors/standardErrors';
+import { NetError, ListenCallback } from '../types/PortManager';
 
 import { MIN_PORT_NUMBER, MAX_PORT_NUMBER } from '../constants/ports';
-
-type NetError = Error & {
-  code: string;
-};
-
-type ListenCallback = (error: NetError | null, port: number) => void;
 
 const i18nKey = 'utils.detectPort';
 

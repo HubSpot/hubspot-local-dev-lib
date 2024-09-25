@@ -12,11 +12,7 @@ import { throwErrorWithMessage } from '../errors/standardErrors';
 import { logger } from '../lib/logger';
 import { i18n } from './lang';
 import { BaseError } from '../types/Error';
-import { RequestPortsData } from '../types/PortManager';
-
-type ServerPortMap = {
-  [instanceId: string]: number;
-};
+import { RequestPortsData, ServerPortMap } from '../types/PortManager';
 
 const i18nKey = 'utils.PortManagerServer';
 

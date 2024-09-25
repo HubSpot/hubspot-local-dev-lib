@@ -18,6 +18,7 @@ export const ALLOWED_EXTENSIONS = new Set([
   'woff2',
   'graphql',
 ]);
+export const JSR_ALLOWED_EXTENSIONS = new Set(['jsx', 'tsx', 'ts']);
 
 export const HUBL_EXTENSIONS = new Set(['css', 'html', 'js']);
 export const MODULE_EXTENSION = 'module';

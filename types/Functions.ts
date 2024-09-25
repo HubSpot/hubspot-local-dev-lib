@@ -39,3 +39,33 @@ export type GetBuildStatusResponse = {
   userId: number;
   deployId: number;
 };
+
+export type FunctionConfig = {
+  runtime: string;
+  version: string;
+  environment: object;
+  secrets: Array<string>;
+  endpoints: {
+    [key: string]: {
+      method: string;
+      file: string;
+    };
+  };
+};
+
+export type FunctionConfigInfo = {
+  endpointPath: string;
+  endpointMethod: string;
+  functionFile: string;
+};
+
+export type FunctionInfo = {
+  functionsFolder: string;
+  filename: string;
+  endpointPath: string;
+  endpointMethod: string;
+};
+
+export type FunctionOptions = {
+  allowExistingFile?: boolean;
+};

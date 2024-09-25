@@ -8,20 +8,13 @@ import { throwErrorWithMessage } from '../../errors/standardErrors';
 import { throwFileSystemError } from '../../errors/fileSystemErrors';
 import { i18n } from '../../utils/lang';
 
+import {
+  FunctionConfig,
+  FunctionConfigInfo,
+  FunctionInfo,
+  FunctionOptions,
+} from '../../types/Functions';
 const i18nKey = 'lib.cms.functions';
-
-type Config = {
-  runtime: string;
-  version: string;
-  environment: object;
-  secrets: Array<string>;
-  endpoints: {
-    [key: string]: {
-      method: string;
-      file: string;
-    };
-  };
-};
 
 function isObjectOrFunction(value: object): boolean {
   const type = typeof value;
@@ -38,17 +31,11 @@ function createEndpoint(
   };
 }
 
-type ConfigInfo = {
-  endpointPath: string;
-  endpointMethod: string;
-  functionFile: string;
-};
-
 function createConfig({
   endpointPath,
   endpointMethod,
   functionFile,
-}: ConfigInfo): Config {
+}: FunctionConfigInfo): FunctionConfig {
   return {
     runtime: 'nodejs18.x',
     version: '1.0',
@@ -60,14 +47,14 @@ function createConfig({
   };
 }
 
-function writeConfig(configFilePath: string, config: Config): void {
+function writeConfig(configFilePath: string, config: FunctionConfig): void {
   const configJson = JSON.stringify(config, null, '  ');
   fs.writeFileSync(configFilePath, configJson);
 }
 
 function updateExistingConfig(
   configFilePath: string,
-  { endpointPath, endpointMethod, functionFile }: ConfigInfo
+  { endpointPath, endpointMethod, functionFile }: FunctionConfigInfo
 ): void {
   let configString!: string;
   try {
@@ -84,9 +71,9 @@ function updateExistingConfig(
     });
   }
 
-  let config!: Config;
+  let config!: FunctionConfig;
   try {
-    config = JSON.parse(configString) as Config;
+    config = JSON.parse(configString) as FunctionConfig;
   } catch (err) {
     logger.debug(
       i18n(`${i18nKey}.updateExistingConfig.invalidJSON`, {
@@ -139,17 +126,6 @@ function updateExistingConfig(
     });
   }
 }
-
-type FunctionInfo = {
-  functionsFolder: string;
-  filename: string;
-  endpointPath: string;
-  endpointMethod: string;
-};
-
-type FunctionOptions = {
-  allowExistingFile?: boolean;
-};
 
 export async function createFunction(
   functionInfo: FunctionInfo,
