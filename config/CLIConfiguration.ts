@@ -489,7 +489,12 @@ class CLIConfiguration {
     }
 
     if (accountId) {
-      this.addOrUpdateAccount({ accountId, name: newName, env: this.getEnv() });
+      this.addOrUpdateAccount({
+        accountId,
+        name: newName,
+        env: this.getEnv(),
+        accountType: accountConfigToRename.accountType,
+      });
     }
 
     if (accountConfigToRename.name === this.getDefaultAccount()) {
