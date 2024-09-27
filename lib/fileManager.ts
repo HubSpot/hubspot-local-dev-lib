@@ -12,7 +12,7 @@ import {
 import { walk } from './fs';
 import { logger } from './logger';
 import { createIgnoreFilter } from './ignoreRules';
-import http from '../http';
+import { http } from '../http';
 import { escapeRegExp } from './escapeRegExp';
 import {
   getCwd,
@@ -20,16 +20,10 @@ import {
   convertToLocalFileSystemPath,
 } from './path';
 
-import { throwApiError } from '../errors/apiErrors';
-import {
-  isFatalError,
-  throwErrorWithMessage,
-  throwError,
-} from '../errors/standardErrors';
-import { throwFileSystemError } from '../errors/fileSystemErrors';
-import { GenericError } from '../types/Error';
 import { File, SimplifiedFolder } from '../types/FileManager';
 import { i18n } from '../utils/lang';
+import { isAuthError, isHubSpotHttpError } from '../errors';
+import { FileSystemError } from '../models/FileSystemError';
 
 const i18nKey = 'lib.fileManager';
 
@@ -59,13 +53,19 @@ export async function uploadFolder(
       await uploadFile(accountId, file, destPath);
       logger.log(i18n(`${i18nKey}.uploadSuccess`, { file, destPath }));
     } catch (err) {
-      if (isFatalError(err)) {
-        throwError(err);
+      if (isHubSpotHttpError(err)) {
+        err.updateContext({
+          filepath: file,
+          dest: destPath,
+        });
+        throw err;
       }
-      throwErrorWithMessage(`${i18nKey}.errors.uploadFailed`, {
-        file,
-        destPath,
-      });
+      throw new Error(
+        i18n(`${i18nKey}.errors.uploadFailed`, {
+          file,
+          destPath,
+        })
+      );
     }
   }
 }
@@ -116,7 +116,7 @@ async function fetchAllPagedFiles(
   let count = 0;
   let offset = 0;
   while (totalFiles === null || count < totalFiles) {
-    const response = await fetchFiles(
+    const { data: response } = await fetchFiles(
       accountId,
       folderId,
       offset,
@@ -144,11 +144,14 @@ async function fetchFolderContents(
   try {
     await fs.ensureDir(dest);
   } catch (err) {
-    throwFileSystemError(err, {
-      dest,
-      accountId,
-      write: true,
-    });
+    throw new FileSystemError(
+      { cause: err },
+      {
+        dest,
+        accountId,
+        operation: 'write',
+      }
+    );
   }
 
   const files = await fetchAllPagedFiles(accountId, folder.id, includeArchived);
@@ -163,7 +166,9 @@ async function fetchFolderContents(
     await downloadFile(accountId, file, dest, overwrite);
   }
 
-  const { objects: folders } = await fetchFolders(accountId, folder.id);
+  const {
+    data: { objects: folders },
+  } = await fetchFolders(accountId, folder.id);
   for (const folder of folders) {
     const nestedFolder = path.join(dest, folder.name);
     await fetchFolderContents(
@@ -228,10 +233,10 @@ async function downloadSingleFile(
   includeArchived?: boolean
 ) {
   if (!includeArchived && file.archived) {
-    throwErrorWithMessage(`${i18nKey}.errors.archivedFile`, { src });
+    throw new Error(i18n(`${i18nKey}.errors.archivedFile`, { src }));
   }
   if (file.hidden) {
-    throwErrorWithMessage(`${i18nKey}.errors.hiddenFile`, { src });
+    throw new Error(i18n(`${i18nKey}.errors.hiddenFile`, { src }));
   }
 
   logger.log(
@@ -271,7 +276,9 @@ export async function downloadFileOrFolder(
         includeArchived
       );
     } else {
-      const { file, folder } = await fetchStat(accountId, src);
+      const {
+        data: { file, folder },
+      } = await fetchStat(accountId, src);
       if (file) {
         await downloadSingleFile(
           accountId,
@@ -293,12 +300,12 @@ export async function downloadFileOrFolder(
       }
     }
   } catch (err) {
-    const error = err as GenericError;
-    if (error.isAxiosError) {
-      throwApiError(err, {
+    if (isAuthError(err)) {
+      err.updateContext({
         request: src,
         accountId,
       });
-    } else throwError(error);
+    }
+    throw err;
   }
 }

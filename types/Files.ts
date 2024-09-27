@@ -1,4 +1,3 @@
-import { AxiosError } from 'axios';
 import { ValueOf } from '../types/Utils';
 import {
   STAT_TYPES,
@@ -7,6 +6,7 @@ import {
 } from '../constants/files';
 import { MODE } from '../constants/files';
 import { HttpOptions } from './Http';
+import { AxiosError } from 'axios';
 
 export type StatType = ValueOf<typeof STAT_TYPES>;
 
@@ -41,7 +41,7 @@ type ResultType = ValueOf<typeof FILE_UPLOAD_RESULT_TYPES>;
 
 export type UploadFolderResults = {
   resultType: ResultType;
-  error: AxiosError | null;
+  error: unknown;
   file: string;
 };
 
@@ -74,14 +74,14 @@ export type CommandOptions = {
   onFirstErrorCallback?: (
     file: string,
     destPath: string,
-    error: AxiosError
+    error: unknown
   ) => void;
   onRetryCallback?: (file: string, destPath: string) => void;
   onFinalErrorCallback?: (
     accountId: number,
     file: string,
     destPath: string,
-    error: AxiosError
+    error: unknown
   ) => void;
 };
 

@@ -224,7 +224,7 @@ export function writeConfig(options: WriteConfigOptions = {}): void {
   } catch (err) {
     logFileSystemErrorInstance(err as BaseError, {
       filepath: configPath || '',
-      write: true,
+      operation: 'write',
     });
   }
 }
@@ -241,7 +241,10 @@ function readConfigFile(): { source?: string; error?: BaseError } {
   } catch (err) {
     error = err as BaseError;
     logger.error('Config file could not be read "%s"', _configPath);
-    logFileSystemErrorInstance(error, { filepath: _configPath, read: true });
+    logFileSystemErrorInstance(error, {
+      filepath: _configPath,
+      operation: 'read',
+    });
   }
   return { source: source && source.toString(), error };
 }

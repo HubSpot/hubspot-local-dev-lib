@@ -17,6 +17,7 @@ import hubdbFetchRowsResponseWithPaging from './fixtures/hubdb/fetchRowsResponse
 import hubdbTableResponse from './fixtures/hubdb/tableResponse.json';
 import hubdbCreateRowsResponse from './fixtures/hubdb/createRowsResponse.json';
 import { Table } from '../../types/Hubdb';
+import { mockAxiosResponse } from './__utils__/mockAxiosResponse';
 
 jest.mock('fs-extra');
 jest.mock('../path');
@@ -41,8 +42,8 @@ describe('lib/hubdb', () => {
 
     beforeEach(() => {
       getCwd.mockReturnValue(projectCwd);
-      fetchRows.mockResolvedValue(hubdbFetchRowResponse);
-      fetchTable.mockResolvedValue(hubdbTableResponse);
+      fetchRows.mockResolvedValue(mockAxiosResponse(hubdbFetchRowResponse));
+      fetchTable.mockResolvedValue(mockAxiosResponse(hubdbTableResponse));
     });
 
     it('fetches all results', async () => {
@@ -67,7 +68,9 @@ describe('lib/hubdb', () => {
     });
 
     it('fetches all results with paging', async () => {
-      fetchRows.mockResolvedValueOnce(hubdbFetchRowsResponseWithPaging);
+      fetchRows.mockResolvedValueOnce(
+        mockAxiosResponse(hubdbFetchRowsResponseWithPaging)
+      );
       await downloadHubDbTable(accountId, tableId, destPath);
       const outputFile = JSON.parse(
         mockedFS.outputFile.mock.calls[0][1] as string
@@ -92,9 +95,9 @@ describe('lib/hubdb', () => {
       mockedFS.statSync.mockReturnValue({ isFile: () => true } as fs.Stats);
       mockedFS.readJsonSync.mockReturnValue(hubdbTableResponse);
 
-      createTable.mockResolvedValue(hubdbTableResponse);
-      createRows.mockResolvedValue(hubdbCreateRowsResponse);
-      publishTable.mockResolvedValue(hubdbTableResponse);
+      createTable.mockResolvedValue(mockAxiosResponse(hubdbTableResponse));
+      createRows.mockResolvedValue(mockAxiosResponse(hubdbCreateRowsResponse));
+      publishTable.mockResolvedValue(mockAxiosResponse(hubdbTableResponse));
 
       const table = await createHubDbTable(
         accountId,
@@ -109,7 +112,7 @@ describe('lib/hubdb', () => {
 
   describe('clearHubDbTableRows()', () => {
     it('clears all of the hubdb table rows', async () => {
-      fetchRows.mockResolvedValue(hubdbFetchRowResponse);
+      fetchRows.mockResolvedValue(mockAxiosResponse(hubdbFetchRowResponse));
       const result = await clearHubDbTableRows(123, '456');
 
       expect(result.deletedRowCount).toBe(3);

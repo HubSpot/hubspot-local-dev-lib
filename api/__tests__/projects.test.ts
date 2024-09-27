@@ -1,7 +1,7 @@
 jest.mock('../../http');
 jest.mock('fs');
 import { createReadStream } from 'fs';
-import http from '../../http';
+import { http } from '../../http';
 import {
   cancelStagedBuild,
   checkCloneStatus,

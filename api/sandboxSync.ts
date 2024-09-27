@@ -1,20 +1,20 @@
-import http from '../http';
+import { AxiosPromise } from 'axios';
+import { http } from '../http';
 import {
   InitiateSyncResponse,
   FetchTypesResponse,
   TaskRequestData,
-  SyncTaskStatusType,
 } from '../types/Sandbox';
 import { SANDBOX_TIMEOUT } from '../constants/api';
 const SANDBOXES_SYNC_API_PATH = 'sandboxes-sync/v1';
 
-export async function initiateSync(
+export function initiateSync(
   fromHubId: number,
   toHubId: number,
   tasks: Array<TaskRequestData>,
   sandboxHubId: number
-): Promise<InitiateSyncResponse> {
-  return http.post(fromHubId, {
+): AxiosPromise<InitiateSyncResponse> {
+  return http.post<InitiateSyncResponse>(fromHubId, {
     data: {
       command: 'SYNC',
       fromHubId,
@@ -27,20 +27,11 @@ export async function initiateSync(
   });
 }
 
-export async function fetchTaskStatus(
-  accountId: number,
-  taskId: number
-): Promise<SyncTaskStatusType> {
-  return http.get(accountId, {
-    url: `${SANDBOXES_SYNC_API_PATH}/tasks/${taskId}/status`,
-  });
-}
-
 export async function fetchTypes(
   accountId: number,
   toHubId: number
-): Promise<FetchTypesResponse> {
-  return http.get(accountId, {
+): AxiosPromise<FetchTypesResponse> {
+  return http.get<FetchTypesResponse>(accountId, {
     url: `${SANDBOXES_SYNC_API_PATH}/types${
       toHubId ? `?toHubId=${toHubId}` : ''
     }`,

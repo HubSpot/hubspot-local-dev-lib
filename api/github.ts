@@ -1,4 +1,4 @@
-import axios, { AxiosResponse } from 'axios';
+import axios, { AxiosPromise } from 'axios';
 import { getDefaultUserAgentHeader } from '../http/getAxiosConfig';
 import { GithubReleaseData, GithubRepoFile, RepoPath } from '../types/Github';
 
@@ -17,10 +17,10 @@ const GITHUB_AUTH_HEADERS = {
 
 // Returns information about the repo's releases. Defaults to "latest" if no tag is provided
 // https://docs.github.com/en/rest/releases/releases?apiVersion=2022-11-28#get-a-release-by-tag-name
-export async function fetchRepoReleaseData(
+export function fetchRepoReleaseData(
   repoPath: RepoPath,
   tag = ''
-): Promise<AxiosResponse<GithubReleaseData>> {
+): AxiosPromise<GithubReleaseData> {
   const URL = `${GITHUB_REPOS_API}/${repoPath}/releases`;
 
   return axios.get<GithubReleaseData>(
@@ -33,9 +33,7 @@ export async function fetchRepoReleaseData(
 
 // Returns the entire repo content as a zip, using the zipball_url from fetchRepoReleaseData()
 // https://docs.github.com/en/rest/repos/contents?apiVersion=2022-11-28#download-a-repository-archive-zip
-export async function fetchRepoAsZip(
-  zipUrl: string
-): Promise<AxiosResponse<Buffer>> {
+export function fetchRepoAsZip(zipUrl: string): AxiosPromise<Buffer> {
   return axios.get<Buffer>(zipUrl, {
     responseType: 'arraybuffer',
     headers: { ...getDefaultUserAgentHeader(), ...GITHUB_AUTH_HEADERS },
@@ -43,11 +41,11 @@ export async function fetchRepoAsZip(
 }
 
 // Returns the raw file contents via the raw.githubusercontent endpoint
-export async function fetchRepoFile(
+export function fetchRepoFile(
   repoPath: RepoPath,
   filePath: string,
   ref: string
-): Promise<AxiosResponse<Buffer>> {
+): AxiosPromise<Buffer> {
   return axios.get<Buffer>(
     `${GITHUB_RAW_CONTENT_API_PATH}/${repoPath}/${ref}/${filePath}`,
     {
@@ -57,9 +55,9 @@ export async function fetchRepoFile(
 }
 
 // Returns the raw file contents via the raw.githubusercontent endpoint
-export async function fetchRepoFileByDownloadUrl(
+export function fetchRepoFileByDownloadUrl(
   downloadUrl: string
-): Promise<AxiosResponse<Buffer>> {
+): AxiosPromise<Buffer> {
   return axios.get<Buffer>(downloadUrl, {
     headers: { ...getDefaultUserAgentHeader(), ...GITHUB_AUTH_HEADERS },
     responseType: 'arraybuffer',
@@ -68,11 +66,11 @@ export async function fetchRepoFileByDownloadUrl(
 
 // Returns the contents of a file or directory in a repository by path
 // https://docs.github.com/en/rest/repos/contents?apiVersion=2022-11-28#get-repository-content
-export async function fetchRepoContents(
+export function fetchRepoContents(
   repoPath: RepoPath,
   path: string,
   ref?: string
-): Promise<AxiosResponse<Array<GithubRepoFile>>> {
+): AxiosPromise<Array<GithubRepoFile>> {
   const refQuery = ref ? `?ref=${ref}` : '';
 
   return axios.get<Array<GithubRepoFile>>(

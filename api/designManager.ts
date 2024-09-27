@@ -1,4 +1,5 @@
-import http from '../http';
+import { AxiosPromise } from 'axios';
+import { http } from '../http';
 import { QueryParams } from '../types/Http';
 import {
   FetchThemesResponse,
@@ -7,19 +8,19 @@ import {
 
 const DESIGN_MANAGER_API_PATH = 'designmanager/v1';
 
-export async function fetchThemes(
+export function fetchThemes(
   accountId: number,
   params: QueryParams = {}
-): Promise<FetchThemesResponse> {
+): AxiosPromise<FetchThemesResponse> {
   return http.get<FetchThemesResponse>(accountId, {
     url: `${DESIGN_MANAGER_API_PATH}/themes/combined`,
     params,
   });
 }
 
-export async function fetchBuiltinMapping(
+export function fetchBuiltinMapping(
   accountId: number
-): Promise<FetchBuiltinMappingResponse> {
+): AxiosPromise<FetchBuiltinMappingResponse> {
   return http.get<FetchBuiltinMappingResponse>(accountId, {
     url: `${DESIGN_MANAGER_API_PATH}/widgets/builtin-mapping`,
   });
