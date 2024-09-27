@@ -239,7 +239,7 @@ export function getDefaultAccount(): string | number | null | undefined {
   return config_DEPRECATED.getConfigDefaultAccount();
 }
 
-export function getConfigAccounts():
+export function getAccounts():
   | Array<CLIAccount_NEW>
   | Array<CLIAccount_DEPRECATED>
   | null
