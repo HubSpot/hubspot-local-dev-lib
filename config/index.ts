@@ -232,7 +232,7 @@ export function getAccountType(
   return config_DEPRECATED.getAccountType(accountType, sandboxAccountType);
 }
 
-export function getConfigDefaultAccount(): string | number | null | undefined {
+export function getDefaultAccount(): string | number | null | undefined {
   if (CLIConfiguration.isActive()) {
     return CLIConfiguration.getDefaultAccount();
   }
