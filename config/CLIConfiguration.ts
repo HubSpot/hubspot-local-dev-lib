@@ -248,7 +248,7 @@ class CLIConfiguration {
     return this.getAccount(nameOrId);
   }
 
-  getConfigAccountIndex(accountId: number): number {
+  getAccountIndex(accountId: number): number {
     return this.config
       ? this.config.accounts.findIndex(
           account => account.accountId === accountId
@@ -426,7 +426,7 @@ class CLIConfiguration {
           accountId,
         })
       );
-      const index = this.getConfigAccountIndex(accountId);
+      const index = this.getAccountIndex(accountId);
       if (index < 0) {
         this.config.accounts.push(completedAccountConfig);
       } else {
@@ -526,7 +526,7 @@ class CLIConfiguration {
       logger.debug(
         i18n(`${i18nKey}.removeAccountFromConfig.deleting`, { accountId })
       );
-      const index = this.getConfigAccountIndex(accountId);
+      const index = this.getAccountIndex(accountId);
       this.config.accounts.splice(index, 1);
 
       if (this.getDefaultAccount() === accountConfig.name) {
