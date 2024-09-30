@@ -14,7 +14,7 @@ import {
   CLIAccount_DEPRECATED,
   FlatAccountFields,
 } from '../types/Accounts';
-import { getAccountIdentifier } from '../utils/getAccountIdentifier';
+import { getAccountIdentifier } from './getAccountIdentifier';
 import { Mode } from '../types/Files';
 
 // Use new config if it exists

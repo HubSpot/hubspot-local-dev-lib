@@ -15,11 +15,8 @@ import {
   createEmptyConfigFile,
   configFileExists,
 } from '../index';
-import {
-  getAccountIdentifier,
-  getAccounts,
-  getDefaultAccount,
-} from '../../utils/getAccountIdentifier';
+import { getAccountIdentifier } from '../getAccountIdentifier';
+import { getAccounts, getDefaultAccount } from '../../utils/accounts';
 import { ENVIRONMENTS } from '../../constants/environments';
 import { HUBSPOT_ACCOUNT_TYPES } from '../../constants/config';
 import { CLIConfig, CLIConfig_DEPRECATED } from '../../types/Config';
