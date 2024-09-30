@@ -54,6 +54,7 @@
     "./http": "./http/index.js",
     "./http/*": "./http/*.js",
     "./config": "./config/index.js",
+    "./configUtils": "./config/configUtils.js",
     "./constants/*": "./constants/*.js",
     "./models/*": "./models/*.js",
     "./types/*": "./types/*.d.ts",
