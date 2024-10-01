@@ -49,12 +49,6 @@ type MutationError = {
   };
 };
 
-export type SyncTaskStatusType = {
-  status: string;
-  result?: string;
-  tasks: Pick<CompositeSyncTask, 'type' | 'status'>[];
-};
-
 type SyncMutationData = {
   numRequests: number;
   numSuccesses: number;

@@ -12,7 +12,6 @@ import {
 } from './path';
 import { logger } from './logger';
 import { fetchFileStream, download, downloadDefault } from '../api/fileMapper';
-import { throwError, throwErrorWithMessage } from '../errors/standardErrors';
 import {
   MODULE_EXTENSION,
   FUNCTIONS_EXTENSION,
@@ -27,9 +26,9 @@ import {
   PathTypeData,
   RecursiveFileMapperCallback,
 } from '../types/Files';
-import { throwFileSystemError } from '../errors/fileSystemErrors';
-import { isTimeoutError } from '../errors/apiErrors';
+import { isTimeoutError } from '../errors';
 import { i18n } from '../utils/lang';
+import { FileSystemError } from '../models/FileSystemError';
 
 const i18nKey = 'lib.fileMapper';
 
@@ -99,9 +98,11 @@ function validateFileMapperNode(node: FileMapperNode): void {
   } catch (err) {
     json = node;
   }
-  throwErrorWithMessage(`${i18nKey}.errors.invalidNode`, {
-    json: JSON.stringify(json),
-  });
+  throw new Error(
+    i18n(`${i18nKey}.errors.invalidNode`, {
+      json: JSON.stringify(json),
+    })
+  );
 }
 
 export function getTypeDataFromPath(src: string): PathTypeData {
@@ -154,11 +155,14 @@ export async function writeUtimes(
     const mtime = node.updatedAt ? new Date(node.updatedAt) : now;
     await fs.utimes(filepath, atime, mtime);
   } catch (err) {
-    throwFileSystemError(err, {
-      filepath,
-      accountId,
-      write: true,
-    });
+    throw new FileSystemError(
+      { cause: err },
+      {
+        filepath,
+        accountId,
+        operation: 'write',
+      }
+    );
   }
 }
 
@@ -190,19 +194,14 @@ async function fetchAndWriteFileStream(
     return;
   }
   if (!isAllowedExtension(srcPath, Array.from(JSR_ALLOWED_EXTENSIONS))) {
-    throwErrorWithMessage(`${i18nKey}.errors.invalidFileType`, { srcPath });
+    throw new Error(i18n(`${i18nKey}.errors.invalidFileType`, { srcPath }));
   }
-  let node: FileMapperNode;
-  try {
-    node = await fetchFileStream(
-      accountId,
-      srcPath,
-      filepath,
-      getFileMapperQueryValues(mode, options)
-    );
-  } catch (err) {
-    throwError(err);
-  }
+  const node = await fetchFileStream(
+    accountId,
+    srcPath,
+    filepath,
+    getFileMapperQueryValues(mode, options)
+  );
   await writeUtimes(accountId, filepath, node);
 }
 
@@ -246,12 +245,14 @@ async function writeFileMapperNode(
       })
     );
   } catch (err) {
-    throwFileSystemError(err, {
-      filepath: localFilepath,
-      accountId,
-      write: true,
-    });
-    return false;
+    throw new FileSystemError(
+      { cause: err },
+      {
+        filepath: localFilepath,
+        accountId,
+        operation: 'write',
+      }
+    );
   }
   return true;
 }
@@ -264,10 +265,12 @@ async function downloadFile(
   options: FileMapperInputOptions = {}
 ): Promise<void> {
   const { isFile, isHubspot } = getTypeDataFromPath(src);
+
+  if (!isFile) {
+    throw new Error(i18n(`${i18nKey}.errors.invalidRequest`, { src }));
+  }
+
   try {
-    if (!isFile) {
-      throwErrorWithMessage(`${i18nKey}.errors.invalidRequest`, { src });
-    }
     const dest = path.resolve(destPath);
     const cwd = getCwd();
     let filepath: string;
@@ -297,12 +300,11 @@ async function downloadFile(
   } catch (err) {
     const error = err as AxiosError;
     if (isHubspot && isTimeoutError(error)) {
-      throwErrorWithMessage(`${i18nKey}.errors.assetTimeout`, {}, error);
+      throw new Error(i18n(`${i18nKey}.errors.assetTimeout`), { cause: error });
     } else {
-      throwErrorWithMessage(
-        `${i18nKey}.errors.failedToFetchFile`,
-        { src, dest: destPath },
-        error
+      throw new Error(
+        i18n(`${i18nKey}.errors.failedToFetchFile`, { src, dest: destPath }),
+        { cause: error }
       );
     }
   }
@@ -316,13 +318,15 @@ export async function fetchFolderFromApi(
 ): Promise<FileMapperNode> {
   const { isRoot, isFolder, isHubspot } = getTypeDataFromPath(src);
   if (!isFolder) {
-    throwErrorWithMessage(`${i18nKey}.errors.invalidFetchFolderRequest`, {
-      src,
-    });
+    throw new Error(
+      i18n(`${i18nKey}.errors.invalidFetchFolderRequest`, {
+        src,
+      })
+    );
   }
   const srcPath = isRoot ? '@root' : src;
   const queryValues = getFileMapperQueryValues(mode, options);
-  const node = isHubspot
+  const { data: node } = isHubspot
     ? await downloadDefault(accountId, srcPath, queryValues)
     : await download(accountId, srcPath, queryValues);
   logger.log(i18n(`${i18nKey}.folderFetch`, { src, accountId }));
@@ -383,17 +387,17 @@ async function downloadFolder(
         })
       );
     } else {
-      throwErrorWithMessage(`${i18nKey}.errors.incompleteFetch`, { src });
+      // TODO: Fix this exception. It is triggering the catch block so this error is being rewritten
+      throw new Error(i18n(`${i18nKey}.errors.incompleteFetch`, { src }));
     }
   } catch (err) {
     const error = err as AxiosError;
     if (isTimeoutError(error)) {
-      throwErrorWithMessage(`${i18nKey}.errors.assetTimeout`, {}, error);
+      throw new Error(i18n(`${i18nKey}.errors.assetTimeout`), { cause: error });
     } else {
-      throwErrorWithMessage(
-        `${i18nKey}.errors.failedToFetchFolder`,
-        { src, dest: destPath },
-        err
+      throw new Error(
+        i18n(`${i18nKey}.errors.failedToFetchFolder`, { src, dest: destPath }),
+        { cause: err }
       );
     }
   }

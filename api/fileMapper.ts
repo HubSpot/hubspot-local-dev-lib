@@ -1,8 +1,8 @@
 import fs from 'fs';
 import path from 'path';
 import contentDisposition from 'content-disposition';
-import { AxiosResponse } from 'axios';
-import http from '../http';
+import { AxiosResponse, AxiosPromise } from 'axios';
+import { http } from '../http';
 import { getCwd } from '../lib/path';
 import { FileMapperNode, FileMapperOptions, FileTree } from '../types/Files';
 
@@ -41,12 +41,12 @@ export function createFileMapperNodeFromStreamResponse(
   };
 }
 
-export async function upload(
+export function upload(
   accountId: number,
   src: string,
   dest: string,
   options: FileMapperOptions = {}
-): Promise<void> {
+): AxiosPromise<void> {
   return http.post<void>(accountId, {
     url: `${FILE_MAPPER_API_PATH}/upload/${encodeURIComponent(dest)}`,
     data: {
@@ -58,11 +58,11 @@ export async function upload(
 }
 
 // Fetch a module by moduleId
-export async function fetchModule(
+export function fetchModule(
   accountId: number,
   moduleId: number,
   options: FileMapperOptions = {}
-): Promise<FileTree> {
+): AxiosPromise<FileTree> {
   return http.get<FileTree>(accountId, {
     url: `${FILE_MAPPER_API_PATH}/modules/${moduleId}`,
     ...options,
@@ -88,11 +88,11 @@ export async function fetchFileStream(
 }
 
 // Fetch a folder or file node by path.
-export async function download(
+export function download(
   accountId: number,
   filepath: string,
   options: FileMapperOptions = {}
-): Promise<FileMapperNode> {
+): AxiosPromise<FileMapperNode> {
   return http.get<FileMapperNode>(accountId, {
     url: `${FILE_MAPPER_API_PATH}/download/${encodeURIComponent(filepath)}`,
     ...options,
@@ -100,11 +100,11 @@ export async function download(
 }
 
 // Fetch a folder or file node by path.
-export async function downloadDefault(
+export function downloadDefault(
   accountId: number,
   filepath: string,
   options: FileMapperOptions = {}
-): Promise<FileMapperNode> {
+): AxiosPromise<FileMapperNode> {
   return http.get<FileMapperNode>(accountId, {
     url: `${FILE_MAPPER_API_PATH}/download-default/${filepath}`,
     ...options,
@@ -112,21 +112,21 @@ export async function downloadDefault(
 }
 
 // Delete a file or folder by path
-export async function deleteFile(
+export function deleteFile(
   accountId: number,
   filePath: string
-): Promise<void> {
+): AxiosPromise<void> {
   return http.delete(accountId, {
     url: `${FILE_MAPPER_API_PATH}/delete/${encodeURIComponent(filePath)}`,
   });
 }
 
 // Moves file from srcPath to destPath
-export async function moveFile(
+export function moveFile(
   accountId: number,
   srcPath: string,
   destPath: string
-): Promise<void> {
+): AxiosPromise<void> {
   return http.put(accountId, {
     url: `${FILE_MAPPER_API_PATH}/rename/${srcPath}?path=${destPath}`,
     headers: { 'Content-Type': 'application/json' },
@@ -134,10 +134,10 @@ export async function moveFile(
 }
 
 // Get directory contents
-export async function getDirectoryContentsByPath(
+export function getDirectoryContentsByPath(
   accountId: number,
   path: string
-): Promise<FileMapperNode> {
+): AxiosPromise<FileMapperNode> {
   return http.get(accountId, {
     url: `${FILE_MAPPER_API_PATH}/meta/${path}`,
   });
