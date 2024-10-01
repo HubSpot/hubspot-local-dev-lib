@@ -57,8 +57,7 @@
     "./config": "./config/index.js",
     "./constants/*": "./constants/*.js",
     "./models/*": "./models/*.js",
-    "./types/*": "./types/*.d.ts",
-    "./utils/*": "./utils/*.js"
+    "./types/*": "./types/*.d.ts"
   },
   "dependencies": {
     "address": "^2.0.1",
