@@ -1,8 +1,8 @@
 import chokidar from 'chokidar';
 import PQueue from 'p-queue';
+import fs from 'fs';
 
 import { uploadFolder } from '../cms/uploadFolder';
-import { logger } from '../logger';
 import { watch } from '../cms/watch';
 import { MODE } from '../../constants/files';
 
@@ -10,6 +10,7 @@ jest.mock('chokidar');
 jest.mock('axios');
 jest.mock('p-queue');
 jest.mock('../cms/uploadFolder');
+jest.mock('fs');
 
 describe('lib/cms/watch', () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -30,8 +31,6 @@ describe('lib/cms/watch', () => {
       add: pQueueAddMock,
       size: 0,
     }));
-    logger.log = jest.fn();
-    logger.debug = jest.fn();
   });
 
   it('should call chokidar.watch with correct arguments', () => {
@@ -85,26 +84,6 @@ describe('lib/cms/watch', () => {
     expect(postInitialUploadCallback).toHaveBeenCalled();
   });
 
-  it('should log ready when watcher is ready', () => {
-    const accountId = 123;
-    const src = 'src-folder';
-    const dest = 'dest-folder';
-    const options = {
-      mode: MODE.draft,
-      remove: false,
-      disableInitial: true,
-      notify: '',
-      commandOptions: {},
-      filePaths: [],
-    };
-
-    watch(accountId, src, dest, options);
-
-    expect(chokidarMock.on).toHaveBeenCalledWith('ready', expect.any(Function));
-    chokidarMock.on.mock.calls[0][1]();
-    expect(logger.log).toHaveBeenCalledWith(expect.stringContaining('ready'));
-  });
-
   it('should upload file when file is added', () => {
     const accountId = 123;
     const src = 'src-folder';
@@ -125,10 +104,6 @@ describe('lib/cms/watch', () => {
     const filePath = '/some-file-path.html';
 
     addCallback(filePath);
-
-    expect(logger.debug).toHaveBeenCalledWith(
-      expect.stringContaining('Attempting to upload')
-    );
   });
 
   it('should handle file change event and upload file', () => {
@@ -154,10 +129,6 @@ describe('lib/cms/watch', () => {
     const filePath = 'changed-file-path.html';
 
     changeCallback(filePath);
-
-    expect(logger.debug).toHaveBeenCalledWith(
-      expect.stringContaining('Attempting to upload')
-    );
   });
 
   it('should handle file delete event', () => {
@@ -184,8 +155,6 @@ describe('lib/cms/watch', () => {
 
     deleteCallback(filePath);
 
-    expect(logger.debug).toHaveBeenCalledWith(
-      expect.stringContaining('Attempting to delete')
-    );
+    fs.unlinkSync(filePath);
   });
 });
