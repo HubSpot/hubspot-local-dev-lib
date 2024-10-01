@@ -49,64 +49,62 @@ const mockValidation: Validation = {
   html: '',
 };
 
-describe('lint function', () => {
-  const accountId = 123;
-  const filePath = 'test.html';
+describe('lib/cms/validate', () => {
+  describe('lint function', () => {
+    const accountId = 123;
+    const filePath = 'test.html';
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
+    it('should return an empty array if directory has no files', async () => {
+      mockedFsStat.mockResolvedValue(mockFsStats);
+      mockedWalk.mockResolvedValue([]);
 
-  it('should return an empty array if directory has no files', async () => {
-    mockedFsStat.mockResolvedValue(mockFsStats);
-    mockedWalk.mockResolvedValue([]);
+      const result = await lint(accountId, filePath);
+      expect(result).toEqual([]);
+    });
 
-    const result = await lint(accountId, filePath);
-    expect(result).toEqual([]);
-  });
+    it('should return the correct object if a file has no content', async () => {
+      mockedFsStat.mockResolvedValue({ isDirectory: () => false });
+      mockedFsReadFile.mockResolvedValue('  ');
 
-  it('should return the correct object if a file has no content', async () => {
-    mockedFsStat.mockResolvedValue({ isDirectory: () => false });
-    mockedFsReadFile.mockResolvedValue('  ');
+      const result = await lint(accountId, filePath);
+      expect(result).toEqual([{ file: filePath, validation: null }]);
+    });
 
-    const result = await lint(accountId, filePath);
-    expect(result).toEqual([{ file: filePath, validation: null }]);
-  });
+    it('should call validateHubl with the correct parameters', async () => {
+      const mockSource = 'valid HUBL content';
+      mockedFsStat.mockResolvedValue({ isDirectory: () => false });
+      mockedFsReadFile.mockResolvedValue(mockSource);
+      mockedValidateHubl.mockResolvedValue(mockValidation);
+      const result = await lint(accountId, filePath);
+      expect(validateHubl).toHaveBeenCalledWith(accountId, mockSource);
+      expect(result).toEqual([{ file: filePath, validation: mockValidation }]);
+    });
 
-  it('should call validateHubl with the correct parameters', async () => {
-    const mockSource = 'valid HUBL content';
-    mockedFsStat.mockResolvedValue({ isDirectory: () => false });
-    mockedFsReadFile.mockResolvedValue(mockSource);
-    mockedValidateHubl.mockResolvedValue(mockValidation);
-    const result = await lint(accountId, filePath);
-    expect(validateHubl).toHaveBeenCalledWith(accountId, mockSource);
-    expect(result).toEqual([{ file: filePath, validation: mockValidation }]);
-  });
+    it('should filter out files with invalid extensions', async () => {
+      const invalidFile = 'test.txt';
+      mockedFsStat.mockResolvedValue({ isDirectory: () => true });
+      mockedWalk.mockResolvedValue([invalidFile, filePath]);
+      mockedFsReadFile.mockResolvedValue('valid HUBL content');
+      mockedValidateHubl.mockResolvedValue(mockValidation);
 
-  it('should filter out files with invalid extensions', async () => {
-    const invalidFile = 'test.txt';
-    mockedFsStat.mockResolvedValue({ isDirectory: () => true });
-    mockedWalk.mockResolvedValue([invalidFile, filePath]);
-    mockedFsReadFile.mockResolvedValue('valid HUBL content');
-    mockedValidateHubl.mockResolvedValue(mockValidation);
+      const result = await lint(accountId, filePath);
 
-    const result = await lint(accountId, filePath);
+      expect(result).toHaveLength(1);
+      expect((result as Partial<LintResult>[])[0].file).toBe(filePath);
+    });
 
-    expect(result).toHaveLength(1);
-    expect((result as Partial<LintResult>[])[0].file).toBe(filePath);
-  });
+    it('should execute callback if provided', async () => {
+      const mockCallback = jest.fn();
+      const mockSource = 'valid HUBL content';
+      mockedFsStat.mockResolvedValue({ isDirectory: () => false });
+      mockedFsReadFile.mockResolvedValue(mockSource);
+      mockedValidateHubl.mockResolvedValue(mockValidation);
 
-  it('should execute callback if provided', async () => {
-    const mockCallback = jest.fn();
-    const mockSource = 'valid HUBL content';
-    mockedFsStat.mockResolvedValue({ isDirectory: () => false });
-    mockedFsReadFile.mockResolvedValue(mockSource);
-    mockedValidateHubl.mockResolvedValue(mockValidation);
-
-    await lint(accountId, filePath, mockCallback);
-    expect(mockCallback).toHaveBeenCalledWith({
-      file: filePath,
-      validation: mockValidation,
+      await lint(accountId, filePath, mockCallback);
+      expect(mockCallback).toHaveBeenCalledWith({
+        file: filePath,
+        validation: mockValidation,
+      });
     });
   });
 });

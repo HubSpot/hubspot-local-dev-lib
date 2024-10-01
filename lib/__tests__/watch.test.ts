@@ -11,7 +11,7 @@ jest.mock('axios');
 jest.mock('p-queue');
 jest.mock('../cms/uploadFolder');
 
-describe('watch function', () => {
+describe('lib/cms/watch', () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let chokidarMock: any;
   let pQueueAddMock: jest.Mock;

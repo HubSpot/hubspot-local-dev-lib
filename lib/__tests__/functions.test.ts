@@ -2,7 +2,6 @@ import fs, { PathLike } from 'fs-extra';
 import findup from 'findup-sync';
 import { getCwd } from '../path';
 import { downloadGithubRepoContents } from '../github';
-import { logger } from '../logger';
 import {
   createFunction,
   isObjectOrFunction,
@@ -24,11 +23,7 @@ const mockedFsReadFileSync = fs.readFileSync as jest.MockedFunction<
   typeof fs.readFileSync
 >;
 
-describe('functions', () => {
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
+describe('lib/cms/functions', () => {
   describe('createFunction', () => {
     const mockFunctionInfo = {
       functionsFolder: 'testFolder',
@@ -80,14 +75,6 @@ describe('functions', () => {
         '/mock/dest/testFolder.functions/serverless.json',
         expect.any(String)
       );
-
-      // Verify that the logger was called with the correct messages
-      jest.spyOn(logger, 'log').mockImplementation(() => {
-        'The /mock/dest/testFolder.functions path already exists';
-      });
-      jest.spyOn(logger, 'log').mockImplementation(() => {
-        'Created /mock/dest/testFolder.functions/testFunction.js';
-      });
     });
   });
 
