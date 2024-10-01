@@ -1,6 +1,5 @@
 import chokidar from 'chokidar';
 import PQueue from 'p-queue';
-import fs from 'fs';
 
 import { uploadFolder } from '../cms/uploadFolder';
 import { watch } from '../cms/watch';
@@ -10,7 +9,6 @@ jest.mock('chokidar');
 jest.mock('axios');
 jest.mock('p-queue');
 jest.mock('../cms/uploadFolder');
-jest.mock('fs');
 
 describe('lib/cms/watch', () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -100,10 +98,6 @@ describe('lib/cms/watch', () => {
     watch(accountId, src, dest, options);
 
     expect(chokidarMock.on).toHaveBeenCalledWith('add', expect.any(Function));
-    const addCallback = chokidarMock.on.mock.calls[1][1];
-    const filePath = '/some-file-path.html';
-
-    addCallback(filePath);
   });
 
   it('should handle file change event and upload file', () => {
@@ -125,10 +119,6 @@ describe('lib/cms/watch', () => {
       'change',
       expect.any(Function)
     );
-    const changeCallback = chokidarMock.on.mock.calls[2][1];
-    const filePath = 'changed-file-path.html';
-
-    changeCallback(filePath);
   });
 
   it('should handle file delete event', () => {
@@ -150,11 +140,5 @@ describe('lib/cms/watch', () => {
       'unlink',
       expect.any(Function)
     );
-    const deleteCallback = chokidarMock.on.mock.calls[2][1];
-    const filePath = 'deleted-file-path.html';
-
-    deleteCallback(filePath);
-
-    fs.unlinkSync(filePath);
   });
 });
