@@ -3,6 +3,7 @@ import { validateHubl } from '../../api/validateHubl';
 import { walk } from '../fs';
 import { lint } from '../cms/validate';
 import { LintResult, Validation } from '../../types/HublValidation';
+import { AxiosPromise } from 'axios';
 
 jest.mock('fs-extra');
 jest.mock('../../api/validateHubl');
@@ -73,7 +74,9 @@ describe('lib/cms/validate', () => {
     const mockSource = 'valid HUBL content';
     mockedFsStat.mockResolvedValue({ isDirectory: () => false });
     mockedFsReadFile.mockResolvedValue(mockSource);
-    mockedValidateHubl.mockResolvedValue(mockValidation);
+    mockedValidateHubl.mockResolvedValue({
+      data: mockValidation,
+    } as unknown as AxiosPromise<Validation>);
     const result = await lint(accountId, filePath);
     expect(validateHubl).toHaveBeenCalledWith(accountId, mockSource);
     expect(result).toEqual([{ file: filePath, validation: mockValidation }]);
@@ -84,7 +87,9 @@ describe('lib/cms/validate', () => {
     mockedFsStat.mockResolvedValue({ isDirectory: () => true });
     mockedWalk.mockResolvedValue([invalidFile, filePath]);
     mockedFsReadFile.mockResolvedValue('valid HUBL content');
-    mockedValidateHubl.mockResolvedValue(mockValidation);
+    mockedValidateHubl.mockResolvedValue({
+      data: mockValidation,
+    } as unknown as AxiosPromise<Validation>);
 
     const result = await lint(accountId, filePath);
 
@@ -97,7 +102,9 @@ describe('lib/cms/validate', () => {
     const mockSource = 'valid HUBL content';
     mockedFsStat.mockResolvedValue({ isDirectory: () => false });
     mockedFsReadFile.mockResolvedValue(mockSource);
-    mockedValidateHubl.mockResolvedValue(mockValidation);
+    mockedValidateHubl.mockResolvedValue({
+      data: mockValidation,
+    } as unknown as AxiosPromise<Validation>);
 
     await lint(accountId, filePath, mockCallback);
     expect(mockCallback).toHaveBeenCalledWith({
