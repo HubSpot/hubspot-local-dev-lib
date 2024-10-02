@@ -291,7 +291,7 @@ class CLIConfiguration {
 
   // Deprecating sandboxAccountType in favor of accountType
   getAccountType(
-    accountType?: AccountType,
+    accountType?: AccountType | null,
     sandboxAccountType?: string | null
   ): AccountType {
     if (accountType) {
@@ -383,6 +383,8 @@ class CLIConfiguration {
     );
     const updatedDefaultMode: ValueOf<typeof MODE> | undefined =
       defaultMode && (defaultMode.toLowerCase() as ValueOf<typeof MODE>);
+    const updatedAccountType =
+      accountType || (currentAccountConfig && currentAccountConfig.accountType);
 
     safelyApplyUpdates('name', name);
     safelyApplyUpdates('env', updatedEnv);
@@ -402,7 +404,7 @@ class CLIConfiguration {
     safelyApplyUpdates('sandboxAccountType', sandboxAccountType);
     safelyApplyUpdates(
       'accountType',
-      this.getAccountType(accountType, sandboxAccountType)
+      this.getAccountType(updatedAccountType, sandboxAccountType)
     );
 
     safelyApplyUpdates('parentAccountId', parentAccountId);
