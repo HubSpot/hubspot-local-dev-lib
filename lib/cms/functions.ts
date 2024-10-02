@@ -15,12 +15,12 @@ import {
 } from '../../types/Functions';
 const i18nKey = 'lib.cms.functions';
 
-function isObjectOrFunction(value: object): boolean {
+export function isObjectOrFunction(value: object): boolean {
   const type = typeof value;
   return value != null && (type === 'object' || type === 'function');
 }
 
-function createEndpoint(
+export function createEndpoint(
   endpointMethod: string,
   filename: string
 ): { method: string; file: string } {
@@ -30,7 +30,7 @@ function createEndpoint(
   };
 }
 
-function createConfig({
+export function createConfig({
   endpointPath,
   endpointMethod,
   functionFile,
