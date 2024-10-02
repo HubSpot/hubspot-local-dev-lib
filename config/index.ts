@@ -7,8 +7,15 @@ import {
 } from './configFile';
 import { CLIConfig_NEW, CLIConfig } from '../types/Config';
 import { CLIOptions, WriteConfigOptions } from '../types/CLIOptions';
-import { AccountType, CLIAccount, FlatAccountFields } from '../types/Accounts';
-import { getAccountIdentifier } from '../utils/getAccountIdentifier';
+import {
+  AccountType,
+  CLIAccount,
+  CLIAccount_NEW,
+  CLIAccount_DEPRECATED,
+  FlatAccountFields,
+} from '../types/Accounts';
+import { getAccountIdentifier } from './getAccountIdentifier';
+import { Mode } from '../types/Files';
 
 // Use new config if it exists
 export function loadConfig(
@@ -225,14 +232,35 @@ export function getAccountType(
   return config_DEPRECATED.getAccountType(accountType, sandboxAccountType);
 }
 
-// These functions are either not supported or have breaking changes with the new config setup
-export const getConfigAccounts = config_DEPRECATED.getConfigAccounts;
-export const getConfigDefaultAccount =
-  config_DEPRECATED.getConfigDefaultAccount;
+export function getDefaultAccount(): string | number | null | undefined {
+  if (CLIConfiguration.isActive()) {
+    return CLIConfiguration.getDefaultAccount();
+  }
+  return config_DEPRECATED.getConfigDefaultAccount();
+}
+
+export function getAccounts():
+  | Array<CLIAccount_NEW>
+  | Array<CLIAccount_DEPRECATED>
+  | null
+  | undefined {
+  if (CLIConfiguration.isActive()) {
+    return CLIConfiguration.getConfigAccounts();
+  }
+  return config_DEPRECATED.getConfigAccounts();
+}
+
+export function updateDefaultMode(mode: Mode): void | CLIConfig_NEW | null {
+  if (CLIConfiguration.isActive()) {
+    return CLIConfiguration.updateDefaultMode(mode);
+  }
+  return config_DEPRECATED.updateDefaultMode(mode);
+}
+
+// These functions are not supported with the new config setup
 export const getConfigAccountId = config_DEPRECATED.getConfigAccountId;
 export const getOrderedAccount = config_DEPRECATED.getOrderedAccount;
 export const getOrderedConfig = config_DEPRECATED.getOrderedConfig;
 export const setConfig = config_DEPRECATED.setConfig;
 export const setConfigPath = config_DEPRECATED.setConfigPath;
 export const findConfig = config_DEPRECATED.findConfig;
-export const updateDefaultMode = config_DEPRECATED.updateDefaultMode;
