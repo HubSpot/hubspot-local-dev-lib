@@ -14,7 +14,7 @@ interface AdditionalGitHubHeaders {
   authorization?: string;
 }
 
-function computeAdditionalHeaders(): AdditionalGitHubHeaders {
+function getAdditionalHeaders(): AdditionalGitHubHeaders {
   const headers: AdditionalGitHubHeaders = {};
 
   if (global && global.githubToken) {
@@ -39,7 +39,7 @@ export function fetchRepoReleaseData(
     {
       headers: {
         ...getDefaultUserAgentHeader(),
-        ...computeAdditionalHeaders(),
+        ...getAdditionalHeaders(),
       },
     }
   );
@@ -50,7 +50,7 @@ export function fetchRepoReleaseData(
 export function fetchRepoAsZip(zipUrl: string): AxiosPromise<Buffer> {
   return axios.get<Buffer>(zipUrl, {
     responseType: 'arraybuffer',
-    headers: { ...getDefaultUserAgentHeader(), ...computeAdditionalHeaders() },
+    headers: { ...getDefaultUserAgentHeader(), ...getAdditionalHeaders() },
   });
 }
 
@@ -65,7 +65,7 @@ export function fetchRepoFile(
     {
       headers: {
         ...getDefaultUserAgentHeader(),
-        ...computeAdditionalHeaders(),
+        ...getAdditionalHeaders(),
       },
     }
   );
@@ -76,7 +76,7 @@ export function fetchRepoFileByDownloadUrl(
   downloadUrl: string
 ): AxiosPromise<Buffer> {
   return axios.get<Buffer>(downloadUrl, {
-    headers: { ...getDefaultUserAgentHeader(), ...computeAdditionalHeaders() },
+    headers: { ...getDefaultUserAgentHeader(), ...getAdditionalHeaders() },
     responseType: 'arraybuffer',
   });
 }
@@ -95,7 +95,7 @@ export function fetchRepoContents(
     {
       headers: {
         ...getDefaultUserAgentHeader(),
-        ...computeAdditionalHeaders(),
+        ...getAdditionalHeaders(),
       },
     }
   );
