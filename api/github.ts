@@ -10,10 +10,21 @@ declare global {
   var githubToken: string;
 }
 
-const GITHUB_AUTH_HEADERS = {
-  authorization:
-    global && global.githubToken ? `Bearer ${global.githubToken}` : null,
-};
+interface AdditionalGitHubHeaders {
+  authorization?: string;
+}
+
+function getAdditionalHeaders(): AdditionalGitHubHeaders {
+  const headers: AdditionalGitHubHeaders = {};
+
+  if (global && global.githubToken) {
+    headers.authorization = `Bearer ${global.githubToken}`;
+  } else if (process.env.GITHUB_TOKEN) {
+    headers.authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
+  }
+
+  return headers;
+}
 
 // Returns information about the repo's releases. Defaults to "latest" if no tag is provided
 // https://docs.github.com/en/rest/releases/releases?apiVersion=2022-11-28#get-a-release-by-tag-name
@@ -26,7 +37,10 @@ export function fetchRepoReleaseData(
   return axios.get<GithubReleaseData>(
     `${URL}/${tag ? `tags/${tag}` : 'latest'}`,
     {
-      headers: { ...getDefaultUserAgentHeader(), ...GITHUB_AUTH_HEADERS },
+      headers: {
+        ...getDefaultUserAgentHeader(),
+        ...getAdditionalHeaders(),
+      },
     }
   );
 }
@@ -36,7 +50,7 @@ export function fetchRepoReleaseData(
 export function fetchRepoAsZip(zipUrl: string): AxiosPromise<Buffer> {
   return axios.get<Buffer>(zipUrl, {
     responseType: 'arraybuffer',
-    headers: { ...getDefaultUserAgentHeader(), ...GITHUB_AUTH_HEADERS },
+    headers: { ...getDefaultUserAgentHeader(), ...getAdditionalHeaders() },
   });
 }
 
@@ -49,7 +63,10 @@ export function fetchRepoFile(
   return axios.get<Buffer>(
     `${GITHUB_RAW_CONTENT_API_PATH}/${repoPath}/${ref}/${filePath}`,
     {
-      headers: { ...getDefaultUserAgentHeader(), ...GITHUB_AUTH_HEADERS },
+      headers: {
+        ...getDefaultUserAgentHeader(),
+        ...getAdditionalHeaders(),
+      },
     }
   );
 }
@@ -59,7 +76,7 @@ export function fetchRepoFileByDownloadUrl(
   downloadUrl: string
 ): AxiosPromise<Buffer> {
   return axios.get<Buffer>(downloadUrl, {
-    headers: { ...getDefaultUserAgentHeader(), ...GITHUB_AUTH_HEADERS },
+    headers: { ...getDefaultUserAgentHeader(), ...getAdditionalHeaders() },
     responseType: 'arraybuffer',
   });
 }
@@ -76,7 +93,10 @@ export function fetchRepoContents(
   return axios.get<Array<GithubRepoFile>>(
     `${GITHUB_REPOS_API}/${repoPath}/contents/${path}${refQuery}`,
     {
-      headers: { ...getDefaultUserAgentHeader(), ...GITHUB_AUTH_HEADERS },
+      headers: {
+        ...getDefaultUserAgentHeader(),
+        ...getAdditionalHeaders(),
+      },
     }
   );
 }
