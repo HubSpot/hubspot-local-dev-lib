@@ -180,7 +180,6 @@ export async function createModule(
     tags: [],
     is_available_for_new_content: false,
   };
-
   const folderName = name.endsWith('.module') ? name : `${name}.module`;
   const destPath = !isReactModule
     ? path.join(dest, folderName)

@@ -53,6 +53,7 @@ export async function upload(
       file: fs.createReadStream(path.resolve(getCwd(), src)),
     },
     headers: { 'Content-Type': 'multipart/form-data' },
+    timeout: 50000,
     ...options,
   });
 }

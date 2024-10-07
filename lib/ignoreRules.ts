@@ -10,6 +10,8 @@ const ignoreList = [
   'cms-assets.json',
   'tsconfig.json',
   'components', // JSR components folder. Maybe not want this to be a general rule in case people are using the folder name already? Tmp for now?
+  'tsconfig.json',
+  'yarn.lock',
   'node_modules', // dependencies
   '.*', // hidden files/folders
   '*.log', // Error log for npm
