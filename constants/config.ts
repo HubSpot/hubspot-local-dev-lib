@@ -2,8 +2,7 @@ import { i18n } from '../utils/lang';
 
 export const DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME = 'hubspot.config.yml';
 
-// Temporary change for easier debugging.
-export const HUBSPOT_CONFIGURATION_FOLDER = 'hubspot';
+export const HUBSPOT_CONFIGURATION_FOLDER = '.hubspot-cli';
 export const HUBSPOT_CONFIGURATION_FILE = 'config.yml';
 
 export const MIN_HTTP_TIMEOUT = 3000;
