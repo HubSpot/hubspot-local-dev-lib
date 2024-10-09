@@ -29,15 +29,6 @@ export function loadConfig(
   return config_DEPRECATED.loadConfig(path, options);
 }
 
-// Needed to refactor this function to work with yargs middleware
-export function loadNewConfig(options: CLIOptions = {}): CLIConfig | null {
-  // Attempt to load the root config
-  if (newConfigFileExists()) {
-    return CLIConfiguration.init(options);
-  }
-  return null;
-}
-
 export function getAndLoadConfigIfNeeded(
   options?: CLIOptions
 ): Partial<CLIConfig> | null {
