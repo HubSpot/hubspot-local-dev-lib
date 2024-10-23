@@ -7,7 +7,7 @@ import { RequestPortsData } from '../types/PortManager';
 
 export const BASE_URL = `http://localhost:${PORT_MANAGER_SERVER_PORT}`;
 
-async function isPortManagerServerRunning(): Promise<boolean> {
+export async function isPortManagerServerRunning(): Promise<boolean> {
   const port = await detectPort(PORT_MANAGER_SERVER_PORT);
   return port !== PORT_MANAGER_SERVER_PORT;
 }
