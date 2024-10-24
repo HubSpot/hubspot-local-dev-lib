@@ -1,14 +1,15 @@
-import http from '../http';
+import { AxiosPromise } from 'axios';
+import { http } from '../http';
 import { Validation, HublValidationOptions } from '../types/HublValidation';
 
 const HUBL_VALIDATE_API_PATH = 'cos-rendering/v1/internal/validate';
 
-export async function validateHubl(
+export function validateHubl(
   accountId: number,
   sourceCode: string,
   hublValidationOptions?: HublValidationOptions
-): Promise<Validation> {
-  return http.post(accountId, {
+): AxiosPromise<Validation> {
+  return http.post<Validation>(accountId, {
     url: HUBL_VALIDATE_API_PATH,
     data: {
       template_source: sourceCode,

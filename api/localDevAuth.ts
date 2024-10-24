@@ -1,5 +1,6 @@
+import { AxiosPromise } from 'axios';
 import { getAxiosConfig } from '../http/getAxiosConfig';
-import http from '../http';
+import { http } from '../http';
 import { ENVIRONMENTS } from '../constants/environments';
 import { Environment } from '../types/Config';
 import {
@@ -12,11 +13,11 @@ import { PublicAppInstallationData } from '../types/Apps';
 
 const LOCALDEVAUTH_API_AUTH_PATH = 'localdevauth/v1/auth';
 
-export async function fetchAccessToken(
+export function fetchAccessToken(
   personalAccessKey: string,
   env: Environment = ENVIRONMENTS.PROD,
   portalId?: number
-): Promise<AccessTokenResponse> {
+): AxiosPromise<AccessTokenResponse> {
   const axiosConfig = getAxiosConfig({
     env,
     localHostOverride: true,
@@ -27,31 +28,29 @@ export async function fetchAccessToken(
     params: portalId ? { portalId } : {},
   });
 
-  const { data } = await axios<AccessTokenResponse>({
+  return axios<AccessTokenResponse>({
     ...axiosConfig,
     method: 'post',
   });
-
-  return data;
 }
 
-export async function fetchScopeData(
+export function fetchScopeData(
   accountId: number,
   scopeGroup: string
-): Promise<ScopeData> {
+): AxiosPromise<ScopeData> {
   return http.get<ScopeData>(accountId, {
     url: `${LOCALDEVAUTH_API_AUTH_PATH}/check-scopes`,
     params: { scopeGroup },
   });
 }
 
-export async function fetchAppInstallationData(
+export function fetchAppInstallationData(
   portalId: number,
   projectId: number,
   appUid: string,
   requiredScopeGroups: Array<string>,
   optionalScopeGroups: Array<string> = []
-): Promise<PublicAppInstallationData> {
+): AxiosPromise<PublicAppInstallationData> {
   return http.post<PublicAppInstallationData>(portalId, {
     url: `${LOCALDEVAUTH_API_AUTH_PATH}/install-info`,
     data: {

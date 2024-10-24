@@ -1,5 +1,4 @@
 import { logger } from '../lib/logger';
-import { throwErrorWithMessage } from '../errors/standardErrors';
 import { loadConfigFromEnvironment } from './environment';
 import { getValidEnv } from '../lib/environment';
 import {
@@ -27,7 +26,7 @@ import { i18n } from '../utils/lang';
 
 const i18nKey = 'config.cliConfiguration';
 
-class CLIConfiguration {
+class _CLIConfiguration {
   options: CLIOptions;
   useEnvConfig: boolean;
   config: CLIConfig_NEW | null;
@@ -346,8 +345,8 @@ class CLIConfiguration {
     } = updatedAccountFields;
 
     if (!accountId) {
-      throwErrorWithMessage(
-        `${i18nKey}.updateAccount.errors.accountIdRequired`
+      throw new Error(
+        i18n(`${i18nKey}.updateAccount.errors.accountIdRequired`)
       );
     }
     if (!this.config) {
@@ -455,14 +454,14 @@ class CLIConfiguration {
    */
   updateDefaultAccount(defaultAccount: string | number): CLIConfig_NEW | null {
     if (!this.config) {
-      throwErrorWithMessage(`${i18nKey}.errors.noConfigLoaded`);
+      throw new Error(i18n(`${i18nKey}.errors.noConfigLoaded`));
     }
     if (
       !defaultAccount ||
       (typeof defaultAccount !== 'number' && typeof defaultAccount !== 'string')
     ) {
-      throwErrorWithMessage(
-        `${i18nKey}.updateDefaultAccount.errors.invalidInput`
+      throw new Error(
+        i18n(`${i18nKey}.updateDefaultAccount.errors.invalidInput`)
       );
     }
 
@@ -475,7 +474,7 @@ class CLIConfiguration {
    */
   renameAccount(currentName: string, newName: string): void {
     if (!this.config) {
-      throwErrorWithMessage(`${i18nKey}.errors.noConfigLoaded`);
+      throw new Error(i18n(`${i18nKey}.errors.noConfigLoaded`));
     }
     const accountId = this.getAccountId(currentName);
     let accountConfigToRename: CLIAccount_NEW | null = null;
@@ -485,9 +484,11 @@ class CLIConfiguration {
     }
 
     if (!accountConfigToRename) {
-      throwErrorWithMessage(`${i18nKey}.renameAccount.errors.invalidName`, {
-        currentName,
-      });
+      throw new Error(
+        i18n(`${i18nKey}.renameAccount.errors.invalidName`, {
+          currentName,
+        })
+      );
     }
 
     if (accountId) {
@@ -510,14 +511,15 @@ class CLIConfiguration {
    */
   removeAccountFromConfig(nameOrId: string | number): boolean {
     if (!this.config) {
-      throwErrorWithMessage(`${i18nKey}.errors.noConfigLoaded`);
+      throw new Error(i18n(`${i18nKey}.errors.noConfigLoaded`));
     }
     const accountId = this.getAccountId(nameOrId);
 
     if (!accountId) {
-      throwErrorWithMessage(
-        `${i18nKey}.removeAccountFromConfig.errors.invalidId`,
-        { nameOrId }
+      throw new Error(
+        i18n(`${i18nKey}.removeAccountFromConfig.errors.invalidId`, {
+          nameOrId,
+        })
       );
     }
 
@@ -546,14 +548,16 @@ class CLIConfiguration {
    */
   updateDefaultMode(defaultMode: string): CLIConfig_NEW | null {
     if (!this.config) {
-      throwErrorWithMessage(`${i18nKey}.errors.noConfigLoaded`);
+      throw new Error(i18n(`${i18nKey}.errors.noConfigLoaded`));
     }
     const ALL_MODES = Object.values(MODE);
     if (!defaultMode || !ALL_MODES.find(m => m === defaultMode)) {
-      throwErrorWithMessage(`${i18nKey}.updateDefaultMode.errors.invalidMode`, {
-        defaultMode,
-        validModes: commaSeparatedValues(ALL_MODES),
-      });
+      throw new Error(
+        i18n(`${i18nKey}.updateDefaultMode.errors.invalidMode`, {
+          defaultMode,
+          validModes: commaSeparatedValues(ALL_MODES),
+        })
+      );
     }
 
     this.config.defaultMode = defaultMode;
@@ -565,16 +569,15 @@ class CLIConfiguration {
    */
   updateHttpTimeout(timeout: string): CLIConfig_NEW | null {
     if (!this.config) {
-      throwErrorWithMessage(`${i18nKey}.errors.noConfigLoaded`);
+      throw new Error(i18n(`${i18nKey}.errors.noConfigLoaded`));
     }
     const parsedTimeout = parseInt(timeout);
     if (isNaN(parsedTimeout) || parsedTimeout < MIN_HTTP_TIMEOUT) {
-      throwErrorWithMessage(
-        `${i18nKey}.updateHttpTimeout.errors.invalidTimeout`,
-        {
+      throw new Error(
+        i18n(`${i18nKey}.updateHttpTimeout.errors.invalidTimeout`, {
           timeout,
           minTimeout: MIN_HTTP_TIMEOUT,
-        }
+        })
       );
     }
 
@@ -587,14 +590,13 @@ class CLIConfiguration {
    */
   updateAllowUsageTracking(isEnabled: boolean): CLIConfig_NEW | null {
     if (!this.config) {
-      throwErrorWithMessage(`${i18nKey}.errors.noConfigLoaded`);
+      throw new Error(i18n(`${i18nKey}.errors.noConfigLoaded`));
     }
     if (typeof isEnabled !== 'boolean') {
-      throwErrorWithMessage(
-        `${i18nKey}.updateAllowUsageTracking.errors.invalidInput`,
-        {
+      throw new Error(
+        i18n(`${i18nKey}.updateAllowUsageTracking.errors.invalidInput`, {
           isEnabled: `${isEnabled}`,
-        }
+        })
       );
     }
 
@@ -610,4 +612,4 @@ class CLIConfiguration {
   }
 }
 
-export default new CLIConfiguration();
+export const CLIConfiguration = new _CLIConfiguration();

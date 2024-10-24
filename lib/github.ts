@@ -1,10 +1,8 @@
 import path from 'path';
 import fs from 'fs-extra';
 
-import { throwError, throwErrorWithMessage } from '../errors/standardErrors';
 import { extractZipArchive } from './archive';
 import { logger } from './logger';
-import { GenericError, BaseError } from '../types/Error';
 import {
   GithubReleaseData,
   GithubRepoFile,
@@ -20,6 +18,7 @@ import {
   fetchRepoContents,
 } from '../api/github';
 import { i18n } from '../utils/lang';
+import { isHubSpotHttpError, isSystemError } from '../errors';
 
 const i18nKey = 'lib.github';
 
@@ -38,10 +37,11 @@ export async function fetchFileFromRepository(
     const { data } = await fetchRepoFile(repoPath, filePath, ref);
     return data;
   } catch (err) {
-    throwErrorWithMessage(
-      `${i18nKey}.fetchFileFromRepository.errors.fetchFail`,
-      {},
-      err
+    throw new Error(
+      i18n(`${i18nKey}.fetchFileFromRepository.errors.fetchFail`),
+      {
+        cause: err,
+      }
     );
   }
 }
@@ -62,10 +62,11 @@ export async function fetchReleaseData(
     const { data } = await fetchRepoReleaseData(repoPath, tag);
     return data;
   } catch (err) {
-    throwErrorWithMessage(
-      `${i18nKey}.fetchReleaseData.errors.fetchFail`,
-      { tag: tag || 'latest' },
-      err
+    throw new Error(
+      i18n(`${i18nKey}.fetchReleaseData.errors.fetchFail`, {
+        tag: tag || 'latest',
+      }),
+      { cause: err }
     );
   }
 }
@@ -101,11 +102,9 @@ async function downloadGithubRepoZip(
     logger.debug(i18n(`${i18nKey}.downloadGithubRepoZip.completed`));
     return data;
   } catch (err) {
-    throwErrorWithMessage(
-      `${i18nKey}.downloadGithubRepoZip.errors.fetchFail`,
-      {},
-      err
-    );
+    throw new Error(i18n(`${i18nKey}.downloadGithubRepoZip.errors.fetchFail`), {
+      cause: err,
+    });
   }
 }
 
@@ -146,7 +145,7 @@ export async function fetchGitHubRepoContentFromDownloadUrl(
   } else {
     fileContents = resp.data;
   }
-  await fs.outputFileSync(dest, fileContents);
+  fs.outputFileSync(dest, fileContents);
 }
 
 // Writes files from a public repository to the destination folder
@@ -214,18 +213,15 @@ export async function downloadGithubRepoContents(
 
     await Promise.all(contentPromises);
   } catch (e) {
-    const error = e as BaseError;
-    if (error?.error?.message) {
-      throwErrorWithMessage(
-        `${i18nKey}.downloadGithubRepoContents.errors.fetchFail`,
-        {
-          errorMessage: error.error.message,
-        },
-        error
+    if (isSystemError(e) && e?.error?.message) {
+      throw new Error(
+        i18n(`${i18nKey}.downloadGithubRepoContents.errors.fetchFail`, {
+          errorMessage: e.error.message,
+        }),
+        { cause: e }
       );
-    } else {
-      throwError(error);
     }
+    throw e;
   }
 }
 
@@ -248,16 +244,13 @@ export async function listGithubRepoContents(
 
     return filteredFiles;
   } catch (e) {
-    const error = e as GenericError;
-    if (error?.response?.data?.message) {
-      throwErrorWithMessage(
-        `${i18nKey}.downloadGithubRepoContents.errors.fetchFail`,
-        {
-          errorMessage: error.response.data.message,
-        }
+    if (isHubSpotHttpError(e) && e.data.message) {
+      throw new Error(
+        i18n(`${i18nKey}.downloadGithubRepoContents.errors.fetchFail`, {
+          errorMessage: e.data.message,
+        })
       );
-    } else {
-      throwError(error);
     }
+    throw e;
   }
 }

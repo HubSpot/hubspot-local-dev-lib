@@ -1,12 +1,6 @@
 import moment from 'moment';
-import { AxiosError } from 'axios';
 import { ENVIRONMENTS } from '../constants/environments';
 import { PERSONAL_ACCESS_KEY_AUTH_METHOD } from '../constants/auth';
-import {
-  throwAuthErrorWithMessage,
-  throwErrorWithMessage,
-  throwError,
-} from '../errors/standardErrors';
 import { fetchAccessToken } from '../api/localDevAuth';
 import { fetchSandboxHubData } from '../api/sandboxHubs';
 import { CLIAccount, PersonalAccessKeyAccount } from '../types/Accounts';
@@ -21,8 +15,9 @@ import {
 import { HUBSPOT_ACCOUNT_TYPES } from '../constants/config';
 import { fetchDeveloperTestAccountData } from '../api/developerTestAccounts';
 import { logger } from './logger';
-import { getAxiosErrorWithContext } from '../errors/apiErrors';
-import CLIConfiguration from '../config/CLIConfiguration';
+import { CLIConfiguration } from '../config/CLIConfiguration';
+import { i18n } from '../utils/lang';
+import { isHubSpotHttpError } from '../errors';
 import { AccessToken } from '../types/Accounts';
 
 const i18nKey = 'lib.personalAccessKey';
@@ -38,21 +33,13 @@ export async function getAccessToken(
   env: Environment = ENVIRONMENTS.PROD,
   accountId?: number
 ): Promise<AccessToken> {
-  let response;
-  try {
-    response = await fetchAccessToken(personalAccessKey, env, accountId);
-  } catch (e) {
-    const error = e as AxiosError<{ message?: string }>;
-    if (error.response) {
-      throwAuthErrorWithMessage(
-        `${i18nKey}.errors.invalidPersonalAccessKey`,
-        { errorMessage: error.response.data.message || '' },
-        error
-      );
-    } else {
-      throwError(e);
-    }
-  }
+  const axiosResponse = await fetchAccessToken(
+    personalAccessKey,
+    env,
+    accountId
+  );
+  const response = axiosResponse.data;
+
   return {
     portalId: response.hubId,
     accessToken: response.oauthAccessToken,
@@ -102,7 +89,7 @@ async function getNewAccessToken(
   if (refreshRequests.has(key)) {
     return refreshRequests.get(key);
   }
-  let accessTokenResponse;
+  let accessTokenResponse: AccessToken;
   try {
     const refreshAccessPromise = refreshAccessToken(
       personalAccessKey,
@@ -127,7 +114,7 @@ async function getNewAccessTokenByAccountId(
 ): Promise<AccessToken> {
   const account = getAccountConfig(accountId) as PersonalAccessKeyAccount;
   if (!account) {
-    throwErrorWithMessage(`${i18nKey}.errors.accountNotFound`, { accountId });
+    throw new Error(i18n(`${i18nKey}.errors.accountNotFound`, { accountId }));
   }
   const { auth, personalAccessKey, env } = account;
 
@@ -146,7 +133,7 @@ export async function accessTokenForPersonalAccessKey(
 ): Promise<string | undefined> {
   const account = getAccountConfig(accountId) as PersonalAccessKeyAccount;
   if (!account) {
-    throwErrorWithMessage(`${i18nKey}.errors.accountNotFound`, { accountId });
+    throw new Error(i18n(`${i18nKey}.errors.accountNotFound`, { accountId }));
   }
   const { auth, personalAccessKey, env } = account;
   const authTokenInfo = auth && auth.tokenInfo;
@@ -197,7 +184,7 @@ export async function updateConfigWithAccessToken(
       accountType === HUBSPOT_ACCOUNT_TYPES.STANDARD_SANDBOX ||
       accountType === HUBSPOT_ACCOUNT_TYPES.DEVELOPMENT_SANDBOX
     ) {
-      const sandboxDataResponse = await fetchSandboxHubData(
+      const { data: sandboxDataResponse } = await fetchSandboxHubData(
         accessToken,
         portalId,
         accountEnv
@@ -208,23 +195,26 @@ export async function updateConfigWithAccessToken(
     }
   } catch (err) {
     // Log error but do not throw
-    logger.debug(getAxiosErrorWithContext(err as AxiosError).message);
+    if (isHubSpotHttpError(err)) {
+      logger.debug(err.message);
+    }
+    logger.debug(err);
   }
 
   try {
     if (accountType === HUBSPOT_ACCOUNT_TYPES.DEVELOPER_TEST) {
-      const developerTestAccountResponse = await fetchDeveloperTestAccountData(
-        accessToken,
-        portalId,
-        accountEnv
-      );
+      const { data: developerTestAccountResponse } =
+        await fetchDeveloperTestAccountData(accessToken, portalId, accountEnv);
       if (developerTestAccountResponse) {
         parentAccountId = developerTestAccountResponse.parentPortalId;
       }
     }
   } catch (err) {
     // Log error but do not throw
-    logger.debug(getAxiosErrorWithContext(err as AxiosError).message);
+    if (isHubSpotHttpError(err)) {
+      logger.debug(err.message);
+    }
+    logger.debug(err);
   }
 
   const updatedAccount = updateAccountConfig({

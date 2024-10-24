@@ -1,5 +1,5 @@
 import * as config_DEPRECATED from './config_DEPRECATED';
-import CLIConfiguration from './CLIConfiguration';
+import { CLIConfiguration } from './CLIConfiguration';
 import {
   configFileExists as newConfigFileExists,
   getConfigFilePath,
