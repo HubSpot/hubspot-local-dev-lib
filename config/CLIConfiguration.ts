@@ -147,7 +147,7 @@ class _CLIConfiguration {
         return false;
       }
       if (accountConfig.name) {
-        if (accountNamesMap[accountConfig.name]) {
+        if (accountNamesMap[accountConfig.name.toLowerCase()]) {
           logger.log(
             i18n(`${i18nKey}.validate.duplicateAccountNames`, {
               accountName: accountConfig.name,
@@ -273,6 +273,13 @@ class _CLIConfiguration {
   }
 
   isAccountInConfig(nameOrId: string | number): boolean {
+    if (typeof nameOrId === 'string') {
+      return (
+        !!this.config &&
+        this.config.accounts &&
+        !!this.getAccountId(nameOrId.toLowerCase())
+      );
+    }
     return (
       !!this.config && this.config.accounts && !!this.getAccountId(nameOrId)
     );
