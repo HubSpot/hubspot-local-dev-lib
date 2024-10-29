@@ -11,6 +11,14 @@ import {
 
 const HUBDB_API_PATH = 'cms/v3/hubdb';
 
+export function listTables(
+  accountId: number
+): AxiosPromise<Table> {
+  return http.get<Table>(accountId, {
+    url: `${HUBDB_API_PATH}/tables`,
+  });
+}
+
 export function fetchTable(
   accountId: number,
   tableId: string
