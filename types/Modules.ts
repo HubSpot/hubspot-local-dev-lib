@@ -14,4 +14,5 @@ export type ModuleDefinition = {
   moduleLabel: string;
   reactType: boolean;
   global: boolean;
+  availableForNewContent: boolean;
 };

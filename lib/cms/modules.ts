@@ -179,7 +179,7 @@ export async function createModule(
     other_assets: [],
     smart_type: 'NOT_SMART',
     tags: [],
-    is_available_for_new_content: false,
+    is_available_for_new_content: moduleDefinition.availableForNewContent,
   };
 
   const folderName = name.endsWith('.module') ? name : `${name}.module`;
