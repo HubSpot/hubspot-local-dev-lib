@@ -51,9 +51,9 @@ describe('config/CLIConfiguration', () => {
     });
   });
 
-  describe('getAccountIndex()', () => {
+  describe('getConfigAccountIndex()', () => {
     it('returns -1 when no config is loaded', () => {
-      expect(config.getAccountIndex(123)).toBe(-1);
+      expect(config.getConfigAccountIndex(123)).toBe(-1);
     });
   });
 

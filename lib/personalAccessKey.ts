@@ -15,7 +15,6 @@ import {
 import { HUBSPOT_ACCOUNT_TYPES } from '../constants/config';
 import { fetchDeveloperTestAccountData } from '../api/developerTestAccounts';
 import { logger } from './logger';
-import { CLIConfiguration } from '../config/CLIConfiguration';
 import { i18n } from '../utils/lang';
 import { isHubSpotHttpError } from '../errors';
 import { AccessToken } from '../types/Accounts';
@@ -217,7 +216,7 @@ export async function updateConfigWithAccessToken(
     logger.debug(err);
   }
 
-  const updatedAccount = updateAccountConfig({
+  const updatedConfig = updateAccountConfig({
     accountId: portalId,
     accountType,
     personalAccessKey,
@@ -227,13 +226,11 @@ export async function updateConfigWithAccessToken(
     parentAccountId,
     env: accountEnv,
   });
-  if (!CLIConfiguration.isActive()) {
-    writeConfig();
-  }
+  writeConfig();
 
   if (makeDefault && name) {
     updateDefaultAccount(name);
   }
 
-  return updatedAccount;
+  return updatedConfig;
 }

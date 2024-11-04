@@ -11,7 +11,7 @@ import {
   ExchangeProof,
 } from '../types/Accounts';
 import { logger } from '../lib/logger';
-import { getAccountIdentifier } from '../config/getAccountIdentifier';
+import { getAccountIdentifier } from '../utils/getAccountIdentifier';
 import { AUTH_METHODS } from '../constants/auth';
 import { i18n } from '../utils/lang';
 
