@@ -7,9 +7,18 @@ import {
   Row,
   Schema,
   Table,
+  FetchTablesResponse,
 } from '../types/Hubdb';
 
 const HUBDB_API_PATH = 'cms/v3/hubdb';
+
+export function fetchTables(
+  accountId: number
+): AxiosPromise<FetchTablesResponse> {
+  return http.get<FetchTablesResponse>(accountId, {
+    url: `${HUBDB_API_PATH}/tables`,
+  });
+}
 
 export function fetchTable(
   accountId: number,

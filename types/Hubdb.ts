@@ -91,3 +91,9 @@ export type FetchRowsResponse = {
   results: Array<Row>;
   paging?: { next: { after: string | null } } | null;
 };
+
+export type FetchTablesResponse = {
+  total: number;
+  results: Array<Table>;
+  paging?: { next: { after: string | null } } | null;
+};
