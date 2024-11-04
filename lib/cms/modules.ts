@@ -166,6 +166,7 @@ export async function createModule(
     contentTypes,
     global,
     reactType: isReactModule,
+    availableForNewContent,
   } = moduleDefinition;
 
   const moduleMetaData = {
@@ -179,7 +180,7 @@ export async function createModule(
     other_assets: [],
     smart_type: 'NOT_SMART',
     tags: [],
-    is_available_for_new_content: moduleDefinition.availableForNewContent,
+    is_available_for_new_content: availableForNewContent,
   };
 
   const folderName = name.endsWith('.module') ? name : `${name}.module`;
