@@ -2,7 +2,7 @@ import { OAuth2Manager } from '../models/OAuth2Manager';
 import { AUTH_METHODS } from '../constants/auth';
 import { FlatAccountFields } from '../types/Accounts';
 import { logger } from './logger';
-import { getAccountIdentifier } from '../utils/getAccountIdentifier';
+import { getAccountIdentifier } from '../config/getAccountIdentifier';
 import { updateAccountConfig, writeConfig } from '../config';
 import { i18n } from '../utils/lang';
 
