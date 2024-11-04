@@ -7,6 +7,7 @@ import {
   Row,
   Schema,
   Table,
+  FetchTablesResponse,
 } from '../types/Hubdb';
 
 const HUBDB_API_PATH = 'cms/v3/hubdb';
