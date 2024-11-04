@@ -147,7 +147,7 @@ class _CLIConfiguration {
         return false;
       }
       if (accountConfig.name) {
-        if (accountNamesMap[accountConfig.name.toLowerCase()]) {
+        if (accountNamesMap[accountConfig.name]) {
           logger.log(
             i18n(`${i18nKey}.validate.duplicateAccountNames`, {
               accountName: accountConfig.name,
@@ -166,7 +166,7 @@ class _CLIConfiguration {
         accountNamesMap[accountConfig.name] = true;
       }
       if (!accountConfig.accountType) {
-        this.addOrUpdateAccount({
+        this.updateAccount({
           ...accountConfig,
           accountId: accountConfig.accountId,
           accountType: this.getAccountType(
@@ -247,7 +247,7 @@ class _CLIConfiguration {
     return this.getAccount(nameOrId);
   }
 
-  getAccountIndex(accountId: number): number {
+  getConfigAccountIndex(accountId: number): number {
     return this.config
       ? this.config.accounts.findIndex(
           account => account.accountId === accountId
@@ -257,29 +257,13 @@ class _CLIConfiguration {
 
   getConfigForAccount(accountId?: number): CLIAccount_NEW | null {
     if (this.config) {
-      return (
-        this.config.accounts.find(account => account.accountId === accountId) ||
-        null
-      );
-    }
-    return null;
-  }
-
-  getConfigAccounts(): Array<CLIAccount_NEW> | null {
-    if (this.config) {
-      return this.config.accounts || null;
+      this.config.accounts.find(account => account.accountId === accountId) ||
+        null;
     }
     return null;
   }
 
   isAccountInConfig(nameOrId: string | number): boolean {
-    if (typeof nameOrId === 'string') {
-      return (
-        !!this.config &&
-        this.config.accounts &&
-        !!this.getAccountId(nameOrId.toLowerCase())
-      );
-    }
     return (
       !!this.config && this.config.accounts && !!this.getAccountId(nameOrId)
     );
@@ -306,7 +290,7 @@ class _CLIConfiguration {
 
   // Deprecating sandboxAccountType in favor of accountType
   getAccountType(
-    accountType?: AccountType | null,
+    accountType?: AccountType,
     sandboxAccountType?: string | null
   ): AccountType {
     if (accountType) {
@@ -330,7 +314,7 @@ class _CLIConfiguration {
   /**
    * @throws {Error}
    */
-  addOrUpdateAccount(
+  updateAccount(
     updatedAccountFields: Partial<FlatAccountFields_NEW>,
     writeUpdate = true
   ): FlatAccountFields_NEW | null {
@@ -361,13 +345,10 @@ class _CLIConfiguration {
       return null;
     }
 
-    // Check whether the account is already listed in the config.yml file.
     const currentAccountConfig = this.getAccount(accountId);
 
-    // For accounts that are already in the config.yml file, sets the auth property.
     let auth: OAuthAccount_NEW['auth'] =
       (currentAccountConfig && currentAccountConfig.auth) || {};
-    // For accounts not already in the config.yml file, sets the auth property.
     if (clientId || clientSecret || scopes || tokenInfo) {
       auth = {
         ...(currentAccountConfig ? currentAccountConfig.auth : {}),
@@ -398,8 +379,6 @@ class _CLIConfiguration {
     );
     const updatedDefaultMode: ValueOf<typeof MODE> | undefined =
       defaultMode && (defaultMode.toLowerCase() as ValueOf<typeof MODE>);
-    const updatedAccountType =
-      accountType || (currentAccountConfig && currentAccountConfig.accountType);
 
     safelyApplyUpdates('name', name);
     safelyApplyUpdates('env', updatedEnv);
@@ -419,34 +398,31 @@ class _CLIConfiguration {
     safelyApplyUpdates('sandboxAccountType', sandboxAccountType);
     safelyApplyUpdates(
       'accountType',
-      this.getAccountType(updatedAccountType, sandboxAccountType)
+      this.getAccountType(accountType, sandboxAccountType)
     );
 
     safelyApplyUpdates('parentAccountId', parentAccountId);
 
     const completedAccountConfig = nextAccountConfig as FlatAccountFields_NEW;
-    if (!Object.hasOwn(this.config, 'accounts')) {
-      this.config.accounts = [];
-    }
+
     if (currentAccountConfig) {
       logger.debug(
         i18n(`${i18nKey}.updateAccount.updating`, {
           accountId,
         })
       );
-      const index = this.getAccountIndex(accountId);
-      if (index < 0) {
-        this.config.accounts.push(completedAccountConfig);
-      } else {
-        this.config.accounts[index] = completedAccountConfig;
-      }
+      const index = this.getConfigAccountIndex(accountId);
+      this.config.accounts[index] = completedAccountConfig;
       logger.debug(
         i18n(`${i18nKey}.updateAccount.addingConfigEntry`, {
           accountId,
         })
       );
-    } else {
-      this.config.accounts.push(completedAccountConfig);
+      if (this.config.accounts) {
+        this.config.accounts.push(completedAccountConfig);
+      } else {
+        this.config.accounts = [completedAccountConfig];
+      }
     }
 
     if (writeUpdate) {
@@ -499,12 +475,7 @@ class _CLIConfiguration {
     }
 
     if (accountId) {
-      this.addOrUpdateAccount({
-        accountId,
-        name: newName,
-        env: this.getEnv(),
-        accountType: accountConfigToRename.accountType,
-      });
+      this.updateAccount({ accountId, name: newName, env: this.getEnv() });
     }
 
     if (accountConfigToRename.name === this.getDefaultAccount()) {
@@ -537,7 +508,7 @@ class _CLIConfiguration {
       logger.debug(
         i18n(`${i18nKey}.removeAccountFromConfig.deleting`, { accountId })
       );
-      const index = this.getAccountIndex(accountId);
+      const index = this.getConfigAccountIndex(accountId);
       this.config.accounts.splice(index, 1);
 
       if (this.getDefaultAccount() === accountConfig.name) {

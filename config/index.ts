@@ -1,21 +1,14 @@
 import * as config_DEPRECATED from './config_DEPRECATED';
 import { CLIConfiguration } from './CLIConfiguration';
 import {
-  configFileExists as newConfigFileExists,
+  configFileExists,
   getConfigFilePath,
   deleteConfigFile as newDeleteConfigFile,
 } from './configFile';
 import { CLIConfig_NEW, CLIConfig } from '../types/Config';
 import { CLIOptions, WriteConfigOptions } from '../types/CLIOptions';
-import {
-  AccountType,
-  CLIAccount,
-  CLIAccount_NEW,
-  CLIAccount_DEPRECATED,
-  FlatAccountFields,
-} from '../types/Accounts';
-import { getAccountIdentifier } from './getAccountIdentifier';
-import { Mode } from '../types/Files';
+import { AccountType, CLIAccount, FlatAccountFields } from '../types/Accounts';
+import { getAccountIdentifier } from '../utils/getAccountIdentifier';
 
 // Use new config if it exists
 export function loadConfig(
@@ -23,7 +16,7 @@ export function loadConfig(
   options: CLIOptions = {}
 ): CLIConfig | null {
   // Attempt to load the root config
-  if (newConfigFileExists()) {
+  if (configFileExists()) {
     return CLIConfiguration.init(options);
   }
   return config_DEPRECATED.loadConfig(path, options);
@@ -54,9 +47,9 @@ export function loadConfigFromEnvironment(): boolean {
 
 export function createEmptyConfigFile(
   options: { path?: string } = {},
-  useHiddenConfig = false
+  useRootConfig = false
 ): void {
-  if (useHiddenConfig) {
+  if (useRootConfig) {
     CLIConfiguration.write({ accounts: [] });
   } else {
     return config_DEPRECATED.createEmptyConfigFile(options);
@@ -88,20 +81,11 @@ export function writeConfig(options: WriteConfigOptions = {}): void {
   }
 }
 
-export function getConfigPath(
-  path?: string,
-  useHiddenConfig = false
-): string | null {
-  if (useHiddenConfig || CLIConfiguration.isActive()) {
+export function getConfigPath(path?: string): string | null {
+  if (CLIConfiguration.isActive()) {
     return getConfigFilePath();
   }
   return config_DEPRECATED.getConfigPath(path);
-}
-
-export function configFileExists(useHiddenConfig?: boolean) {
-  return useHiddenConfig
-    ? newConfigFileExists()
-    : Boolean(config_DEPRECATED.getConfigPath());
 }
 
 export function getAccountConfig(accountId?: number): CLIAccount | null {
@@ -123,7 +107,7 @@ export function updateAccountConfig(
 ): FlatAccountFields | null {
   const accountIdentifier = getAccountIdentifier(configOptions);
   if (CLIConfiguration.isActive()) {
-    return CLIConfiguration.addOrUpdateAccount({
+    return CLIConfiguration.updateAccount({
       ...configOptions,
       accountId: accountIdentifier,
     });
@@ -232,35 +216,14 @@ export function getAccountType(
   return config_DEPRECATED.getAccountType(accountType, sandboxAccountType);
 }
 
-export function getDefaultAccount(): string | number | null | undefined {
-  if (CLIConfiguration.isActive()) {
-    return CLIConfiguration.getDefaultAccount();
-  }
-  return config_DEPRECATED.getConfigDefaultAccount();
-}
-
-export function getAccounts():
-  | Array<CLIAccount_NEW>
-  | Array<CLIAccount_DEPRECATED>
-  | null
-  | undefined {
-  if (CLIConfiguration.isActive()) {
-    return CLIConfiguration.getConfigAccounts();
-  }
-  return config_DEPRECATED.getConfigAccounts();
-}
-
-export function updateDefaultMode(mode: Mode): void | CLIConfig_NEW | null {
-  if (CLIConfiguration.isActive()) {
-    return CLIConfiguration.updateDefaultMode(mode);
-  }
-  return config_DEPRECATED.updateDefaultMode(mode);
-}
-
-// These functions are not supported with the new config setup
+// These functions are either not supported or have breaking changes with the new config setup
+export const getConfigAccounts = config_DEPRECATED.getConfigAccounts;
+export const getConfigDefaultAccount =
+  config_DEPRECATED.getConfigDefaultAccount;
 export const getConfigAccountId = config_DEPRECATED.getConfigAccountId;
 export const getOrderedAccount = config_DEPRECATED.getOrderedAccount;
 export const getOrderedConfig = config_DEPRECATED.getOrderedConfig;
 export const setConfig = config_DEPRECATED.setConfig;
 export const setConfigPath = config_DEPRECATED.setConfigPath;
 export const findConfig = config_DEPRECATED.findConfig;
+export const updateDefaultMode = config_DEPRECATED.updateDefaultMode;
