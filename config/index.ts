@@ -232,14 +232,14 @@ export function getAccountType(
   return config_DEPRECATED.getAccountType(accountType, sandboxAccountType);
 }
 
-export function getDefaultAccount(): string | number | null | undefined {
+export function getConfigDefaultAccount(): string | number | null | undefined {
   if (CLIConfiguration.isActive()) {
     return CLIConfiguration.getDefaultAccount();
   }
   return config_DEPRECATED.getConfigDefaultAccount();
 }
 
-export function getAccounts():
+export function getConfigAccounts():
   | Array<CLIAccount_NEW>
   | Array<CLIAccount_DEPRECATED>
   | null
