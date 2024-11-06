@@ -1,6 +1,6 @@
 import { addOauthToAccountConfig, getOauthManager } from '../oauth';
 
-jest.mock('../../utils/getAccountIdentifier');
+jest.mock('../../config/getAccountIdentifier');
 jest.mock('../../config');
 jest.mock('../logger');
 jest.mock('../../errors');

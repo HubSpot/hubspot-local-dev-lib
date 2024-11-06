@@ -1,21 +1,9 @@
-import { CLIAccount, GenericAccount } from '../types/Accounts';
+import { CLIAccount } from '../types/Accounts';
 import {
   CLIConfig,
   CLIConfig_DEPRECATED,
   CLIConfig_NEW,
 } from '../types/Config';
-
-export function getAccountIdentifier(
-  account?: GenericAccount | null
-): number | undefined {
-  if (!account) {
-    return undefined;
-  } else if (Object.hasOwn(account, 'portalId')) {
-    return account.portalId;
-  } else if (Object.hasOwn(account, 'accountId')) {
-    return account.accountId;
-  }
-}
 
 export function getAccounts(config?: CLIConfig | null): Array<CLIAccount> {
   if (!config) {
