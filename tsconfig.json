@@ -6,7 +6,9 @@
     "strict": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "rootDir": ".",
+    "outDir": "dist"
   },
   "include": [
     "api",
