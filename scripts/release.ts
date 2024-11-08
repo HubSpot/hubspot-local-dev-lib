@@ -242,7 +242,6 @@ async function builder(yargs: Argv): Promise<Argv> {
   });
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-expressions
 yargs(process.argv.slice(2))
   .scriptName('yarn')
   .usage('Release script')
