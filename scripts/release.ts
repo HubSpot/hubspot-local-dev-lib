@@ -6,7 +6,7 @@ import { confirm } from '@inquirer/prompts';
 
 import { name as packageName, version as localVersion } from '../package.json';
 import { logger, setLogLevel, LOG_LEVEL } from '../lib/logger';
-import { build } from './build';
+import { build } from './lib/build';
 
 const exec = promisify(_exec);
 
