@@ -133,17 +133,21 @@ async function handler({
     process.exit(EXIT_CODES.ERROR);
   }
 
-  const { next: currentNextTag, experimental: currentExperimentalTag } =
-    await getDistTags();
+  const {
+    // next: currentNextTag,
+    experimental: currentExperimentalTag,
+  } = await getDistTags();
 
-  if (!isExperimental && currentNextTag !== localVersion) {
-    logger.error(
-      `Local package.json version ${localVersion} is out of sync with published version ${currentNextTag}`
-    );
-    process.exit(EXIT_CODES.ERROR);
-  }
+  // if (!isExperimental && currentNextTag !== localVersion) {
+  //   logger.error(
+  //     `Local package.json version ${localVersion} is out of sync with published version ${currentNextTag}`
+  //   );
+  //   process.exit(EXIT_CODES.ERROR);
+  // }
 
-  const currentVersion = isExperimental ? currentExperimentalTag : localVersion;
+  const currentVersion = isExperimental
+    ? currentExperimentalTag || '0.0.0'
+    : localVersion;
   const prereleaseIdentifier = isExperimental
     ? PRERELEASE_IDENTIFIER.EXPERIMENTAL
     : PRERELEASE_IDENTIFIER.NEXT;
