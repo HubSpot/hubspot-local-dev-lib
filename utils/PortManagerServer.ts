@@ -16,6 +16,9 @@ import { RequestPortsData, ServerPortMap } from '../types/PortManager';
 
 const i18nKey = 'utils.PortManagerServer';
 
+export const HEALTH_CHECK_PATH = '/port-manager-health-check';
+export const SERVICE_HEALTHY = 'OK';
+
 class _PortManagerServer {
   app?: Express;
   server?: Server;
@@ -36,6 +39,7 @@ class _PortManagerServer {
 
     try {
       this.server = await this.listen();
+      logger.debug(this.server);
     } catch (e) {
       if (isSystemError(e) && e.code === 'EADDRINUSE') {
         throw new Error(
@@ -80,6 +84,10 @@ class _PortManagerServer {
     this.app.post('/servers', this.assignPortsToServers);
     this.app.delete('/servers/:instanceId', this.deleteServerInstance);
     this.app.post('/close', this.closeServer);
+
+    this.app.use(HEALTH_CHECK_PATH, (req, res) => {
+      res.status(200).send({ status: SERVICE_HEALTHY });
+    });
   }
 
   setPort(instanceId: string, port: number) {
