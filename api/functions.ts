@@ -1,4 +1,4 @@
-import { http, HubSpotResponse } from '../http';
+import { http, HubSpotPromise } from '../http';
 import { QueryParams } from '../types/Http';
 import { GetBuildStatusResponse, GetRoutesResponse } from '../types/Functions';
 
@@ -6,7 +6,7 @@ const FUNCTION_API_PATH = 'cms/v3/functions';
 
 export function getRoutes(
   accountId: number
-): HubSpotResponse<GetRoutesResponse> {
+): HubSpotPromise<GetRoutesResponse> {
   return http.get(accountId, {
     url: `${FUNCTION_API_PATH}/routes`,
   });
@@ -16,7 +16,7 @@ export function getFunctionLogs(
   accountId: number,
   route: string,
   params: QueryParams = {}
-): HubSpotResponse {
+): HubSpotPromise {
   const { limit = 5 } = params;
 
   return http.get(accountId, {
@@ -28,7 +28,7 @@ export function getFunctionLogs(
 export function getLatestFunctionLog(
   accountId: number,
   route: string
-): HubSpotResponse {
+): HubSpotPromise {
   return http.get(accountId, {
     url: `${FUNCTION_API_PATH}/results/by-route/${encodeURIComponent(
       route
@@ -39,7 +39,7 @@ export function getLatestFunctionLog(
 export function buildPackage(
   accountId: number,
   folderPath: string
-): HubSpotResponse<string> {
+): HubSpotPromise<string> {
   return http.post(accountId, {
     url: `${FUNCTION_API_PATH}/build/async`,
     headers: {
@@ -54,7 +54,7 @@ export function buildPackage(
 export function getBuildStatus(
   accountId: number,
   buildId: number
-): HubSpotResponse<GetBuildStatusResponse> {
+): HubSpotPromise<GetBuildStatusResponse> {
   return http.get(accountId, {
     url: `${FUNCTION_API_PATH}/build/${buildId}/poll`,
   });

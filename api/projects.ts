@@ -1,4 +1,4 @@
-import { http, HubSpotResponse } from '../http';
+import { http, HubSpotPromise } from '../http';
 import fs from 'fs';
 import { FormData, QueryParams } from '../types/Http';
 import {
@@ -30,7 +30,7 @@ const MIGRATIONS_API_PATH = 'dfs/migrations/v1';
 
 export function fetchProjects(
   accountId: number
-): HubSpotResponse<FetchProjectResponse> {
+): HubSpotPromise<FetchProjectResponse> {
   return http.get<FetchProjectResponse>(accountId, {
     url: DEVELOPER_PROJECTS_API_PATH,
   });
@@ -39,7 +39,7 @@ export function fetchProjects(
 export function createProject(
   accountId: number,
   name: string
-): HubSpotResponse<Project> {
+): HubSpotPromise<Project> {
   return http.post<Project>(accountId, {
     url: DEVELOPER_PROJECTS_API_PATH,
     data: {
@@ -54,7 +54,7 @@ export function uploadProject(
   projectFile: string,
   uploadMessage: string,
   platformVersion?: string
-): HubSpotResponse<UploadProjectResponse> {
+): HubSpotPromise<UploadProjectResponse> {
   const formData: FormData = {
     file: fs.createReadStream(projectFile),
     uploadMessage,
@@ -74,7 +74,7 @@ export function uploadProject(
 export function fetchProject(
   accountId: number,
   projectName: string
-): HubSpotResponse<Project> {
+): HubSpotPromise<Project> {
   return http.get<Project>(accountId, {
     url: `${DEVELOPER_PROJECTS_API_PATH}/by-name/${encodeURIComponent(projectName)}`,
   });
@@ -83,7 +83,7 @@ export function fetchProject(
 export async function fetchProjectComponentsMetadata(
   accountId: number,
   projectId: number
-): HubSpotResponse<ProjectComponentsMetadata> {
+): HubSpotPromise<ProjectComponentsMetadata> {
   return http.get(accountId, {
     url: `${DEVELOPER_FILE_SYSTEM_PATH}/projects-deployed-build/${projectId}`,
   });
@@ -93,7 +93,7 @@ export async function downloadProject(
   accountId: number,
   projectName: string,
   buildId: number
-): HubSpotResponse<Buffer> {
+): HubSpotPromise<Buffer> {
   return http.get<Buffer>(accountId, {
     url: `${PROJECTS_API_PATH}/${encodeURIComponent(
       projectName
@@ -106,7 +106,7 @@ export async function downloadProject(
 export function deleteProject(
   accountId: number,
   projectName: string
-): HubSpotResponse<void> {
+): HubSpotPromise<void> {
   return http.delete(accountId, {
     url: `${DEVELOPER_PROJECTS_API_PATH}/${encodeURIComponent(projectName)}`,
   });
@@ -114,7 +114,7 @@ export function deleteProject(
 
 export function fetchPlatformVersions(
   accountId: number
-): HubSpotResponse<FetchPlatformVersionResponse> {
+): HubSpotPromise<FetchPlatformVersionResponse> {
   return http.get<FetchPlatformVersionResponse>(accountId, {
     url: `${DEVELOPER_PROJECTS_API_PATH}/platformVersion`,
   });
@@ -124,7 +124,7 @@ export function fetchProjectBuilds(
   accountId: number,
   projectName: string,
   params: QueryParams = {}
-): HubSpotResponse<FetchProjectBuildsResponse> {
+): HubSpotPromise<FetchProjectBuildsResponse> {
   return http.get<FetchProjectBuildsResponse>(accountId, {
     url: `${PROJECTS_API_PATH}/${encodeURIComponent(projectName)}/builds`,
     params,
@@ -135,7 +135,7 @@ export function getBuildStatus(
   accountId: number,
   projectName: string,
   buildId: number
-): HubSpotResponse<Build> {
+): HubSpotPromise<Build> {
   return http.get<Build>(accountId, {
     url: `${PROJECTS_API_PATH}/${encodeURIComponent(
       projectName
@@ -147,7 +147,7 @@ export function getBuildStructure(
   accountId: number,
   projectName: string,
   buildId: number
-): HubSpotResponse<ComponentStructureResponse> {
+): HubSpotPromise<ComponentStructureResponse> {
   return http.get<ComponentStructureResponse>(accountId, {
     url: `dfs/v1/builds/by-project-name/${encodeURIComponent(
       projectName
@@ -159,7 +159,7 @@ export function deployProject(
   accountId: number,
   projectName: string,
   buildId: number
-): HubSpotResponse<ProjectDeployResponse> {
+): HubSpotPromise<ProjectDeployResponse> {
   return http.post<ProjectDeployResponse>(accountId, {
     url: `${PROJECTS_DEPLOY_API_PATH}/deploys/queue/async`,
     data: {
@@ -173,7 +173,7 @@ export function getDeployStatus(
   accountId: number,
   projectName: string,
   deployId: number
-): HubSpotResponse<Deploy> {
+): HubSpotPromise<Deploy> {
   return http.get<Deploy>(accountId, {
     url: `${PROJECTS_DEPLOY_API_PATH}/deploy-status/projects/${encodeURIComponent(
       projectName
@@ -185,7 +185,7 @@ export function getDeployStructure(
   accountId: number,
   projectName: string,
   deployId: number
-): HubSpotResponse<ComponentStructureResponse> {
+): HubSpotPromise<ComponentStructureResponse> {
   return http.get<ComponentStructureResponse>(accountId, {
     url: `${PROJECTS_DEPLOY_API_PATH}/deploys/by-project-name/${encodeURIComponent(
       projectName
@@ -196,7 +196,7 @@ export function getDeployStructure(
 export function fetchProjectSettings(
   accountId: number,
   projectName: string
-): HubSpotResponse<ProjectSettings> {
+): HubSpotPromise<ProjectSettings> {
   return http.get<ProjectSettings>(accountId, {
     url: `${DEVELOPER_PROJECTS_API_PATH}/${encodeURIComponent(projectName)}/settings`,
   });
@@ -206,7 +206,7 @@ export async function provisionBuild(
   accountId: number,
   projectName: string,
   platformVersion?: string
-): HubSpotResponse<Build> {
+): HubSpotPromise<Build> {
   return http.post<Build>(accountId, {
     url: `${PROJECTS_API_PATH}/${encodeURIComponent(
       projectName
@@ -221,7 +221,7 @@ export function queueBuild(
   accountId: number,
   projectName: string,
   platformVersion?: string
-): HubSpotResponse<void> {
+): HubSpotPromise<void> {
   return http.post(accountId, {
     url: `${PROJECTS_API_PATH}/${encodeURIComponent(
       projectName
@@ -236,7 +236,7 @@ export function uploadFileToBuild(
   projectName: string,
   filePath: string,
   path: string
-): HubSpotResponse<void> {
+): HubSpotPromise<void> {
   return http.put(accountId, {
     url: `${PROJECTS_API_PATH}/${encodeURIComponent(
       projectName
@@ -252,7 +252,7 @@ export function deleteFileFromBuild(
   accountId: number,
   projectName: string,
   path: string
-): HubSpotResponse<void> {
+): HubSpotPromise<void> {
   return http.delete(accountId, {
     url: `${PROJECTS_API_PATH}/${encodeURIComponent(
       projectName
@@ -263,7 +263,7 @@ export function deleteFileFromBuild(
 export function cancelStagedBuild(
   accountId: number,
   projectName: string
-): HubSpotResponse<void> {
+): HubSpotPromise<void> {
   return http.post(accountId, {
     url: `${PROJECTS_API_PATH}/${encodeURIComponent(
       projectName
@@ -280,7 +280,7 @@ export function fetchBuildWarnLogs(
   accountId: number,
   projectName: string,
   buildId: number
-): HubSpotResponse<WarnLogsResponse> {
+): HubSpotPromise<WarnLogsResponse> {
   return http.get<WarnLogsResponse>(accountId, {
     url: `${PROJECTS_LOGS_API_PATH}/logs/projects/${encodeURIComponent(
       projectName
@@ -292,7 +292,7 @@ export function fetchDeployWarnLogs(
   accountId: number,
   projectName: string,
   deployId: number
-): HubSpotResponse<WarnLogsResponse> {
+): HubSpotPromise<WarnLogsResponse> {
   return http.get<WarnLogsResponse>(accountId, {
     url: `${PROJECTS_LOGS_API_PATH}/logs/projects/${encodeURIComponent(
       projectName
@@ -304,7 +304,7 @@ export function migrateApp(
   accountId: number,
   appId: number,
   projectName: string
-): HubSpotResponse<MigrateAppResponse> {
+): HubSpotPromise<MigrateAppResponse> {
   return http.post<MigrateAppResponse>(accountId, {
     url: `${MIGRATIONS_API_PATH}/migrations`,
     data: {
@@ -318,7 +318,7 @@ export function migrateApp(
 export function checkMigrationStatus(
   accountId: number,
   id: number
-): HubSpotResponse<PollAppResponse> {
+): HubSpotPromise<PollAppResponse> {
   return http.get<PollAppResponse>(accountId, {
     url: `${MIGRATIONS_API_PATH}/migrations/${id}`,
   });
@@ -327,7 +327,7 @@ export function checkMigrationStatus(
 export function cloneApp(
   accountId: number,
   appId: number
-): HubSpotResponse<CloneAppResponse> {
+): HubSpotPromise<CloneAppResponse> {
   return http.post<CloneAppResponse>(accountId, {
     url: `${MIGRATIONS_API_PATH}/exports`,
     data: {
@@ -340,7 +340,7 @@ export function cloneApp(
 export function checkCloneStatus(
   accountId: number,
   exportId: number
-): HubSpotResponse<CloneAppResponse> {
+): HubSpotPromise<CloneAppResponse> {
   return http.get<CloneAppResponse>(accountId, {
     url: `${MIGRATIONS_API_PATH}/exports/${exportId}/status`,
   });
@@ -349,7 +349,7 @@ export function checkCloneStatus(
 export function downloadClonedProject(
   accountId: number,
   exportId: number
-): HubSpotResponse<Buffer> {
+): HubSpotPromise<Buffer> {
   return http.get<Buffer>(accountId, {
     url: `${MIGRATIONS_API_PATH}/exports/${exportId}/download-as-clone`,
     responseType: 'arraybuffer',

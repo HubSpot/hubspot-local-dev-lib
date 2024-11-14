@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { http, HubSpotResponse } from '../http';
+import { http, HubSpotPromise } from '../http';
 import { FormData } from '../types/Http';
 import {
   FetchStatResponse,
@@ -16,7 +16,7 @@ export function uploadFile(
   accountId: number,
   src: string,
   dest: string
-): HubSpotResponse<UploadResponse> {
+): HubSpotPromise<UploadResponse> {
   const directory = path.dirname(dest);
   const filename = path.basename(dest);
   const formData: FormData = {
@@ -44,7 +44,7 @@ export function uploadFile(
 export function fetchStat(
   accountId: number,
   src: string
-): HubSpotResponse<FetchStatResponse> {
+): HubSpotPromise<FetchStatResponse> {
   return http.get<FetchStatResponse>(accountId, {
     url: `${FILE_MANAGER_V2_API_PATH}/files/stat/${src}`,
   });
@@ -55,7 +55,7 @@ export function fetchFiles(
   folderId: number | 'None',
   offset: number,
   archived?: boolean
-): HubSpotResponse<FetchFilesResponse> {
+): HubSpotPromise<FetchFilesResponse> {
   return http.get<FetchFilesResponse>(accountId, {
     url: `${FILE_MANAGER_V2_API_PATH}/files/`,
     params: {
@@ -70,7 +70,7 @@ export function fetchFiles(
 export function fetchFolders(
   accountId: number,
   folderId: number | 'None'
-): HubSpotResponse<FetchFolderResponse> {
+): HubSpotPromise<FetchFolderResponse> {
   return http.get<FetchFolderResponse>(accountId, {
     url: `${FILE_MANAGER_V2_API_PATH}/folders/`,
     params: {

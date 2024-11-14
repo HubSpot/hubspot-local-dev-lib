@@ -1,5 +1,5 @@
 import axios, { AxiosPromise } from 'axios';
-import { http, HubSpotResponse } from '../http';
+import { http, HubSpotPromise } from '../http';
 import { getAxiosConfig } from '../http/getAxiosConfig';
 import { ENVIRONMENTS } from '../constants/environments';
 import { SANDBOX_TIMEOUT } from '../constants/api';
@@ -17,7 +17,7 @@ export function createSandbox(
   accountId: number,
   name: string,
   type: 1 | 2
-): HubSpotResponse<SandboxResponse> {
+): HubSpotPromise<SandboxResponse> {
   return http.post<SandboxResponse>(accountId, {
     data: { name, type, generatePersonalAccessKey: true }, // For CLI, generatePersonalAccessKey will always be true since we'll be saving the entry to the config
     timeout: SANDBOX_TIMEOUT,
@@ -28,7 +28,7 @@ export function createSandbox(
 export function deleteSandbox(
   parentAccountId: number,
   sandboxAccountId: number
-): HubSpotResponse<void> {
+): HubSpotPromise<void> {
   return http.delete(parentAccountId, {
     url: `${SANDBOX_API_PATH}/${sandboxAccountId}`,
   });
@@ -36,7 +36,7 @@ export function deleteSandbox(
 
 export function getSandboxUsageLimits(
   parentAccountId: number
-): HubSpotResponse<SandboxUsageLimitsResponse> {
+): HubSpotPromise<SandboxUsageLimitsResponse> {
   return http.get<SandboxUsageLimitsResponse>(parentAccountId, {
     url: `${SANDBOX_API_PATH}/parent/${parentAccountId}/usage`,
   });

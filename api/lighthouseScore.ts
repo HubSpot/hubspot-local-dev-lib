@@ -1,4 +1,4 @@
-import { http, HubSpotResponse } from '../http';
+import { http, HubSpotPromise } from '../http';
 import { Data, QueryParams } from '../types/Http';
 import {
   GetLighthouseScoreResponse,
@@ -10,7 +10,7 @@ const LIGHTHOUSE_SCORE_API_BASE = 'quality-engine/v1/lighthouse';
 export function requestLighthouseScore(
   accountId: number,
   data: Data = {}
-): HubSpotResponse<RequestLighthouseScoreResponse> {
+): HubSpotPromise<RequestLighthouseScoreResponse> {
   return http.post<RequestLighthouseScoreResponse>(accountId, {
     url: `${LIGHTHOUSE_SCORE_API_BASE}/request`,
     data,
@@ -20,7 +20,7 @@ export function requestLighthouseScore(
 export function getLighthouseScoreStatus(
   accountId: number,
   params: QueryParams = {}
-): HubSpotResponse<string> {
+): HubSpotPromise<string> {
   return http.get<string>(accountId, {
     url: `${LIGHTHOUSE_SCORE_API_BASE}/status`,
     params,
@@ -30,7 +30,7 @@ export function getLighthouseScoreStatus(
 export function getLighthouseScore(
   accountId: number,
   params: QueryParams = {}
-): HubSpotResponse<GetLighthouseScoreResponse> {
+): HubSpotPromise<GetLighthouseScoreResponse> {
   return http.get<GetLighthouseScoreResponse>(accountId, {
     url: `${LIGHTHOUSE_SCORE_API_BASE}/scores`,
     params,

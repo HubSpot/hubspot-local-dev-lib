@@ -1,4 +1,4 @@
-import { http, HubSpotResponse } from '../http';
+import { http, HubSpotPromise } from '../http';
 import {
   InitiateSyncResponse,
   FetchTypesResponse,
@@ -12,7 +12,7 @@ export async function initiateSync(
   toHubId: number,
   tasks: Array<TaskRequestData>,
   sandboxHubId: number
-): HubSpotResponse<InitiateSyncResponse> {
+): HubSpotPromise<InitiateSyncResponse> {
   return http.post<InitiateSyncResponse>(fromHubId, {
     data: {
       command: 'SYNC',
@@ -29,7 +29,7 @@ export async function initiateSync(
 export async function fetchTypes(
   accountId: number,
   toHubId: number
-): HubSpotResponse<FetchTypesResponse> {
+): HubSpotPromise<FetchTypesResponse> {
   return http.get<FetchTypesResponse>(accountId, {
     url: `${SANDBOXES_SYNC_API_PATH}/types${
       toHubId ? `?toHubId=${toHubId}` : ''

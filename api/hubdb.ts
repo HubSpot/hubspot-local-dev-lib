@@ -1,4 +1,4 @@
-import { http, HubSpotResponse } from '../http';
+import { http, HubSpotPromise } from '../http';
 import { QueryParams } from '../types/Http';
 import {
   CreateRowsResponse,
@@ -13,7 +13,7 @@ const HUBDB_API_PATH = 'cms/v3/hubdb';
 
 export function fetchTables(
   accountId: number
-): HubSpotResponse<FetchTablesResponse> {
+): HubSpotPromise<FetchTablesResponse> {
   return http.get<FetchTablesResponse>(accountId, {
     url: `${HUBDB_API_PATH}/tables`,
   });
@@ -22,7 +22,7 @@ export function fetchTables(
 export function fetchTable(
   accountId: number,
   tableId: string
-): HubSpotResponse<Table> {
+): HubSpotPromise<Table> {
   return http.get<Table>(accountId, {
     url: `${HUBDB_API_PATH}/tables/${tableId}`,
   });
@@ -31,7 +31,7 @@ export function fetchTable(
 export function createTable(
   accountId: number,
   schema: Schema
-): HubSpotResponse<Table> {
+): HubSpotPromise<Table> {
   return http.post<Table>(accountId, {
     url: `${HUBDB_API_PATH}/tables`,
     data: schema,
@@ -42,7 +42,7 @@ export function updateTable(
   accountId: number,
   tableId: string,
   schema: Schema
-): HubSpotResponse<Table> {
+): HubSpotPromise<Table> {
   return http.patch<Table>(accountId, {
     url: `${HUBDB_API_PATH}/tables/${tableId}/draft`,
     data: schema,
@@ -52,7 +52,7 @@ export function updateTable(
 export function publishTable(
   accountId: number,
   tableId: string
-): HubSpotResponse<Table> {
+): HubSpotPromise<Table> {
   return http.post<Table>(accountId, {
     url: `${HUBDB_API_PATH}/tables/${tableId}/draft/publish`,
     headers: {
@@ -64,7 +64,7 @@ export function publishTable(
 export function deleteTable(
   accountId: number,
   tableId: string
-): HubSpotResponse<void> {
+): HubSpotPromise<void> {
   return http.delete(accountId, {
     url: `${HUBDB_API_PATH}/tables/${tableId}`,
   });
@@ -74,7 +74,7 @@ export function createRows(
   accountId: number,
   tableId: string,
   rows: Array<Row>
-): HubSpotResponse<CreateRowsResponse> {
+): HubSpotPromise<CreateRowsResponse> {
   return http.post<CreateRowsResponse>(accountId, {
     url: `${HUBDB_API_PATH}/tables/${tableId}/rows/draft/batch/create`,
     data: { inputs: rows },
@@ -85,7 +85,7 @@ export function fetchRows(
   accountId: number,
   tableId: string,
   params: QueryParams = {}
-): HubSpotResponse<FetchRowsResponse> {
+): HubSpotPromise<FetchRowsResponse> {
   return http.get<FetchRowsResponse>(accountId, {
     url: `${HUBDB_API_PATH}/tables/${tableId}/rows/draft`,
     params,
@@ -96,7 +96,7 @@ export function deleteRows(
   accountId: number,
   tableId: string,
   rowIds: Array<string>
-): HubSpotResponse<void> {
+): HubSpotPromise<void> {
   return http.post(accountId, {
     url: `${HUBDB_API_PATH}/tables/${tableId}/rows/draft/batch/purge`,
     data: { inputs: rowIds },
