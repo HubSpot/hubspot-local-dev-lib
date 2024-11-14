@@ -16,7 +16,7 @@ import { HubSpotHttpError } from '../models/HubSpotHttpError';
 
 const i18nKey = 'http.index';
 
-export type HubSpotResponse<T = unknown> = Promise<AxiosResponse<T>>;
+export type HubSpotResponse<T = unknown> = AxiosPromise<T>;
 
 axios.interceptors.response.use(undefined, error => {
   // Wrap all axios errors in our own Error class.  Attach the error
