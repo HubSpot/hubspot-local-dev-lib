@@ -1,15 +1,31 @@
 import axios from 'axios';
 
-import { PortManagerServer } from '../utils/PortManagerServer';
-import { detectPort } from '../utils/detectPort';
+import {
+  HEALTH_CHECK_PATH,
+  PortManagerServer,
+  SERVICE_HEALTHY,
+} from '../utils/PortManagerServer';
 import { PORT_MANAGER_SERVER_PORT } from '../constants/ports';
 import { RequestPortsData } from '../types/PortManager';
+import { detectPort } from '../utils/detectPort';
+import { logger } from './logger';
 
 export const BASE_URL = `http://localhost:${PORT_MANAGER_SERVER_PORT}`;
 
+export async function isPortManagerPortAvailable(): Promise<boolean> {
+  return (
+    (await detectPort(PORT_MANAGER_SERVER_PORT)) === PORT_MANAGER_SERVER_PORT
+  );
+}
+
 export async function isPortManagerServerRunning(): Promise<boolean> {
-  const port = await detectPort(PORT_MANAGER_SERVER_PORT);
-  return port !== PORT_MANAGER_SERVER_PORT;
+  try {
+    const { data } = await axios.get(`${BASE_URL}${HEALTH_CHECK_PATH}`);
+    return data.status === SERVICE_HEALTHY;
+  } catch (e) {
+    logger.debug(e);
+    return false;
+  }
 }
 
 export async function startPortManagerServer(): Promise<void> {
