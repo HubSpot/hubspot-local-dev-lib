@@ -16,6 +16,8 @@ import { HubSpotHttpError } from '../models/HubSpotHttpError';
 
 const i18nKey = 'http.index';
 
+export type HubSpotResponse<T = unknown> = Promise<AxiosResponse<T>>;
+
 axios.interceptors.response.use(undefined, error => {
   // Wrap all axios errors in our own Error class.  Attach the error
   // as the cause for the new error, so we maintain the stack trace
@@ -115,7 +117,7 @@ async function withAuth(
 async function getRequest<T>(
   accountId: number,
   options: HttpOptions
-): AxiosPromise<T> {
+): HubSpotResponse<T> {
   const { params, ...rest } = options;
   const optionsWithParams = addQueryParams(rest, params);
   const requestConfig = await withAuth(accountId, optionsWithParams);
@@ -126,7 +128,7 @@ async function getRequest<T>(
 async function postRequest<T>(
   accountId: number,
   options: HttpOptions
-): AxiosPromise<T> {
+): HubSpotResponse<T> {
   const requestConfig = await withAuth(accountId, options);
   return axios<T>({ ...requestConfig, method: 'post' });
 }
@@ -134,7 +136,7 @@ async function postRequest<T>(
 async function putRequest<T>(
   accountId: number,
   options: HttpOptions
-): AxiosPromise<T> {
+): HubSpotResponse<T> {
   const requestConfig = await withAuth(accountId, options);
   return axios<T>({ ...requestConfig, method: 'put' });
 }
@@ -142,7 +144,7 @@ async function putRequest<T>(
 async function patchRequest<T>(
   accountId: number,
   options: HttpOptions
-): AxiosPromise<T> {
+): HubSpotResponse<T> {
   const requestConfig = await withAuth(accountId, options);
   return axios<T>({ ...requestConfig, method: 'patch' });
 }
@@ -150,7 +152,7 @@ async function patchRequest<T>(
 async function deleteRequest<T>(
   accountId: number,
   options: HttpOptions
-): AxiosPromise<T> {
+): HubSpotResponse<T> {
   const requestConfig = await withAuth(accountId, options);
   return axios<T>({ ...requestConfig, method: 'delete' });
 }

@@ -1,5 +1,4 @@
-import { AxiosPromise } from 'axios';
-import { http } from '../http';
+import { http, HubSpotResponse } from '../http';
 import fs from 'fs';
 import { FormData, QueryParams } from '../types/Http';
 import {
@@ -31,7 +30,7 @@ const MIGRATIONS_API_PATH = 'dfs/migrations/v1';
 
 export function fetchProjects(
   accountId: number
-): AxiosPromise<FetchProjectResponse> {
+): HubSpotResponse<FetchProjectResponse> {
   return http.get<FetchProjectResponse>(accountId, {
     url: DEVELOPER_PROJECTS_API_PATH,
   });
@@ -40,7 +39,7 @@ export function fetchProjects(
 export function createProject(
   accountId: number,
   name: string
-): AxiosPromise<Project> {
+): HubSpotResponse<Project> {
   return http.post<Project>(accountId, {
     url: DEVELOPER_PROJECTS_API_PATH,
     data: {
@@ -55,7 +54,7 @@ export function uploadProject(
   projectFile: string,
   uploadMessage: string,
   platformVersion?: string
-): AxiosPromise<UploadProjectResponse> {
+): HubSpotResponse<UploadProjectResponse> {
   const formData: FormData = {
     file: fs.createReadStream(projectFile),
     uploadMessage,
@@ -75,7 +74,7 @@ export function uploadProject(
 export function fetchProject(
   accountId: number,
   projectName: string
-): AxiosPromise<Project> {
+): HubSpotResponse<Project> {
   return http.get<Project>(accountId, {
     url: `${DEVELOPER_PROJECTS_API_PATH}/by-name/${encodeURIComponent(projectName)}`,
   });
@@ -84,7 +83,7 @@ export function fetchProject(
 export async function fetchProjectComponentsMetadata(
   accountId: number,
   projectId: number
-): AxiosPromise<ProjectComponentsMetadata> {
+): HubSpotResponse<ProjectComponentsMetadata> {
   return http.get(accountId, {
     url: `${DEVELOPER_FILE_SYSTEM_PATH}/projects-deployed-build/${projectId}`,
   });
@@ -94,7 +93,7 @@ export async function downloadProject(
   accountId: number,
   projectName: string,
   buildId: number
-): AxiosPromise<Buffer> {
+): HubSpotResponse<Buffer> {
   return http.get<Buffer>(accountId, {
     url: `${PROJECTS_API_PATH}/${encodeURIComponent(
       projectName
@@ -107,7 +106,7 @@ export async function downloadProject(
 export function deleteProject(
   accountId: number,
   projectName: string
-): AxiosPromise<void> {
+): HubSpotResponse<void> {
   return http.delete(accountId, {
     url: `${DEVELOPER_PROJECTS_API_PATH}/${encodeURIComponent(projectName)}`,
   });
@@ -115,7 +114,7 @@ export function deleteProject(
 
 export function fetchPlatformVersions(
   accountId: number
-): AxiosPromise<FetchPlatformVersionResponse> {
+): HubSpotResponse<FetchPlatformVersionResponse> {
   return http.get<FetchPlatformVersionResponse>(accountId, {
     url: `${DEVELOPER_PROJECTS_API_PATH}/platformVersion`,
   });
@@ -125,7 +124,7 @@ export function fetchProjectBuilds(
   accountId: number,
   projectName: string,
   params: QueryParams = {}
-): AxiosPromise<FetchProjectBuildsResponse> {
+): HubSpotResponse<FetchProjectBuildsResponse> {
   return http.get<FetchProjectBuildsResponse>(accountId, {
     url: `${PROJECTS_API_PATH}/${encodeURIComponent(projectName)}/builds`,
     params,
@@ -136,7 +135,7 @@ export function getBuildStatus(
   accountId: number,
   projectName: string,
   buildId: number
-): AxiosPromise<Build> {
+): HubSpotResponse<Build> {
   return http.get<Build>(accountId, {
     url: `${PROJECTS_API_PATH}/${encodeURIComponent(
       projectName
@@ -148,7 +147,7 @@ export function getBuildStructure(
   accountId: number,
   projectName: string,
   buildId: number
-): AxiosPromise<ComponentStructureResponse> {
+): HubSpotResponse<ComponentStructureResponse> {
   return http.get<ComponentStructureResponse>(accountId, {
     url: `dfs/v1/builds/by-project-name/${encodeURIComponent(
       projectName
@@ -160,7 +159,7 @@ export function deployProject(
   accountId: number,
   projectName: string,
   buildId: number
-): AxiosPromise<ProjectDeployResponse> {
+): HubSpotResponse<ProjectDeployResponse> {
   return http.post<ProjectDeployResponse>(accountId, {
     url: `${PROJECTS_DEPLOY_API_PATH}/deploys/queue/async`,
     data: {
@@ -174,7 +173,7 @@ export function getDeployStatus(
   accountId: number,
   projectName: string,
   deployId: number
-): AxiosPromise<Deploy> {
+): HubSpotResponse<Deploy> {
   return http.get<Deploy>(accountId, {
     url: `${PROJECTS_DEPLOY_API_PATH}/deploy-status/projects/${encodeURIComponent(
       projectName
@@ -186,7 +185,7 @@ export function getDeployStructure(
   accountId: number,
   projectName: string,
   deployId: number
-): AxiosPromise<ComponentStructureResponse> {
+): HubSpotResponse<ComponentStructureResponse> {
   return http.get<ComponentStructureResponse>(accountId, {
     url: `${PROJECTS_DEPLOY_API_PATH}/deploys/by-project-name/${encodeURIComponent(
       projectName
@@ -197,7 +196,7 @@ export function getDeployStructure(
 export function fetchProjectSettings(
   accountId: number,
   projectName: string
-): AxiosPromise<ProjectSettings> {
+): HubSpotResponse<ProjectSettings> {
   return http.get<ProjectSettings>(accountId, {
     url: `${DEVELOPER_PROJECTS_API_PATH}/${encodeURIComponent(projectName)}/settings`,
   });
@@ -207,7 +206,7 @@ export async function provisionBuild(
   accountId: number,
   projectName: string,
   platformVersion?: string
-): AxiosPromise<Build> {
+): HubSpotResponse<Build> {
   return http.post<Build>(accountId, {
     url: `${PROJECTS_API_PATH}/${encodeURIComponent(
       projectName
@@ -222,7 +221,7 @@ export function queueBuild(
   accountId: number,
   projectName: string,
   platformVersion?: string
-): AxiosPromise<void> {
+): HubSpotResponse<void> {
   return http.post(accountId, {
     url: `${PROJECTS_API_PATH}/${encodeURIComponent(
       projectName
@@ -237,7 +236,7 @@ export function uploadFileToBuild(
   projectName: string,
   filePath: string,
   path: string
-): AxiosPromise<void> {
+): HubSpotResponse<void> {
   return http.put(accountId, {
     url: `${PROJECTS_API_PATH}/${encodeURIComponent(
       projectName
@@ -253,7 +252,7 @@ export function deleteFileFromBuild(
   accountId: number,
   projectName: string,
   path: string
-): AxiosPromise<void> {
+): HubSpotResponse<void> {
   return http.delete(accountId, {
     url: `${PROJECTS_API_PATH}/${encodeURIComponent(
       projectName
@@ -264,7 +263,7 @@ export function deleteFileFromBuild(
 export function cancelStagedBuild(
   accountId: number,
   projectName: string
-): AxiosPromise<void> {
+): HubSpotResponse<void> {
   return http.post(accountId, {
     url: `${PROJECTS_API_PATH}/${encodeURIComponent(
       projectName
@@ -281,7 +280,7 @@ export function fetchBuildWarnLogs(
   accountId: number,
   projectName: string,
   buildId: number
-): AxiosPromise<WarnLogsResponse> {
+): HubSpotResponse<WarnLogsResponse> {
   return http.get<WarnLogsResponse>(accountId, {
     url: `${PROJECTS_LOGS_API_PATH}/logs/projects/${encodeURIComponent(
       projectName
@@ -293,7 +292,7 @@ export function fetchDeployWarnLogs(
   accountId: number,
   projectName: string,
   deployId: number
-): AxiosPromise<WarnLogsResponse> {
+): HubSpotResponse<WarnLogsResponse> {
   return http.get<WarnLogsResponse>(accountId, {
     url: `${PROJECTS_LOGS_API_PATH}/logs/projects/${encodeURIComponent(
       projectName
@@ -305,7 +304,7 @@ export function migrateApp(
   accountId: number,
   appId: number,
   projectName: string
-): AxiosPromise<MigrateAppResponse> {
+): HubSpotResponse<MigrateAppResponse> {
   return http.post<MigrateAppResponse>(accountId, {
     url: `${MIGRATIONS_API_PATH}/migrations`,
     data: {
@@ -319,7 +318,7 @@ export function migrateApp(
 export function checkMigrationStatus(
   accountId: number,
   id: number
-): AxiosPromise<PollAppResponse> {
+): HubSpotResponse<PollAppResponse> {
   return http.get<PollAppResponse>(accountId, {
     url: `${MIGRATIONS_API_PATH}/migrations/${id}`,
   });
@@ -328,7 +327,7 @@ export function checkMigrationStatus(
 export function cloneApp(
   accountId: number,
   appId: number
-): AxiosPromise<CloneAppResponse> {
+): HubSpotResponse<CloneAppResponse> {
   return http.post<CloneAppResponse>(accountId, {
     url: `${MIGRATIONS_API_PATH}/exports`,
     data: {
@@ -341,7 +340,7 @@ export function cloneApp(
 export function checkCloneStatus(
   accountId: number,
   exportId: number
-): AxiosPromise<CloneAppResponse> {
+): HubSpotResponse<CloneAppResponse> {
   return http.get<CloneAppResponse>(accountId, {
     url: `${MIGRATIONS_API_PATH}/exports/${exportId}/status`,
   });
@@ -350,7 +349,7 @@ export function checkCloneStatus(
 export function downloadClonedProject(
   accountId: number,
   exportId: number
-): AxiosPromise<Buffer> {
+): HubSpotResponse<Buffer> {
   return http.get<Buffer>(accountId, {
     url: `${MIGRATIONS_API_PATH}/exports/${exportId}/download-as-clone`,
     responseType: 'arraybuffer',

@@ -1,9 +1,10 @@
-import axios, { AxiosPromise } from 'axios';
+import axios from 'axios';
 import { getAxiosConfig } from './getAxiosConfig';
 import { addQueryParams } from './addQueryParams';
 import { HttpOptions } from '../types/Http';
+import { HubSpotResponse } from './index';
 
-async function getRequest<T>(options: HttpOptions): AxiosPromise<T> {
+async function getRequest<T>(options: HttpOptions): HubSpotResponse<T> {
   const { params, ...rest } = options;
   const optionsWithParams = addQueryParams(rest, params);
   const requestConfig = await getAxiosConfig(optionsWithParams);
@@ -11,22 +12,22 @@ async function getRequest<T>(options: HttpOptions): AxiosPromise<T> {
   return axios<T>(requestConfig);
 }
 
-async function postRequest<T>(options: HttpOptions): AxiosPromise<T> {
+async function postRequest<T>(options: HttpOptions): HubSpotResponse<T> {
   const requestConfig = await getAxiosConfig(options);
   return axios<T>({ ...requestConfig, method: 'post' });
 }
 
-async function putRequest<T>(options: HttpOptions): AxiosPromise<T> {
+async function putRequest<T>(options: HttpOptions): HubSpotResponse<T> {
   const requestConfig = await getAxiosConfig(options);
   return axios<T>({ ...requestConfig, method: 'put' });
 }
 
-async function patchRequest<T>(options: HttpOptions): AxiosPromise<T> {
+async function patchRequest<T>(options: HttpOptions): HubSpotResponse<T> {
   const requestConfig = await getAxiosConfig(options);
   return axios<T>({ ...requestConfig, method: 'patch' });
 }
 
-async function deleteRequest<T>(options: HttpOptions): AxiosPromise<T> {
+async function deleteRequest<T>(options: HttpOptions): HubSpotResponse<T> {
   const requestConfig = await getAxiosConfig(options);
   return axios<T>({ ...requestConfig, method: 'delete' });
 }

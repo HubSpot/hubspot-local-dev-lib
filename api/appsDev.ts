@@ -1,5 +1,4 @@
-import { AxiosPromise } from 'axios';
-import { http } from '../http';
+import { http, HubSpotResponse } from '../http';
 import {
   PublicApp,
   PublicAppInstallCounts,
@@ -11,7 +10,7 @@ const APPS_DEV_API_PATH = 'apps-dev/external/public/v3';
 
 export function fetchPublicAppsForPortal(
   accountId: number
-): AxiosPromise<FetchPublicAppsForPortalResponse> {
+): HubSpotResponse<FetchPublicAppsForPortalResponse> {
   return http.get<FetchPublicAppsForPortalResponse>(accountId, {
     url: `${APPS_DEV_API_PATH}/full/portal`,
   });
@@ -20,7 +19,7 @@ export function fetchPublicAppsForPortal(
 export function fetchPublicAppDeveloperTestAccountInstallData(
   appId: number,
   accountId: number
-): AxiosPromise<PublicAppDeveloperTestAccountInstallData> {
+): HubSpotResponse<PublicAppDeveloperTestAccountInstallData> {
   return http.get<PublicAppDeveloperTestAccountInstallData>(accountId, {
     url: `${APPS_DEV_API_PATH}/${appId}/test-portal-installs`,
   });
@@ -29,7 +28,7 @@ export function fetchPublicAppDeveloperTestAccountInstallData(
 export function fetchPublicAppProductionInstallCounts(
   appId: number,
   accountId: number
-): AxiosPromise<PublicAppInstallCounts> {
+): HubSpotResponse<PublicAppInstallCounts> {
   return http.get<PublicAppInstallCounts>(accountId, {
     url: `${APPS_DEV_API_PATH}/${appId}/install-counts-without-test-portals`,
   });
@@ -38,7 +37,7 @@ export function fetchPublicAppProductionInstallCounts(
 export function fetchPublicAppMetadata(
   appId: number,
   accountId: number
-): AxiosPromise<PublicApp> {
+): HubSpotResponse<PublicApp> {
   return http.get<PublicApp>(accountId, {
     url: `${APPS_DEV_API_PATH}/${appId}/full`,
   });

@@ -1,6 +1,7 @@
-import axios, { AxiosPromise } from 'axios';
+import axios from 'axios';
 import { getDefaultUserAgentHeader } from '../http/getAxiosConfig';
 import { GithubReleaseData, GithubRepoFile, RepoPath } from '../types/Github';
+import { HubSpotResponse } from '../http';
 
 const GITHUB_REPOS_API = 'https://api.github.com/repos';
 const GITHUB_RAW_CONTENT_API_PATH = 'https://raw.githubusercontent.com';
@@ -31,7 +32,7 @@ function getAdditionalHeaders(): AdditionalGitHubHeaders {
 export function fetchRepoReleaseData(
   repoPath: RepoPath,
   tag = ''
-): AxiosPromise<GithubReleaseData> {
+): HubSpotResponse<GithubReleaseData> {
   const URL = `${GITHUB_REPOS_API}/${repoPath}/releases`;
 
   return axios.get<GithubReleaseData>(
@@ -47,7 +48,7 @@ export function fetchRepoReleaseData(
 
 // Returns the entire repo content as a zip, using the zipball_url from fetchRepoReleaseData()
 // https://docs.github.com/en/rest/repos/contents?apiVersion=2022-11-28#download-a-repository-archive-zip
-export function fetchRepoAsZip(zipUrl: string): AxiosPromise<Buffer> {
+export function fetchRepoAsZip(zipUrl: string): HubSpotResponse<Buffer> {
   return axios.get<Buffer>(zipUrl, {
     responseType: 'arraybuffer',
     headers: { ...getDefaultUserAgentHeader(), ...getAdditionalHeaders() },
@@ -59,7 +60,7 @@ export function fetchRepoFile(
   repoPath: RepoPath,
   filePath: string,
   ref: string
-): AxiosPromise<Buffer> {
+): HubSpotResponse<Buffer> {
   return axios.get<Buffer>(
     `${GITHUB_RAW_CONTENT_API_PATH}/${repoPath}/${ref}/${filePath}`,
     {
@@ -74,7 +75,7 @@ export function fetchRepoFile(
 // Returns the raw file contents via the raw.githubusercontent endpoint
 export function fetchRepoFileByDownloadUrl(
   downloadUrl: string
-): AxiosPromise<Buffer> {
+): HubSpotResponse<Buffer> {
   return axios.get<Buffer>(downloadUrl, {
     headers: { ...getDefaultUserAgentHeader(), ...getAdditionalHeaders() },
     responseType: 'arraybuffer',
@@ -87,7 +88,7 @@ export function fetchRepoContents(
   repoPath: RepoPath,
   path: string,
   ref?: string
-): AxiosPromise<Array<GithubRepoFile>> {
+): HubSpotResponse<Array<GithubRepoFile>> {
   const refQuery = ref ? `?ref=${ref}` : '';
 
   return axios.get<Array<GithubRepoFile>>(
