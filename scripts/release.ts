@@ -22,9 +22,6 @@ const TAG = {
   EXPERIMENTAL: 'experimental',
 } as const;
 
-// remove
-const EXPERIMENTAL_TEMP = 'experimental-temp';
-
 const INCREMENT = {
   PATCH: 'patch',
   MINOR: 'minor',
@@ -117,13 +114,13 @@ async function updateNextTag(
   isDryRun: boolean
 ): Promise<void> {
   logger.log();
-  logger.log(`Updating ${EXPERIMENTAL_TEMP} tag...`);
+  logger.log(`Updating ${TAG.NEXT} tag...`);
 
   const commandArgs = [
     'dist-tag',
     'add',
     `${packageName}@${newVersion}`,
-    EXPERIMENTAL_TEMP,
+    TAG.NEXT,
     '--registry',
     REGISTRY,
   ];
@@ -140,7 +137,7 @@ async function updateNextTag(
         if (code !== EXIT_CODES.SUCCESS) {
           reject();
         } else {
-          logger.success(`${EXPERIMENTAL_TEMP} tag updated successfully`);
+          logger.success(`${TAG.NEXT} tag updated successfully`);
           resolve();
         }
       });
