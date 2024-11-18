@@ -139,6 +139,8 @@ async function updateNextTag(
     EXPERIMENTAL_TEMP,
     '--registry',
     REGISTRY,
+    '--otp',
+    otp,
   ];
 
   return new Promise((resolve, reject) => {
@@ -266,6 +268,7 @@ async function handler({
 
   let otp = '';
 
+  logger.log();
   if (!isDryRun) {
     otp = await input({ message: 'Enter your NPM one-time password' });
   } else {
