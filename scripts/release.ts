@@ -4,7 +4,11 @@ import yargs, { ArgumentsCamelCase, Argv } from 'yargs';
 import semver from 'semver';
 import { confirm } from '@inquirer/prompts';
 
-import { name as packageName, version as localVersion } from '../package.json';
+import {
+  name as packageName,
+  version as localVersion,
+  publishConfig,
+} from '../package.json';
 import { logger, setLogLevel, LOG_LEVEL } from '../lib/logger';
 import { build } from './lib/build';
 
@@ -46,6 +50,9 @@ const EXIT_CODES = {
   ERROR: 1,
 };
 
+// Commands run with `spawn` won't always get this from the package.json
+const REGISTRY = publishConfig.registry;
+
 type ReleaseArguments = {
   versionIncrement: (typeof VERSION_INCREMENT_OPTIONS)[number];
   tag: (typeof TAG_OPTIONS)[number];
@@ -83,7 +90,7 @@ async function publish(tag: Tag, isDryRun: boolean): Promise<void> {
   logger.log('-'.repeat(50));
   logger.log();
 
-  const commandArgs = ['publish', '--tag', tag];
+  const commandArgs = ['publish', '--tag', tag, '--registry', REGISTRY];
 
   if (isDryRun) {
     commandArgs.push('--dry-run');
@@ -117,6 +124,8 @@ async function updateNextTag(
     'add',
     `${packageName}@${newVersion}`,
     EXPERIMENTAL_TEMP,
+    '--registry',
+    REGISTRY,
   ];
 
   return new Promise((resolve, reject) => {
