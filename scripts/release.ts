@@ -2,7 +2,7 @@ import { exec as _exec, spawn } from 'child_process';
 import { promisify } from 'util';
 import yargs, { ArgumentsCamelCase, Argv } from 'yargs';
 import semver from 'semver';
-import { confirm } from '@inquirer/prompts';
+import { confirm, input } from '@inquirer/prompts';
 
 import {
   name as packageName,
@@ -21,6 +21,9 @@ const TAG = {
   NEXT: 'next',
   EXPERIMENTAL: 'experimental',
 } as const;
+
+// remove
+const EXPERIMENTAL_TEMP = 'experimental-temp';
 
 const INCREMENT = {
   PATCH: 'patch',
@@ -81,13 +84,25 @@ async function cleanup(newVersion: string): Promise<void> {
   await exec(`git tag -d v${newVersion}`);
 }
 
-async function publish(tag: Tag, isDryRun: boolean): Promise<void> {
+async function publish(
+  tag: Tag,
+  otp: string,
+  isDryRun: boolean
+): Promise<void> {
   logger.log();
   logger.log(`Publishing to ${tag}...`);
   logger.log('-'.repeat(50));
   logger.log();
 
-  const commandArgs = ['publish', '--tag', tag, '--registry', REGISTRY];
+  const commandArgs = [
+    'publish',
+    '--tag',
+    tag,
+    '--registry',
+    REGISTRY,
+    '--otp',
+    otp,
+  ];
 
   if (isDryRun) {
     commandArgs.push('--dry-run');
@@ -111,16 +126,17 @@ async function publish(tag: Tag, isDryRun: boolean): Promise<void> {
 
 async function updateNextTag(
   newVersion: string,
+  otp: string,
   isDryRun: boolean
 ): Promise<void> {
   logger.log();
-  logger.log(`Updating ${TAG.NEXT} tag...`);
+  logger.log(`Updating ${EXPERIMENTAL_TEMP} tag...`);
 
   const commandArgs = [
     'dist-tag',
     'add',
     `${packageName}@${newVersion}`,
-    TAG.NEXT,
+    EXPERIMENTAL_TEMP,
     '--registry',
     REGISTRY,
   ];
@@ -137,7 +153,7 @@ async function updateNextTag(
         if (code !== EXIT_CODES.SUCCESS) {
           reject();
         } else {
-          logger.success(`${TAG.NEXT} tag updated successfully`);
+          logger.success(`${EXPERIMENTAL_TEMP} tag updated successfully`);
           resolve();
         }
       });
@@ -248,11 +264,19 @@ async function handler({
   logger.log();
   await build();
 
+  let otp = '';
+
+  if (!isDryRun) {
+    otp = await input({ message: 'Enter your NPM one-time password' });
+  } else {
+    logger.log('Dry run: skipping one-time password entry');
+  }
+
   try {
-    await publish(tag, isDryRun);
+    await publish(tag, otp, isDryRun);
 
     if (tag === TAG.EXPERIMENTAL) {
-      await updateNextTag(newVersion, isDryRun);
+      await updateNextTag(newVersion, otp, isDryRun);
     }
   } catch (e) {
     logger.error(
