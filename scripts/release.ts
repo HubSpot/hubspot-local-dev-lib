@@ -285,7 +285,7 @@ async function handler({
 
   const gitCommand = `git push --atomic origin ${branch} v${newVersion}`;
 
-  if (tag === TAG.EXPERIMENTAL) {
+  if (tag === TAG.LATEST) {
     try {
       await updateNextTag(newVersion, otp, isDryRun);
     } catch (e) {
