@@ -277,10 +277,6 @@ async function handler({
 
   try {
     await publish(tag, otp, isDryRun);
-
-    if (tag === TAG.EXPERIMENTAL) {
-      await updateNextTag(newVersion, otp, isDryRun);
-    }
   } catch (e) {
     logger.error(
       'An error occurred while releasing the package. Correct the error and re-run `yarn build`.'
@@ -289,16 +285,31 @@ async function handler({
     process.exit(EXIT_CODES.ERROR);
   }
 
+  const gitCommand = `git push --atomic origin ${branch} v${newVersion}`;
+
+  if (tag === TAG.EXPERIMENTAL) {
+    try {
+      await updateNextTag(newVersion, otp, isDryRun);
+    } catch (e) {
+      logger.error(
+        `An error occured while updating the ${TAG.NEXT} tag. To finish this release, run the following commands:`
+      );
+      logger.log(`npm dist-tag add ${packageName}@${newVersion} ${TAG.NEXT}`);
+      logger.log(gitCommand);
+    }
+  }
+
   if (isDryRun) {
     await cleanup(newVersion);
     logger.log();
-    logger.success('Dry run release finished successfully');
+    logger.log('Dry run: skipping push to Github');
+    logger.success('Dry run release finished successfully.');
     process.exit(EXIT_CODES.SUCCESS);
   }
 
   logger.log();
   logger.log(`Pushing changes to Github...`);
-  await exec(`git push --atomic origin ${branch} v${newVersion}`);
+  await exec(gitCommand);
   logger.log(`Changes pushed successfully`);
 
   logger.log();
