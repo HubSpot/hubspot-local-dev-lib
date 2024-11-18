@@ -2,6 +2,7 @@ import { exec as _exec, spawn } from 'child_process';
 import { promisify } from 'util';
 import yargs, { ArgumentsCamelCase, Argv } from 'yargs';
 import semver from 'semver';
+import open from 'open';
 import { confirm, input } from '@inquirer/prompts';
 
 import {
@@ -319,6 +320,10 @@ async function handler({
   logger.log(
     'View on npm: https://www.npmjs.com/package/@hubspot/local-dev-lib?activeTab=versions'
   );
+
+  logger.log();
+  logger.log('Remember to create a new release on Github!');
+  open('https://github.com/HubSpot/hubspot-local-dev-lib/releases/new');
 }
 
 async function builder(yargs: Argv): Promise<Argv> {
