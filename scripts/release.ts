@@ -2,9 +2,14 @@ import { exec as _exec, spawn } from 'child_process';
 import { promisify } from 'util';
 import yargs, { ArgumentsCamelCase, Argv } from 'yargs';
 import semver from 'semver';
-import { confirm } from '@inquirer/prompts';
+import open from 'open';
+import { confirm, input } from '@inquirer/prompts';
 
-import { name as packageName, version as localVersion } from '../package.json';
+import {
+  name as packageName,
+  version as localVersion,
+  publishConfig,
+} from '../package.json';
 import { logger, setLogLevel, LOG_LEVEL } from '../lib/logger';
 import { build } from './lib/build';
 
@@ -43,6 +48,9 @@ const EXIT_CODES = {
   ERROR: 1,
 };
 
+// Commands run with `spawn` won't always get this from the package.json
+const REGISTRY = publishConfig.registry;
+
 type ReleaseArguments = {
   versionIncrement: (typeof VERSION_INCREMENT_OPTIONS)[number];
   tag: (typeof TAG_OPTIONS)[number];
@@ -74,13 +82,25 @@ async function cleanup(newVersion: string): Promise<void> {
   await exec(`git tag -d v${newVersion}`);
 }
 
-async function publish(tag: Tag, isDryRun: boolean): Promise<void> {
+async function publish(
+  tag: Tag,
+  otp: string,
+  isDryRun: boolean
+): Promise<void> {
   logger.log();
   logger.log(`Publishing to ${tag}...`);
   logger.log('-'.repeat(50));
   logger.log();
 
-  const commandArgs = ['publish', '--tag', tag];
+  const commandArgs = [
+    'publish',
+    '--tag',
+    tag,
+    '--registry',
+    REGISTRY,
+    '--otp',
+    otp,
+  ];
 
   if (isDryRun) {
     commandArgs.push('--dry-run');
@@ -104,6 +124,7 @@ async function publish(tag: Tag, isDryRun: boolean): Promise<void> {
 
 async function updateNextTag(
   newVersion: string,
+  otp: string,
   isDryRun: boolean
 ): Promise<void> {
   logger.log();
@@ -114,6 +135,10 @@ async function updateNextTag(
     'add',
     `${packageName}@${newVersion}`,
     TAG.NEXT,
+    '--registry',
+    REGISTRY,
+    '--otp',
+    otp,
   ];
 
   return new Promise((resolve, reject) => {
@@ -212,6 +237,25 @@ async function handler({
     process.exit(EXIT_CODES.SUCCESS);
   }
 
+  if (
+    tag === TAG.LATEST &&
+    !localVersion.includes(PRERELEASE_IDENTIFIER.NEXT)
+  ) {
+    logger.log();
+    const proceedWithoutBetaRelease = await confirm({
+      message: `The current changes have not yet been released in beta. It's recommended to release and test all changes on the ${TAG.NEXT} tag before releasing them to ${TAG.LATEST}. Are you sure you want to proceed?`,
+      default: false,
+    });
+
+    if (!proceedWithoutBetaRelease) {
+      logger.log();
+      logger.log(
+        `To release your changes on the next tag, run \`yarn release -v=${versionIncrement} -t=next\``
+      );
+      process.exit(EXIT_CODES.SUCCESS);
+    }
+  }
+
   logger.log();
   logger.log(`Updating version to ${newVersion}...`);
   await exec(`yarn version --new-version ${newVersion}`);
@@ -220,12 +264,17 @@ async function handler({
   logger.log();
   await build();
 
-  try {
-    await publish(tag, isDryRun);
+  let otp = '';
 
-    if (tag === TAG.LATEST) {
-      await updateNextTag(newVersion, isDryRun);
-    }
+  logger.log();
+  if (!isDryRun) {
+    otp = await input({ message: 'Enter your NPM one-time password:' });
+  } else {
+    logger.log('Dry run: skipping one-time password entry');
+  }
+
+  try {
+    await publish(tag, otp, isDryRun);
   } catch (e) {
     logger.error(
       'An error occurred while releasing the package. Correct the error and re-run `yarn build`.'
@@ -234,16 +283,31 @@ async function handler({
     process.exit(EXIT_CODES.ERROR);
   }
 
+  const gitCommand = `git push --atomic origin ${branch} v${newVersion}`;
+
+  if (tag === TAG.EXPERIMENTAL) {
+    try {
+      await updateNextTag(newVersion, otp, isDryRun);
+    } catch (e) {
+      logger.error(
+        `An error occured while updating the ${TAG.NEXT} tag. To finish this release, run the following commands:`
+      );
+      logger.log(`npm dist-tag add ${packageName}@${newVersion} ${TAG.NEXT}`);
+      logger.log(gitCommand);
+    }
+  }
+
   if (isDryRun) {
     await cleanup(newVersion);
     logger.log();
-    logger.success('Dry run release finished successfully');
+    logger.log('Dry run: skipping push to Github');
+    logger.success('Dry run release finished successfully.');
     process.exit(EXIT_CODES.SUCCESS);
   }
 
   logger.log();
   logger.log(`Pushing changes to Github...`);
-  await exec(`git push --atomic origin ${branch} v${newVersion}`);
+  await exec(gitCommand);
   logger.log(`Changes pushed successfully`);
 
   logger.log();
@@ -253,6 +317,10 @@ async function handler({
   logger.log(
     'View on npm: https://www.npmjs.com/package/@hubspot/local-dev-lib?activeTab=versions'
   );
+
+  logger.log();
+  logger.log('Remember to create a new release on Github!');
+  open('https://github.com/HubSpot/hubspot-local-dev-lib/releases/new');
 }
 
 async function builder(yargs: Argv): Promise<Argv> {
