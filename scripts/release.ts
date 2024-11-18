@@ -270,7 +270,7 @@ async function handler({
 
   logger.log();
   if (!isDryRun) {
-    otp = await input({ message: 'Enter your NPM one-time password' });
+    otp = await input({ message: 'Enter your NPM one-time password:' });
   } else {
     logger.log('Dry run: skipping one-time password entry');
   }
