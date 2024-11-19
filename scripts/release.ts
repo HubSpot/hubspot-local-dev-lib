@@ -318,9 +318,11 @@ async function handler({
     'View on npm: https://www.npmjs.com/package/@hubspot/local-dev-lib?activeTab=versions'
   );
 
-  logger.log();
-  logger.log('Remember to create a new release on Github!');
-  open('https://github.com/HubSpot/hubspot-local-dev-lib/releases/new');
+  if (tag === TAG.LATEST) {
+    logger.log();
+    logger.log('Remember to create a new release on Github!');
+    open('https://github.com/HubSpot/hubspot-local-dev-lib/releases/new');
+  }
 }
 
 async function builder(yargs: Argv): Promise<Argv> {
