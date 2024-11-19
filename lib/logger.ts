@@ -48,7 +48,7 @@ export class Logger {
     console.info(...stylize('[INFO]', Styles.info, args));
   }
   debug(...args: any[]) {
-    console.debug(...stylize('[DEBUG]', Styles.log, args));
+    console.trace(...stylize('[DEBUG]', Styles.log, args));
   }
   group(...args: any[]) {
     console.group(...args);
