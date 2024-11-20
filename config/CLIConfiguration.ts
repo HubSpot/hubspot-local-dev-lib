@@ -23,6 +23,7 @@ import {
 import { CLIOptions } from '../types/CLIOptions';
 import { ValueOf } from '../types/Utils';
 import { i18n } from '../utils/lang';
+import { Mode } from '../types/Files';
 
 const i18nKey = 'config.cliConfiguration';
 
@@ -553,7 +554,7 @@ class _CLIConfiguration {
   /**
    * @throws {Error}
    */
-  updateDefaultMode(defaultMode: string): CLIConfig_NEW | null {
+  updateDefaultMode(defaultMode: Mode): CLIConfig_NEW | null {
     if (!this.config) {
       throw new Error(i18n(`${i18nKey}.errors.noConfigLoaded`));
     }

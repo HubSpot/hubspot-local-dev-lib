@@ -121,7 +121,7 @@ describe('config/CLIConfiguration', () => {
   describe('updateDefaultMode()', () => {
     it('throws when no config is loaded', () => {
       expect(() => {
-        config.updateDefaultMode('newMode');
+        config.updateDefaultMode('draft');
       }).toThrow();
     });
   });
