@@ -274,9 +274,9 @@
           "invalidId": "Unable to find account for {{ nameOrId }}."
         }
       },
-      "updateDefaultMode": {
+      "updateDefaultCmsPublishMode": {
         "errors": {
-          "invalidMode": "The mode {{ defaultMode }} is invalid. Valid values are {{ validModes }}."
+          "invalidCmsPublishMode": "The CMS publish mode {{ defaultCmsPublishMode }} is invalid. Valid values are {{ validCmsPublishModes }}."
         }
       },
       "updateHttpTimeout": {
