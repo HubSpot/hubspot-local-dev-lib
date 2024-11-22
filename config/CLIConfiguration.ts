@@ -569,10 +569,13 @@ class _CLIConfiguration {
       !ALL_CMS_PUBLISH_MODES.find(m => m === defaultCmsPublishMode)
     ) {
       throw new Error(
-        i18n(`${i18nKey}.updateDefaultMode.errors.invalidMode`, {
-          defaultCmsPublishMode,
-          validCmsPublishModes: commaSeparatedValues(ALL_CMS_PUBLISH_MODES),
-        })
+        i18n(
+          `${i18nKey}.updateDefaultCmsPublishMode.errors.invalidCmsPublishMode`,
+          {
+            defaultCmsPublishMode,
+            validCmsPublishModes: commaSeparatedValues(ALL_CMS_PUBLISH_MODES),
+          }
+        )
       );
     }
 
