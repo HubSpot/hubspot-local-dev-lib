@@ -288,7 +288,7 @@ function loadConfigFromFile(path?: string, options: CLIOptions = {}) {
   if (sourceError) return;
   const { parsed, error: parseError } = parseConfig(source);
   if (parseError) return;
-  setConfig(parsed);
+  setConfig(handleLegacyCmsPublishMode(parsed));
 
   if (!getConfig()) {
     logger.debug('The config file was empty config');
@@ -886,7 +886,7 @@ function loadEnvironmentVariableConfig(options: {
     `Loaded config from environment variables for account ${portalId}`
   );
 
-  return setConfig(envConfig);
+  return setConfig(handleLegacyCmsPublishMode(envConfig));
 }
 
 export function isConfigFlagEnabled(flag: keyof CLIConfig_DEPRECATED): boolean {
@@ -897,4 +897,14 @@ export function isConfigFlagEnabled(flag: keyof CLIConfig_DEPRECATED): boolean {
   const config = getAndLoadConfigIfNeeded();
 
   return Boolean(config[flag] || false);
+}
+
+function handleLegacyCmsPublishMode(
+  config: CLIConfig_DEPRECATED | undefined
+): CLIConfig_DEPRECATED | undefined {
+  if (config?.defaultMode) {
+    config.defaultCmsPublishMode = config.defaultMode;
+    delete config.defaultMode;
+  }
+  return config;
 }

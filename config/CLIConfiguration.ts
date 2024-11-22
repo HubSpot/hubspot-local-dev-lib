@@ -64,7 +64,7 @@ class _CLIConfiguration {
           })
         );
         this.useEnvConfig = true;
-        this.config = configFromEnv;
+        this.config = this.handleLegacyCmsPublishMode(configFromEnv);
       }
     } else {
       const configFromFile = loadConfigFromFile();
@@ -75,7 +75,7 @@ class _CLIConfiguration {
         this.config = { accounts: [] };
       }
       this.useEnvConfig = false;
-      this.config = configFromFile;
+      this.config = this.handleLegacyCmsPublishMode(configFromFile);
     }
 
     return this.config;
@@ -625,6 +625,16 @@ class _CLIConfiguration {
       return true;
     }
     return this.config.allowUsageTracking !== false;
+  }
+
+  handleLegacyCmsPublishMode(
+    config: CLIConfig_NEW | null
+  ): CLIConfig_NEW | null {
+    if (config?.defaultMode) {
+      config.defaultCmsPublishMode = config.defaultMode;
+      delete config.defaultMode;
+    }
+    return config;
   }
 }
 

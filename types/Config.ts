@@ -7,6 +7,7 @@ export interface CLIConfig_NEW {
   accounts: Array<CLIAccount_NEW>;
   allowUsageTracking?: boolean;
   defaultAccount?: string | number;
+  defaultMode?: CmsPublishMode; // Deprecated - left in to handle existing configs with this field
   defaultCmsPublishMode?: CmsPublishMode;
   httpTimeout?: number;
   env?: Environment;
@@ -17,6 +18,7 @@ export interface CLIConfig_DEPRECATED {
   portals: Array<CLIAccount_DEPRECATED>;
   allowUsageTracking?: boolean;
   defaultPortal?: string | number;
+  defaultMode?: CmsPublishMode; // Deprecated - left in to handle existing configs with this field
   defaultCmsPublishMode?: CmsPublishMode;
   httpTimeout?: number;
   env?: Environment;
