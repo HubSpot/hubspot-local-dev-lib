@@ -3,7 +3,7 @@ import PQueue from 'p-queue';
 
 import { uploadFolder } from '../cms/uploadFolder';
 import { watch } from '../cms/watch';
-import { MODE } from '../../constants/files';
+import { CMS_PUBLISH_MODE } from '../../constants/files';
 
 jest.mock('chokidar');
 jest.mock('axios');
@@ -36,7 +36,7 @@ describe('lib/cms/watch', () => {
     const src = 'src-folder';
     const dest = 'dest-folder';
     const options = {
-      mode: MODE.draft,
+      cmsPublishMode: CMS_PUBLISH_MODE.draft,
       remove: false,
       disableInitial: true,
       notify: '',
@@ -57,7 +57,7 @@ describe('lib/cms/watch', () => {
     const src = 'src-folder';
     const dest = 'dest-folder';
     const options = {
-      mode: MODE.draft,
+      cmsPublishMode: CMS_PUBLISH_MODE.draft,
       remove: false,
       disableInitial: false,
       notify: '',
@@ -77,7 +77,7 @@ describe('lib/cms/watch', () => {
       {},
       options.commandOptions,
       options.filePaths,
-      options.mode
+      options.cmsPublishMode
     );
     expect(postInitialUploadCallback).toHaveBeenCalled();
   });
@@ -87,7 +87,7 @@ describe('lib/cms/watch', () => {
     const src = 'src-folder';
     const dest = 'dest-folder';
     const options = {
-      mode: MODE.draft,
+      cmsPublishMode: CMS_PUBLISH_MODE.draft,
       remove: false,
       disableInitial: true,
       notify: '',
@@ -105,7 +105,7 @@ describe('lib/cms/watch', () => {
     const src = 'src-folder';
     const dest = 'dest-folder';
     const options = {
-      mode: MODE.draft,
+      cmsPublishMode: CMS_PUBLISH_MODE.draft,
       remove: false,
       disableInitial: true,
       notify: '',
@@ -126,7 +126,7 @@ describe('lib/cms/watch', () => {
     const src = 'src-folder';
     const dest = 'dest-folder';
     const options = {
-      mode: MODE.draft,
+      cmsPublishMode: CMS_PUBLISH_MODE.draft,
       remove: true,
       disableInitial: true,
       notify: '',

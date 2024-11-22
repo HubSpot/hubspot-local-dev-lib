@@ -38,7 +38,7 @@ export function getOrderedConfig(
 ): CLIConfig_NEW {
   const {
     defaultAccount,
-    defaultMode,
+    defaultCmsPublishMode,
     httpTimeout,
     allowUsageTracking,
     accounts,
@@ -47,7 +47,7 @@ export function getOrderedConfig(
 
   return {
     ...(defaultAccount && { defaultAccount }),
-    defaultMode,
+    defaultCmsPublishMode,
     httpTimeout,
     allowUsageTracking,
     ...rest,

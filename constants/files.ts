@@ -4,12 +4,12 @@ export const STAT_TYPES = {
   DIRECTORY: 'dir',
 } as const;
 
-export const MODE = {
+export const CMS_PUBLISH_MODE = {
   draft: 'draft',
   publish: 'publish',
 } as const;
 
-export const DEFAULT_MODE = MODE.publish;
+export const DEFAULT_CMS_PUBLISH_MODE = CMS_PUBLISH_MODE.publish;
 
 export const FILE_UPLOAD_RESULT_TYPES = {
   SUCCESS: 'SUCCESS',

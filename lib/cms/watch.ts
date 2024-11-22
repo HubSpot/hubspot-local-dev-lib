@@ -16,7 +16,7 @@ import { getThemePreviewUrl, getThemeJSONPath } from './themes';
 import { logger } from '../logger';
 import {
   UploadFileOptions,
-  Mode,
+  CmsPublishMode,
   WatchOptions,
   WatchErrorHandler,
 } from '../../types/Files';
@@ -69,7 +69,7 @@ async function uploadFile(
   file: string,
   dest: string,
   options: UploadFileOptions,
-  mode: Mode | null = null,
+  cmsPublishMode: CmsPublishMode | null = null,
   onUploadFileError: (
     file: string,
     dest: string,
@@ -115,7 +115,7 @@ async function uploadFile(
     convertFields && fieldsJs?.outputPath ? fieldsJs.outputPath : file;
 
   logger.debug(i18n(`${i18nKey}.uploadAttempt`, { file, dest }));
-  const apiOptions = getFileMapperQueryValues(mode, options);
+  const apiOptions = getFileMapperQueryValues(cmsPublishMode, options);
   queue.add(() => {
     return upload(accountId, fileToUpload, dest, apiOptions)
       .then(() => {
@@ -171,7 +171,7 @@ export function watch(
   src: string,
   dest: string,
   {
-    mode,
+    cmsPublishMode,
     remove,
     disableInitial,
     notify,
@@ -213,7 +213,7 @@ export function watch(
       {},
       commandOptions,
       filePaths,
-      mode || null
+      cmsPublishMode || null
     ).then(result => {
       logger.log(
         i18n(`${i18nKey}.folderUploadSuccess`, {
@@ -246,7 +246,7 @@ export function watch(
         src,
         commandOptions,
       },
-      mode,
+      cmsPublishMode,
       onUploadFileError
     );
     triggerNotify(notify, 'Added', filePath, uploadPromise);
@@ -308,7 +308,7 @@ export function watch(
         src,
         commandOptions,
       },
-      mode,
+      cmsPublishMode,
       onUploadFileError
     );
     triggerNotify(notify, 'Changed', filePath, uploadPromise);
