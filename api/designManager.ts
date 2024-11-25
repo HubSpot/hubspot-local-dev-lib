@@ -1,6 +1,5 @@
-import { AxiosPromise } from 'axios';
 import { http } from '../http';
-import { QueryParams } from '../types/Http';
+import { HubSpotPromise, QueryParams } from '../types/Http';
 import {
   FetchThemesResponse,
   FetchBuiltinMappingResponse,
@@ -11,7 +10,7 @@ const DESIGN_MANAGER_API_PATH = 'designmanager/v1';
 export function fetchThemes(
   accountId: number,
   params: QueryParams = {}
-): AxiosPromise<FetchThemesResponse> {
+): HubSpotPromise<FetchThemesResponse> {
   return http.get<FetchThemesResponse>(accountId, {
     url: `${DESIGN_MANAGER_API_PATH}/themes/combined`,
     params,
@@ -20,7 +19,7 @@ export function fetchThemes(
 
 export function fetchBuiltinMapping(
   accountId: number
-): AxiosPromise<FetchBuiltinMappingResponse> {
+): HubSpotPromise<FetchBuiltinMappingResponse> {
   return http.get<FetchBuiltinMappingResponse>(accountId, {
     url: `${DESIGN_MANAGER_API_PATH}/widgets/builtin-mapping`,
   });

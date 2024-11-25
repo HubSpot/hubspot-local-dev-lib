@@ -9,6 +9,7 @@ import {
   SandboxResponse,
   SandboxUsageLimitsResponse,
 } from '../types/Sandbox';
+import { HubSpotPromise } from '../types/Http';
 
 const SANDBOX_API_PATH = 'sandbox-hubs/v1';
 const SANDBOX_API_PATH_V2 = 'sandbox-hubs/v2';
@@ -17,7 +18,7 @@ export function createSandbox(
   accountId: number,
   name: string,
   type: 1 | 2
-): AxiosPromise<SandboxResponse> {
+): HubSpotPromise<SandboxResponse> {
   return http.post<SandboxResponse>(accountId, {
     data: { name, type, generatePersonalAccessKey: true }, // For CLI, generatePersonalAccessKey will always be true since we'll be saving the entry to the config
     timeout: SANDBOX_TIMEOUT,
@@ -28,7 +29,7 @@ export function createSandbox(
 export function deleteSandbox(
   parentAccountId: number,
   sandboxAccountId: number
-): AxiosPromise<void> {
+): HubSpotPromise<void> {
   return http.delete(parentAccountId, {
     url: `${SANDBOX_API_PATH}/${sandboxAccountId}`,
   });
@@ -36,7 +37,7 @@ export function deleteSandbox(
 
 export function getSandboxUsageLimits(
   parentAccountId: number
-): AxiosPromise<SandboxUsageLimitsResponse> {
+): HubSpotPromise<SandboxUsageLimitsResponse> {
   return http.get<SandboxUsageLimitsResponse>(parentAccountId, {
     url: `${SANDBOX_API_PATH}/parent/${parentAccountId}/usage`,
   });

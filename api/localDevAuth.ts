@@ -1,4 +1,3 @@
-import { AxiosPromise } from 'axios';
 import { getAxiosConfig } from '../http/getAxiosConfig';
 import { http } from '../http';
 import { ENVIRONMENTS } from '../constants/environments';
@@ -10,6 +9,7 @@ import {
 } from '../types/Accounts';
 import axios from 'axios';
 import { PublicAppInstallationData } from '../types/Apps';
+import { HubSpotPromise } from '../types/Http';
 
 const LOCALDEVAUTH_API_AUTH_PATH = 'localdevauth/v1/auth';
 
@@ -17,7 +17,7 @@ export function fetchAccessToken(
   personalAccessKey: string,
   env: Environment = ENVIRONMENTS.PROD,
   portalId?: number
-): AxiosPromise<AccessTokenResponse> {
+): HubSpotPromise<AccessTokenResponse> {
   const axiosConfig = getAxiosConfig({
     env,
     localHostOverride: true,
@@ -37,7 +37,7 @@ export function fetchAccessToken(
 export function fetchScopeData(
   accountId: number,
   scopeGroup: string
-): AxiosPromise<ScopeData> {
+): HubSpotPromise<ScopeData> {
   return http.get<ScopeData>(accountId, {
     url: `${LOCALDEVAUTH_API_AUTH_PATH}/check-scopes`,
     params: { scopeGroup },
@@ -50,7 +50,7 @@ export function fetchAppInstallationData(
   appUid: string,
   requiredScopeGroups: Array<string>,
   optionalScopeGroups: Array<string> = []
-): AxiosPromise<PublicAppInstallationData> {
+): HubSpotPromise<PublicAppInstallationData> {
   return http.post<PublicAppInstallationData>(portalId, {
     url: `${LOCALDEVAUTH_API_AUTH_PATH}/install-info`,
     data: {

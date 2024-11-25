@@ -9,7 +9,7 @@ import { addQueryParams } from './addQueryParams';
 import { accessTokenForPersonalAccessKey } from '../lib/personalAccessKey';
 import { getOauthManager } from '../lib/oauth';
 import { FlatAccountFields } from '../types/Accounts';
-import { HttpOptions } from '../types/Http';
+import { HttpOptions, HubSpotPromise } from '../types/Http';
 import { logger } from '../lib/logger';
 import { i18n } from '../utils/lang';
 import { HubSpotHttpError } from '../models/HubSpotHttpError';
@@ -115,7 +115,7 @@ async function withAuth(
 async function getRequest<T>(
   accountId: number,
   options: HttpOptions
-): AxiosPromise<T> {
+): HubSpotPromise<T> {
   const { params, ...rest } = options;
   const optionsWithParams = addQueryParams(rest, params);
   const requestConfig = await withAuth(accountId, optionsWithParams);
@@ -126,7 +126,7 @@ async function getRequest<T>(
 async function postRequest<T>(
   accountId: number,
   options: HttpOptions
-): AxiosPromise<T> {
+): HubSpotPromise<T> {
   const requestConfig = await withAuth(accountId, options);
   return axios<T>({ ...requestConfig, method: 'post' });
 }
@@ -134,7 +134,7 @@ async function postRequest<T>(
 async function putRequest<T>(
   accountId: number,
   options: HttpOptions
-): AxiosPromise<T> {
+): HubSpotPromise<T> {
   const requestConfig = await withAuth(accountId, options);
   return axios<T>({ ...requestConfig, method: 'put' });
 }
@@ -142,7 +142,7 @@ async function putRequest<T>(
 async function patchRequest<T>(
   accountId: number,
   options: HttpOptions
-): AxiosPromise<T> {
+): HubSpotPromise<T> {
   const requestConfig = await withAuth(accountId, options);
   return axios<T>({ ...requestConfig, method: 'patch' });
 }
@@ -150,7 +150,7 @@ async function patchRequest<T>(
 async function deleteRequest<T>(
   accountId: number,
   options: HttpOptions
-): AxiosPromise<T> {
+): HubSpotPromise<T> {
   const requestConfig = await withAuth(accountId, options);
   return axios<T>({ ...requestConfig, method: 'delete' });
 }

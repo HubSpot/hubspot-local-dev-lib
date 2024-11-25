@@ -1,8 +1,7 @@
-import { AxiosPromise } from 'axios';
 import fs from 'fs';
 import path from 'path';
 import { http } from '../http';
-import { FormData } from '../types/Http';
+import { FormData, HubSpotPromise } from '../types/Http';
 import {
   FetchStatResponse,
   FetchFilesResponse,
@@ -17,7 +16,7 @@ export function uploadFile(
   accountId: number,
   src: string,
   dest: string
-): AxiosPromise<UploadResponse> {
+): HubSpotPromise<UploadResponse> {
   const directory = path.dirname(dest);
   const filename = path.basename(dest);
   const formData: FormData = {
@@ -45,7 +44,7 @@ export function uploadFile(
 export function fetchStat(
   accountId: number,
   src: string
-): AxiosPromise<FetchStatResponse> {
+): HubSpotPromise<FetchStatResponse> {
   return http.get<FetchStatResponse>(accountId, {
     url: `${FILE_MANAGER_V2_API_PATH}/files/stat/${src}`,
   });
@@ -56,7 +55,7 @@ export function fetchFiles(
   folderId: number | 'None',
   offset: number,
   archived?: boolean
-): AxiosPromise<FetchFilesResponse> {
+): HubSpotPromise<FetchFilesResponse> {
   return http.get<FetchFilesResponse>(accountId, {
     url: `${FILE_MANAGER_V2_API_PATH}/files/`,
     params: {
@@ -71,7 +70,7 @@ export function fetchFiles(
 export function fetchFolders(
   accountId: number,
   folderId: number | 'None'
-): AxiosPromise<FetchFolderResponse> {
+): HubSpotPromise<FetchFolderResponse> {
   return http.get<FetchFolderResponse>(accountId, {
     url: `${FILE_MANAGER_V2_API_PATH}/folders/`,
     params: {

@@ -1,10 +1,11 @@
 import fs from 'fs';
 import path from 'path';
 import contentDisposition from 'content-disposition';
-import { AxiosResponse, AxiosPromise } from 'axios';
+import { AxiosResponse } from 'axios';
 import { http } from '../http';
 import { getCwd } from '../lib/path';
 import { FileMapperNode, FileMapperOptions, FileTree } from '../types/Files';
+import { HubSpotPromise } from '../types/Http';
 
 export const FILE_MAPPER_API_PATH = 'content/filemapper/v1';
 
@@ -46,7 +47,7 @@ export function upload(
   src: string,
   dest: string,
   options: FileMapperOptions = {}
-): AxiosPromise<void> {
+): HubSpotPromise<void> {
   return http.post<void>(accountId, {
     url: `${FILE_MAPPER_API_PATH}/upload/${encodeURIComponent(dest)}`,
     data: {
@@ -62,7 +63,7 @@ export function fetchModule(
   accountId: number,
   moduleId: number,
   options: FileMapperOptions = {}
-): AxiosPromise<FileTree> {
+): HubSpotPromise<FileTree> {
   return http.get<FileTree>(accountId, {
     url: `${FILE_MAPPER_API_PATH}/modules/${moduleId}`,
     ...options,
@@ -92,7 +93,7 @@ export function download(
   accountId: number,
   filepath: string,
   options: FileMapperOptions = {}
-): AxiosPromise<FileMapperNode> {
+): HubSpotPromise<FileMapperNode> {
   return http.get<FileMapperNode>(accountId, {
     url: `${FILE_MAPPER_API_PATH}/download/${encodeURIComponent(filepath)}`,
     ...options,
@@ -104,7 +105,7 @@ export function downloadDefault(
   accountId: number,
   filepath: string,
   options: FileMapperOptions = {}
-): AxiosPromise<FileMapperNode> {
+): HubSpotPromise<FileMapperNode> {
   return http.get<FileMapperNode>(accountId, {
     url: `${FILE_MAPPER_API_PATH}/download-default/${filepath}`,
     ...options,
@@ -115,7 +116,7 @@ export function downloadDefault(
 export function deleteFile(
   accountId: number,
   filePath: string
-): AxiosPromise<void> {
+): HubSpotPromise<void> {
   return http.delete(accountId, {
     url: `${FILE_MAPPER_API_PATH}/delete/${encodeURIComponent(filePath)}`,
   });
@@ -126,7 +127,7 @@ export function moveFile(
   accountId: number,
   srcPath: string,
   destPath: string
-): AxiosPromise<void> {
+): HubSpotPromise<void> {
   return http.put(accountId, {
     url: `${FILE_MAPPER_API_PATH}/rename/${srcPath}?path=${destPath}`,
     headers: { 'Content-Type': 'application/json' },
@@ -137,7 +138,7 @@ export function moveFile(
 export function getDirectoryContentsByPath(
   accountId: number,
   path: string
-): AxiosPromise<FileMapperNode> {
+): HubSpotPromise<FileMapperNode> {
   return http.get(accountId, {
     url: `${FILE_MAPPER_API_PATH}/meta/${path}`,
   });
