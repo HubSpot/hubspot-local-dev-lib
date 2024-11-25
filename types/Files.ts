@@ -4,7 +4,7 @@ import {
   FILE_TYPES,
   FILE_UPLOAD_RESULT_TYPES,
 } from '../constants/files';
-import { MODE } from '../constants/files';
+import { CMS_PUBLISH_MODE } from '../constants/files';
 import { HttpOptions } from './Http';
 import { AxiosError } from 'axios';
 
@@ -26,7 +26,7 @@ export type FileMapperNode = {
   children: Array<FileMapperNode>;
 };
 
-export type Mode = ValueOf<typeof MODE>;
+export type CmsPublishMode = ValueOf<typeof CMS_PUBLISH_MODE>;
 
 export type FileMapperOptions = Omit<HttpOptions, 'url'>;
 
@@ -98,7 +98,7 @@ export type UploadFileOptions = FileMapperInputOptions & {
 };
 
 export type WatchOptions = {
-  mode?: Mode;
+  cmsPublishMode?: CmsPublishMode;
   remove?: boolean;
   disableInitial?: boolean;
   notify?: string;

@@ -22,7 +22,7 @@ import {
   CommandOptions,
   FilePathsByType,
 } from '../../types/Files';
-import { Mode } from '../../types/Files';
+import { CmsPublishMode } from '../../types/Files';
 import { i18n } from '../../utils/lang';
 import { HubSpotHttpError } from '../../models/HubSpotHttpError';
 
@@ -172,7 +172,7 @@ export async function uploadFolder(
   fileMapperOptions: FileMapperInputOptions,
   commandOptions: CommandOptions = {},
   filePaths: Array<string> = [],
-  mode: Mode | null = null
+  cmsPublishMode: CmsPublishMode | null = null
 ): Promise<Array<UploadFolderResults>> {
   const {
     saveOutput,
@@ -197,7 +197,10 @@ export async function uploadFolder(
     : null;
   const regex = new RegExp(`^${escapeRegExp(src)}`);
 
-  const apiOptions = getFileMapperQueryValues(mode, fileMapperOptions);
+  const apiOptions = getFileMapperQueryValues(
+    cmsPublishMode,
+    fileMapperOptions
+  );
   const failures: Array<{ file: string; destPath: string }> = [];
   let fieldsJsPaths: Array<Partial<FieldsJs>> = [];
   let tmpDirRegex: RegExp;

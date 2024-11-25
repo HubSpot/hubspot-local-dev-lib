@@ -17,10 +17,10 @@ import {
   FUNCTIONS_EXTENSION,
   JSR_ALLOWED_EXTENSIONS,
 } from '../constants/extensions';
-import { MODE } from '../constants/files';
+import { CMS_PUBLISH_MODE } from '../constants/files';
 import {
   FileMapperNode,
-  Mode,
+  CmsPublishMode,
   FileMapperOptions,
   FileMapperInputOptions,
   PathTypeData,
@@ -57,18 +57,18 @@ export function isPathToHubspot(filepath: string): boolean {
   return /^(\/|\\)?@hubspot/i.test(filepath.trim());
 }
 
-function useApiBuffer(mode?: Mode | null): boolean {
-  return mode === MODE.draft;
+function useApiBuffer(cmsPublishMode?: CmsPublishMode | null): boolean {
+  return cmsPublishMode === CMS_PUBLISH_MODE.draft;
 }
 
-// Determines API param based on mode an options
+// Determines API param based on publish mode and options
 export function getFileMapperQueryValues(
-  mode?: Mode | null,
+  cmsPublishMode?: CmsPublishMode | null,
   { staging, assetVersion }: FileMapperInputOptions = {}
 ): FileMapperOptions {
   return {
     params: {
-      buffer: useApiBuffer(mode),
+      buffer: useApiBuffer(cmsPublishMode),
       environmentId: staging ? 2 : 1,
       version: assetVersion,
     },
@@ -183,7 +183,7 @@ async function fetchAndWriteFileStream(
   accountId: number,
   srcPath: string,
   filepath: string,
-  mode?: Mode,
+  cmsPublishMode?: CmsPublishMode,
   options: FileMapperInputOptions = {}
 ): Promise<void> {
   if (typeof srcPath !== 'string' || !srcPath.trim()) {
@@ -200,7 +200,7 @@ async function fetchAndWriteFileStream(
     accountId,
     srcPath,
     filepath,
-    getFileMapperQueryValues(mode, options)
+    getFileMapperQueryValues(cmsPublishMode, options)
   );
   await writeUtimes(accountId, filepath, node);
 }
@@ -211,7 +211,7 @@ async function writeFileMapperNode(
   accountId: number,
   filepath: string,
   node: FileMapperNode,
-  mode?: Mode,
+  cmsPublishMode?: CmsPublishMode,
   options: FileMapperInputOptions = {}
 ): Promise<boolean> {
   const localFilepath = convertToLocalFileSystemPath(path.resolve(filepath));
@@ -229,7 +229,7 @@ async function writeFileMapperNode(
         accountId,
         node.path,
         localFilepath,
-        mode,
+        cmsPublishMode,
         options
       );
       return true;
@@ -261,7 +261,7 @@ async function downloadFile(
   accountId: number,
   src: string,
   destPath: string,
-  mode?: Mode,
+  cmsPublishMode?: CmsPublishMode,
   options: FileMapperInputOptions = {}
 ): Promise<void> {
   const { isFile, isHubspot } = getTypeDataFromPath(src);
@@ -288,7 +288,13 @@ async function downloadFile(
         : path.resolve(cwd, dest, name);
     }
     const localFsPath = convertToLocalFileSystemPath(filepath);
-    await fetchAndWriteFileStream(accountId, src, localFsPath, mode, options);
+    await fetchAndWriteFileStream(
+      accountId,
+      src,
+      localFsPath,
+      cmsPublishMode,
+      options
+    );
     await queue.onIdle();
     logger.success(
       i18n(`${i18nKey}.completedFetch`, {
@@ -313,7 +319,7 @@ async function downloadFile(
 export async function fetchFolderFromApi(
   accountId: number,
   src: string,
-  mode?: Mode,
+  cmsPublishMode?: CmsPublishMode,
   options: FileMapperInputOptions = {}
 ): Promise<FileMapperNode> {
   const { isRoot, isFolder, isHubspot } = getTypeDataFromPath(src);
@@ -325,7 +331,7 @@ export async function fetchFolderFromApi(
     );
   }
   const srcPath = isRoot ? '@root' : src;
-  const queryValues = getFileMapperQueryValues(mode, options);
+  const queryValues = getFileMapperQueryValues(cmsPublishMode, options);
   const { data: node } = isHubspot
     ? await downloadDefault(accountId, srcPath, queryValues)
     : await download(accountId, srcPath, queryValues);
@@ -337,11 +343,16 @@ async function downloadFolder(
   accountId: number,
   src: string,
   destPath: string,
-  mode?: Mode,
+  cmsPublishMode?: CmsPublishMode,
   options: FileMapperInputOptions = {}
 ) {
   try {
-    const node = await fetchFolderFromApi(accountId, src, mode, options);
+    const node = await fetchFolderFromApi(
+      accountId,
+      src,
+      cmsPublishMode,
+      options
+    );
     if (!node) {
       return;
     }
@@ -359,7 +370,7 @@ async function downloadFolder(
             accountId,
             filepath || '',
             childNode,
-            mode,
+            cmsPublishMode,
             options
           );
           if (succeeded === false) {
@@ -414,7 +425,7 @@ export async function downloadFileOrFolder(
   accountId: number,
   src: string,
   dest: string,
-  mode?: Mode,
+  cmsPublishMode?: CmsPublishMode,
   options: FileMapperInputOptions = {}
 ): Promise<void> {
   if (!src) {
@@ -422,8 +433,8 @@ export async function downloadFileOrFolder(
   }
   const { isFile } = getTypeDataFromPath(src);
   if (isFile) {
-    await downloadFile(accountId, src, dest, mode, options);
+    await downloadFile(accountId, src, dest, cmsPublishMode, options);
   } else {
-    await downloadFolder(accountId, src, dest, mode, options);
+    await downloadFolder(accountId, src, dest, cmsPublishMode, options);
   }
 }

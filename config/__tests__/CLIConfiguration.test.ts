@@ -118,10 +118,10 @@ describe('config/CLIConfiguration', () => {
     });
   });
 
-  describe('updateDefaultMode()', () => {
+  describe('updateDefaultCmsPublishMode()', () => {
     it('throws when no config is loaded', () => {
       expect(() => {
-        config.updateDefaultMode('draft');
+        config.updateDefaultCmsPublishMode('draft');
       }).toThrow();
     });
   });

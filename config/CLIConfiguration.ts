@@ -12,7 +12,7 @@ import { commaSeparatedValues } from '../lib/text';
 import { ENVIRONMENTS } from '../constants/environments';
 import { API_KEY_AUTH_METHOD } from '../constants/auth';
 import { HUBSPOT_ACCOUNT_TYPES, MIN_HTTP_TIMEOUT } from '../constants/config';
-import { MODE } from '../constants/files';
+import { CMS_PUBLISH_MODE } from '../constants/files';
 import { CLIConfig_NEW, Environment } from '../types/Config';
 import {
   CLIAccount_NEW,
@@ -21,9 +21,8 @@ import {
   AccountType,
 } from '../types/Accounts';
 import { CLIOptions } from '../types/CLIOptions';
-import { ValueOf } from '../types/Utils';
 import { i18n } from '../utils/lang';
-import { Mode } from '../types/Files';
+import { CmsPublishMode } from '../types/Files';
 
 const i18nKey = 'config.cliConfiguration';
 
@@ -65,7 +64,7 @@ class _CLIConfiguration {
           })
         );
         this.useEnvConfig = true;
-        this.config = configFromEnv;
+        this.config = this.handleLegacyCmsPublishMode(configFromEnv);
       }
     } else {
       const configFromFile = loadConfigFromFile();
@@ -76,7 +75,7 @@ class _CLIConfiguration {
         this.config = { accounts: [] };
       }
       this.useEnvConfig = false;
-      this.config = configFromFile;
+      this.config = this.handleLegacyCmsPublishMode(configFromFile);
     }
 
     return this.config;
@@ -342,7 +341,7 @@ class _CLIConfiguration {
       authType,
       clientId,
       clientSecret,
-      defaultMode,
+      defaultCmsPublishMode,
       env,
       name,
       parentAccountId,
@@ -397,8 +396,9 @@ class _CLIConfiguration {
     const updatedEnv = getValidEnv(
       env || (currentAccountConfig && currentAccountConfig.env)
     );
-    const updatedDefaultMode: ValueOf<typeof MODE> | undefined =
-      defaultMode && (defaultMode.toLowerCase() as ValueOf<typeof MODE>);
+    const updatedDefaultCmsPublishMode: CmsPublishMode | undefined =
+      defaultCmsPublishMode &&
+      (defaultCmsPublishMode.toLowerCase() as CmsPublishMode);
     const updatedAccountType =
       accountType || (currentAccountConfig && currentAccountConfig.accountType);
 
@@ -410,9 +410,12 @@ class _CLIConfiguration {
     if (nextAccountConfig.authType === API_KEY_AUTH_METHOD.value) {
       safelyApplyUpdates('apiKey', apiKey);
     }
-    if (typeof updatedDefaultMode !== 'undefined') {
+    if (typeof updatedDefaultCmsPublishMode !== 'undefined') {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      safelyApplyUpdates('defaultMode', MODE[updatedDefaultMode]);
+      safelyApplyUpdates(
+        'defaultCmsPublishMode',
+        CMS_PUBLISH_MODE[updatedDefaultCmsPublishMode]
+      );
     }
     safelyApplyUpdates('personalAccessKey', personalAccessKey);
 
@@ -554,21 +557,29 @@ class _CLIConfiguration {
   /**
    * @throws {Error}
    */
-  updateDefaultMode(defaultMode: Mode): CLIConfig_NEW | null {
+  updateDefaultCmsPublishMode(
+    defaultCmsPublishMode: CmsPublishMode
+  ): CLIConfig_NEW | null {
     if (!this.config) {
       throw new Error(i18n(`${i18nKey}.errors.noConfigLoaded`));
     }
-    const ALL_MODES = Object.values(MODE);
-    if (!defaultMode || !ALL_MODES.find(m => m === defaultMode)) {
+    const ALL_CMS_PUBLISH_MODES = Object.values(CMS_PUBLISH_MODE);
+    if (
+      !defaultCmsPublishMode ||
+      !ALL_CMS_PUBLISH_MODES.find(m => m === defaultCmsPublishMode)
+    ) {
       throw new Error(
-        i18n(`${i18nKey}.updateDefaultMode.errors.invalidMode`, {
-          defaultMode,
-          validModes: commaSeparatedValues(ALL_MODES),
-        })
+        i18n(
+          `${i18nKey}.updateDefaultCmsPublishMode.errors.invalidCmsPublishMode`,
+          {
+            defaultCmsPublishMode,
+            validCmsPublishModes: commaSeparatedValues(ALL_CMS_PUBLISH_MODES),
+          }
+        )
       );
     }
 
-    this.config.defaultMode = defaultMode;
+    this.config.defaultCmsPublishMode = defaultCmsPublishMode;
     return this.write();
   }
 
@@ -617,6 +628,16 @@ class _CLIConfiguration {
       return true;
     }
     return this.config.allowUsageTracking !== false;
+  }
+
+  handleLegacyCmsPublishMode(
+    config: CLIConfig_NEW | null
+  ): CLIConfig_NEW | null {
+    if (config?.defaultMode) {
+      config.defaultCmsPublishMode = config.defaultMode;
+      delete config.defaultMode;
+    }
+    return config;
   }
 }
 

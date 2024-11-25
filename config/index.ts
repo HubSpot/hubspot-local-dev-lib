@@ -15,7 +15,7 @@ import {
   FlatAccountFields,
 } from '../types/Accounts';
 import { getAccountIdentifier } from './getAccountIdentifier';
-import { Mode } from '../types/Files';
+import { CmsPublishMode } from '../types/Files';
 
 // Use new config if it exists
 export function loadConfig(
@@ -250,11 +250,13 @@ export function getConfigAccounts():
   return config_DEPRECATED.getConfigAccounts();
 }
 
-export function updateDefaultMode(mode: Mode): void | CLIConfig_NEW | null {
+export function updateDefaultCmsPublishMode(
+  cmsPublishMode: CmsPublishMode
+): void | CLIConfig_NEW | null {
   if (CLIConfiguration.isActive()) {
-    return CLIConfiguration.updateDefaultMode(mode);
+    return CLIConfiguration.updateDefaultCmsPublishMode(cmsPublishMode);
   }
-  return config_DEPRECATED.updateDefaultMode(mode);
+  return config_DEPRECATED.updateDefaultCmsPublishMode(cmsPublishMode);
 }
 
 // These functions are not supported with the new config setup

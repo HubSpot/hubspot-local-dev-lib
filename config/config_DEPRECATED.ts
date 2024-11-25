@@ -14,7 +14,7 @@ import {
   PERSONAL_ACCESS_KEY_AUTH_METHOD,
   OAUTH_SCOPES,
 } from '../constants/auth';
-import { MODE } from '../constants/files';
+import { CMS_PUBLISH_MODE } from '../constants/files';
 import { getValidEnv } from '../lib/environment';
 import { logger } from '../lib/logger';
 import { isConfigPathInGitRepo } from '../utils/git';
@@ -32,10 +32,10 @@ import {
   UpdateAccountConfigOptions,
 } from '../types/Accounts';
 import { BaseError } from '../types/Error';
-import { Mode } from '../types/Files';
+import { CmsPublishMode } from '../types/Files';
 import { CLIOptions, WriteConfigOptions } from '../types/CLIOptions';
 
-const ALL_MODES = Object.values(MODE);
+const ALL_CMS_PUBLISH_MODES = Object.values(CMS_PUBLISH_MODE);
 let _config: CLIConfig_DEPRECATED | null;
 let _configPath: string | null;
 let environmentVariableConfigLoaded = false;
@@ -182,7 +182,7 @@ export function getOrderedAccount(
 export function getOrderedConfig(unorderedConfig: CLIConfig_DEPRECATED) {
   const {
     defaultPortal,
-    defaultMode,
+    defaultCmsPublishMode,
     httpTimeout,
     allowUsageTracking,
     portals,
@@ -191,7 +191,7 @@ export function getOrderedConfig(unorderedConfig: CLIConfig_DEPRECATED) {
 
   return {
     ...(defaultPortal && { defaultPortal }),
-    defaultMode,
+    defaultCmsPublishMode,
     httpTimeout,
     allowUsageTracking,
     ...rest,
@@ -288,7 +288,7 @@ function loadConfigFromFile(path?: string, options: CLIOptions = {}) {
   if (sourceError) return;
   const { parsed, error: parseError } = parseConfig(source);
   if (parseError) return;
-  setConfig(parsed);
+  setConfig(handleLegacyCmsPublishMode(parsed));
 
   if (!getConfig()) {
     logger.debug('The config file was empty config');
@@ -491,7 +491,7 @@ export function updateAccountConfig(
     authType,
     clientId,
     clientSecret,
-    defaultMode,
+    defaultCmsPublishMode,
     environment,
     name,
     parentAccountId,
@@ -526,8 +526,8 @@ export function updateAccountConfig(
       (configOptions && configOptions.env) ||
       (accountConfig && accountConfig.env)
   );
-  const mode: Mode | undefined =
-    defaultMode && (defaultMode.toLowerCase() as Mode);
+  const cmsPublishMode: CmsPublishMode | undefined =
+    defaultCmsPublishMode?.toLowerCase() as CmsPublishMode;
   const nextAccountConfig: FlatAccountFields_DEPRECATED = {
     ...accountConfig,
     name: name || (accountConfig && accountConfig.name),
@@ -537,7 +537,10 @@ export function updateAccountConfig(
     auth,
     accountType: getAccountType(accountType, sandboxAccountType),
     apiKey,
-    defaultMode: mode && Object.hasOwn(MODE, mode) ? mode : undefined,
+    defaultCmsPublishMode:
+      cmsPublishMode && Object.hasOwn(CMS_PUBLISH_MODE, cmsPublishMode)
+        ? cmsPublishMode
+        : undefined,
     personalAccessKey,
     sandboxAccountType,
     parentAccountId,
@@ -583,17 +586,22 @@ export function updateDefaultAccount(defaultAccount: string | number): void {
 /**
  * @throws {Error}
  */
-export function updateDefaultMode(defaultMode: Mode): void {
-  if (!defaultMode || !ALL_MODES.find(m => m === defaultMode)) {
+export function updateDefaultCmsPublishMode(
+  defaultCmsPublishMode: CmsPublishMode
+): void {
+  if (
+    !defaultCmsPublishMode ||
+    !ALL_CMS_PUBLISH_MODES.find(m => m === defaultCmsPublishMode)
+  ) {
     throw new Error(
-      `The mode ${defaultMode} is invalid. Valid values are ${commaSeparatedValues(
-        ALL_MODES
+      `The mode ${defaultCmsPublishMode} is invalid. Valid values are ${commaSeparatedValues(
+        ALL_CMS_PUBLISH_MODES
       )}.`
     );
   }
 
   const config = getAndLoadConfigIfNeeded();
-  config.defaultMode = defaultMode;
+  config.defaultCmsPublishMode = defaultCmsPublishMode;
 
   setDefaultConfigPathIfUnset();
   writeConfig();
@@ -878,7 +886,7 @@ function loadEnvironmentVariableConfig(options: {
     `Loaded config from environment variables for account ${portalId}`
   );
 
-  return setConfig(envConfig);
+  return setConfig(handleLegacyCmsPublishMode(envConfig));
 }
 
 export function isConfigFlagEnabled(flag: keyof CLIConfig_DEPRECATED): boolean {
@@ -889,4 +897,14 @@ export function isConfigFlagEnabled(flag: keyof CLIConfig_DEPRECATED): boolean {
   const config = getAndLoadConfigIfNeeded();
 
   return Boolean(config[flag] || false);
+}
+
+function handleLegacyCmsPublishMode(
+  config: CLIConfig_DEPRECATED | undefined
+): CLIConfig_DEPRECATED | undefined {
+  if (config?.defaultMode) {
+    config.defaultCmsPublishMode = config.defaultMode;
+    delete config.defaultMode;
+  }
+  return config;
 }

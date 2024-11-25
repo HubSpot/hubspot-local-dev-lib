@@ -1,5 +1,5 @@
 import { HUBSPOT_ACCOUNT_TYPES } from '../constants/config';
-import { Mode } from './Files';
+import { CmsPublishMode } from './Files';
 import { Environment } from './Config';
 import { ValueOf } from './Utils';
 
@@ -9,7 +9,7 @@ export interface CLIAccount_NEW {
   name?: string;
   accountId: number;
   accountType?: AccountType;
-  defaultMode?: Mode;
+  defaultCmsPublishMode?: CmsPublishMode;
   env: Environment;
   authType?: AuthType;
   auth?: {
@@ -24,7 +24,7 @@ export interface CLIAccount_NEW {
 export interface CLIAccount_DEPRECATED {
   name?: string;
   portalId?: number;
-  defaultMode?: Mode;
+  defaultCmsPublishMode?: CmsPublishMode;
   env: Environment;
   accountType?: AccountType;
   authType?: AuthType;
