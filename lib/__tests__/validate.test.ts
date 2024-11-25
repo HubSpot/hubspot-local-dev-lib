@@ -3,7 +3,7 @@ import { validateHubl } from '../../api/validateHubl';
 import { walk } from '../fs';
 import { lint } from '../cms/validate';
 import { LintResult, Validation } from '../../types/HublValidation';
-import { HubSpotPromise } from '../../http';
+import { HubSpotPromise } from '../../types/Http';
 
 jest.mock('fs-extra');
 jest.mock('../../api/validateHubl');
