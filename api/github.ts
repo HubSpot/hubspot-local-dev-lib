@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { getDefaultUserAgentHeader } from '../http/getAxiosConfig';
 import { GithubReleaseData, GithubRepoFile, RepoPath } from '../types/Github';
-import { HubSpotPromise } from '../http';
+import { HubSpotPromise } from '../types/Http';
 
 const GITHUB_REPOS_API = 'https://api.github.com/repos';
 const GITHUB_RAW_CONTENT_API_PATH = 'https://raw.githubusercontent.com';

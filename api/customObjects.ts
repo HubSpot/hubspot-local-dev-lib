@@ -1,9 +1,10 @@
-import { http, HubSpotPromise } from '../http';
+import { http } from '../http';
 import {
   FetchSchemasResponse,
   Schema,
   CreateObjectsResponse,
 } from '../types/Schemas';
+import { HubSpotPromise } from '../types/Http';
 
 const CUSTOM_OBJECTS_API_PATH = 'crm/v3/objects';
 const SCHEMA_API_PATH = 'crm-object-schemas/v3/schemas';

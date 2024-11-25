@@ -2,9 +2,10 @@ import fs from 'fs';
 import path from 'path';
 import contentDisposition from 'content-disposition';
 import { AxiosResponse } from 'axios';
-import { http, HubSpotPromise } from '../http';
+import { http } from '../http';
 import { getCwd } from '../lib/path';
 import { FileMapperNode, FileMapperOptions, FileTree } from '../types/Files';
+import { HubSpotPromise } from '../types/Http';
 
 export const FILE_MAPPER_API_PATH = 'content/filemapper/v1';
 

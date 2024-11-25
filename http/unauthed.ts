@@ -1,8 +1,7 @@
 import axios from 'axios';
 import { getAxiosConfig } from './getAxiosConfig';
 import { addQueryParams } from './addQueryParams';
-import { HttpOptions } from '../types/Http';
-import { HubSpotPromise } from './index';
+import { HttpOptions, HubSpotPromise } from '../types/Http';
 
 async function getRequest<T>(options: HttpOptions): HubSpotPromise<T> {
   const { params, ...rest } = options;

@@ -1,10 +1,11 @@
-import { http, HubSpotPromise } from '../http';
+import { http } from '../http';
 import {
   PublicApp,
   PublicAppInstallCounts,
   PublicAppDeveloperTestAccountInstallData,
   FetchPublicAppsForPortalResponse,
 } from '../types/Apps';
+import { HubSpotPromise } from '../types/Http';
 
 const APPS_DEV_API_PATH = 'apps-dev/external/public/v3';
 

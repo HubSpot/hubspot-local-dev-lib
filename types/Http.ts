@@ -1,6 +1,8 @@
-import { ResponseType } from 'axios';
+import { AxiosPromise, ResponseType } from 'axios';
 import { ReadStream } from 'fs';
 import { Stream } from 'stream';
+
+export type HubSpotPromise<T = unknown> = AxiosPromise<T>;
 
 export type Data = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -1,5 +1,5 @@
-import { http, HubSpotPromise } from '../http';
-import { Data, QueryParams } from '../types/Http';
+import { http } from '../http';
+import { Data, HubSpotPromise, QueryParams } from '../types/Http';
 import {
   GetLighthouseScoreResponse,
   RequestLighthouseScoreResponse,

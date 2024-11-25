@@ -1,5 +1,5 @@
 import { getAxiosConfig } from '../http/getAxiosConfig';
-import { http, HubSpotPromise } from '../http';
+import { http } from '../http';
 import { ENVIRONMENTS } from '../constants/environments';
 import { Environment } from '../types/Config';
 import {
@@ -9,6 +9,7 @@ import {
 } from '../types/Accounts';
 import axios from 'axios';
 import { PublicAppInstallationData } from '../types/Apps';
+import { HubSpotPromise } from '../types/Http';
 
 const LOCALDEVAUTH_API_AUTH_PATH = 'localdevauth/v1/auth';
 

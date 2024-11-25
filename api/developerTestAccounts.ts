@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { http, HubSpotPromise } from '../http';
+import { http } from '../http';
 import { getAxiosConfig } from '../http/getAxiosConfig';
 import { ENVIRONMENTS } from '../constants/environments';
 import {
@@ -8,6 +8,7 @@ import {
 } from '../types/developerTestAccounts';
 import { SANDBOX_TIMEOUT } from '../constants/api';
 import { Environment } from '../types/Config';
+import { HubSpotPromise } from '../types/Http';
 
 const TEST_ACCOUNTS_API_PATH = 'integrators/test-portals/v2';
 

@@ -1,5 +1,5 @@
-import { http, HubSpotPromise } from '../http';
-import { QueryParams } from '../types/Http';
+import { http } from '../http';
+import { HubSpotPromise, QueryParams } from '../types/Http';
 import {
   FetchThemesResponse,
   FetchBuiltinMappingResponse,

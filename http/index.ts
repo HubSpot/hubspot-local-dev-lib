@@ -9,14 +9,12 @@ import { addQueryParams } from './addQueryParams';
 import { accessTokenForPersonalAccessKey } from '../lib/personalAccessKey';
 import { getOauthManager } from '../lib/oauth';
 import { FlatAccountFields } from '../types/Accounts';
-import { HttpOptions } from '../types/Http';
+import { HttpOptions, HubSpotPromise } from '../types/Http';
 import { logger } from '../lib/logger';
 import { i18n } from '../utils/lang';
 import { HubSpotHttpError } from '../models/HubSpotHttpError';
 
 const i18nKey = 'http.index';
-
-export type HubSpotPromise<T = unknown> = AxiosPromise<T>;
 
 axios.interceptors.response.use(undefined, error => {
   // Wrap all axios errors in our own Error class.  Attach the error

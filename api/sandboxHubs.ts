@@ -1,5 +1,5 @@
 import axios, { AxiosPromise } from 'axios';
-import { http, HubSpotPromise } from '../http';
+import { http } from '../http';
 import { getAxiosConfig } from '../http/getAxiosConfig';
 import { ENVIRONMENTS } from '../constants/environments';
 import { SANDBOX_TIMEOUT } from '../constants/api';
@@ -9,6 +9,7 @@ import {
   SandboxResponse,
   SandboxUsageLimitsResponse,
 } from '../types/Sandbox';
+import { HubSpotPromise } from '../types/Http';
 
 const SANDBOX_API_PATH = 'sandbox-hubs/v1';
 const SANDBOX_API_PATH_V2 = 'sandbox-hubs/v2';
