@@ -56,12 +56,12 @@ export function fetchRepoAsZip(zipUrl: string): HubSpotPromise<Buffer> {
 }
 
 // Returns the raw file contents via the raw.githubusercontent endpoint
-export function fetchRepoFile(
+export function fetchRepoFile<T = Buffer>(
   repoPath: RepoPath,
   filePath: string,
   ref: string
-): HubSpotPromise<Buffer> {
-  return axios.get<Buffer>(
+): HubSpotPromise<T> {
+  return axios.get<T>(
     `${GITHUB_RAW_CONTENT_API_PATH}/${repoPath}/${ref}/${filePath}`,
     {
       headers: {

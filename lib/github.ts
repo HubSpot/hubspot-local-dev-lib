@@ -22,12 +22,11 @@ import { isHubSpotHttpError, isSystemError } from '../errors';
 
 const i18nKey = 'lib.github';
 
-export async function fetchFileFromRepository(
+export async function fetchFileFromRepository<T = Buffer>(
   repoPath: RepoPath,
   filePath: string,
   ref: string
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): Promise<any> {
+): Promise<T> {
   try {
     logger.debug(
       i18n(`${i18nKey}.fetchFileFromRepository.fetching`, {
@@ -36,7 +35,7 @@ export async function fetchFileFromRepository(
     );
 
     const { data } = await fetchRepoFile(repoPath, filePath, ref);
-    return data;
+    return data as T;
   } catch (err) {
     throw new Error(
       i18n(`${i18nKey}.fetchFileFromRepository.errors.fetchFail`),
