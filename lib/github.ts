@@ -146,7 +146,6 @@ export async function fetchGitHubRepoContentFromDownloadUrl(
   } else {
     fileContents = resp.data;
   }
-  // @ts-expect-error TODO: Discuss with team how to address error
   fs.outputFileSync(dest, fileContents);
 }
 
