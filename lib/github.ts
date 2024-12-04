@@ -26,7 +26,8 @@ export async function fetchFileFromRepository(
   repoPath: RepoPath,
   filePath: string,
   ref: string
-): Promise<Buffer> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): Promise<any> {
   try {
     logger.debug(
       i18n(`${i18nKey}.fetchFileFromRepository.fetching`, {
@@ -145,6 +146,7 @@ export async function fetchGitHubRepoContentFromDownloadUrl(
   } else {
     fileContents = resp.data;
   }
+  // @ts-expect-error TODO: Discuss with team how to address error
   fs.outputFileSync(dest, fileContents);
 }
 
