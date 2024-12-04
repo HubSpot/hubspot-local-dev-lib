@@ -23,6 +23,6 @@ export type GetValidationResultsResponse = {
     REQUIRED: { status: string; results: Array<Check> };
     RECOMMENDED: { status: string; results: Array<Check> };
   };
-  errors: Array<Error>;
+  errors: Array<ValidationError>;
   requestedAt: string;
 };
