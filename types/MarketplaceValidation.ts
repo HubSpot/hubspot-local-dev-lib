@@ -1,4 +1,4 @@
-type Check = {
+export type Check = {
   check: string;
   status: string;
   title: string;
@@ -9,6 +9,12 @@ type Check = {
   file: string;
 };
 
+export interface ValidationError {
+  validationRequestId: number;
+  failureReasonType: string;
+  context: string;
+}
+
 export type GetValidationResultsResponse = {
   validationRequestId: number;
   assetPath: string;
@@ -17,6 +23,6 @@ export type GetValidationResultsResponse = {
     REQUIRED: { status: string; results: Array<Check> };
     RECOMMENDED: { status: string; results: Array<Check> };
   };
-  errors: Array<Error>;
+  errors: Array<ValidationError>;
   requestedAt: string;
 };
