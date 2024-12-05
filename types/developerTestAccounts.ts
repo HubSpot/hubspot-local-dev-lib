@@ -5,6 +5,7 @@ export type DeveloperTestAccount = {
   createdAt: string;
   updatedAt: string;
   status: string;
+  id: number;
 };
 
 export type FetchDeveloperTestAccountsResponse = {

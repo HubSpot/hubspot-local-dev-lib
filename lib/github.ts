@@ -34,8 +34,8 @@ export async function fetchFileFromRepository<T = Buffer>(
       })
     );
 
-    const { data } = await fetchRepoFile(repoPath, filePath, ref);
-    return data as T;
+    const { data } = await fetchRepoFile<T>(repoPath, filePath, ref);
+    return data;
   } catch (err) {
     throw new Error(
       i18n(`${i18nKey}.fetchFileFromRepository.errors.fetchFail`),
