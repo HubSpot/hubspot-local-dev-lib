@@ -53,8 +53,27 @@ export function uploadProject(
   projectName: string,
   projectFile: string,
   uploadMessage: string,
-  platformVersion?: string
+  platformVersion?: string,
+  intermediateRepresentation?: unknown
 ): HubSpotPromise<UploadProjectResponse> {
+  if (intermediateRepresentation) {
+    const formData = {
+      projectFilesZip: fs.createReadStream(projectFile),
+      uploadRequest: JSON.stringify({
+        ...intermediateRepresentation,
+        projectName,
+        buildMessage: uploadMessage,
+      }),
+    };
+
+    return http.post(accountId, {
+      url: `project-components-external/v3/upload/new-api`,
+      timeout: 60_000,
+      data: formData,
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  }
+
   const formData: FormData = {
     file: fs.createReadStream(projectFile),
     uploadMessage,
@@ -62,7 +81,6 @@ export function uploadProject(
   if (platformVersion) {
     formData.platformVersion = platformVersion;
   }
-
   return http.post<UploadProjectResponse>(accountId, {
     url: `${PROJECTS_API_PATH}/upload/${encodeURIComponent(projectName)}`,
     timeout: 60_000,
