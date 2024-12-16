@@ -1,5 +1,6 @@
 import { Build } from './Build';
 import { GithubSourceData } from './Github';
+import { ProjectLog } from './ProjectLog';
 
 export type Project = {
   createdAt: number;
@@ -61,4 +62,8 @@ export type ProjectStandardError = {
   }>;
   context: object;
   links: { [key: string]: string };
+};
+
+export type WarnLogsResponse = {
+  logs: Array<ProjectLog>;
 };

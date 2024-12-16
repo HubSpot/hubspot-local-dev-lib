@@ -36,6 +36,7 @@ export type Build = {
   status: ValueOf<typeof BUILD_STATUS>;
   subbuildStatuses: Array<SubbuildStatus>;
   uploadMessage: string;
+  autoDeployId: number;
 };
 
 export type FetchProjectBuildsResponse = {
