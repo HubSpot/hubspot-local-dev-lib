@@ -18,6 +18,7 @@ export type SubdeployStatus = {
   startedAt: string;
   status: DeployStatus;
   id: string;
+  visible: boolean;
 };
 
 export type Deploy = {

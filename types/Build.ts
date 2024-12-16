@@ -18,6 +18,7 @@ export type SubbuildStatus = {
   startedAt: string;
   status: ValueOf<typeof BUILD_STATUS>;
   id: string;
+  visible: boolean;
 };
 
 export type Build = {
