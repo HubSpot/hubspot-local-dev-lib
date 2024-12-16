@@ -2,7 +2,7 @@ import { ValueOf } from './Utils';
 import { ACTIVITY_SOURCE } from '../enums/project';
 import { DEPLOY_ACTION, DEPLOY_STATUS } from '../enums/deploy';
 import { COMPONENT_TYPES, SUBCOMPONENT_TYPES } from '../enums/build';
-import { OptionalError } from './Error';
+import { ProjectStandardError } from './Project';
 
 export type DeployStatus = ValueOf<typeof DEPLOY_STATUS>;
 
@@ -14,7 +14,7 @@ export type SubdeployStatus = {
     | ValueOf<typeof SUBCOMPONENT_TYPES>;
   errorMessage: string;
   finishedAt: string;
-  standardError?: OptionalError;
+  standardError: ProjectStandardError | null;
   startedAt: string;
   status: DeployStatus;
   id: string;

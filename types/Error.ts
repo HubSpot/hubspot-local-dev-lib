@@ -36,8 +36,6 @@ export interface HubSpotHttpErrorContext extends FileSystemErrorContext {
   projectName?: string;
 }
 
-export type OptionalError = BaseError | null | undefined;
-
 export type ErrorContext = {
   accountId?: number;
 };
