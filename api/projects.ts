@@ -48,7 +48,7 @@ export function createProject(
   });
 }
 
-export function uploadProject(
+export async function uploadProject(
   accountId: number,
   projectName: string,
   projectFile: string,
@@ -66,12 +66,21 @@ export function uploadProject(
       }),
     };
 
-    return http.post(accountId, {
+    const response = await http.post<{
+      buildId: number;
+      createdBuildId: number;
+    }>(accountId, {
       url: `project-components-external/v3/upload/new-api`,
       timeout: 60_000,
       data: formData,
       headers: { 'Content-Type': 'multipart/form-data' },
     });
+
+    // Remap the response to match the expected shape
+    response.data.buildId = response.data.createdBuildId;
+
+    // @ts-expect-error Fix me later
+    return response;
   }
 
   const formData: FormData = {

@@ -42,12 +42,13 @@ export function flattenAndRemoveSymlinks(
 
 const generateRecursiveFilePromise = async (
   dir: string,
-  file: string
+  file: string,
+  ignoreDirs?: string[]
 ): Promise<FileData> => {
   return getFileInfoAsync(dir, file).then(fileData => {
     return new Promise(resolve => {
       if (fileData.type === STAT_TYPES.DIRECTORY) {
-        walk(fileData.filepath).then(files => {
+        walk(fileData.filepath, ignoreDirs).then(files => {
           resolve({ ...fileData, files });
         });
       } else {
@@ -57,10 +58,16 @@ const generateRecursiveFilePromise = async (
   });
 };
 
-export async function walk(dir: string): Promise<Array<string>> {
+export async function walk(
+  dir: string,
+  ignoreDirs?: string[]
+): Promise<Array<string>> {
   function processFiles(files: Array<string>) {
+    if (ignoreDirs?.some(ignored => dir.includes(ignored))) {
+      return [];
+    }
     return Promise.all(
-      files.map(file => generateRecursiveFilePromise(dir, file))
+      files.map(file => generateRecursiveFilePromise(dir, file, ignoreDirs))
     );
   }
 
