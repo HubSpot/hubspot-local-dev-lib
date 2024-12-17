@@ -1,5 +1,6 @@
 import { ValueOf } from './Utils';
-import { OptionalError } from './Error';
+import { ProjectStandardError } from './Project';
+
 export const MIGRATION_STATUS = {
   BUILDING: 'BUILDING',
   FAILURE: 'FAILURE',
@@ -21,6 +22,6 @@ export type CloneAppResponse = {
 export type PollAppResponse = {
   id: number;
   project?: { id: number; name: string; buildId: number; deployId: number };
-  error?: OptionalError;
+  error: ProjectStandardError | null;
   status: ValueOf<typeof MIGRATION_STATUS>;
 };
