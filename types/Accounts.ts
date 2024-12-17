@@ -32,6 +32,8 @@ export interface CLIAccount_DEPRECATED {
   authType?: AuthType;
   auth?: {
     tokenInfo?: TokenInfo;
+    clientId?: string;
+    clientSecret?: string;
   };
   sandboxAccountType?: string | null;
   parentAccountId?: number | null;
