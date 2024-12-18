@@ -63,6 +63,7 @@ export async function walk(
   ignoreDirs?: string[]
 ): Promise<Array<string>> {
   function processFiles(files: Array<string>) {
+    // If the directory is in the ignore list, return an empty array to skip the directory contents
     if (ignoreDirs?.some(ignored => dir.includes(ignored))) {
       return [];
     }

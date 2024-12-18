@@ -36,6 +36,8 @@ const createReadStreamMock = createReadStream as jest.MockedFunction<
   typeof createReadStream
 >;
 
+const httpPostMock = http.post as jest.MockedFunction<typeof http.post>;
+
 describe('api/projects', () => {
   const accountId = 999999;
   const projectId = 888888;
@@ -128,6 +130,51 @@ describe('api/projects', () => {
           file: formData,
           uploadMessage,
           platformVersion,
+        },
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+    });
+
+    it('should call the v3 api when optional intermediateRepresentation is provided', async () => {
+      // @ts-expect-error Wants full axios response
+      httpPostMock.mockResolvedValue({
+        data: {
+          createdBuildId: 123,
+        },
+      });
+
+      const intermediateRepresentation = {
+        intermediateNodesIndexedByUid: {
+          'calling-1': {
+            componentType: 'APP',
+            uid: 'calling-1',
+            config: {},
+            componentDeps: {},
+            files: {},
+          },
+        },
+      };
+
+      await uploadProject(
+        accountId,
+        projectName,
+        projectFile,
+        uploadMessage,
+        platformVersion,
+        intermediateRepresentation
+      );
+      expect(http.post).toHaveBeenCalledTimes(1);
+      expect(http.post).toHaveBeenCalledWith(accountId, {
+        url: `project-components-external/v3/upload/new-api`,
+        timeout: 60_000,
+        data: {
+          projectFilesZip: formData,
+          platformVersion,
+          uploadRequest: JSON.stringify({
+            ...intermediateRepresentation,
+            projectName,
+            buildMessage: uploadMessage,
+          }),
         },
         headers: { 'Content-Type': 'multipart/form-data' },
       });

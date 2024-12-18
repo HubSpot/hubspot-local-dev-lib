@@ -37,6 +37,11 @@ export type UploadProjectResponse = {
   };
 };
 
+export type UploadIRResponse = {
+  buildId?: number;
+  createdBuildId: number;
+};
+
 export type ProjectSettings = {
   isAutoDeployEnabled: boolean;
 };
