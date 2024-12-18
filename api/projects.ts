@@ -8,6 +8,7 @@ import {
   ProjectSettings,
   FetchPlatformVersionResponse,
   WarnLogsResponse,
+  UploadIRResponse,
 } from '../types/Project';
 import { Build, FetchProjectBuildsResponse } from '../types/Build';
 import {
@@ -27,6 +28,8 @@ const PROJECTS_DEPLOY_API_PATH = 'dfs/deploy/v1';
 const PROJECTS_LOGS_API_PATH = 'dfs/logging/v1';
 const DEVELOPER_PROJECTS_API_PATH = 'developer/projects/v1';
 const MIGRATIONS_API_PATH = 'dfs/migrations/v1';
+
+const PROJECTS_V3_API_PATH = 'project-components-external/v3';
 
 export function fetchProjects(
   accountId: number
@@ -48,13 +51,38 @@ export function createProject(
   });
 }
 
-export function uploadProject(
+export async function uploadProject(
   accountId: number,
   projectName: string,
   projectFile: string,
   uploadMessage: string,
-  platformVersion?: string
-): HubSpotPromise<UploadProjectResponse> {
+  platformVersion?: string,
+  intermediateRepresentation?: unknown
+): HubSpotPromise<UploadProjectResponse | UploadIRResponse> {
+  if (intermediateRepresentation) {
+    const formData = {
+      projectFilesZip: fs.createReadStream(projectFile),
+      platformVersion,
+      uploadRequest: JSON.stringify({
+        ...intermediateRepresentation,
+        projectName,
+        buildMessage: uploadMessage,
+      }),
+    };
+
+    const response = await http.post<UploadIRResponse>(accountId, {
+      url: `${PROJECTS_V3_API_PATH}/upload/new-api`,
+      timeout: 60_000,
+      data: formData,
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+
+    // Remap the response to match the expected shape
+    response.data.buildId = response.data.createdBuildId;
+
+    return response;
+  }
+
   const formData: FormData = {
     file: fs.createReadStream(projectFile),
     uploadMessage,
@@ -62,7 +90,6 @@ export function uploadProject(
   if (platformVersion) {
     formData.platformVersion = platformVersion;
   }
-
   return http.post<UploadProjectResponse>(accountId, {
     url: `${PROJECTS_API_PATH}/upload/${encodeURIComponent(projectName)}`,
     timeout: 60_000,
