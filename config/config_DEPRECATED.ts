@@ -105,6 +105,12 @@ export function validateConfig(): boolean {
     logger.error('config.portals[] is not defined');
     return false;
   }
+
+  if (accounts.length === 0) {
+    logger.error('There are no accounts defined in the configuration file');
+    return false;
+  }
+
   const accountIdsHash: { [id: number]: CLIAccount_DEPRECATED } = {};
   const accountNamesHash: { [name: string]: CLIAccount_DEPRECATED } = {};
 

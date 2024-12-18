@@ -36,6 +36,7 @@ export interface HubSpotHttpErrorContext extends FileSystemErrorContext {
   projectName?: string;
 }
 
+// TODO: Remove in next major release
 export type OptionalError = BaseError | null | undefined;
 
 export type ErrorContext = {

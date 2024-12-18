@@ -6,7 +6,7 @@ import {
 } from '../enums/build';
 import { ActivitySource } from './Activity';
 import { DeployStatusTaskLocator } from './Deploy';
-import { OptionalError } from './Error';
+import { ProjectStandardError } from './Project';
 
 export type SubbuildStatus = {
   buildName: string;
@@ -14,10 +14,11 @@ export type SubbuildStatus = {
   errorMessage: string;
   finishedAt: string;
   rootPath: string;
-  standardError?: OptionalError;
+  standardError: ProjectStandardError | null;
   startedAt: string;
   status: ValueOf<typeof BUILD_STATUS>;
   id: string;
+  visible: boolean;
 };
 
 export type Build = {
@@ -35,6 +36,7 @@ export type Build = {
   status: ValueOf<typeof BUILD_STATUS>;
   subbuildStatuses: Array<SubbuildStatus>;
   uploadMessage: string;
+  autoDeployId: number;
 };
 
 export type FetchProjectBuildsResponse = {

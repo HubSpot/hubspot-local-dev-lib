@@ -7,6 +7,7 @@ import {
   UploadProjectResponse,
   ProjectSettings,
   FetchPlatformVersionResponse,
+  WarnLogsResponse,
   UploadIRResponse,
 } from '../types/Project';
 import { Build, FetchProjectBuildsResponse } from '../types/Build';
@@ -15,7 +16,6 @@ import {
   ProjectComponentsMetadata,
 } from '../types/ComponentStructure';
 import { Deploy, ProjectDeployResponse } from '../types/Deploy';
-import { ProjectLog } from '../types/ProjectLog';
 import {
   MigrateAppResponse,
   CloneAppResponse,
@@ -298,10 +298,6 @@ export function cancelStagedBuild(
     headers: { 'Content-Type': 'application/json' },
   });
 }
-
-type WarnLogsResponse = {
-  logs: Array<ProjectLog>;
-};
 
 export function fetchBuildWarnLogs(
   accountId: number,
