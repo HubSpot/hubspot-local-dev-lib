@@ -2,7 +2,7 @@ import path from 'path';
 import fs from 'fs-extra';
 import { getCwd } from '../path';
 import { walk } from '../fs';
-import { listGithubRepoContents, downloadGithubRepoContents } from '../github';
+import { listGithubRepoContents, cloneGithubRepo } from '../github';
 import { logger } from '../logger';
 import {
   isPathInput,
@@ -240,13 +240,10 @@ export async function createModule(
     ? 'Sample.module'
     : 'SampleReactModule';
 
-  await downloadGithubRepoContents(
-    'HubSpot/cms-sample-assets',
-    `modules/${sampleAssetPath}`,
-    destPath,
-    '',
-    moduleFileFilter
-  );
+  // TODO: figure out how to handle the module file filter
+  await cloneGithubRepo('HubSpot/cms-sample-assets', destPath, {
+    sourceDir: `modules/${sampleAssetPath}`,
+  });
 
   // Updating React module files after fetch
   if (isReactModule) {
@@ -271,11 +268,9 @@ export async function retrieveDefaultModule(
     return defaultReactModules;
   }
 
-  await downloadGithubRepoContents(
-    'HubSpot/cms-react',
-    `default-react-modules/src/components/modules/${name}`,
-    dest
-  );
+  await cloneGithubRepo('HubSpot/cms-react', dest, {
+    sourceDir: `default-react-modules/src/components/modules/${name}`,
+  });
 }
 
 const MODULE_HTML_EXTENSION_REGEX = new RegExp(
