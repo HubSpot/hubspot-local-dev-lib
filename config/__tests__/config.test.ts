@@ -449,7 +449,7 @@ describe('config/config', () => {
 
       beforeEach(() => {
         process.env = {
-          HUBSPOT_PORTAL_ID: `${portalId}`,
+          HUBSPOT_ACCOUNT_ID: `${portalId}`,
           HUBSPOT_CLIENT_ID: clientId,
           HUBSPOT_CLIENT_SECRET: clientSecret,
           HUBSPOT_REFRESH_TOKEN: refreshToken,
@@ -499,7 +499,7 @@ describe('config/config', () => {
 
       beforeEach(() => {
         process.env = {
-          HUBSPOT_PORTAL_ID: `${portalId}`,
+          HUBSPOT_ACCOUNT_ID: `${portalId}`,
           HUBSPOT_API_KEY: apiKey,
         };
         getAndLoadConfigIfNeeded({ useEnv: true });
@@ -537,7 +537,7 @@ describe('config/config', () => {
 
       beforeEach(() => {
         process.env = {
-          HUBSPOT_PORTAL_ID: `${portalId}`,
+          HUBSPOT_ACCOUNT_ID: `${portalId}`,
           HUBSPOT_PERSONAL_ACCESS_KEY: personalAccessKey,
         };
         getAndLoadConfigIfNeeded({ useEnv: true });
