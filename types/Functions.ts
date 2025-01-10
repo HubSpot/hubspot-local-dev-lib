@@ -69,3 +69,31 @@ export type FunctionInfo = {
 export type FunctionOptions = {
   allowExistingFile?: boolean;
 };
+
+export type FunctionLog = {
+  id: string;
+  executionTime: number;
+  log: string;
+  error: {
+    message: string;
+    type: string;
+    stackTrace: string[][];
+  };
+  status: string;
+  createdAt: number;
+  memory: string;
+};
+
+export type GetFunctionLogsResponse = {
+  results: FunctionLog[];
+  paging: {
+    next: {
+      after: string;
+      link: string;
+    };
+    prev: {
+      before: string;
+      link: string;
+    };
+  };
+};

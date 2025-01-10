@@ -1,6 +1,11 @@
 import { http } from '../http';
 import { HubSpotPromise, QueryParams } from '../types/Http';
-import { GetBuildStatusResponse, GetRoutesResponse } from '../types/Functions';
+import {
+  GetBuildStatusResponse,
+  FunctionLog,
+  GetRoutesResponse,
+  GetFunctionLogsResponse,
+} from '../types/Functions';
 
 const FUNCTION_API_PATH = 'cms/v3/functions';
 
@@ -16,7 +21,7 @@ export function getFunctionLogs(
   accountId: number,
   route: string,
   params: QueryParams = {}
-): HubSpotPromise {
+): HubSpotPromise<GetFunctionLogsResponse> {
   const { limit = 5 } = params;
 
   return http.get(accountId, {
@@ -28,7 +33,7 @@ export function getFunctionLogs(
 export function getLatestFunctionLog(
   accountId: number,
   route: string
-): HubSpotPromise {
+): HubSpotPromise<FunctionLog> {
   return http.get(accountId, {
     url: `${FUNCTION_API_PATH}/results/by-route/${encodeURIComponent(
       route
