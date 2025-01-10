@@ -2,7 +2,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import findup from 'findup-sync';
 import { getCwd } from '../path';
-import { downloadGithubRepoContents } from '../github';
+import { fetchFileFromRepository } from '../github';
 import { logger } from '../logger';
 import { i18n } from '../../utils/lang';
 import { FileSystemError } from '../../models/FileSystemError';
@@ -192,11 +192,13 @@ export async function createFunction(
     );
   }
 
-  await downloadGithubRepoContents(
+  const result = await fetchFileFromRepository(
     'HubSpot/cms-sample-assets',
     'functions/sample-function.js',
-    functionFilePath
+    'main'
   );
+
+  fs.writeFileSync(functionFilePath, result);
 
   logger.log(
     i18n(`${i18nKey}.createFunction.createdFunctionFile`, {
