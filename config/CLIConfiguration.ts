@@ -9,6 +9,7 @@ import {
   deleteConfigFile,
 } from './configFile';
 import { commaSeparatedValues } from '../lib/text';
+import { getCwd } from '../lib/path';
 import { ENVIRONMENTS } from '../constants/environments';
 import { API_KEY_AUTH_METHOD } from '../constants/auth';
 import { HUBSPOT_ACCOUNT_TYPES, MIN_HTTP_TIMEOUT } from '../constants/config';
@@ -228,9 +229,11 @@ class _CLIConfiguration {
   }
 
   getDefaultAccount(): string | number | null {
-    return this.config && this.config.defaultAccount
-      ? this.config.defaultAccount
-      : null;
+    return (
+      this.getResolvedDefaultAccountForCWD() ||
+      this.config?.defaultAccount ||
+      null
+    );
   }
 
   // TODO a util that returns the account to use, respecting the values set in
@@ -241,10 +244,19 @@ class _CLIConfiguration {
   // "/src/brodgers/customer-project-1" is the path to the project dir
   // "customer-account1" is the name of the account to use as the default for the specified dir
   // These defaults take precedence over the standard default account specified in the config
-  getResolvedDefaultAccountForCWD(
-    nameOrId: string | number
-  ): CLIAccount_NEW | null {
-    return this.getAccount(nameOrId);
+  getResolvedDefaultAccountForCWD(): string | number | null {
+    const cwd = getCwd();
+    const overrides = this.config?.defaultAccountOverrides;
+
+    if (overrides) {
+      for (const [path, account] of Object.entries(overrides)) {
+        if (cwd.startsWith(path)) {
+          return account;
+        }
+      }
+    }
+
+    return null;
   }
 
   getAccountIndex(accountId: number): number {

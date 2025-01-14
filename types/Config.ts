@@ -7,6 +7,7 @@ export interface CLIConfig_NEW {
   accounts: Array<CLIAccount_NEW>;
   allowUsageTracking?: boolean;
   defaultAccount?: string | number;
+  defaultAccountOverrides?: { [key: string]: string | number };
   defaultMode?: CmsPublishMode; // Deprecated - left in to handle existing configs with this field
   defaultCmsPublishMode?: CmsPublishMode;
   httpTimeout?: number;
