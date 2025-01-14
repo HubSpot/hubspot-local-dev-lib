@@ -210,12 +210,11 @@ export async function createModule(
   );
 
   // Filter out certain fetched files from the response
-  const moduleFileFilter = (src: string, dest: string) => {
+  const moduleFileFilter = (src: string) => {
     const emailEnabled = moduleDefinition.contentTypes.includes('EMAIL');
 
     switch (path.basename(src)) {
       case 'meta.json':
-        fs.writeJSONSync(dest, moduleMetaData, { spaces: 2 }); // writing a meta.json file to standard HubL modules
         return false;
       case 'module.js':
       case 'module.css':
@@ -240,9 +239,28 @@ export async function createModule(
     ? 'Sample.module'
     : 'SampleReactModule';
 
-  // TODO: figure out how to handle the module file filter
   await cloneGithubRepo('HubSpot/cms-sample-assets', destPath, {
     sourceDir: `modules/${sampleAssetPath}`,
+  });
+
+  // TODO: Validate these changes with tests
+  const files = await walk(`modules/${sampleAssetPath}`);
+
+  files
+    .filter(filePath => !moduleFileFilter(filePath))
+    .forEach(filePath => {
+      fs.unlinkSync(filePath);
+    });
+
+  // Get and write the metafiles
+  const metaFiles = files.filter(
+    filePath => path.basename(filePath) === 'meta.json'
+  );
+
+  metaFiles.forEach(metaFile => {
+    fs.writeJSONSync(path.join(destPath, metaFile), moduleMetaData, {
+      spaces: 2,
+    });
   });
 
   // Updating React module files after fetch
