@@ -148,7 +148,10 @@ export async function fetchGitHubRepoContentFromDownloadUrl(
   fs.outputFileSync(dest, fileContents);
 }
 
-// Writes files from a public repository to the destination folder
+/**
+ * Writes files from a public repository to the destination folder
+  @deprecated - This method fetches all the files individually, which can hit rate limits for unauthorized requests. Use `cloneGithubRepo` instead.
+ */
 export async function downloadGithubRepoContents(
   repoPath: RepoPath,
   contentPath: string,

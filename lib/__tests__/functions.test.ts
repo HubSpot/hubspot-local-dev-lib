@@ -1,7 +1,7 @@
 import fs, { PathLike } from 'fs-extra';
 import findup from 'findup-sync';
 import { getCwd } from '../path';
-import { downloadGithubRepoContents } from '../github';
+import { fetchFileFromRepository as __fetchFileFromRepository } from '../github';
 import {
   createFunction,
   isObjectOrFunction,
@@ -22,6 +22,11 @@ const mockedFsExistsSync = fs.existsSync as jest.MockedFunction<
 const mockedFsReadFileSync = fs.readFileSync as jest.MockedFunction<
   typeof fs.readFileSync
 >;
+
+const fetchFileFromRepository =
+  __fetchFileFromRepository as jest.MockedFunction<
+    typeof __fetchFileFromRepository
+  >;
 
 describe('lib/cms/functions', () => {
   describe('createFunction', () => {
@@ -60,14 +65,23 @@ describe('lib/cms/functions', () => {
     });
 
     it('should create a new function successfully', async () => {
+      const functionSourceCode = 'function code';
+      fetchFileFromRepository.mockResolvedValue(functionSourceCode);
+
       await createFunction(mockFunctionInfo, mockDest);
 
       expect(fs.mkdirp).not.toHaveBeenCalled();
 
-      expect(downloadGithubRepoContents).toHaveBeenCalledWith(
+      expect(fetchFileFromRepository).toHaveBeenCalledWith(
         'HubSpot/cms-sample-assets',
         'functions/sample-function.js',
-        '/mock/dest/testFolder.functions/testFunction.js'
+        'main'
+      );
+
+      // Check that the config file was updated
+      expect(fs.writeFileSync).toHaveBeenCalledWith(
+        '/mock/dest/testFolder.functions/testFunction.js',
+        functionSourceCode
       );
 
       // Check that the config file was updated

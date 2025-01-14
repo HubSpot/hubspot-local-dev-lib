@@ -4,15 +4,14 @@ import {
   isCodedFile,
   createTemplate,
 } from '../cms/templates';
-import { downloadGithubRepoContents as __downloadGithubRepoContents } from '../github';
+import { cloneGithubRepo as __cloneGithubRepo } from '../github';
 
 jest.mock('fs-extra');
 jest.mock('../github');
 
-const downloadGithubRepoContents =
-  __downloadGithubRepoContents as jest.MockedFunction<
-    typeof __downloadGithubRepoContents
-  >;
+const cloneGithubRepo = __cloneGithubRepo as jest.MockedFunction<
+  typeof __cloneGithubRepo
+>;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const makeAnnotation = (options: { [key: string]: any } = {}) => {
@@ -63,10 +62,10 @@ describe('lib/cms/templates', () => {
       jest.spyOn(fs, 'existsSync').mockReturnValue(false);
       await createTemplate('my-template', '/', 'page-template');
 
-      expect(downloadGithubRepoContents).toHaveBeenCalledWith(
+      expect(cloneGithubRepo).toHaveBeenCalledWith(
         'HubSpot/cms-sample-assets',
-        'templates/page-template.html',
-        '/my-template.html'
+        '/my-template.html',
+        { sourceDir: 'templates/page-template.html' }
       );
     });
   });
