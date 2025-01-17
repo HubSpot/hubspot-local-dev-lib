@@ -5,6 +5,8 @@ export const DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME = 'hubspot.config.yml';
 export const HUBSPOT_CONFIGURATION_FOLDER = '.hubspot-cli';
 export const HUBSPOT_CONFIGURATION_FILE = 'config.yml';
 
+export const DEFAULT_OVERRIDE_FILE_NAME = '.hs-account';
+
 export const MIN_HTTP_TIMEOUT = 3000;
 
 export const HUBSPOT_ACCOUNT_TYPES = {

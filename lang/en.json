@@ -263,6 +263,12 @@
           "invalidInput": "A 'defaultAccount' with value of number or string is required to update the config."
         }
       },
+      "getResolvedDefaultAccountForCWD": {
+        "errors": {
+          "invalidAccountId": "In the default override file (.hs-account), the account ID is required to be a number. Please delete the current file and generate it using `hs accounts create-override`",
+          "accountNotFound": "The account with ID {{ accountId }} was not found in the config file. Use `hs auth` to authorize the account."
+        }
+      },
       "renameAccount": {
         "errors": {
           "invalidName": "Cannot find account with identifier {{ currentName }}"
