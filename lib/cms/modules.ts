@@ -218,17 +218,9 @@ export async function createModule(
         return false;
       case 'module.js':
       case 'module.css':
-        if (emailEnabled) {
-          return false;
-        }
-        return true;
+        return !emailEnabled;
       case 'global-sample-react-module.css':
-      case 'stories':
-      case 'tests':
-        if (getInternalVersion) {
-          return true;
-        }
-        return false;
+        return getInternalVersion;
       default:
         return true;
     }
@@ -252,6 +244,11 @@ export async function createModule(
     .forEach(filePath => {
       fs.unlinkSync(filePath);
     });
+
+  if (!getInternalVersion) {
+    fs.removeSync(path.join(destPath, 'stories'));
+    fs.removeSync(path.join(destPath, 'tests'));
+  }
 
   // Get and write the metafiles
   const metaFiles = files.filter(
