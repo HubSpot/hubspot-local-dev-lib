@@ -239,12 +239,13 @@ export async function createModule(
     ? 'Sample.module'
     : 'SampleReactModule';
 
+  const sourceDir = `modules/${sampleAssetPath}`;
+
   await cloneGithubRepo('HubSpot/cms-sample-assets', destPath, {
-    sourceDir: `modules/${sampleAssetPath}`,
+    sourceDir,
   });
 
-  // TODO: Validate these changes with tests
-  const files = await walk(`modules/${sampleAssetPath}`);
+  const files = await walk(destPath);
 
   files
     .filter(filePath => !moduleFileFilter(filePath))
@@ -258,7 +259,7 @@ export async function createModule(
   );
 
   metaFiles.forEach(metaFile => {
-    fs.writeJSONSync(path.join(destPath, metaFile), moduleMetaData, {
+    fs.writeJSONSync(metaFile, moduleMetaData, {
       spaces: 2,
     });
   });
