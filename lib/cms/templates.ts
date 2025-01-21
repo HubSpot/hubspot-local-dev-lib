@@ -1,6 +1,6 @@
 import fs from 'fs-extra';
 import path from 'path';
-import { downloadGithubRepoContents } from '../github';
+import { cloneGithubRepo } from '../github';
 import { logger } from '../logger';
 import { i18n } from '../../utils/lang';
 
@@ -74,11 +74,9 @@ export async function createTemplate(
     })
   );
 
-  await downloadGithubRepoContents(
-    'HubSpot/cms-sample-assets',
-    assetPath,
-    filePath
-  );
+  await cloneGithubRepo('HubSpot/cms-sample-assets', filePath, {
+    sourceDir: assetPath,
+  });
 }
 
 export const TEMPLATE_TYPES = {

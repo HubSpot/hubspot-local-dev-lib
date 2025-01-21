@@ -2,7 +2,7 @@ import path from 'path';
 import fs from 'fs-extra';
 import { getCwd } from '../path';
 import { walk } from '../fs';
-import { listGithubRepoContents, downloadGithubRepoContents } from '../github';
+import { listGithubRepoContents, cloneGithubRepo } from '../github';
 import { logger } from '../logger';
 import {
   isPathInput,
@@ -210,26 +210,17 @@ export async function createModule(
   );
 
   // Filter out certain fetched files from the response
-  const moduleFileFilter = (src: string, dest: string) => {
+  const moduleFileFilter = (src: string) => {
     const emailEnabled = moduleDefinition.contentTypes.includes('EMAIL');
 
     switch (path.basename(src)) {
       case 'meta.json':
-        fs.writeJSONSync(dest, moduleMetaData, { spaces: 2 }); // writing a meta.json file to standard HubL modules
         return false;
       case 'module.js':
       case 'module.css':
-        if (emailEnabled) {
-          return false;
-        }
-        return true;
+        return !emailEnabled;
       case 'global-sample-react-module.css':
-      case 'stories':
-      case 'tests':
-        if (getInternalVersion) {
-          return true;
-        }
-        return false;
+        return getInternalVersion;
       default:
         return true;
     }
@@ -240,13 +231,35 @@ export async function createModule(
     ? 'Sample.module'
     : 'SampleReactModule';
 
-  await downloadGithubRepoContents(
-    'HubSpot/cms-sample-assets',
-    `modules/${sampleAssetPath}`,
-    destPath,
-    '',
-    moduleFileFilter
+  const sourceDir = `modules/${sampleAssetPath}`;
+
+  await cloneGithubRepo('HubSpot/cms-sample-assets', destPath, {
+    sourceDir,
+  });
+
+  const files = await walk(destPath);
+
+  files
+    .filter(filePath => !moduleFileFilter(filePath))
+    .forEach(filePath => {
+      fs.unlinkSync(filePath);
+    });
+
+  if (!getInternalVersion) {
+    fs.removeSync(path.join(destPath, 'stories'));
+    fs.removeSync(path.join(destPath, 'tests'));
+  }
+
+  // Get and write the metafiles
+  const metaFiles = files.filter(
+    filePath => path.basename(filePath) === 'meta.json'
   );
+
+  metaFiles.forEach(metaFile => {
+    fs.writeJSONSync(metaFile, moduleMetaData, {
+      spaces: 2,
+    });
+  });
 
   // Updating React module files after fetch
   if (isReactModule) {
@@ -271,11 +284,9 @@ export async function retrieveDefaultModule(
     return defaultReactModules;
   }
 
-  await downloadGithubRepoContents(
-    'HubSpot/cms-react',
-    `default-react-modules/src/components/modules/${name}`,
-    dest
-  );
+  await cloneGithubRepo('HubSpot/cms-react', dest, {
+    sourceDir: `default-react-modules/src/components/modules/${name}`,
+  });
 }
 
 const MODULE_HTML_EXTENSION_REGEX = new RegExp(
