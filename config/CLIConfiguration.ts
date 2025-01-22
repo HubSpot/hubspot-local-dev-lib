@@ -244,10 +244,14 @@ class _CLIConfiguration {
     );
   }
 
-  getResolvedDefaultAccountForCWD(): number | null {
-    const defaultOverrideFile = findup([DEFAULT_ACCOUNT_OVERRIDE_FILE_NAME], {
+  getDefaultAccountOverrideFilePath(): string | null {
+    return findup([DEFAULT_ACCOUNT_OVERRIDE_FILE_NAME], {
       cwd: getCwd(),
     });
+  }
+
+  getResolvedDefaultAccountForCWD(): number | null {
+    const defaultOverrideFile = this.getDefaultAccountOverrideFilePath();
     if (!defaultOverrideFile) {
       return null;
     }
