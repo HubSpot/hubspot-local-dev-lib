@@ -17,7 +17,9 @@ import { API_KEY_AUTH_METHOD } from '../constants/auth';
 import {
   HUBSPOT_ACCOUNT_TYPES,
   MIN_HTTP_TIMEOUT,
-  DEFAULT_OVERRIDE_FILE_NAME,
+  DEFAULT_ACCOUNT_OVERRIDE_FILE_NAME,
+  DEFAULT_ACCOUNT_OVERRIDE_ERROR_INVALID_ID,
+  DEFAULT_ACCOUNT_OVERRIDE_ERROR_ACCOUNT_NOT_FOUND,
 } from '../constants/config';
 import { CMS_PUBLISH_MODE } from '../constants/files';
 import { CLIConfig_NEW, Environment } from '../types/Config';
@@ -243,7 +245,7 @@ class _CLIConfiguration {
   }
 
   getResolvedDefaultAccountForCWD(): number | null {
-    const defaultOverrideFile = findup([DEFAULT_OVERRIDE_FILE_NAME], {
+    const defaultOverrideFile = findup([DEFAULT_ACCOUNT_OVERRIDE_FILE_NAME], {
       cwd: getCwd(),
     });
     if (!defaultOverrideFile) {
@@ -253,29 +255,28 @@ class _CLIConfiguration {
     const accountId = Number(source);
 
     if (isNaN(accountId)) {
-      logger.error(
-        i18n(
-          `${i18nKey}.getResolvedDefaultAccountForCWD.errors.invalidAccountId`
-        )
+      throw new Error(
+        i18n(`${i18nKey}.getResolvedDefaultAccountForCWD.errorHeader`, {
+          hsAccountFile: defaultOverrideFile,
+        }),
+        {
+          cause: DEFAULT_ACCOUNT_OVERRIDE_ERROR_INVALID_ID,
+        }
       );
-      process.exit(1);
     }
 
-    if (this.config && this.config.accounts) {
-      const account = this.config.accounts.find(
-        account => account.accountId === accountId
+    const account = this.config?.accounts?.find(
+      account => account.accountId === accountId
+    );
+    if (!account) {
+      throw new Error(
+        i18n(`${i18nKey}.getResolvedDefaultAccountForCWD.errorHeader`, {
+          hsAccountFile: defaultOverrideFile,
+        }),
+        {
+          cause: DEFAULT_ACCOUNT_OVERRIDE_ERROR_ACCOUNT_NOT_FOUND,
+        }
       );
-      if (!account) {
-        logger.error(
-          i18n(
-            `${i18nKey}.getResolvedDefaultAccountForCWD.errors.accountNotFound`,
-            {
-              accountId,
-            }
-          )
-        );
-        process.exit(1);
-      }
     }
 
     return accountId;
