@@ -263,6 +263,9 @@
           "invalidInput": "A 'defaultAccount' with value of number or string is required to update the config."
         }
       },
+      "getResolvedDefaultAccountForCWD": {
+        "errorHeader": "Error in {{ hsAccountFile }}"
+      },
       "renameAccount": {
         "errors": {
           "invalidName": "Cannot find account with identifier {{ currentName }}"

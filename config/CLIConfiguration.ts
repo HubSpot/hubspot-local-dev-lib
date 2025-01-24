@@ -1,3 +1,6 @@
+import fs from 'fs';
+import findup from 'findup-sync';
+import { getCwd } from '../lib/path';
 import { logger } from '../lib/logger';
 import { loadConfigFromEnvironment } from './environment';
 import { getValidEnv } from '../lib/environment';
@@ -11,7 +14,13 @@ import {
 import { commaSeparatedValues } from '../lib/text';
 import { ENVIRONMENTS } from '../constants/environments';
 import { API_KEY_AUTH_METHOD } from '../constants/auth';
-import { HUBSPOT_ACCOUNT_TYPES, MIN_HTTP_TIMEOUT } from '../constants/config';
+import {
+  HUBSPOT_ACCOUNT_TYPES,
+  MIN_HTTP_TIMEOUT,
+  DEFAULT_ACCOUNT_OVERRIDE_FILE_NAME,
+  DEFAULT_ACCOUNT_OVERRIDE_ERROR_INVALID_ID,
+  DEFAULT_ACCOUNT_OVERRIDE_ERROR_ACCOUNT_NOT_FOUND,
+} from '../constants/config';
 import { CMS_PUBLISH_MODE } from '../constants/files';
 import { CLIConfig_NEW, Environment } from '../types/Config';
 import {
@@ -228,23 +237,53 @@ class _CLIConfiguration {
   }
 
   getDefaultAccount(): string | number | null {
-    return this.config && this.config.defaultAccount
-      ? this.config.defaultAccount
-      : null;
+    return (
+      this.getResolvedDefaultAccountForCWD() ||
+      this.config?.defaultAccount ||
+      null
+    );
   }
 
-  // TODO a util that returns the account to use, respecting the values set in
-  // "defaultAccountOverrides"
-  // Example "defaultAccountOverrides":
-  //  - /src/brodgers/customer-project-1: customer-account1
-  //  - /src/brodgers/customer-project-2: customer-account2
-  // "/src/brodgers/customer-project-1" is the path to the project dir
-  // "customer-account1" is the name of the account to use as the default for the specified dir
-  // These defaults take precedence over the standard default account specified in the config
-  getResolvedDefaultAccountForCWD(
-    nameOrId: string | number
-  ): CLIAccount_NEW | null {
-    return this.getAccount(nameOrId);
+  getDefaultAccountOverrideFilePath(): string | null {
+    return findup([DEFAULT_ACCOUNT_OVERRIDE_FILE_NAME], {
+      cwd: getCwd(),
+    });
+  }
+
+  getResolvedDefaultAccountForCWD(): number | null {
+    const defaultOverrideFile = this.getDefaultAccountOverrideFilePath();
+    if (!defaultOverrideFile) {
+      return null;
+    }
+    const source = fs.readFileSync(defaultOverrideFile, 'utf8');
+    const accountId = Number(source);
+
+    if (isNaN(accountId)) {
+      throw new Error(
+        i18n(`${i18nKey}.getResolvedDefaultAccountForCWD.errorHeader`, {
+          hsAccountFile: defaultOverrideFile,
+        }),
+        {
+          cause: DEFAULT_ACCOUNT_OVERRIDE_ERROR_INVALID_ID,
+        }
+      );
+    }
+
+    const account = this.config?.accounts?.find(
+      account => account.accountId === accountId
+    );
+    if (!account) {
+      throw new Error(
+        i18n(`${i18nKey}.getResolvedDefaultAccountForCWD.errorHeader`, {
+          hsAccountFile: defaultOverrideFile,
+        }),
+        {
+          cause: DEFAULT_ACCOUNT_OVERRIDE_ERROR_ACCOUNT_NOT_FOUND,
+        }
+      );
+    }
+
+    return accountId;
   }
 
   getAccountIndex(accountId: number): number {
