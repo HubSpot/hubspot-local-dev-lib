@@ -25,6 +25,7 @@ import {
 const PROJECTS_API_PATH = 'dfs/v1/projects';
 const DEVELOPER_FILE_SYSTEM_PATH = 'dfs/v1';
 const PROJECTS_DEPLOY_API_PATH = 'dfs/deploy/v1';
+const PROJECTS_DEPLOY_API_PATH_V3 = 'dfs/deploy/v3';
 const PROJECTS_LOGS_API_PATH = 'dfs/logging/v1';
 const DEVELOPER_PROJECTS_API_PATH = 'developer/projects/v1';
 const MIGRATIONS_API_PATH = 'dfs/migrations/v1';
@@ -185,8 +186,18 @@ export function getBuildStructure(
 export function deployProject(
   accountId: number,
   projectName: string,
-  buildId: number
+  buildId: number,
+  useNewDeployApi = false
 ): HubSpotPromise<ProjectDeployResponse> {
+  if (useNewDeployApi) {
+    return http.post<ProjectDeployResponse>(accountId, {
+      url: `${PROJECTS_DEPLOY_API_PATH_V3}/deploys/queue/async`,
+      data: {
+        projectName,
+        targetBuildId: buildId,
+      },
+    });
+  }
   return http.post<ProjectDeployResponse>(accountId, {
     url: `${PROJECTS_DEPLOY_API_PATH}/deploys/queue/async`,
     data: {
