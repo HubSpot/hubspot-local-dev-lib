@@ -259,9 +259,9 @@ export function updateDefaultCmsPublishMode(
   return config_DEPRECATED.updateDefaultCmsPublishMode(cmsPublishMode);
 }
 
-export function getResolvedDefaultAccountForCWD() {
+export function getCWDAccountOverride() {
   if (CLIConfiguration.isActive()) {
-    return CLIConfiguration.getResolvedDefaultAccountForCWD();
+    return CLIConfiguration.getCWDAccountOverride();
   }
 }
 

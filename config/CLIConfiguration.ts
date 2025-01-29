@@ -237,11 +237,7 @@ class _CLIConfiguration {
   }
 
   getDefaultAccount(): string | number | null {
-    return (
-      this.getResolvedDefaultAccountForCWD() ||
-      this.config?.defaultAccount ||
-      null
-    );
+    return this.getCWDAccountOverride() || this.config?.defaultAccount || null;
   }
 
   getDefaultAccountOverrideFilePath(): string | null {
@@ -250,40 +246,57 @@ class _CLIConfiguration {
     });
   }
 
-  getResolvedDefaultAccountForCWD(): number | null {
+  getCWDAccountOverride(): string | number | null {
     const defaultOverrideFile = this.getDefaultAccountOverrideFilePath();
     if (!defaultOverrideFile) {
       return null;
     }
-    const source = fs.readFileSync(defaultOverrideFile, 'utf8');
-    const accountId = Number(source);
+    try {
+      const source = fs.readFileSync(defaultOverrideFile, 'utf8');
+      const accountId = Number(source);
 
-    if (isNaN(accountId)) {
-      throw new Error(
-        i18n(`${i18nKey}.getResolvedDefaultAccountForCWD.errorHeader`, {
-          hsAccountFile: defaultOverrideFile,
-        }),
-        {
-          cause: DEFAULT_ACCOUNT_OVERRIDE_ERROR_INVALID_ID,
-        }
+      if (isNaN(accountId)) {
+        throw new Error(
+          i18n(`${i18nKey}.getCWDAccountOverride.errorHeader`, {
+            hsAccountFile: defaultOverrideFile,
+          }),
+          {
+            cause: DEFAULT_ACCOUNT_OVERRIDE_ERROR_INVALID_ID,
+          }
+        );
+      }
+
+      const account = this.config?.accounts?.find(
+        account => account.accountId === accountId
       );
-    }
+      if (!account) {
+        throw new Error(
+          i18n(`${i18nKey}.getCWDAccountOverride.errorHeader`, {
+            hsAccountFile: defaultOverrideFile,
+          }),
+          {
+            cause: DEFAULT_ACCOUNT_OVERRIDE_ERROR_ACCOUNT_NOT_FOUND,
+          }
+        );
+      }
 
-    const account = this.config?.accounts?.find(
-      account => account.accountId === accountId
-    );
-    if (!account) {
-      throw new Error(
-        i18n(`${i18nKey}.getResolvedDefaultAccountForCWD.errorHeader`, {
-          hsAccountFile: defaultOverrideFile,
-        }),
-        {
-          cause: DEFAULT_ACCOUNT_OVERRIDE_ERROR_ACCOUNT_NOT_FOUND,
-        }
-      );
+      return account.name || account.accountId;
+    } catch (e) {
+      if (e instanceof Error) {
+        logger.error(
+          i18n(`${i18nKey}.getCWDAccountOverride.readFileError`, {
+            error: e.message,
+          })
+        );
+      } else {
+        logger.error(
+          i18n(`${i18nKey}.getCWDAccountOverride.readFileError`, {
+            error: String(e),
+          })
+        );
+      }
+      return null;
     }
-
-    return accountId;
   }
 
   getAccountIndex(accountId: number): number {

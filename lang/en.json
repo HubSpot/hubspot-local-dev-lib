@@ -263,8 +263,9 @@
           "invalidInput": "A 'defaultAccount' with value of number or string is required to update the config."
         }
       },
-      "getResolvedDefaultAccountForCWD": {
-        "errorHeader": "Error in {{ hsAccountFile }}"
+      "getCWDAccountOverride": {
+        "errorHeader": "Error in {{ hsAccountFile }}",
+        "readFileError": "Error reading account override file."
       },
       "renameAccount": {
         "errors": {
