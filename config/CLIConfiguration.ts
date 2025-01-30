@@ -251,36 +251,10 @@ class _CLIConfiguration {
     if (!defaultOverrideFile) {
       return null;
     }
+
+    let source: string;
     try {
-      const source = fs.readFileSync(defaultOverrideFile, 'utf8');
-      const accountId = Number(source);
-
-      if (isNaN(accountId)) {
-        throw new Error(
-          i18n(`${i18nKey}.getCWDAccountOverride.errorHeader`, {
-            hsAccountFile: defaultOverrideFile,
-          }),
-          {
-            cause: DEFAULT_ACCOUNT_OVERRIDE_ERROR_INVALID_ID,
-          }
-        );
-      }
-
-      const account = this.config?.accounts?.find(
-        account => account.accountId === accountId
-      );
-      if (!account) {
-        throw new Error(
-          i18n(`${i18nKey}.getCWDAccountOverride.errorHeader`, {
-            hsAccountFile: defaultOverrideFile,
-          }),
-          {
-            cause: DEFAULT_ACCOUNT_OVERRIDE_ERROR_ACCOUNT_NOT_FOUND,
-          }
-        );
-      }
-
-      return account.name || account.accountId;
+      source = fs.readFileSync(defaultOverrideFile, 'utf8');
     } catch (e) {
       if (e instanceof Error) {
         logger.error(
@@ -288,15 +262,38 @@ class _CLIConfiguration {
             error: e.message,
           })
         );
-      } else {
-        logger.error(
-          i18n(`${i18nKey}.getCWDAccountOverride.readFileError`, {
-            error: String(e),
-          })
-        );
       }
       return null;
     }
+
+    const accountId = Number(source);
+
+    if (isNaN(accountId)) {
+      throw new Error(
+        i18n(`${i18nKey}.getCWDAccountOverride.errorHeader`, {
+          hsAccountFile: defaultOverrideFile,
+        }),
+        {
+          cause: DEFAULT_ACCOUNT_OVERRIDE_ERROR_INVALID_ID,
+        }
+      );
+    }
+
+    const account = this.config?.accounts?.find(
+      account => account.accountId === accountId
+    );
+    if (!account) {
+      throw new Error(
+        i18n(`${i18nKey}.getCWDAccountOverride.errorHeader`, {
+          hsAccountFile: defaultOverrideFile,
+        }),
+        {
+          cause: DEFAULT_ACCOUNT_OVERRIDE_ERROR_ACCOUNT_NOT_FOUND,
+        }
+      );
+    }
+
+    return account.name || account.accountId;
   }
 
   getAccountIndex(accountId: number): number {
