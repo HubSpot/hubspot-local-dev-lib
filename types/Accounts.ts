@@ -16,6 +16,7 @@ export interface HubSpotConfigAccount {
     tokenInfo?: TokenInfo;
     clientId?: string;
     clientSecret?: string;
+    scopes?: Array<string>;
   };
   sandboxAccountType?: string | null;
   parentAccountId?: number | null;

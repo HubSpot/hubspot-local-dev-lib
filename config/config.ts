@@ -11,6 +11,7 @@ import {
   getGlobalConfigFilePath,
   readConfigFile,
   parseConfig,
+  loadConfigFromEnvironment,
 } from './configUtils';
 
 export function getConfigFilePath(): string {
@@ -41,7 +42,7 @@ export function getConfig(
   }
 
   if (useEnv) {
-    // do something else
+    return loadConfigFromEnvironment();
   }
 
   const pathToRead = configFilePath || getConfigFilePath();
@@ -51,8 +52,6 @@ export function getConfig(
 
   return parseConfig(configFileSource);
 }
-
-function getConfigIfExists(): HubSpotConfig | undefined {}
 
 function isConfigValid(config: HubSpotConfig): boolean {}
 
