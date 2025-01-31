@@ -5,7 +5,7 @@ import { ValueOf } from './Utils';
 
 export type AuthType = 'personalaccesskey' | 'apikey' | 'oauth2';
 
-export interface CLIAccount_NEW {
+export interface HubSpotConfigAccount {
   name?: string;
   accountId: number;
   accountType?: AccountType;
@@ -23,25 +23,9 @@ export interface CLIAccount_NEW {
   personalAccessKey?: string;
 }
 
-export interface CLIAccount_DEPRECATED {
-  name?: string;
-  portalId?: number;
-  defaultCmsPublishMode?: CmsPublishMode;
-  env: Environment;
-  accountType?: AccountType;
-  authType?: AuthType;
-  auth?: {
-    tokenInfo?: TokenInfo;
-    clientId?: string;
-    clientSecret?: string;
-  };
-  sandboxAccountType?: string | null;
-  parentAccountId?: number | null;
-  apiKey?: string;
-  personalAccessKey?: string;
-}
-
-export type CLIAccount = CLIAccount_NEW | CLIAccount_DEPRECATED;
+export type DeprecatedHubSpotConfigAccountFields = {
+  portalId: number;
+};
 
 export type GenericAccount = {
   portalId?: number;
@@ -56,22 +40,12 @@ export type TokenInfo = {
   refreshToken?: string;
 };
 
-export interface PersonalAccessKeyAccount_NEW extends CLIAccount_NEW {
+export interface PersonalAccessKeyConfigAccount extends HubSpotConfigAccount {
   authType: 'personalaccesskey';
   personalAccessKey: string;
 }
 
-export interface PersonalAccessKeyAccount_DEPRECATED
-  extends CLIAccount_DEPRECATED {
-  authType: 'personalaccesskey';
-  personalAccessKey: string;
-}
-
-export type PersonalAccessKeyAccount =
-  | PersonalAccessKeyAccount_NEW
-  | PersonalAccessKeyAccount_DEPRECATED;
-
-export interface OAuthAccount_NEW extends CLIAccount_NEW {
+export interface OAuthConfigAccount extends HubSpotConfigAccount {
   authType: 'oauth2';
   auth: {
     clientId?: string;
@@ -81,31 +55,12 @@ export interface OAuthAccount_NEW extends CLIAccount_NEW {
   };
 }
 
-export interface OAuthAccount_DEPRECATED extends CLIAccount_DEPRECATED {
-  authType: 'oauth2';
-  auth: {
-    clientId?: string;
-    clientSecret?: string;
-    scopes?: Array<string>;
-    tokenInfo?: TokenInfo;
-  };
-}
-
-export type OAuthAccount = OAuthAccount_NEW | OAuthAccount_DEPRECATED;
-
-export interface APIKeyAccount_NEW extends CLIAccount_NEW {
+export interface APIKeyConfigAccount extends HubSpotConfigAccount {
   authType: 'apikey';
   apiKey: string;
 }
 
-export interface APIKeyAccount_DEPRECATED extends CLIAccount_DEPRECATED {
-  authType: 'apikey';
-  apiKey: string;
-}
-
-export type APIKeyAccount = APIKeyAccount_NEW | APIKeyAccount_DEPRECATED;
-
-export interface FlatAccountFields_NEW extends CLIAccount_NEW {
+export interface HubSpotConfigAccountOptions extends HubSpotConfigAccount {
   tokenInfo?: TokenInfo;
   clientId?: string;
   clientSecret?: string;
@@ -113,19 +68,6 @@ export interface FlatAccountFields_NEW extends CLIAccount_NEW {
   apiKey?: string;
   personalAccessKey?: string;
 }
-
-export interface FlatAccountFields_DEPRECATED extends CLIAccount_DEPRECATED {
-  tokenInfo?: TokenInfo;
-  clientId?: string;
-  clientSecret?: string;
-  scopes?: Array<string>;
-  apiKey?: string;
-  personalAccessKey?: string;
-}
-
-export type FlatAccountFields =
-  | FlatAccountFields_NEW
-  | FlatAccountFields_DEPRECATED;
 
 export type ScopeData = {
   portalScopesInGroup: Array<string>;
@@ -148,10 +90,10 @@ export type EnabledFeaturesResponse = {
   enabledFeatures: { [key: string]: boolean };
 };
 
-export type UpdateAccountConfigOptions =
-  Partial<FlatAccountFields_DEPRECATED> & {
-    environment?: Environment;
-  };
+// export type UpdateAccountConfigOptions =
+//   Partial<FlatAccountFields_DEPRECATED> & {
+//     environment?: Environment;
+//   };
 
 export type PersonalAccessKeyOptions = {
   accountId: number;

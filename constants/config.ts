@@ -22,3 +22,7 @@ export const HUBSPOT_ACCOUNT_TYPE_STRINGS = {
   APP_DEVELOPER: i18n('lib.accountTypes.appDeveloper'),
   STANDARD: i18n('lib.accountTypes.standard'),
 } as const;
+
+export const CONFIG_FLAGS = {
+  USE_CUSTOM_OBJECT_HUBFILE: 'useCustomObjectHubfile',
+} as const;

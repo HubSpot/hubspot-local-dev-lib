@@ -1,139 +1,73 @@
+import path from 'path';
+import os from 'os';
+import fs from 'fs';
+import yaml from 'js-yaml';
+
+import {
+  HUBSPOT_CONFIGURATION_FOLDER,
+  HUBSPOT_CONFIGURATION_FILE,
+} from '../constants/config';
+import { HubSpotConfig, DeprecatedHubSpotConfigFields } from '../types/Config';
+import { FileSystemError } from '../models/FileSystemError';
 import { logger } from '../lib/logger';
-import {
-  API_KEY_AUTH_METHOD,
-  OAUTH_AUTH_METHOD,
-  PERSONAL_ACCESS_KEY_AUTH_METHOD,
-} from '../constants/auth';
-import { CLIConfig_NEW } from '../types/Config';
-import {
-  AuthType,
-  CLIAccount_NEW,
-  APIKeyAccount_NEW,
-  OAuthAccount_NEW,
-  PersonalAccessKeyAccount_NEW,
-  PersonalAccessKeyOptions,
-  OAuthOptions,
-  APIKeyOptions,
-} from '../types/Accounts';
-import { i18n } from '../utils/lang';
 
-const i18nKey = 'config.configUtils';
-
-export function getOrderedAccount(
-  unorderedAccount: CLIAccount_NEW
-): CLIAccount_NEW {
-  const { name, accountId, env, authType, ...rest } = unorderedAccount;
-
-  return {
-    name,
-    accountId,
-    env,
-    authType,
-    ...rest,
-  };
+export function getGlobalConfigFilePath(): string {
+  return path.join(
+    os.homedir(),
+    HUBSPOT_CONFIGURATION_FOLDER,
+    HUBSPOT_CONFIGURATION_FILE
+  );
 }
 
-export function getOrderedConfig(
-  unorderedConfig: CLIConfig_NEW
-): CLIConfig_NEW {
-  const {
-    defaultAccount,
-    defaultCmsPublishMode,
-    httpTimeout,
-    allowUsageTracking,
-    accounts,
-    ...rest
-  } = unorderedConfig;
+export function readConfigFile(configPath: string): string {
+  let source = '';
 
-  return {
-    ...(defaultAccount && { defaultAccount }),
-    defaultCmsPublishMode,
-    httpTimeout,
-    allowUsageTracking,
-    ...rest,
-    accounts: accounts.map(getOrderedAccount),
-  };
-}
-
-function generatePersonalAccessKeyAccountConfig({
-  accountId,
-  personalAccessKey,
-  env,
-}: PersonalAccessKeyOptions): PersonalAccessKeyAccount_NEW {
-  return {
-    authType: PERSONAL_ACCESS_KEY_AUTH_METHOD.value,
-    accountId,
-    personalAccessKey,
-    env,
-  };
-}
-
-function generateOauthAccountConfig({
-  accountId,
-  clientId,
-  clientSecret,
-  refreshToken,
-  scopes,
-  env,
-}: OAuthOptions): OAuthAccount_NEW {
-  return {
-    authType: OAUTH_AUTH_METHOD.value,
-    accountId,
-    auth: {
-      clientId,
-      clientSecret,
-      scopes,
-      tokenInfo: {
-        refreshToken,
-      },
-    },
-    env,
-  };
-}
-
-function generateApiKeyAccountConfig({
-  accountId,
-  apiKey,
-  env,
-}: APIKeyOptions): APIKeyAccount_NEW {
-  return {
-    authType: API_KEY_AUTH_METHOD.value,
-    accountId,
-    apiKey,
-    env,
-  };
-}
-
-export function generateConfig(
-  type: AuthType,
-  options: PersonalAccessKeyOptions | OAuthOptions | APIKeyOptions
-): CLIConfig_NEW | null {
-  if (!options) {
-    return null;
-  }
-  const config: CLIConfig_NEW = { accounts: [] };
-  let configAccount: CLIAccount_NEW;
-
-  switch (type) {
-    case API_KEY_AUTH_METHOD.value:
-      configAccount = generateApiKeyAccountConfig(options as APIKeyOptions);
-      break;
-    case PERSONAL_ACCESS_KEY_AUTH_METHOD.value:
-      configAccount = generatePersonalAccessKeyAccountConfig(
-        options as PersonalAccessKeyOptions
-      );
-      break;
-    case OAUTH_AUTH_METHOD.value:
-      configAccount = generateOauthAccountConfig(options as OAuthOptions);
-      break;
-    default:
-      logger.debug(i18n(`${i18nKey}.unknownType`, { type }));
-      return null;
+  try {
+    source = fs.readFileSync(configPath).toString();
+  } catch (err) {
+    logger.debug('@TODO Error reading');
+    throw new FileSystemError(
+      { cause: err },
+      {
+        filepath: configPath,
+        operation: 'read',
+      }
+    );
   }
 
-  if (configAccount) {
-    config.accounts.push(configAccount);
+  return source;
+}
+
+export function normalizeParsedConfig(
+  parsedConfig: HubSpotConfig & DeprecatedHubSpotConfigFields
+): HubSpotConfig {
+  if (parsedConfig.portals) {
+    parsedConfig.accounts = parsedConfig.portals.map(account => {
+      account.accountId = account.portalId;
+      return account;
+    });
   }
 
-  return config;
+  if (parsedConfig.defaultPortal) {
+    parsedConfig.defaultAccount = parsedConfig.defaultPortal;
+  }
+
+  if (parsedConfig.defaultMode) {
+    parsedConfig.defaultCmsPublishMode = parsedConfig.defaultMode;
+  }
+
+  return parsedConfig;
+}
+
+export function parseConfig(configSource: string): HubSpotConfig {
+  let parsedYaml: HubSpotConfig & DeprecatedHubSpotConfigFields;
+
+  try {
+    parsedYaml = yaml.load(configSource) as HubSpotConfig &
+      DeprecatedHubSpotConfigFields;
+  } catch (err) {
+    throw new Error('@TODO Error parsing', { cause: err });
+  }
+
+  return normalizeParsedConfig(parsedYaml);
 }

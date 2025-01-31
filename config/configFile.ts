@@ -7,7 +7,7 @@ import {
   HUBSPOT_CONFIGURATION_FILE,
   HUBSPOT_CONFIGURATION_FOLDER,
 } from '../constants/config';
-import { getOrderedConfig } from './configUtils';
+import { getOrderedConfig } from './configUtils_OLD';
 import { CLIConfig_NEW } from '../types/Config';
 import { i18n } from '../utils/lang';
 import { FileSystemError } from '../models/FileSystemError';

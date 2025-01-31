@@ -11,7 +11,7 @@ import {
   PERSONAL_ACCESS_KEY_AUTH_METHOD,
   OAUTH_SCOPES,
 } from '../constants/auth';
-import { generateConfig } from './configUtils';
+import { generateConfig } from './configUtils_OLD';
 import { getValidEnv } from '../lib/environment';
 import { i18n } from '../utils/lang';
 

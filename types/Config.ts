@@ -1,31 +1,38 @@
+import { CONFIG_FLAGS } from '../constants/config';
 import { ENVIRONMENTS } from '../constants/environments';
-import { CLIAccount_NEW, CLIAccount_DEPRECATED } from './Accounts';
+import {
+  DeprecatedHubSpotConfigAccountFields,
+  HubSpotConfigAccount,
+} from './Accounts';
 import { CmsPublishMode } from './Files';
 import { ValueOf } from './Utils';
 
-export interface CLIConfig_NEW {
-  accounts: Array<CLIAccount_NEW>;
+export interface HubSpotConfig {
+  accounts: Array<HubSpotConfigAccount>;
   allowUsageTracking?: boolean;
   defaultAccount?: string | number;
-  defaultMode?: CmsPublishMode; // Deprecated - left in to handle existing configs with this field
   defaultCmsPublishMode?: CmsPublishMode;
   httpTimeout?: number;
   env?: Environment;
   httpUseLocalhost?: boolean;
 }
 
-export interface CLIConfig_DEPRECATED {
-  portals: Array<CLIAccount_DEPRECATED>;
-  allowUsageTracking?: boolean;
-  defaultPortal?: string | number;
-  defaultMode?: CmsPublishMode; // Deprecated - left in to handle existing configs with this field
-  defaultCmsPublishMode?: CmsPublishMode;
-  httpTimeout?: number;
-  env?: Environment;
-  httpUseLocalhost?: boolean;
-}
+export type DeprecatedHubSpotConfigFields = {
+  portals?: Array<HubSpotConfigAccount & DeprecatedHubSpotConfigAccountFields>;
+  defaultPortal?: number;
+  defaultMode?: CmsPublishMode;
+};
 
-export type CLIConfig = CLIConfig_NEW | CLIConfig_DEPRECATED;
+// export interface CLIConfig_DEPRECATED {
+//   portals: Array<CLIAccount_DEPRECATED>;
+//   allowUsageTracking?: boolean;
+//   defaultPortal?: string | number;
+//   defaultMode?: CmsPublishMode; // Deprecated - left in to handle existing configs with this field
+//   defaultCmsPublishMode?: CmsPublishMode;
+//   httpTimeout?: number;
+//   env?: Environment;
+//   httpUseLocalhost?: boolean;
+// }
 
 export type Environment = ValueOf<typeof ENVIRONMENTS> | '';
 
@@ -44,3 +51,5 @@ export type GitInclusionResult = {
   configIgnored: boolean;
   gitignoreFiles: Array<string>;
 };
+
+export type ConfigFlag = ValueOf<typeof CONFIG_FLAGS>;
