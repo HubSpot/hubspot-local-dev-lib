@@ -259,6 +259,18 @@ export function updateDefaultCmsPublishMode(
   return config_DEPRECATED.updateDefaultCmsPublishMode(cmsPublishMode);
 }
 
+export function getCWDAccountOverride() {
+  if (CLIConfiguration.isActive()) {
+    return CLIConfiguration.getCWDAccountOverride();
+  }
+}
+
+export function getDefaultAccountOverrideFilePath() {
+  if (CLIConfiguration.isActive()) {
+    return CLIConfiguration.getDefaultAccountOverrideFilePath();
+  }
+}
+
 // These functions are not supported with the new config setup
 export const getConfigAccountId = config_DEPRECATED.getConfigAccountId;
 export const getOrderedAccount = config_DEPRECATED.getOrderedAccount;
