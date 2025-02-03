@@ -13,6 +13,8 @@ import {
   parseConfig,
   buildConfigFromEnvironment,
   writeConfigFile,
+  getLocalConfigFileDefaultPath,
+  getConfigAccountByIdentifier,
 } from './configUtils';
 
 export function getDefaultConfigFilePath(): string {
@@ -99,8 +101,9 @@ export function isConfigValid(
 }
 
 export function createEmptyConfigFile(
-  configFilePath: string,
-  useEnv: boolean
+  configFilePath: string | null,
+  useEnv: boolean,
+  useGlobalConfig = false
 ): void {
   if (configFilePath && useEnv) {
     throw new Error('@TODO');
@@ -108,13 +111,17 @@ export function createEmptyConfigFile(
     return;
   }
 
-  const pathToWrite = configFilePath || getDefaultConfigFilePath();
+  const defaultPath = useGlobalConfig
+    ? getGlobalConfigFilePath()
+    : getLocalConfigFileDefaultPath();
+
+  const pathToWrite = configFilePath || defaultPath;
 
   writeConfigFile({ accounts: [] }, pathToWrite);
 }
 
 export function deleteConfigFile(
-  configFilePath: string,
+  configFilePath: string | null,
   useEnv: boolean
 ): void {
   if (configFilePath && useEnv) {
@@ -127,17 +134,73 @@ export function deleteConfigFile(
   fs.unlinkSync(pathToDelete);
 }
 
-function getConfigAccountById(accountId: number): HubSpotConfigAccount {}
+export function getConfigAccountById(
+  configFilePath: string | null,
+  useEnv: boolean,
+  accountId: number
+): HubSpotConfigAccount {
+  const { accounts } = getConfig(configFilePath, useEnv);
 
-function getConfigAccountByName(accountName: string): HubSpotConfigAccount {}
+  const account = getConfigAccountByIdentifier(
+    accounts,
+    'accountId',
+    accountId
+  );
 
-function getConfigDefaultAccount(): HubSpotConfigAccount {}
+  if (!account) {
+    throw new Error('@TODO account not found');
+  }
 
-function getAllConfigAccounts(): HubSpotConfigAccount[];
+  return account;
+}
 
-function getAccountEnvironmentById(accountId: number): Environment {}
+export function getConfigAccountByName(
+  configFilePath: string | null,
+  useEnv: boolean,
+  accountName: string
+): HubSpotConfigAccount {
+  const { accounts } = getConfig(configFilePath, useEnv);
 
-function getDefaultAccountEnvironment(): Environment {}
+  const account = getConfigAccountByIdentifier(accounts, 'name', accountName);
+
+  if (!account) {
+    throw new Error('@TODO account not found');
+  }
+
+  return account;
+}
+
+export function getConfigDefaultAccount(
+  configFilePath: string | null,
+  useEnv: boolean
+): HubSpotConfigAccount {
+  const { accounts, defaultAccount } = getConfig(configFilePath, useEnv);
+
+  if (!defaultAccount) {
+    throw new Error('@TODO no default account');
+  }
+
+  const account = getConfigAccountByIdentifier(
+    accounts,
+    'name',
+    defaultAccount
+  );
+
+  if (!account) {
+    throw new Error('@TODO no default account');
+  }
+
+  return account;
+}
+
+export function getAllConfigAccounts(
+  configFilePath: string | null,
+  useEnv: boolean
+): HubSpotConfigAccount[] {
+  const { accounts } = getConfig(configFilePath, useEnv);
+
+  return accounts;
+}
 
 function updateConfigAccount(
   accoundId: number,

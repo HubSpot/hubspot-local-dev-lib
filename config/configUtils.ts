@@ -7,6 +7,7 @@ import {
   HUBSPOT_CONFIGURATION_FOLDER,
   HUBSPOT_CONFIGURATION_FILE,
   HUBSPOT_ACCOUNT_TYPES,
+  DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME,
 } from '../constants/config';
 import { ENVIRONMENT_VARIABLES } from '../constants/environments';
 import {
@@ -20,6 +21,7 @@ import { FileSystemError } from '../models/FileSystemError';
 import { logger } from '../lib/logger';
 import { HubSpotConfigAccount, AccountType } from '../types/Accounts';
 import { getValidEnv } from '../lib/environment';
+import { getCwd } from '../lib/path';
 
 export function getGlobalConfigFilePath(): string {
   return path.join(
@@ -27,6 +29,10 @@ export function getGlobalConfigFilePath(): string {
     HUBSPOT_CONFIGURATION_FOLDER,
     HUBSPOT_CONFIGURATION_FILE
   );
+}
+
+export function getLocalConfigFileDefaultPath(): string {
+  return `${getCwd()}/${DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME}`;
 }
 
 export function readConfigFile(configPath: string): string {
@@ -209,4 +215,12 @@ export function buildConfigFromEnvironment(): HubSpotConfig {
   }
 
   return { accounts: [account] };
+}
+
+export function getConfigAccountByIdentifier(
+  accounts: Array<HubSpotConfigAccount>,
+  identifierFieldName: 'name' | 'accountId',
+  identifier: string | number
+): HubSpotConfigAccount | undefined {
+  return accounts.find(account => account[identifierFieldName] === identifier);
 }

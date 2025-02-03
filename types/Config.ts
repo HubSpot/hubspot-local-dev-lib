@@ -10,7 +10,7 @@ import { ValueOf } from './Utils';
 export interface HubSpotConfig {
   accounts: Array<HubSpotConfigAccount>;
   allowUsageTracking?: boolean;
-  defaultAccount?: string | number;
+  defaultAccount?: string;
   defaultCmsPublishMode?: CmsPublishMode;
   httpTimeout?: number;
   env?: Environment;
@@ -19,7 +19,7 @@ export interface HubSpotConfig {
 
 export type DeprecatedHubSpotConfigFields = {
   portals?: Array<HubSpotConfigAccount & DeprecatedHubSpotConfigAccountFields>;
-  defaultPortal?: number;
+  defaultPortal?: string;
   defaultMode?: CmsPublishMode;
 };
 
