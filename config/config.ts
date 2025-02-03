@@ -1,4 +1,4 @@
-import fs from 'fs';
+import fs from 'fs-extra';
 import findup from 'findup-sync';
 
 import { DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME } from '../constants/config';
@@ -11,10 +11,11 @@ import {
   getGlobalConfigFilePath,
   readConfigFile,
   parseConfig,
-  loadConfigFromEnvironment,
+  buildConfigFromEnvironment,
+  writeConfigFile,
 } from './configUtils';
 
-export function getConfigFilePath(): string {
+export function getDefaultConfigFilePath(): string {
   const globalConfigFilePath = getGlobalConfigFilePath();
 
   if (fs.existsSync(globalConfigFilePath)) {
@@ -34,18 +35,18 @@ export function getConfigFilePath(): string {
 }
 
 export function getConfig(
-  configFilePath?: string,
-  useEnv = false
+  configFilePath: string | null,
+  useEnv: boolean
 ): HubSpotConfig {
   if (configFilePath && useEnv) {
     throw new Error('@TODO');
   }
 
   if (useEnv) {
-    return loadConfigFromEnvironment();
+    return buildConfigFromEnvironment();
   }
 
-  const pathToRead = configFilePath || getConfigFilePath();
+  const pathToRead = configFilePath || getDefaultConfigFilePath();
 
   logger.debug(`@TODOReading config from ${pathToRead}`);
   const configFileSource = readConfigFile(pathToRead);
@@ -53,11 +54,78 @@ export function getConfig(
   return parseConfig(configFileSource);
 }
 
-function isConfigValid(config: HubSpotConfig): boolean {}
+export function isConfigValid(
+  configFilePath: string | null,
+  useEnv: boolean
+): boolean {
+  const config = getConfig(configFilePath, useEnv);
 
-function createEmptyConfigFile(): void {}
+  if (config.accounts.length === 0) {
+    logger.log('@TODO');
+    return false;
+  }
 
-function deleteConfigFile(): void {}
+  const accountIdsMap: { [key: number]: boolean } = {};
+  const accountNamesMap: { [key: string]: boolean } = {};
+
+  return config.accounts.every(account => {
+    if (!account) {
+      logger.log('@TODO');
+      return false;
+    }
+    if (!account.accountId) {
+      logger.log('@TODO');
+      return false;
+    }
+    if (accountIdsMap[account.accountId]) {
+      logger.log('@TODO');
+      return false;
+    }
+    if (account.name) {
+      if (accountNamesMap[account.name.toLowerCase()]) {
+        logger.log('@TODO');
+        return false;
+      }
+      if (/\s+/.test(account.name)) {
+        logger.log('@TODO');
+        return false;
+      }
+      accountNamesMap[account.name] = true;
+    }
+
+    accountIdsMap[account.accountId] = true;
+    return true;
+  });
+}
+
+export function createEmptyConfigFile(
+  configFilePath: string,
+  useEnv: boolean
+): void {
+  if (configFilePath && useEnv) {
+    throw new Error('@TODO');
+  } else if (useEnv) {
+    return;
+  }
+
+  const pathToWrite = configFilePath || getDefaultConfigFilePath();
+
+  writeConfigFile({ accounts: [] }, pathToWrite);
+}
+
+export function deleteConfigFile(
+  configFilePath: string,
+  useEnv: boolean
+): void {
+  if (configFilePath && useEnv) {
+    throw new Error('@TODO');
+  } else if (useEnv) {
+    return;
+  }
+
+  const pathToDelete = configFilePath || getDefaultConfigFilePath();
+  fs.unlinkSync(pathToDelete);
+}
 
 function getConfigAccountById(accountId: number): HubSpotConfigAccount {}
 

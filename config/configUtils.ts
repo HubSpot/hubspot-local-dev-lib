@@ -1,11 +1,12 @@
 import path from 'path';
 import os from 'os';
-import fs from 'fs';
+import fs from 'fs-extra';
 import yaml from 'js-yaml';
 
 import {
   HUBSPOT_CONFIGURATION_FOLDER,
   HUBSPOT_CONFIGURATION_FILE,
+  HUBSPOT_ACCOUNT_TYPES,
 } from '../constants/config';
 import { ENVIRONMENT_VARIABLES } from '../constants/environments';
 import {
@@ -17,7 +18,7 @@ import {
 import { HubSpotConfig, DeprecatedHubSpotConfigFields } from '../types/Config';
 import { FileSystemError } from '../models/FileSystemError';
 import { logger } from '../lib/logger';
-import { HubSpotConfigAccount } from '../types/Accounts';
+import { HubSpotConfigAccount, AccountType } from '../types/Accounts';
 import { getValidEnv } from '../lib/environment';
 
 export function getGlobalConfigFilePath(): string {
@@ -47,6 +48,72 @@ export function readConfigFile(configPath: string): string {
   return source;
 }
 
+// Ensure written config files have fields in a consistent order
+function formatConfigForWrite(config: HubSpotConfig) {
+  const {
+    defaultAccount,
+    defaultCmsPublishMode,
+    httpTimeout,
+    allowUsageTracking,
+    accounts,
+    ...rest
+  } = config;
+
+  return {
+    ...(defaultAccount && { defaultAccount }),
+    defaultCmsPublishMode,
+    httpTimeout,
+    allowUsageTracking,
+    ...rest,
+    accounts: accounts.map(account => {
+      const { name, accountId, env, authType, ...rest } = account;
+
+      return {
+        name,
+        accountId,
+        env,
+        authType,
+        ...rest,
+      };
+    }),
+  };
+}
+
+export function writeConfigFile(
+  config: HubSpotConfig,
+  configPath: string
+): void {
+  const source = yaml.dump(
+    JSON.parse(JSON.stringify(formatConfigForWrite(config), null, 2))
+  );
+
+  try {
+    fs.ensureFileSync(configPath);
+    fs.writeFileSync(configPath, source);
+    logger.debug('@TODO');
+  } catch (err) {
+    throw new FileSystemError(
+      { cause: err },
+      {
+        filepath: configPath,
+        operation: 'write',
+      }
+    );
+  }
+}
+
+function getAccountType(sandboxAccountType?: string): AccountType {
+  if (sandboxAccountType) {
+    if (sandboxAccountType.toUpperCase() === 'DEVELOPER') {
+      return HUBSPOT_ACCOUNT_TYPES.DEVELOPMENT_SANDBOX;
+    }
+    if (sandboxAccountType.toUpperCase() === 'STANDARD') {
+      return HUBSPOT_ACCOUNT_TYPES.STANDARD_SANDBOX;
+    }
+  }
+  return HUBSPOT_ACCOUNT_TYPES.STANDARD;
+}
+
 export function normalizeParsedConfig(
   parsedConfig: HubSpotConfig & DeprecatedHubSpotConfigFields
 ): HubSpotConfig {
@@ -65,6 +132,12 @@ export function normalizeParsedConfig(
     parsedConfig.defaultCmsPublishMode = parsedConfig.defaultMode;
   }
 
+  parsedConfig.accounts.forEach(account => {
+    if (!account.accountType) {
+      account.accountType = getAccountType(account.sandboxAccountType);
+    }
+  });
+
   return parsedConfig;
 }
 
@@ -81,7 +154,7 @@ export function parseConfig(configSource: string): HubSpotConfig {
   return normalizeParsedConfig(parsedYaml);
 }
 
-export function loadConfigFromEnvironment(): HubSpotConfig {
+export function buildConfigFromEnvironment(): HubSpotConfig {
   const apiKey = process.env[ENVIRONMENT_VARIABLES.HUBSPOT_API_KEY];
   const clientId = process.env[ENVIRONMENT_VARIABLES.HUBSPOT_CLIENT_ID];
   const clientSecret = process.env[ENVIRONMENT_VARIABLES.HUBSPOT_CLIENT_SECRET];

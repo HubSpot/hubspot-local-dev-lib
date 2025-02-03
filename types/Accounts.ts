@@ -18,8 +18,8 @@ export interface HubSpotConfigAccount {
     clientSecret?: string;
     scopes?: Array<string>;
   };
-  sandboxAccountType?: string | null;
-  parentAccountId?: number | null;
+  sandboxAccountType?: string;
+  parentAccountId?: number;
   apiKey?: string;
   personalAccessKey?: string;
 }
