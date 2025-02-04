@@ -49,7 +49,7 @@ export async function fetchScopeAuthorizationData(
   accountId: number
 ): HubSpotPromise<ScopeAuthorizationResponse> {
   return http.get<ScopeAuthorizationResponse>(accountId, {
-    url: `${LOCALDEVAUTH_API_AUTH_PATH}/scope-groups/authorized`
+    url: `${LOCALDEVAUTH_API_AUTH_PATH}/scope-groups/authorized`,
   });
 }
 
