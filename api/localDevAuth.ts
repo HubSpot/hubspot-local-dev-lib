@@ -6,7 +6,6 @@ import {
   ScopeData,
   AccessTokenResponse,
   EnabledFeaturesResponse,
-  ScopeGroupAuthorization,
   ScopeAuthorizationResponse,
 } from '../types/Accounts';
 import axios from 'axios';
