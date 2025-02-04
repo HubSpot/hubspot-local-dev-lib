@@ -112,6 +112,7 @@ export interface FlatAccountFields_NEW extends CLIAccount_NEW {
   scopes?: Array<string>;
   apiKey?: string;
   personalAccessKey?: string;
+  environment?: Environment;
 }
 
 export interface FlatAccountFields_DEPRECATED extends CLIAccount_DEPRECATED {
@@ -121,6 +122,7 @@ export interface FlatAccountFields_DEPRECATED extends CLIAccount_DEPRECATED {
   scopes?: Array<string>;
   apiKey?: string;
   personalAccessKey?: string;
+  environment?: Environment;
 }
 
 export type FlatAccountFields =
