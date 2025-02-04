@@ -2,7 +2,10 @@ import fs from 'fs-extra';
 import findup from 'findup-sync';
 
 import { DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME } from '../constants/config';
-import { HubSpotConfigAccount } from '../types/Accounts';
+import {
+  HubSpotConfigAccount,
+  HubSpotConfigAccountOptions,
+} from '../types/Accounts';
 import { HubSpotConfig, Environment, ConfigFlag } from '../types/Config';
 import { CmsPublishMode } from '../types/Files';
 import { logger } from '../lib/logger';
@@ -203,9 +206,15 @@ export function getAllConfigAccounts(
 }
 
 function updateConfigAccount(
+  configFilePath: string | null,
+  useEnv: boolean,
   accoundId: number,
-  fieldsToUpdate: object
-): HubSpotConfigAccount {}
+  fieldsToUpdate: HubSpotConfigAccountOptions
+): HubSpotConfigAccount {
+  if (useEnv) {
+    throw new Error('@TODO');
+  }
+}
 
 function setConfigAccountAsDefault(accountId: number): void {}
 
