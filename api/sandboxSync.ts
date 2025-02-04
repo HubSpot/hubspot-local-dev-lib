@@ -6,7 +6,9 @@ import {
 } from '../types/Sandbox';
 import { SANDBOX_TIMEOUT } from '../constants/api';
 import { HubSpotPromise } from '../types/Http';
+
 const SANDBOXES_SYNC_API_PATH = 'sandboxes-sync/v1';
+const PORTABILITY_SYNC_API_PATH = 'portability-sync/v1';
 
 export async function initiateSync(
   fromHubId: number,
@@ -32,7 +34,7 @@ export async function fetchTypes(
   toHubId: number
 ): HubSpotPromise<FetchTypesResponse> {
   return http.get<FetchTypesResponse>(accountId, {
-    url: `${SANDBOXES_SYNC_API_PATH}/types${
+    url: `${PORTABILITY_SYNC_API_PATH}/types${
       toHubId ? `?toHubId=${toHubId}` : ''
     }`,
   });
