@@ -132,6 +132,22 @@ export type ScopeData = {
   userScopesInGroup: Array<string>;
 };
 
+export type ScopeAuthorizationResponse = {
+  results: Array<ScopeGroupAuthorization>;
+}
+
+export type ScopeGroupAuthorization = {
+  scopeGroup: ScopeGroup;
+  portalAuthorized: boolean;
+  userAuthorized: boolean;
+}
+
+export type ScopeGroup = {
+  name: string;
+  shortDescription: string;
+  longDescription: string;
+}
+
 export type AccessTokenResponse = {
   hubId: number;
   userId: number;

@@ -1,9 +1,9 @@
 import moment from 'moment';
 import { ENVIRONMENTS } from '../constants/environments';
 import { PERSONAL_ACCESS_KEY_AUTH_METHOD } from '../constants/auth';
-import { fetchAccessToken } from '../api/localDevAuth';
+import { fetchAccessToken, fetchScopeAuthorizationData } from '../api/localDevAuth';
 import { fetchSandboxHubData } from '../api/sandboxHubs';
-import { CLIAccount, PersonalAccessKeyAccount } from '../types/Accounts';
+import { CLIAccount, PersonalAccessKeyAccount, ScopeGroupAuthorization } from '../types/Accounts';
 import { Environment } from '../types/Config';
 import {
   getAccountConfig,
@@ -166,6 +166,12 @@ export async function scopesOnAccessToken(
   accountId: number
 ): Promise<Array<string>> {
   return (await getNewAccessTokenByAccountId(accountId)).scopeGroups;
+}
+
+export async function authorizedScopesForPortalAndUser(
+  accountId: number
+): Promise<Array<ScopeGroupAuthorization>> {
+  return (await fetchScopeAuthorizationData(accountId)).data.results;
 }
 
 export async function updateConfigWithAccessToken(
