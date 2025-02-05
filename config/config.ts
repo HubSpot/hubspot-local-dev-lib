@@ -105,15 +105,8 @@ export function isConfigValid(
 
 export function createEmptyConfigFile(
   configFilePath: string | null,
-  useEnv: boolean,
   useGlobalConfig = false
 ): void {
-  if (configFilePath && useEnv) {
-    throw new Error('@TODO');
-  } else if (useEnv) {
-    return;
-  }
-
   const defaultPath = useGlobalConfig
     ? getGlobalConfigFilePath()
     : getLocalConfigFileDefaultPath();
@@ -123,16 +116,7 @@ export function createEmptyConfigFile(
   writeConfigFile({ accounts: [] }, pathToWrite);
 }
 
-export function deleteConfigFile(
-  configFilePath: string | null,
-  useEnv: boolean
-): void {
-  if (configFilePath && useEnv) {
-    throw new Error('@TODO');
-  } else if (useEnv) {
-    return;
-  }
-
+export function deleteConfigFile(configFilePath: string | null): void {
   const pathToDelete = configFilePath || getDefaultConfigFilePath();
   fs.unlinkSync(pathToDelete);
 }
@@ -178,10 +162,6 @@ export function getConfigDefaultAccount(
   useEnv: boolean
 ): HubSpotConfigAccount {
   const { accounts, defaultAccount } = getConfig(configFilePath, useEnv);
-
-  if (useEnv) {
-    return accounts[0];
-  }
 
   if (!defaultAccount) {
     throw new Error('@TODO no default account');

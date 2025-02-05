@@ -178,6 +178,7 @@ export function buildConfigFromEnvironment(): HubSpotConfig {
   }
 
   const accountId = parseInt(accountIdVar);
+
   const env = getValidEnv(hubspotEnvironment);
 
   let account: HubSpotConfigAccount;
@@ -188,6 +189,7 @@ export function buildConfigFromEnvironment(): HubSpotConfig {
       accountId,
       personalAccessKey,
       env,
+      name: accountIdVar,
     };
   } else if (clientId && clientSecret && refreshToken) {
     account = {
@@ -202,6 +204,7 @@ export function buildConfigFromEnvironment(): HubSpotConfig {
         },
       },
       env,
+      name: accountIdVar,
     };
   } else if (apiKey) {
     account = {
@@ -209,12 +212,13 @@ export function buildConfigFromEnvironment(): HubSpotConfig {
       accountId,
       apiKey,
       env,
+      name: accountIdVar,
     };
   } else {
     throw new Error('@TODO');
   }
 
-  return { accounts: [account] };
+  return { accounts: [account], defaultAccount: accountIdVar };
 }
 
 export function getConfigAccountByIdentifier(
