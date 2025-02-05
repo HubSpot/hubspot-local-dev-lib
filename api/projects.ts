@@ -63,6 +63,7 @@ export async function uploadProject(
   if (intermediateRepresentation) {
     const formData = {
       projectFilesZip: fs.createReadStream(projectFile),
+      projectFileZipSizeInBytes: fs.statSync(projectFile).size,
       platformVersion,
       uploadRequest: JSON.stringify({
         ...intermediateRepresentation,
