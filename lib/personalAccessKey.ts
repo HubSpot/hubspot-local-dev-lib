@@ -1,9 +1,16 @@
 import moment from 'moment';
 import { ENVIRONMENTS } from '../constants/environments';
 import { PERSONAL_ACCESS_KEY_AUTH_METHOD } from '../constants/auth';
-import { fetchAccessToken, fetchScopeAuthorizationData } from '../api/localDevAuth';
+import {
+  fetchAccessToken,
+  fetchScopeAuthorizationData,
+} from '../api/localDevAuth';
 import { fetchSandboxHubData } from '../api/sandboxHubs';
-import { CLIAccount, PersonalAccessKeyAccount, ScopeGroupAuthorization } from '../types/Accounts';
+import {
+  CLIAccount,
+  PersonalAccessKeyAccount,
+  ScopeGroupAuthorization,
+} from '../types/Accounts';
 import { Environment } from '../types/Config';
 import {
   getAccountConfig,
