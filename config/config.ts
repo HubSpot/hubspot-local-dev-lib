@@ -179,6 +179,10 @@ export function getConfigDefaultAccount(
 ): HubSpotConfigAccount {
   const { accounts, defaultAccount } = getConfig(configFilePath, useEnv);
 
+  if (useEnv) {
+    return accounts[0];
+  }
+
   if (!defaultAccount) {
     throw new Error('@TODO no default account');
   }
@@ -205,7 +209,7 @@ export function getAllConfigAccounts(
   return accounts;
 }
 
-function updateConfigAccount(
+function addOrpdateConfigAccount(
   configFilePath: string | null,
   useEnv: boolean,
   accoundId: number,
