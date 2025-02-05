@@ -6,6 +6,7 @@ import {
   ScopeData,
   AccessTokenResponse,
   EnabledFeaturesResponse,
+  ScopeAuthorizationResponse,
 } from '../types/Accounts';
 import axios from 'axios';
 import { PublicAppInstallationData } from '../types/Apps';
@@ -41,6 +42,14 @@ export function fetchScopeData(
   return http.get<ScopeData>(accountId, {
     url: `${LOCALDEVAUTH_API_AUTH_PATH}/check-scopes`,
     params: { scopeGroup },
+  });
+}
+
+export async function fetchScopeAuthorizationData(
+  accountId: number
+): HubSpotPromise<ScopeAuthorizationResponse> {
+  return http.get<ScopeAuthorizationResponse>(accountId, {
+    url: `${LOCALDEVAUTH_API_AUTH_PATH}/scope-groups/authorized`,
   });
 }
 
