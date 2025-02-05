@@ -2,26 +2,22 @@ import { HUBSPOT_ACCOUNT_TYPES } from '../constants/config';
 import { CmsPublishMode } from './Files';
 import { Environment } from './Config';
 import { ValueOf } from './Utils';
-
+import {
+  PERSONAL_ACCESS_KEY_AUTH_METHOD,
+  OAUTH_AUTH_METHOD,
+  API_KEY_AUTH_METHOD,
+} from '../constants/auth';
 export type AuthType = 'personalaccesskey' | 'apikey' | 'oauth2';
 
-export interface HubSpotConfigAccount {
-  name?: string;
+interface BaseHubSpotConfigAccount {
+  name: string;
   accountId: number;
-  accountType?: AccountType;
+  accountType?: AccountType; // @TODO: make required?
   defaultCmsPublishMode?: CmsPublishMode;
   env: Environment;
-  authType?: AuthType;
-  auth?: {
-    tokenInfo?: TokenInfo;
-    clientId?: string;
-    clientSecret?: string;
-    scopes?: Array<string>;
-  };
+  authType: AuthType;
   sandboxAccountType?: string;
   parentAccountId?: number;
-  apiKey?: string;
-  personalAccessKey?: string;
 }
 
 export type DeprecatedHubSpotConfigAccountFields = {
@@ -41,34 +37,31 @@ export type TokenInfo = {
   refreshToken?: string;
 };
 
-export interface PersonalAccessKeyConfigAccount extends HubSpotConfigAccount {
-  authType: 'personalaccesskey';
+export interface PersonalAccessKeyConfigAccount
+  extends BaseHubSpotConfigAccount {
+  authType: typeof PERSONAL_ACCESS_KEY_AUTH_METHOD.value;
   personalAccessKey: string;
 }
 
-export interface OAuthConfigAccount extends HubSpotConfigAccount {
-  authType: 'oauth2';
+export interface OAuthConfigAccount extends BaseHubSpotConfigAccount {
+  authType: typeof OAUTH_AUTH_METHOD.value;
   auth: {
-    clientId?: string;
-    clientSecret?: string;
-    scopes?: Array<string>;
-    tokenInfo?: TokenInfo;
+    clientId: string;
+    clientSecret: string;
+    scopes: Array<string>;
+    tokenInfo: TokenInfo;
   };
 }
 
-export interface APIKeyConfigAccount extends HubSpotConfigAccount {
-  authType: 'apikey';
+export interface APIKeyConfigAccount extends BaseHubSpotConfigAccount {
+  authType: typeof API_KEY_AUTH_METHOD.value;
   apiKey: string;
 }
 
-export interface HubSpotConfigAccountOptions extends HubSpotConfigAccount {
-  tokenInfo?: TokenInfo;
-  clientId?: string;
-  clientSecret?: string;
-  scopes?: Array<string>;
-  apiKey?: string;
-  personalAccessKey?: string;
-}
+export type HubSpotConfigAccount =
+  | PersonalAccessKeyConfigAccount
+  | OAuthConfigAccount
+  | APIKeyConfigAccount;
 
 export type ScopeData = {
   portalScopesInGroup: Array<string>;

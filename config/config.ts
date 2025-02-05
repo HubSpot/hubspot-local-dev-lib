@@ -2,10 +2,7 @@ import fs from 'fs-extra';
 import findup from 'findup-sync';
 
 import { DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME } from '../constants/config';
-import {
-  HubSpotConfigAccount,
-  HubSpotConfigAccountOptions,
-} from '../types/Accounts';
+import { HubSpotConfigAccount } from '../types/Accounts';
 import { HubSpotConfig, Environment, ConfigFlag } from '../types/Config';
 import { CmsPublishMode } from '../types/Files';
 import { logger } from '../lib/logger';
@@ -18,6 +15,10 @@ import {
   writeConfigFile,
   getLocalConfigFileDefaultPath,
   getConfigAccountByIdentifier,
+  removeUndefinedFieldsFromConfigAccount,
+  hasAuthField,
+  isValidHubSpotConfigAccount,
+  getConfigAccountIndexById,
 } from './configUtils';
 
 export function getDefaultConfigFilePath(): string {
@@ -189,15 +190,73 @@ export function getAllConfigAccounts(
   return accounts;
 }
 
-function addOrpdateConfigAccount(
+// @TODO: Add logger debugs?
+export function addConfigAccount(
   configFilePath: string | null,
-  useEnv: boolean,
-  accoundId: number,
-  fieldsToUpdate: HubSpotConfigAccountOptions
-): HubSpotConfigAccount {
-  if (useEnv) {
+  accountToAdd: HubSpotConfigAccount
+): void {
+  const config = getConfig(configFilePath, false);
+  const accountInConfig = getConfigAccountByIdentifier(
+    config.accounts,
+    'accountId',
+    accountToAdd.accountId
+  );
+
+  if (accountInConfig) {
+    throw new Error('@TODO account already exists');
+  }
+
+  const configToWrite = removeUndefinedFieldsFromConfigAccount(accountToAdd);
+
+  config.accounts.push(configToWrite);
+
+  writeConfigFile(config, configFilePath || getDefaultConfigFilePath());
+}
+
+export function updateConfigAccount(
+  configFilePath: string | null,
+  accountId: number,
+  fieldsToUpdate: Partial<HubSpotConfigAccount>
+): void {
+  if (fieldsToUpdate.accountId !== accountId) {
     throw new Error('@TODO');
   }
+
+  const config = getConfig(configFilePath, false);
+
+  const accountToUpdate = getConfigAccountByIdentifier(
+    config.accounts,
+    'accountId',
+    accountId
+  );
+
+  if (!accountToUpdate) {
+    throw new Error('@TODO account not found');
+  }
+
+  const cleanedFieldsToUpdate =
+    removeUndefinedFieldsFromConfigAccount(fieldsToUpdate);
+
+  const accountAuth = hasAuthField(accountToUpdate) ? accountToUpdate.auth : {};
+
+  const authFieldsToUpdate = hasAuthField(cleanedFieldsToUpdate)
+    ? { auth: { ...accountAuth, ...cleanedFieldsToUpdate.auth } }
+    : {};
+
+  const updatedAccount = {
+    ...accountToUpdate,
+    ...cleanedFieldsToUpdate,
+    ...authFieldsToUpdate,
+  };
+
+  if (!isValidHubSpotConfigAccount(updatedAccount)) {
+    throw new Error('@TODO');
+  }
+
+  const accountIndex = getConfigAccountIndexById(config.accounts, accountId);
+  config.accounts[accountIndex] = updatedAccount;
+
+  writeConfigFile(config, configFilePath || getDefaultConfigFilePath());
 }
 
 function setConfigAccountAsDefault(accountId: number): void {}

@@ -19,7 +19,11 @@ import {
 import { HubSpotConfig, DeprecatedHubSpotConfigFields } from '../types/Config';
 import { FileSystemError } from '../models/FileSystemError';
 import { logger } from '../lib/logger';
-import { HubSpotConfigAccount, AccountType } from '../types/Accounts';
+import {
+  HubSpotConfigAccount,
+  AccountType,
+  OAuthConfigAccount,
+} from '../types/Accounts';
 import { getValidEnv } from '../lib/environment';
 import { getCwd } from '../lib/path';
 
@@ -161,6 +165,8 @@ export function parseConfig(configSource: string): HubSpotConfig {
 }
 
 export function buildConfigFromEnvironment(): HubSpotConfig {
+  // @TODO: Add other config fields
+  // @TODO: handle account type?
   const apiKey = process.env[ENVIRONMENT_VARIABLES.HUBSPOT_API_KEY];
   const clientId = process.env[ENVIRONMENT_VARIABLES.HUBSPOT_CLIENT_ID];
   const clientSecret = process.env[ENVIRONMENT_VARIABLES.HUBSPOT_CLIENT_SECRET];
@@ -227,4 +233,70 @@ export function getConfigAccountByIdentifier(
   identifier: string | number
 ): HubSpotConfigAccount | undefined {
   return accounts.find(account => account[identifierFieldName] === identifier);
+}
+
+export function getConfigAccountIndexById(
+  accounts: Array<HubSpotConfigAccount>,
+  id: string | number
+): number {
+  return accounts.findIndex(account => account.accountId === id);
+}
+
+export function hasAuthField(
+  account: Partial<HubSpotConfigAccount>
+): account is OAuthConfigAccount {
+  return 'auth' in account && typeof account.auth === 'object';
+}
+
+export function removeUndefinedFieldsFromConfigAccount<
+  T extends
+    | HubSpotConfigAccount
+    | Partial<HubSpotConfigAccount> = HubSpotConfigAccount,
+>(account: T): T {
+  Object.keys(account).forEach(k => {
+    const key = k as keyof T;
+    if (account[key] === undefined) {
+      delete account[key];
+    }
+  });
+
+  if (hasAuthField(account)) {
+    Object.keys(account.auth).forEach(k => {
+      const key = k as keyof T;
+      if (account[key] === undefined) {
+        delete account[key];
+      }
+    });
+  }
+
+  return account;
+}
+
+export function isValidHubSpotConfigAccount(
+  account: unknown
+): account is HubSpotConfigAccount {
+  if (!account || typeof account !== 'object') {
+    return false;
+  }
+
+  if (!('authType' in account) || typeof account.authType !== 'string') {
+    return false;
+  }
+
+  if (account.authType === PERSONAL_ACCESS_KEY_AUTH_METHOD.value) {
+    return (
+      'personalAccessKey' in account &&
+      typeof account.personalAccessKey === 'string'
+    );
+  }
+
+  if (account.authType === OAUTH_AUTH_METHOD.value) {
+    return 'auth' in account && typeof account.auth === 'object';
+  }
+
+  if (account.authType === API_KEY_AUTH_METHOD.value) {
+    return 'apiKey' in account && typeof account.apiKey === 'string';
+  }
+
+  return false;
 }
