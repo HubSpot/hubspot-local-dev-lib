@@ -60,10 +60,12 @@ export async function uploadProject(
   platformVersion?: string,
   intermediateRepresentation?: unknown
 ): HubSpotPromise<UploadProjectResponse | UploadIRResponse> {
+  if (fs.statSync(projectFile).size > 100 * 1024 * 1024) {
+    throw new Error('File size is too large. The maximum file size is 100MB.');
+  }
   if (intermediateRepresentation) {
     const formData = {
       projectFilesZip: fs.createReadStream(projectFile),
-      projectFileZipSizeInBytes: fs.statSync(projectFile).size,
       platformVersion,
       uploadRequest: JSON.stringify({
         ...intermediateRepresentation,
