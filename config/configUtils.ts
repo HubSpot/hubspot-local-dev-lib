@@ -2,6 +2,7 @@ import path from 'path';
 import os from 'os';
 import fs from 'fs-extra';
 import yaml from 'js-yaml';
+import findup from 'findup-sync';
 
 import {
   HUBSPOT_CONFIGURATION_FOLDER,
@@ -29,6 +30,13 @@ export function getGlobalConfigFilePath(): string {
     HUBSPOT_CONFIGURATION_FOLDER,
     HUBSPOT_CONFIGURATION_FILE
   );
+}
+
+export function getLocalConfigFilePath(): string | null {
+  return findup([
+    DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME,
+    DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME.replace('.yml', '.yaml'),
+  ]);
 }
 
 export function getLocalConfigFileDefaultPath(): string {

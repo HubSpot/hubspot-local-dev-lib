@@ -1,16 +1,13 @@
 import fs from 'fs-extra';
-import findup from 'findup-sync';
 
-import {
-  DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME,
-  MIN_HTTP_TIMEOUT,
-} from '../constants/config';
+import { MIN_HTTP_TIMEOUT } from '../constants/config';
 import { HubSpotConfigAccount } from '../types/Accounts';
 import { HubSpotConfig, ConfigFlag } from '../types/Config';
 import { CmsPublishMode } from '../types/Files';
 import { logger } from '../lib/logger';
 import {
   getGlobalConfigFilePath,
+  getLocalConfigFilePath,
   readConfigFile,
   parseConfig,
   buildConfigFromEnvironment,
@@ -21,6 +18,15 @@ import {
   getConfigAccountIndexById,
 } from './configUtils';
 import { CMS_PUBLISH_MODE } from '../constants/files';
+import { Environment } from '../types/Config';
+
+export function localConfigFileExists(): boolean {
+  return Boolean(getLocalConfigFilePath());
+}
+
+export function globalConfigFileExists(): boolean {
+  return fs.existsSync(getGlobalConfigFilePath());
+}
 
 export function getDefaultConfigFilePath(): string {
   const globalConfigFilePath = getGlobalConfigFilePath();
@@ -29,16 +35,13 @@ export function getDefaultConfigFilePath(): string {
     return globalConfigFilePath;
   }
 
-  const localConfigPath = findup([
-    DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME,
-    DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME.replace('.yml', '.yaml'),
-  ]);
+  const localConfigFilePath = getLocalConfigFilePath();
 
-  if (!localConfigPath) {
+  if (!localConfigFilePath) {
     throw new Error('@TODO');
   }
 
-  return localConfigPath;
+  return localConfigFilePath;
 }
 
 export function getConfig(
@@ -185,6 +188,19 @@ export function getAllConfigAccounts(
   const { accounts } = getConfig(configFilePath, useEnv);
 
   return accounts;
+}
+
+export function getConfigAccountEnvironment(
+  configFilePath: string | null,
+  useEnv: boolean,
+  accountId?: number
+): Environment {
+  if (accountId) {
+    const account = getConfigAccountById(configFilePath, useEnv, accountId);
+    return account.env;
+  }
+  const defaultAccount = getConfigDefaultAccount(configFilePath, useEnv);
+  return defaultAccount.env;
 }
 
 // @TODO: Add logger debugs?
