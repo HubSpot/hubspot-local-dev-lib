@@ -8,6 +8,7 @@ const ignoreList = [
   'hubspot.config.yml',
   'hubspot.config.yaml',
   'node_modules', // dependencies
+  'dist', // Build assets
   '.*', // hidden files/folders
   '*.log', // Error log for npm
   '*.swp', // Swap file for vim state
