@@ -10,11 +10,12 @@ import { ValueOf } from './Utils';
 export interface HubSpotConfig {
   accounts: Array<HubSpotConfigAccount>;
   allowUsageTracking?: boolean;
-  defaultAccount?: string;
+  defaultAccount?: number;
   defaultCmsPublishMode?: CmsPublishMode;
   httpTimeout?: number;
   env?: Environment;
   httpUseLocalhost?: boolean;
+  useCustomObjectHubfile?: boolean;
 }
 
 export type DeprecatedHubSpotConfigFields = {

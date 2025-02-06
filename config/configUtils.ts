@@ -19,11 +19,7 @@ import {
 import { HubSpotConfig, DeprecatedHubSpotConfigFields } from '../types/Config';
 import { FileSystemError } from '../models/FileSystemError';
 import { logger } from '../lib/logger';
-import {
-  HubSpotConfigAccount,
-  AccountType,
-  OAuthConfigAccount,
-} from '../types/Accounts';
+import { HubSpotConfigAccount, AccountType } from '../types/Accounts';
 import { getValidEnv } from '../lib/environment';
 import { getCwd } from '../lib/path';
 
@@ -70,7 +66,7 @@ export function removeUndefinedFieldsFromConfigAccount<
     }
   });
 
-  if (hasAuthField(account)) {
+  if ('auth' in account && typeof account.auth === 'object') {
     Object.keys(account.auth).forEach(k => {
       const key = k as keyof T;
       if (account[key] === undefined) {
@@ -266,12 +262,6 @@ export function getConfigAccountIndexById(
   id: string | number
 ): number {
   return accounts.findIndex(account => account.accountId === id);
-}
-
-export function hasAuthField(
-  account: Partial<HubSpotConfigAccount>
-): account is OAuthConfigAccount {
-  return 'auth' in account && typeof account.auth === 'object';
 }
 
 export function isConfigAccountValid(account: HubSpotConfigAccount) {

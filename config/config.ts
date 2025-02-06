@@ -1,12 +1,14 @@
 import fs from 'fs-extra';
 import findup from 'findup-sync';
 
-import { DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME } from '../constants/config';
+import {
+  DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME,
+  MIN_HTTP_TIMEOUT,
+} from '../constants/config';
 import { HubSpotConfigAccount } from '../types/Accounts';
-import { HubSpotConfig, Environment, ConfigFlag } from '../types/Config';
+import { HubSpotConfig, ConfigFlag } from '../types/Config';
 import { CmsPublishMode } from '../types/Files';
 import { logger } from '../lib/logger';
-import { i18n } from '../utils/lang';
 import {
   getGlobalConfigFilePath,
   readConfigFile,
@@ -15,10 +17,10 @@ import {
   writeConfigFile,
   getLocalConfigFileDefaultPath,
   getConfigAccountByIdentifier,
-  hasAuthField,
   isConfigAccountValid,
   getConfigAccountIndexById,
 } from './configUtils';
+import { CMS_PUBLISH_MODE } from '../constants/files';
 
 export function getDefaultConfigFilePath(): string {
   const globalConfigFilePath = getGlobalConfigFilePath();
@@ -165,7 +167,7 @@ export function getConfigDefaultAccount(
 
   const account = getConfigAccountByIdentifier(
     accounts,
-    'name',
+    'accountId',
     defaultAccount
   );
 
@@ -235,18 +237,138 @@ export function updateConfigAccount(
   writeConfigFile(config, configFilePath || getDefaultConfigFilePath());
 }
 
-function setConfigAccountAsDefault(accountId: number): void {}
+export function setConfigAccountAsDefault(
+  configFilePath: string | null,
+  accountIdentifier: number | string
+): void {
+  const config = getConfig(configFilePath, false);
 
-function renameConfigAccount(accountId: number, newName: string): void {}
+  const identifierAsNumber =
+    typeof accountIdentifier === 'number'
+      ? accountIdentifier
+      : parseInt(accountIdentifier);
+  const isId = !isNaN(identifierAsNumber);
 
-function removeAccountFromConfig(accountId: number): void {}
+  const account = getConfigAccountByIdentifier(
+    config.accounts,
+    isId ? 'accountId' : 'name',
+    isId ? identifierAsNumber : accountIdentifier
+  );
 
-function updateHttpTimeout(timeout: number): void {}
+  if (!account) {
+    throw new Error('@TODO account not found');
+  }
 
-function updateAllowUsageTracking(isAllowed: boolean): void {}
+  config.defaultAccount = account.accountId;
+  writeConfigFile(config, configFilePath || getDefaultConfigFilePath());
+}
 
-function updateDefaultCmsPublishMode(cmsPublishMode: CmsPublishMode): void {}
+export function renameConfigAccount(
+  configFilePath: string | null,
+  currentName: string,
+  newName: string
+): void {
+  const config = getConfig(configFilePath, false);
 
-function isConfigFlagEnabled(flag: ConfigFlag): boolean {}
+  const account = getConfigAccountByIdentifier(
+    config.accounts,
+    'name',
+    currentName
+  );
 
-function isUsageTrackingAllowed(): boolean {}
+  if (!account) {
+    throw new Error('@TODO account not found');
+  }
+
+  const duplicateAccount = getConfigAccountByIdentifier(
+    config.accounts,
+    'name',
+    newName
+  );
+
+  if (duplicateAccount) {
+    throw new Error('@TODO account name already exists');
+  }
+
+  account.name = newName;
+
+  writeConfigFile(config, configFilePath || getDefaultConfigFilePath());
+}
+
+export function removeAccountFromConfig(
+  configFilePath: string | null,
+  accountId: number
+): void {
+  const config = getConfig(configFilePath, false);
+
+  const index = getConfigAccountIndexById(config.accounts, accountId);
+
+  if (index < 0) {
+    throw new Error('@TODO account does not exist');
+  }
+
+  config.accounts.splice(index, 1);
+
+  writeConfigFile(config, configFilePath || getDefaultConfigFilePath());
+}
+
+export function updateHttpTimeout(
+  configFilePath: string | null,
+  timeout: string | number
+): void {
+  const parsedTimeout =
+    typeof timeout === 'string' ? parseInt(timeout) : timeout;
+
+  if (isNaN(parsedTimeout) || parsedTimeout < MIN_HTTP_TIMEOUT) {
+    throw new Error('@TODO timeout must be greater than min');
+  }
+
+  const config = getConfig(configFilePath, false);
+
+  config.httpTimeout = parsedTimeout;
+
+  writeConfigFile(config, configFilePath || getDefaultConfigFilePath());
+}
+
+export function updateAllowUsageTracking(
+  configFilePath: string | null,
+  isAllowed: boolean
+): void {
+  const config = getConfig(configFilePath, false);
+
+  config.allowUsageTracking = isAllowed;
+
+  writeConfigFile(config, configFilePath || getDefaultConfigFilePath());
+}
+
+export function updateDefaultCmsPublishMode(
+  configFilePath: string | null,
+  cmsPublishMode: CmsPublishMode
+): void {
+  if (
+    !cmsPublishMode ||
+    !Object.values(CMS_PUBLISH_MODE).includes(cmsPublishMode)
+  ) {
+    throw new Error('@TODO invalid CMS publihs mode');
+  }
+
+  const config = getConfig(configFilePath, false);
+
+  config.defaultCmsPublishMode = cmsPublishMode;
+
+  writeConfigFile(config, configFilePath || getDefaultConfigFilePath());
+}
+
+export function isConfigFlagEnabled(
+  configFilePath: string | null,
+  flag: ConfigFlag,
+  defaultValue: boolean
+): boolean {
+  const config = getConfig(configFilePath, false);
+
+  if (typeof config[flag] === 'undefined') {
+    return defaultValue;
+  }
+
+  return Boolean(config[flag]);
+}
