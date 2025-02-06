@@ -58,6 +58,30 @@ export function readConfigFile(configPath: string): string {
   return source;
 }
 
+export function removeUndefinedFieldsFromConfigAccount<
+  T extends
+    | HubSpotConfigAccount
+    | Partial<HubSpotConfigAccount> = HubSpotConfigAccount,
+>(account: T): T {
+  Object.keys(account).forEach(k => {
+    const key = k as keyof T;
+    if (account[key] === undefined) {
+      delete account[key];
+    }
+  });
+
+  if (hasAuthField(account)) {
+    Object.keys(account.auth).forEach(k => {
+      const key = k as keyof T;
+      if (account[key] === undefined) {
+        delete account[key];
+      }
+    });
+  }
+
+  return account;
+}
+
 // Ensure written config files have fields in a consistent order
 function formatConfigForWrite(config: HubSpotConfig) {
   const {
@@ -69,7 +93,7 @@ function formatConfigForWrite(config: HubSpotConfig) {
     ...rest
   } = config;
 
-  return {
+  const orderedConfig = {
     ...(defaultAccount && { defaultAccount }),
     defaultCmsPublishMode,
     httpTimeout,
@@ -87,6 +111,8 @@ function formatConfigForWrite(config: HubSpotConfig) {
       };
     }),
   };
+
+  return removeUndefinedFieldsFromConfigAccount(orderedConfig);
 }
 
 export function writeConfigFile(
@@ -248,54 +274,25 @@ export function hasAuthField(
   return 'auth' in account && typeof account.auth === 'object';
 }
 
-export function removeUndefinedFieldsFromConfigAccount<
-  T extends
-    | HubSpotConfigAccount
-    | Partial<HubSpotConfigAccount> = HubSpotConfigAccount,
->(account: T): T {
-  Object.keys(account).forEach(k => {
-    const key = k as keyof T;
-    if (account[key] === undefined) {
-      delete account[key];
-    }
-  });
-
-  if (hasAuthField(account)) {
-    Object.keys(account.auth).forEach(k => {
-      const key = k as keyof T;
-      if (account[key] === undefined) {
-        delete account[key];
-      }
-    });
-  }
-
-  return account;
-}
-
-export function isValidHubSpotConfigAccount(
-  account: unknown
-): account is HubSpotConfigAccount {
+export function isConfigAccountValid(account: HubSpotConfigAccount) {
   if (!account || typeof account !== 'object') {
     return false;
   }
 
-  if (!('authType' in account) || typeof account.authType !== 'string') {
+  if (!account.authType) {
     return false;
   }
 
   if (account.authType === PERSONAL_ACCESS_KEY_AUTH_METHOD.value) {
-    return (
-      'personalAccessKey' in account &&
-      typeof account.personalAccessKey === 'string'
-    );
+    return 'personalAccessKey' in account && account.personalAccessKey;
   }
 
   if (account.authType === OAUTH_AUTH_METHOD.value) {
-    return 'auth' in account && typeof account.auth === 'object';
+    return 'auth' in account && account.auth;
   }
 
   if (account.authType === API_KEY_AUTH_METHOD.value) {
-    return 'apiKey' in account && typeof account.apiKey === 'string';
+    return 'apiKey' in account && account.apiKey;
   }
 
   return false;
