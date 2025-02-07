@@ -147,9 +147,9 @@ export async function renameAccount(
   newName: string
 ): Promise<void> {
   if (CLIConfiguration.isActive()) {
-    CLIConfiguration.renameAccount(currentName, newName);
+    return CLIConfiguration.renameAccount(currentName, newName);
   } else {
-    config_DEPRECATED.renameAccount(currentName, newName);
+    return config_DEPRECATED.renameAccount(currentName, newName);
   }
 }
 
@@ -169,11 +169,13 @@ export function removeSandboxAccountFromConfig(
   return config_DEPRECATED.removeSandboxAccountFromConfig(nameOrId);
 }
 
-export async function deleteAccount(accountName: string): Promise<void> {
+export async function deleteAccount(
+  accountName: string
+): Promise<void | boolean> {
   if (CLIConfiguration.isActive()) {
-    CLIConfiguration.removeAccountFromConfig(accountName);
+    return CLIConfiguration.removeAccountFromConfig(accountName);
   } else {
-    config_DEPRECATED.deleteAccount(accountName);
+    return config_DEPRECATED.deleteAccount(accountName);
   }
 }
 
