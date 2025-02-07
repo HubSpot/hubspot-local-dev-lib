@@ -23,6 +23,7 @@ import { logger } from '../lib/logger';
 import { HubSpotConfigAccount, AccountType } from '../types/Accounts';
 import { getValidEnv } from '../lib/environment';
 import { getCwd } from '../lib/path';
+import { CMS_PUBLISH_MODE } from '../constants/files';
 
 export function getGlobalConfigFilePath(): string {
   return path.join(
@@ -165,7 +166,7 @@ export function normalizeParsedConfig(
   }
 
   if (parsedConfig.defaultPortal) {
-    parsedConfig.defaultAccount = parsedConfig.defaultPortal;
+    parsedConfig.defaultAccount = parseInt(parsedConfig.defaultPortal);
   }
 
   if (parsedConfig.defaultMode) {
@@ -195,7 +196,6 @@ export function parseConfig(configSource: string): HubSpotConfig {
 }
 
 export function buildConfigFromEnvironment(): HubSpotConfig {
-  // @TODO: Add other config fields
   // @TODO: handle account type?
   const apiKey = process.env[ENVIRONMENT_VARIABLES.HUBSPOT_API_KEY];
   const clientId = process.env[ENVIRONMENT_VARIABLES.HUBSPOT_CLIENT_ID];
@@ -208,12 +208,31 @@ export function buildConfigFromEnvironment(): HubSpotConfig {
   const refreshToken = process.env[ENVIRONMENT_VARIABLES.HUBSPOT_REFRESH_TOKEN];
   const hubspotEnvironment =
     process.env[ENVIRONMENT_VARIABLES.HUBSPOT_ENVIRONMENT];
+  const httpTimeoutVar = process.env[ENVIRONMENT_VARIABLES.HTTP_TIMEOUT];
+  const httpUseLocalhostVar =
+    process.env[ENVIRONMENT_VARIABLES.HTTP_USE_LOCALHOST];
+  const allowUsageTrackingVar =
+    process.env[ENVIRONMENT_VARIABLES.ALLOW_USAGE_TRACKING];
+  const defaultCmsPublishModeVar =
+    process.env[ENVIRONMENT_VARIABLES.DEFAULT_CMS_PUBLISH_MODE];
 
   if (!accountIdVar) {
     throw new Error('@TODO');
   }
 
   const accountId = parseInt(accountIdVar);
+  const httpTimeout = httpTimeoutVar ? parseInt(httpTimeoutVar) : undefined;
+  const httpUseLocalhost = httpUseLocalhostVar
+    ? httpUseLocalhostVar === 'true'
+    : undefined;
+  const allowUsageTracking = allowUsageTrackingVar
+    ? allowUsageTrackingVar === 'true'
+    : undefined;
+  const defaultCmsPublishMode =
+    defaultCmsPublishModeVar === CMS_PUBLISH_MODE.draft ||
+    defaultCmsPublishModeVar === CMS_PUBLISH_MODE.publish
+      ? defaultCmsPublishModeVar
+      : undefined;
 
   const env = getValidEnv(hubspotEnvironment);
 
@@ -254,7 +273,14 @@ export function buildConfigFromEnvironment(): HubSpotConfig {
     throw new Error('@TODO');
   }
 
-  return { accounts: [account], defaultAccount: accountIdVar };
+  return {
+    accounts: [account],
+    defaultAccount: accountId,
+    httpTimeout,
+    httpUseLocalhost,
+    allowUsageTracking,
+    defaultCmsPublishMode,
+  };
 }
 
 export function getConfigAccountByIdentifier(
