@@ -3,19 +3,22 @@ import { ENVIRONMENTS } from '../constants/environments';
 import { PERSONAL_ACCESS_KEY_AUTH_METHOD } from '../constants/auth';
 import { fetchAccessToken } from '../api/localDevAuth';
 import { fetchSandboxHubData } from '../api/sandboxHubs';
-import { CLIAccount, PersonalAccessKeyAccount } from '../types/Accounts';
+import {
+  HubSpotConfigAccount,
+  PersonalAccessKeyConfigAccount,
+} from '../types/Accounts';
 import { Environment } from '../types/Config';
 import {
-  getAccountConfig,
-  updateAccountConfig,
-  writeConfig,
-  getEnv,
-  updateDefaultAccount,
+  getConfigAccountById,
+  getConfigAccountByName,
+  updateConfigAccount,
+  getConfigAccountEnvironment,
+  setConfigAccountAsDefault,
+  getConfigDefaultAccount,
 } from '../config';
 import { HUBSPOT_ACCOUNT_TYPES } from '../constants/config';
 import { fetchDeveloperTestAccountData } from '../api/developerTestAccounts';
 import { logger } from './logger';
-import { CLIConfiguration } from '../config/CLIConfiguration';
 import { i18n } from '../utils/lang';
 import { isHubSpotHttpError } from '../errors';
 import { AccessToken } from '../types/Accounts';
@@ -53,49 +56,40 @@ export async function getAccessToken(
 }
 
 async function refreshAccessToken(
-  personalAccessKey: string,
-  env: Environment = ENVIRONMENTS.PROD,
-  accountId: number
+  account: PersonalAccessKeyConfigAccount
 ): Promise<AccessToken> {
+  const { personalAccessKey, env, accountId } = account;
   const accessTokenResponse = await getAccessToken(
     personalAccessKey,
     env,
     accountId
   );
   const { accessToken, expiresAt } = accessTokenResponse;
-  const config = getAccountConfig(accountId);
 
-  updateAccountConfig({
-    env,
-    ...config,
-    accountId,
-    tokenInfo: {
-      accessToken,
-      expiresAt: expiresAt,
+  updateConfigAccount({
+    ...account,
+    auth: {
+      tokenInfo: {
+        accessToken,
+        expiresAt: expiresAt,
+      },
     },
   });
-  writeConfig();
 
   return accessTokenResponse;
 }
 
 async function getNewAccessToken(
-  accountId: number,
-  personalAccessKey: string,
-  expiresAt: string | undefined,
-  env: Environment
+  account: PersonalAccessKeyConfigAccount
 ): Promise<AccessToken> {
-  const key = getRefreshKey(personalAccessKey, expiresAt);
+  const { personalAccessKey, auth } = account;
+  const key = getRefreshKey(personalAccessKey, auth.tokenInfo.expiresAt);
   if (refreshRequests.has(key)) {
     return refreshRequests.get(key);
   }
   let accessTokenResponse: AccessToken;
   try {
-    const refreshAccessPromise = refreshAccessToken(
-      personalAccessKey,
-      env,
-      accountId
-    );
+    const refreshAccessPromise = refreshAccessToken(account);
     if (key) {
       refreshRequests.set(key, refreshAccessPromise);
     }
@@ -112,18 +106,15 @@ async function getNewAccessToken(
 async function getNewAccessTokenByAccountId(
   accountId: number
 ): Promise<AccessToken> {
-  const account = getAccountConfig(accountId) as PersonalAccessKeyAccount;
+  const account = getConfigAccountById(accountId);
   if (!account) {
     throw new Error(i18n(`${i18nKey}.errors.accountNotFound`, { accountId }));
   }
-  const { auth, personalAccessKey, env } = account;
+  if (account.authType !== PERSONAL_ACCESS_KEY_AUTH_METHOD.value) {
+    throw new Error('@TODO');
+  }
 
-  const accessTokenResponse = await getNewAccessToken(
-    accountId,
-    personalAccessKey,
-    auth?.tokenInfo?.expiresAt,
-    env
-  );
+  const accessTokenResponse = await getNewAccessToken(account);
   return accessTokenResponse;
 }
 
@@ -131,11 +122,15 @@ export async function accessTokenForPersonalAccessKey(
   accountId: number,
   forceRefresh = false
 ): Promise<string | undefined> {
-  const account = getAccountConfig(accountId) as PersonalAccessKeyAccount;
+  const account = getConfigAccountById(accountId);
   if (!account) {
     throw new Error(i18n(`${i18nKey}.errors.accountNotFound`, { accountId }));
   }
-  const { auth, personalAccessKey, env } = account;
+  if (account.authType !== PERSONAL_ACCESS_KEY_AUTH_METHOD.value) {
+    throw new Error('@TODO');
+  }
+
+  const { auth } = account;
   const authTokenInfo = auth && auth.tokenInfo;
   const authDataExists = authTokenInfo && auth?.tokenInfo?.accessToken;
 
@@ -144,15 +139,10 @@ export async function accessTokenForPersonalAccessKey(
     forceRefresh ||
     moment().add(5, 'minutes').isAfter(moment(authTokenInfo.expiresAt))
   ) {
-    return getNewAccessToken(
-      accountId,
-      personalAccessKey,
-      authTokenInfo && authTokenInfo.expiresAt,
-      env
-    ).then(tokenInfo => tokenInfo.accessToken);
+    return getNewAccessToken(account).then(tokenInfo => tokenInfo.accessToken);
   }
 
-  return auth?.tokenInfo?.accessToken;
+  return auth.tokenInfo?.accessToken;
 }
 
 export async function enabledFeaturesForPersonalAccessKey(
@@ -174,9 +164,12 @@ export async function updateConfigWithAccessToken(
   env?: Environment,
   name?: string,
   makeDefault = false
-): Promise<CLIAccount | null> {
+): Promise<PersonalAccessKeyConfigAccount | null> {
   const { portalId, accessToken, expiresAt, accountType } = token;
-  const accountEnv = env || getEnv(name);
+  const account = name
+    ? getConfigAccountByName(name)
+    : getConfigDefaultAccount();
+  const accountEnv = env || account.env;
 
   let parentAccountId;
   try {
@@ -217,22 +210,21 @@ export async function updateConfigWithAccessToken(
     logger.debug(err);
   }
 
-  const updatedAccount = updateAccountConfig({
+  const updatedAccount = {
     accountId: portalId,
     accountType,
     personalAccessKey,
-    name,
+    name: name || account.name,
     authType: PERSONAL_ACCESS_KEY_AUTH_METHOD.value,
-    tokenInfo: { accessToken, expiresAt },
+    auth: { tokenInfo: { accessToken, expiresAt } },
     parentAccountId,
     env: accountEnv,
-  });
-  if (!CLIConfiguration.isActive()) {
-    writeConfig();
-  }
+  };
+
+  updateConfigAccount(updatedAccount);
 
   if (makeDefault && name) {
-    updateDefaultAccount(name);
+    setConfigAccountAsDefault(name);
   }
 
   return updatedAccount;

@@ -1,47 +1,34 @@
 import { OAuth2Manager } from '../models/OAuth2Manager';
 import { AUTH_METHODS } from '../constants/auth';
-import { FlatAccountFields } from '../types/Accounts';
+import { OAuthConfigAccount } from '../types/Accounts';
 import { logger } from './logger';
-import { getAccountIdentifier } from '../config/getAccountIdentifier';
-import { updateAccountConfig, writeConfig } from '../config';
+import { updateConfigAccount } from '../config';
 import { i18n } from '../utils/lang';
 
 const i18nKey = 'lib.oauth';
 
 const oauthManagers = new Map<number, OAuth2Manager>();
 
-function writeOauthTokenInfo(accountConfig: FlatAccountFields): void {
-  const accountId = getAccountIdentifier(accountConfig);
-
+function writeOauthTokenInfo(account: OAuthConfigAccount): void {
   logger.debug(
-    i18n(`${i18nKey}.writeTokenInfo`, { portalId: accountId || '' })
+    i18n(`${i18nKey}.writeTokenInfo`, { portalId: account.accountId })
   );
 
-  updateAccountConfig(accountConfig);
-  writeConfig();
+  updateConfigAccount(account);
 }
 
-export function getOauthManager(
-  accountId: number,
-  accountConfig: FlatAccountFields
-) {
-  if (!oauthManagers.has(accountId)) {
+export function getOauthManager(account: OAuthConfigAccount) {
+  if (!oauthManagers.has(account.accountId)) {
     oauthManagers.set(
-      accountId,
-      OAuth2Manager.fromConfig(accountConfig, () =>
-        writeOauthTokenInfo(accountConfig)
-      )
+      account.accountId,
+      new OAuth2Manager(account, () => writeOauthTokenInfo(account))
     );
   }
-  return oauthManagers.get(accountId);
+  return oauthManagers.get(account.accountId);
 }
 
 export function addOauthToAccountConfig(oauth: OAuth2Manager) {
   logger.log(i18n(`${i18nKey}.addOauthToAccountConfig.init`));
-  updateAccountConfig({
-    ...oauth.account,
-    authType: AUTH_METHODS.oauth.value,
-  });
-  writeConfig();
+  updateConfigAccount(oauth.account);
   logger.success(i18n(`${i18nKey}.addOauthToAccountConfig.success`));
 }

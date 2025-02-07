@@ -1,5 +1,5 @@
 import { version } from '../package.json';
-import { getAndLoadConfigIfNeeded } from '../config';
+import { getConfig } from '../config';
 import { getHubSpotApiOrigin } from '../lib/urls';
 import { HttpOptions } from '../types/Http';
 import { AxiosRequestConfig } from 'axios';
@@ -48,7 +48,7 @@ const DEFAULT_TRANSITIONAL = {
 
 export function getAxiosConfig(options: HttpOptions): AxiosRequestConfig {
   const { env, localHostOverride, headers, ...rest } = options;
-  const config = getAndLoadConfigIfNeeded();
+  const config = getConfig();
 
   let httpTimeout = 15000;
   let httpUseLocalhost = false;

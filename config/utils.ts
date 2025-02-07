@@ -340,3 +340,18 @@ export function isConfigAccountValid(account: HubSpotConfigAccount) {
 
   return false;
 }
+
+export function getAccountIdentifierAndType(
+  accountIdentifier: string | number
+): { identifier: string | number; identifierType: 'name' | 'accountId' } {
+  const identifierAsNumber =
+    typeof accountIdentifier === 'number'
+      ? accountIdentifier
+      : parseInt(accountIdentifier);
+  const isId = !isNaN(identifierAsNumber);
+
+  return {
+    identifier: isId ? identifierAsNumber : accountIdentifier,
+    identifierType: isId ? 'accountId' : 'name',
+  };
+}

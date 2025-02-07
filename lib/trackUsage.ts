@@ -2,9 +2,10 @@ import axios from 'axios';
 import { getAxiosConfig } from '../http/getAxiosConfig';
 import { logger } from './logger';
 import { http } from '../http';
-import { getAccountConfig, getEnv } from '../config';
+import { getConfigAccountById, getConfigAccountEnvironment } from '../config';
 import { FILE_MAPPER_API_PATH } from '../api/fileMapper';
 import { i18n } from '../utils/lang';
+import { getValidEnv } from './environment';
 
 const i18nKey = 'lib.trackUsage';
 
@@ -40,9 +41,9 @@ export async function trackUsage(
 
   const path = `${FILE_MAPPER_API_PATH}/${analyticsEndpoint}`;
 
-  const accountConfig = accountId && getAccountConfig(accountId);
+  const account = accountId && getConfigAccountById(accountId);
 
-  if (accountConfig && accountConfig.authType === 'personalaccesskey') {
+  if (account && account.authType === 'personalaccesskey') {
     logger.debug(i18n(`${i18nKey}.sendingEventAuthenticated`));
     try {
       await http.post(accountId, {
@@ -56,7 +57,9 @@ export async function trackUsage(
     }
   }
 
-  const env = getEnv(accountId);
+  const env = accountId
+    ? getConfigAccountEnvironment(accountId)
+    : getValidEnv();
   const axiosConfig = getAxiosConfig({
     env,
     url: path,

@@ -3,16 +3,16 @@ import fs from 'fs-extra';
 import contentDisposition from 'content-disposition';
 import axios, { AxiosRequestConfig, AxiosResponse, AxiosPromise } from 'axios';
 
-import { getAccountConfig } from '../config';
+import { getConfigAccountById } from '../config';
 import { USER_AGENTS, getAxiosConfig } from './getAxiosConfig';
 import { addQueryParams } from './addQueryParams';
 import { accessTokenForPersonalAccessKey } from '../lib/personalAccessKey';
 import { getOauthManager } from '../lib/oauth';
-import { FlatAccountFields } from '../types/Accounts';
 import { HttpOptions, HubSpotPromise } from '../types/Http';
 import { logger } from '../lib/logger';
 import { i18n } from '../utils/lang';
 import { HubSpotHttpError } from '../models/HubSpotHttpError';
+import { OAuthConfigAccount } from '../types/Accounts';
 
 const i18nKey = 'http.index';
 
@@ -27,15 +27,16 @@ export function addUserAgentHeader(key: string, value: string) {
 }
 
 async function withOauth(
-  accountId: number,
-  accountConfig: FlatAccountFields,
+  account: OAuthConfigAccount,
   axiosConfig: AxiosRequestConfig
 ): Promise<AxiosRequestConfig> {
   const { headers } = axiosConfig;
-  const oauth = getOauthManager(accountId, accountConfig);
+  const oauth = getOauthManager(account);
 
   if (!oauth) {
-    throw new Error(i18n(`${i18nKey}.errors.withOauth`, { accountId }));
+    throw new Error(
+      i18n(`${i18nKey}.errors.withOauth`, { accountId: account.accountId })
+    );
   }
 
   const accessToken = await oauth.accessToken();
@@ -82,13 +83,9 @@ async function withAuth(
   accountId: number,
   options: HttpOptions
 ): Promise<AxiosRequestConfig> {
-  const accountConfig = getAccountConfig(accountId);
+  const account = getConfigAccountById(accountId);
 
-  if (!accountConfig) {
-    throw new Error(i18n(`${i18nKey}.errors.withAuth`, { accountId }));
-  }
-
-  const { env, authType, apiKey } = accountConfig;
+  const { env, authType } = account;
   const axiosConfig = withPortalId(
     accountId,
     getAxiosConfig({ env, ...options })
@@ -99,17 +96,22 @@ async function withAuth(
   }
 
   if (authType === 'oauth2') {
-    return withOauth(accountId, accountConfig, axiosConfig);
+    return withOauth(account, axiosConfig);
   }
-  const { params } = axiosConfig;
 
-  return {
-    ...axiosConfig,
-    params: {
-      ...params,
-      hapikey: apiKey,
-    },
-  };
+  if (authType === 'apikey') {
+    const { params } = axiosConfig;
+
+    return {
+      ...axiosConfig,
+      params: {
+        ...params,
+        hapikey: account.apiKey,
+      },
+    };
+  }
+
+  throw new Error('@TODO: invalid aut type');
 }
 
 async function getRequest<T>(

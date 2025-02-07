@@ -24,11 +24,6 @@ export type DeprecatedHubSpotConfigAccountFields = {
   portalId: number;
 };
 
-export type GenericAccount = {
-  portalId?: number;
-  accountId?: number;
-};
-
 export type AccountType = ValueOf<typeof HUBSPOT_ACCOUNT_TYPES>;
 
 export type TokenInfo = {
@@ -41,6 +36,9 @@ export interface PersonalAccessKeyConfigAccount
   extends BaseHubSpotConfigAccount {
   authType: typeof PERSONAL_ACCESS_KEY_AUTH_METHOD.value;
   personalAccessKey: string;
+  auth: {
+    tokenInfo: TokenInfo;
+  };
 }
 
 export interface OAuthConfigAccount extends BaseHubSpotConfigAccount {
@@ -84,11 +82,6 @@ export type EnabledFeaturesResponse = {
   enabledFeatures: { [key: string]: boolean };
 };
 
-// export type UpdateAccountConfigOptions =
-//   Partial<FlatAccountFields_DEPRECATED> & {
-//     environment?: Environment;
-//   };
-
 export type PersonalAccessKeyOptions = {
   accountId: number;
   personalAccessKey: string;
@@ -119,18 +112,6 @@ export type AccessToken = {
   encodedOAuthRefreshToken: string;
   hubName: string;
   accountType: ValueOf<typeof HUBSPOT_ACCOUNT_TYPES>;
-};
-
-export type OAuth2ManagerAccountConfig = {
-  name?: string;
-  accountId?: number;
-  clientId?: string;
-  clientSecret?: string;
-  scopes?: Array<string>;
-  env?: Environment;
-  environment?: Environment;
-  tokenInfo?: TokenInfo;
-  authType?: 'oauth2';
 };
 
 export type WriteTokenInfoFunction = (tokenInfo: TokenInfo) => void;
