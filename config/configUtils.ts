@@ -44,6 +44,25 @@ export function getLocalConfigFileDefaultPath(): string {
   return `${getCwd()}/${DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME}`;
 }
 
+export function getConfigPathEnvironmentVariables(): {
+  useEnvironmentConfig: boolean;
+  configFilePathFromEnvironment: string | undefined;
+} {
+  const configFilePathFromEnvironment =
+    process.env[ENVIRONMENT_VARIABLES.HUBSPOT_CONFIG_PATH];
+  const useEnvironmentConfig =
+    process.env[ENVIRONMENT_VARIABLES.USE_ENVIRONMENT_CONFIG] === 'true';
+
+  if (configFilePathFromEnvironment && useEnvironmentConfig) {
+    throw new Error('@TODO');
+  }
+
+  return {
+    configFilePathFromEnvironment,
+    useEnvironmentConfig,
+  };
+}
+
 export function readConfigFile(configPath: string): string {
   let source = '';
 

@@ -16,6 +16,7 @@ import {
   getConfigAccountByIdentifier,
   isConfigAccountValid,
   getConfigAccountIndexById,
+  getConfigPathEnvironmentVariables,
 } from './configUtils';
 import { CMS_PUBLISH_MODE } from '../constants/files';
 import { Environment } from '../types/Config';
@@ -28,7 +29,7 @@ export function globalConfigFileExists(): boolean {
   return fs.existsSync(getGlobalConfigFilePath());
 }
 
-export function getDefaultConfigFilePath(): string {
+function getDefaultConfigFilePath(): string {
   const globalConfigFilePath = getGlobalConfigFilePath();
 
   if (fs.existsSync(globalConfigFilePath)) {
@@ -44,19 +45,20 @@ export function getDefaultConfigFilePath(): string {
   return localConfigFilePath;
 }
 
-export function getConfig(
-  configFilePath: string | null,
-  useEnv: boolean
-): HubSpotConfig {
-  if (configFilePath && useEnv) {
-    throw new Error('@TODO');
-  }
+export function getConfigFilePath(): string {
+  const { configFilePathFromEnvironment } = getConfigPathEnvironmentVariables();
 
-  if (useEnv) {
+  return configFilePathFromEnvironment || getDefaultConfigFilePath();
+}
+
+export function getConfig(): HubSpotConfig {
+  const { useEnvironmentConfig } = getConfigPathEnvironmentVariables();
+
+  if (useEnvironmentConfig) {
     return buildConfigFromEnvironment();
   }
 
-  const pathToRead = configFilePath || getDefaultConfigFilePath();
+  const pathToRead = getConfigFilePath();
 
   logger.debug(`@TODOReading config from ${pathToRead}`);
   const configFileSource = readConfigFile(pathToRead);
@@ -64,11 +66,8 @@ export function getConfig(
   return parseConfig(configFileSource);
 }
 
-export function isConfigValid(
-  configFilePath: string | null,
-  useEnv: boolean
-): boolean {
-  const config = getConfig(configFilePath, useEnv);
+export function isConfigValid(): boolean {
+  const config = getConfig();
 
   if (config.accounts.length === 0) {
     logger.log('@TODO');
@@ -104,30 +103,24 @@ export function isConfigValid(
   });
 }
 
-export function createEmptyConfigFile(
-  configFilePath: string | null,
-  useGlobalConfig = false
-): void {
+export function createEmptyConfigFile(useGlobalConfig = false): void {
+  const { configFilePathFromEnvironment } = getConfigPathEnvironmentVariables();
   const defaultPath = useGlobalConfig
     ? getGlobalConfigFilePath()
     : getLocalConfigFileDefaultPath();
 
-  const pathToWrite = configFilePath || defaultPath;
+  const pathToWrite = configFilePathFromEnvironment || defaultPath;
 
   writeConfigFile({ accounts: [] }, pathToWrite);
 }
 
-export function deleteConfigFile(configFilePath: string | null): void {
-  const pathToDelete = configFilePath || getDefaultConfigFilePath();
+export function deleteConfigFile(): void {
+  const pathToDelete = getConfigFilePath();
   fs.unlinkSync(pathToDelete);
 }
 
-export function getConfigAccountById(
-  configFilePath: string | null,
-  useEnv: boolean,
-  accountId: number
-): HubSpotConfigAccount {
-  const { accounts } = getConfig(configFilePath, useEnv);
+export function getConfigAccountById(accountId: number): HubSpotConfigAccount {
+  const { accounts } = getConfig();
 
   const account = getConfigAccountByIdentifier(
     accounts,
@@ -143,11 +136,9 @@ export function getConfigAccountById(
 }
 
 export function getConfigAccountByName(
-  configFilePath: string | null,
-  useEnv: boolean,
   accountName: string
 ): HubSpotConfigAccount {
-  const { accounts } = getConfig(configFilePath, useEnv);
+  const { accounts } = getConfig();
 
   const account = getConfigAccountByIdentifier(accounts, 'name', accountName);
 
@@ -158,11 +149,8 @@ export function getConfigAccountByName(
   return account;
 }
 
-export function getConfigDefaultAccount(
-  configFilePath: string | null,
-  useEnv: boolean
-): HubSpotConfigAccount {
-  const { accounts, defaultAccount } = getConfig(configFilePath, useEnv);
+export function getConfigDefaultAccount(): HubSpotConfigAccount {
+  const { accounts, defaultAccount } = getConfig();
 
   if (!defaultAccount) {
     throw new Error('@TODO no default account');
@@ -181,38 +169,28 @@ export function getConfigDefaultAccount(
   return account;
 }
 
-export function getAllConfigAccounts(
-  configFilePath: string | null,
-  useEnv: boolean
-): HubSpotConfigAccount[] {
-  const { accounts } = getConfig(configFilePath, useEnv);
+export function getAllConfigAccounts(): HubSpotConfigAccount[] {
+  const { accounts } = getConfig();
 
   return accounts;
 }
 
-export function getConfigAccountEnvironment(
-  configFilePath: string | null,
-  useEnv: boolean,
-  accountId?: number
-): Environment {
+export function getConfigAccountEnvironment(accountId?: number): Environment {
   if (accountId) {
-    const account = getConfigAccountById(configFilePath, useEnv, accountId);
+    const account = getConfigAccountById(accountId);
     return account.env;
   }
-  const defaultAccount = getConfigDefaultAccount(configFilePath, useEnv);
+  const defaultAccount = getConfigDefaultAccount();
   return defaultAccount.env;
 }
 
 // @TODO: Add logger debugs?
-export function addConfigAccount(
-  configFilePath: string | null,
-  accountToAdd: HubSpotConfigAccount
-): void {
+export function addConfigAccount(accountToAdd: HubSpotConfigAccount): void {
   if (!isConfigAccountValid(accountToAdd)) {
     throw new Error('@TODO');
   }
 
-  const config = getConfig(configFilePath, false);
+  const config = getConfig();
 
   const accountInConfig = getConfigAccountByIdentifier(
     config.accounts,
@@ -226,18 +204,17 @@ export function addConfigAccount(
 
   config.accounts.push(accountToAdd);
 
-  writeConfigFile(config, configFilePath || getDefaultConfigFilePath());
+  writeConfigFile(config, getConfigFilePath());
 }
 
 export function updateConfigAccount(
-  configFilePath: string | null,
   updatedAccount: HubSpotConfigAccount
 ): void {
   if (!isConfigAccountValid(updatedAccount)) {
     throw new Error('@TODO');
   }
 
-  const config = getConfig(configFilePath, false);
+  const config = getConfig();
 
   const accountIndex = getConfigAccountIndexById(
     config.accounts,
@@ -250,14 +227,13 @@ export function updateConfigAccount(
 
   config.accounts[accountIndex] = updatedAccount;
 
-  writeConfigFile(config, configFilePath || getDefaultConfigFilePath());
+  writeConfigFile(config, getConfigFilePath());
 }
 
 export function setConfigAccountAsDefault(
-  configFilePath: string | null,
   accountIdentifier: number | string
 ): void {
-  const config = getConfig(configFilePath, false);
+  const config = getConfig();
 
   const identifierAsNumber =
     typeof accountIdentifier === 'number'
@@ -276,15 +252,14 @@ export function setConfigAccountAsDefault(
   }
 
   config.defaultAccount = account.accountId;
-  writeConfigFile(config, configFilePath || getDefaultConfigFilePath());
+  writeConfigFile(config, getConfigFilePath());
 }
 
 export function renameConfigAccount(
-  configFilePath: string | null,
   currentName: string,
   newName: string
 ): void {
-  const config = getConfig(configFilePath, false);
+  const config = getConfig();
 
   const account = getConfigAccountByIdentifier(
     config.accounts,
@@ -308,14 +283,11 @@ export function renameConfigAccount(
 
   account.name = newName;
 
-  writeConfigFile(config, configFilePath || getDefaultConfigFilePath());
+  writeConfigFile(config, getConfigFilePath());
 }
 
-export function removeAccountFromConfig(
-  configFilePath: string | null,
-  accountId: number
-): void {
-  const config = getConfig(configFilePath, false);
+export function removeAccountFromConfig(accountId: number): void {
+  const config = getConfig();
 
   const index = getConfigAccountIndexById(config.accounts, accountId);
 
@@ -325,13 +297,10 @@ export function removeAccountFromConfig(
 
   config.accounts.splice(index, 1);
 
-  writeConfigFile(config, configFilePath || getDefaultConfigFilePath());
+  writeConfigFile(config, getConfigFilePath());
 }
 
-export function updateHttpTimeout(
-  configFilePath: string | null,
-  timeout: string | number
-): void {
+export function updateHttpTimeout(timeout: string | number): void {
   const parsedTimeout =
     typeof timeout === 'string' ? parseInt(timeout) : timeout;
 
@@ -339,26 +308,22 @@ export function updateHttpTimeout(
     throw new Error('@TODO timeout must be greater than min');
   }
 
-  const config = getConfig(configFilePath, false);
+  const config = getConfig();
 
   config.httpTimeout = parsedTimeout;
 
-  writeConfigFile(config, configFilePath || getDefaultConfigFilePath());
+  writeConfigFile(config, getConfigFilePath());
 }
 
-export function updateAllowUsageTracking(
-  configFilePath: string | null,
-  isAllowed: boolean
-): void {
-  const config = getConfig(configFilePath, false);
+export function updateAllowUsageTracking(isAllowed: boolean): void {
+  const config = getConfig();
 
   config.allowUsageTracking = isAllowed;
 
-  writeConfigFile(config, configFilePath || getDefaultConfigFilePath());
+  writeConfigFile(config, getConfigFilePath());
 }
 
 export function updateDefaultCmsPublishMode(
-  configFilePath: string | null,
   cmsPublishMode: CmsPublishMode
 ): void {
   if (
@@ -368,19 +333,18 @@ export function updateDefaultCmsPublishMode(
     throw new Error('@TODO invalid CMS publihs mode');
   }
 
-  const config = getConfig(configFilePath, false);
+  const config = getConfig();
 
   config.defaultCmsPublishMode = cmsPublishMode;
 
-  writeConfigFile(config, configFilePath || getDefaultConfigFilePath());
+  writeConfigFile(config, getConfigFilePath());
 }
 
 export function isConfigFlagEnabled(
-  configFilePath: string | null,
   flag: ConfigFlag,
   defaultValue: boolean
 ): boolean {
-  const config = getConfig(configFilePath, false);
+  const config = getConfig();
 
   if (typeof config[flag] === 'undefined') {
     return defaultValue;
