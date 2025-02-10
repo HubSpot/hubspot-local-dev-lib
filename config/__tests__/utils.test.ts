@@ -122,6 +122,14 @@ function cleanupEnvironmentVariables() {
 }
 
 describe('config/utils', () => {
+  beforeEach(() => {
+    cleanupEnvironmentVariables();
+  });
+
+  afterEach(() => {
+    cleanupEnvironmentVariables();
+  });
+
   describe('getGlobalConfigFilePath()', () => {
     it('returns the global config file path', () => {
       const globalConfigFilePath = getGlobalConfigFilePath();
@@ -164,7 +172,6 @@ describe('config/utils', () => {
       const result = getConfigPathEnvironmentVariables();
       expect(result.useEnvironmentConfig).toBe(false);
       expect(result.configFilePathFromEnvironment).toBe(configPath);
-      cleanupEnvironmentVariables();
     });
 
     it('throws when both environment variables are set', () => {
@@ -172,7 +179,6 @@ describe('config/utils', () => {
       process.env[ENVIRONMENT_VARIABLES.USE_ENVIRONMENT_CONFIG] = 'true';
 
       expect(() => getConfigPathEnvironmentVariables()).toThrow();
-      cleanupEnvironmentVariables();
     });
   });
 
@@ -260,7 +266,6 @@ describe('config/utils', () => {
         ...CONFIG,
         accounts: [{ ...PAK_ACCOUNT, name: '123', accountType: undefined }],
       });
-      cleanupEnvironmentVariables();
     });
 
     it('builds OAuth config', () => {
@@ -282,7 +287,6 @@ describe('config/utils', () => {
         ...CONFIG,
         accounts: [OAUTH_ACCOUNT],
       });
-      cleanupEnvironmentVariables();
     });
 
     it('throws when required variables missing', () => {
@@ -291,8 +295,6 @@ describe('config/utils', () => {
         process.env[ENVIRONMENT_VARIABLES.HUBSPOT_ENVIRONMENT] = 'qa';
         buildConfigFromEnvironment();
       }).toThrow();
-
-      cleanupEnvironmentVariables();
     });
   });
 

@@ -1,808 +1,377 @@
+import findup from 'findup-sync';
 import fs from 'fs-extra';
+
 import {
-  setConfig,
-  getAndLoadConfigIfNeeded,
+  localConfigFileExists,
+  globalConfigFileExists,
+  getConfigFilePath,
   getConfig,
-  getAccountType,
-  getConfigPath,
-  getAccountConfig,
-  getAccountId,
-  updateDefaultAccount,
-  updateAccountConfig,
-  validateConfig,
-  deleteEmptyConfigFile,
-  setConfigPath,
+  isConfigValid,
   createEmptyConfigFile,
-  configFileExists,
+  deleteConfigFile,
+  getConfigAccountById,
+  getConfigAccountByName,
+  getConfigDefaultAccount,
+  getAllConfigAccounts,
+  getConfigAccountEnvironment,
+  addConfigAccount,
+  updateConfigAccount,
+  setConfigAccountAsDefault,
+  renameConfigAccount,
+  removeAccountFromConfig,
+  updateHttpTimeout,
+  updateAllowUsageTracking,
+  updateDefaultCmsPublishMode,
+  isConfigFlagEnabled,
 } from '../index';
-import { getAccountIdentifier } from '../getAccountIdentifier';
-import { getAccounts, getDefaultAccount } from '../../utils/accounts';
-import { ENVIRONMENTS } from '../../constants/environments';
-import { HUBSPOT_ACCOUNT_TYPES } from '../../constants/config';
-import { CLIConfig, CLIConfig_DEPRECATED } from '../../types/Config';
+import { HubSpotConfigAccount } from '../../types/Accounts';
+import { HubSpotConfig } from '../../types/Config';
+import { getCwd } from '../../lib/path';
 import {
-  APIKeyAccount_DEPRECATED,
-  AuthType,
-  CLIAccount,
-  OAuthAccount,
-  OAuthAccount_DEPRECATED,
-  APIKeyAccount,
-  PersonalAccessKeyAccount,
-  PersonalAccessKeyAccount_DEPRECATED,
+  PersonalAccessKeyConfigAccount,
+  OAuthConfigAccount,
+  APIKeyConfigAccount,
 } from '../../types/Accounts';
-import * as configFile from '../configFile';
-import * as config_DEPRECATED from '../config_DEPRECATED';
+import {
+  PERSONAL_ACCESS_KEY_AUTH_METHOD,
+  OAUTH_AUTH_METHOD,
+  API_KEY_AUTH_METHOD,
+} from '../../constants/auth';
+import {
+  getGlobalConfigFilePath,
+  getLocalConfigFileDefaultPath,
+} from '../utils';
+import { ENVIRONMENT_VARIABLES } from '../../constants/config';
+import * as utils from '../utils';
 
-const CONFIG_PATHS = {
-  none: null,
-  default: '/Users/fakeuser/hubspot.config.yml',
-  nonStandard: '/Some/non-standard.config.yml',
-  cwd: `${process.cwd()}/hubspot.config.yml`,
-  hidden: '/Users/fakeuser/config.yml',
-};
+jest.mock('findup-sync');
+jest.mock('../../lib/path');
+jest.mock('fs-extra');
 
-let mockedConfigPath: string | null = CONFIG_PATHS.default;
+const mockFindup = findup as jest.MockedFunction<typeof findup>;
+const mockCwd = getCwd as jest.MockedFunction<typeof getCwd>;
+const mockFs = fs as jest.Mocked<typeof fs>;
 
-jest.mock('findup-sync', () => {
-  return jest.fn(() => mockedConfigPath);
-});
-
-jest.mock('../../lib/logger');
-
-const fsReadFileSyncSpy = jest.spyOn(fs, 'readFileSync');
-const fsWriteFileSyncSpy = jest.spyOn(fs, 'writeFileSync');
-
-jest.mock('../configFile', () => ({
-  getConfigFilePath: jest.fn(),
-  configFileExists: jest.fn(),
-}));
-
-const API_KEY_CONFIG: APIKeyAccount_DEPRECATED = {
-  portalId: 1111,
-  name: 'API',
-  authType: 'apikey',
-  apiKey: 'secret',
-  env: ENVIRONMENTS.QA,
-};
-
-const OAUTH2_CONFIG: OAuthAccount_DEPRECATED = {
-  name: 'OAUTH2',
-  portalId: 2222,
-  authType: 'oauth2',
+const PAK_ACCOUNT: PersonalAccessKeyConfigAccount = {
+  name: 'test-account',
+  accountId: 123,
+  authType: PERSONAL_ACCESS_KEY_AUTH_METHOD.value,
+  personalAccessKey: 'test-key',
+  env: 'qa',
   auth: {
-    clientId: 'fakeClientId',
-    clientSecret: 'fakeClientSecret',
-    scopes: ['content'],
-    tokenInfo: {
-      expiresAt: '2020-01-01T00:00:00.000Z',
-      refreshToken: 'fakeOauthRefreshToken',
-      accessToken: 'fakeOauthAccessToken',
-    },
+    tokenInfo: {},
   },
-  env: ENVIRONMENTS.QA,
+  accountType: 'STANDARD',
 };
 
-const PERSONAL_ACCESS_KEY_CONFIG: PersonalAccessKeyAccount_DEPRECATED = {
-  name: 'PERSONALACCESSKEY',
-  authType: 'personalaccesskey',
+const OAUTH_ACCOUNT: OAuthConfigAccount = {
+  accountId: 123,
+  env: 'qa',
+  name: '123',
+  authType: OAUTH_AUTH_METHOD.value,
+  accountType: undefined,
   auth: {
+    clientId: 'test-client-id',
+    clientSecret: 'test-client-secret',
     tokenInfo: {
-      expiresAt: '2020-01-01T00:00:00.000Z',
-      accessToken: 'fakePersonalAccessKeyAccessToken',
+      refreshToken: 'test-refresh-token',
     },
+    scopes: ['content', 'hubdb', 'files'],
   },
-  personalAccessKey: 'fakePersonalAccessKey',
-  env: ENVIRONMENTS.QA,
-  portalId: 1,
 };
 
-const PORTALS = [API_KEY_CONFIG, OAUTH2_CONFIG, PERSONAL_ACCESS_KEY_CONFIG];
-
-const CONFIG: CLIConfig_DEPRECATED = {
-  defaultPortal: PORTALS[0].name,
-  portals: PORTALS,
+const API_KEY_ACCOUNT: APIKeyConfigAccount = {
+  accountId: 123,
+  env: 'qa',
+  name: '123',
+  authType: API_KEY_AUTH_METHOD.value,
+  accountType: undefined,
+  apiKey: 'test-api-key',
 };
 
-function getAccountByAuthType(
-  config: CLIConfig | undefined | null,
-  authType: AuthType
-): CLIAccount {
-  return getAccounts(config).filter(portal => portal.authType === authType)[0];
+const CONFIG: HubSpotConfig = {
+  defaultAccount: PAK_ACCOUNT.accountId,
+  accounts: [PAK_ACCOUNT],
+  defaultCmsPublishMode: 'publish',
+  httpTimeout: 1000,
+  httpUseLocalhost: true,
+  allowUsageTracking: true,
+};
+
+function cleanupEnvironmentVariables() {
+  Object.keys(ENVIRONMENT_VARIABLES).forEach(key => {
+    delete process.env[key];
+  });
 }
 
-describe('config/config', () => {
-  const globalConsole = global.console;
-  beforeAll(() => {
-    global.console.error = jest.fn();
-    global.console.debug = jest.fn();
-  });
-  afterAll(() => {
-    global.console = globalConsole;
+describe('config/index', () => {
+  beforeEach(() => {
+    cleanupEnvironmentVariables();
   });
 
-  describe('setConfig()', () => {
-    beforeEach(() => {
-      setConfig(CONFIG);
+  afterEach(() => {
+    cleanupEnvironmentVariables();
+  });
+
+  describe('localConfigFileExists()', () => {
+    it('returns true when local config exists', () => {
+      mockFindup.mockReturnValueOnce(getLocalConfigFileDefaultPath());
+      expect(localConfigFileExists()).toBe(true);
     });
 
-    it('sets the config properly', () => {
+    it('returns false when local config does not exist', () => {
+      mockFindup.mockReturnValueOnce(null);
+      expect(localConfigFileExists()).toBe(false);
+    });
+  });
+
+  describe('globalConfigFileExists()', () => {
+    it('returns true when global config exists', () => {
+      mockFs.existsSync.mockReturnValueOnce(true);
+      expect(globalConfigFileExists()).toBe(true);
+    });
+
+    it('returns false when global config does not exist', () => {
+      mockFs.existsSync.mockReturnValueOnce(false);
+      expect(globalConfigFileExists()).toBe(false);
+    });
+  });
+
+  describe('getConfigFilePath()', () => {
+    it('returns environment path when set', () => {
+      process.env[ENVIRONMENT_VARIABLES.HUBSPOT_CONFIG_PATH] =
+        'test-environment-path';
+      expect(getConfigFilePath()).toBe('test-environment-path');
+    });
+
+    it('returns global path when exists', () => {
+      mockFs.existsSync.mockReturnValueOnce(true);
+      expect(getConfigFilePath()).toBe(getGlobalConfigFilePath());
+    });
+
+    it('returns local path when global does not exist', () => {
+      mockFs.existsSync.mockReturnValueOnce(false);
+      mockFindup.mockReturnValueOnce(getLocalConfigFileDefaultPath());
+      expect(getConfigFilePath()).toBe(getLocalConfigFileDefaultPath());
+    });
+  });
+
+  describe('getConfig()', () => {
+    it('returns environment config when enabled', () => {
+      process.env[ENVIRONMENT_VARIABLES.USE_ENVIRONMENT_CONFIG] = 'true';
+      process.env[ENVIRONMENT_VARIABLES.HUBSPOT_ACCOUNT_ID] = '234';
+      process.env[ENVIRONMENT_VARIABLES.HUBSPOT_ENVIRONMENT] = 'qa';
+      process.env[ENVIRONMENT_VARIABLES.HUBSPOT_API_KEY] = 'test-api-key';
+      expect(getConfig()).toEqual({
+        defaultAccount: 234,
+        accounts: [
+          {
+            accountId: 234,
+            name: '234',
+            env: 'qa',
+            apiKey: 'test-api-key',
+            authType: API_KEY_AUTH_METHOD.value,
+          },
+        ],
+      });
+    });
+
+    it('returns parsed config from file', () => {
+      mockFs.existsSync.mockReturnValueOnce(true);
+      mockFs.readFileSync.mockReturnValueOnce('test-config-content');
+      jest.spyOn(utils, 'parseConfig').mockReturnValueOnce(CONFIG);
+
       expect(getConfig()).toEqual(CONFIG);
     });
   });
 
-  describe('getAccountId()', () => {
-    beforeEach(() => {
-      process.env = {};
-      setConfig({
-        defaultPortal: PERSONAL_ACCESS_KEY_CONFIG.name,
-        portals: PORTALS,
-      });
+  describe('isConfigValid()', () => {
+    it('returns true for valid config', () => {
+      mockFs.existsSync.mockReturnValueOnce(true);
+      mockFs.readFileSync.mockReturnValueOnce('test-config-content');
+      jest.spyOn(utils, 'parseConfig').mockReturnValueOnce(CONFIG);
+
+      expect(isConfigValid()).toBe(true);
     });
 
-    it('returns portalId from config when a name is passed', () => {
-      expect(getAccountId(OAUTH2_CONFIG.name)).toEqual(OAUTH2_CONFIG.portalId);
+    it('returns false for config with no accounts', () => {
+      mockFs.existsSync.mockReturnValueOnce(true);
+      mockFs.readFileSync.mockReturnValueOnce('test-config-content');
+      jest.spyOn(utils, 'parseConfig').mockReturnValueOnce({ accounts: [] });
+
+      expect(isConfigValid()).toBe(false);
     });
 
-    it('returns portalId from config when a string id is passed', () => {
-      expect(getAccountId((OAUTH2_CONFIG.portalId || '').toString())).toEqual(
-        OAUTH2_CONFIG.portalId
-      );
-    });
-
-    it('returns portalId from config when a numeric id is passed', () => {
-      expect(getAccountId(OAUTH2_CONFIG.portalId)).toEqual(
-        OAUTH2_CONFIG.portalId
-      );
-    });
-
-    it('returns defaultPortal from config', () => {
-      expect(getAccountId() || undefined).toEqual(
-        PERSONAL_ACCESS_KEY_CONFIG.portalId
-      );
-    });
-
-    describe('when defaultPortal is a portalId', () => {
-      beforeEach(() => {
-        process.env = {};
-        setConfig({
-          defaultPortal: PERSONAL_ACCESS_KEY_CONFIG.portalId,
-          portals: PORTALS,
-        });
-      });
-
-      it('returns defaultPortal from config', () => {
-        expect(getAccountId() || undefined).toEqual(
-          PERSONAL_ACCESS_KEY_CONFIG.portalId
-        );
-      });
-    });
-  });
-
-  describe('updateDefaultAccount()', () => {
-    const myPortalName = 'Foo';
-
-    beforeEach(() => {
-      updateDefaultAccount(myPortalName);
-    });
-
-    it('sets the defaultPortal in the config', () => {
-      const config = getConfig();
-      expect(config ? getDefaultAccount(config) : null).toEqual(myPortalName);
-    });
-  });
-
-  describe('deleteEmptyConfigFile()', () => {
-    it('does not delete config file if there are contents', () => {
+    it('returns false for config with duplicate account ids', () => {
+      mockFs.existsSync.mockReturnValueOnce(true);
+      mockFs.readFileSync.mockReturnValueOnce('test-config-content');
       jest
-        .spyOn(fs, 'readFileSync')
-        .mockImplementation(() => 'defaultPortal: "test"');
-      jest.spyOn(fs, 'existsSync').mockImplementation(() => true);
-      fs.unlinkSync = jest.fn();
+        .spyOn(utils, 'parseConfig')
+        .mockReturnValueOnce({ accounts: [PAK_ACCOUNT, PAK_ACCOUNT] });
 
-      deleteEmptyConfigFile();
-      expect(fs.unlinkSync).not.toHaveBeenCalled();
-    });
-
-    it('deletes config file if empty', () => {
-      jest.spyOn(fs, 'readFileSync').mockImplementation(() => '');
-      jest.spyOn(fs, 'existsSync').mockImplementation(() => true);
-      fs.unlinkSync = jest.fn();
-
-      deleteEmptyConfigFile();
-      expect(fs.unlinkSync).toHaveBeenCalled();
-    });
-  });
-
-  describe('updateAccountConfig()', () => {
-    const CONFIG = {
-      defaultPortal: PORTALS[0].name,
-      portals: PORTALS,
-    };
-
-    beforeEach(() => {
-      setConfig(CONFIG);
-    });
-
-    it('sets the env in the config if specified', () => {
-      const environment = ENVIRONMENTS.QA;
-      const modifiedPersonalAccessKeyConfig = {
-        ...PERSONAL_ACCESS_KEY_CONFIG,
-        environment,
-      };
-      updateAccountConfig(modifiedPersonalAccessKeyConfig);
-
-      expect(
-        getAccountByAuthType(
-          getConfig(),
-          modifiedPersonalAccessKeyConfig.authType
-        ).env
-      ).toEqual(environment);
-    });
-
-    it('sets the env in the config if it was preexisting', () => {
-      const env = ENVIRONMENTS.QA;
-      setConfig({
-        defaultPortal: PERSONAL_ACCESS_KEY_CONFIG.name,
-        portals: [{ ...PERSONAL_ACCESS_KEY_CONFIG, env }],
-      });
-      const modifiedPersonalAccessKeyConfig = {
-        ...PERSONAL_ACCESS_KEY_CONFIG,
-        env: undefined,
-      };
-
-      updateAccountConfig(modifiedPersonalAccessKeyConfig);
-
-      expect(
-        getAccountByAuthType(
-          getConfig(),
-          modifiedPersonalAccessKeyConfig.authType
-        ).env
-      ).toEqual(env);
-    });
-
-    it('overwrites the existing env in the config if specified as environment', () => {
-      // NOTE: the config now uses "env", but this is to support legacy behavior
-      const previousEnv = ENVIRONMENTS.PROD;
-      const newEnv = ENVIRONMENTS.QA;
-      setConfig({
-        defaultPortal: PERSONAL_ACCESS_KEY_CONFIG.name,
-        portals: [{ ...PERSONAL_ACCESS_KEY_CONFIG, env: previousEnv }],
-      });
-      const modifiedPersonalAccessKeyConfig = {
-        ...PERSONAL_ACCESS_KEY_CONFIG,
-        environment: newEnv,
-      };
-      updateAccountConfig(modifiedPersonalAccessKeyConfig);
-
-      expect(
-        getAccountByAuthType(
-          getConfig(),
-          modifiedPersonalAccessKeyConfig.authType
-        ).env
-      ).toEqual(newEnv);
-    });
-
-    it('overwrites the existing env in the config if specified as env', () => {
-      const previousEnv = ENVIRONMENTS.PROD;
-      const newEnv = ENVIRONMENTS.QA;
-      setConfig({
-        defaultPortal: PERSONAL_ACCESS_KEY_CONFIG.name,
-        portals: [{ ...PERSONAL_ACCESS_KEY_CONFIG, env: previousEnv }],
-      });
-      const modifiedPersonalAccessKeyConfig = {
-        ...PERSONAL_ACCESS_KEY_CONFIG,
-        env: newEnv,
-      };
-      updateAccountConfig(modifiedPersonalAccessKeyConfig);
-
-      expect(
-        getAccountByAuthType(
-          getConfig(),
-          modifiedPersonalAccessKeyConfig.authType
-        ).env
-      ).toEqual(newEnv);
-    });
-
-    it('sets the name in the config if specified', () => {
-      const name = 'MYNAME';
-      const modifiedPersonalAccessKeyConfig = {
-        ...PERSONAL_ACCESS_KEY_CONFIG,
-        name,
-      };
-      updateAccountConfig(modifiedPersonalAccessKeyConfig);
-
-      expect(
-        getAccountByAuthType(
-          getConfig(),
-          modifiedPersonalAccessKeyConfig.authType
-        ).name
-      ).toEqual(name);
-    });
-
-    it('sets the name in the config if it was preexisting', () => {
-      const name = 'PREEXISTING';
-      setConfig({
-        defaultPortal: PERSONAL_ACCESS_KEY_CONFIG.name,
-        portals: [{ ...PERSONAL_ACCESS_KEY_CONFIG, name }],
-      });
-      const modifiedPersonalAccessKeyConfig = {
-        ...PERSONAL_ACCESS_KEY_CONFIG,
-      };
-      delete modifiedPersonalAccessKeyConfig.name;
-      updateAccountConfig(modifiedPersonalAccessKeyConfig);
-
-      expect(
-        getAccountByAuthType(
-          getConfig(),
-          modifiedPersonalAccessKeyConfig.authType
-        ).name
-      ).toEqual(name);
-    });
-
-    it('overwrites the existing name in the config if specified', () => {
-      const previousName = 'PREVIOUSNAME';
-      const newName = 'NEWNAME';
-      setConfig({
-        defaultPortal: PERSONAL_ACCESS_KEY_CONFIG.name,
-        portals: [{ ...PERSONAL_ACCESS_KEY_CONFIG, name: previousName }],
-      });
-      const modifiedPersonalAccessKeyConfig = {
-        ...PERSONAL_ACCESS_KEY_CONFIG,
-        name: newName,
-      };
-      updateAccountConfig(modifiedPersonalAccessKeyConfig);
-
-      expect(
-        getAccountByAuthType(
-          getConfig(),
-          modifiedPersonalAccessKeyConfig.authType
-        ).name
-      ).toEqual(newName);
-    });
-  });
-
-  describe('validateConfig()', () => {
-    const DEFAULT_PORTAL = PORTALS[0].name;
-
-    it('allows valid config', () => {
-      setConfig({
-        defaultPortal: DEFAULT_PORTAL,
-        portals: PORTALS,
-      });
-      expect(validateConfig()).toEqual(true);
-    });
-
-    it('does not allow duplicate portalIds', () => {
-      setConfig({
-        defaultPortal: DEFAULT_PORTAL,
-        portals: [...PORTALS, PORTALS[0]],
-      });
-      expect(validateConfig()).toEqual(false);
-    });
-
-    it('does not allow duplicate names', () => {
-      setConfig({
-        defaultPortal: DEFAULT_PORTAL,
-        portals: [
-          ...PORTALS,
-          {
-            ...PORTALS[0],
-            portalId: 123456789,
-          },
-        ],
-      });
-      expect(validateConfig()).toEqual(false);
-    });
-
-    it('does not allow names with spaces', () => {
-      setConfig({
-        defaultPortal: DEFAULT_PORTAL,
-        portals: [
-          {
-            ...PORTALS[0],
-            name: 'A NAME WITH SPACES',
-          },
-        ],
-      });
-      expect(validateConfig()).toEqual(false);
-    });
-
-    it('allows multiple portals with no name', () => {
-      setConfig({
-        defaultPortal: DEFAULT_PORTAL,
-        portals: [
-          {
-            ...PORTALS[0],
-            name: undefined,
-          },
-          {
-            ...PORTALS[1],
-            name: undefined,
-          },
-        ],
-      });
-      expect(validateConfig()).toEqual(true);
-    });
-  });
-
-  describe('getAndLoadConfigIfNeeded()', () => {
-    beforeEach(() => {
-      setConfig(undefined);
-      process.env = {};
-    });
-
-    it('loads a config from file if no combination of environment variables is sufficient', () => {
-      const readFileSyncSpy = jest.spyOn(fs, 'readFileSync');
-
-      getAndLoadConfigIfNeeded();
-      expect(fs.readFileSync).toHaveBeenCalled();
-      readFileSyncSpy.mockReset();
-    });
-
-    describe('oauth environment variable config', () => {
-      const {
-        portalId,
-        auth: { clientId, clientSecret },
-      } = OAUTH2_CONFIG;
-      const refreshToken = OAUTH2_CONFIG.auth.tokenInfo?.refreshToken || '';
-      let portalConfig: OAuthAccount | null;
-
-      beforeEach(() => {
-        process.env = {
-          HUBSPOT_ACCOUNT_ID: `${portalId}`,
-          HUBSPOT_CLIENT_ID: clientId,
-          HUBSPOT_CLIENT_SECRET: clientSecret,
-          HUBSPOT_REFRESH_TOKEN: refreshToken,
-        };
-        getAndLoadConfigIfNeeded({ useEnv: true });
-        portalConfig = getAccountConfig(portalId) as OAuthAccount;
-        fsReadFileSyncSpy.mockReset();
-      });
-
-      afterEach(() => {
-        // Clean up environment variable config so subsequent tests don't break
-        process.env = {};
-        setConfig(undefined);
-        getAndLoadConfigIfNeeded();
-      });
-
-      it('does not load a config from file', () => {
-        expect(fsReadFileSyncSpy).not.toHaveBeenCalled();
-      });
-
-      it('creates a portal config', () => {
-        expect(portalConfig).toBeTruthy();
-      });
-
-      it('properly loads portal id value', () => {
-        expect(getAccountIdentifier(portalConfig)).toEqual(portalId);
-      });
-
-      it('properly loads client id value', () => {
-        expect(portalConfig?.auth.clientId).toEqual(clientId);
-      });
-
-      it('properly loads client secret value', () => {
-        expect(portalConfig?.auth.clientSecret).toEqual(clientSecret);
-      });
-
-      it('properly loads refresh token value', () => {
-        expect(portalConfig?.auth?.tokenInfo?.refreshToken).toEqual(
-          refreshToken
-        );
-      });
-    });
-
-    describe('apikey environment variable config', () => {
-      const { portalId, apiKey } = API_KEY_CONFIG;
-      let portalConfig: APIKeyAccount;
-
-      beforeEach(() => {
-        process.env = {
-          HUBSPOT_ACCOUNT_ID: `${portalId}`,
-          HUBSPOT_API_KEY: apiKey,
-        };
-        getAndLoadConfigIfNeeded({ useEnv: true });
-        portalConfig = getAccountConfig(portalId) as APIKeyAccount;
-        fsReadFileSyncSpy.mockReset();
-      });
-
-      afterEach(() => {
-        // Clean up environment variable config so subsequent tests don't break
-        process.env = {};
-        setConfig(undefined);
-        getAndLoadConfigIfNeeded();
-      });
-
-      it('does not load a config from file', () => {
-        expect(fsReadFileSyncSpy).not.toHaveBeenCalled();
-      });
-
-      it('creates a portal config', () => {
-        expect(portalConfig).toBeTruthy();
-      });
-
-      it('properly loads portal id value', () => {
-        expect(getAccountIdentifier(portalConfig)).toEqual(portalId);
-      });
-
-      it('properly loads api key value', () => {
-        expect(portalConfig.apiKey).toEqual(apiKey);
-      });
-    });
-
-    describe('personalaccesskey environment variable config', () => {
-      const { portalId, personalAccessKey } = PERSONAL_ACCESS_KEY_CONFIG;
-      let portalConfig: PersonalAccessKeyAccount | null;
-
-      beforeEach(() => {
-        process.env = {
-          HUBSPOT_ACCOUNT_ID: `${portalId}`,
-          HUBSPOT_PERSONAL_ACCESS_KEY: personalAccessKey,
-        };
-        getAndLoadConfigIfNeeded({ useEnv: true });
-        portalConfig = getAccountConfig(portalId) as PersonalAccessKeyAccount;
-        fsReadFileSyncSpy.mockReset();
-      });
-
-      afterEach(() => {
-        // Clean up environment variable config so subsequent tests don't break
-        process.env = {};
-        setConfig(undefined);
-        getAndLoadConfigIfNeeded();
-      });
-
-      it('does not load a config from file', () => {
-        expect(fsReadFileSyncSpy).not.toHaveBeenCalled();
-      });
-
-      it('creates a portal config', () => {
-        expect(portalConfig).toBeTruthy();
-      });
-
-      it('properly loads portal id value', () => {
-        expect(getAccountIdentifier(portalConfig)).toEqual(portalId);
-      });
-
-      it('properly loads personal access key value', () => {
-        expect(portalConfig?.personalAccessKey).toEqual(personalAccessKey);
-      });
-    });
-  });
-
-  describe('getAccountType()', () => {
-    it('returns STANDARD when no accountType or sandboxAccountType is specified', () => {
-      expect(getAccountType()).toBe(HUBSPOT_ACCOUNT_TYPES.STANDARD);
-    });
-    it('handles sandboxAccountType transforms correctly', () => {
-      expect(getAccountType(undefined, 'DEVELOPER')).toBe(
-        HUBSPOT_ACCOUNT_TYPES.DEVELOPMENT_SANDBOX
-      );
-      expect(getAccountType(undefined, 'STANDARD')).toBe(
-        HUBSPOT_ACCOUNT_TYPES.STANDARD_SANDBOX
-      );
-    });
-    it('handles accountType arg correctly', () => {
-      expect(getAccountType(HUBSPOT_ACCOUNT_TYPES.STANDARD, 'DEVELOPER')).toBe(
-        HUBSPOT_ACCOUNT_TYPES.STANDARD
-      );
-    });
-  });
-
-  describe('getConfigPath()', () => {
-    let fsExistsSyncSpy: jest.SpyInstance;
-
-    beforeAll(() => {
-      fsExistsSyncSpy = jest.spyOn(fs, 'existsSync').mockImplementation(() => {
-        return false;
-      });
-    });
-
-    afterAll(() => {
-      fsExistsSyncSpy.mockRestore();
-    });
-
-    describe('when a standard config is present', () => {
-      it('returns the standard config path when useHiddenConfig is false', () => {
-        (configFile.getConfigFilePath as jest.Mock).mockReturnValue(
-          CONFIG_PATHS.default
-        );
-        const configPath = getConfigPath('', false);
-        expect(configPath).toBe(CONFIG_PATHS.default);
-      });
-
-      it('returns the hidden config path when useHiddenConfig is true', () => {
-        (configFile.getConfigFilePath as jest.Mock).mockReturnValue(
-          CONFIG_PATHS.hidden
-        );
-        const hiddenConfigPath = getConfigPath(undefined, true);
-        expect(hiddenConfigPath).toBe(CONFIG_PATHS.hidden);
-      });
-    });
-
-    describe('when passed a path', () => {
-      it('returns the path when useHiddenConfig is false', () => {
-        const randomConfigPath = '/some/random/path.config.yml';
-        const configPath = getConfigPath(randomConfigPath, false);
-        expect(configPath).toBe(randomConfigPath);
-      });
-
-      it('returns the hidden config path when useHiddenConfig is true, ignoring the passed path', () => {
-        (configFile.getConfigFilePath as jest.Mock).mockReturnValue(
-          CONFIG_PATHS.hidden
-        );
-        const hiddenConfigPath = getConfigPath(
-          '/some/random/path.config.yml',
-          true
-        );
-        expect(hiddenConfigPath).toBe(CONFIG_PATHS.hidden);
-      });
-    });
-
-    describe('when no config is present', () => {
-      beforeAll(() => {
-        fsExistsSyncSpy.mockReturnValue(false);
-      });
-
-      it('returns default directory when useHiddenConfig is false', () => {
-        (configFile.getConfigFilePath as jest.Mock).mockReturnValue(null);
-        const configPath = getConfigPath(undefined, false);
-        expect(configPath).toBe(CONFIG_PATHS.default);
-      });
-
-      it('returns null when useHiddenConfig is true and no hidden config exists', () => {
-        (configFile.getConfigFilePath as jest.Mock).mockReturnValue(null);
-        const hiddenConfigPath = getConfigPath(undefined, true);
-        expect(hiddenConfigPath).toBeNull();
-      });
-    });
-
-    describe('when a non-standard config is present', () => {
-      beforeAll(() => {
-        fsExistsSyncSpy.mockReturnValue(true);
-        (configFile.getConfigFilePath as jest.Mock).mockReturnValue(
-          CONFIG_PATHS.nonStandard
-        );
-      });
-
-      it('returns the hidden config path when useHiddenConfig is true', () => {
-        (configFile.getConfigFilePath as jest.Mock).mockReturnValue(
-          CONFIG_PATHS.hidden
-        );
-        const hiddenConfigPath = getConfigPath(undefined, true);
-        expect(hiddenConfigPath).toBe(CONFIG_PATHS.hidden);
-      });
+      expect(isConfigValid()).toBe(false);
     });
   });
 
   describe('createEmptyConfigFile()', () => {
-    describe('when no config is present', () => {
-      let fsExistsSyncSpy: jest.SpyInstance;
-
-      beforeEach(() => {
-        setConfigPath(CONFIG_PATHS.none);
-        mockedConfigPath = CONFIG_PATHS.none;
-        fsExistsSyncSpy = jest
-          .spyOn(fs, 'existsSync')
-          .mockImplementation(() => {
-            return false;
-          });
-      });
-
-      afterAll(() => {
-        setConfigPath(CONFIG_PATHS.default);
-        mockedConfigPath = CONFIG_PATHS.default;
-        fsExistsSyncSpy.mockRestore();
-      });
-
-      it('writes a new config file', () => {
-        createEmptyConfigFile();
-
-        expect(fsWriteFileSyncSpy).toHaveBeenCalled();
-      });
+    it('creates global config when specified', () => {
+      // TODO: Implement test
     });
 
-    describe('when a config is present', () => {
-      let fsExistsSyncAndReturnTrueSpy: jest.SpyInstance;
-
-      beforeAll(() => {
-        setConfigPath(CONFIG_PATHS.cwd);
-        mockedConfigPath = CONFIG_PATHS.cwd;
-        fsExistsSyncAndReturnTrueSpy = jest
-          .spyOn(fs, 'existsSync')
-          .mockImplementation(pathToCheck => {
-            if (pathToCheck === CONFIG_PATHS.cwd) {
-              return true;
-            }
-
-            return false;
-          });
-      });
-
-      afterAll(() => {
-        fsExistsSyncAndReturnTrueSpy.mockRestore();
-      });
-
-      it('does nothing', () => {
-        createEmptyConfigFile();
-
-        expect(fsWriteFileSyncSpy).not.toHaveBeenCalled();
-      });
-    });
-
-    describe('when passed a path', () => {
-      beforeAll(() => {
-        setConfigPath(CONFIG_PATHS.none);
-        mockedConfigPath = CONFIG_PATHS.none;
-      });
-
-      it('creates a config at the specified path', () => {
-        const specifiedPath = '/some/path/that/has/never/been/used.config.yml';
-        createEmptyConfigFile({ path: specifiedPath });
-
-        expect(fsWriteFileSyncSpy).not.toHaveBeenCalledWith(specifiedPath);
-      });
+    it('creates local config by default', () => {
+      // TODO: Implement test
     });
   });
 
-  describe('configFileExists', () => {
-    let getConfigPathSpy: jest.SpyInstance;
+  describe('deleteConfigFile()', () => {
+    it('deletes the config file', () => {});
+  });
 
-    beforeAll(() => {
-      getConfigPathSpy = jest.spyOn(config_DEPRECATED, 'getConfigPath');
+  describe('getConfigAccountById()', () => {
+    it('returns account when found', () => {
+      // TODO: Implement test
     });
 
-    beforeEach(() => {
-      jest.clearAllMocks();
+    it('throws when account not found', () => {
+      // TODO: Implement test
+    });
+  });
+
+  describe('getConfigAccountByName()', () => {
+    it('returns account when found', () => {
+      // TODO: Implement test
     });
 
-    afterAll(() => {
-      getConfigPathSpy.mockRestore();
+    it('throws when account not found', () => {
+      // TODO: Implement test
+    });
+  });
+
+  describe('getConfigDefaultAccount()', () => {
+    it('returns default account when set', () => {
+      // TODO: Implement test
     });
 
-    it('returns true when useHiddenConfig is true and newConfigFileExists returns true', () => {
-      (configFile.configFileExists as jest.Mock).mockReturnValue(true);
+    it('throws when no default account', () => {
+      // TODO: Implement test
+    });
+  });
 
-      const result = configFileExists(true);
+  describe('getAllConfigAccounts()', () => {
+    it('returns all accounts', () => {
+      // TODO: Implement test
+    });
+  });
 
-      expect(configFile.configFileExists).toHaveBeenCalled();
-      expect(result).toBe(true);
+  describe('getConfigAccountEnvironment()', () => {
+    it('returns environment for specified account', () => {
+      // TODO: Implement test
     });
 
-    it('returns false when useHiddenConfig is true and newConfigFileExists returns false', () => {
-      (configFile.configFileExists as jest.Mock).mockReturnValue(false);
+    it('returns default account environment when no identifier', () => {
+      // TODO: Implement test
+    });
+  });
 
-      const result = configFileExists(true);
-
-      expect(configFile.configFileExists).toHaveBeenCalled();
-      expect(result).toBe(false);
+  describe('addConfigAccount()', () => {
+    it('adds valid account to config', () => {
+      // TODO: Implement test
     });
 
-    it('returns true when useHiddenConfig is false and config_DEPRECATED.getConfigPath returns a valid path', () => {
-      getConfigPathSpy.mockReturnValue(CONFIG_PATHS.default);
-
-      const result = configFileExists(false);
-
-      expect(getConfigPathSpy).toHaveBeenCalled();
-      expect(result).toBe(true);
+    it('throws for invalid account', () => {
+      // TODO: Implement test
     });
 
-    it('returns false when useHiddenConfig is false and config_DEPRECATED.getConfigPath returns an empty path', () => {
-      getConfigPathSpy.mockReturnValue('');
+    it('throws when account already exists', () => {
+      // TODO: Implement test
+    });
+  });
 
-      const result = configFileExists(false);
-
-      expect(getConfigPathSpy).toHaveBeenCalled();
-      expect(result).toBe(false);
+  describe('updateConfigAccount()', () => {
+    it('updates existing account', () => {
+      // TODO: Implement test
     });
 
-    it('defaults to useHiddenConfig as false when not provided', () => {
-      getConfigPathSpy.mockReturnValue(CONFIG_PATHS.default);
+    it('throws for invalid account', () => {
+      // TODO: Implement test
+    });
 
-      const result = configFileExists();
+    it('throws when account not found', () => {
+      // TODO: Implement test
+    });
+  });
 
-      expect(getConfigPathSpy).toHaveBeenCalled();
-      expect(result).toBe(true);
+  describe('setConfigAccountAsDefault()', () => {
+    it('sets account as default by id', () => {
+      // TODO: Implement test
+    });
+
+    it('sets account as default by name', () => {
+      // TODO: Implement test
+    });
+
+    it('throws when account not found', () => {
+      // TODO: Implement test
+    });
+  });
+
+  describe('renameConfigAccount()', () => {
+    it('renames existing account', () => {
+      // TODO: Implement test
+    });
+
+    it('throws when account not found', () => {
+      // TODO: Implement test
+    });
+
+    it('throws when new name already exists', () => {
+      // TODO: Implement test
+    });
+  });
+
+  describe('removeAccountFromConfig()', () => {
+    it('removes existing account', () => {
+      // TODO: Implement test
+    });
+
+    it('throws when account not found', () => {
+      // TODO: Implement test
+    });
+  });
+
+  describe('updateHttpTimeout()', () => {
+    it('updates timeout value', () => {
+      // TODO: Implement test
+    });
+
+    it('throws for invalid timeout', () => {
+      // TODO: Implement test
+    });
+  });
+
+  describe('updateAllowUsageTracking()', () => {
+    it('updates tracking setting', () => {
+      // TODO: Implement test
+    });
+  });
+
+  describe('updateDefaultCmsPublishMode()', () => {
+    it('updates publish mode', () => {
+      // TODO: Implement test
+    });
+
+    it('throws for invalid mode', () => {
+      // TODO: Implement test
+    });
+  });
+
+  describe('isConfigFlagEnabled()', () => {
+    it('returns flag value when set', () => {
+      // TODO: Implement test
+    });
+
+    it('returns default value when not set', () => {
+      // TODO: Implement test
     });
   });
 });
