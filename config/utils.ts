@@ -9,8 +9,8 @@ import {
   HUBSPOT_CONFIGURATION_FILE,
   HUBSPOT_ACCOUNT_TYPES,
   DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME,
+  ENVIRONMENT_VARIABLES,
 } from '../constants/config';
-import { ENVIRONMENT_VARIABLES } from '../constants/environments';
 import {
   PERSONAL_ACCESS_KEY_AUTH_METHOD,
   API_KEY_AUTH_METHOD,
@@ -20,7 +20,12 @@ import {
 import { HubSpotConfig, DeprecatedHubSpotConfigFields } from '../types/Config';
 import { FileSystemError } from '../models/FileSystemError';
 import { logger } from '../lib/logger';
-import { HubSpotConfigAccount, AccountType } from '../types/Accounts';
+import {
+  HubSpotConfigAccount,
+  OAuthConfigAccount,
+  AccountType,
+  TokenInfo,
+} from '../types/Accounts';
 import { getValidEnv } from '../lib/environment';
 import { getCwd } from '../lib/path';
 import { CMS_PUBLISH_MODE } from '../constants/files';
@@ -94,13 +99,27 @@ export function removeUndefinedFieldsFromConfigAccount<
     }
   });
 
-  if ('auth' in account && typeof account.auth === 'object') {
-    Object.keys(account.auth).forEach(k => {
-      const key = k as keyof T;
-      if (account[key] === undefined) {
-        delete account[key];
-      }
-    });
+  if ('auth' in account && account.auth) {
+    if (account.authType === OAUTH_AUTH_METHOD.value) {
+      Object.keys(account.auth).forEach(k => {
+        const key = k as keyof OAuthConfigAccount['auth'];
+        if (account.auth?.[key] === undefined) {
+          delete account.auth?.[key];
+        }
+      });
+    }
+
+    if (
+      'tokenInfo' in account.auth &&
+      typeof account.auth.tokenInfo === 'object'
+    ) {
+      Object.keys(account.auth.tokenInfo).forEach(k => {
+        const key = k as keyof TokenInfo;
+        if (account.auth?.tokenInfo[key] === undefined) {
+          delete account.auth?.tokenInfo[key];
+        }
+      });
+    }
   }
 
   return account;
@@ -179,17 +198,30 @@ export function normalizeParsedConfig(
 ): HubSpotConfig {
   if (parsedConfig.portals) {
     parsedConfig.accounts = parsedConfig.portals.map(account => {
-      account.accountId = account.portalId;
+      if (account.portalId) {
+        account.accountId = account.portalId;
+        delete account.portalId;
+      }
       return account;
     });
+    delete parsedConfig.portals;
   }
 
   if (parsedConfig.defaultPortal) {
-    parsedConfig.defaultAccount = parseInt(parsedConfig.defaultPortal);
+    const defaultAccount = getConfigAccountByInferredIdentifier(
+      parsedConfig.accounts,
+      parsedConfig.defaultPortal
+    );
+
+    if (defaultAccount) {
+      parsedConfig.defaultAccount = defaultAccount.accountId;
+    }
+    delete parsedConfig.defaultPortal;
   }
 
   if (parsedConfig.defaultMode) {
     parsedConfig.defaultCmsPublishMode = parsedConfig.defaultMode;
+    delete parsedConfig.defaultMode;
   }
 
   parsedConfig.accounts.forEach(account => {
@@ -305,45 +337,6 @@ export function buildConfigFromEnvironment(): HubSpotConfig {
   };
 }
 
-export function getConfigAccountByIdentifier(
-  accounts: Array<HubSpotConfigAccount>,
-  identifierFieldName: 'name' | 'accountId',
-  identifier: string | number
-): HubSpotConfigAccount | undefined {
-  return accounts.find(account => account[identifierFieldName] === identifier);
-}
-
-export function getConfigAccountIndexById(
-  accounts: Array<HubSpotConfigAccount>,
-  id: string | number
-): number {
-  return accounts.findIndex(account => account.accountId === id);
-}
-
-export function isConfigAccountValid(account: HubSpotConfigAccount) {
-  if (!account || typeof account !== 'object') {
-    return false;
-  }
-
-  if (!account.authType) {
-    return false;
-  }
-
-  if (account.authType === PERSONAL_ACCESS_KEY_AUTH_METHOD.value) {
-    return 'personalAccessKey' in account && account.personalAccessKey;
-  }
-
-  if (account.authType === OAUTH_AUTH_METHOD.value) {
-    return 'auth' in account && account.auth;
-  }
-
-  if (account.authType === API_KEY_AUTH_METHOD.value) {
-    return 'apiKey' in account && account.apiKey;
-  }
-
-  return false;
-}
-
 export function getAccountIdentifierAndType(
   accountIdentifier: string | number
 ): { identifier: string | number; identifierType: 'name' | 'accountId' } {
@@ -357,4 +350,58 @@ export function getAccountIdentifierAndType(
     identifier: isId ? identifierAsNumber : accountIdentifier,
     identifierType: isId ? 'accountId' : 'name',
   };
+}
+
+export function getConfigAccountByIdentifier(
+  accounts: Array<HubSpotConfigAccount>,
+  identifierFieldName: 'name' | 'accountId',
+  identifier: string | number
+): HubSpotConfigAccount | undefined {
+  return accounts.find(account => account[identifierFieldName] === identifier);
+}
+
+export function getConfigAccountByInferredIdentifier(
+  accounts: Array<HubSpotConfigAccount>,
+  accountIdentifier: string | number
+): HubSpotConfigAccount | undefined {
+  const { identifier, identifierType } =
+    getAccountIdentifierAndType(accountIdentifier);
+  return accounts.find(account => account[identifierType] === identifier);
+}
+
+export function getConfigAccountIndexById(
+  accounts: Array<HubSpotConfigAccount>,
+  id: string | number
+): number {
+  return accounts.findIndex(account => account.accountId === id);
+}
+
+export function isConfigAccountValid(
+  account: Partial<HubSpotConfigAccount>
+): boolean {
+  if (!account || typeof account !== 'object') {
+    return false;
+  }
+
+  if (!account.authType) {
+    return false;
+  }
+
+  if (!account.accountId) {
+    return false;
+  }
+
+  if (account.authType === PERSONAL_ACCESS_KEY_AUTH_METHOD.value) {
+    return 'personalAccessKey' in account && Boolean(account.personalAccessKey);
+  }
+
+  if (account.authType === OAUTH_AUTH_METHOD.value) {
+    return 'auth' in account && Boolean(account.auth);
+  }
+
+  if (account.authType === API_KEY_AUTH_METHOD.value) {
+    return 'apiKey' in account && Boolean(account.apiKey);
+  }
+
+  return false;
 }

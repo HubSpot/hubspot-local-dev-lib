@@ -17,7 +17,7 @@ import {
   isConfigAccountValid,
   getConfigAccountIndexById,
   getConfigPathEnvironmentVariables,
-  getAccountIdentifierAndType,
+  getConfigAccountByInferredIdentifier,
 } from './utils';
 import { CMS_PUBLISH_MODE } from '../constants/files';
 import { Environment } from '../types/Config';
@@ -177,17 +177,13 @@ export function getAllConfigAccounts(): HubSpotConfigAccount[] {
 }
 
 export function getConfigAccountEnvironment(
-  accountIdentifier?: number | string
+  identifier?: number | string
 ): Environment {
-  if (accountIdentifier) {
+  if (identifier) {
     const config = getConfig();
 
-    const { identifier, identifierType } =
-      getAccountIdentifierAndType(accountIdentifier);
-
-    const account = getConfigAccountByIdentifier(
+    const account = getConfigAccountByInferredIdentifier(
       config.accounts,
-      identifierType,
       identifier
     );
 
@@ -245,17 +241,11 @@ export function updateConfigAccount(
   writeConfigFile(config, getConfigFilePath());
 }
 
-export function setConfigAccountAsDefault(
-  accountIdentifier: number | string
-): void {
+export function setConfigAccountAsDefault(identifier: number | string): void {
   const config = getConfig();
 
-  const { identifier, identifierType } =
-    getAccountIdentifierAndType(accountIdentifier);
-
-  const account = getConfigAccountByIdentifier(
+  const account = getConfigAccountByInferredIdentifier(
     config.accounts,
-    identifierType,
     identifier
   );
 

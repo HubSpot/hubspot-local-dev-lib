@@ -21,7 +21,7 @@ interface BaseHubSpotConfigAccount {
 }
 
 export type DeprecatedHubSpotConfigAccountFields = {
-  portalId: number;
+  portalId?: number;
 };
 
 export type AccountType = ValueOf<typeof HUBSPOT_ACCOUNT_TYPES>;
