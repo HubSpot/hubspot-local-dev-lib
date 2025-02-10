@@ -82,27 +82,6 @@ export type EnabledFeaturesResponse = {
   enabledFeatures: { [key: string]: boolean };
 };
 
-export type PersonalAccessKeyOptions = {
-  accountId: number;
-  personalAccessKey: string;
-  env: Environment;
-};
-
-export type OAuthOptions = {
-  accountId: number;
-  clientId: string;
-  clientSecret: string;
-  refreshToken: string;
-  scopes: Array<string>;
-  env: Environment;
-};
-
-export type APIKeyOptions = {
-  accountId: number;
-  apiKey: string;
-  env: Environment;
-};
-
 export type AccessToken = {
   portalId: number;
   accessToken: string;
