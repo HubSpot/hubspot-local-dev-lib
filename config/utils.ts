@@ -264,6 +264,9 @@ export function buildConfigFromEnvironment(): HubSpotConfig {
       personalAccessKey,
       env,
       name: accountIdVar,
+      auth: {
+        tokenInfo: {},
+      },
     };
   } else if (clientId && clientSecret && refreshToken) {
     account = {

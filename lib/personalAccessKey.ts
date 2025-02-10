@@ -3,16 +3,12 @@ import { ENVIRONMENTS } from '../constants/environments';
 import { PERSONAL_ACCESS_KEY_AUTH_METHOD } from '../constants/auth';
 import { fetchAccessToken } from '../api/localDevAuth';
 import { fetchSandboxHubData } from '../api/sandboxHubs';
-import {
-  HubSpotConfigAccount,
-  PersonalAccessKeyConfigAccount,
-} from '../types/Accounts';
+import { PersonalAccessKeyConfigAccount } from '../types/Accounts';
 import { Environment } from '../types/Config';
 import {
   getConfigAccountById,
   getConfigAccountByName,
   updateConfigAccount,
-  getConfigAccountEnvironment,
   setConfigAccountAsDefault,
   getConfigDefaultAccount,
 } from '../config';
