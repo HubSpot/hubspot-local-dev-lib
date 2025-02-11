@@ -299,6 +299,10 @@ export function removeAccountFromConfig(accountId: number): void {
 
   config.accounts.splice(index, 1);
 
+  if (config.defaultAccount === accountId) {
+    delete config.defaultAccount;
+  }
+
   writeConfigFile(config, getConfigFilePath());
 }
 
@@ -344,12 +348,12 @@ export function updateDefaultCmsPublishMode(
 
 export function isConfigFlagEnabled(
   flag: ConfigFlag,
-  defaultValue: boolean
+  defaultValue?: boolean
 ): boolean {
   const config = getConfig();
 
   if (typeof config[flag] === 'undefined') {
-    return defaultValue;
+    return defaultValue || false;
   }
 
   return Boolean(config[flag]);

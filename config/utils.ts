@@ -126,7 +126,7 @@ export function removeUndefinedFieldsFromConfigAccount<
 }
 
 // Ensure written config files have fields in a consistent order
-function formatConfigForWrite(config: HubSpotConfig) {
+export function formatConfigForWrite(config: HubSpotConfig) {
   const {
     defaultAccount,
     defaultCmsPublishMode,

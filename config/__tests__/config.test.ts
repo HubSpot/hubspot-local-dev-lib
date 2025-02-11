@@ -1,5 +1,6 @@
 import findup from 'findup-sync';
 import fs from 'fs-extra';
+import yaml from 'js-yaml';
 
 import {
   localConfigFileExists,
@@ -26,7 +27,6 @@ import {
 } from '../index';
 import { HubSpotConfigAccount } from '../../types/Accounts';
 import { HubSpotConfig } from '../../types/Config';
-import { getCwd } from '../../lib/path';
 import {
   PersonalAccessKeyConfigAccount,
   OAuthConfigAccount,
@@ -40,16 +40,16 @@ import {
 import {
   getGlobalConfigFilePath,
   getLocalConfigFileDefaultPath,
+  formatConfigForWrite,
 } from '../utils';
-import { ENVIRONMENT_VARIABLES } from '../../constants/config';
+import { CONFIG_FLAGS, ENVIRONMENT_VARIABLES } from '../../constants/config';
 import * as utils from '../utils';
-
+import { CmsPublishMode } from '../../types/Files';
 jest.mock('findup-sync');
 jest.mock('../../lib/path');
 jest.mock('fs-extra');
 
 const mockFindup = findup as jest.MockedFunction<typeof findup>;
-const mockCwd = getCwd as jest.MockedFunction<typeof getCwd>;
 const mockFs = fs as jest.Mocked<typeof fs>;
 
 const PAK_ACCOUNT: PersonalAccessKeyConfigAccount = {
@@ -65,9 +65,9 @@ const PAK_ACCOUNT: PersonalAccessKeyConfigAccount = {
 };
 
 const OAUTH_ACCOUNT: OAuthConfigAccount = {
-  accountId: 123,
+  accountId: 234,
   env: 'qa',
-  name: '123',
+  name: '234',
   authType: OAUTH_AUTH_METHOD.value,
   accountType: undefined,
   auth: {
@@ -81,12 +81,12 @@ const OAUTH_ACCOUNT: OAuthConfigAccount = {
 };
 
 const API_KEY_ACCOUNT: APIKeyConfigAccount = {
-  accountId: 123,
+  accountId: 345,
   env: 'qa',
-  name: '123',
+  name: 'api-key-account',
   authType: API_KEY_AUTH_METHOD.value,
-  accountType: undefined,
   apiKey: 'test-api-key',
+  accountType: 'STANDARD',
 };
 
 const CONFIG: HubSpotConfig = {
@@ -98,19 +98,27 @@ const CONFIG: HubSpotConfig = {
   allowUsageTracking: true,
 };
 
-function cleanupEnvironmentVariables() {
+function cleanup() {
   Object.keys(ENVIRONMENT_VARIABLES).forEach(key => {
     delete process.env[key];
   });
+  mockFs.existsSync.mockReset();
+  mockFs.readFileSync.mockReset();
+  mockFs.writeFileSync.mockReset();
+  mockFs.unlinkSync.mockReset();
+  mockFindup.mockReset();
+  jest.restoreAllMocks();
+}
+
+function mockConfig(config = CONFIG) {
+  mockFs.existsSync.mockReturnValue(true);
+  mockFs.readFileSync.mockReturnValueOnce('test-config-content');
+  jest.spyOn(utils, 'parseConfig').mockReturnValueOnce(structuredClone(config));
 }
 
 describe('config/index', () => {
-  beforeEach(() => {
-    cleanupEnvironmentVariables();
-  });
-
   afterEach(() => {
-    cleanupEnvironmentVariables();
+    cleanup();
   });
 
   describe('localConfigFileExists()', () => {
@@ -177,37 +185,26 @@ describe('config/index', () => {
     });
 
     it('returns parsed config from file', () => {
-      mockFs.existsSync.mockReturnValueOnce(true);
-      mockFs.readFileSync.mockReturnValueOnce('test-config-content');
-      jest.spyOn(utils, 'parseConfig').mockReturnValueOnce(CONFIG);
-
+      mockConfig();
       expect(getConfig()).toEqual(CONFIG);
     });
   });
 
   describe('isConfigValid()', () => {
     it('returns true for valid config', () => {
-      mockFs.existsSync.mockReturnValueOnce(true);
-      mockFs.readFileSync.mockReturnValueOnce('test-config-content');
-      jest.spyOn(utils, 'parseConfig').mockReturnValueOnce(CONFIG);
+      mockConfig();
 
       expect(isConfigValid()).toBe(true);
     });
 
     it('returns false for config with no accounts', () => {
-      mockFs.existsSync.mockReturnValueOnce(true);
-      mockFs.readFileSync.mockReturnValueOnce('test-config-content');
-      jest.spyOn(utils, 'parseConfig').mockReturnValueOnce({ accounts: [] });
+      mockConfig({ accounts: [] });
 
       expect(isConfigValid()).toBe(false);
     });
 
     it('returns false for config with duplicate account ids', () => {
-      mockFs.existsSync.mockReturnValueOnce(true);
-      mockFs.readFileSync.mockReturnValueOnce('test-config-content');
-      jest
-        .spyOn(utils, 'parseConfig')
-        .mockReturnValueOnce({ accounts: [PAK_ACCOUNT, PAK_ACCOUNT] });
+      mockConfig({ accounts: [PAK_ACCOUNT, PAK_ACCOUNT] });
 
       expect(isConfigValid()).toBe(false);
     });
@@ -215,163 +212,320 @@ describe('config/index', () => {
 
   describe('createEmptyConfigFile()', () => {
     it('creates global config when specified', () => {
-      // TODO: Implement test
+      mockFs.existsSync.mockReturnValueOnce(true);
+      createEmptyConfigFile(true);
+
+      expect(mockFs.writeFileSync).toHaveBeenCalledWith(
+        getGlobalConfigFilePath(),
+        yaml.dump({ accounts: [] })
+      );
     });
 
     it('creates local config by default', () => {
-      // TODO: Implement test
+      mockFs.existsSync.mockReturnValueOnce(true);
+      createEmptyConfigFile(false);
+
+      expect(mockFs.writeFileSync).toHaveBeenCalledWith(
+        getLocalConfigFileDefaultPath(),
+        yaml.dump({ accounts: [] })
+      );
     });
   });
 
   describe('deleteConfigFile()', () => {
-    it('deletes the config file', () => {});
+    it('deletes the config file', () => {
+      mockFs.existsSync.mockReturnValue(true);
+      deleteConfigFile();
+
+      expect(mockFs.unlinkSync).toHaveBeenCalledWith(getConfigFilePath());
+    });
   });
 
   describe('getConfigAccountById()', () => {
     it('returns account when found', () => {
-      // TODO: Implement test
+      mockConfig();
+
+      expect(getConfigAccountById(123)).toEqual(PAK_ACCOUNT);
     });
 
     it('throws when account not found', () => {
-      // TODO: Implement test
+      mockConfig();
+
+      expect(() => getConfigAccountById(456)).toThrow();
     });
   });
 
   describe('getConfigAccountByName()', () => {
     it('returns account when found', () => {
-      // TODO: Implement test
+      mockConfig();
+
+      expect(getConfigAccountByName('test-account')).toEqual(PAK_ACCOUNT);
     });
 
     it('throws when account not found', () => {
-      // TODO: Implement test
+      mockConfig();
+
+      expect(() => getConfigAccountByName('non-existent-account')).toThrow();
     });
   });
 
   describe('getConfigDefaultAccount()', () => {
     it('returns default account when set', () => {
-      // TODO: Implement test
+      mockConfig();
+
+      expect(getConfigDefaultAccount()).toEqual(PAK_ACCOUNT);
     });
 
     it('throws when no default account', () => {
-      // TODO: Implement test
+      mockConfig({ accounts: [] });
+
+      expect(() => getConfigDefaultAccount()).toThrow();
     });
   });
 
   describe('getAllConfigAccounts()', () => {
     it('returns all accounts', () => {
-      // TODO: Implement test
+      mockConfig();
+
+      expect(getAllConfigAccounts()).toEqual([PAK_ACCOUNT]);
     });
   });
 
   describe('getConfigAccountEnvironment()', () => {
     it('returns environment for specified account', () => {
-      // TODO: Implement test
+      mockConfig();
+
+      expect(getConfigAccountEnvironment(123)).toEqual('qa');
     });
 
     it('returns default account environment when no identifier', () => {
-      // TODO: Implement test
+      mockConfig();
+
+      expect(getConfigAccountEnvironment()).toEqual('qa');
     });
   });
 
   describe('addConfigAccount()', () => {
     it('adds valid account to config', () => {
-      // TODO: Implement test
+      mockConfig();
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
+      mockFs.writeFileSync.mockImplementationOnce(() => {});
+      addConfigAccount(OAUTH_ACCOUNT);
+
+      expect(mockFs.writeFileSync).toHaveBeenCalledWith(
+        getConfigFilePath(),
+        yaml.dump(
+          formatConfigForWrite({
+            ...CONFIG,
+            accounts: [PAK_ACCOUNT, OAUTH_ACCOUNT],
+          })
+        )
+      );
     });
 
     it('throws for invalid account', () => {
-      // TODO: Implement test
+      expect(() =>
+        addConfigAccount({
+          ...PAK_ACCOUNT,
+          personalAccessKey: null,
+        } as unknown as HubSpotConfigAccount)
+      ).toThrow();
     });
 
     it('throws when account already exists', () => {
-      // TODO: Implement test
+      mockConfig();
+
+      expect(() => addConfigAccount(PAK_ACCOUNT)).toThrow();
     });
   });
 
   describe('updateConfigAccount()', () => {
     it('updates existing account', () => {
-      // TODO: Implement test
-    });
+      mockConfig();
 
+      const newAccount = { ...PAK_ACCOUNT, name: 'new-name' };
+
+      updateConfigAccount(newAccount);
+
+      expect(mockFs.writeFileSync).toHaveBeenCalledWith(
+        getConfigFilePath(),
+        yaml.dump(formatConfigForWrite({ ...CONFIG, accounts: [newAccount] }))
+      );
+    });
     it('throws for invalid account', () => {
-      // TODO: Implement test
+      expect(() =>
+        updateConfigAccount({
+          ...PAK_ACCOUNT,
+          personalAccessKey: null,
+        } as unknown as HubSpotConfigAccount)
+      ).toThrow();
     });
 
     it('throws when account not found', () => {
-      // TODO: Implement test
+      mockConfig();
+
+      expect(() => updateConfigAccount(OAUTH_ACCOUNT)).toThrow();
     });
   });
 
   describe('setConfigAccountAsDefault()', () => {
     it('sets account as default by id', () => {
-      // TODO: Implement test
+      const config = { ...CONFIG, accounts: [PAK_ACCOUNT, API_KEY_ACCOUNT] };
+      mockConfig(config);
+
+      setConfigAccountAsDefault(345);
+
+      expect(mockFs.writeFileSync).toHaveBeenCalledWith(
+        getConfigFilePath(),
+        yaml.dump(formatConfigForWrite({ ...config, defaultAccount: 345 }))
+      );
     });
 
     it('sets account as default by name', () => {
-      // TODO: Implement test
+      const config = { ...CONFIG, accounts: [PAK_ACCOUNT, API_KEY_ACCOUNT] };
+      mockConfig(config);
+
+      setConfigAccountAsDefault('api-key-account');
+
+      expect(mockFs.writeFileSync).toHaveBeenCalledWith(
+        getConfigFilePath(),
+        yaml.dump(formatConfigForWrite({ ...config, defaultAccount: 345 }))
+      );
     });
 
     it('throws when account not found', () => {
-      // TODO: Implement test
+      expect(() => setConfigAccountAsDefault('non-existent-account')).toThrow();
     });
   });
 
   describe('renameConfigAccount()', () => {
     it('renames existing account', () => {
-      // TODO: Implement test
+      mockConfig();
+
+      renameConfigAccount('test-account', 'new-name');
+
+      expect(mockFs.writeFileSync).toHaveBeenCalledWith(
+        getConfigFilePath(),
+        yaml.dump(
+          formatConfigForWrite({
+            ...CONFIG,
+            accounts: [{ ...PAK_ACCOUNT, name: 'new-name' }],
+          })
+        )
+      );
     });
 
     it('throws when account not found', () => {
-      // TODO: Implement test
+      expect(() =>
+        renameConfigAccount('non-existent-account', 'new-name')
+      ).toThrow();
     });
 
     it('throws when new name already exists', () => {
-      // TODO: Implement test
+      const config = { ...CONFIG, accounts: [PAK_ACCOUNT, API_KEY_ACCOUNT] };
+      mockConfig(config);
+
+      expect(() =>
+        renameConfigAccount('test-account', 'api-key-account')
+      ).toThrow();
     });
   });
 
   describe('removeAccountFromConfig()', () => {
     it('removes existing account', () => {
-      // TODO: Implement test
+      mockConfig();
+
+      removeAccountFromConfig(123);
+
+      expect(mockFs.writeFileSync).toHaveBeenCalledWith(
+        getConfigFilePath(),
+        yaml.dump(
+          formatConfigForWrite({
+            ...CONFIG,
+            accounts: [],
+            defaultAccount: undefined,
+          })
+        )
+      );
     });
 
     it('throws when account not found', () => {
-      // TODO: Implement test
+      mockConfig();
+
+      expect(() => removeAccountFromConfig(456)).toThrow();
     });
   });
 
   describe('updateHttpTimeout()', () => {
     it('updates timeout value', () => {
-      // TODO: Implement test
+      mockConfig();
+
+      updateHttpTimeout(4000);
+
+      expect(mockFs.writeFileSync).toHaveBeenCalledWith(
+        getConfigFilePath(),
+        yaml.dump(formatConfigForWrite({ ...CONFIG, httpTimeout: 4000 }))
+      );
     });
 
     it('throws for invalid timeout', () => {
-      // TODO: Implement test
+      expect(() => updateHttpTimeout('invalid-timeout')).toThrow();
     });
   });
 
   describe('updateAllowUsageTracking()', () => {
     it('updates tracking setting', () => {
-      // TODO: Implement test
+      mockConfig();
+      updateAllowUsageTracking(false);
+
+      expect(mockFs.writeFileSync).toHaveBeenCalledWith(
+        getConfigFilePath(),
+        yaml.dump(
+          formatConfigForWrite({ ...CONFIG, allowUsageTracking: false })
+        )
+      );
     });
   });
 
   describe('updateDefaultCmsPublishMode()', () => {
     it('updates publish mode', () => {
-      // TODO: Implement test
+      mockConfig();
+
+      updateDefaultCmsPublishMode('draft');
+
+      expect(mockFs.writeFileSync).toHaveBeenCalledWith(
+        getConfigFilePath(),
+        yaml.dump(
+          formatConfigForWrite({ ...CONFIG, defaultCmsPublishMode: 'draft' })
+        )
+      );
     });
 
     it('throws for invalid mode', () => {
-      // TODO: Implement test
+      expect(() =>
+        updateDefaultCmsPublishMode('invalid-mode' as unknown as CmsPublishMode)
+      ).toThrow();
     });
   });
 
   describe('isConfigFlagEnabled()', () => {
     it('returns flag value when set', () => {
-      // TODO: Implement test
+      mockConfig({
+        ...CONFIG,
+        [CONFIG_FLAGS.USE_CUSTOM_OBJECT_HUBFILE]: true,
+      });
+
+      expect(isConfigFlagEnabled(CONFIG_FLAGS.USE_CUSTOM_OBJECT_HUBFILE)).toBe(
+        true
+      );
     });
 
     it('returns default value when not set', () => {
-      // TODO: Implement test
+      mockConfig();
+
+      expect(
+        isConfigFlagEnabled(CONFIG_FLAGS.USE_CUSTOM_OBJECT_HUBFILE, true)
+      ).toBe(true);
     });
   });
 });
