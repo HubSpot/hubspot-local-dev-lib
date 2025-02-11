@@ -2,6 +2,7 @@ import { version } from '../package.json';
 import { getConfig } from '../config';
 import { getHubSpotApiOrigin } from '../lib/urls';
 import { HttpOptions } from '../types/Http';
+import { HubSpotConfig } from '../types/Config';
 import { AxiosRequestConfig } from 'axios';
 import https from 'https';
 import http from 'http';
@@ -48,7 +49,12 @@ const DEFAULT_TRANSITIONAL = {
 
 export function getAxiosConfig(options: HttpOptions): AxiosRequestConfig {
   const { env, localHostOverride, headers, ...rest } = options;
-  const config = getConfig();
+  let config: HubSpotConfig | null;
+  try {
+    config = getConfig();
+  } catch (e) {
+    config = null;
+  }
 
   let httpTimeout = 15000;
   let httpUseLocalhost = false;

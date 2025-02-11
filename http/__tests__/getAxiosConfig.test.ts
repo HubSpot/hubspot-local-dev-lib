@@ -1,19 +1,16 @@
-import { getAndLoadConfigIfNeeded as __getAndLoadConfigIfNeeded } from '../../config';
+import { getConfig as __getConfig } from '../../config';
 import { ENVIRONMENTS } from '../../constants/environments';
 import { getAxiosConfig } from '../getAxiosConfig';
 
 jest.mock('../../config');
 
-const getAndLoadConfigIfNeeded =
-  __getAndLoadConfigIfNeeded as jest.MockedFunction<
-    typeof __getAndLoadConfigIfNeeded
-  >;
+const getConfig = __getConfig as jest.MockedFunction<typeof __getConfig>;
 
 const url = 'https://app.hubspot.com';
 
 describe('http/getAxiosConfig', () => {
   it('constructs baseURL as expected based on environment', () => {
-    getAndLoadConfigIfNeeded.mockReturnValue({
+    getConfig.mockReturnValue({
       accounts: [],
     });
 
@@ -25,7 +22,7 @@ describe('http/getAxiosConfig', () => {
     });
   });
   it('supports httpUseLocalhost config option to construct baseURL for local HTTP services', () => {
-    getAndLoadConfigIfNeeded.mockReturnValue({
+    getConfig.mockReturnValue({
       httpUseLocalhost: true,
       accounts: [],
     });
