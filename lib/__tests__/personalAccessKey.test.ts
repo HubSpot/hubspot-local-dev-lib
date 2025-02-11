@@ -1,8 +1,8 @@
 import moment from 'moment';
 import {
-  getAndLoadConfigIfNeeded as __getAndLoadConfigIfNeeded,
-  getAccountConfig as __getAccountConfig,
-  updateAccountConfig as __updateAccountConfig,
+  getConfig as __getConfig,
+  getConfigAccountById as __getConfigAccountById,
+  updateConfigAccount as __updateConfigAccount,
 } from '../../config';
 import { fetchAccessToken as __fetchAccessToken } from '../../api/localDevAuth';
 import { fetchSandboxHubData as __fetchSandboxHubData } from '../../api/sandboxHubs';
@@ -14,7 +14,7 @@ import {
   getAccessToken,
   updateConfigWithAccessToken,
 } from '../personalAccessKey';
-import { AuthType } from '../../types/Accounts';
+import { HubSpotConfigAccount } from '../../types/Accounts';
 import { mockAxiosResponse } from './__utils__/mockAxiosResponse';
 
 jest.mock('../../config');
@@ -23,16 +23,13 @@ jest.mock('../../api/localDevAuth');
 jest.mock('../../api/sandboxHubs');
 jest.mock('../../api/developerTestAccounts');
 
-const updateAccountConfig = __updateAccountConfig as jest.MockedFunction<
-  typeof __updateAccountConfig
+const updateConfigAccount = __updateConfigAccount as jest.MockedFunction<
+  typeof __updateConfigAccount
 >;
-const getAccountConfig = __getAccountConfig as jest.MockedFunction<
-  typeof __getAccountConfig
+const getConfigAccountById = __getConfigAccountById as jest.MockedFunction<
+  typeof __getConfigAccountById
 >;
-const getAndLoadConfigIfNeeded =
-  __getAndLoadConfigIfNeeded as jest.MockedFunction<
-    typeof __getAndLoadConfigIfNeeded
-  >;
+const getConfig = __getConfig as jest.MockedFunction<typeof __getConfig>;
 const fetchAccessToken = __fetchAccessToken as jest.MockedFunction<
   typeof __fetchAccessToken
 >;
@@ -48,16 +45,20 @@ describe('lib/personalAccessKey', () => {
   describe('accessTokenForPersonalAccessKey()', () => {
     it('refreshes access token when access token is missing', async () => {
       const accountId = 123;
-      const account = {
+      const account: HubSpotConfigAccount = {
+        name: 'test-account',
         accountId,
-        authType: 'personalaccesskey' as AuthType,
+        authType: 'personalaccesskey',
         personalAccessKey: 'let-me-in',
         env: ENVIRONMENTS.QA,
+        auth: {
+          tokenInfo: {},
+        },
       };
-      getAndLoadConfigIfNeeded.mockReturnValue({
+      getConfig.mockReturnValue({
         accounts: [account],
       });
-      getAccountConfig.mockReturnValue(account);
+      getConfigAccountById.mockReturnValue(account);
 
       const freshAccessToken = 'fresh-token';
       fetchAccessToken.mockResolvedValue(
@@ -77,16 +78,20 @@ describe('lib/personalAccessKey', () => {
     });
     it('uses accountId when refreshing token', async () => {
       const accountId = 123;
-      const account = {
+      const account: HubSpotConfigAccount = {
         accountId,
-        authType: 'personalaccesskey' as AuthType,
+        name: 'test-account',
+        authType: 'personalaccesskey',
         personalAccessKey: 'let-me-in-2',
         env: ENVIRONMENTS.PROD,
+        auth: {
+          tokenInfo: {},
+        },
       };
-      getAndLoadConfigIfNeeded.mockReturnValue({
+      getConfig.mockReturnValue({
         accounts: [account],
       });
-      getAccountConfig.mockReturnValue(account);
+      getConfigAccountById.mockReturnValue(account);
 
       await accessTokenForPersonalAccessKey(accountId);
       expect(fetchAccessToken).toHaveBeenCalledWith(
@@ -97,9 +102,10 @@ describe('lib/personalAccessKey', () => {
     });
     it('refreshes access token when the existing token is expired', async () => {
       const accountId = 123;
-      const account = {
+      const account: HubSpotConfigAccount = {
+        name: 'test-account',
         accountId,
-        authType: 'personalaccesskey' as AuthType,
+        authType: 'personalaccesskey',
         personalAccessKey: 'let-me-in-3',
         auth: {
           tokenInfo: {
@@ -109,10 +115,10 @@ describe('lib/personalAccessKey', () => {
         },
         env: ENVIRONMENTS.QA,
       };
-      getAndLoadConfigIfNeeded.mockReturnValue({
+      getConfig.mockReturnValue({
         accounts: [account],
       });
-      getAccountConfig.mockReturnValue(account);
+      getConfigAccountById.mockReturnValue(account);
 
       const freshAccessToken = 'fresh-token';
       fetchAccessToken.mockResolvedValue(
@@ -134,26 +140,32 @@ describe('lib/personalAccessKey', () => {
       const accountId = 123;
       const accessKey = 'let-me-in-4';
       const userId = 456;
-      const mockAccount = (expiresAt: string, accessToken: string) => ({
-        accountId,
-        authType: 'personalaccesskey' as AuthType,
-        personalAccessKey: accessKey,
-        auth: {
-          tokenInfo: {
-            expiresAt,
-            accessToken,
+      function mockAccount(
+        expiresAt: string,
+        accessToken: string
+      ): HubSpotConfigAccount {
+        return {
+          name: 'test-account',
+          accountId,
+          authType: 'personalaccesskey',
+          personalAccessKey: accessKey,
+          auth: {
+            tokenInfo: {
+              expiresAt,
+              accessToken,
+            },
           },
-        },
-        env: ENVIRONMENTS.QA,
-      });
+          env: ENVIRONMENTS.QA,
+        };
+      }
       const initialAccountConfig = mockAccount(
         moment().subtract(2, 'hours').toISOString(),
         'test-token'
       );
-      getAndLoadConfigIfNeeded.mockReturnValueOnce({
+      getConfig.mockReturnValueOnce({
         accounts: [initialAccountConfig],
       });
-      getAccountConfig.mockReturnValueOnce(initialAccountConfig);
+      getConfigAccountById.mockReturnValueOnce(initialAccountConfig);
 
       const firstAccessToken = 'fresh-token';
       const expiresAtMillis = moment().subtract(1, 'hours').valueOf();
@@ -177,10 +189,10 @@ describe('lib/personalAccessKey', () => {
         moment(expiresAtMillis).toISOString(),
         firstAccessToken
       );
-      getAndLoadConfigIfNeeded.mockReturnValueOnce({
+      getConfig.mockReturnValueOnce({
         accounts: [updatedAccountConfig],
       });
-      getAccountConfig.mockReturnValueOnce(updatedAccountConfig);
+      getConfigAccountById.mockReturnValueOnce(updatedAccountConfig);
 
       const secondAccessToken = 'another-fresh-token';
       fetchAccessToken.mockResolvedValue(
@@ -227,7 +239,7 @@ describe('lib/personalAccessKey', () => {
         'account-name'
       );
 
-      expect(updateAccountConfig).toHaveBeenCalledWith(
+      expect(updateConfigAccount).toHaveBeenCalledWith(
         expect.objectContaining({
           accountId: 123,
           accountType: HUBSPOT_ACCOUNT_TYPES.STANDARD,
@@ -269,7 +281,7 @@ describe('lib/personalAccessKey', () => {
         'account-name'
       );
 
-      expect(updateAccountConfig).toHaveBeenCalledWith(
+      expect(updateConfigAccount).toHaveBeenCalledWith(
         expect.objectContaining({
           accountId: 123,
           accountType: HUBSPOT_ACCOUNT_TYPES.DEVELOPMENT_SANDBOX,
@@ -317,7 +329,7 @@ describe('lib/personalAccessKey', () => {
         'Dev test portal'
       );
 
-      expect(updateAccountConfig).toHaveBeenCalledWith(
+      expect(updateConfigAccount).toHaveBeenCalledWith(
         expect.objectContaining({
           accountId: 123,
           accountType: HUBSPOT_ACCOUNT_TYPES.DEVELOPER_TEST,
