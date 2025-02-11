@@ -21,7 +21,7 @@ import {
 } from './utils';
 import { CMS_PUBLISH_MODE } from '../constants/files';
 import { Environment } from '../types/Config';
-
+import { i18n } from '../utils/lang';
 export function localConfigFileExists(): boolean {
   return Boolean(getLocalConfigFilePath());
 }
@@ -40,7 +40,7 @@ function getDefaultConfigFilePath(): string {
   const localConfigFilePath = getLocalConfigFilePath();
 
   if (!localConfigFilePath) {
-    throw new Error('@TODO');
+    throw new Error(i18n('config.getDefaultConfigFilePath.error'));
   }
 
   return localConfigFilePath;
@@ -61,7 +61,7 @@ export function getConfig(): HubSpotConfig {
 
   const pathToRead = getConfigFilePath();
 
-  logger.debug(`@TODOReading config from ${pathToRead}`);
+  logger.debug(i18n('config.getConfig', { path: pathToRead }));
   const configFileSource = readConfigFile(pathToRead);
 
   return parseConfig(configFileSource);
@@ -71,7 +71,7 @@ export function isConfigValid(): boolean {
   const config = getConfig();
 
   if (config.accounts.length === 0) {
-    logger.log('@TODO');
+    logger.debug(i18n('config.isConfigValid.missingAccounts'));
     return false;
   }
 
@@ -80,20 +80,31 @@ export function isConfigValid(): boolean {
 
   return config.accounts.every(account => {
     if (!isConfigAccountValid(account)) {
-      logger.log('@TODO');
       return false;
     }
     if (accountIdsMap[account.accountId]) {
-      logger.log('@TODO');
+      logger.debug(
+        i18n('config.isConfigValid.duplicateAccountIds', {
+          accountId: account.accountId,
+        })
+      );
       return false;
     }
     if (account.name) {
       if (accountNamesMap[account.name.toLowerCase()]) {
-        logger.log('@TODO');
+        logger.debug(
+          i18n('config.isConfigValid.duplicateAccountNames', {
+            accountName: account.name,
+          })
+        );
         return false;
       }
       if (/\s+/.test(account.name)) {
-        logger.log('@TODO');
+        logger.debug(
+          i18n('config.isConfigValid.invalidAccountName', {
+            accountName: account.name,
+          })
+        );
         return false;
       }
       accountNamesMap[account.name] = true;
@@ -130,7 +141,7 @@ export function getConfigAccountById(accountId: number): HubSpotConfigAccount {
   );
 
   if (!account) {
-    throw new Error('@TODO account not found');
+    throw new Error(i18n('config.getConfigAccountById.error', { accountId }));
   }
 
   return account;
@@ -144,7 +155,9 @@ export function getConfigAccountByName(
   const account = getConfigAccountByIdentifier(accounts, 'name', accountName);
 
   if (!account) {
-    throw new Error('@TODO account not found');
+    throw new Error(
+      i18n('config.getConfigAccountByName.error', { accountName })
+    );
   }
 
   return account;
@@ -154,7 +167,7 @@ export function getConfigDefaultAccount(): HubSpotConfigAccount {
   const { accounts, defaultAccount } = getConfig();
 
   if (!defaultAccount) {
-    throw new Error('@TODO no default account');
+    throw new Error(i18n('config.getConfigDefaultAccount.fieldMissingError'));
   }
 
   const account = getConfigAccountByIdentifier(
@@ -164,7 +177,11 @@ export function getConfigDefaultAccount(): HubSpotConfigAccount {
   );
 
   if (!account) {
-    throw new Error('@TODO no default account');
+    throw new Error(
+      i18n('config.getConfigDefaultAccount.accountMissingError', {
+        defaultAccount,
+      })
+    );
   }
 
   return account;
@@ -195,10 +212,9 @@ export function getConfigAccountEnvironment(
   return defaultAccount.env;
 }
 
-// @TODO: Add logger debugs?
 export function addConfigAccount(accountToAdd: HubSpotConfigAccount): void {
   if (!isConfigAccountValid(accountToAdd)) {
-    throw new Error('@TODO');
+    throw new Error(i18n('config.addConfigAccount.invalidAccount'));
   }
 
   const config = getConfig();
@@ -210,7 +226,11 @@ export function addConfigAccount(accountToAdd: HubSpotConfigAccount): void {
   );
 
   if (accountInConfig) {
-    throw new Error('@TODO account already exists');
+    throw new Error(
+      i18n('config.addConfigAccount.duplicateAccount', {
+        accountId: accountToAdd.accountId,
+      })
+    );
   }
 
   config.accounts.push(accountToAdd);
@@ -222,7 +242,7 @@ export function updateConfigAccount(
   updatedAccount: HubSpotConfigAccount
 ): void {
   if (!isConfigAccountValid(updatedAccount)) {
-    throw new Error('@TODO');
+    throw new Error(i18n('config.updateConfigAccount.invalidAccount'));
   }
 
   const config = getConfig();
@@ -233,7 +253,11 @@ export function updateConfigAccount(
   );
 
   if (accountIndex < 0) {
-    throw new Error('@TODO account not found');
+    throw new Error(
+      i18n('config.updateConfigAccount.accountNotFound', {
+        accountId: updatedAccount.accountId,
+      })
+    );
   }
 
   config.accounts[accountIndex] = updatedAccount;
@@ -250,7 +274,11 @@ export function setConfigAccountAsDefault(identifier: number | string): void {
   );
 
   if (!account) {
-    throw new Error('@TODO account not found');
+    throw new Error(
+      i18n('config.setConfigAccountAsDefault.accountNotFound', {
+        accountId: identifier,
+      })
+    );
   }
 
   config.defaultAccount = account.accountId;
@@ -270,7 +298,11 @@ export function renameConfigAccount(
   );
 
   if (!account) {
-    throw new Error('@TODO account not found');
+    throw new Error(
+      i18n('config.renameConfigAccount.accountNotFound', {
+        currentName,
+      })
+    );
   }
 
   const duplicateAccount = getConfigAccountByIdentifier(
@@ -280,7 +312,11 @@ export function renameConfigAccount(
   );
 
   if (duplicateAccount) {
-    throw new Error('@TODO account name already exists');
+    throw new Error(
+      i18n('config.renameConfigAccount.duplicateAccount', {
+        newName,
+      })
+    );
   }
 
   account.name = newName;
@@ -294,7 +330,11 @@ export function removeAccountFromConfig(accountId: number): void {
   const index = getConfigAccountIndexById(config.accounts, accountId);
 
   if (index < 0) {
-    throw new Error('@TODO account does not exist');
+    throw new Error(
+      i18n('config.removeAccountFromConfig.accountNotFound', {
+        accountId,
+      })
+    );
   }
 
   config.accounts.splice(index, 1);
@@ -311,7 +351,11 @@ export function updateHttpTimeout(timeout: string | number): void {
     typeof timeout === 'string' ? parseInt(timeout) : timeout;
 
   if (isNaN(parsedTimeout) || parsedTimeout < MIN_HTTP_TIMEOUT) {
-    throw new Error('@TODO timeout must be greater than min');
+    throw new Error(
+      i18n('config.updateHttpTimeout.invalidTimeout', {
+        minTimeout: MIN_HTTP_TIMEOUT,
+      })
+    );
   }
 
   const config = getConfig();
@@ -336,7 +380,9 @@ export function updateDefaultCmsPublishMode(
     !cmsPublishMode ||
     !Object.values(CMS_PUBLISH_MODE).includes(cmsPublishMode)
   ) {
-    throw new Error('@TODO invalid CMS publihs mode');
+    throw new Error(
+      i18n('config.updateDefaultCmsPublishMode.invalidCmsPublishMode')
+    );
   }
 
   const config = getConfig();

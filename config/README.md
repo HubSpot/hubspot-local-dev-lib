@@ -1,5 +1,3 @@
-TODO: UPDATE THIS
-
 # hubspot/local-dev-lib
 
 ## Config utils
@@ -12,17 +10,20 @@ The config file is named `huspot.config.yml`.
 
 There are a handful of standard config utils that anyone working in this library should be familiar with.
 
-#### getAndLoadConfigIfNeeded()
+#### getConfig()
 
-Locates, parses, and stores the `hubspot.config.yml` file in memory. This should be the first thing that you do if you plan to access any of the config file values. If the config has already been loaded, this function will simply return the already-parsed config values.
+Locates and parses the hubspot config file. This function will automatically find the correct config file. Typically, it defaults to the nearest config file by working up the direcotry tree. Custom config locations can be set using the following environment variables
 
-#### updateAccountConfig()
+- `USE_ENVIRONTMENT_CONFIG` - load config account from environment variables
+- `HUBSPOT_CONFIG_PATH` - specify a path to a specific config file
 
-Safely writes updated values to the `hubspot.config.yml` file. This will also refresh the in-memory values that have been stored for the targeted account.
+#### updateConfigAccount()
 
-#### getAccountConfig()
+Safely writes updated values to the `hubspot.config.yml` file.
 
-Returns config data for a specific account, given the account's ID.
+#### getConfigAccountById() and getConfigAccountByName()
+
+Returns config data for a specific account, given the account's ID or name.
 
 ## Example config
 
@@ -41,7 +42,3 @@ portals:
     accountType: STANDARD
     personalAccessKey: 'my-personal-access-key'
 ```
-
-## config_DEPRECATED.ts explained
-
-You may notice that we have a few configuration files in our `config/` folder. This is because we are in the middle of exploring a new method for storing account information. Despite its naming, config_DEPRECATED.ts is still the configuration file that handles all of our config logic. We have a proxy file named `config/index.ts` that will always choose to use the soon-to-be deprecated configuration file. This proxy file will enable us to slowly port config functionality over to the new pattern (i.e. `config/CLIConfiguration.ts`). For now, it is recommended to use config_DEPRECATED.ts and the utils it provides. We ask that any updates made to config_DEPRECATED.ts are also made to the newer CLIConfiguration.ts file whenever applicable.

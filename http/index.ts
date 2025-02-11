@@ -111,7 +111,12 @@ async function withAuth(
     };
   }
 
-  throw new Error('@TODO: invalid aut type');
+  throw new Error(
+    i18n(`${i18nKey}.errors.invalidAuthType`, {
+      accountId,
+      authType,
+    })
+  );
 }
 
 async function getRequest<T>(

@@ -74,7 +74,8 @@
     "personalAccessKey": {
       "errors": {
         "accountNotFound": "Account with id {{ accountId }} does not exist.",
-        "invalidPersonalAccessKey": "Error while retrieving new access token: {{ errorMessage }}"
+        "invalidPersonalAccessKey": "Error while retrieving new access token: {{ errorMessage }}",
+        "invalidAuthType": "Error fetching access token: account {{ accountId }} uses an auth type other than personalaccesskey"
       }
     },
     "cms": {
@@ -232,80 +233,68 @@
     }
   },
   "config": {
-    "cliConfiguration": {
-      "errors": {
-        "noConfigLoaded": "No config loaded."
-      },
-      "load": {
-        "configFromEnv": "Loaded config from environment variables for {{ accountId }}",
-        "configFromFile": "Loaded config from configuration file.",
-        "empty": "The config file was empty. Initializing an empty config."
-      },
-      "validate": {
-        "noConfig": "Valiation failed: No config was found.",
-        "noConfigAccounts": "Valiation failed: config.accounts[] is not defined.",
-        "emptyAccountConfig": "Valiation failed: config.accounts[] has an empty entry.",
-        "noAccountId": "Valiation failed: config.accounts[] has an entry missing accountId.",
-        "duplicateAccountIds": "Valiation failed: config.accounts[] has multiple entries with {{ accountId }}.",
-        "duplicateAccountNames": "Valiation failed: config.accounts[] has multiple entries with {{ accountName }}.",
-        "nameContainsSpaces": "Valiation failed: config.name {{ accountName }} cannot contain spaces."
-      },
-      "updateAccount": {
-        "noConfigToUpdate": "No config to update.",
-        "updating": "Updating account config for {{ accountId }}",
-        "addingConfigEntry": "Adding account config entry for {{ accountId }}",
-        "errors": {
-          "accountIdRequired": "An accountId is required to update the config"
-        }
-      },
-      "updateDefaultAccount": {
-        "errors": {
-          "invalidInput": "A 'defaultAccount' with value of number or string is required to update the config."
-        }
-      },
-      "renameAccount": {
-        "errors": {
-          "invalidName": "Cannot find account with identifier {{ currentName }}"
-        }
-      },
-      "removeAccountFromConfig": {
-        "deleting": "Deleting config for {{ accountId }}",
-        "errors": {
-          "invalidId": "Unable to find account for {{ nameOrId }}."
-        }
-      },
-      "updateDefaultCmsPublishMode": {
-        "errors": {
-          "invalidCmsPublishMode": "The CMS publish mode {{ defaultCmsPublishMode }} is invalid. Valid values are {{ validCmsPublishModes }}."
-        }
-      },
-      "updateHttpTimeout": {
-        "errors": {
-          "invalidTimeout": "The value {{ timeout }} is invalid. The value must be a number greater than {{ minTimeout }}."
-        }
-      },
-      "updateAllowUsageTracking": {
-        "errors": {
-          "invalidInput": "Unable to update allowUsageTracking. The value {{ isEnabled }} is invalid. The value must be a boolean."
-        }
-      }
+    "getDefaultConfigFilePath": {
+      "error": "Error getting config file path: no config file found"
     },
-    "configFile": {
-      "errorReading": "Config file could not be read: {{ configPath }}",
-      "writeSuccess": "Successfully wrote updated config data to {{ configPath }}",
-      "errorLoading": "A configuration file could not be found at {{ configPath }}.",
-      "errors": {
-        "parsing": "Config file could not be parsed"
-      }
+    "getConfig": "Reading config from {{ path }}",
+    "isConfigValid": {
+      "missingAccounts": "Invalid config: no accounts found",
+      "duplicateAccountIds": "Invalid config: multiple accounts with accountId: {{ accountId }}",
+      "duplicateAccountNames": "Invalid config: multiple accounts with name: {{ accountName }}",
+      "invalidAccountName": "Invalid config: account name {{ accountName }} contains spaces"
     },
-    "configUtils": {
-      "unknownType": "Unknown auth type {{ type }}"
+    "getConfigAccountById": {
+      "error": "Error getting config account: no account with id {{ accountId }} exists in config"
     },
-    "environment": {
-      "loadConfig": {
-        "missingAccountId": "Unable to load config from environment variables: Missing accountId",
-        "missingEnv": "Unable to load config from environment variables: Missing env",
-        "unknownAuthType": "Unable to load config from environment variables: Unknown auth type"
+    "getConfigAccountByName": {
+      "error": "Error getting config account: no account with name {{ accountName }} exists in config"
+    },
+    "getConfigDefaultAccount": {
+      "fieldMissingError": "Error getting config default account: no default account field found in config",
+      "accountMissingError": "Error getting config default account: default account is set to {{ defaultAccount }} but no account with that id exists in config"
+    },
+    "addConfigAccount": {
+      "invalidAccount": "Error adding config account: account is invalid",
+      "duplicateAccount": "Error adding config account: account with id {{ accountId }} already exists in config"
+    },
+    "updateConfigAccount": {
+      "invalidAccount": "Error updating config account: account is invalid",
+      "accountNotFound": "Error updating config account: account with id {{ accountId }} not found in config"
+    },
+    "setConfigAccountAsDefault": {
+      "accountNotFound": "Error setting config default account: account with id {{ accountId }} not found in config"
+    },
+    "renameConfigAccount": {
+      "accountNotFound": "Error renaming config account: account with name {{ currentName }} not found in config",
+      "duplicateAccount": "Error renaming config account: account with name {{ newName}} already exists in config"
+    },
+    "removeAccountFromConfig": {
+      "accountNotFound": "Error removing config account: account with id {{ accountId }} not found in config"
+    },
+    "updateHttpTimeout": {
+      "invalidTimeout": "Error updating config http timeout: timeout must be greater than {{ minTimeout }}"
+    },
+    "updateDefaultCmsPublishMode": {
+      "invalidCmsPublishMode": "Error updating config default CMS publish mode: CMS publish can only be set to 'draft' or 'publish'"
+    },
+    "utils": {
+      "isConfigAccountValid": {
+        "missingAccount": "Invalid config: at least one account in config is missing data",
+        "missingAuthType": "Invalid config: account {{ accountId }} has no authType",
+        "missingAccountId": "Invalid config: at least one account in config is missing accountId",
+        "missingApiKey": "Invalid config: account {{ accountId }} has authType of apikey but is missing the apiKey field",
+        "missingAuth": "Invalid config: account {{ accountId }} has authtype of oauth2 but is missing auth data",
+        "missingPersonalAccessKey": "Invalid config: account {{ accountId }} has authType of personalAccessKey but is missing the personalAccessKey field"
+      },
+      "getConfigPathEnvironmentVariables": {
+        "invalidEnvironmentVariables": "Error loading config: USE_ENVIRONMENT_CONFIG and HUBSPOT_CONFIG_PATH cannot both be set simultaneously"
+      },
+      "parseConfig": {
+        "error": "An error occurred parsing the config file."
+      },
+      "buildConfigFromEnvironment": {
+        "missingAccountId": "Error loading config from environment: HUBSPOT_ACCOUNT_ID not set",
+        "invalidAuthType": "Error loading config from environment: auth is invalid. Use HUBSPOT_CLIENT_ID, HUBSPOT_CLIENT_SECRET, and HUBSPOT_REFRESH_TOKEN to authenticate with Oauth2, PERSONAL_ACCESS_KEY to authenticate with Personal Access Key, or API_KEY to authenticate with API Key."
       }
     }
   },
@@ -357,7 +346,8 @@
       },
       "errors": {
         "withOauth": "Oauth manager for account {{ accountId }} not found.",
-        "withAuth": "Account with id {{ accountId }} not found."
+        "withAuth": "Account with id {{ accountId }} not found.",
+        "invalidAuthType": "Error authenticating HTTP request: account {{ accountId }} has an invalid auth type {{ authType }}"
       }
     }
   },

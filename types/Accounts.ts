@@ -12,7 +12,7 @@ export type AuthType = 'personalaccesskey' | 'apikey' | 'oauth2';
 interface BaseHubSpotConfigAccount {
   name: string;
   accountId: number;
-  accountType?: AccountType; // @TODO: make required?
+  accountType?: AccountType;
   defaultCmsPublishMode?: CmsPublishMode;
   env: Environment;
   authType: AuthType;

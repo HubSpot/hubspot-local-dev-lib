@@ -107,7 +107,11 @@ async function getNewAccessTokenByAccountId(
     throw new Error(i18n(`${i18nKey}.errors.accountNotFound`, { accountId }));
   }
   if (account.authType !== PERSONAL_ACCESS_KEY_AUTH_METHOD.value) {
-    throw new Error('@TODO');
+    throw new Error(
+      i18n(`${i18nKey}.errors.invalidAuthType`, {
+        accountId,
+      })
+    );
   }
 
   const accessTokenResponse = await getNewAccessToken(account);
@@ -123,7 +127,11 @@ export async function accessTokenForPersonalAccessKey(
     throw new Error(i18n(`${i18nKey}.errors.accountNotFound`, { accountId }));
   }
   if (account.authType !== PERSONAL_ACCESS_KEY_AUTH_METHOD.value) {
-    throw new Error('@TODO');
+    throw new Error(
+      i18n(`${i18nKey}.errors.invalidAuthType`, {
+        accountId,
+      })
+    );
   }
 
   const { auth } = account;

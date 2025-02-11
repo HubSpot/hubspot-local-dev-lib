@@ -29,6 +29,7 @@ import {
 import { getValidEnv } from '../lib/environment';
 import { getCwd } from '../lib/path';
 import { CMS_PUBLISH_MODE } from '../constants/files';
+import { i18n } from '../utils/lang';
 
 export function getGlobalConfigFilePath(): string {
   return path.join(
@@ -59,7 +60,11 @@ export function getConfigPathEnvironmentVariables(): {
     process.env[ENVIRONMENT_VARIABLES.USE_ENVIRONMENT_CONFIG] === 'true';
 
   if (configFilePathFromEnvironment && useEnvironmentConfig) {
-    throw new Error('@TODO');
+    throw new Error(
+      i18n(
+        'config.utils.getConfigPathEnvironmentVariables.invalidEnvironmentVariables'
+      )
+    );
   }
 
   return {
@@ -74,7 +79,6 @@ export function readConfigFile(configPath: string): string {
   try {
     source = fs.readFileSync(configPath).toString();
   } catch (err) {
-    logger.debug('@TODO Error reading');
     throw new FileSystemError(
       { cause: err },
       {
@@ -169,7 +173,6 @@ export function writeConfigFile(
   try {
     fs.ensureFileSync(configPath);
     fs.writeFileSync(configPath, source);
-    logger.debug('@TODO');
   } catch (err) {
     throw new FileSystemError(
       { cause: err },
@@ -240,14 +243,13 @@ export function parseConfig(configSource: string): HubSpotConfig {
     parsedYaml = yaml.load(configSource) as HubSpotConfig &
       DeprecatedHubSpotConfigFields;
   } catch (err) {
-    throw new Error('@TODO Error parsing', { cause: err });
+    throw new Error(i18n('config.utils.parseConfig.error'), { cause: err });
   }
 
   return normalizeParsedConfig(parsedYaml);
 }
 
 export function buildConfigFromEnvironment(): HubSpotConfig {
-  // @TODO: handle account type?
   const apiKey = process.env[ENVIRONMENT_VARIABLES.HUBSPOT_API_KEY];
   const clientId = process.env[ENVIRONMENT_VARIABLES.HUBSPOT_CLIENT_ID];
   const clientSecret = process.env[ENVIRONMENT_VARIABLES.HUBSPOT_CLIENT_SECRET];
@@ -268,7 +270,9 @@ export function buildConfigFromEnvironment(): HubSpotConfig {
     process.env[ENVIRONMENT_VARIABLES.DEFAULT_CMS_PUBLISH_MODE];
 
   if (!accountIdVar) {
-    throw new Error('@TODO');
+    throw new Error(
+      i18n('config.utils.buildConfigFromEnvironment.missingAccountId')
+    );
   }
 
   const accountId = parseInt(accountIdVar);
@@ -324,7 +328,9 @@ export function buildConfigFromEnvironment(): HubSpotConfig {
       name: accountIdVar,
     };
   } else {
-    throw new Error('@TODO');
+    throw new Error(
+      i18n('config.utils.buildConfigFromEnvironment.invalidAuthType')
+    );
   }
 
   return {
@@ -380,28 +386,62 @@ export function isConfigAccountValid(
   account: Partial<HubSpotConfigAccount>
 ): boolean {
   if (!account || typeof account !== 'object') {
-    return false;
-  }
-
-  if (!account.authType) {
+    logger.debug(i18n('config.utils.isConfigAccountValid.missingAccount'));
     return false;
   }
 
   if (!account.accountId) {
+    logger.debug(i18n('config.utils.isConfigAccountValid.missingAccountId'));
     return false;
   }
 
+  if (!account.authType) {
+    logger.debug(
+      i18n('config.utils.isConfigAccountValid.missingAuthType', {
+        accountId: account.accountId,
+      })
+    );
+    return false;
+  }
+
+  let valid = false;
+
   if (account.authType === PERSONAL_ACCESS_KEY_AUTH_METHOD.value) {
-    return 'personalAccessKey' in account && Boolean(account.personalAccessKey);
+    valid =
+      'personalAccessKey' in account && Boolean(account.personalAccessKey);
+
+    if (!valid) {
+      logger.debug(
+        i18n('config.utils.isConfigAccountValid.missingPersonalAccessKey', {
+          accountId: account.accountId,
+        })
+      );
+    }
   }
 
   if (account.authType === OAUTH_AUTH_METHOD.value) {
-    return 'auth' in account && Boolean(account.auth);
+    valid = 'auth' in account && Boolean(account.auth);
+
+    if (!valid) {
+      logger.debug(
+        i18n('config.utils.isConfigAccountValid.missingAuth', {
+          accountId: account.accountId,
+        })
+      );
+    }
   }
 
   if (account.authType === API_KEY_AUTH_METHOD.value) {
-    return 'apiKey' in account && Boolean(account.apiKey);
+    valid = 'apiKey' in account && Boolean(account.apiKey);
+
+    if (!valid) {
+      logger.debug(
+        i18n('config.utils.isConfigAccountValid.missingApiKey', {
+          accountId: account.accountId,
+        })
+      );
+    }
   }
 
-  return false;
+  return valid;
 }
