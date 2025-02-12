@@ -170,9 +170,8 @@ export function getConfigDefaultAccount(): HubSpotConfigAccount {
     throw new Error(i18n('config.getConfigDefaultAccount.fieldMissingError'));
   }
 
-  const account = getConfigAccountByIdentifier(
+  const account = getConfigAccountByInferredIdentifier(
     accounts,
-    'accountId',
     defaultAccount
   );
 
