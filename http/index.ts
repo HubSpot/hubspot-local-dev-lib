@@ -13,6 +13,11 @@ import { logger } from '../lib/logger';
 import { i18n } from '../utils/lang';
 import { HubSpotHttpError } from '../models/HubSpotHttpError';
 import { OAuthConfigAccount } from '../types/Accounts';
+import {
+  PERSONAL_ACCESS_KEY_AUTH_METHOD,
+  OAUTH_AUTH_METHOD,
+  API_KEY_AUTH_METHOD,
+} from '../constants/auth';
 
 const i18nKey = 'http.index';
 
@@ -91,15 +96,15 @@ async function withAuth(
     getAxiosConfig({ env, ...options })
   );
 
-  if (authType === 'personalaccesskey') {
+  if (authType === PERSONAL_ACCESS_KEY_AUTH_METHOD.value) {
     return withPersonalAccessKey(accountId, axiosConfig);
   }
 
-  if (authType === 'oauth2') {
+  if (authType === OAUTH_AUTH_METHOD.value) {
     return withOauth(account, axiosConfig);
   }
 
-  if (authType === 'apikey') {
+  if (authType === API_KEY_AUTH_METHOD.value) {
     const { params } = axiosConfig;
 
     return {

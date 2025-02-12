@@ -1,6 +1,6 @@
 import fs from 'fs-extra';
 
-import { MIN_HTTP_TIMEOUT } from '../constants/config';
+import { ACCOUNT_IDENTIFIERS, MIN_HTTP_TIMEOUT } from '../constants/config';
 import { HubSpotConfigAccount } from '../types/Accounts';
 import { HubSpotConfig, ConfigFlag } from '../types/Config';
 import { CmsPublishMode } from '../types/Files';
@@ -138,7 +138,7 @@ export function getConfigAccountById(accountId: number): HubSpotConfigAccount {
 
   const account = getConfigAccountByIdentifier(
     accounts,
-    'accountId',
+    ACCOUNT_IDENTIFIERS.ACCOUNT_ID,
     accountId
   );
 
@@ -154,7 +154,11 @@ export function getConfigAccountByName(
 ): HubSpotConfigAccount {
   const { accounts } = getConfig();
 
-  const account = getConfigAccountByIdentifier(accounts, 'name', accountName);
+  const account = getConfigAccountByIdentifier(
+    accounts,
+    ACCOUNT_IDENTIFIERS.NAME,
+    accountName
+  );
 
   if (!account) {
     throw new Error(
@@ -230,7 +234,7 @@ export function addConfigAccount(accountToAdd: HubSpotConfigAccount): void {
 
   const accountInConfig = getConfigAccountByIdentifier(
     config.accounts,
-    'accountId',
+    ACCOUNT_IDENTIFIERS.ACCOUNT_ID,
     accountToAdd.accountId
   );
 
@@ -302,7 +306,7 @@ export function renameConfigAccount(
 
   const account = getConfigAccountByIdentifier(
     config.accounts,
-    'name',
+    ACCOUNT_IDENTIFIERS.NAME,
     currentName
   );
 
@@ -316,7 +320,7 @@ export function renameConfigAccount(
 
   const duplicateAccount = getConfigAccountByIdentifier(
     config.accounts,
-    'name',
+    ACCOUNT_IDENTIFIERS.NAME,
     newName
   );
 

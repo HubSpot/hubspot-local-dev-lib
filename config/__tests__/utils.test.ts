@@ -181,7 +181,8 @@ describe('config/utils', () => {
 
     it('throws when both environment variables are set', () => {
       process.env[ENVIRONMENT_VARIABLES.HUBSPOT_CONFIG_PATH] = 'path';
-      process.env[ENVIRONMENT_VARIABLES.USE_ENVIRONMENT_CONFIG] = 'true';
+      process.env[ENVIRONMENT_VARIABLES.USE_ENVIRONMENT_HUBSPOT_CONFIG] =
+        'true';
 
       expect(() => getConfigPathEnvironmentVariables()).toThrow();
     });
@@ -226,10 +227,8 @@ describe('config/utils', () => {
 
   describe('writeConfigFile()', () => {
     it('writes formatted config to file', () => {
-      // eslint-disable-next-line @typescript-eslint/no-empty-function
-      mockFs.ensureFileSync.mockImplementation(() => {});
-      // eslint-disable-next-line @typescript-eslint/no-empty-function
-      mockFs.writeFileSync.mockImplementation(() => {});
+      mockFs.ensureFileSync.mockImplementation(() => undefined);
+      mockFs.writeFileSync.mockImplementation(() => undefined);
 
       writeConfigFile(CONFIG, 'test.yml');
 

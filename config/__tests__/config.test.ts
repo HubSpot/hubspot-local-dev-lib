@@ -173,7 +173,8 @@ describe('config/index', () => {
 
   describe('getConfig()', () => {
     it('returns environment config when enabled', () => {
-      process.env[ENVIRONMENT_VARIABLES.USE_ENVIRONMENT_CONFIG] = 'true';
+      process.env[ENVIRONMENT_VARIABLES.USE_ENVIRONMENT_HUBSPOT_CONFIG] =
+        'true';
       process.env[ENVIRONMENT_VARIABLES.HUBSPOT_ACCOUNT_ID] = '234';
       process.env[ENVIRONMENT_VARIABLES.HUBSPOT_ENVIRONMENT] = 'qa';
       process.env[ENVIRONMENT_VARIABLES.HUBSPOT_API_KEY] = 'test-api-key';
@@ -324,8 +325,7 @@ describe('config/index', () => {
   describe('addConfigAccount()', () => {
     it('adds valid account to config', () => {
       mockConfig();
-      // eslint-disable-next-line @typescript-eslint/no-empty-function
-      mockFs.writeFileSync.mockImplementationOnce(() => {});
+      mockFs.writeFileSync.mockImplementationOnce(() => undefined);
       addConfigAccount(OAUTH_ACCOUNT);
 
       expect(mockFs.writeFileSync).toHaveBeenCalledWith(

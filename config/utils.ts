@@ -10,6 +10,7 @@ import {
   HUBSPOT_ACCOUNT_TYPES,
   DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME,
   ENVIRONMENT_VARIABLES,
+  ACCOUNT_IDENTIFIERS,
 } from '../constants/config';
 import {
   PERSONAL_ACCESS_KEY_AUTH_METHOD,
@@ -30,7 +31,7 @@ import { getValidEnv } from '../lib/environment';
 import { getCwd } from '../lib/path';
 import { CMS_PUBLISH_MODE } from '../constants/files';
 import { i18n } from '../utils/lang';
-
+import { ValueOf } from '../types/utils';
 export function getGlobalConfigFilePath(): string {
   return path.join(
     os.homedir(),
@@ -57,7 +58,8 @@ export function getConfigPathEnvironmentVariables(): {
   const configFilePathFromEnvironment =
     process.env[ENVIRONMENT_VARIABLES.HUBSPOT_CONFIG_PATH];
   const useEnvironmentConfig =
-    process.env[ENVIRONMENT_VARIABLES.USE_ENVIRONMENT_CONFIG] === 'true';
+    process.env[ENVIRONMENT_VARIABLES.USE_ENVIRONMENT_HUBSPOT_CONFIG] ===
+    'true';
 
   if (configFilePathFromEnvironment && useEnvironmentConfig) {
     throw new Error(
@@ -345,7 +347,10 @@ export function buildConfigFromEnvironment(): HubSpotConfig {
 
 export function getAccountIdentifierAndType(
   accountIdentifier: string | number
-): { identifier: string | number; identifierType: 'name' | 'accountId' } {
+): {
+  identifier: string | number;
+  identifierType: ValueOf<typeof ACCOUNT_IDENTIFIERS>;
+} {
   const identifierAsNumber =
     typeof accountIdentifier === 'number'
       ? accountIdentifier
@@ -354,13 +359,15 @@ export function getAccountIdentifierAndType(
 
   return {
     identifier: isId ? identifierAsNumber : accountIdentifier,
-    identifierType: isId ? 'accountId' : 'name',
+    identifierType: isId
+      ? ACCOUNT_IDENTIFIERS.ACCOUNT_ID
+      : ACCOUNT_IDENTIFIERS.NAME,
   };
 }
 
 export function getConfigAccountByIdentifier(
   accounts: Array<HubSpotConfigAccount>,
-  identifierFieldName: 'name' | 'accountId',
+  identifierFieldName: ValueOf<typeof ACCOUNT_IDENTIFIERS>,
   identifier: string | number
 ): HubSpotConfigAccount | undefined {
   return accounts.find(account => account[identifierFieldName] === identifier);
@@ -377,7 +384,7 @@ export function getConfigAccountByInferredIdentifier(
 
 export function getConfigAccountIndexById(
   accounts: Array<HubSpotConfigAccount>,
-  id: string | number
+  id: number
 ): number {
   return accounts.findIndex(account => account.accountId === id);
 }
