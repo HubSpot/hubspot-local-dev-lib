@@ -22,6 +22,7 @@ import {
 import { CMS_PUBLISH_MODE } from '../constants/files';
 import { Environment } from '../types/Config';
 import { i18n } from '../utils/lang';
+import { getDefaultAccountOverrideAccountId } from './defaultAccountOverride';
 
 export function localConfigFileExists(): boolean {
   return Boolean(getLocalConfigFilePath());
@@ -164,23 +165,30 @@ export function getConfigAccountByName(
   return account;
 }
 
-// @TODO: handle account override
 export function getConfigDefaultAccount(): HubSpotConfigAccount {
   const { accounts, defaultAccount } = getConfig();
 
-  if (!defaultAccount) {
+  let defaultAccountToUse = defaultAccount;
+
+  if (globalConfigFileExists()) {
+    const defaultAccountOverrideAccountId =
+      getDefaultAccountOverrideAccountId();
+    defaultAccountToUse = defaultAccountOverrideAccountId || defaultAccount;
+  }
+
+  if (!defaultAccountToUse) {
     throw new Error(i18n('config.getConfigDefaultAccount.fieldMissingError'));
   }
 
   const account = getConfigAccountByInferredIdentifier(
     accounts,
-    defaultAccount
+    defaultAccountToUse
   );
 
   if (!account) {
     throw new Error(
       i18n('config.getConfigDefaultAccount.accountMissingError', {
-        defaultAccount,
+        defaultAccountToUse,
       })
     );
   }
