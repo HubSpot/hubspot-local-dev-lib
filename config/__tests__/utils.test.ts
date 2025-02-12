@@ -3,7 +3,7 @@ import fs from 'fs-extra';
 import {
   getGlobalConfigFilePath,
   getLocalConfigFilePath,
-  getLocalConfigFileDefaultPath,
+  getLocalConfigDefaultFilePath,
   getConfigPathEnvironmentVariables,
   readConfigFile,
   removeUndefinedFieldsFromConfigAccount,
@@ -27,7 +27,10 @@ import {
   DeprecatedHubSpotConfigFields,
   HubSpotConfig,
 } from '../../types/Config';
-import { ENVIRONMENT_VARIABLES } from '../../constants/config';
+import {
+  ENVIRONMENT_VARIABLES,
+  HUBSPOT_CONFIGURATION_FOLDER,
+} from '../../constants/config';
 import { FileSystemError } from '../../models/FileSystemError';
 import {
   PERSONAL_ACCESS_KEY_AUTH_METHOD,
@@ -134,7 +137,9 @@ describe('config/utils', () => {
     it('returns the global config file path', () => {
       const globalConfigFilePath = getGlobalConfigFilePath();
       expect(globalConfigFilePath).toBeDefined();
-      expect(globalConfigFilePath).toContain('.hubspot-cli/config.yml');
+      expect(globalConfigFilePath).toContain(
+        `${HUBSPOT_CONFIGURATION_FOLDER}/config.yml`
+      );
     });
   });
 
@@ -154,12 +159,12 @@ describe('config/utils', () => {
     });
   });
 
-  describe('getLocalConfigFileDefaultPath()', () => {
+  describe('getLocalConfigDefaultFilePath()', () => {
     it('returns the default config path in current directory', () => {
       const mockCwdPath = '/mock/cwd';
       mockCwd.mockReturnValue(mockCwdPath);
 
-      const defaultPath = getLocalConfigFileDefaultPath();
+      const defaultPath = getLocalConfigDefaultFilePath();
       expect(defaultPath).toBe(`${mockCwdPath}/hubspot.config.yml`);
     });
   });

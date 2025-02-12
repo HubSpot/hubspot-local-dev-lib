@@ -42,15 +42,22 @@ import {
   getLocalConfigDefaultFilePath,
   formatConfigForWrite,
 } from '../utils';
+import { getDefaultAccountOverrideAccountId } from '../defaultAccountOverride';
 import { CONFIG_FLAGS, ENVIRONMENT_VARIABLES } from '../../constants/config';
 import * as utils from '../utils';
 import { CmsPublishMode } from '../../types/Files';
+
 jest.mock('findup-sync');
 jest.mock('../../lib/path');
 jest.mock('fs-extra');
+jest.mock('../defaultAccountOverride');
 
 const mockFindup = findup as jest.MockedFunction<typeof findup>;
 const mockFs = fs as jest.Mocked<typeof fs>;
+const mockGetDefaultAccountOverrideAccountId =
+  getDefaultAccountOverrideAccountId as jest.MockedFunction<
+    typeof getDefaultAccountOverrideAccountId
+  >;
 
 const PAK_ACCOUNT: PersonalAccessKeyConfigAccount = {
   name: 'test-account',
@@ -280,6 +287,15 @@ describe('config/index', () => {
       mockConfig({ accounts: [] });
 
       expect(() => getConfigDefaultAccount()).toThrow();
+    });
+
+    it('returns the correct account when default account override is set', () => {
+      mockConfig({ accounts: [PAK_ACCOUNT, OAUTH_ACCOUNT] });
+      mockGetDefaultAccountOverrideAccountId.mockReturnValueOnce(
+        OAUTH_ACCOUNT.accountId
+      );
+
+      expect(getConfigDefaultAccount()).toEqual(OAUTH_ACCOUNT);
     });
   });
 
