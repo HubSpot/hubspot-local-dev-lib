@@ -46,7 +46,7 @@ export function getLocalConfigFilePath(): string | null {
   ]);
 }
 
-export function getLocalConfigFileDefaultPath(): string {
+export function getLocalConfigDefaultFilePath(): string {
   return `${getCwd()}/${DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME}`;
 }
 

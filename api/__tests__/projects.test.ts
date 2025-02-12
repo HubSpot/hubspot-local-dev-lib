@@ -331,7 +331,7 @@ describe('api/projects', () => {
 
   describe('deployProject', () => {
     const buildId = 1;
-    it('should call http correctly', async () => {
+    it('should call the v1 api when useNewDeployApi is false or omitted', async () => {
       await deployProject(accountId, projectName, buildId);
       expect(http.post).toHaveBeenCalledTimes(1);
       expect(http.post).toHaveBeenCalledWith(accountId, {
@@ -339,6 +339,18 @@ describe('api/projects', () => {
         data: {
           projectName,
           buildId,
+        },
+      });
+    });
+
+    it('should call the v3 api when useNewDeployApi is true', async () => {
+      await deployProject(accountId, projectName, buildId, true);
+      expect(http.post).toHaveBeenCalledTimes(1);
+      expect(http.post).toHaveBeenCalledWith(accountId, {
+        url: `dfs/deploy/v3/deploys/queue/async`,
+        data: {
+          projectName,
+          targetBuildId: buildId,
         },
       });
     });

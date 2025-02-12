@@ -296,6 +296,12 @@
         "missingAccountId": "Error loading config from environment: HUBSPOT_ACCOUNT_ID not set",
         "invalidAuthType": "Error loading config from environment: auth is invalid. Use HUBSPOT_CLIENT_ID, HUBSPOT_CLIENT_SECRET, and HUBSPOT_REFRESH_TOKEN to authenticate with Oauth2, PERSONAL_ACCESS_KEY to authenticate with Personal Access Key, or API_KEY to authenticate with API Key."
       }
+    },
+    "defaultAccountOverride": {
+      "getDefaultAccountOverrideAccountId": {
+        "errorHeader": "Error in {{ hsAccountFile }}",
+        "readFileError": "Error reading account override file."
+      }
     }
   },
   "models": {

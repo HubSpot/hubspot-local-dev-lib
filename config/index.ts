@@ -12,7 +12,7 @@ import {
   parseConfig,
   buildConfigFromEnvironment,
   writeConfigFile,
-  getLocalConfigFileDefaultPath,
+  getLocalConfigDefaultFilePath,
   getConfigAccountByIdentifier,
   isConfigAccountValid,
   getConfigAccountIndexById,
@@ -22,6 +22,7 @@ import {
 import { CMS_PUBLISH_MODE } from '../constants/files';
 import { Environment } from '../types/Config';
 import { i18n } from '../utils/lang';
+
 export function localConfigFileExists(): boolean {
   return Boolean(getLocalConfigFilePath());
 }
@@ -30,7 +31,7 @@ export function globalConfigFileExists(): boolean {
   return fs.existsSync(getGlobalConfigFilePath());
 }
 
-function getDefaultConfigFilePath(): string {
+function getConfigDefaultFilePath(): string {
   const globalConfigFilePath = getGlobalConfigFilePath();
 
   if (fs.existsSync(globalConfigFilePath)) {
@@ -49,7 +50,7 @@ function getDefaultConfigFilePath(): string {
 export function getConfigFilePath(): string {
   const { configFilePathFromEnvironment } = getConfigPathEnvironmentVariables();
 
-  return configFilePathFromEnvironment || getDefaultConfigFilePath();
+  return configFilePathFromEnvironment || getConfigDefaultFilePath();
 }
 
 export function getConfig(): HubSpotConfig {
@@ -119,7 +120,7 @@ export function createEmptyConfigFile(useGlobalConfig = false): void {
   const { configFilePathFromEnvironment } = getConfigPathEnvironmentVariables();
   const defaultPath = useGlobalConfig
     ? getGlobalConfigFilePath()
-    : getLocalConfigFileDefaultPath();
+    : getLocalConfigDefaultFilePath();
 
   const pathToWrite = configFilePathFromEnvironment || defaultPath;
 
@@ -163,6 +164,7 @@ export function getConfigAccountByName(
   return account;
 }
 
+// @TODO: handle account override
 export function getConfigDefaultAccount(): HubSpotConfigAccount {
   const { accounts, defaultAccount } = getConfig();
 
