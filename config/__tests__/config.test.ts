@@ -39,7 +39,7 @@ import {
 } from '../../constants/auth';
 import {
   getGlobalConfigFilePath,
-  getLocalConfigFileDefaultPath,
+  getLocalConfigDefaultFilePath,
   formatConfigForWrite,
 } from '../utils';
 import { CONFIG_FLAGS, ENVIRONMENT_VARIABLES } from '../../constants/config';
@@ -123,7 +123,7 @@ describe('config/index', () => {
 
   describe('localConfigFileExists()', () => {
     it('returns true when local config exists', () => {
-      mockFindup.mockReturnValueOnce(getLocalConfigFileDefaultPath());
+      mockFindup.mockReturnValueOnce(getLocalConfigDefaultFilePath());
       expect(localConfigFileExists()).toBe(true);
     });
 
@@ -159,8 +159,8 @@ describe('config/index', () => {
 
     it('returns local path when global does not exist', () => {
       mockFs.existsSync.mockReturnValueOnce(false);
-      mockFindup.mockReturnValueOnce(getLocalConfigFileDefaultPath());
-      expect(getConfigFilePath()).toBe(getLocalConfigFileDefaultPath());
+      mockFindup.mockReturnValueOnce(getLocalConfigDefaultFilePath());
+      expect(getConfigFilePath()).toBe(getLocalConfigDefaultFilePath());
     });
   });
 
@@ -226,7 +226,7 @@ describe('config/index', () => {
       createEmptyConfigFile(false);
 
       expect(mockFs.writeFileSync).toHaveBeenCalledWith(
-        getLocalConfigFileDefaultPath(),
+        getLocalConfigDefaultFilePath(),
         yaml.dump({ accounts: [] })
       );
     });
