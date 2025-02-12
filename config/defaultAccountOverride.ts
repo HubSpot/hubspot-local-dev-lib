@@ -1,5 +1,5 @@
 import findup from 'findup-sync';
-import fs from 'fs';
+import fs from 'fs-extra';
 
 import { getCwd } from '../lib/path';
 import {
@@ -65,7 +65,7 @@ export function getDefaultAccountOverrideAccountId(): number | null {
   return account.accountId;
 }
 
-export function getDefaultAccountOverrideFilePath() {
+export function getDefaultAccountOverrideFilePath(): string | null {
   return findup([DEFAULT_ACCOUNT_OVERRIDE_FILE_NAME], {
     cwd: getCwd(),
   });
