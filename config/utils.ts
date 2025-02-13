@@ -207,6 +207,10 @@ export function normalizeParsedConfig(
         account.accountId = account.portalId;
         delete account.portalId;
       }
+      if (!account.accountType) {
+        account.accountType = getAccountType(account.sandboxAccountType);
+        delete account.sandboxAccountType;
+      }
       return account;
     });
     delete parsedConfig.portals;
@@ -228,12 +232,6 @@ export function normalizeParsedConfig(
     parsedConfig.defaultCmsPublishMode = parsedConfig.defaultMode;
     delete parsedConfig.defaultMode;
   }
-
-  parsedConfig.accounts.forEach(account => {
-    if (!account.accountType) {
-      account.accountType = getAccountType(account.sandboxAccountType);
-    }
-  });
 
   return parsedConfig;
 }

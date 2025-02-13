@@ -16,12 +16,12 @@ interface BaseHubSpotConfigAccount {
   defaultCmsPublishMode?: CmsPublishMode;
   env: Environment;
   authType: AuthType;
-  sandboxAccountType?: string;
   parentAccountId?: number;
 }
 
 export type DeprecatedHubSpotConfigAccountFields = {
   portalId?: number;
+  sandboxAccountType?: string;
 };
 
 export type AccountType = ValueOf<typeof HUBSPOT_ACCOUNT_TYPES>;
