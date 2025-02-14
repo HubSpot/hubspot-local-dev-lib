@@ -31,7 +31,7 @@ import { getValidEnv } from '../lib/environment';
 import { getCwd } from '../lib/path';
 import { CMS_PUBLISH_MODE } from '../constants/files';
 import { i18n } from '../utils/lang';
-import { ValueOf } from '../types/utils';
+import { ValueOf } from '../types/Utils';
 export function getGlobalConfigFilePath(): string {
   return path.join(
     os.homedir(),
