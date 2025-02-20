@@ -22,7 +22,7 @@ export function batchCreateObjects(
 
 export function createObjectSchema(
   accountId: number,
-  schema: JSON
+  schema: Schema
 ): HubSpotPromise<Schema> {
   return http.post<Schema>(accountId, {
     url: SCHEMA_API_PATH,
