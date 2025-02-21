@@ -12,7 +12,7 @@ const SCHEMA_API_PATH = 'crm-object-schemas/v3/schemas';
 export function batchCreateObjects(
   accountId: number,
   objectTypeId: string,
-  objects: JSON
+  objects: Schema
 ): HubSpotPromise<CreateObjectsResponse> {
   return http.post<CreateObjectsResponse>(accountId, {
     url: `${CUSTOM_OBJECTS_API_PATH}/${objectTypeId}/batch/create`,
