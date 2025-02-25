@@ -5,6 +5,7 @@ import {
   CreateObjectsResponse,
 } from '../types/Schemas';
 import { HubSpotPromise } from '../types/Http';
+import { ObjectDefinition } from '../types/CustomObject';
 
 const CUSTOM_OBJECTS_API_PATH = 'crm/v3/objects';
 const SCHEMA_API_PATH = 'crm-object-schemas/v3/schemas';
@@ -12,7 +13,7 @@ const SCHEMA_API_PATH = 'crm-object-schemas/v3/schemas';
 export function batchCreateObjects(
   accountId: number,
   objectTypeId: string,
-  objects: Schema
+  objects: ObjectDefinition[]
 ): HubSpotPromise<CreateObjectsResponse> {
   return http.post<CreateObjectsResponse>(accountId, {
     url: `${CUSTOM_OBJECTS_API_PATH}/${objectTypeId}/batch/create`,
