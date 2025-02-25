@@ -1,19 +1,23 @@
 export type ObjectDefinition = {
-  associations: [
+  inputs: [
     {
-      types: [
+      associations?: [
         {
-          associationCategory: string;
-          associationTypeId: number;
+          types: [
+            {
+              associationCategory: string;
+              associationTypeId: number;
+            },
+          ];
+          to: {
+            id: string;
+          };
         },
       ];
-      to: {
-        id: string;
+      objectWriteTraceId?: number;
+      properties: {
+        [key: string]: string;
       };
     },
   ];
-  objectWriteTraceId: string;
-  properties: {
-    [key: string]: string;
-  };
 };

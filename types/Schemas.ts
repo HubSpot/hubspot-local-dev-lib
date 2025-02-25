@@ -41,22 +41,24 @@ export type CreateObjectsResponse = {
   }>;
 };
 
-export type ObjectDefinition = {
-  associations: [
+export type SchemaDefinition = {
+  allowsSensitiveProperties?: boolean;
+  associatedObjects?: Array<string>;
+  description?: string;
+  labels: {
+    plural: string;
+    singular: string;
+  };
+  searchableProperties?: Array<string>;
+  secondaryDisplayProperties?: Array<string>;
+  name: string;
+  primaryDisplayProperty?: string;
+  properties: [
     {
-      types: [
-        {
-          associationCategory: string;
-          associationTypeId: number;
-        },
-      ];
-      to: {
-        id: string;
-      };
+      isPrimaryDisplayLabel: true;
+      label: string;
+      name: string;
     },
   ];
-  objectWriteTraceId: string;
-  properties: {
-    [key: string]: string;
-  };
+  requiredProperties: Array<string>;
 };
