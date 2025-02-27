@@ -6,7 +6,7 @@ import {
   CreateObjectsResponse,
 } from '../types/Schemas';
 import { HubSpotPromise } from '../types/Http';
-import { ObjectDefinition } from '../types/CustomObject';
+import { ObjectDefinition } from '../types/Schemas';
 
 const CUSTOM_OBJECTS_API_PATH = 'crm/v3/objects';
 const SCHEMA_API_PATH = 'crm-object-schemas/v3/schemas';
