@@ -78,4 +78,5 @@ export type CloneGithubRepoOptions = {
   branch?: string; // Repo branch
   tag?: string; // Repo tag
   sourceDir?: string; // The directory within the downloaded repo to write after extraction
+  hideLogs?: boolean; // Hide logs from the console
 };

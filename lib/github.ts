@@ -22,6 +22,9 @@ import { isHubSpotHttpError, isSystemError } from '../errors';
 
 const i18nKey = 'lib.github';
 
+/**
+ * @deprecated Use `fetchRepoFile` instead - this util is a thin wrapper around it
+ */
 export async function fetchFileFromRepository<T = Buffer>(
   repoPath: RepoPath,
   filePath: string,
@@ -113,15 +116,18 @@ export async function cloneGithubRepo(
   dest: string,
   options: CloneGithubRepoOptions = {}
 ): Promise<boolean> {
-  const { tag, isRelease, branch, sourceDir, type } = options;
+  const { tag, isRelease, branch, sourceDir, type, hideLogs } = options;
   const zip = await downloadGithubRepoZip(repoPath, isRelease, {
     tag,
     branch,
   });
   const repoName = repoPath.split('/')[1];
-  const success = await extractZipArchive(zip, repoName, dest, { sourceDir });
+  const success = await extractZipArchive(zip, repoName, dest, {
+    sourceDir,
+    hideLogs,
+  });
 
-  if (success) {
+  if (success && !hideLogs) {
     logger.log(
       i18n(`${i18nKey}.cloneGithubRepo.success`, {
         type: type || '',
