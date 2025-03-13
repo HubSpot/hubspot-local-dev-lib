@@ -169,6 +169,13 @@ export function getConfigAccountByName(
   return account;
 }
 
+export function getConfigAccountIfExists(
+  identifier: number | string
+): HubSpotConfigAccount | undefined {
+  const config = getConfig();
+  return getConfigAccountByInferredIdentifier(config.accounts, identifier);
+}
+
 export function getConfigDefaultAccount(): HubSpotConfigAccount {
   const { accounts, defaultAccount } = getConfig();
 
