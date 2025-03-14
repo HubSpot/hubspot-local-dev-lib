@@ -180,7 +180,7 @@ export async function updateConfigWithAccessToken(
   env?: Environment,
   name?: string,
   makeDefault = false
-): Promise<PersonalAccessKeyConfigAccount | null> {
+): Promise<PersonalAccessKeyConfigAccount> {
   const { portalId, accessToken, expiresAt, accountType } = token;
   const account = name
     ? getConfigAccountByName(name)
