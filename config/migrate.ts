@@ -24,21 +24,24 @@ import { logger } from '../lib/logger';
 
 const i18nKey = 'config.migrate';
 
-export function getConfig(useHiddenConfig = false): Partial<CLIConfig> | null {
+export function getConfig(
+  useHiddenConfig?: boolean,
+  configPath?: string
+): Partial<CLIConfig> | null {
   if (useHiddenConfig) {
     return CLIConfiguration.config;
   }
-  return config_DEPRECATED.getAndLoadConfigIfNeeded();
+  return config_DEPRECATED.loadConfig(configPath);
 }
 
 export function getConfigPath(
-  path?: string,
+  configPath?: string,
   useHiddenConfig = false
 ): string | null {
   if (useHiddenConfig) {
     return getConfigFilePath();
   }
-  return config_DEPRECATED.getConfigPath(path);
+  return config_DEPRECATED.getConfigPath(configPath);
 }
 
 export function configFileExists(
