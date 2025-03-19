@@ -79,7 +79,7 @@ export function migrateConfig(
   deprecatedConfig: CLIConfig_DEPRECATED | null
 ): void {
   if (!deprecatedConfig) {
-    throw new Error(i18n(`${i18nKey}.errors.noDefaultConfig`));
+    throw new Error(i18n(`${i18nKey}.errors.noDeprecatedConfig`));
   }
   const { defaultPortal, portals, ...rest } = deprecatedConfig;
   const updatedConfig = {
@@ -106,7 +106,7 @@ function mergeConfigPropertes(
     'env',
   ];
   const conflicts: Array<{
-    property: keyof CLIConfig;
+    property: keyof CLIConfig_NEW;
     oldValue: boolean | string | number | CmsPublishMode | Environment;
     newValue: boolean | string | number | CmsPublishMode | Environment;
   }> = [];
@@ -125,6 +125,18 @@ function mergeConfigPropertes(
       globalConfig[prop] = deprecatedConfig[prop];
     }
   });
+
+  if ('defaultAccount' in globalConfig && 'defaultPortal' in deprecatedConfig) {
+    if (globalConfig.defaultAccount !== deprecatedConfig.defaultPortal) {
+      conflicts.push({
+        property: 'defaultAccount',
+        oldValue: deprecatedConfig.defaultPortal!,
+        newValue: globalConfig.defaultAccount!,
+      });
+    }
+  } else if ('defaultPortal' in deprecatedConfig) {
+    globalConfig.defaultAccount = deprecatedConfig.defaultPortal;
+  }
 
   if (conflicts.length > 0) {
     logger.log(
