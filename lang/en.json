@@ -311,6 +311,12 @@
         "missingEnv": "Unable to load config from environment variables: Missing env",
         "unknownAuthType": "Unable to load config from environment variables: Unknown auth type"
       }
+    },
+    "migrate": {
+      "errors": {
+        "writeConfig": "Unable to write global configuration file at {{ configPath }}",
+        "noDefaultConfig": "No default configuration file found. Skipping migration to global config."
+      }
     }
   },
   "models": {

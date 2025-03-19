@@ -1,9 +1,12 @@
 import { i18n } from '../utils/lang';
+import os from 'os';
 
 export const DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME = 'hubspot.config.yml';
 
 export const HUBSPOT_CONFIGURATION_FOLDER = '.hscli';
 export const HUBSPOT_CONFIGURATION_FILE = 'config.yml';
+
+export const GLOBAL_CONFIG_PATH = `${os.homedir()}/${HUBSPOT_CONFIGURATION_FOLDER}/${HUBSPOT_CONFIGURATION_FILE}`;
 
 export const DEFAULT_ACCOUNT_OVERRIDE_FILE_NAME = '.hsaccount';
 export const DEFAULT_ACCOUNT_OVERRIDE_ERROR_INVALID_ID =
