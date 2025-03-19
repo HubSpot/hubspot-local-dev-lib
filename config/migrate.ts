@@ -1,3 +1,5 @@
+import * as config_DEPRECATED from './config_DEPRECATED';
+import { CLIConfiguration } from './CLIConfiguration';
 import {
   CLIConfig,
   CLIConfig_DEPRECATED,
@@ -10,13 +12,50 @@ import {
   createEmptyConfigFile,
   loadConfig,
   deleteEmptyConfigFile,
-  deleteConfigFile,
 } from './index';
+import {
+  getConfigFilePath,
+  configFileExists as newConfigFileExists,
+  deleteConfigFile as newDeleteConfigFile,
+} from './configFile';
 import { GLOBAL_CONFIG_PATH } from '../constants/config';
 import { i18n } from '../utils/lang';
 import { logger } from '../lib/logger';
 
 const i18nKey = 'config.migrate';
+
+export function getConfig(useHiddenConfig = false): Partial<CLIConfig> | null {
+  if (useHiddenConfig) {
+    return CLIConfiguration.config;
+  }
+  return config_DEPRECATED.getAndLoadConfigIfNeeded();
+}
+
+export function getConfigPath(
+  path?: string,
+  useHiddenConfig = false
+): string | null {
+  if (useHiddenConfig) {
+    return getConfigFilePath();
+  }
+  return config_DEPRECATED.getConfigPath(path);
+}
+
+export function configFileExists(
+  useHiddenConfig?: boolean,
+  configPath?: string
+): boolean {
+  return useHiddenConfig
+    ? newConfigFileExists()
+    : Boolean(config_DEPRECATED.getConfigPath(configPath));
+}
+
+export function deleteConfigFile(useHiddenConfig = false): void {
+  if (useHiddenConfig) {
+    newDeleteConfigFile();
+  }
+  config_DEPRECATED.deleteConfigFile();
+}
 
 function writeGlobalConfigFile(updatedConfig: CLIConfig_NEW): void {
   const updatedConfigJson = JSON.stringify(updatedConfig);
@@ -25,7 +64,7 @@ function writeGlobalConfigFile(updatedConfig: CLIConfig_NEW): void {
 
   try {
     writeConfig({ source: updatedConfigJson });
-    deleteConfigFile(true);
+    deleteConfigFile();
   } catch (error) {
     deleteEmptyConfigFile();
 
