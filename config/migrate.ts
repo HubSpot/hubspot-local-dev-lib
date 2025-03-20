@@ -18,7 +18,15 @@ import {
   configFileExists as newConfigFileExists,
   deleteConfigFile as newDeleteConfigFile,
 } from './configFile';
-import { GLOBAL_CONFIG_PATH } from '../constants/config';
+import {
+  GLOBAL_CONFIG_PATH,
+  DEFAULT_CMS_PUBLISH_MODE,
+  HTTP_TIMEOUT,
+  ENV,
+  HTTP_USE_LOCALHOST,
+  DEFAULT_ACCOUNT,
+  DEFAULT_PORTAL,
+} from '../constants/config';
 import { i18n } from '../utils/lang';
 import { logger } from '../lib/logger';
 
@@ -103,10 +111,10 @@ function mergeConfigPropertes(
   deprecatedConfig: CLIConfig_DEPRECATED
 ): CLIConfig_NEW {
   const propertiesToCheck: Array<keyof Partial<CLIConfig>> = [
-    'defaultCmsPublishMode',
-    'httpTimeout',
-    'allowUsageTracking',
-    'env',
+    DEFAULT_CMS_PUBLISH_MODE,
+    HTTP_TIMEOUT,
+    ENV,
+    HTTP_USE_LOCALHOST,
   ];
   const conflicts: Array<{
     property: keyof CLIConfig_NEW;
@@ -115,42 +123,49 @@ function mergeConfigPropertes(
   }> = [];
 
   propertiesToCheck.forEach(prop => {
-    if (prop in globalConfig && prop in deprecatedConfig) {
-      if (globalConfig[prop] !== deprecatedConfig[prop]) {
-        conflicts.push({
-          property: prop,
-          oldValue: deprecatedConfig[prop]!,
-          newValue: globalConfig[prop]!,
-        });
-      }
+    if (
+      prop in globalConfig &&
+      prop in deprecatedConfig &&
+      globalConfig[prop] !== deprecatedConfig[prop]
+    ) {
+      conflicts.push({
+        property: prop,
+        oldValue: deprecatedConfig[prop]!,
+        newValue: globalConfig[prop]!,
+      });
     } else {
       // @ts-expect-error TODO
       globalConfig[prop] = deprecatedConfig[prop];
     }
   });
 
-  if ('defaultAccount' in globalConfig && 'defaultPortal' in deprecatedConfig) {
-    if (globalConfig.defaultAccount !== deprecatedConfig.defaultPortal) {
-      conflicts.push({
-        property: 'defaultAccount',
-        oldValue: deprecatedConfig.defaultPortal!,
-        newValue: globalConfig.defaultAccount!,
-      });
-    }
-  } else if ('defaultPortal' in deprecatedConfig) {
+  if (
+    DEFAULT_ACCOUNT in globalConfig &&
+    DEFAULT_PORTAL in deprecatedConfig &&
+    globalConfig.defaultAccount !== deprecatedConfig.defaultPortal
+  ) {
+    conflicts.push({
+      property: DEFAULT_ACCOUNT,
+      oldValue: deprecatedConfig.defaultPortal!,
+      newValue: globalConfig.defaultAccount!,
+    });
+  } else if (DEFAULT_PORTAL in deprecatedConfig) {
     globalConfig.defaultAccount = deprecatedConfig.defaultPortal;
   }
 
   if (conflicts.length > 0) {
+    const formattedConflicts = conflicts
+      .map(
+        ({ property, oldValue, newValue }) =>
+          `${property}: ${oldValue} (deprecated) vs ${newValue} (global)`
+      )
+      .join('\n');
+
     logger.log(
-      `The following properties have different values in the deprecated and global config files:\n${conflicts
-        .map(
-          ({ property, oldValue, newValue }) =>
-            `${property}: ${oldValue} (deprecated) vs ${newValue} (global)`
-        )
-        .join('\n')}`
+      i18n(`${i18nKey}.conflicts`, {
+        formattedConflicts,
+      })
     );
-    return globalConfig;
   }
 
   return globalConfig;
