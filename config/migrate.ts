@@ -134,7 +134,8 @@ function mergeConfigPropertes(
         newValue: globalConfig[prop]!,
       });
     } else {
-      // @ts-expect-error TODO
+      // @ts-expect-error Cannot reconcile CLIConfig_NEW and CLIConfig_DEPRECATED types
+      // But we know that the properties are compatible
       globalConfig[prop] = deprecatedConfig[prop];
     }
   });
