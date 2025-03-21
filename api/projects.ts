@@ -334,7 +334,126 @@ export function fetchDeployWarnLogs(
   });
 }
 
-export function migrateApp(
+export interface MigrationStageOneResponse {
+  migrationId: number;
+  uidsRequired: string[];
+}
+export interface ListAppsMigrationComponent {
+  id: string;
+  componentType: string;
+  isSupported: boolean;
+}
+
+interface BaseMigrationApp {
+  appId: number;
+  appName: string;
+  isMigratable: boolean;
+  migrationComponents: ListAppsMigrationComponent[];
+  unmigratableReason: string | null;
+}
+
+export interface MigrateableApp extends BaseMigrationApp {
+  isMigratable: true;
+  unmigratableReason: null;
+}
+
+export interface UnmigrateableApp extends BaseMigrationApp {
+  isMigratable: false;
+  unmigratableReason: string;
+}
+
+export type MigrationApp = MigrateableApp | UnmigrateableApp;
+
+export interface ListAppsResponse {
+  migratableApps: MigrateableApp[];
+  unmigratableApps: UnmigrateableApp[];
+}
+
+export async function listAppsForMigration(
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  portalId: number
+): Promise<ListAppsResponse> {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve({
+        migratableApps: [
+          {
+            appId: 1,
+            appName: 'App - 3',
+            isMigratable: true,
+            migrationComponents: [],
+            unmigratableReason: null,
+          },
+          {
+            appId: 2,
+            appName: 'App - 2',
+            isMigratable: true,
+            migrationComponents: [],
+            unmigratableReason: null,
+          },
+        ],
+        unmigratableApps: [
+          {
+            appId: 3,
+            appName: 'App 3 ',
+            isMigratable: false,
+            migrationComponents: [],
+            unmigratableReason: 'UP_TO_DATE',
+          },
+        ],
+      });
+    }, 150);
+  });
+}
+
+export async function beginMigration(
+  appId: number
+): Promise<MigrationStageOneResponse> {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      if (appId === 1) {
+        return resolve({
+          migrationId: 1234,
+          uidsRequired: [
+            'App 1',
+            'Serverless function 1',
+            'Serverless function 2',
+          ],
+        });
+      }
+      resolve({
+        migrationId: 1234,
+        uidsRequired: [],
+      });
+    }, 1500);
+  });
+}
+
+type MigrationFinishResponse = {
+  projectName: string;
+  buildId: number;
+};
+
+export async function finishMigration(
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  portalId: number,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  migrationId: number,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  uidMap: Record<string, string>,
+  projectName: string
+): Promise<MigrationFinishResponse> {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve({
+        projectName,
+        buildId: 1234,
+      });
+    }, 2000);
+  });
+}
+
+export function migrateNonProjectApp_v2023_2(
   accountId: number,
   appId: number,
   projectName: string
