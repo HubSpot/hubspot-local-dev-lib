@@ -31,6 +31,7 @@ export const HUBSPOT_ACCOUNT_TYPE_STRINGS = {
 
 export const CONFIG_FLAGS = {
   USE_CUSTOM_OBJECT_HUBFILE: 'useCustomObjectHubfile',
+  HTTP_USE_LOCALHOST: 'httpUseLocalhost',
 } as const;
 
 export const ENVIRONMENT_VARIABLES = {
