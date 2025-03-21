@@ -2,6 +2,7 @@ import axios from 'axios';
 import moment from 'moment';
 import { OAuth2Manager } from '../OAuth2Manager';
 import { ENVIRONMENTS } from '../../constants/environments';
+import { HubSpotConfigAccount } from '../../types/Accounts';
 
 jest.mock('axios');
 
@@ -19,10 +20,11 @@ const axiosSpy = axiosMock.mockResolvedValue({
 
 const initialRefreshToken = '84d22710-4cb7-5581-ba05-35f9945e5e8e';
 
-const oauthAccount = {
+const oauthAccount: HubSpotConfigAccount = {
+  name: 'my-account',
   accountId: 123,
   env: ENVIRONMENTS.PROD,
-  authType: 'oauth2' as const,
+  authType: 'oauth2',
   auth: {
     clientId: 'd996372f-2b53-30d3-9c3b-4fdde4bce3a2',
     clientSecret: 'f90a6248-fbc0-3b03-b0db-ec58c95e791',
@@ -46,10 +48,7 @@ describe('models/Oauth2Manager', () => {
 
   describe('fromConfig()', () => {
     it('initializes an oauth manager instance', async () => {
-      const oauthManager = OAuth2Manager.fromConfig(
-        oauthAccount,
-        () => undefined
-      );
+      const oauthManager = new OAuth2Manager(oauthAccount, () => undefined);
 
       expect(oauthManager.refreshTokenRequest).toBe(null);
       expect(oauthManager.account).toMatchObject(oauthAccount);
@@ -58,10 +57,7 @@ describe('models/Oauth2Manager', () => {
 
   describe('refreshAccessToken()', () => {
     it('refreshes the oauth access token', async () => {
-      const oauthManager = OAuth2Manager.fromConfig(
-        oauthAccount,
-        () => undefined
-      );
+      const oauthManager = new OAuth2Manager(oauthAccount, () => undefined);
 
       await oauthManager.refreshAccessToken();
 
@@ -76,10 +72,10 @@ describe('models/Oauth2Manager', () => {
         method: 'post',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       });
-      expect(oauthManager.account.tokenInfo?.refreshToken).toBe(
+      expect(oauthManager.account.auth.tokenInfo?.refreshToken).toBe(
         mockRefreshTokenResponse.refresh_token
       );
-      expect(oauthManager.account.tokenInfo?.accessToken).toBe(
+      expect(oauthManager.account.auth.tokenInfo?.accessToken).toBe(
         mockRefreshTokenResponse.access_token
       );
     });
