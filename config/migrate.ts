@@ -113,7 +113,8 @@ export type ConflictProperty = {
 
 export function mergeConfigProperties(
   globalConfig: CLIConfig_NEW,
-  deprecatedConfig: CLIConfig_DEPRECATED
+  deprecatedConfig: CLIConfig_DEPRECATED,
+  force?: boolean
 ): {
   initialConfig: CLIConfig_NEW;
   conflicts: Array<ConflictProperty>;
@@ -127,19 +128,19 @@ export function mergeConfigProperties(
   const conflicts: Array<ConflictProperty> = [];
 
   propertiesToCheck.forEach(prop => {
-    if (
-      prop in globalConfig &&
-      prop in deprecatedConfig &&
-      globalConfig[prop] !== deprecatedConfig[prop]
-    ) {
-      conflicts.push({
-        property: prop,
-        oldValue: deprecatedConfig[prop]!,
-        newValue: globalConfig[prop]!,
-      });
+    if (prop in globalConfig && prop in deprecatedConfig) {
+      if (force) {
+        // @ts-expect-error Cannot reconcile CLIConfig_NEW and CLIConfig_DEPRECATED types
+        globalConfig[prop] = deprecatedConfig[prop];
+      } else if (globalConfig[prop] !== deprecatedConfig[prop]) {
+        conflicts.push({
+          property: prop,
+          oldValue: deprecatedConfig[prop]!,
+          newValue: globalConfig[prop]!,
+        });
+      }
     } else {
       // @ts-expect-error Cannot reconcile CLIConfig_NEW and CLIConfig_DEPRECATED types
-      // But we know that the properties are compatible
       globalConfig[prop] = deprecatedConfig[prop];
     }
   });
