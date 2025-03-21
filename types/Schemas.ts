@@ -40,3 +40,49 @@ export type CreateObjectsResponse = {
     archived: boolean;
   }>;
 };
+
+export type SchemaDefinition = {
+  allowsSensitiveProperties?: boolean;
+  associatedObjects?: Array<string>;
+  description?: string;
+  labels: {
+    plural: string;
+    singular: string;
+  };
+  searchableProperties?: Array<string>;
+  secondaryDisplayProperties?: Array<string>;
+  name: string;
+  primaryDisplayProperty?: string;
+  properties: [
+    {
+      isPrimaryDisplayLabel: true;
+      label: string;
+      name: string;
+    },
+  ];
+  requiredProperties: Array<string>;
+};
+
+export type ObjectDefinition = {
+  inputs: [
+    {
+      associations?: [
+        {
+          types: [
+            {
+              associationCategory: string;
+              associationTypeId: number;
+            },
+          ];
+          to: {
+            id: string;
+          };
+        },
+      ];
+      objectWriteTraceId?: number;
+      properties: {
+        [key: string]: string;
+      };
+    },
+  ];
+};
