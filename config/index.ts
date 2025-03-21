@@ -207,6 +207,31 @@ export function getConfigDefaultAccount(): HubSpotConfigAccount {
   return account;
 }
 
+export function getConfigDefaultAccountIfExists():
+  | HubSpotConfigAccount
+  | undefined {
+  const { accounts, defaultAccount } = getConfig();
+
+  let defaultAccountToUse = defaultAccount;
+
+  if (globalConfigFileExists()) {
+    const defaultAccountOverrideAccountId =
+      getDefaultAccountOverrideAccountId();
+    defaultAccountToUse = defaultAccountOverrideAccountId || defaultAccount;
+  }
+
+  if (!defaultAccountToUse) {
+    return;
+  }
+
+  const account = getConfigAccountByInferredIdentifier(
+    accounts,
+    defaultAccountToUse
+  );
+
+  return account;
+}
+
 export function getAllConfigAccounts(): HubSpotConfigAccount[] {
   const { accounts } = getConfig();
 
