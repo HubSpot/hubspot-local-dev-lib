@@ -28,7 +28,6 @@ import {
   DEFAULT_PORTAL,
 } from '../constants/config';
 import { i18n } from '../utils/lang';
-import { logger } from '../lib/logger';
 
 const i18nKey = 'config.migrate';
 
@@ -78,7 +77,6 @@ function writeGlobalConfigFile(updatedConfig: CLIConfig_NEW): void {
     deleteConfigFile();
   } catch (error) {
     deleteEmptyConfigFile();
-
     throw new Error(
       i18n(`${i18nKey}.errors.writeConfig`, { configPath: GLOBAL_CONFIG_PATH }),
       { cause: error }
@@ -106,21 +104,27 @@ export function migrateConfig(
   writeGlobalConfigFile(updatedConfig);
 }
 
-function mergeConfigPropertes(
+type ConflictValue = boolean | string | number | CmsPublishMode | Environment;
+export type ConflictProperty = {
+  property: keyof CLIConfig_NEW;
+  oldValue: ConflictValue;
+  newValue: ConflictValue;
+};
+
+export function mergeConfigProperties(
   globalConfig: CLIConfig_NEW,
   deprecatedConfig: CLIConfig_DEPRECATED
-): CLIConfig_NEW {
+): {
+  initialConfig: CLIConfig_NEW;
+  conflicts: Array<ConflictProperty>;
+} {
   const propertiesToCheck: Array<keyof Partial<CLIConfig>> = [
     DEFAULT_CMS_PUBLISH_MODE,
     HTTP_TIMEOUT,
     ENV,
     HTTP_USE_LOCALHOST,
   ];
-  const conflicts: Array<{
-    property: keyof CLIConfig_NEW;
-    oldValue: boolean | string | number | CmsPublishMode | Environment;
-    newValue: boolean | string | number | CmsPublishMode | Environment;
-  }> = [];
+  const conflicts: Array<ConflictProperty> = [];
 
   propertiesToCheck.forEach(prop => {
     if (
@@ -154,35 +158,24 @@ function mergeConfigPropertes(
     globalConfig.defaultAccount = deprecatedConfig.defaultPortal;
   }
 
-  if (conflicts.length > 0) {
-    const formattedConflicts = conflicts
-      .map(
-        ({ property, oldValue, newValue }) =>
-          `${property}: ${oldValue} (deprecated) vs ${newValue} (global)`
-      )
-      .join('\n');
-
-    logger.log(
-      i18n(`${i18nKey}.conflicts`, {
-        formattedConflicts,
-      })
-    );
-  }
-
-  return globalConfig;
+  return { initialConfig: globalConfig, conflicts };
 }
 
 function mergeAccounts(
   globalConfig: CLIConfig_NEW,
   deprecatedConfig: CLIConfig_DEPRECATED
-): CLIConfig_NEW {
+): {
+  finalConfig: CLIConfig_NEW;
+  skippedAccountIds: Array<string | number>;
+} {
+  let existingAccountIds: Array<string | number> = [];
   if (globalConfig.accounts && deprecatedConfig.portals) {
-    const existingPortalIds = new Set(
-      globalConfig.accounts.map(account => account.accountId)
+    existingAccountIds = globalConfig.accounts.map(
+      account => account.accountId
     );
 
     const newAccounts = deprecatedConfig.portals
-      .filter(portal => !existingPortalIds.has(portal.portalId!))
+      .filter(portal => !existingAccountIds.includes(portal.portalId!))
       .map(({ portalId, ...rest }) => ({
         ...rest,
         accountId: portalId!,
@@ -193,15 +186,23 @@ function mergeAccounts(
     }
   }
 
-  return globalConfig;
+  return {
+    finalConfig: globalConfig,
+    skippedAccountIds: deprecatedConfig.portals
+      .filter(portal => existingAccountIds.includes(portal.portalId!))
+      .map(portal => portal.portalId!),
+  };
 }
 
 export function mergeExistingConfigs(
   globalConfig: CLIConfig_NEW,
   deprecatedConfig: CLIConfig_DEPRECATED
-): void {
-  const updatedConfig = mergeConfigPropertes(globalConfig, deprecatedConfig);
-  const finalConfig = mergeAccounts(updatedConfig, deprecatedConfig);
+): { finalConfig: CLIConfig_NEW; skippedAccountIds: Array<string | number> } {
+  const { finalConfig, skippedAccountIds } = mergeAccounts(
+    globalConfig,
+    deprecatedConfig
+  );
 
   writeGlobalConfigFile(finalConfig);
+  return { finalConfig, skippedAccountIds };
 }
