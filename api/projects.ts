@@ -344,29 +344,34 @@ export interface ListAppsMigrationComponent {
   isSupported: boolean;
 }
 
+export const UNMIGRATABLE_REASONS = {
+  UP_TO_DATE: 'UP_TO_DATE',
+  IS_A_PRIVATE_APP: 'IS_A_PRIVATE_APP',
+  LISTED_IN_MARKETPLACE: 'LISTED_IN_MARKETPLACE',
+};
+
 interface BaseMigrationApp {
   appId: number;
   appName: string;
   isMigratable: boolean;
   migrationComponents: ListAppsMigrationComponent[];
-  unmigratableReason: string | null;
+  unmigratableReason: keyof typeof UNMIGRATABLE_REASONS | string | null;
 }
 
-export interface MigrateableApp extends BaseMigrationApp {
+export interface MigratableApp extends BaseMigrationApp {
   isMigratable: true;
   unmigratableReason: null;
 }
 
-export interface UnmigrateableApp extends BaseMigrationApp {
+export interface UnmigratableApp extends BaseMigrationApp {
   isMigratable: false;
-  unmigratableReason: string;
 }
 
-export type MigrationApp = MigrateableApp | UnmigrateableApp;
+export type MigrationApp = MigratableApp | UnmigratableApp;
 
 export interface ListAppsResponse {
-  migratableApps: MigrateableApp[];
-  unmigratableApps: UnmigrateableApp[];
+  migratableApps: MigratableApp[];
+  unmigratableApps: UnmigratableApp[];
 }
 
 export async function listAppsForMigration(
