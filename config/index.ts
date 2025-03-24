@@ -98,10 +98,13 @@ export function getConfigPath(
   return config_DEPRECATED.getConfigPath(path);
 }
 
-export function configFileExists(useHiddenConfig?: boolean) {
+export function configFileExists(
+  useHiddenConfig?: boolean,
+  path?: string
+): boolean {
   return useHiddenConfig
     ? newConfigFileExists()
-    : Boolean(config_DEPRECATED.getConfigPath());
+    : Boolean(config_DEPRECATED.getConfigPath(path));
 }
 
 export function getAccountConfig(accountId?: number): CLIAccount | null {

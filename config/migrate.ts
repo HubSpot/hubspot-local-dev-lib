@@ -13,11 +13,7 @@ import {
   loadConfig,
   deleteEmptyConfigFile,
 } from './index';
-import {
-  getConfigFilePath,
-  configFileExists as newConfigFileExists,
-  deleteConfigFile as newDeleteConfigFile,
-} from './configFile';
+import { getConfigFilePath } from './configFile';
 import {
   GLOBAL_CONFIG_PATH,
   DEFAULT_CMS_PUBLISH_MODE,
@@ -51,30 +47,19 @@ export function getConfigPath(
   return config_DEPRECATED.getConfigPath(configPath);
 }
 
-export function configFileExists(
-  useHiddenConfig?: boolean,
-  configPath?: string
-): boolean {
-  return useHiddenConfig
-    ? newConfigFileExists()
-    : Boolean(config_DEPRECATED.getConfigPath(configPath));
-}
-
-export function deleteConfigFile(useHiddenConfig = false): void {
-  if (useHiddenConfig) {
-    newDeleteConfigFile();
-  }
-  config_DEPRECATED.deleteConfigFile();
-}
-
-function writeGlobalConfigFile(updatedConfig: CLIConfig_NEW): void {
+function writeGlobalConfigFile(
+  updatedConfig: CLIConfig_NEW,
+  isMigrating = false
+): void {
   const updatedConfigJson = JSON.stringify(updatedConfig);
-  createEmptyConfigFile({}, true);
+  if (isMigrating) {
+    createEmptyConfigFile({}, true);
+  }
   loadConfig('');
 
   try {
     writeConfig({ source: updatedConfigJson });
-    deleteConfigFile();
+    config_DEPRECATED.deleteConfigFile();
   } catch (error) {
     deleteEmptyConfigFile();
     throw new Error(
@@ -101,7 +86,7 @@ export function migrateConfig(
         accountId: portalId!,
       })),
   };
-  writeGlobalConfigFile(updatedConfig);
+  writeGlobalConfigFile(updatedConfig, true);
 }
 
 type ConflictValue = boolean | string | number | CmsPublishMode | Environment;
@@ -129,19 +114,16 @@ export function mergeConfigProperties(
 
   propertiesToCheck.forEach(prop => {
     if (prop in globalConfig && prop in deprecatedConfig) {
-      if (force) {
+      if (force || globalConfig[prop] === deprecatedConfig[prop]) {
         // @ts-expect-error Cannot reconcile CLIConfig_NEW and CLIConfig_DEPRECATED types
         globalConfig[prop] = deprecatedConfig[prop];
-      } else if (globalConfig[prop] !== deprecatedConfig[prop]) {
+      } else {
         conflicts.push({
           property: prop,
           oldValue: deprecatedConfig[prop]!,
           newValue: globalConfig[prop]!,
         });
       }
-    } else {
-      // @ts-expect-error Cannot reconcile CLIConfig_NEW and CLIConfig_DEPRECATED types
-      globalConfig[prop] = deprecatedConfig[prop];
     }
   });
 
@@ -170,13 +152,21 @@ function mergeAccounts(
   skippedAccountIds: Array<string | number>;
 } {
   let existingAccountIds: Array<string | number> = [];
+  const skippedAccountIds: Array<string | number> = [];
+
   if (globalConfig.accounts && deprecatedConfig.portals) {
     existingAccountIds = globalConfig.accounts.map(
       account => account.accountId
     );
 
     const newAccounts = deprecatedConfig.portals
-      .filter(portal => !existingAccountIds.includes(portal.portalId!))
+      .filter(portal => {
+        const isExisting = existingAccountIds.includes(portal.portalId!);
+        if (isExisting) {
+          skippedAccountIds.push(portal.portalId!);
+        }
+        return !isExisting;
+      })
       .map(({ portalId, ...rest }) => ({
         ...rest,
         accountId: portalId!,
@@ -189,9 +179,7 @@ function mergeAccounts(
 
   return {
     finalConfig: globalConfig,
-    skippedAccountIds: deprecatedConfig.portals
-      .filter(portal => existingAccountIds.includes(portal.portalId!))
-      .map(portal => portal.portalId!),
+    skippedAccountIds,
   };
 }
 

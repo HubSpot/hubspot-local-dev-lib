@@ -313,7 +313,6 @@
       }
     },
     "migrate": {
-      "conflicts": "The following properties have different values in the deprecated and global config files: \n{{ formattedConflicts }}",
       "errors": {
         "writeConfig": "Unable to write global configuration file at {{ configPath }}.",
         "noDeprecatedConfig": "No deprecated configuration file found. Skipping migration to global config."
