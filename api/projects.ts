@@ -28,7 +28,8 @@ const PROJECTS_DEPLOY_API_PATH = 'dfs/deploy/v1';
 const PROJECTS_DEPLOY_API_PATH_V3 = 'dfs/deploy/v3';
 const PROJECTS_LOGS_API_PATH = 'dfs/logging/v1';
 const DEVELOPER_PROJECTS_API_PATH = 'developer/projects/v1';
-const MIGRATIONS_API_PATH = 'dfs/migrations/v1';
+const MIGRATIONS_API_PATH_V1 = 'dfs/migrations/v1';
+const MIGRATIONS_API_PATH_V2 = 'dfs/migrations/v2';
 
 const PROJECTS_V3_API_PATH = 'project-components-external/v3';
 
@@ -355,16 +356,15 @@ interface BaseMigrationApp {
   appName: string;
   isMigratable: boolean;
   migrationComponents: ListAppsMigrationComponent[];
-  unmigratableReason: keyof typeof UNMIGRATABLE_REASONS | string | null;
 }
 
 export interface MigratableApp extends BaseMigrationApp {
   isMigratable: true;
-  unmigratableReason: null;
 }
 
 export interface UnmigratableApp extends BaseMigrationApp {
   isMigratable: false;
+  unmigratableReason: keyof typeof UNMIGRATABLE_REASONS;
 }
 
 export type MigrationApp = MigratableApp | UnmigratableApp;
@@ -375,39 +375,10 @@ export interface ListAppsResponse {
 }
 
 export async function listAppsForMigration(
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  portalId: number
-): Promise<ListAppsResponse> {
-  return new Promise(resolve => {
-    setTimeout(() => {
-      resolve({
-        migratableApps: [
-          {
-            appId: 1,
-            appName: 'App - 3',
-            isMigratable: true,
-            migrationComponents: [],
-            unmigratableReason: null,
-          },
-          {
-            appId: 2,
-            appName: 'App - 2',
-            isMigratable: true,
-            migrationComponents: [],
-            unmigratableReason: null,
-          },
-        ],
-        unmigratableApps: [
-          {
-            appId: 3,
-            appName: 'App 3 ',
-            isMigratable: false,
-            migrationComponents: [],
-            unmigratableReason: 'UP_TO_DATE',
-          },
-        ],
-      });
-    }, 150);
+  accountId: number
+): HubSpotPromise<ListAppsResponse> {
+  return http.get<ListAppsResponse>(accountId, {
+    url: `${MIGRATIONS_API_PATH_V2}/list-apps`,
   });
 }
 
@@ -464,7 +435,7 @@ export function migrateNonProjectApp_v2023_2(
   projectName: string
 ): HubSpotPromise<MigrateAppResponse> {
   return http.post<MigrateAppResponse>(accountId, {
-    url: `${MIGRATIONS_API_PATH}/migrations`,
+    url: `${MIGRATIONS_API_PATH_V1}/migrations`,
     data: {
       componentId: appId,
       componentType: 'PUBLIC_APP_ID',
@@ -478,7 +449,7 @@ export function checkMigrationStatus(
   id: number
 ): HubSpotPromise<PollAppResponse> {
   return http.get<PollAppResponse>(accountId, {
-    url: `${MIGRATIONS_API_PATH}/migrations/${id}`,
+    url: `${MIGRATIONS_API_PATH_V1}/migrations/${id}`,
   });
 }
 
@@ -487,7 +458,7 @@ export function cloneApp(
   appId: number
 ): HubSpotPromise<CloneAppResponse> {
   return http.post<CloneAppResponse>(accountId, {
-    url: `${MIGRATIONS_API_PATH}/exports`,
+    url: `${MIGRATIONS_API_PATH_V1}/exports`,
     data: {
       componentId: appId,
       componentType: 'PUBLIC_APP_ID',
@@ -500,7 +471,7 @@ export function checkCloneStatus(
   exportId: number
 ): HubSpotPromise<CloneAppResponse> {
   return http.get<CloneAppResponse>(accountId, {
-    url: `${MIGRATIONS_API_PATH}/exports/${exportId}/status`,
+    url: `${MIGRATIONS_API_PATH_V1}/exports/${exportId}/status`,
   });
 }
 
@@ -509,7 +480,7 @@ export function downloadClonedProject(
   exportId: number
 ): HubSpotPromise<Buffer> {
   return http.get<Buffer>(accountId, {
-    url: `${MIGRATIONS_API_PATH}/exports/${exportId}/download-as-clone`,
+    url: `${MIGRATIONS_API_PATH_V1}/exports/${exportId}/download-as-clone`,
     responseType: 'arraybuffer',
   });
 }
