@@ -23,6 +23,7 @@ export const DEFAULT_CMS_PUBLISH_MODE = 'defaultCmsPublishMode';
 export const HTTP_TIMEOUT = 'httpTimeout';
 export const ENV = 'env';
 export const HTTP_USE_LOCALHOST = 'httpUseLocalhost';
+export const ALLOW_USAGE_TRACKING = 'allowUsageTracking';
 export const DEFAULT_ACCOUNT = 'defaultAccount';
 export const DEFAULT_PORTAL = 'defaultPortal';
 

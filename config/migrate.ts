@@ -1,3 +1,5 @@
+import fs from 'fs';
+
 import * as config_DEPRECATED from './config_DEPRECATED';
 import { CLIConfiguration } from './CLIConfiguration';
 import {
@@ -13,13 +15,17 @@ import {
   loadConfig,
   deleteEmptyConfigFile,
 } from './index';
-import { getConfigFilePath } from './configFile';
+import {
+  getConfigFilePath,
+  configFileExists as newConfigFileExists,
+} from './configFile';
 import {
   GLOBAL_CONFIG_PATH,
   DEFAULT_CMS_PUBLISH_MODE,
   HTTP_TIMEOUT,
   ENV,
   HTTP_USE_LOCALHOST,
+  ALLOW_USAGE_TRACKING,
   DEFAULT_ACCOUNT,
   DEFAULT_PORTAL,
 } from '../constants/config';
@@ -27,14 +33,27 @@ import { i18n } from '../utils/lang';
 
 const i18nKey = 'config.migrate';
 
-export function getConfig(
-  useHiddenConfig?: boolean,
+export function getDeprecatedConfig(
   configPath?: string
-): Partial<CLIConfig> | null {
-  if (useHiddenConfig) {
+): CLIConfig_DEPRECATED | null {
+  return config_DEPRECATED.loadConfig(configPath);
+}
+
+export function getGlobalConfig(): CLIConfig_NEW | null {
+  if (CLIConfiguration.isActive()) {
     return CLIConfiguration.config;
   }
-  return config_DEPRECATED.loadConfig(configPath);
+  return null;
+}
+
+export function configFileExists(
+  useHiddenConfig = false,
+  configPath?: string
+): boolean {
+  return useHiddenConfig
+    ? newConfigFileExists()
+    : Boolean(configPath && fs.existsSync(configPath)) ||
+        Boolean(config_DEPRECATED.loadConfig(configPath));
 }
 
 export function getConfigPath(
@@ -109,6 +128,7 @@ export function mergeConfigProperties(
     HTTP_TIMEOUT,
     ENV,
     HTTP_USE_LOCALHOST,
+    ALLOW_USAGE_TRACKING,
   ];
   const conflicts: Array<ConflictProperty> = [];
 
