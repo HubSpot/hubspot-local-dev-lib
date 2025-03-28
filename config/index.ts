@@ -244,9 +244,8 @@ export function getConfigDefaultAccount(): string | number | null | undefined {
 export function getDisplayDefaultAccount(): string | number | null | undefined {
   if (CLIConfiguration.isActive()) {
     return CLIConfiguration.config?.defaultAccount;
-  } else {
-    return config_DEPRECATED.getConfigDefaultAccount();
   }
+  return config_DEPRECATED.getConfigDefaultAccount();
 }
 
 export function getConfigAccounts():
