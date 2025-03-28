@@ -21,6 +21,7 @@ import {
   CloneAppResponse,
   PollAppResponse,
 } from '../types/Migration';
+import { PLATFORM_VERSIONS } from '../constants/platformVersion';
 
 const PROJECTS_API_PATH = 'dfs/v1/projects';
 const DEVELOPER_FILE_SYSTEM_PATH = 'dfs/v1';
@@ -337,7 +338,10 @@ export function fetchDeployWarnLogs(
 
 export interface MigrationStageOneResponse {
   migrationId: number;
-  uidsRequired: string[];
+  componentsRequiringUids: Record<
+    string,
+    { componentType: string; componentHint: string | null }
+  >;
 }
 export interface ListAppsMigrationComponent {
   id: string;
@@ -383,25 +387,14 @@ export async function listAppsForMigration(
 }
 
 export async function beginMigration(
-  appId: number
-): Promise<MigrationStageOneResponse> {
-  return new Promise(resolve => {
-    setTimeout(() => {
-      if (appId === 1) {
-        return resolve({
-          migrationId: 1234,
-          uidsRequired: [
-            'App 1',
-            'Serverless function 1',
-            'Serverless function 2',
-          ],
-        });
-      }
-      resolve({
-        migrationId: 1234,
-        uidsRequired: [],
-      });
-    }, 1500);
+  accountId: number,
+  applicationId: number
+): HubSpotPromise<MigrationStageOneResponse> {
+  return http.post(accountId, {
+    url: `${MIGRATIONS_API_PATH_V2}/migrations`,
+    data: {
+      applicationId,
+    },
   });
 }
 
@@ -411,21 +404,23 @@ type MigrationFinishResponse = {
 };
 
 export async function finishMigration(
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   portalId: number,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   migrationId: number,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  uidMap: Record<string, string>,
-  projectName: string
-): Promise<MigrationFinishResponse> {
-  return new Promise(resolve => {
-    setTimeout(() => {
-      resolve({
-        projectName,
-        buildId: 1234,
-      });
-    }, 2000);
+  componentUids: Record<string, string>,
+  projectName: string,
+  targetPlatformVersion: string
+): HubSpotPromise<MigrationFinishResponse> {
+  const pathPlatformVersion =
+    targetPlatformVersion === PLATFORM_VERSIONS.unstable
+      ? targetPlatformVersion
+      : `v${targetPlatformVersion.replace('.', '')}`;
+  return http.post(portalId, {
+    url: `${MIGRATIONS_API_PATH_V2}/migrations/migrate/${pathPlatformVersion}`,
+    data: {
+      migrationId,
+      projectName,
+      componentUids,
+    },
   });
 }
 
