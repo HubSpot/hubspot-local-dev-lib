@@ -98,7 +98,7 @@ export function getConfigPath(
   return config_DEPRECATED.getConfigPath(path);
 }
 
-export function configFileExists(useHiddenConfig?: boolean) {
+export function configFileExists(useHiddenConfig?: boolean): boolean {
   return useHiddenConfig
     ? newConfigFileExists()
     : Boolean(config_DEPRECATED.getConfigPath());

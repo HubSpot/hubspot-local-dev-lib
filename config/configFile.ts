@@ -1,12 +1,7 @@
 import fs from 'fs-extra';
-import path from 'path';
-import os from 'os';
 import yaml from 'js-yaml';
 import { logger } from '../lib/logger';
-import {
-  HUBSPOT_CONFIGURATION_FILE,
-  HUBSPOT_CONFIGURATION_FOLDER,
-} from '../constants/config';
+import { GLOBAL_CONFIG_PATH } from '../constants/config';
 import { getOrderedConfig } from './configUtils';
 import { CLIConfig_NEW } from '../types/Config';
 import { i18n } from '../utils/lang';
@@ -15,11 +10,7 @@ import { FileSystemError } from '../models/FileSystemError';
 const i18nKey = 'config.configFile';
 
 export function getConfigFilePath(): string {
-  return path.join(
-    os.homedir(),
-    HUBSPOT_CONFIGURATION_FOLDER,
-    HUBSPOT_CONFIGURATION_FILE
-  );
+  return GLOBAL_CONFIG_PATH;
 }
 
 export function configFileExists(): boolean {
