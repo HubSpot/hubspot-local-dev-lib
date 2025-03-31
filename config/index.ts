@@ -241,6 +241,13 @@ export function getConfigDefaultAccount(): string | number | null | undefined {
   return config_DEPRECATED.getConfigDefaultAccount();
 }
 
+export function getDisplayDefaultAccount(): string | number | null | undefined {
+  if (CLIConfiguration.isActive()) {
+    return CLIConfiguration.config?.defaultAccount;
+  }
+  return config_DEPRECATED.getConfigDefaultAccount();
+}
+
 export function getConfigAccounts():
   | Array<CLIAccount_NEW>
   | Array<CLIAccount_DEPRECATED>
