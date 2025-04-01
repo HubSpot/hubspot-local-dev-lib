@@ -441,8 +441,18 @@ export function migrateNonProjectApp_v2023_2(
 
 export function checkMigrationStatus(
   accountId: number,
-  id: number
+  id: number,
+  targetPlatformVersion: string = PLATFORM_VERSIONS.v2023_2
 ): HubSpotPromise<PollAppResponse> {
+  if (
+    targetPlatformVersion === PLATFORM_VERSIONS.unstable ||
+    targetPlatformVersion === PLATFORM_VERSIONS.v2025_2
+  ) {
+    return http.get<PollAppResponse>(accountId, {
+      url: `${MIGRATIONS_API_PATH_V2}/migrations/${id}`,
+    });
+  }
+
   return http.get<PollAppResponse>(accountId, {
     url: `${MIGRATIONS_API_PATH_V1}/migrations/${id}`,
   });
