@@ -424,7 +424,7 @@ export async function finishMigration(
   });
 }
 
-export function migrateNonProjectApp_v2023_2(
+export function migrateApp(
   accountId: number,
   appId: number,
   projectName: string

@@ -25,7 +25,7 @@ import {
   getBuildStructure,
   getDeployStatus,
   getDeployStructure,
-  migrateNonProjectApp_v2023_2,
+  migrateApp,
   provisionBuild,
   queueBuild,
   uploadFileToBuild,
@@ -572,7 +572,7 @@ describe('api/projects', () => {
   describe('migrateApp', () => {
     const appId = 123456;
     it('should call http correctly', async () => {
-      await migrateNonProjectApp_v2023_2(accountId, appId, projectName);
+      await migrateApp(accountId, appId, projectName);
       expect(http.post).toHaveBeenCalledTimes(1);
       expect(http.post).toHaveBeenCalledWith(accountId, {
         url: `dfs/migrations/v1/migrations`,
