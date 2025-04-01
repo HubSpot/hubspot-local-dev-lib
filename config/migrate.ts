@@ -152,11 +152,15 @@ export function mergeConfigProperties(
     DEFAULT_PORTAL in deprecatedConfig &&
     globalConfig.defaultAccount !== deprecatedConfig.defaultPortal
   ) {
-    conflicts.push({
-      property: DEFAULT_ACCOUNT,
-      oldValue: deprecatedConfig.defaultPortal!,
-      newValue: globalConfig.defaultAccount!,
-    });
+    if (force) {
+      globalConfig.defaultAccount = deprecatedConfig.defaultPortal;
+    } else {
+      conflicts.push({
+        property: DEFAULT_ACCOUNT,
+        oldValue: deprecatedConfig.defaultPortal!,
+        newValue: globalConfig.defaultAccount!,
+      });
+    }
   } else if (DEFAULT_PORTAL in deprecatedConfig) {
     globalConfig.defaultAccount = deprecatedConfig.defaultPortal;
   }
