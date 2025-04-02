@@ -1,5 +1,3 @@
-import fs from 'fs';
-
 import * as config_DEPRECATED from './config_DEPRECATED';
 import { CLIConfiguration } from './CLIConfiguration';
 import {
@@ -52,8 +50,7 @@ export function configFileExists(
 ): boolean {
   return useHiddenConfig
     ? newConfigFileExists()
-    : Boolean(configPath && fs.existsSync(configPath)) ||
-        Boolean(config_DEPRECATED.loadConfig(configPath));
+    : Boolean(config_DEPRECATED.getConfigPath(configPath));
 }
 
 export function getConfigPath(
