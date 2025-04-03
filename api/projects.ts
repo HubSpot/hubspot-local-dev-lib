@@ -9,6 +9,9 @@ import {
   FetchPlatformVersionResponse,
   WarnLogsResponse,
   UploadIRResponse,
+  ListAppsResponse,
+  BeginMigrationResponse,
+  FinishMigrationResponse,
 } from '../types/Project';
 import { Build, FetchProjectBuildsResponse } from '../types/Build';
 import {
@@ -336,47 +339,11 @@ export function fetchDeployWarnLogs(
   });
 }
 
-export interface MigrationStageOneResponse {
-  migrationId: number;
-  componentsRequiringUids: Record<
-    string,
-    { componentType: string; componentHint: string | null }
-  >;
-}
-export interface ListAppsMigrationComponent {
-  id: string;
-  componentType: string;
-  isSupported: boolean;
-}
-
 export const UNMIGRATABLE_REASONS = {
   UP_TO_DATE: 'UP_TO_DATE',
   IS_A_PRIVATE_APP: 'IS_A_PRIVATE_APP',
   LISTED_IN_MARKETPLACE: 'LISTED_IN_MARKETPLACE',
 };
-
-interface BaseMigrationApp {
-  appId: number;
-  appName: string;
-  isMigratable: boolean;
-  migrationComponents: ListAppsMigrationComponent[];
-}
-
-export interface MigratableApp extends BaseMigrationApp {
-  isMigratable: true;
-}
-
-export interface UnmigratableApp extends BaseMigrationApp {
-  isMigratable: false;
-  unmigratableReason: keyof typeof UNMIGRATABLE_REASONS;
-}
-
-export type MigrationApp = MigratableApp | UnmigratableApp;
-
-export interface ListAppsResponse {
-  migratableApps: MigratableApp[];
-  unmigratableApps: UnmigratableApp[];
-}
 
 export async function listAppsForMigration(
   accountId: number
@@ -389,7 +356,7 @@ export async function listAppsForMigration(
 export async function beginMigration(
   accountId: number,
   applicationId: number
-): HubSpotPromise<MigrationStageOneResponse> {
+): HubSpotPromise<BeginMigrationResponse> {
   return http.post(accountId, {
     url: `${MIGRATIONS_API_PATH_V2}/migrations`,
     data: {
@@ -398,18 +365,13 @@ export async function beginMigration(
   });
 }
 
-type MigrationFinishResponse = {
-  projectName: string;
-  buildId: number;
-};
-
 export async function finishMigration(
   portalId: number,
   migrationId: number,
   componentUids: Record<string, string>,
   projectName: string,
   targetPlatformVersion: string
-): HubSpotPromise<MigrationFinishResponse> {
+): HubSpotPromise<FinishMigrationResponse> {
   const pathPlatformVersion =
     targetPlatformVersion === PLATFORM_VERSIONS.unstable
       ? targetPlatformVersion
