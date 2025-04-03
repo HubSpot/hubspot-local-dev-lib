@@ -30,6 +30,9 @@ import {
   queueBuild,
   uploadFileToBuild,
   uploadProject,
+  listAppsForMigration,
+  beginMigration,
+  finishMigration,
 } from '../projects';
 
 const createReadStreamMock = createReadStream as jest.MockedFunction<
@@ -630,6 +633,108 @@ describe('api/projects', () => {
       expect(http.get).toHaveBeenCalledWith(accountId, {
         url: `dfs/migrations/v1/exports/${exportId}/download-as-clone`,
         responseType: 'arraybuffer',
+      });
+    });
+  });
+
+  describe('listAppsForMigration', () => {
+    it('should call http correctly', async () => {
+      await listAppsForMigration(accountId);
+      expect(http.get).toHaveBeenCalledTimes(1);
+      expect(http.get).toHaveBeenCalledWith(accountId, {
+        url: `dfs/migrations/v2/list-apps`,
+      });
+    });
+  });
+
+  describe('beginMigration', () => {
+    it('should call http correctly', async () => {
+      const applicationId = 123456;
+      await beginMigration(accountId, applicationId);
+      expect(http.post).toHaveBeenCalledTimes(1);
+      expect(http.post).toHaveBeenCalledWith(accountId, {
+        url: `dfs/migrations/v2/migrations`,
+        data: {
+          applicationId,
+        },
+      });
+    });
+  });
+
+  describe('finishMigration', () => {
+    it('should call http correctly with stable platform version', async () => {
+      const migrationId = 123456;
+      const componentUids = { 'component-1': 'uid-1' };
+      const targetPlatformVersion = '2025.2';
+      await finishMigration(
+        accountId,
+        migrationId,
+        componentUids,
+        projectName,
+        targetPlatformVersion
+      );
+      expect(http.post).toHaveBeenCalledTimes(1);
+      expect(http.post).toHaveBeenCalledWith(accountId, {
+        url: `dfs/migrations/v2/migrations/migrate/v20252`,
+        data: {
+          migrationId,
+          projectName,
+          componentUids,
+        },
+      });
+    });
+
+    it('should call http correctly with unstable platform version', async () => {
+      const migrationId = 123456;
+      const componentUids = { 'component-1': 'uid-1' };
+      const targetPlatformVersion = 'unstable';
+      await finishMigration(
+        accountId,
+        migrationId,
+        componentUids,
+        projectName,
+        targetPlatformVersion
+      );
+      expect(http.post).toHaveBeenCalledTimes(1);
+      expect(http.post).toHaveBeenCalledWith(accountId, {
+        url: `dfs/migrations/v2/migrations/migrate/unstable`,
+        data: {
+          migrationId,
+          projectName,
+          componentUids,
+        },
+      });
+    });
+  });
+
+  describe('checkMigrationStatus', () => {
+    it('should call v1 api for stable platform version', async () => {
+      const migrationId = 123456;
+      const targetPlatformVersion = '2023.2';
+      await checkMigrationStatus(accountId, migrationId, targetPlatformVersion);
+      expect(http.get).toHaveBeenCalledTimes(1);
+      expect(http.get).toHaveBeenCalledWith(accountId, {
+        url: `dfs/migrations/v1/migrations/${migrationId}`,
+      });
+    });
+
+    it('should call v2 api for unstable platform version', async () => {
+      const migrationId = 123456;
+      const targetPlatformVersion = 'unstable';
+      await checkMigrationStatus(accountId, migrationId, targetPlatformVersion);
+      expect(http.get).toHaveBeenCalledTimes(1);
+      expect(http.get).toHaveBeenCalledWith(accountId, {
+        url: `dfs/migrations/v2/migrations/${migrationId}`,
+      });
+    });
+
+    it('should call v2 api for 2025.2 platform version', async () => {
+      const migrationId = 123456;
+      const targetPlatformVersion = '2025.2';
+      await checkMigrationStatus(accountId, migrationId, targetPlatformVersion);
+      expect(http.get).toHaveBeenCalledTimes(1);
+      expect(http.get).toHaveBeenCalledWith(accountId, {
+        url: `dfs/migrations/v2/migrations/${migrationId}`,
       });
     });
   });
