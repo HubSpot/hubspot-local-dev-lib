@@ -98,7 +98,7 @@ export function getConfigPath(
   return config_DEPRECATED.getConfigPath(path);
 }
 
-export function configFileExists(useHiddenConfig?: boolean) {
+export function configFileExists(useHiddenConfig?: boolean): boolean {
   return useHiddenConfig
     ? newConfigFileExists()
     : Boolean(config_DEPRECATED.getConfigPath());
@@ -237,6 +237,13 @@ export function getAccountType(
 export function getConfigDefaultAccount(): string | number | null | undefined {
   if (CLIConfiguration.isActive()) {
     return CLIConfiguration.getDefaultAccount();
+  }
+  return config_DEPRECATED.getConfigDefaultAccount();
+}
+
+export function getDisplayDefaultAccount(): string | number | null | undefined {
+  if (CLIConfiguration.isActive()) {
+    return CLIConfiguration.config?.defaultAccount;
   }
   return config_DEPRECATED.getConfigDefaultAccount();
 }
