@@ -406,6 +406,7 @@ export function checkMigrationStatus(
   id: number,
   targetPlatformVersion: string = PLATFORM_VERSIONS.v2023_2
 ): HubSpotPromise<PollAppResponse> {
+  // TODO: This is a WIP, we need to wait for the BE team to implement it for the new platform version
   if (
     targetPlatformVersion === PLATFORM_VERSIONS.unstable ||
     targetPlatformVersion === PLATFORM_VERSIONS.v2025_2
