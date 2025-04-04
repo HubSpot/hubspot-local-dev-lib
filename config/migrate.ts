@@ -18,7 +18,7 @@ import {
 } from './utils';
 import { ValueOf } from '../types/Utils';
 
-function getConfigAtPath(path: string): HubSpotConfig {
+export function getConfigAtPath(path: string): HubSpotConfig {
   const configFileSource = readConfigFile(path);
 
   return parseConfig(configFileSource);
