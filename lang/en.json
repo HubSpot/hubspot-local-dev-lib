@@ -302,6 +302,12 @@
         "errorHeader": "Error in {{ hsAccountFile }}",
         "readFileError": "Error reading account override file."
       }
+    },
+    "migrate": {
+      "errors": {
+        "writeConfig": "Unable to write global configuration file at {{ configPath }}.",
+        "noDeprecatedConfig": "No deprecated configuration file found. Skipping migration to global config."
+      }
     }
   },
   "models": {

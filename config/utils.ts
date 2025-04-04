@@ -1,16 +1,13 @@
-import path from 'path';
-import os from 'os';
 import fs from 'fs-extra';
 import yaml from 'js-yaml';
 import findup from 'findup-sync';
 
 import {
-  HUBSPOT_CONFIGURATION_FOLDER,
-  HUBSPOT_CONFIGURATION_FILE,
   HUBSPOT_ACCOUNT_TYPES,
   DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME,
   ENVIRONMENT_VARIABLES,
   ACCOUNT_IDENTIFIERS,
+  GLOBAL_CONFIG_PATH,
 } from '../constants/config';
 import {
   PERSONAL_ACCESS_KEY_AUTH_METHOD,
@@ -32,12 +29,9 @@ import { getCwd } from '../lib/path';
 import { CMS_PUBLISH_MODE } from '../constants/files';
 import { i18n } from '../utils/lang';
 import { ValueOf } from '../types/Utils';
+
 export function getGlobalConfigFilePath(): string {
-  return path.join(
-    os.homedir(),
-    HUBSPOT_CONFIGURATION_FOLDER,
-    HUBSPOT_CONFIGURATION_FILE
-  );
+  return GLOBAL_CONFIG_PATH;
 }
 
 export function getLocalConfigFilePath(): string | null {

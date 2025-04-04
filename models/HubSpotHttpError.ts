@@ -18,7 +18,7 @@ export class HubSpotHttpError<T = any> extends Error {
   public detailedMessage?: string;
   private divider = `\n- `;
   public cause: ErrorOptions['cause'];
-
+  public timeout?: number;
   constructor(
     message?: string,
     options?: ErrorOptions,
@@ -42,6 +42,7 @@ export class HubSpotHttpError<T = any> extends Error {
 
       this.code = code;
       this.method = config?.method;
+      this.timeout = config?.timeout;
 
       // Pull the request fields to the top level
       if (response) {
