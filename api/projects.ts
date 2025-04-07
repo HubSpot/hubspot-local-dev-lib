@@ -9,6 +9,9 @@ import {
   FetchPlatformVersionResponse,
   WarnLogsResponse,
   UploadIRResponse,
+  ListAppsResponse,
+  BeginMigrationResponse,
+  FinishMigrationResponse,
 } from '../types/Project';
 import { Build, FetchProjectBuildsResponse } from '../types/Build';
 import {
@@ -21,6 +24,7 @@ import {
   CloneAppResponse,
   PollAppResponse,
 } from '../types/Migration';
+import { PLATFORM_VERSIONS } from '../constants/projects';
 
 const PROJECTS_API_PATH = 'dfs/v1/projects';
 const DEVELOPER_FILE_SYSTEM_PATH = 'dfs/v1';
@@ -28,7 +32,8 @@ const PROJECTS_DEPLOY_API_PATH = 'dfs/deploy/v1';
 const PROJECTS_DEPLOY_API_PATH_V3 = 'dfs/deploy/v3';
 const PROJECTS_LOGS_API_PATH = 'dfs/logging/v1';
 const DEVELOPER_PROJECTS_API_PATH = 'developer/projects/v1';
-const MIGRATIONS_API_PATH = 'dfs/migrations/v1';
+const MIGRATIONS_API_PATH_V1 = 'dfs/migrations/v1';
+const MIGRATIONS_API_PATH_V2 = 'dfs/migrations/v2';
 
 const PROJECTS_V3_API_PATH = 'project-components-external/v3';
 
@@ -334,13 +339,54 @@ export function fetchDeployWarnLogs(
   });
 }
 
+export async function listAppsForMigration(
+  accountId: number
+): HubSpotPromise<ListAppsResponse> {
+  return http.get<ListAppsResponse>(accountId, {
+    url: `${MIGRATIONS_API_PATH_V2}/list-apps`,
+  });
+}
+
+export async function beginMigration(
+  accountId: number,
+  applicationId: number
+): HubSpotPromise<BeginMigrationResponse> {
+  return http.post(accountId, {
+    url: `${MIGRATIONS_API_PATH_V2}/migrations`,
+    data: {
+      applicationId,
+    },
+  });
+}
+
+export async function finishMigration(
+  portalId: number,
+  migrationId: number,
+  componentUids: Record<string, string>,
+  projectName: string,
+  targetPlatformVersion: string
+): HubSpotPromise<FinishMigrationResponse> {
+  const pathPlatformVersion =
+    targetPlatformVersion === PLATFORM_VERSIONS.unstable
+      ? targetPlatformVersion
+      : `v${targetPlatformVersion.replace('.', '')}`;
+  return http.post(portalId, {
+    url: `${MIGRATIONS_API_PATH_V2}/migrations/migrate/${pathPlatformVersion}`,
+    data: {
+      migrationId,
+      projectName,
+      componentUids,
+    },
+  });
+}
+
 export function migrateApp(
   accountId: number,
   appId: number,
   projectName: string
 ): HubSpotPromise<MigrateAppResponse> {
   return http.post<MigrateAppResponse>(accountId, {
-    url: `${MIGRATIONS_API_PATH}/migrations`,
+    url: `${MIGRATIONS_API_PATH_V1}/migrations`,
     data: {
       componentId: appId,
       componentType: 'PUBLIC_APP_ID',
@@ -351,10 +397,20 @@ export function migrateApp(
 
 export function checkMigrationStatus(
   accountId: number,
-  id: number
+  id: number,
+  targetPlatformVersion: string = PLATFORM_VERSIONS.v2023_2
 ): HubSpotPromise<PollAppResponse> {
+  if (
+    targetPlatformVersion === PLATFORM_VERSIONS.unstable ||
+    targetPlatformVersion === PLATFORM_VERSIONS.v2025_2
+  ) {
+    return http.get<PollAppResponse>(accountId, {
+      url: `${MIGRATIONS_API_PATH_V2}/migrations/${id}/status`,
+    });
+  }
+
   return http.get<PollAppResponse>(accountId, {
-    url: `${MIGRATIONS_API_PATH}/migrations/${id}`,
+    url: `${MIGRATIONS_API_PATH_V1}/migrations/${id}`,
   });
 }
 
@@ -363,7 +419,7 @@ export function cloneApp(
   appId: number
 ): HubSpotPromise<CloneAppResponse> {
   return http.post<CloneAppResponse>(accountId, {
-    url: `${MIGRATIONS_API_PATH}/exports`,
+    url: `${MIGRATIONS_API_PATH_V1}/exports`,
     data: {
       componentId: appId,
       componentType: 'PUBLIC_APP_ID',
@@ -376,7 +432,7 @@ export function checkCloneStatus(
   exportId: number
 ): HubSpotPromise<CloneAppResponse> {
   return http.get<CloneAppResponse>(accountId, {
-    url: `${MIGRATIONS_API_PATH}/exports/${exportId}/status`,
+    url: `${MIGRATIONS_API_PATH_V1}/exports/${exportId}/status`,
   });
 }
 
@@ -385,7 +441,7 @@ export function downloadClonedProject(
   exportId: number
 ): HubSpotPromise<Buffer> {
   return http.get<Buffer>(accountId, {
-    url: `${MIGRATIONS_API_PATH}/exports/${exportId}/download-as-clone`,
+    url: `${MIGRATIONS_API_PATH_V1}/exports/${exportId}/download-as-clone`,
     responseType: 'arraybuffer',
   });
 }
