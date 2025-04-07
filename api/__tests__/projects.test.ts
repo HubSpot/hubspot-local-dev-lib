@@ -724,7 +724,7 @@ describe('api/projects', () => {
       await checkMigrationStatus(accountId, migrationId, targetPlatformVersion);
       expect(http.get).toHaveBeenCalledTimes(1);
       expect(http.get).toHaveBeenCalledWith(accountId, {
-        url: `dfs/migrations/v2/migrations/${migrationId}`,
+        url: `dfs/migrations/v2/migrations/${migrationId}/status`,
       });
     });
 
@@ -734,7 +734,7 @@ describe('api/projects', () => {
       await checkMigrationStatus(accountId, migrationId, targetPlatformVersion);
       expect(http.get).toHaveBeenCalledTimes(1);
       expect(http.get).toHaveBeenCalledWith(accountId, {
-        url: `dfs/migrations/v2/migrations/${migrationId}`,
+        url: `dfs/migrations/v2/migrations/${migrationId}/status`,
       });
     });
   });
