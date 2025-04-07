@@ -24,7 +24,7 @@ import {
   CloneAppResponse,
   PollAppResponse,
 } from '../types/Migration';
-import { PLATFORM_VERSIONS } from '../constants/platformVersion';
+import { PLATFORM_VERSIONS } from '../constants/projects';
 
 const PROJECTS_API_PATH = 'dfs/v1/projects';
 const DEVELOPER_FILE_SYSTEM_PATH = 'dfs/v1';
@@ -338,12 +338,6 @@ export function fetchDeployWarnLogs(
     )}/deploys/${deployId}/combined/warn`,
   });
 }
-
-export const UNMIGRATABLE_REASONS = {
-  UP_TO_DATE: 'UP_TO_DATE',
-  IS_A_PRIVATE_APP: 'IS_A_PRIVATE_APP',
-  LISTED_IN_MARKETPLACE: 'LISTED_IN_MARKETPLACE',
-};
 
 export async function listAppsForMigration(
   accountId: number

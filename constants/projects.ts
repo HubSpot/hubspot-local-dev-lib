@@ -1,0 +1,12 @@
+export const UNMIGRATABLE_REASONS = {
+  UP_TO_DATE: 'UP_TO_DATE',
+  IS_A_PRIVATE_APP: 'IS_A_PRIVATE_APP',
+  LISTED_IN_MARKETPLACE: 'LISTED_IN_MARKETPLACE',
+};
+
+export const PLATFORM_VERSIONS = {
+  v2023_2: '2023.2',
+  v2025_1: '2025.1',
+  v2025_2: '2025.2',
+  unstable: 'unstable',
+};

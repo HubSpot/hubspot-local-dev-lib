@@ -1,7 +1,7 @@
 import { Build } from './Build';
 import { GithubSourceData } from './Github';
 import { ProjectLog } from './ProjectLog';
-import { UNMIGRATABLE_REASONS } from '../api/projects';
+import { UNMIGRATABLE_REASONS } from '../constants/projects';
 
 export type Project = {
   createdAt: number;
