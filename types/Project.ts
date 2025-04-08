@@ -79,6 +79,7 @@ interface BaseMigrationApp {
   appName: string;
   isMigratable: boolean;
   migrationComponents: ListAppsMigrationComponent[];
+  projectName?: string;
 }
 
 export interface MigratableApp extends BaseMigrationApp {
@@ -97,20 +98,16 @@ export interface ListAppsResponse {
   unmigratableApps: UnmigratableApp[];
 }
 
-export interface BeginMigrationResponse {
+export interface InitializeMigrationResponse {
   migrationId: number;
-  componentsRequiringUids: Record<
-    string,
-    { componentType: string; componentHint: string | null }
-  >;
 }
+
 export interface ListAppsMigrationComponent {
   id: string;
   componentType: string;
   isSupported: boolean;
 }
 
-export type FinishMigrationResponse = {
-  projectName: string;
-  buildId: number;
+export type ContinueMigrationResponse = {
+  migrationId: number;
 };

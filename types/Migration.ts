@@ -7,6 +7,9 @@ export const MIGRATION_STATUS = {
   PREPARING: 'PREPARING',
   PENDING: 'PENDING',
   SUCCESS: 'SUCCESS',
+  IN_PROGRESS: 'IN_PROGRESS',
+  ROLLING_BACK: 'ROLLING_BACK',
+  INPUT_REQUIRED: 'INPUT_REQUIRED',
 } as const;
 
 export type MigrateAppResponse = {
@@ -24,4 +27,44 @@ export type PollAppResponse = {
   project?: { id: number; name: string; buildId: number; deployId: number };
   error: ProjectStandardError | null;
   status: ValueOf<typeof MIGRATION_STATUS>;
+  componentsRequiringUids?: Record<
+    string,
+    { componentType: string; componentHint: string | null }
+  >;
 };
+
+export interface MigrationBaseStatus {
+  id: number;
+}
+
+export interface MigrationInProgress extends MigrationBaseStatus {
+  status: typeof MIGRATION_STATUS.IN_PROGRESS;
+}
+
+export interface MigrationInputRequired extends MigrationBaseStatus {
+  status: typeof MIGRATION_STATUS.INPUT_REQUIRED;
+  componentsRequiringUids: Record<
+    string,
+    {
+      externalId: string;
+      componentHints: { componentType: string; componentHint: string };
+    }
+  >;
+}
+
+export interface MigrationSuccess extends MigrationBaseStatus {
+  status: typeof MIGRATION_STATUS.SUCCESS;
+  buildId: number;
+}
+
+export interface MigrationFailed extends MigrationBaseStatus {
+  status: typeof MIGRATION_STATUS.FAILURE;
+  projectErrorsDetail?: string;
+  componentErrorDetails: Record<string, string>;
+}
+
+export type MigrationStatus =
+  | MigrationInProgress
+  | MigrationInputRequired
+  | MigrationSuccess
+  | MigrationFailed;

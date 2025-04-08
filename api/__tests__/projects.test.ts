@@ -31,8 +31,8 @@ import {
   uploadFileToBuild,
   uploadProject,
   listAppsForMigration,
-  beginMigration,
-  finishMigration,
+  initializeMigration,
+  continueMigration,
 } from '../projects';
 
 const createReadStreamMock = createReadStream as jest.MockedFunction<
@@ -647,10 +647,10 @@ describe('api/projects', () => {
     });
   });
 
-  describe('beginMigration', () => {
+  describe('migrationInitialization', () => {
     it('should call http correctly', async () => {
       const applicationId = 123456;
-      await beginMigration(accountId, applicationId);
+      await initializeMigration(accountId, applicationId);
       expect(http.post).toHaveBeenCalledTimes(1);
       expect(http.post).toHaveBeenCalledWith(accountId, {
         url: `dfs/migrations/v2/migrations`,
@@ -666,7 +666,7 @@ describe('api/projects', () => {
       const migrationId = 123456;
       const componentUids = { 'component-1': 'uid-1' };
       const targetPlatformVersion = '2025.2';
-      await finishMigration(
+      await continueMigration(
         accountId,
         migrationId,
         componentUids,
@@ -688,7 +688,7 @@ describe('api/projects', () => {
       const migrationId = 123456;
       const componentUids = { 'component-1': 'uid-1' };
       const targetPlatformVersion = 'unstable';
-      await finishMigration(
+      await continueMigration(
         accountId,
         migrationId,
         componentUids,

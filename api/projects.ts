@@ -10,8 +10,8 @@ import {
   WarnLogsResponse,
   UploadIRResponse,
   ListAppsResponse,
-  BeginMigrationResponse,
-  FinishMigrationResponse,
+  InitializeMigrationResponse,
+  ContinueMigrationResponse,
 } from '../types/Project';
 import { Build, FetchProjectBuildsResponse } from '../types/Build';
 import {
@@ -23,6 +23,7 @@ import {
   MigrateAppResponse,
   CloneAppResponse,
   PollAppResponse,
+  MigrationStatus,
 } from '../types/Migration';
 import { PLATFORM_VERSIONS } from '../constants/projects';
 
@@ -347,25 +348,27 @@ export async function listAppsForMigration(
   });
 }
 
-export async function beginMigration(
+export async function initializeMigration(
   accountId: number,
-  applicationId: number
-): HubSpotPromise<BeginMigrationResponse> {
+  applicationId: number,
+  platformVersion: string
+): HubSpotPromise<InitializeMigrationResponse> {
   return http.post(accountId, {
     url: `${MIGRATIONS_API_PATH_V2}/migrations`,
     data: {
       applicationId,
+      platformVersion,
     },
   });
 }
 
-export async function finishMigration(
+export async function continueMigration(
   portalId: number,
   migrationId: number,
   componentUids: Record<string, string>,
   projectName: string,
   targetPlatformVersion: string
-): HubSpotPromise<FinishMigrationResponse> {
+): HubSpotPromise<ContinueMigrationResponse> {
   const pathPlatformVersion =
     targetPlatformVersion === PLATFORM_VERSIONS.unstable
       ? targetPlatformVersion
@@ -395,20 +398,24 @@ export function migrateApp(
   });
 }
 
+export function checkMigrationStatusV2(
+  accountId: number,
+  id: number
+): HubSpotPromise<MigrationStatus> {
+  return http.get<MigrationStatus>(accountId, {
+    url: `${MIGRATIONS_API_PATH_V2}/migrations/${id}/status`,
+  });
+}
+
+/**
+ * @deprecated
+ * @param accountId
+ * @param id
+ */
 export function checkMigrationStatus(
   accountId: number,
-  id: number,
-  targetPlatformVersion: string = PLATFORM_VERSIONS.v2023_2
+  id: number
 ): HubSpotPromise<PollAppResponse> {
-  if (
-    targetPlatformVersion === PLATFORM_VERSIONS.unstable ||
-    targetPlatformVersion === PLATFORM_VERSIONS.v2025_2
-  ) {
-    return http.get<PollAppResponse>(accountId, {
-      url: `${MIGRATIONS_API_PATH_V2}/migrations/${id}/status`,
-    });
-  }
-
   return http.get<PollAppResponse>(accountId, {
     url: `${MIGRATIONS_API_PATH_V1}/migrations/${id}`,
   });
