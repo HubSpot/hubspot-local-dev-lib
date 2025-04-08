@@ -8,7 +8,6 @@ export const MIGRATION_STATUS = {
   PENDING: 'PENDING',
   SUCCESS: 'SUCCESS',
   IN_PROGRESS: 'IN_PROGRESS',
-  ROLLING_BACK: 'ROLLING_BACK',
   INPUT_REQUIRED: 'INPUT_REQUIRED',
 } as const;
 
@@ -46,8 +45,8 @@ export interface MigrationInputRequired extends MigrationBaseStatus {
   componentsRequiringUids: Record<
     string,
     {
-      externalId: string;
-      componentHints: { componentType: string; componentHint: string };
+      componentType: string;
+      componentHint: string;
     }
   >;
 }

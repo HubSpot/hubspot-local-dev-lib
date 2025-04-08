@@ -348,6 +348,14 @@ export async function listAppsForMigration(
   });
 }
 
+function mapPlatformVersionToEnum(platformVersion: string): string {
+  if (platformVersion === PLATFORM_VERSIONS.unstable) {
+    return PLATFORM_VERSIONS.unstable.toUpperCase();
+  }
+
+  return `V${platformVersion.replace('.', '_')}`;
+}
+
 export async function initializeMigration(
   accountId: number,
   applicationId: number,
@@ -357,7 +365,7 @@ export async function initializeMigration(
     url: `${MIGRATIONS_API_PATH_V2}/migrations`,
     data: {
       applicationId,
-      platformVersion,
+      platformVersion: mapPlatformVersionToEnum(platformVersion),
     },
   });
 }
@@ -366,15 +374,10 @@ export async function continueMigration(
   portalId: number,
   migrationId: number,
   componentUids: Record<string, string>,
-  projectName: string,
-  targetPlatformVersion: string
+  projectName: string
 ): HubSpotPromise<ContinueMigrationResponse> {
-  const pathPlatformVersion =
-    targetPlatformVersion === PLATFORM_VERSIONS.unstable
-      ? targetPlatformVersion
-      : `v${targetPlatformVersion.replace('.', '')}`;
   return http.post(portalId, {
-    url: `${MIGRATIONS_API_PATH_V2}/migrations/migrate/${pathPlatformVersion}`,
+    url: `${MIGRATIONS_API_PATH_V2}/migrations/continue`,
     data: {
       migrationId,
       projectName,
