@@ -26,10 +26,6 @@ export type PollAppResponse = {
   project?: { id: number; name: string; buildId: number; deployId: number };
   error: ProjectStandardError | null;
   status: ValueOf<typeof MIGRATION_STATUS>;
-  componentsRequiringUids?: Record<
-    string,
-    { componentType: string; componentHint: string | null }
-  >;
 };
 
 export interface MigrationBaseStatus {
