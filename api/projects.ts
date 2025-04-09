@@ -9,9 +9,6 @@ import {
   FetchPlatformVersionResponse,
   WarnLogsResponse,
   UploadIRResponse,
-  ListAppsResponse,
-  BeginMigrationResponse,
-  FinishMigrationResponse,
 } from '../types/Project';
 import { Build, FetchProjectBuildsResponse } from '../types/Build';
 import {
@@ -24,7 +21,6 @@ import {
   CloneAppResponse,
   PollAppResponse,
 } from '../types/Migration';
-import { PLATFORM_VERSIONS } from '../constants/projects';
 
 const PROJECTS_API_PATH = 'dfs/v1/projects';
 const DEVELOPER_FILE_SYSTEM_PATH = 'dfs/v1';
@@ -33,7 +29,6 @@ const PROJECTS_DEPLOY_API_PATH_V3 = 'dfs/deploy/v3';
 const PROJECTS_LOGS_API_PATH = 'dfs/logging/v1';
 const DEVELOPER_PROJECTS_API_PATH = 'developer/projects/v1';
 const MIGRATIONS_API_PATH_V1 = 'dfs/migrations/v1';
-const MIGRATIONS_API_PATH_V2 = 'dfs/migrations/v2';
 
 const PROJECTS_V3_API_PATH = 'project-components-external/v3';
 
@@ -339,47 +334,9 @@ export function fetchDeployWarnLogs(
   });
 }
 
-export async function listAppsForMigration(
-  accountId: number
-): HubSpotPromise<ListAppsResponse> {
-  return http.get<ListAppsResponse>(accountId, {
-    url: `${MIGRATIONS_API_PATH_V2}/list-apps`,
-  });
-}
-
-export async function beginMigration(
-  accountId: number,
-  applicationId: number
-): HubSpotPromise<BeginMigrationResponse> {
-  return http.post(accountId, {
-    url: `${MIGRATIONS_API_PATH_V2}/migrations`,
-    data: {
-      applicationId,
-    },
-  });
-}
-
-export async function finishMigration(
-  portalId: number,
-  migrationId: number,
-  componentUids: Record<string, string>,
-  projectName: string,
-  targetPlatformVersion: string
-): HubSpotPromise<FinishMigrationResponse> {
-  const pathPlatformVersion =
-    targetPlatformVersion === PLATFORM_VERSIONS.unstable
-      ? targetPlatformVersion
-      : `v${targetPlatformVersion.replace('.', '')}`;
-  return http.post(portalId, {
-    url: `${MIGRATIONS_API_PATH_V2}/migrations/migrate/${pathPlatformVersion}`,
-    data: {
-      migrationId,
-      projectName,
-      componentUids,
-    },
-  });
-}
-
+/**
+ * @deprecated
+ */
 export function migrateApp(
   accountId: number,
   appId: number,
@@ -395,25 +352,21 @@ export function migrateApp(
   });
 }
 
+/**
+ * @deprecated
+ */
 export function checkMigrationStatus(
   accountId: number,
-  id: number,
-  targetPlatformVersion: string = PLATFORM_VERSIONS.v2023_2
+  id: number
 ): HubSpotPromise<PollAppResponse> {
-  if (
-    targetPlatformVersion === PLATFORM_VERSIONS.unstable ||
-    targetPlatformVersion === PLATFORM_VERSIONS.v2025_2
-  ) {
-    return http.get<PollAppResponse>(accountId, {
-      url: `${MIGRATIONS_API_PATH_V2}/migrations/${id}/status`,
-    });
-  }
-
   return http.get<PollAppResponse>(accountId, {
     url: `${MIGRATIONS_API_PATH_V1}/migrations/${id}`,
   });
 }
 
+/**
+ * @deprecated
+ */
 export function cloneApp(
   accountId: number,
   appId: number
@@ -427,6 +380,9 @@ export function cloneApp(
   });
 }
 
+/**
+ * @deprecated
+ */
 export function checkCloneStatus(
   accountId: number,
   exportId: number
@@ -436,6 +392,9 @@ export function checkCloneStatus(
   });
 }
 
+/**
+ * @deprecated
+ */
 export function downloadClonedProject(
   accountId: number,
   exportId: number
