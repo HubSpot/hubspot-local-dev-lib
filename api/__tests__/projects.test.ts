@@ -30,10 +30,6 @@ import {
   queueBuild,
   uploadFileToBuild,
   uploadProject,
-  listAppsForMigration,
-  initializeMigration,
-  continueMigration,
-  checkMigrationStatusV2,
 } from '../projects';
 
 const createReadStreamMock = createReadStream as jest.MockedFunction<
@@ -638,74 +634,6 @@ describe('api/projects', () => {
     });
   });
 
-  describe('listAppsForMigration', () => {
-    it('should call http correctly', async () => {
-      await listAppsForMigration(accountId);
-      expect(http.get).toHaveBeenCalledTimes(1);
-      expect(http.get).toHaveBeenCalledWith(accountId, {
-        url: `dfs/migrations/v2/list-apps`,
-      });
-    });
-  });
-
-  describe('migrationInitialization', () => {
-    it('should call http correctly', async () => {
-      const applicationId = 123456;
-      const platformVersion = 'unstable';
-      await initializeMigration(accountId, applicationId, platformVersion);
-      expect(http.post).toHaveBeenCalledTimes(1);
-      expect(http.post).toHaveBeenCalledWith(accountId, {
-        url: `dfs/migrations/v2/migrations`,
-        data: {
-          applicationId,
-          platformVersion: platformVersion.toUpperCase(),
-        },
-      });
-    });
-  });
-
-  describe('finishMigration', () => {
-    it('should call http correctly with stable platform version', async () => {
-      const migrationId = 123456;
-      const componentUids = { 'component-1': 'uid-1' };
-      await continueMigration(
-        accountId,
-        migrationId,
-        componentUids,
-        projectName
-      );
-      expect(http.post).toHaveBeenCalledTimes(1);
-      expect(http.post).toHaveBeenCalledWith(accountId, {
-        url: `dfs/migrations/v2/migrations/continue`,
-        data: {
-          migrationId,
-          projectName,
-          componentUids,
-        },
-      });
-    });
-
-    it('should call http correctly with unstable platform version', async () => {
-      const migrationId = 123456;
-      const componentUids = { 'component-1': 'uid-1' };
-      await continueMigration(
-        accountId,
-        migrationId,
-        componentUids,
-        projectName
-      );
-      expect(http.post).toHaveBeenCalledTimes(1);
-      expect(http.post).toHaveBeenCalledWith(accountId, {
-        url: `dfs/migrations/v2/migrations/continue`,
-        data: {
-          migrationId,
-          projectName,
-          componentUids,
-        },
-      });
-    });
-  });
-
   describe('checkMigrationStatus', () => {
     it('should call v1 api for stable platform version', async () => {
       const migrationId = 123456;
@@ -713,26 +641,6 @@ describe('api/projects', () => {
       expect(http.get).toHaveBeenCalledTimes(1);
       expect(http.get).toHaveBeenCalledWith(accountId, {
         url: `dfs/migrations/v1/migrations/${migrationId}`,
-      });
-    });
-  });
-
-  describe('checkMigrationStatusV2', () => {
-    it('should call v2 api for unstable platform version', async () => {
-      const migrationId = 123456;
-      await checkMigrationStatusV2(accountId, migrationId);
-      expect(http.get).toHaveBeenCalledTimes(1);
-      expect(http.get).toHaveBeenCalledWith(accountId, {
-        url: `dfs/migrations/v2/migrations/${migrationId}/status`,
-      });
-    });
-
-    it('should call v2 api for 2025.2 platform version', async () => {
-      const migrationId = 123456;
-      await checkMigrationStatusV2(accountId, migrationId);
-      expect(http.get).toHaveBeenCalledTimes(1);
-      expect(http.get).toHaveBeenCalledWith(accountId, {
-        url: `dfs/migrations/v2/migrations/${migrationId}/status`,
       });
     });
   });

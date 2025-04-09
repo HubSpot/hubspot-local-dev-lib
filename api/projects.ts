@@ -9,9 +9,6 @@ import {
   FetchPlatformVersionResponse,
   WarnLogsResponse,
   UploadIRResponse,
-  ListAppsResponse,
-  InitializeMigrationResponse,
-  ContinueMigrationResponse,
 } from '../types/Project';
 import { Build, FetchProjectBuildsResponse } from '../types/Build';
 import {
@@ -23,9 +20,7 @@ import {
   MigrateAppResponse,
   CloneAppResponse,
   PollAppResponse,
-  MigrationStatus,
 } from '../types/Migration';
-import { PLATFORM_VERSIONS } from '../constants/projects';
 
 const PROJECTS_API_PATH = 'dfs/v1/projects';
 const DEVELOPER_FILE_SYSTEM_PATH = 'dfs/v1';
@@ -34,7 +29,6 @@ const PROJECTS_DEPLOY_API_PATH_V3 = 'dfs/deploy/v3';
 const PROJECTS_LOGS_API_PATH = 'dfs/logging/v1';
 const DEVELOPER_PROJECTS_API_PATH = 'developer/projects/v1';
 const MIGRATIONS_API_PATH_V1 = 'dfs/migrations/v1';
-const MIGRATIONS_API_PATH_V2 = 'dfs/migrations/v2';
 
 const PROJECTS_V3_API_PATH = 'project-components-external/v3';
 
@@ -337,61 +331,6 @@ export function fetchDeployWarnLogs(
     url: `${PROJECTS_LOGS_API_PATH}/logs/projects/${encodeURIComponent(
       projectName
     )}/deploys/${deployId}/combined/warn`,
-  });
-}
-
-export async function listAppsForMigration(
-  accountId: number
-): HubSpotPromise<ListAppsResponse> {
-  return http.get<ListAppsResponse>(accountId, {
-    url: `${MIGRATIONS_API_PATH_V2}/list-apps`,
-  });
-}
-
-function mapPlatformVersionToEnum(platformVersion: string): string {
-  if (platformVersion === PLATFORM_VERSIONS.unstable) {
-    return PLATFORM_VERSIONS.unstable.toUpperCase();
-  }
-
-  return `V${platformVersion.replace('.', '_')}`;
-}
-
-export async function initializeMigration(
-  accountId: number,
-  applicationId: number,
-  platformVersion: string
-): HubSpotPromise<InitializeMigrationResponse> {
-  return http.post(accountId, {
-    url: `${MIGRATIONS_API_PATH_V2}/migrations`,
-    data: {
-      applicationId,
-      platformVersion: mapPlatformVersionToEnum(platformVersion),
-    },
-  });
-}
-
-export async function continueMigration(
-  portalId: number,
-  migrationId: number,
-  componentUids: Record<string, string>,
-  projectName: string
-): HubSpotPromise<ContinueMigrationResponse> {
-  return http.post(portalId, {
-    url: `${MIGRATIONS_API_PATH_V2}/migrations/continue`,
-    data: {
-      migrationId,
-      projectName,
-      componentUids,
-    },
-  });
-}
-
-export function checkMigrationStatusV2(
-  accountId: number,
-  id: number
-): HubSpotPromise<MigrationStatus> {
-  return http.get<MigrationStatus>(accountId, {
-    url: `${MIGRATIONS_API_PATH_V2}/migrations/${id}/status`,
   });
 }
 

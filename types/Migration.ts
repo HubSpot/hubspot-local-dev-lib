@@ -27,39 +27,3 @@ export type PollAppResponse = {
   error: ProjectStandardError | null;
   status: ValueOf<typeof MIGRATION_STATUS>;
 };
-
-export interface MigrationBaseStatus {
-  id: number;
-}
-
-export interface MigrationInProgress extends MigrationBaseStatus {
-  status: typeof MIGRATION_STATUS.IN_PROGRESS;
-}
-
-export interface MigrationInputRequired extends MigrationBaseStatus {
-  status: typeof MIGRATION_STATUS.INPUT_REQUIRED;
-  componentsRequiringUids: Record<
-    string,
-    {
-      componentType: string;
-      componentHint: string;
-    }
-  >;
-}
-
-export interface MigrationSuccess extends MigrationBaseStatus {
-  status: typeof MIGRATION_STATUS.SUCCESS;
-  buildId: number;
-}
-
-export interface MigrationFailed extends MigrationBaseStatus {
-  status: typeof MIGRATION_STATUS.FAILURE;
-  projectErrorsDetail?: string;
-  componentErrorDetails: Record<string, string>;
-}
-
-export type MigrationStatus =
-  | MigrationInProgress
-  | MigrationInputRequired
-  | MigrationSuccess
-  | MigrationFailed;
