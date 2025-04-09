@@ -130,20 +130,20 @@ export const SandboxStatus = {
 export type SandboxVersion = keyof typeof SandboxVersioning;
 export type V2SandboxStatus = keyof typeof SandboxStatus;
 export type V2Sandbox = {
-  sandboxHubId: number | null;
-  parentHubId: number | null;
-  name: string | null;
+  sandboxHubId: number;
+  parentHubId: number;
+  name: string;
   version: SandboxVersion;
-  type: string | null;
+  type: string;
   status: V2SandboxStatus;
-  createdAt: string | null;
+  createdAt: string;
   createdByUser: User;
-  currentUserHasAccess: boolean | null;
-  currentUserHasSuperAdminAccess: boolean | null;
-  superAdminsInSandbox: number | null;
-  requestAccessFrom: User | null;
-  updatedAt: string | null;
-  updatedByUser: User | null;
+  currentUserHasAccess?: boolean;
+  currentUserHasSuperAdminAccess?: boolean;
+  superAdminsInSandbox?: number;
+  requestAccessFrom?: User | null;
+  updatedAt?: string;
+  updatedByUser?: User | null;
 };
 
 export type SandboxResponse = {

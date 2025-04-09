@@ -84,5 +84,8 @@ export function getPersonalAccessKey(
 ): HubSpotPromise<PersonalAccessKey> {
   return http.post<PersonalAccessKey>(accountId, {
     url: `${SANDBOX_API_PATH_V2}/sandboxes/${sandboxId}/personal-access-key`,
+    headers: {
+      'Content-Type': 'application/json',
+    },
   });
 }
