@@ -386,6 +386,18 @@ export async function continueMigration(
   });
 }
 
+export function checkMigrationStatusV2(
+  accountId: number,
+  id: number
+): HubSpotPromise<MigrationStatus> {
+  return http.get<MigrationStatus>(accountId, {
+    url: `${MIGRATIONS_API_PATH_V2}/migrations/${id}/status`,
+  });
+}
+
+/**
+ * @deprecated
+ */
 export function migrateApp(
   accountId: number,
   appId: number,
@@ -401,19 +413,8 @@ export function migrateApp(
   });
 }
 
-export function checkMigrationStatusV2(
-  accountId: number,
-  id: number
-): HubSpotPromise<MigrationStatus> {
-  return http.get<MigrationStatus>(accountId, {
-    url: `${MIGRATIONS_API_PATH_V2}/migrations/${id}/status`,
-  });
-}
-
 /**
  * @deprecated
- * @param accountId
- * @param id
  */
 export function checkMigrationStatus(
   accountId: number,
@@ -424,6 +425,9 @@ export function checkMigrationStatus(
   });
 }
 
+/**
+ * @deprecated
+ */
 export function cloneApp(
   accountId: number,
   appId: number
@@ -437,6 +441,9 @@ export function cloneApp(
   });
 }
 
+/**
+ * @deprecated
+ */
 export function checkCloneStatus(
   accountId: number,
   exportId: number
@@ -446,6 +453,9 @@ export function checkCloneStatus(
   });
 }
 
+/**
+ * @deprecated
+ */
 export function downloadClonedProject(
   accountId: number,
   exportId: number
