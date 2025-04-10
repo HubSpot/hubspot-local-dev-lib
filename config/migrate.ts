@@ -55,6 +55,13 @@ export function mergeConfigProperties(
     toConfig.allowUsageTracking = fromConfig.allowUsageTracking;
     toConfig.defaultAccount = fromConfig.defaultAccount;
   } else {
+    toConfig.defaultCmsPublishMode ||= fromConfig.defaultCmsPublishMode;
+    toConfig.httpTimeout ||= fromConfig.httpTimeout;
+    toConfig.env ||= fromConfig.env;
+    toConfig.httpUseLocalhost ||= fromConfig.httpUseLocalhost;
+    toConfig.allowUsageTracking ||= fromConfig.allowUsageTracking;
+    toConfig.defaultAccount ||= fromConfig.defaultAccount;
+
     const propertiesToCheck = [
       DEFAULT_CMS_PUBLISH_MODE,
       HTTP_TIMEOUT,
@@ -65,7 +72,7 @@ export function mergeConfigProperties(
     ] as const;
 
     propertiesToCheck.forEach(prop => {
-      if (toConfig[prop] !== fromConfig[prop]) {
+      if (toConfig[prop] && toConfig[prop] !== fromConfig[prop]) {
         conflicts.push({
           property: prop,
           oldValue: fromConfig[prop],
