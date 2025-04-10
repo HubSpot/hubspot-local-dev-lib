@@ -58,8 +58,14 @@ export function mergeConfigProperties(
     toConfig.defaultCmsPublishMode ||= fromConfig.defaultCmsPublishMode;
     toConfig.httpTimeout ||= fromConfig.httpTimeout;
     toConfig.env ||= fromConfig.env;
-    toConfig.httpUseLocalhost ||= fromConfig.httpUseLocalhost;
-    toConfig.allowUsageTracking ||= fromConfig.allowUsageTracking;
+    toConfig.httpUseLocalhost =
+      toConfig.httpUseLocalhost === undefined
+        ? fromConfig.httpUseLocalhost
+        : toConfig.httpUseLocalhost;
+    toConfig.allowUsageTracking =
+      toConfig.allowUsageTracking === undefined
+        ? fromConfig.allowUsageTracking
+        : toConfig.allowUsageTracking;
     toConfig.defaultAccount ||= fromConfig.defaultAccount;
 
     const propertiesToCheck = [
@@ -72,7 +78,7 @@ export function mergeConfigProperties(
     ] as const;
 
     propertiesToCheck.forEach(prop => {
-      if (toConfig[prop] && toConfig[prop] !== fromConfig[prop]) {
+      if (toConfig[prop] !== undefined && toConfig[prop] !== fromConfig[prop]) {
         conflicts.push({
           property: prop,
           oldValue: fromConfig[prop],
