@@ -10,7 +10,6 @@ describe('lib/environment', () => {
     });
 
     it('should return prod when the provided env is not equal to QA', () => {
-      // @ts-expect-error purposefully causing an error
       expect(getValidEnv('notQA')).toEqual(PROD);
     });
 
