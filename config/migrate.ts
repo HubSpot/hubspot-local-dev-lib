@@ -130,8 +130,12 @@ export function mergeConfigProperties(
   const conflicts: Array<ConflictProperty> = [];
 
   propertiesToCheck.forEach(prop => {
-    if (prop in globalConfig && prop in deprecatedConfig) {
-      if (force || globalConfig[prop] === deprecatedConfig[prop]) {
+    if (prop in deprecatedConfig) {
+      if (
+        force ||
+        !(prop in globalConfig) ||
+        globalConfig[prop] === deprecatedConfig[prop]
+      ) {
         // @ts-expect-error Cannot reconcile CLIConfig_NEW and CLIConfig_DEPRECATED types
         globalConfig[prop] = deprecatedConfig[prop];
       } else {
