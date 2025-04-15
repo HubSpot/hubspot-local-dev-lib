@@ -16,11 +16,30 @@ import { HubSpotHttpError } from '../models/HubSpotHttpError';
 
 const i18nKey = 'http.index';
 
-axios.interceptors.response.use(undefined, error => {
-  // Wrap all axios errors in our own Error class.  Attach the error
-  // as the cause for the new error, so we maintain the stack trace
-  return Promise.reject(new HubSpotHttpError(error.message, { cause: error }));
-});
+axios.interceptors.response.use(
+  (response: AxiosResponse) => {
+    try {
+      // if (process.env.HUBSPOT_NETWORK_LOGGING) {
+      logger.debug({
+        url: response.config.url,
+        data: response.data,
+        status: response.status,
+      });
+      // }
+    } catch (error) {
+      // Ignore any errors that occur while logging the response
+    }
+
+    return response;
+  },
+  error => {
+    // Wrap all axios errors in our own Error class.  Attach the error
+    // as the cause for the new error, so we maintain the stack trace
+    return Promise.reject(
+      new HubSpotHttpError(error.message, { cause: error })
+    );
+  }
+);
 
 export function addUserAgentHeader(key: string, value: string) {
   USER_AGENTS[key] = value;
