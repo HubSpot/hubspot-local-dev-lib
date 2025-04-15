@@ -51,7 +51,11 @@ export class HubSpotHttpError<T = any> extends Error {
         this.status = response.status;
         this.statusText = response.statusText;
         this.data = response.data;
-        if (response.data && 'correlationId' in response.data) {
+        if (
+          response.data &&
+          typeof response.data === 'object' &&
+          'correlationId' in response.data
+        ) {
           this.correlationId = response.data.correlationId;
         }
         this.headers = response.headers;
