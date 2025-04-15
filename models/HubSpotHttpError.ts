@@ -19,6 +19,8 @@ export class HubSpotHttpError<T = any> extends Error {
   private divider = `\n- `;
   public cause: ErrorOptions['cause'];
   public timeout?: number;
+  public correlationId?: string;
+
   constructor(
     message?: string,
     options?: ErrorOptions,
@@ -49,6 +51,9 @@ export class HubSpotHttpError<T = any> extends Error {
         this.status = response.status;
         this.statusText = response.statusText;
         this.data = response.data;
+        if (response.data && 'correlationId' in response.data) {
+          this.correlationId = response.data.correlationId;
+        }
         this.headers = response.headers;
         this.parseValidationErrors(response.data);
       }
@@ -92,6 +97,9 @@ export class HubSpotHttpError<T = any> extends Error {
     }
     if (this.context) {
       messages.push(`context: ${JSON.stringify(this.context, undefined, 2)}`);
+    }
+    if (this.correlationId) {
+      messages.push(`correlationId: ${this.correlationId}`);
     }
     if (this.derivedContext) {
       messages.push(
