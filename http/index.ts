@@ -1,7 +1,12 @@
 import path from 'path';
 import fs from 'fs-extra';
 import contentDisposition from 'content-disposition';
-import axios, { AxiosRequestConfig, AxiosResponse, AxiosPromise } from 'axios';
+import axios, {
+  AxiosRequestConfig,
+  AxiosResponse,
+  AxiosPromise,
+  isAxiosError,
+} from 'axios';
 
 import { getAccountConfig } from '../config';
 import { USER_AGENTS, getAxiosConfig } from './getAxiosConfig';
@@ -16,23 +21,34 @@ import { HubSpotHttpError } from '../models/HubSpotHttpError';
 
 const i18nKey = 'http.index';
 
-axios.interceptors.response.use(
-  (response: AxiosResponse) => {
-    try {
-      // if (process.env.HUBSPOT_NETWORK_LOGGING) {
+function logRequest(response: AxiosResponse) {
+  try {
+    if (process.env.HUBSPOT_NETWORK_LOGGING) {
       logger.debug({
         url: response.config.url,
         data: response.data,
         status: response.status,
       });
-      // }
-    } catch (error) {
-      // Ignore any errors that occur while logging the response
     }
+  } catch (error) {
+    // Ignore any errors that occur while logging the response
+  }
+}
 
+axios.interceptors.response.use(
+  (response: AxiosResponse) => {
+    logRequest(response);
     return response;
   },
   error => {
+    try {
+      if (isAxiosError(error) && error.response) {
+        logRequest(error.response);
+      }
+    } catch (e) {
+      // Ignore any errors that occur while logging the response
+    }
+
     // Wrap all axios errors in our own Error class.  Attach the error
     // as the cause for the new error, so we maintain the stack trace
     return Promise.reject(
