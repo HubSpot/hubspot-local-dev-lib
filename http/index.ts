@@ -18,12 +18,17 @@ import { HttpOptions, HubSpotPromise } from '../types/Http';
 import { logger } from '../lib/logger';
 import { i18n } from '../utils/lang';
 import { HubSpotHttpError } from '../models/HubSpotHttpError';
+import { LOCALDEVAUTH_ACCESS_TOKEN_PATH } from '../api/localDevAuth';
 
 const i18nKey = 'http.index';
 
 function logRequest(response: AxiosResponse) {
   try {
     if (process.env.HUBSPOT_NETWORK_LOGGING) {
+      if (response.config.url === LOCALDEVAUTH_ACCESS_TOKEN_PATH) {
+        // Don't log access tokens
+        return;
+      }
       logger.debug({
         url: response.config.url,
         data: response.data,
