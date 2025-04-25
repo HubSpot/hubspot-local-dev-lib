@@ -19,6 +19,7 @@ import { logger } from '../lib/logger';
 import { i18n } from '../utils/lang';
 import { HubSpotHttpError } from '../models/HubSpotHttpError';
 import { LOCALDEVAUTH_ACCESS_TOKEN_PATH } from '../api/localDevAuth';
+import * as util from 'util';
 
 const i18nKey = 'http.index';
 
@@ -29,11 +30,20 @@ function logRequest(response: AxiosResponse) {
         // Don't log access tokens
         return;
       }
-      logger.debug({
-        url: response.config.url,
-        data: response.data,
-        status: response.status,
-      });
+      logger.debug(
+        util.inspect(
+          {
+            method: response.config.method,
+            baseURL: response.config.baseURL,
+            url: response.config.url,
+            data: response.data,
+            status: response.status,
+          },
+          false,
+          null,
+          true
+        )
+      );
     }
   } catch (error) {
     // Ignore any errors that occur while logging the response
