@@ -1,6 +1,6 @@
 {
   "name": "@hubspot/local-dev-lib",
-  "version": "3.5.2",
+  "version": "3.5.4",
   "description": "Provides library functionality for HubSpot local development tooling, including the HubSpot CLI",
   "repository": {
     "type": "git",
@@ -61,7 +61,7 @@
   },
   "dependencies": {
     "address": "2.0.2",
-    "axios": "1.8.3",
+    "axios": "1.8.4",
     "chalk": "2.4.2",
     "chokidar": "3.6.0",
     "content-disposition": "0.5.4",
