@@ -204,12 +204,10 @@ class _CLIConfiguration {
       return null;
     }
 
-    if (typeof nameOrIdToCheck === 'number') {
-      accountId = nameOrIdToCheck;
-    } else if (/^\d+$/.test(nameOrIdToCheck)) {
-      accountId = parseInt(nameOrIdToCheck, 10);
-    } else {
+    if (typeof nameOrIdToCheck === 'string') {
       name = nameOrIdToCheck;
+    } else if (typeof nameOrIdToCheck === 'number') {
+      accountId = nameOrIdToCheck;
     }
 
     if (name) {

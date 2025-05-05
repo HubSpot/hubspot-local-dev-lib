@@ -408,12 +408,10 @@ export function getAccountId(nameOrId?: string | number): number | undefined {
   function setNameOrAccountFromSuppliedValue(
     suppliedValue: string | number
   ): void {
-    if (typeof suppliedValue === 'number') {
-      accountId = suppliedValue;
-    } else if (/^\d+$/.test(suppliedValue)) {
-      accountId = parseInt(suppliedValue, 10);
-    } else {
+    if (typeof suppliedValue === 'string') {
       name = suppliedValue;
+    } else if (typeof suppliedValue === 'number') {
+      accountId = suppliedValue;
     }
   }
 
