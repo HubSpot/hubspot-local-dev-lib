@@ -59,9 +59,7 @@ describe('lib/text', () => {
     });
 
     it('handles null or undefined input by returning empty string', () => {
-      // @ts-expect-error - Testing null input even though type is string
       expect(toKebabCase(null)).toBe('');
-      // @ts-expect-error - Testing undefined input even though type is string
       expect(toKebabCase(undefined)).toBe('');
     });
   });
