@@ -138,7 +138,7 @@ export class HubSpotHttpError<T = any> extends Error {
 
   private parseValidationErrors(
     responseData: {
-      errors?: Array<ValidationError>;
+      errors?: Array<ValidationError> | string;
       message?: string;
     } = { errors: [], message: '' }
   ): void {
@@ -154,7 +154,7 @@ export class HubSpotHttpError<T = any> extends Error {
       errorMessages.push(message);
     }
 
-    if (errors) {
+    if (Array.isArray(errors)) {
       const specificErrors = errors.map(error => {
         let errorMessage = error.message;
 
@@ -170,6 +170,8 @@ export class HubSpotHttpError<T = any> extends Error {
         return errorMessage;
       });
       errorMessages.push(...specificErrors);
+    } else if (typeof errors === 'string') {
+      errorMessages.push(errors);
     }
 
     this.validationErrors = errorMessages;
