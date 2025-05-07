@@ -146,7 +146,7 @@ export class HubSpotHttpError<T = any> extends Error {
       return;
     }
 
-    const errorMessages = [];
+    const errorMessages: string[] = [];
 
     const { errors, message } = responseData;
 
