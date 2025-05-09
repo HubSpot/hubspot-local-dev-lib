@@ -1,5 +1,6 @@
 import { http } from '../http';
 import { HubSpotPromise } from '../types/Http';
+import { FetchDevSecretsResponse } from '../types/DevSecrets';
 
 const DEV_APP_SECRETS_API_PATH = 'dev-secrets/management/v3/secrets/app/';
 
@@ -18,20 +19,14 @@ export function addAppSecret(
   });
 }
 
-// export function updateAppSecret(
-//   accountId: number,
-//   appId: string,
-//   key: string,
-//   value: string
-// ): HubSpotPromise<void> {
-//   return http.put(accountId, {
-//     url: `${DEV_APP_SECRETS_API_PATH}${appId}/upsert`,
-//     data: {
-//       key,
-//       value,
-//     },
-//   });
-// }
+export function updateAppSecret(
+  accountId: number,
+  appId: number,
+  key: string,
+  value: string
+): HubSpotPromise<void> {
+  return addAppSecret(accountId, appId, key, value);
+}
 
 export function deleteAppSecret(
   accountId: number,
@@ -46,11 +41,11 @@ export function deleteAppSecret(
   });
 }
 
-// export function fetchAppSecrets(
-//   accountId: number,
-//   appId: string
-// ): HubSpotPromise<FetchSecretsResponse> {
-//   return http.get<FetchSecretsResponse>(accountId, {
-//     url: `${DEV_APP_SECRETS_API_PATH}${appId}`,
-//   });
-// }
+export function fetchAppSecrets(
+  accountId: number,
+  appId: number
+): HubSpotPromise<FetchDevSecretsResponse> {
+  return http.get<FetchDevSecretsResponse>(accountId, {
+    url: `${DEV_APP_SECRETS_API_PATH}${appId}`,
+  });
+}
