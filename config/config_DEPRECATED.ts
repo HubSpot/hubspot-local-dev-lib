@@ -410,6 +410,9 @@ export function getAccountId(nameOrId?: string | number): number | undefined {
   ): void {
     if (typeof suppliedValue === 'string') {
       name = suppliedValue;
+      if (/^\d+$/.test(suppliedValue)) {
+        accountId = parseInt(suppliedValue, 10);
+      }
     } else if (typeof suppliedValue === 'number') {
       accountId = suppliedValue;
     }
@@ -428,7 +431,8 @@ export function getAccountId(nameOrId?: string | number): number | undefined {
   const accounts = getConfigAccounts(config);
   if (name && accounts) {
     account = accounts.find(p => p.name === name);
-  } else if (accountId && accounts) {
+  }
+  if (accountId && accounts && !account) {
     account = accounts.find(p => accountId === p.portalId);
   }
 

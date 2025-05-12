@@ -206,12 +206,19 @@ class _CLIConfiguration {
 
     if (typeof nameOrIdToCheck === 'string') {
       name = nameOrIdToCheck;
+      if (/^\d+$/.test(nameOrIdToCheck)) {
+        accountId = parseInt(nameOrIdToCheck, 10);
+      }
     } else if (typeof nameOrIdToCheck === 'number') {
       accountId = nameOrIdToCheck;
     }
 
     if (name) {
-      return this.config.accounts.find(a => a.name === name) || null;
+      return (
+        this.config.accounts.find(a => a.name === name) ||
+        this.config.accounts.find(a => accountId === a.accountId) ||
+        null
+      );
     } else if (accountId) {
       return this.config.accounts.find(a => accountId === a.accountId) || null;
     }
