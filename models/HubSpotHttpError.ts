@@ -146,7 +146,7 @@ export class HubSpotHttpError<T = any> extends Error {
       return;
     }
 
-    const errorMessages = [];
+    const errorMessages: string[] = [];
 
     const { errors, message } = responseData;
 
@@ -154,10 +154,9 @@ export class HubSpotHttpError<T = any> extends Error {
       errorMessages.push(message);
     }
 
-    if (errors) {
+    if (Array.isArray(errors)) {
       const specificErrors = errors.map(error => {
         let errorMessage = error.message;
-
         if (error.context?.requiredScopes) {
           // Sometimes the scopes come back with duplicates
           const scopes = new Set<string>(error.context.requiredScopes);
