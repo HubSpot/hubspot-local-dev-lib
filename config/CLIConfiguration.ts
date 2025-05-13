@@ -213,17 +213,17 @@ class _CLIConfiguration {
       accountId = nameOrIdToCheck;
     }
 
+    let account = null;
     if (name) {
-      return (
-        this.config.accounts.find(a => a.name === name) ||
-        this.config.accounts.find(a => accountId === a.accountId) ||
-        null
-      );
-    } else if (accountId) {
-      return this.config.accounts.find(a => accountId === a.accountId) || null;
+      account = this.config.accounts.find(a => a.name === name) || null;
     }
 
-    return null;
+    if (accountId && !account) {
+      account =
+        this.config.accounts.find(a => accountId === a.accountId) || null;
+    }
+
+    return account;
   }
 
   isConfigFlagEnabled(
