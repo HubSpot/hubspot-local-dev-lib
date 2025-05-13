@@ -656,6 +656,18 @@ class _CLIConfiguration {
   /**
    * @throws {Error}
    */
+  updateAllowAutoUpdates(enabled: boolean): CLIConfig_NEW | null {
+    if (!this.config) {
+      throw new Error(i18n(`${i18nKey}.errors.noConfigLoaded`));
+    }
+
+    this.config.allowAutoUpdates = enabled;
+    return this.write();
+  }
+
+  /**
+   * @throws {Error}
+   */
   updateAllowUsageTracking(isEnabled: boolean): CLIConfig_NEW | null {
     if (!this.config) {
       throw new Error(i18n(`${i18nKey}.errors.noConfigLoaded`));

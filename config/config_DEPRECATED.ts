@@ -634,6 +634,17 @@ export function updateHttpTimeout(timeout: string): void {
 /**
  * @throws {Error}
  */
+export function updateAllowAutoUpdates(enabled: boolean): void {
+  const config = getAndLoadConfigIfNeeded();
+  config.allowAutoUpdates = enabled;
+
+  setDefaultConfigPathIfUnset();
+  writeConfig();
+}
+
+/**
+ * @throws {Error}
+ */
 export function updateAllowUsageTracking(isEnabled: boolean): void {
   if (typeof isEnabled !== 'boolean') {
     throw new Error(

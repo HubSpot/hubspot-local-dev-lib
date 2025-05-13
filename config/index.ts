@@ -187,6 +187,14 @@ export function updateHttpTimeout(timeout: string): void {
   }
 }
 
+export function updateAllowAutoUpdates(enabled: boolean): void {
+  if (CLIConfiguration.isActive()) {
+    CLIConfiguration.updateAllowAutoUpdates(enabled);
+  } else {
+    config_DEPRECATED.updateAllowAutoUpdates(enabled);
+  }
+}
+
 export function updateAllowUsageTracking(isEnabled: boolean): void {
   if (CLIConfiguration.isActive()) {
     CLIConfiguration.updateAllowUsageTracking(isEnabled);
