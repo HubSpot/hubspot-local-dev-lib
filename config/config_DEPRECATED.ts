@@ -429,15 +429,16 @@ export function getAccountId(nameOrId?: string | number): number | undefined {
   }
 
   const accounts = getConfigAccounts(config);
-  if (name && accounts) {
-    account = accounts.find(p => p.name === name);
-  }
-  if (accountId && accounts && !account) {
-    account = accounts.find(p => accountId === p.portalId);
-  }
-
-  if (account) {
-    return account.portalId;
+  if (accounts) {
+    if (name) {
+      account = accounts.find(p => p.name === name);
+    }
+    if (accountId && !account) {
+      account = accounts.find(p => accountId === p.portalId);
+    }
+    if (account) {
+      return account.portalId;
+    }
   }
 
   return undefined;
