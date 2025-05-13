@@ -213,7 +213,7 @@ class _CLIConfiguration {
       accountId = nameOrIdToCheck;
     }
 
-    let account = null;
+    let account: CLIAccount_NEW | null = null;
     if (name) {
       account = this.config.accounts.find(a => a.name === name) || null;
     }
