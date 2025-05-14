@@ -3,6 +3,8 @@ import path from 'path';
 import os from 'os';
 
 export const DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME = 'hubspot.config.yml';
+export const ARCHIVED_HUBSPOT_CONFIG_YAML_FILE_NAME =
+  'archived.hubspot.config.yml';
 
 export const HUBSPOT_CONFIGURATION_FOLDER = '.hscli';
 export const HUBSPOT_CONFIGURATION_FILE = 'config.yml';

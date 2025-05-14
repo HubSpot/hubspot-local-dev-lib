@@ -26,8 +26,11 @@ import {
   ALLOW_USAGE_TRACKING,
   DEFAULT_ACCOUNT,
   DEFAULT_PORTAL,
+  ARCHIVED_HUBSPOT_CONFIG_YAML_FILE_NAME,
 } from '../constants/config';
 import { i18n } from '../utils/lang';
+import fs from 'fs';
+import path from 'path';
 
 const i18nKey = 'config.migrate';
 
@@ -75,7 +78,15 @@ function writeGlobalConfigFile(
 
   try {
     writeConfig({ source: updatedConfigJson });
-    config_DEPRECATED.deleteConfigFile();
+    const oldConfigPath = config_DEPRECATED.getConfigPath();
+    if (oldConfigPath) {
+      const dir = path.dirname(oldConfigPath);
+      const newConfigPath = path.join(
+        dir,
+        ARCHIVED_HUBSPOT_CONFIG_YAML_FILE_NAME
+      );
+      fs.renameSync(oldConfigPath, newConfigPath);
+    }
   } catch (error) {
     deleteEmptyConfigFile();
     throw new Error(
