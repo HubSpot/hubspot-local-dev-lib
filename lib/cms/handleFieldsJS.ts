@@ -58,7 +58,6 @@ export class FieldsJs {
         {
           cwd: dirName,
           env: {
-            test: ['test', 'test2'],
             dirName,
             fieldOptions: fieldOptionsAsString,
             filePath,
