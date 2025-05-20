@@ -15,7 +15,7 @@ export class FieldsJs {
   filePath: string;
   rootWriteDir: string;
   rejected: boolean;
-  fieldOptions: string;
+  fieldOptions: string | string[];
   outputPath?: string;
   toJSON?: () => JSON;
 
@@ -23,7 +23,7 @@ export class FieldsJs {
     projectDir: string,
     filePath: string,
     rootWriteDir?: string | null,
-    fieldOptions = ''
+    fieldOptions: string | string[] = ''
   ) {
     this.projectDir = projectDir;
     this.filePath = filePath;
@@ -48,6 +48,10 @@ export class FieldsJs {
     const dirName = path.dirname(filePath);
 
     return new Promise<string>((resolve, reject) => {
+      const fieldOptionsAsString = Array.isArray(this.fieldOptions)
+        ? this.fieldOptions.join(',')
+        : this.fieldOptions;
+
       const convertFieldsProcess = fork(
         path.join(__dirname, './processFieldsJs.js'),
         [],
@@ -56,7 +60,7 @@ export class FieldsJs {
           env: {
             test: ['test', 'test2'],
             dirName,
-            fieldOptions: this.fieldOptions,
+            fieldOptions: fieldOptionsAsString,
             filePath,
             writeDir,
           },

@@ -408,12 +408,13 @@ export function getAccountId(nameOrId?: string | number): number | undefined {
   function setNameOrAccountFromSuppliedValue(
     suppliedValue: string | number
   ): void {
-    if (typeof suppliedValue === 'number') {
-      accountId = suppliedValue;
-    } else if (/^\d+$/.test(suppliedValue)) {
-      accountId = parseInt(suppliedValue, 10);
-    } else {
+    if (typeof suppliedValue === 'string') {
       name = suppliedValue;
+      if (/^\d+$/.test(suppliedValue)) {
+        accountId = parseInt(suppliedValue, 10);
+      }
+    } else if (typeof suppliedValue === 'number') {
+      accountId = suppliedValue;
     }
   }
 
@@ -428,14 +429,16 @@ export function getAccountId(nameOrId?: string | number): number | undefined {
   }
 
   const accounts = getConfigAccounts(config);
-  if (name && accounts) {
-    account = accounts.find(p => p.name === name);
-  } else if (accountId && accounts) {
-    account = accounts.find(p => accountId === p.portalId);
-  }
-
-  if (account) {
-    return account.portalId;
+  if (accounts) {
+    if (name) {
+      account = accounts.find(p => p.name === name);
+    }
+    if (accountId && !account) {
+      account = accounts.find(p => accountId === p.portalId);
+    }
+    if (account) {
+      return account.portalId;
+    }
   }
 
   return undefined;
@@ -626,6 +629,17 @@ export function updateHttpTimeout(timeout: string): void {
 
   const config = getAndLoadConfigIfNeeded();
   config.httpTimeout = parsedTimeout;
+
+  setDefaultConfigPathIfUnset();
+  writeConfig();
+}
+
+/**
+ * @throws {Error}
+ */
+export function updateAllowAutoUpdates(enabled: boolean): void {
+  const config = getAndLoadConfigIfNeeded();
+  config.allowAutoUpdates = enabled;
 
   setDefaultConfigPathIfUnset();
   writeConfig();

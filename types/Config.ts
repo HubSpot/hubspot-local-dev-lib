@@ -6,6 +6,7 @@ import { ValueOf } from './Utils';
 export interface CLIConfig_NEW {
   accounts: Array<CLIAccount_NEW>;
   allowUsageTracking?: boolean;
+  allowAutoUpdates?: boolean;
   defaultAccount?: string | number;
   defaultMode?: CmsPublishMode; // Deprecated - left in to handle existing configs with this field
   defaultCmsPublishMode?: CmsPublishMode;
@@ -17,6 +18,7 @@ export interface CLIConfig_NEW {
 export interface CLIConfig_DEPRECATED {
   portals: Array<CLIAccount_DEPRECATED>;
   allowUsageTracking?: boolean;
+  allowAutoUpdates?: boolean;
   defaultPortal?: string | number;
   defaultMode?: CmsPublishMode; // Deprecated - left in to handle existing configs with this field
   defaultCmsPublishMode?: CmsPublishMode;
