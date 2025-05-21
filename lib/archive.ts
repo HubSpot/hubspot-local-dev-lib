@@ -88,13 +88,22 @@ async function copySourceToDest(
       srcDirPath.push(rootDir);
     }
 
+    const foo = [];
+
     if (sourceDir) {
-      srcDirPath.push(sourceDir);
+      foo.push(...(Array.isArray(sourceDir) ? sourceDir : [sourceDir]));
     }
 
-    const projectSrcDir = join(...srcDirPath);
+    if (foo.length === 0) {
+      const projectSrcDir = join(...srcDirPath);
+      await fs.copy(projectSrcDir, dest);
+    } else {
+      for (let i = 0; i < foo.length; i++) {
+        const projectSrcDir = join(...srcDirPath, foo[i]);
+        await fs.copy(projectSrcDir, dest);
+      }
+    }
 
-    await fs.copy(projectSrcDir, dest);
     logger.debug(i18n(`${i18nKey}.copySourceToDest.success`));
     return true;
   } catch (err) {
