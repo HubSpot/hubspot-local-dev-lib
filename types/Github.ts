@@ -77,6 +77,6 @@ export type CloneGithubRepoOptions = {
   type?: string; // The type of asset being downloaded. Used for logging
   branch?: string; // Repo branch
   tag?: string; // Repo tag
-  sourceDir?: string; // The directory within the downloaded repo to write after extraction
+  sourceDir?: string | string[]; // The directory within the downloaded repo to write after extraction
   hideLogs?: boolean; // Hide logs from the console
 };

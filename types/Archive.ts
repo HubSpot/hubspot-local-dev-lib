@@ -4,7 +4,7 @@ export type ZipData = {
 };
 
 export type CopySourceToDestOptions = {
-  sourceDir?: string;
+  sourceDir?: string | string[];
   includesRootDir?: boolean;
   hideLogs?: boolean;
 };
