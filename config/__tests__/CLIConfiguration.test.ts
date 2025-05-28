@@ -63,12 +63,6 @@ describe('config/CLIConfiguration', () => {
     });
   });
 
-  describe('getConfigForAccount()', () => {
-    it('returns null when no config is loaded', () => {
-      expect(config.getConfigForAccount(123)).toBe(null);
-    });
-  });
-
   describe('getEnv()', () => {
     it('returns PROD when no config is loaded', () => {
       expect(config.getEnv(123)).toBe(ENVIRONMENTS.PROD);

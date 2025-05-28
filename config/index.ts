@@ -106,7 +106,7 @@ export function configFileExists(useHiddenConfig?: boolean): boolean {
 
 export function getAccountConfig(accountId?: number): CLIAccount | null {
   if (CLIConfiguration.isActive()) {
-    return CLIConfiguration.getConfigForAccount(accountId);
+    return CLIConfiguration.getAccount(accountId);
   }
   return config_DEPRECATED.getAccountConfig(accountId) || null;
 }
