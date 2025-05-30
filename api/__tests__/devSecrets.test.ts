@@ -8,6 +8,7 @@ import {
 } from '../devSecrets';
 
 const httpPostMock = http.post as jest.MockedFunction<typeof http.post>;
+const httpPatchMock = http.patch as jest.MockedFunction<typeof http.patch>;
 const httpDeleteMock = http.delete as jest.MockedFunction<typeof http.delete>;
 const httpGetMock = http.get as jest.MockedFunction<typeof http.get>;
 
@@ -16,14 +17,14 @@ describe('api/devSecrets', () => {
   const appId = 456;
   const key = 'SECRET_KEY';
   const value = 'SECRET_VALUE';
-  const DEV_APP_SECRETS_API_PATH = 'dev-secrets/management/v3/secrets/app/';
+  const DEV_APP_SECRETS_API_PATH = 'dev-secrets/management/v3/';
 
   describe('addAppSecret', () => {
     it('should call http.post with correct arguments', async () => {
       await addAppSecret(accountId, appId, key, value);
       expect(httpPostMock).toHaveBeenCalledTimes(1);
       expect(httpPostMock).toHaveBeenCalledWith(accountId, {
-        url: `${DEV_APP_SECRETS_API_PATH}${appId}/upsert`,
+        url: `${DEV_APP_SECRETS_API_PATH}secrets/app/${appId}`,
         data: { key, value },
       });
     });
@@ -32,9 +33,9 @@ describe('api/devSecrets', () => {
   describe('updateAppSecret', () => {
     it('should call addAppSecret (http.post) with correct arguments', async () => {
       await updateAppSecret(accountId, appId, key, value);
-      expect(httpPostMock).toHaveBeenCalledTimes(1);
-      expect(httpPostMock).toHaveBeenCalledWith(accountId, {
-        url: `${DEV_APP_SECRETS_API_PATH}${appId}/upsert`,
+      expect(httpPatchMock).toHaveBeenCalledTimes(1);
+      expect(httpPatchMock).toHaveBeenCalledWith(accountId, {
+        url: `${DEV_APP_SECRETS_API_PATH}secrets/app/${appId}`,
         data: { key, value },
       });
     });
@@ -45,7 +46,7 @@ describe('api/devSecrets', () => {
       await deleteAppSecret(accountId, appId, key);
       expect(httpDeleteMock).toHaveBeenCalledTimes(1);
       expect(httpDeleteMock).toHaveBeenCalledWith(accountId, {
-        url: `${DEV_APP_SECRETS_API_PATH}${appId}`,
+        url: `${DEV_APP_SECRETS_API_PATH}secrets/app/${appId}`,
         data: { key },
       });
     });
@@ -56,7 +57,7 @@ describe('api/devSecrets', () => {
       await fetchAppSecrets(accountId, appId);
       expect(httpGetMock).toHaveBeenCalledTimes(1);
       expect(httpGetMock).toHaveBeenCalledWith(accountId, {
-        url: `${DEV_APP_SECRETS_API_PATH}${appId}`,
+        url: `${DEV_APP_SECRETS_API_PATH}keys/app/${appId}`,
       });
     });
   });
