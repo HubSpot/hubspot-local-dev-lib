@@ -1,3 +1,5 @@
 export type FetchDevSecretsResponse = {
-  results: Array<string>;
+  secretKeys: Array<{
+    secretKey: string;
+  }>;
 };
