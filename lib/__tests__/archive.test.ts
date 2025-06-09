@@ -135,5 +135,27 @@ describe('lib/archive', () => {
         `Failed to clean up temp dir: ${tmpDirName}`
       );
     });
+
+    it('should copy multiple source directories when sourceDir is an array', async () => {
+      const sourceDir1 = 'sourceDir1';
+      const sourceDir2 = 'sourceDir2';
+
+      const sourceDir = [sourceDir1, sourceDir2];
+
+      const result = await extractZipArchive(zip, name, dest, {
+        sourceDir,
+      });
+
+      expect(fs.copy).toHaveBeenCalledTimes(sourceDir.length);
+      expect(fs.copy).toHaveBeenCalledWith(
+        `${tmpExtractPath}/${rootDir}/${sourceDir1}`,
+        dest
+      );
+      expect(fs.copy).toHaveBeenCalledWith(
+        `${tmpExtractPath}/${rootDir}/${sourceDir2}`,
+        dest
+      );
+      expect(result).toBe(true);
+    });
   });
 });

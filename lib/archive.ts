@@ -88,18 +88,18 @@ async function copySourceToDest(
       srcDirPath.push(rootDir);
     }
 
-    const foo = [];
+    const sourceDirs = [];
 
     if (sourceDir) {
-      foo.push(...(Array.isArray(sourceDir) ? sourceDir : [sourceDir]));
+      sourceDirs.push(...(Array.isArray(sourceDir) ? sourceDir : [sourceDir]));
     }
 
-    if (foo.length === 0) {
+    if (sourceDirs.length === 0) {
       const projectSrcDir = join(...srcDirPath);
       await fs.copy(projectSrcDir, dest);
     } else {
-      for (let i = 0; i < foo.length; i++) {
-        const projectSrcDir = join(...srcDirPath, foo[i]);
+      for (let i = 0; i < sourceDirs.length; i++) {
+        const projectSrcDir = join(...srcDirPath, sourceDirs[i]);
         await fs.copy(projectSrcDir, dest);
       }
     }
