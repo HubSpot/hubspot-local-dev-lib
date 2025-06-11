@@ -103,6 +103,7 @@ async function copySourceToDest(
       for (let i = 0; i < sourceDirs.length; i++) {
         const projectSrcDir = join(...srcDirPath, sourceDirs[i]);
 
+        let collisions: string[] = [];
         if (
           fs.existsSync(dest) &&
           handleCollision &&
@@ -116,10 +117,15 @@ async function copySourceToDest(
           );
 
           // Files that exist in the same positions in both the
-          const collisions = existingFiles.filter(currentFile =>
+          collisions = existingFiles.filter(currentFile =>
             newFiles.includes(currentFile)
           );
-
+        }
+        if (
+          collisions.length &&
+          handleCollision &&
+          typeof handleCollision === 'function'
+        ) {
           handleCollision({
             dest,
             src: projectSrcDir,
