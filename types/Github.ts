@@ -1,3 +1,5 @@
+import { Collision } from './Archive';
+
 type GithubAuthor = {
   login: string;
   id: number;
@@ -79,4 +81,5 @@ export type CloneGithubRepoOptions = {
   tag?: string; // Repo tag
   sourceDir?: string | string[]; // The directory within the downloaded repo to write after extraction
   hideLogs?: boolean; // Hide logs from the console
+  handleCollision?: (collision: Collision) => void;
 };

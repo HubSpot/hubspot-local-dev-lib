@@ -116,7 +116,8 @@ export async function cloneGithubRepo(
   dest: string,
   options: CloneGithubRepoOptions = {}
 ): Promise<boolean> {
-  const { tag, isRelease, branch, sourceDir, type, hideLogs } = options;
+  const { tag, isRelease, branch, sourceDir, type, hideLogs, handleCollision } =
+    options;
   const zip = await downloadGithubRepoZip(repoPath, isRelease, {
     tag,
     branch,
@@ -125,6 +126,7 @@ export async function cloneGithubRepo(
   const success = await extractZipArchive(zip, repoName, dest, {
     sourceDir,
     hideLogs,
+    handleCollision,
   });
 
   if (success && !hideLogs) {

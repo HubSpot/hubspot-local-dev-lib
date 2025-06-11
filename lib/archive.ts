@@ -1,5 +1,5 @@
 import fs from 'fs-extra';
-import { join } from 'path';
+import path, { join } from 'path';
 import { tmpdir } from 'os';
 import extract from 'extract-zip';
 
@@ -7,6 +7,7 @@ import { logger } from './logger';
 import { i18n } from '../utils/lang';
 import { ZipData, CopySourceToDestOptions } from '../types/Archive';
 import { FileSystemError } from '../models/FileSystemError';
+import { walk } from './fs';
 
 const i18nKey = 'lib.archive';
 
@@ -67,6 +68,7 @@ async function copySourceToDest(
     sourceDir,
     includesRootDir = true,
     hideLogs = false,
+    handleCollision,
   }: CopySourceToDestOptions = {}
 ): Promise<boolean> {
   try {
@@ -100,7 +102,32 @@ async function copySourceToDest(
     } else {
       for (let i = 0; i < sourceDirs.length; i++) {
         const projectSrcDir = join(...srcDirPath, sourceDirs[i]);
-        await fs.copy(projectSrcDir, dest);
+
+        if (
+          fs.existsSync(dest) &&
+          handleCollision &&
+          typeof handleCollision === 'function'
+        ) {
+          const existingFiles = (await walk(dest, ['node_modules'])).map(file =>
+            path.normalize(path.relative(dest, file))
+          );
+          const newFiles = (await walk(projectSrcDir, ['node_modules'])).map(
+            file => path.relative(projectSrcDir, file)
+          );
+
+          // Files that exist in the same positions in both the
+          const collisions = existingFiles.filter(currentFile =>
+            newFiles.includes(currentFile)
+          );
+
+          handleCollision({
+            dest,
+            src: projectSrcDir,
+            collisions,
+          });
+        } else {
+          await fs.copy(projectSrcDir, dest);
+        }
       }
     }
 
@@ -131,7 +158,12 @@ export async function extractZipArchive(
   zip: Buffer,
   name: string,
   dest: string,
-  { sourceDir, includesRootDir, hideLogs }: CopySourceToDestOptions = {}
+  {
+    sourceDir,
+    includesRootDir,
+    hideLogs,
+    handleCollision,
+  }: CopySourceToDestOptions = {}
 ): Promise<boolean> {
   let success = false;
 
@@ -143,6 +175,7 @@ export async function extractZipArchive(
         sourceDir,
         includesRootDir,
         hideLogs,
+        handleCollision,
       });
     }
 
