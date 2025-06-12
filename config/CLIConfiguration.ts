@@ -204,21 +204,26 @@ class _CLIConfiguration {
       return null;
     }
 
-    if (typeof nameOrIdToCheck === 'number') {
-      accountId = nameOrIdToCheck;
-    } else if (/^\d+$/.test(nameOrIdToCheck)) {
-      accountId = parseInt(nameOrIdToCheck, 10);
-    } else {
+    if (typeof nameOrIdToCheck === 'string') {
       name = nameOrIdToCheck;
+      if (/^\d+$/.test(nameOrIdToCheck)) {
+        accountId = parseInt(nameOrIdToCheck, 10);
+      }
+    } else if (typeof nameOrIdToCheck === 'number') {
+      accountId = nameOrIdToCheck;
     }
 
+    let account: CLIAccount_NEW | null = null;
     if (name) {
-      return this.config.accounts.find(a => a.name === name) || null;
-    } else if (accountId) {
-      return this.config.accounts.find(a => accountId === a.accountId) || null;
+      account = this.config.accounts.find(a => a.name === name) || null;
     }
 
-    return null;
+    if (accountId && !account) {
+      account =
+        this.config.accounts.find(a => accountId === a.accountId) || null;
+    }
+
+    return account;
   }
 
   isConfigFlagEnabled(
@@ -302,16 +307,6 @@ class _CLIConfiguration {
           account => account.accountId === accountId
         )
       : -1;
-  }
-
-  getConfigForAccount(accountId?: number): CLIAccount_NEW | null {
-    if (this.config) {
-      return (
-        this.config.accounts.find(account => account.accountId === accountId) ||
-        null
-      );
-    }
-    return null;
   }
 
   getConfigAccounts(): Array<CLIAccount_NEW> | null {
@@ -650,6 +645,18 @@ class _CLIConfiguration {
     }
 
     this.config.httpTimeout = parsedTimeout;
+    return this.write();
+  }
+
+  /**
+   * @throws {Error}
+   */
+  updateAllowAutoUpdates(enabled: boolean): CLIConfig_NEW | null {
+    if (!this.config) {
+      throw new Error(i18n(`${i18nKey}.errors.noConfigLoaded`));
+    }
+
+    this.config.allowAutoUpdates = enabled;
     return this.write();
   }
 

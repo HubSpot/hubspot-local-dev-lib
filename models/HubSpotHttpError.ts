@@ -19,6 +19,8 @@ export class HubSpotHttpError<T = any> extends Error {
   private divider = `\n- `;
   public cause: ErrorOptions['cause'];
   public timeout?: number;
+  public correlationId?: string;
+
   constructor(
     message?: string,
     options?: ErrorOptions,
@@ -49,6 +51,13 @@ export class HubSpotHttpError<T = any> extends Error {
         this.status = response.status;
         this.statusText = response.statusText;
         this.data = response.data;
+        if (
+          response.data &&
+          typeof response.data === 'object' &&
+          'correlationId' in response.data
+        ) {
+          this.correlationId = response.data.correlationId;
+        }
         this.headers = response.headers;
         this.parseValidationErrors(response.data);
       }
@@ -93,6 +102,9 @@ export class HubSpotHttpError<T = any> extends Error {
     if (this.context) {
       messages.push(`context: ${JSON.stringify(this.context, undefined, 2)}`);
     }
+    if (this.correlationId) {
+      messages.push(`correlationId: ${this.correlationId}`);
+    }
     if (this.derivedContext) {
       messages.push(
         `derivedContext: ${JSON.stringify(this.derivedContext, undefined, 2)}`
@@ -134,7 +146,7 @@ export class HubSpotHttpError<T = any> extends Error {
       return;
     }
 
-    const errorMessages = [];
+    const errorMessages: string[] = [];
 
     const { errors, message } = responseData;
 
@@ -142,10 +154,9 @@ export class HubSpotHttpError<T = any> extends Error {
       errorMessages.push(message);
     }
 
-    if (errors) {
+    if (Array.isArray(errors)) {
       const specificErrors = errors.map(error => {
         let errorMessage = error.message;
-
         if (error.context?.requiredScopes) {
           // Sometimes the scopes come back with duplicates
           const scopes = new Set<string>(error.context.requiredScopes);

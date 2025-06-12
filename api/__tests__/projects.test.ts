@@ -633,4 +633,15 @@ describe('api/projects', () => {
       });
     });
   });
+
+  describe('checkMigrationStatus', () => {
+    it('should call v1 api for stable platform version', async () => {
+      const migrationId = 123456;
+      await checkMigrationStatus(accountId, migrationId);
+      expect(http.get).toHaveBeenCalledTimes(1);
+      expect(http.get).toHaveBeenCalledWith(accountId, {
+        url: `dfs/migrations/v1/migrations/${migrationId}`,
+      });
+    });
+  });
 });

@@ -14,6 +14,8 @@ import { HubSpotPromise } from '../types/Http';
 
 const LOCALDEVAUTH_API_AUTH_PATH = 'localdevauth/v1/auth';
 
+export const LOCALDEVAUTH_ACCESS_TOKEN_PATH = `${LOCALDEVAUTH_API_AUTH_PATH}/refresh`;
+
 export function fetchAccessToken(
   personalAccessKey: string,
   env: Environment = ENVIRONMENTS.PROD,
@@ -22,7 +24,7 @@ export function fetchAccessToken(
   const axiosConfig = getAxiosConfig({
     env,
     localHostOverride: true,
-    url: `${LOCALDEVAUTH_API_AUTH_PATH}/refresh`,
+    url: LOCALDEVAUTH_ACCESS_TOKEN_PATH,
     data: {
       encodedOAuthRefreshToken: personalAccessKey,
     },

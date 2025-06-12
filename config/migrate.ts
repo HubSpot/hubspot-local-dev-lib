@@ -26,8 +26,11 @@ import {
   ALLOW_USAGE_TRACKING,
   DEFAULT_ACCOUNT,
   DEFAULT_PORTAL,
+  ARCHIVED_HUBSPOT_CONFIG_YAML_FILE_NAME,
 } from '../constants/config';
 import { i18n } from '../utils/lang';
+import fs from 'fs';
+import path from 'path';
 
 const i18nKey = 'config.migrate';
 
@@ -75,7 +78,15 @@ function writeGlobalConfigFile(
 
   try {
     writeConfig({ source: updatedConfigJson });
-    config_DEPRECATED.deleteConfigFile();
+    const oldConfigPath = config_DEPRECATED.getConfigPath();
+    if (oldConfigPath) {
+      const dir = path.dirname(oldConfigPath);
+      const newConfigPath = path.join(
+        dir,
+        ARCHIVED_HUBSPOT_CONFIG_YAML_FILE_NAME
+      );
+      fs.renameSync(oldConfigPath, newConfigPath);
+    }
   } catch (error) {
     deleteEmptyConfigFile();
     throw new Error(
@@ -130,8 +141,12 @@ export function mergeConfigProperties(
   const conflicts: Array<ConflictProperty> = [];
 
   propertiesToCheck.forEach(prop => {
-    if (prop in globalConfig && prop in deprecatedConfig) {
-      if (force || globalConfig[prop] === deprecatedConfig[prop]) {
+    if (prop in deprecatedConfig) {
+      if (
+        force ||
+        !(prop in globalConfig) ||
+        globalConfig[prop] === deprecatedConfig[prop]
+      ) {
         // @ts-expect-error Cannot reconcile CLIConfig_NEW and CLIConfig_DEPRECATED types
         globalConfig[prop] = deprecatedConfig[prop];
       } else {

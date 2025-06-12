@@ -7,6 +7,8 @@ export const MIGRATION_STATUS = {
   PREPARING: 'PREPARING',
   PENDING: 'PENDING',
   SUCCESS: 'SUCCESS',
+  IN_PROGRESS: 'IN_PROGRESS',
+  INPUT_REQUIRED: 'INPUT_REQUIRED',
 } as const;
 
 export type MigrateAppResponse = {

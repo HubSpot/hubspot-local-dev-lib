@@ -4,6 +4,7 @@ import { getAxiosConfig } from '../http/getAxiosConfig';
 import { ENVIRONMENTS } from '../constants/environments';
 import {
   DeveloperTestAccount,
+  CreateDeveloperTestAccountResponse,
   FetchDeveloperTestAccountsResponse,
 } from '../types/developerTestAccounts';
 import { SANDBOX_TIMEOUT } from '../constants/api';
@@ -23,8 +24,8 @@ export function fetchDeveloperTestAccounts(
 export function createDeveloperTestAccount(
   accountId: number,
   accountName: string
-): HubSpotPromise<DeveloperTestAccount> {
-  return http.post<DeveloperTestAccount>(accountId, {
+): HubSpotPromise<CreateDeveloperTestAccountResponse> {
+  return http.post<CreateDeveloperTestAccountResponse>(accountId, {
     url: TEST_ACCOUNTS_API_PATH,
     data: { accountName, generatePersonalAccessKey: true }, // For CLI, generatePersonalAccessKey will always be true since we'll be saving the entry to the config
     timeout: SANDBOX_TIMEOUT,
