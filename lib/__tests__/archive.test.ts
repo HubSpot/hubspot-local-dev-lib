@@ -318,5 +318,54 @@ describe('lib/archive', () => {
       );
       expect(result).toBe(true);
     });
+
+    it('should handle async handleCollision function', async () => {
+      const sourceDir = 'sourceDir';
+      const handleCollisionMock = jest.fn().mockResolvedValue(undefined);
+
+      fsExistsSyncMock.mockReturnValue(true);
+      walkMock
+        .mockResolvedValueOnce([`${dest}/file1.txt`, `${dest}/README.md`])
+        .mockResolvedValueOnce([
+          `${tmpExtractPath}/${rootDir}/${sourceDir}/file1.txt`,
+          `${tmpExtractPath}/${rootDir}/${sourceDir}/README.md`,
+        ]);
+
+      await extractZipArchive(zip, name, dest, {
+        sourceDir,
+        handleCollision: handleCollisionMock,
+      });
+
+      expect(handleCollisionMock).toHaveBeenCalledWith({
+        dest,
+        src: `${tmpExtractPath}/${rootDir}/${sourceDir}`,
+        collisions: ['file1.txt', 'README.md'],
+      });
+      expect(fs.copy).not.toHaveBeenCalled();
+    });
+
+    it('should handle synchronous handleCollision function wrapped in Promise.resolve', async () => {
+      const sourceDir = 'sourceDir';
+      const handleCollisionMock = jest.fn().mockReturnValue('sync result');
+
+      fsExistsSyncMock.mockReturnValue(true);
+      walkMock
+        .mockResolvedValueOnce([`${dest}/file1.txt`])
+        .mockResolvedValueOnce([
+          `${tmpExtractPath}/${rootDir}/${sourceDir}/file1.txt`,
+        ]);
+
+      await extractZipArchive(zip, name, dest, {
+        sourceDir,
+        handleCollision: handleCollisionMock,
+      });
+
+      expect(handleCollisionMock).toHaveBeenCalledWith({
+        dest,
+        src: `${tmpExtractPath}/${rootDir}/${sourceDir}`,
+        collisions: ['file1.txt'],
+      });
+      expect(fs.copy).not.toHaveBeenCalled();
+    });
   });
 });

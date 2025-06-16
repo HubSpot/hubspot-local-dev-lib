@@ -13,5 +13,5 @@ export type CopySourceToDestOptions = {
   sourceDir?: string | string[];
   includesRootDir?: boolean;
   hideLogs?: boolean;
-  handleCollision?: (collision: Collision) => void;
+  handleCollision?: (collision: Collision) => void | Promise<void>;
 };

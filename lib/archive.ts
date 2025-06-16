@@ -128,7 +128,7 @@ async function copySourceToDest(
           handleCollision &&
           typeof handleCollision === 'function'
         ) {
-          handleCollision({
+          await handleCollision({
             dest,
             src: projectSrcDir,
             collisions,
