@@ -297,5 +297,26 @@ describe('lib/archive', () => {
         collisions: ['path/to/file.txt'],
       });
     });
+
+    it('should deduplicate source directories when sourceDir array contains duplicates', async () => {
+      const sourceDir1 = 'sourceDir1';
+      const sourceDir2 = 'sourceDir2';
+      const sourceDir = [sourceDir1, sourceDir2, sourceDir1, sourceDir2];
+
+      const result = await extractZipArchive(zip, name, dest, {
+        sourceDir,
+      });
+
+      expect(fs.copy).toHaveBeenCalledTimes(2);
+      expect(fs.copy).toHaveBeenCalledWith(
+        `${tmpExtractPath}/${rootDir}/${sourceDir1}`,
+        dest
+      );
+      expect(fs.copy).toHaveBeenCalledWith(
+        `${tmpExtractPath}/${rootDir}/${sourceDir2}`,
+        dest
+      );
+      expect(result).toBe(true);
+    });
   });
 });

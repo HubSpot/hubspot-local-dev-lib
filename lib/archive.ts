@@ -93,7 +93,9 @@ async function copySourceToDest(
     const sourceDirs = [];
 
     if (sourceDir) {
-      sourceDirs.push(...(Array.isArray(sourceDir) ? sourceDir : [sourceDir]));
+      sourceDirs.push(
+        ...(Array.isArray(sourceDir) ? new Set(sourceDir) : [sourceDir])
+      );
     }
 
     if (sourceDirs.length === 0) {
@@ -116,7 +118,7 @@ async function copySourceToDest(
             file => path.relative(projectSrcDir, file)
           );
 
-          // Files that exist in the same positions in both the
+          // Find files that exist in the same positions in both directories
           collisions = existingFiles.filter(currentFile =>
             newFiles.includes(currentFile)
           );
