@@ -187,7 +187,8 @@ export function deployProject(
   accountId: number,
   projectName: string,
   buildId: number,
-  useNewDeployApi = false
+  useNewDeployApi = false,
+  force = false
 ): HubSpotPromise<ProjectDeployResponse> {
   if (useNewDeployApi) {
     return http.post<ProjectDeployResponse>(accountId, {
@@ -195,6 +196,7 @@ export function deployProject(
       data: {
         projectName,
         targetBuildId: buildId,
+        ignoreWarnings: force,
       },
     });
   }
@@ -203,6 +205,7 @@ export function deployProject(
     data: {
       projectName,
       buildId,
+      skipRemovalWarning: force,
     },
   });
 }
