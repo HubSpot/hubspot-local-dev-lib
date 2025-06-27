@@ -6,6 +6,8 @@ import {
   DeveloperTestAccount,
   CreateDeveloperTestAccountResponse,
   FetchDeveloperTestAccountsResponse,
+  DeveloperTestAccountConfig,
+  CreateDeveloperTestAccountV3Response,
 } from '../types/developerTestAccounts';
 import { SANDBOX_TIMEOUT } from '../constants/api';
 import { Environment } from '../types/Config';
@@ -24,26 +26,28 @@ export function fetchDeveloperTestAccounts(
 
 export function createDeveloperTestAccount(
   accountId: number,
-  accountName: string,
-  useV3 = false,
-  accountLevels: {
-    marketingLevel?: string;
-    opsLevel?: string;
-    serviceLevel?: string;
-    salesLevel?: string;
-    contentLevel?: string;
-  } = {}
-): HubSpotPromise<CreateDeveloperTestAccountResponse> {
-  if (useV3) {
-    return http.post<CreateDeveloperTestAccountResponse>(accountId, {
+  accountInfo: string
+): HubSpotPromise<CreateDeveloperTestAccountResponse>;
+export function createDeveloperTestAccount(
+  accountId: number,
+  accountInfo: DeveloperTestAccountConfig
+): HubSpotPromise<CreateDeveloperTestAccountV3Response>;
+export function createDeveloperTestAccount(
+  accountId: number,
+  accountInfo: string | DeveloperTestAccountConfig
+): HubSpotPromise<
+  CreateDeveloperTestAccountResponse | CreateDeveloperTestAccountV3Response
+> {
+  if (typeof accountInfo === 'object') {
+    return http.post<CreateDeveloperTestAccountV3Response>(accountId, {
       url: TEST_ACCOUNTS_API_PATH_V3,
-      data: { accountName, generatePersonalAccessKey: true, ...accountLevels },
+      data: accountInfo,
       timeout: SANDBOX_TIMEOUT,
     });
   }
   return http.post<CreateDeveloperTestAccountResponse>(accountId, {
     url: TEST_ACCOUNTS_API_PATH,
-    data: { accountName, generatePersonalAccessKey: true }, // For CLI, generatePersonalAccessKey will always be true since we'll be saving the entry to the config
+    data: { accountName: accountInfo, generatePersonalAccessKey: true }, // For CLI, generatePersonalAccessKey will always be true since we'll be saving the entry to the config
     timeout: SANDBOX_TIMEOUT,
   });
 }
