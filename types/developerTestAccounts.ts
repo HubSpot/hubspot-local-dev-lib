@@ -19,7 +19,25 @@ export type CreateDeveloperTestAccountResponse = {
   personalAccessKey: string;
 };
 
+export type CreateDeveloperTestAccountV3Response = {
+  id: number;
+  accountName: string;
+  personalAccessKey: string;
+};
+
 export type FetchDeveloperTestAccountsResponse = {
   results: DeveloperTestAccount[];
   maxTestPortals: number;
+};
+
+type AccountLevel = 'STARTER' | 'PROFESSIONAL' | 'ENTERPRISE';
+
+export type DeveloperTestAccountConfig = {
+  accountName: string;
+  description?: string;
+  marketingLevel?: AccountLevel;
+  opsLevel?: AccountLevel;
+  serviceLevel?: AccountLevel;
+  salesLevel?: AccountLevel;
+  contentLevel?: AccountLevel;
 };
