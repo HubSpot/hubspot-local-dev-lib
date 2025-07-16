@@ -8,6 +8,7 @@ import {
   FetchDeveloperTestAccountsResponse,
   DeveloperTestAccountConfig,
   CreateDeveloperTestAccountV3Response,
+  InstallAppIntoDeveloperTestAccountResponse,
 } from '../types/developerTestAccounts';
 import { SANDBOX_TIMEOUT } from '../constants/api';
 import { Environment } from '../types/Config';
@@ -86,4 +87,34 @@ export function fetchDeveloperTestAccountData(
   };
 
   return axios<DeveloperTestAccount>(reqWithToken);
+}
+
+export function installAppIntoDeveloperTestAccount(
+  accountId: number,
+  testAccountId: number,
+  projectName: string,
+  appUId: string
+): HubSpotPromise<InstallAppIntoDeveloperTestAccountResponse> {
+  return http.post<InstallAppIntoDeveloperTestAccountResponse>(accountId, {
+    url: `${TEST_ACCOUNTS_API_PATH_V3}/install-apps`,
+    data: {
+      testPortalId: testAccountId,
+      developerQualifiedSymbols: [{ developerSymbol: appUId, projectName }],
+    },
+    timeout: SANDBOX_TIMEOUT,
+  });
+}
+
+export function fetchIsAppIsInstalledIntoDeveloperTestAccount(
+  accountId: number,
+  projectName: string,
+  appUId: string
+): HubSpotPromise<{ ready: boolean }> {
+  return http.post<{ ready: boolean }>(accountId, {
+    url: `${TEST_ACCOUNTS_API_PATH_V3}/install-apps/readiness`,
+    data: {
+      developerQualifiedSymbols: [{ developerSymbol: appUId, projectName }],
+    },
+    timeout: SANDBOX_TIMEOUT,
+  });
 }

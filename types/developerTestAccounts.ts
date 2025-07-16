@@ -41,3 +41,13 @@ export type DeveloperTestAccountConfig = {
   salesLevel?: AccountLevel;
   contentLevel?: AccountLevel;
 };
+
+export type InstallAppIntoDeveloperTestAccountResponse = {
+  authCodes: Array<{
+    developerQualifiedSymbol: {
+      projectName: string;
+      developerSymbol: string;
+    };
+    authCode: string;
+  }>;
+};
