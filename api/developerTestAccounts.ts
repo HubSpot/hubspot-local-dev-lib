@@ -99,21 +99,21 @@ export function installAppIntoDeveloperTestAccount(
     url: `${TEST_ACCOUNTS_API_PATH_V3}/install-apps`,
     data: {
       testPortalId: testAccountId,
-      developerQualifiedSymbols: [{ developerSymbol: appUId, projectName }],
+      developerQualifiedSymbol: { developerSymbol: appUId, projectName },
     },
     timeout: SANDBOX_TIMEOUT,
   });
 }
 
-export function fetchIsAppIsInstalledIntoDeveloperTestAccount(
+export function fetchDeveloperTestAccountAppInstallStatus(
   accountId: number,
   projectName: string,
   appUId: string
-): HubSpotPromise<{ ready: boolean }> {
-  return http.post<{ ready: boolean }>(accountId, {
+): HubSpotPromise<{ status: 'IN_PROGRESS' | 'SUCCESS' }> {
+  return http.post<{ status: 'IN_PROGRESS' | 'SUCCESS' }>(accountId, {
     url: `${TEST_ACCOUNTS_API_PATH_V3}/install-apps/readiness`,
     data: {
-      developerQualifiedSymbols: [{ developerSymbol: appUId, projectName }],
+      developerQualifiedSymbol: { developerSymbol: appUId, projectName },
     },
     timeout: SANDBOX_TIMEOUT,
   });
