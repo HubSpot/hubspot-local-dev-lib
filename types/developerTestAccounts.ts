@@ -42,7 +42,7 @@ export type DeveloperTestAccountConfig = {
   contentLevel?: AccountLevel;
 };
 
-export type InstallAppIntoDeveloperTestAccountResponse = {
+export type InstallOauthAppIntoDeveloperTestAccountResponse = {
   authCodes: Array<{
     developerQualifiedSymbol: {
       projectName: string;

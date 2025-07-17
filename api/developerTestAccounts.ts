@@ -8,7 +8,7 @@ import {
   FetchDeveloperTestAccountsResponse,
   DeveloperTestAccountConfig,
   CreateDeveloperTestAccountV3Response,
-  InstallAppIntoDeveloperTestAccountResponse,
+  InstallOauthAppIntoDeveloperTestAccountResponse,
 } from '../types/developerTestAccounts';
 import { SANDBOX_TIMEOUT } from '../constants/api';
 import { Environment } from '../types/Config';
@@ -89,13 +89,13 @@ export function fetchDeveloperTestAccountData(
   return axios<DeveloperTestAccount>(reqWithToken);
 }
 
-export function installAppIntoDeveloperTestAccount(
+export function installOauthAppIntoDeveloperTestAccount(
   accountId: number,
   testAccountId: number,
   projectName: string,
   appUId: string
-): HubSpotPromise<InstallAppIntoDeveloperTestAccountResponse> {
-  return http.post<InstallAppIntoDeveloperTestAccountResponse>(accountId, {
+): HubSpotPromise<InstallOauthAppIntoDeveloperTestAccountResponse> {
+  return http.post<InstallOauthAppIntoDeveloperTestAccountResponse>(accountId, {
     url: `${TEST_ACCOUNTS_API_PATH_V3}/install-apps`,
     data: {
       testPortalId: testAccountId,
@@ -105,7 +105,7 @@ export function installAppIntoDeveloperTestAccount(
   });
 }
 
-export function fetchDeveloperTestAccountAppInstallStatus(
+export function fetchDeveloperTestAccountOauthAppInstallStatus(
   accountId: number,
   projectName: string,
   appUId: string
