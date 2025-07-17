@@ -118,3 +118,12 @@ export function fetchIsAppIsInstalledIntoDeveloperTestAccount(
     timeout: SANDBOX_TIMEOUT,
   });
 }
+
+export function fetchDeveloperTestAccountGateSyncStatus(
+  accountId: number,
+  testAccountId: number
+): HubSpotPromise<{ status: 'IN_PROGRESS' | 'SUCCESS' }> {
+  return http.get<{ status: 'IN_PROGRESS' | 'SUCCESS' }>(accountId, {
+    url: `${TEST_ACCOUNTS_API_PATH_V3}/gate-sync-status/${testAccountId}`,
+  });
+}
