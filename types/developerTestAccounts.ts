@@ -51,3 +51,7 @@ export type InstallOauthAppIntoDeveloperTestAccountResponse = {
     authCode: string;
   }>;
 };
+
+export type TestPortalStatusResponse = {
+  status: 'IN_PROGRESS' | 'SUCCESS';
+};

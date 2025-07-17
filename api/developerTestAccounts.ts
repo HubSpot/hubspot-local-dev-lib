@@ -9,6 +9,7 @@ import {
   DeveloperTestAccountConfig,
   CreateDeveloperTestAccountV3Response,
   InstallOauthAppIntoDeveloperTestAccountResponse,
+  TestPortalStatusResponse,
 } from '../types/developerTestAccounts';
 import { SANDBOX_TIMEOUT } from '../constants/api';
 import { Environment } from '../types/Config';
@@ -109,8 +110,8 @@ export function fetchDeveloperTestAccountOauthAppInstallStatus(
   accountId: number,
   projectName: string,
   appUId: string
-): HubSpotPromise<{ status: 'IN_PROGRESS' | 'SUCCESS' }> {
-  return http.post<{ status: 'IN_PROGRESS' | 'SUCCESS' }>(accountId, {
+): HubSpotPromise<TestPortalStatusResponse> {
+  return http.post<TestPortalStatusResponse>(accountId, {
     url: `${TEST_ACCOUNTS_API_PATH_V3}/install-apps/readiness`,
     data: {
       developerQualifiedSymbol: { developerSymbol: appUId, projectName },
@@ -122,8 +123,8 @@ export function fetchDeveloperTestAccountOauthAppInstallStatus(
 export function fetchDeveloperTestAccountGateSyncStatus(
   accountId: number,
   testAccountId: number
-): HubSpotPromise<{ status: 'IN_PROGRESS' | 'SUCCESS' }> {
-  return http.get<{ status: 'IN_PROGRESS' | 'SUCCESS' }>(accountId, {
+): HubSpotPromise<TestPortalStatusResponse> {
+  return http.get<TestPortalStatusResponse>(accountId, {
     url: `${TEST_ACCOUNTS_API_PATH_V3}/gate-sync-status/${testAccountId}`,
   });
 }
