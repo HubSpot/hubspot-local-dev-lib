@@ -55,3 +55,7 @@ export type InstallOauthAppIntoDeveloperTestAccountResponse = {
 export type TestPortalStatusResponse = {
   status: 'IN_PROGRESS' | 'SUCCESS';
 };
+
+export type GenerateDeveloperTestAccountPersonalAccessKeyResponse = {
+  personalAccessKey: string;
+};
