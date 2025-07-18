@@ -10,6 +10,7 @@ import {
   CreateDeveloperTestAccountV3Response,
   InstallOauthAppIntoDeveloperTestAccountResponse,
   TestPortalStatusResponse,
+  GenerateDeveloperTestAccountPersonalAccessKeyResponse,
 } from '../types/developerTestAccounts';
 import { SANDBOX_TIMEOUT } from '../constants/api';
 import { Environment } from '../types/Config';
@@ -127,4 +128,16 @@ export function fetchDeveloperTestAccountGateSyncStatus(
   return http.get<TestPortalStatusResponse>(accountId, {
     url: `${TEST_ACCOUNTS_API_PATH_V3}/gate-sync-status/${testAccountId}`,
   });
+}
+
+export function generateDeveloperTestAccountPersonalAccessKey(
+  accountId: number,
+  testAccountId: number
+): HubSpotPromise<GenerateDeveloperTestAccountPersonalAccessKeyResponse> {
+  return http.get<GenerateDeveloperTestAccountPersonalAccessKeyResponse>(
+    accountId,
+    {
+      url: `${TEST_ACCOUNTS_API_PATH_V3}/generate-pak/${testAccountId}`,
+    }
+  );
 }
