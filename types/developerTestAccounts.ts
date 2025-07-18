@@ -41,3 +41,17 @@ export type DeveloperTestAccountConfig = {
   salesLevel?: AccountLevel;
   contentLevel?: AccountLevel;
 };
+
+export type InstallOauthAppIntoDeveloperTestAccountResponse = {
+  authCodes: Array<{
+    developerQualifiedSymbol: {
+      projectName: string;
+      developerSymbol: string;
+    };
+    authCode: string;
+  }>;
+};
+
+export type TestPortalStatusResponse = {
+  status: 'IN_PROGRESS' | 'SUCCESS';
+};
