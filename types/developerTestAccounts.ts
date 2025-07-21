@@ -22,7 +22,6 @@ export type CreateDeveloperTestAccountResponse = {
 export type CreateDeveloperTestAccountV3Response = {
   id: number;
   accountName: string;
-  personalAccessKey: string;
 };
 
 export type FetchDeveloperTestAccountsResponse = {
@@ -54,4 +53,8 @@ export type InstallOauthAppIntoDeveloperTestAccountResponse = {
 
 export type TestPortalStatusResponse = {
   status: 'IN_PROGRESS' | 'SUCCESS';
+};
+
+export type GenerateDeveloperTestAccountPersonalAccessKeyResponse = {
+  personalAccessKey: string;
 };
