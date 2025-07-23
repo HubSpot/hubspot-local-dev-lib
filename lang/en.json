@@ -31,6 +31,7 @@
       }
     },
     "github": {
+      "rateLimitError": "Github rate limit hit. Set the GITHUB_TOKEN env variable with your github PATH. This will increase the github api's rate limit.",
       "fetchFileFromRepository": {
         "fetching": "Fetching {{ path }}...",
         "errors": {

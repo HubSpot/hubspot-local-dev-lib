@@ -339,6 +339,7 @@ describe('api/projects', () => {
         data: {
           projectName,
           buildId,
+          skipRemovalWarning: false,
         },
       });
     });
@@ -351,6 +352,7 @@ describe('api/projects', () => {
         data: {
           projectName,
           targetBuildId: buildId,
+          ignoreWarnings: false,
         },
       });
     });
