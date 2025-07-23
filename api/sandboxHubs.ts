@@ -69,7 +69,7 @@ export function fetchSandboxHubData(
 export function createV2Sandbox(
   accountId: number,
   name: string,
-  type: 'STANDARD' | 'DEVELOPMENT',
+  type: 'STANDARD' | 'DEVELOPER',
   syncObjectRecords: boolean
 ): HubSpotPromise<V2Sandbox> {
   return http.post<V2Sandbox>(accountId, {
@@ -87,5 +87,6 @@ export function getPersonalAccessKey(
     headers: {
       'Content-Type': 'application/json',
     },
+    timeout: SANDBOX_TIMEOUT,
   });
 }
