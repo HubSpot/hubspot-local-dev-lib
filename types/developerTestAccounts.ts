@@ -29,7 +29,7 @@ export type FetchDeveloperTestAccountsResponse = {
   maxTestPortals: number;
 };
 
-export type AccountLevel = 'STARTER' | 'PROFESSIONAL' | 'ENTERPRISE';
+export type AccountLevel = 'FREE' | 'STARTER' | 'PROFESSIONAL' | 'ENTERPRISE';
 
 export type DeveloperTestAccountConfig = {
   accountName: string;
