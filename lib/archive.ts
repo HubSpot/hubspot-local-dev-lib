@@ -106,6 +106,8 @@ async function copySourceToDest(
         const projectSrcDir = join(...srcDirPath, sourceDirs[i]);
 
         let collisions: string[] = [];
+        let filesWithoutCollisions: string[] = [];
+
         if (
           fs.existsSync(dest) &&
           handleCollision &&
@@ -122,7 +124,12 @@ async function copySourceToDest(
           collisions = existingFiles.filter(currentFile =>
             newFiles.includes(currentFile)
           );
+
+          filesWithoutCollisions = newFiles.filter(
+            currentFile => !collisions.includes(currentFile)
+          );
         }
+
         if (
           collisions.length &&
           handleCollision &&
@@ -133,6 +140,14 @@ async function copySourceToDest(
             src: projectSrcDir,
             collisions,
           });
+          await Promise.all(
+            filesWithoutCollisions.map(currentFile =>
+              fs.copy(
+                path.join(projectSrcDir, currentFile),
+                path.join(dest, currentFile)
+              )
+            )
+          );
         } else {
           await fs.copy(projectSrcDir, dest);
         }
