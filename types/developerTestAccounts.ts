@@ -22,7 +22,6 @@ export type CreateDeveloperTestAccountResponse = {
 export type CreateDeveloperTestAccountV3Response = {
   id: number;
   accountName: string;
-  personalAccessKey?: string;
 };
 
 export type FetchDeveloperTestAccountsResponse = {
