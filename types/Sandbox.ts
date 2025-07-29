@@ -194,7 +194,7 @@ export type FetchTypesResponse = {
   results: Array<SandboxType>;
 };
 
-export type PersonalAccessKey = {
+export type SandboxPersonalAccessKey = {
   personalAccessKey: {
     encodedOAuthRefreshToken: string;
     oauthAccessToken: string;

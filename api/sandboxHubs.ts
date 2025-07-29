@@ -5,7 +5,7 @@ import { ENVIRONMENTS } from '../constants/environments';
 import { SANDBOX_TIMEOUT } from '../constants/api';
 import { Environment } from '../types/Config';
 import {
-  PersonalAccessKey,
+  SandboxPersonalAccessKey,
   SandboxHubData,
   SandboxResponse,
   SandboxUsageLimitsResponse,
@@ -78,11 +78,11 @@ export function createV2Sandbox(
   });
 }
 
-export function getPersonalAccessKey(
+export function getSandboxPersonalAccessKey(
   accountId: number,
   sandboxId: number
-): HubSpotPromise<PersonalAccessKey> {
-  return http.post<PersonalAccessKey>(accountId, {
+): HubSpotPromise<SandboxPersonalAccessKey> {
+  return http.post<SandboxPersonalAccessKey>(accountId, {
     url: `${SANDBOX_API_PATH_V2}/sandboxes/${sandboxId}/personal-access-key`,
     headers: {
       'Content-Type': 'application/json',
