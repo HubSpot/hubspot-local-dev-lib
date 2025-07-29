@@ -18,7 +18,11 @@ import {
   fetchRepoContents,
 } from '../api/github';
 import { i18n } from '../utils/lang';
-import { isHubSpotHttpError, isSystemError } from '../errors';
+import {
+  isGithubRateLimitError,
+  isHubSpotHttpError,
+  isSystemError,
+} from '../errors';
 
 const i18nKey = 'lib.github';
 
@@ -40,6 +44,7 @@ export async function fetchFileFromRepository<T = Buffer>(
     const { data } = await fetchRepoFile<T>(repoPath, filePath, ref);
     return data;
   } catch (err) {
+    checkGithubRateLimit(err);
     throw new Error(
       i18n(`${i18nKey}.fetchFileFromRepository.errors.fetchFail`),
       {
@@ -65,6 +70,7 @@ export async function fetchReleaseData(
     const { data } = await fetchRepoReleaseData(repoPath, tag);
     return data;
   } catch (err) {
+    checkGithubRateLimit(err);
     throw new Error(
       i18n(`${i18nKey}.fetchReleaseData.errors.fetchFail`, {
         tag: tag || 'latest',
@@ -105,6 +111,7 @@ async function downloadGithubRepoZip(
     logger.debug(i18n(`${i18nKey}.downloadGithubRepoZip.completed`));
     return data;
   } catch (err) {
+    checkGithubRateLimit(err);
     throw new Error(i18n(`${i18nKey}.downloadGithubRepoZip.errors.fetchFail`), {
       cause: err,
     });
@@ -224,6 +231,7 @@ export async function downloadGithubRepoContents(
 
     await Promise.all(contentPromises);
   } catch (e) {
+    checkGithubRateLimit(e);
     if (isSystemError(e) && e?.error?.message) {
       throw new Error(
         i18n(`${i18nKey}.downloadGithubRepoContents.errors.fetchFail`, {
@@ -255,6 +263,7 @@ export async function listGithubRepoContents(
 
     return filteredFiles;
   } catch (e) {
+    checkGithubRateLimit(e);
     if (isHubSpotHttpError(e) && e.data.message) {
       throw new Error(
         i18n(`${i18nKey}.downloadGithubRepoContents.errors.fetchFail`, {
@@ -263,5 +272,13 @@ export async function listGithubRepoContents(
       );
     }
     throw e;
+  }
+}
+
+function checkGithubRateLimit(err: unknown) {
+  if (isGithubRateLimitError(err)) {
+    throw new Error(i18n(`${i18nKey}.rateLimitError`), {
+      cause: err,
+    });
   }
 }
