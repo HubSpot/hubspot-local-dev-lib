@@ -140,12 +140,14 @@ async function copySourceToDest(
             src: projectSrcDir,
             collisions,
           });
-          filesWithoutCollisions.forEach(currentFile => {
-            fs.copySync(
-              path.join(projectSrcDir, currentFile),
-              path.join(dest, currentFile)
-            );
-          });
+          await Promise.all(
+            filesWithoutCollisions.map(currentFile =>
+              fs.copy(
+                path.join(projectSrcDir, currentFile),
+                path.join(dest, currentFile)
+              )
+            )
+          );
         } else {
           await fs.copy(projectSrcDir, dest);
         }

@@ -22,7 +22,6 @@ const fsRemoveMock = fs.remove as jest.MockedFunction<typeof fs.remove>;
 const fsExistsSyncMock = fs.existsSync as jest.MockedFunction<
   typeof fs.existsSync
 >;
-const fsCopySyncMock = fs.copySync as jest.MockedFunction<typeof fs.copySync>;
 const walkMock = walk as jest.MockedFunction<typeof walk>;
 
 describe('lib/archive', () => {
@@ -192,7 +191,6 @@ describe('lib/archive', () => {
         src: `${tmpExtractPath}/${rootDir}/${sourceDir}`,
         collisions: ['file1.txt', 'README.md'],
       });
-      expect(fs.copy).not.toHaveBeenCalled();
     });
 
     it('should call handleCollision for each source directory when multiple dirs have collisions', async () => {
@@ -393,11 +391,10 @@ describe('lib/archive', () => {
         collisions: ['file1.txt', 'README.md'],
       });
 
-      expect(fsCopySyncMock).toHaveBeenCalledWith(
+      expect(fsCopyMock).toHaveBeenCalledWith(
         `${tmpExtractPath}/${rootDir}/${sourceDir}/unique.js`,
         `${dest}unique.js`
       );
-      expect(fs.copy).not.toHaveBeenCalled();
     });
 
     it('should copy all non-collided files when some files have collisions', async () => {
@@ -425,20 +422,19 @@ describe('lib/archive', () => {
         collisions: ['existing.txt'],
       });
 
-      expect(fsCopySyncMock).toHaveBeenCalledTimes(3);
-      expect(fsCopySyncMock).toHaveBeenCalledWith(
+      expect(fsCopyMock).toHaveBeenCalledTimes(3);
+      expect(fsCopyMock).toHaveBeenCalledWith(
         `${tmpExtractPath}/${rootDir}/${sourceDir}/new1.js`,
         `${dest}new1.js`
       );
-      expect(fsCopySyncMock).toHaveBeenCalledWith(
+      expect(fsCopyMock).toHaveBeenCalledWith(
         `${tmpExtractPath}/${rootDir}/${sourceDir}/new2.css`,
         `${dest}new2.css`
       );
-      expect(fsCopySyncMock).toHaveBeenCalledWith(
+      expect(fsCopyMock).toHaveBeenCalledWith(
         `${tmpExtractPath}/${rootDir}/${sourceDir}/subfolder/new3.html`,
         `${dest}subfolder/new3.html`
       );
-      expect(fs.copy).not.toHaveBeenCalled();
     });
   });
 });
