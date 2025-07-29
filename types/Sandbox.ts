@@ -117,6 +117,35 @@ export type Sandbox = {
   superAdminsInSandbox?: number;
 };
 
+export const SandboxVersioning = {
+  V1: 'V1',
+  V2: 'V2',
+} as const;
+
+export const SandboxStatus = {
+  PENDING: 'PENDING',
+  READY: 'READY',
+  FAILED: 'FAILED',
+} as const;
+export type SandboxVersion = keyof typeof SandboxVersioning;
+export type V2SandboxStatus = keyof typeof SandboxStatus;
+export type V2Sandbox = {
+  sandboxHubId: number;
+  parentHubId: number;
+  name: string;
+  version: SandboxVersion;
+  type: string;
+  status: V2SandboxStatus;
+  createdAt: string;
+  createdByUser: User;
+  currentUserHasAccess?: boolean;
+  currentUserHasSuperAdminAccess?: boolean;
+  superAdminsInSandbox?: number;
+  requestAccessFrom?: User | null;
+  updatedAt?: string;
+  updatedByUser?: User | null;
+};
+
 export type SandboxResponse = {
   sandbox: Sandbox;
   personalAccessKey: string;
@@ -163,4 +192,11 @@ export type SandboxType = {
 
 export type FetchTypesResponse = {
   results: Array<SandboxType>;
+};
+
+export type SandboxPersonalAccessKey = {
+  personalAccessKey: {
+    encodedOAuthRefreshToken: string;
+    oauthAccessToken: string;
+  };
 };
