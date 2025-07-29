@@ -22,6 +22,7 @@ const fsRemoveMock = fs.remove as jest.MockedFunction<typeof fs.remove>;
 const fsExistsSyncMock = fs.existsSync as jest.MockedFunction<
   typeof fs.existsSync
 >;
+const fsCopySyncMock = fs.copySync as jest.MockedFunction<typeof fs.copySync>;
 const walkMock = walk as jest.MockedFunction<typeof walk>;
 
 describe('lib/archive', () => {
@@ -365,6 +366,78 @@ describe('lib/archive', () => {
         src: `${tmpExtractPath}/${rootDir}/${sourceDir}`,
         collisions: ['file1.txt'],
       });
+      expect(fs.copy).not.toHaveBeenCalled();
+    });
+
+    it('should copy non-collided files when collisions are handled', async () => {
+      const sourceDir = 'sourceDir';
+      const handleCollisionMock = jest.fn();
+
+      fsExistsSyncMock.mockReturnValue(true);
+      walkMock
+        .mockResolvedValueOnce([`${dest}/file1.txt`, `${dest}/README.md`])
+        .mockResolvedValueOnce([
+          `${tmpExtractPath}/${rootDir}/${sourceDir}/file1.txt`,
+          `${tmpExtractPath}/${rootDir}/${sourceDir}/unique.js`,
+          `${tmpExtractPath}/${rootDir}/${sourceDir}/README.md`,
+        ]);
+
+      await extractZipArchive(zip, name, dest, {
+        sourceDir,
+        handleCollision: handleCollisionMock,
+      });
+
+      expect(handleCollisionMock).toHaveBeenCalledWith({
+        dest,
+        src: `${tmpExtractPath}/${rootDir}/${sourceDir}`,
+        collisions: ['file1.txt', 'README.md'],
+      });
+
+      expect(fsCopySyncMock).toHaveBeenCalledWith(
+        `${tmpExtractPath}/${rootDir}/${sourceDir}/unique.js`,
+        `${dest}unique.js`
+      );
+      expect(fs.copy).not.toHaveBeenCalled();
+    });
+
+    it('should copy all non-collided files when some files have collisions', async () => {
+      const sourceDir = 'sourceDir';
+      const handleCollisionMock = jest.fn();
+
+      fsExistsSyncMock.mockReturnValue(true);
+      walkMock
+        .mockResolvedValueOnce([`${dest}/existing.txt`])
+        .mockResolvedValueOnce([
+          `${tmpExtractPath}/${rootDir}/${sourceDir}/existing.txt`,
+          `${tmpExtractPath}/${rootDir}/${sourceDir}/new1.js`,
+          `${tmpExtractPath}/${rootDir}/${sourceDir}/new2.css`,
+          `${tmpExtractPath}/${rootDir}/${sourceDir}/subfolder/new3.html`,
+        ]);
+
+      await extractZipArchive(zip, name, dest, {
+        sourceDir,
+        handleCollision: handleCollisionMock,
+      });
+
+      expect(handleCollisionMock).toHaveBeenCalledWith({
+        dest,
+        src: `${tmpExtractPath}/${rootDir}/${sourceDir}`,
+        collisions: ['existing.txt'],
+      });
+
+      expect(fsCopySyncMock).toHaveBeenCalledTimes(3);
+      expect(fsCopySyncMock).toHaveBeenCalledWith(
+        `${tmpExtractPath}/${rootDir}/${sourceDir}/new1.js`,
+        `${dest}new1.js`
+      );
+      expect(fsCopySyncMock).toHaveBeenCalledWith(
+        `${tmpExtractPath}/${rootDir}/${sourceDir}/new2.css`,
+        `${dest}new2.css`
+      );
+      expect(fsCopySyncMock).toHaveBeenCalledWith(
+        `${tmpExtractPath}/${rootDir}/${sourceDir}/subfolder/new3.html`,
+        `${dest}subfolder/new3.html`
+      );
       expect(fs.copy).not.toHaveBeenCalled();
     });
   });
