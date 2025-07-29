@@ -40,7 +40,24 @@ export type DeployStatusTaskLocator = {
   links: Array<{ status: string }>;
 };
 
-export type ProjectDeployResponse = {
+export type ProjectDeployResponseQueued = {
   id: string;
+  buildResultType: 'DEPLOY_QUEUED';
   links: { status: string };
 };
+
+type SubdeployValidationIssue = {
+  uid: string;
+  componentTypeName: string;
+  errorMessages: string[];
+  blockingMessages: { message: string; isWarning: boolean }[];
+};
+
+export type ProjectDeployResponseBlocked = {
+  buildResultType: 'DEPLOY_BLOCKED';
+  issues: SubdeployValidationIssue[];
+};
+
+export type ProjectDeployResponse =
+  | ProjectDeployResponseQueued
+  | ProjectDeployResponseBlocked;
