@@ -5,9 +5,11 @@ import { ENVIRONMENTS } from '../constants/environments';
 import { SANDBOX_TIMEOUT } from '../constants/api';
 import { Environment } from '../types/Config';
 import {
+  SandboxPersonalAccessKey,
   SandboxHubData,
   SandboxResponse,
   SandboxUsageLimitsResponse,
+  V2Sandbox,
 } from '../types/Sandbox';
 import { HubSpotPromise } from '../types/Http';
 
@@ -62,4 +64,29 @@ export function fetchSandboxHubData(
   };
 
   return axios<SandboxHubData>(reqWithToken);
+}
+
+export function createV2Sandbox(
+  accountId: number,
+  name: string,
+  type: 'STANDARD' | 'DEVELOPER',
+  syncObjectRecords: boolean
+): HubSpotPromise<V2Sandbox> {
+  return http.post<V2Sandbox>(accountId, {
+    url: `${SANDBOX_API_PATH_V2}/sandboxes`,
+    data: { name, type, syncObjectRecords },
+  });
+}
+
+export function getSandboxPersonalAccessKey(
+  accountId: number,
+  sandboxId: number
+): HubSpotPromise<SandboxPersonalAccessKey> {
+  return http.post<SandboxPersonalAccessKey>(accountId, {
+    url: `${SANDBOX_API_PATH_V2}/sandboxes/${sandboxId}/personal-access-key`,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    timeout: SANDBOX_TIMEOUT,
+  });
 }
