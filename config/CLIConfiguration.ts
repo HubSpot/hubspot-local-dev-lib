@@ -696,7 +696,7 @@ class _CLIConfiguration {
     return config;
   }
 
-  hasStateFlag(flag: string): boolean {
+  hasLocalStateFlag(flag: string): boolean {
     if (!this.config) {
       return false;
     }
@@ -704,19 +704,19 @@ class _CLIConfiguration {
     return this.config.flags?.includes(flag) || false;
   }
 
-  addStateFlag(flag: string): void {
+  addLocalStateFlag(flag: string): void {
     if (!this.config) {
       throw new Error(i18n(`${i18nKey}.errors.noConfigLoaded`));
     }
 
-    if (!this.hasStateFlag(flag)) {
+    if (!this.hasLocalStateFlag(flag)) {
       this.config.flags = [...(this.config.flags || []), flag];
     }
 
     this.write();
   }
 
-  removeStateFlag(flag: string): void {
+  removeLocalStateFlag(flag: string): void {
     if (!this.config) {
       throw new Error(i18n(`${i18nKey}.errors.noConfigLoaded`));
     }

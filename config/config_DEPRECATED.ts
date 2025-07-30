@@ -931,7 +931,7 @@ function handleLegacyCmsPublishMode(
   return config;
 }
 
-export function hasStateFlag(flag: string): boolean {
+export function hasLocalStateFlag(flag: string): boolean {
   if (!_config) {
     return false;
   }
@@ -939,19 +939,19 @@ export function hasStateFlag(flag: string): boolean {
   return _config.flags?.includes(flag) || false;
 }
 
-export function addStateFlag(flag: string): void {
+export function addLocalStateFlag(flag: string): void {
   if (!_config) {
     throw new Error('No config loaded');
   }
 
-  if (!hasStateFlag(flag)) {
+  if (!hasLocalStateFlag(flag)) {
     _config.flags = [...(_config.flags || []), flag];
   }
 
   writeConfig();
 }
 
-export function removeStateFlag(flag: string): void {
+export function removeLocalStateFlag(flag: string): void {
   if (!_config) {
     throw new Error('No config loaded');
   }

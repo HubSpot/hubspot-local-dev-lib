@@ -288,26 +288,26 @@ export function getDefaultAccountOverrideFilePath() {
   }
 }
 
-export function hasStateFlag(flag: string): boolean {
+export function hasLocalStateFlag(flag: string): boolean {
   if (CLIConfiguration.isActive()) {
-    return CLIConfiguration.hasStateFlag(flag);
+    return CLIConfiguration.hasLocalStateFlag(flag);
   }
-  return config_DEPRECATED.hasStateFlag(flag);
+  return config_DEPRECATED.hasLocalStateFlag(flag);
 }
 
-export function addStateFlag(flag: string): void {
+export function addLocalStateFlag(flag: string): void {
   if (CLIConfiguration.isActive()) {
-    CLIConfiguration.addStateFlag(flag);
+    CLIConfiguration.addLocalStateFlag(flag);
   } else {
-    config_DEPRECATED.addStateFlag(flag);
+    config_DEPRECATED.addLocalStateFlag(flag);
   }
 }
 
-export function removeStateFlag(flag: string): void {
+export function removeLocalStateFlag(flag: string): void {
   if (CLIConfiguration.isActive()) {
-    CLIConfiguration.removeStateFlag(flag);
+    CLIConfiguration.removeLocalStateFlag(flag);
   } else {
-    config_DEPRECATED.removeStateFlag(flag);
+    config_DEPRECATED.removeLocalStateFlag(flag);
   }
 }
 
