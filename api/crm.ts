@@ -16,11 +16,13 @@ export function createImport(
     path.resolve(getCwd(), filepath)
   );
 
+  const jsonImportRequest = JSON.stringify(importRequest);
+
   const importFiles = importRequest.files;
 
   return importFiles.map(file => {
     const formData: FormData = {
-      importRequest: JSON.stringify(importRequest),
+      importRequest: jsonImportRequest,
       files: fs.createReadStream(path.resolve(getCwd(), file.fileName)),
     };
 
