@@ -695,6 +695,36 @@ class _CLIConfiguration {
     }
     return config;
   }
+
+  hasStateFlag(flag: string): boolean {
+    if (!this.config) {
+      return false;
+    }
+
+    return this.config.flags?.includes(flag) || false;
+  }
+
+  addStateFlag(flag: string): void {
+    if (!this.config) {
+      throw new Error(i18n(`${i18nKey}.errors.noConfigLoaded`));
+    }
+
+    if (!this.hasStateFlag(flag)) {
+      this.config.flags = [...(this.config.flags || []), flag];
+    }
+
+    this.write();
+  }
+
+  removeStateFlag(flag: string): void {
+    if (!this.config) {
+      throw new Error(i18n(`${i18nKey}.errors.noConfigLoaded`));
+    }
+
+    this.config.flags = this.config.flags?.filter(f => f !== flag) || [];
+
+    this.write();
+  }
 }
 
 export const CLIConfiguration = new _CLIConfiguration();

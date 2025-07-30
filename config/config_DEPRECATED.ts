@@ -930,3 +930,33 @@ function handleLegacyCmsPublishMode(
   }
   return config;
 }
+
+export function hasStateFlag(flag: string): boolean {
+  if (!_config) {
+    return false;
+  }
+
+  return _config.flags?.includes(flag) || false;
+}
+
+export function addStateFlag(flag: string): void {
+  if (!_config) {
+    throw new Error('No config loaded');
+  }
+
+  if (!hasStateFlag(flag)) {
+    _config.flags = [...(_config.flags || []), flag];
+  }
+
+  writeConfig();
+}
+
+export function removeStateFlag(flag: string): void {
+  if (!_config) {
+    throw new Error('No config loaded');
+  }
+
+  _config.flags = _config.flags?.filter(f => f !== flag) || [];
+
+  writeConfig();
+}
