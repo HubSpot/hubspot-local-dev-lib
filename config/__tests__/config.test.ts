@@ -9,6 +9,7 @@ import {
   getAccountId,
   updateDefaultAccount,
   updateAccountConfig,
+  updateAutoOpenBrowser,
   validateConfig,
   deleteEmptyConfigFile,
   setConfigPath,
@@ -182,6 +183,54 @@ describe('config/config', () => {
     it('sets the defaultPortal in the config', () => {
       const config = getConfig();
       expect(config ? getDefaultAccount(config) : null).toEqual(myPortalName);
+    });
+  });
+
+  describe('updateAutoOpenBrowser()', () => {
+    beforeEach(() => {
+      setConfig({
+        defaultPortal: 'test',
+        portals: [],
+      });
+    });
+
+    it('sets autoOpenBrowser to true in the config', () => {
+      updateAutoOpenBrowser(true);
+      const config = getConfig();
+      expect(config?.autoOpenBrowser).toBe(true);
+    });
+
+    it('sets autoOpenBrowser to false in the config', () => {
+      updateAutoOpenBrowser(false);
+      const config = getConfig();
+      expect(config?.autoOpenBrowser).toBe(false);
+    });
+
+    it('overwrites existing autoOpenBrowser value', () => {
+      // First set to true
+      updateAutoOpenBrowser(true);
+      let config = getConfig();
+      expect(config?.autoOpenBrowser).toBe(true);
+
+      // Then set to false
+      updateAutoOpenBrowser(false);
+      config = getConfig();
+      expect(config?.autoOpenBrowser).toBe(false);
+    });
+
+    it('maintains other config properties when updating autoOpenBrowser', () => {
+      const testConfig = {
+        defaultPortal: 'test-portal',
+        portals: PORTALS,
+        allowUsageTracking: false,
+      };
+      setConfig(testConfig);
+
+      updateAutoOpenBrowser(true);
+
+      const updatedConfig = getConfig();
+      expect(updatedConfig?.allowUsageTracking).toBe(false);
+      expect(updatedConfig?.autoOpenBrowser).toBe(true);
     });
   });
 

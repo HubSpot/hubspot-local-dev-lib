@@ -679,6 +679,23 @@ class _CLIConfiguration {
     return this.write();
   }
 
+  updateAutoOpenBrowser(isEnabled: boolean): CLIConfig_NEW | null {
+    if (!this.config) {
+      throw new Error(i18n(`${i18nKey}.errors.noConfigLoaded`));
+    }
+
+    if (typeof isEnabled !== 'boolean') {
+      throw new Error(
+        i18n(`${i18nKey}.updateAutoOpenBrowser.errors.invalidInput`, {
+          isEnabled: `${isEnabled}`,
+        })
+      );
+    }
+
+    this.config.autoOpenBrowser = isEnabled;
+    return this.write();
+  }
+
   isTrackingAllowed(): boolean {
     if (!this.config) {
       return true;

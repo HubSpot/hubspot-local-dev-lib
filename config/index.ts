@@ -203,6 +203,14 @@ export function updateAllowUsageTracking(isEnabled: boolean): void {
   }
 }
 
+export function updateAutoOpenBrowser(isEnabled: boolean): void {
+  if (CLIConfiguration.isActive()) {
+    CLIConfiguration.updateAutoOpenBrowser(isEnabled);
+  } else {
+    config_DEPRECATED.updateAutoOpenBrowser(isEnabled);
+  }
+}
+
 export function deleteConfigFile(): void {
   if (CLIConfiguration.isActive()) {
     newDeleteConfigFile();

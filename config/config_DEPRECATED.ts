@@ -662,6 +662,20 @@ export function updateAllowUsageTracking(isEnabled: boolean): void {
   writeConfig();
 }
 
+export function updateAutoOpenBrowser(isEnabled: boolean): void {
+  if (typeof isEnabled !== 'boolean') {
+    throw new Error(
+      `Unable to update autoOpenBrowser. The value ${isEnabled} is invalid. The value must be a boolean.`
+    );
+  }
+
+  const config = getAndLoadConfigIfNeeded();
+  config.autoOpenBrowser = isEnabled;
+
+  setDefaultConfigPathIfUnset();
+  writeConfig();
+}
+
 /**
  * @throws {Error}
  */
