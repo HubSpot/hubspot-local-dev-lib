@@ -13,6 +13,7 @@ export interface CLIConfig_NEW {
   httpTimeout?: number;
   env?: Environment;
   httpUseLocalhost?: boolean;
+  flags?: Array<string>;
 }
 
 export interface CLIConfig_DEPRECATED {
@@ -25,6 +26,7 @@ export interface CLIConfig_DEPRECATED {
   httpTimeout?: number;
   env?: Environment;
   httpUseLocalhost?: boolean;
+  flags?: Array<string>;
 }
 
 export type CLIConfig = CLIConfig_NEW | CLIConfig_DEPRECATED;
