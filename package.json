@@ -70,6 +70,7 @@
     "express": "4.21.2",
     "extract-zip": "2.0.1",
     "findup-sync": "5.0.0",
+    "form-data": "^4.0.4",
     "fs-extra": "11.2.0",
     "ignore": "5.3.1",
     "js-yaml": "4.1.0",
