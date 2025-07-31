@@ -294,9 +294,9 @@
           "invalidInput": "Unable to update allowUsageTracking. The value {{ isEnabled }} is invalid. The value must be a boolean."
         }
       },
-      "updateAutoOpenLocalDevSessionInBrowser": {
+      "updateAutoOpenBrowser": {
         "errors": {
-          "invalidInput": "Unable to update autoOpenLocalDevSessionInBrowser. The value {{ isEnabled }} is invalid. The value must be a boolean."
+          "invalidInput": "Unable to update autoOpenBrowser. The value {{ isEnabled }} is invalid. The value must be a boolean."
         }
       }
     },

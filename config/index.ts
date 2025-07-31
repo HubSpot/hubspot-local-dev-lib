@@ -203,13 +203,11 @@ export function updateAllowUsageTracking(isEnabled: boolean): void {
   }
 }
 
-export function updateAutoOpenLocalDevSessionInBrowser(
-  isEnabled: boolean
-): void {
+export function updateAutoOpenBrowser(isEnabled: boolean): void {
   if (CLIConfiguration.isActive()) {
-    CLIConfiguration.updateAutoOpenLocalDevSessionInBrowser(isEnabled);
+    CLIConfiguration.updateAutoOpenBrowser(isEnabled);
   } else {
-    config_DEPRECATED.updateAutoOpenLocalDevSessionInBrowser(isEnabled);
+    config_DEPRECATED.updateAutoOpenBrowser(isEnabled);
   }
 }
 

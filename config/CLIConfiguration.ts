@@ -679,25 +679,20 @@ class _CLIConfiguration {
     return this.write();
   }
 
-  updateAutoOpenLocalDevSessionInBrowser(
-    isEnabled: boolean
-  ): CLIConfig_NEW | null {
+  updateAutoOpenBrowser(isEnabled: boolean): CLIConfig_NEW | null {
     if (!this.config) {
       throw new Error(i18n(`${i18nKey}.errors.noConfigLoaded`));
     }
 
     if (typeof isEnabled !== 'boolean') {
       throw new Error(
-        i18n(
-          `${i18nKey}.updateAutoOpenLocalDevSessionInBrowser.errors.invalidInput`,
-          {
-            isEnabled: `${isEnabled}`,
-          }
-        )
+        i18n(`${i18nKey}.updateAutoOpenBrowser.errors.invalidInput`, {
+          isEnabled: `${isEnabled}`,
+        })
       );
     }
 
-    this.config.autoOpenLocalDevSessionInBrowser = isEnabled;
+    this.config.autoOpenBrowser = isEnabled;
     return this.write();
   }
 

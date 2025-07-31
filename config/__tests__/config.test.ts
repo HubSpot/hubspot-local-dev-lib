@@ -9,7 +9,7 @@ import {
   getAccountId,
   updateDefaultAccount,
   updateAccountConfig,
-  updateAutoOpenLocalDevSessionInBrowser,
+  updateAutoOpenBrowser,
   validateConfig,
   deleteEmptyConfigFile,
   setConfigPath,
@@ -186,7 +186,7 @@ describe('config/config', () => {
     });
   });
 
-  describe('updateAutoOpenLocalDevSessionInBrowser()', () => {
+  describe('updateAutoOpenBrowser()', () => {
     beforeEach(() => {
       setConfig({
         defaultPortal: 'test',
@@ -194,31 +194,31 @@ describe('config/config', () => {
       });
     });
 
-    it('sets autoOpenLocalDevSessionInBrowser to true in the config', () => {
-      updateAutoOpenLocalDevSessionInBrowser(true);
+    it('sets autoOpenBrowser to true in the config', () => {
+      updateAutoOpenBrowser(true);
       const config = getConfig();
-      expect(config?.autoOpenLocalDevSessionInBrowser).toBe(true);
+      expect(config?.autoOpenBrowser).toBe(true);
     });
 
-    it('sets autoOpenLocalDevSessionInBrowser to false in the config', () => {
-      updateAutoOpenLocalDevSessionInBrowser(false);
+    it('sets autoOpenBrowser to false in the config', () => {
+      updateAutoOpenBrowser(false);
       const config = getConfig();
-      expect(config?.autoOpenLocalDevSessionInBrowser).toBe(false);
+      expect(config?.autoOpenBrowser).toBe(false);
     });
 
-    it('overwrites existing autoOpenLocalDevSessionInBrowser value', () => {
+    it('overwrites existing autoOpenBrowser value', () => {
       // First set to true
-      updateAutoOpenLocalDevSessionInBrowser(true);
+      updateAutoOpenBrowser(true);
       let config = getConfig();
-      expect(config?.autoOpenLocalDevSessionInBrowser).toBe(true);
+      expect(config?.autoOpenBrowser).toBe(true);
 
       // Then set to false
-      updateAutoOpenLocalDevSessionInBrowser(false);
+      updateAutoOpenBrowser(false);
       config = getConfig();
-      expect(config?.autoOpenLocalDevSessionInBrowser).toBe(false);
+      expect(config?.autoOpenBrowser).toBe(false);
     });
 
-    it('maintains other config properties when updating autoOpenLocalDevSessionInBrowser', () => {
+    it('maintains other config properties when updating autoOpenBrowser', () => {
       const testConfig = {
         defaultPortal: 'test-portal',
         portals: PORTALS,
@@ -226,11 +226,11 @@ describe('config/config', () => {
       };
       setConfig(testConfig);
 
-      updateAutoOpenLocalDevSessionInBrowser(true);
+      updateAutoOpenBrowser(true);
 
       const updatedConfig = getConfig();
       expect(updatedConfig?.allowUsageTracking).toBe(false);
-      expect(updatedConfig?.autoOpenLocalDevSessionInBrowser).toBe(true);
+      expect(updatedConfig?.autoOpenBrowser).toBe(true);
     });
   });
 

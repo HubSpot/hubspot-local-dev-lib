@@ -662,17 +662,15 @@ export function updateAllowUsageTracking(isEnabled: boolean): void {
   writeConfig();
 }
 
-export function updateAutoOpenLocalDevSessionInBrowser(
-  isEnabled: boolean
-): void {
+export function updateAutoOpenBrowser(isEnabled: boolean): void {
   if (typeof isEnabled !== 'boolean') {
     throw new Error(
-      `Unable to update autoOpenLocalDevSessionInBrowser. The value ${isEnabled} is invalid. The value must be a boolean.`
+      `Unable to update autoOpenBrowser. The value ${isEnabled} is invalid. The value must be a boolean.`
     );
   }
 
   const config = getAndLoadConfigIfNeeded();
-  config.autoOpenLocalDevSessionInBrowser = isEnabled;
+  config.autoOpenBrowser = isEnabled;
 
   setDefaultConfigPathIfUnset();
   writeConfig();
