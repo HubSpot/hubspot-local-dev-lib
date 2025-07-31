@@ -298,6 +298,29 @@ export function getDefaultAccountOverrideFilePath() {
   }
 }
 
+export function hasLocalStateFlag(flag: string): boolean {
+  if (CLIConfiguration.isActive()) {
+    return CLIConfiguration.hasLocalStateFlag(flag);
+  }
+  return config_DEPRECATED.hasLocalStateFlag(flag);
+}
+
+export function addLocalStateFlag(flag: string): void {
+  if (CLIConfiguration.isActive()) {
+    CLIConfiguration.addLocalStateFlag(flag);
+  } else {
+    config_DEPRECATED.addLocalStateFlag(flag);
+  }
+}
+
+export function removeLocalStateFlag(flag: string): void {
+  if (CLIConfiguration.isActive()) {
+    CLIConfiguration.removeLocalStateFlag(flag);
+  } else {
+    config_DEPRECATED.removeLocalStateFlag(flag);
+  }
+}
+
 // These functions are not supported with the new config setup
 export const getConfigAccountId = config_DEPRECATED.getConfigAccountId;
 export const getOrderedAccount = config_DEPRECATED.getOrderedAccount;

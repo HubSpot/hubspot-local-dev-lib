@@ -131,7 +131,7 @@ export function mergeConfigProperties(
   initialConfig: CLIConfig_NEW;
   conflicts: Array<ConflictProperty>;
 } {
-  const propertiesToCheck: Array<keyof Partial<CLIConfig>> = [
+  const propertiesToCheck: Array<keyof Omit<CLIConfig, 'flags'>> = [
     DEFAULT_CMS_PUBLISH_MODE,
     HTTP_TIMEOUT,
     ENV,
@@ -158,6 +158,15 @@ export function mergeConfigProperties(
       }
     }
   });
+
+  if (globalConfig.flags || deprecatedConfig.flags) {
+    globalConfig.flags = Array.from(
+      new Set([
+        ...(globalConfig.flags || []),
+        ...(deprecatedConfig.flags || []),
+      ])
+    );
+  }
 
   if (
     DEFAULT_ACCOUNT in globalConfig &&

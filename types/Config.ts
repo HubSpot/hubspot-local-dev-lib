@@ -14,6 +14,7 @@ export interface CLIConfig_NEW {
   env?: Environment;
   httpUseLocalhost?: boolean;
   autoOpenLocalDevSessionInBrowser?: boolean;
+  flags?: Array<string>;
 }
 
 export interface CLIConfig_DEPRECATED {
@@ -27,6 +28,7 @@ export interface CLIConfig_DEPRECATED {
   env?: Environment;
   httpUseLocalhost?: boolean;
   autoOpenLocalDevSessionInBrowser?: boolean;
+  flags?: Array<string>;
 }
 
 export type CLIConfig = CLIConfig_NEW | CLIConfig_DEPRECATED;
