@@ -9,6 +9,7 @@ import {
   getAccountId,
   updateDefaultAccount,
   updateAccountConfig,
+  updateAutoOpenLocalDevSessionInBrowser,
   validateConfig,
   deleteEmptyConfigFile,
   setConfigPath,
@@ -182,6 +183,54 @@ describe('config/config', () => {
     it('sets the defaultPortal in the config', () => {
       const config = getConfig();
       expect(config ? getDefaultAccount(config) : null).toEqual(myPortalName);
+    });
+  });
+
+  describe('updateAutoOpenLocalDevSessionInBrowser()', () => {
+    beforeEach(() => {
+      setConfig({
+        defaultPortal: 'test',
+        portals: [],
+      });
+    });
+
+    it('sets autoOpenLocalDevSessionInBrowser to true in the config', () => {
+      updateAutoOpenLocalDevSessionInBrowser(true);
+      const config = getConfig();
+      expect(config?.autoOpenLocalDevSessionInBrowser).toBe(true);
+    });
+
+    it('sets autoOpenLocalDevSessionInBrowser to false in the config', () => {
+      updateAutoOpenLocalDevSessionInBrowser(false);
+      const config = getConfig();
+      expect(config?.autoOpenLocalDevSessionInBrowser).toBe(false);
+    });
+
+    it('overwrites existing autoOpenLocalDevSessionInBrowser value', () => {
+      // First set to true
+      updateAutoOpenLocalDevSessionInBrowser(true);
+      let config = getConfig();
+      expect(config?.autoOpenLocalDevSessionInBrowser).toBe(true);
+
+      // Then set to false
+      updateAutoOpenLocalDevSessionInBrowser(false);
+      config = getConfig();
+      expect(config?.autoOpenLocalDevSessionInBrowser).toBe(false);
+    });
+
+    it('maintains other config properties when updating autoOpenLocalDevSessionInBrowser', () => {
+      const testConfig = {
+        defaultPortal: 'test-portal',
+        portals: PORTALS,
+        allowUsageTracking: false,
+      };
+      setConfig(testConfig);
+
+      updateAutoOpenLocalDevSessionInBrowser(true);
+
+      const updatedConfig = getConfig();
+      expect(updatedConfig?.allowUsageTracking).toBe(false);
+      expect(updatedConfig?.autoOpenLocalDevSessionInBrowser).toBe(true);
     });
   });
 

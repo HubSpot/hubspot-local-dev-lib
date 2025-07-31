@@ -203,6 +203,16 @@ export function updateAllowUsageTracking(isEnabled: boolean): void {
   }
 }
 
+export function updateAutoOpenLocalDevSessionInBrowser(
+  isEnabled: boolean
+): void {
+  if (CLIConfiguration.isActive()) {
+    CLIConfiguration.updateAutoOpenLocalDevSessionInBrowser(isEnabled);
+  } else {
+    config_DEPRECATED.updateAutoOpenLocalDevSessionInBrowser(isEnabled);
+  }
+}
+
 export function deleteConfigFile(): void {
   if (CLIConfiguration.isActive()) {
     newDeleteConfigFile();

@@ -293,6 +293,11 @@
         "errors": {
           "invalidInput": "Unable to update allowUsageTracking. The value {{ isEnabled }} is invalid. The value must be a boolean."
         }
+      },
+      "updateAutoOpenLocalDevSessionInBrowser": {
+        "errors": {
+          "invalidInput": "Unable to update autoOpenLocalDevSessionInBrowser. The value {{ isEnabled }} is invalid. The value must be a boolean."
+        }
       }
     },
     "configFile": {
