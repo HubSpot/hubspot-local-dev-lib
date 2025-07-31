@@ -6,10 +6,38 @@ import { getCwd } from '../lib/path';
 import { HubSpotPromise, FormData } from '../types/Http';
 const HUBSPOT_CRM_IMPORT_PATH = '/crm/v3/imports';
 
+// export function createImport(
+//   accountId: number,
+//   filepath: string
+// ): HubSpotPromise[] {
+//   validateJsonPath(filepath);
+
+//   const importRequest: ImportRequest = fs.readJsonSync(
+//     path.resolve(getCwd(), filepath)
+//   );
+
+//   const jsonImportRequest = JSON.stringify(importRequest);
+
+//   const importFiles = importRequest.files;
+
+//   return importFiles.map(file => {
+//     const formData: FormData = {
+//       importRequest: jsonImportRequest,
+//       files: fs.createReadStream(path.resolve(getCwd(), file.fileName)),
+//     };
+
+//     return http.post(accountId, {
+//       url: `${HUBSPOT_CRM_IMPORT_PATH}`,
+//       data: formData,
+//       headers: { 'Content-Type': 'multipart/form-data' },
+//     });
+//   });
+// }
+
 export function createImport(
   accountId: number,
   filepath: string
-): HubSpotPromise[] {
+): HubSpotPromise {
   validateJsonPath(filepath);
 
   const importRequest: ImportRequest = fs.readJsonSync(
@@ -20,17 +48,17 @@ export function createImport(
 
   const importFiles = importRequest.files;
 
-  return importFiles.map(file => {
-    const formData: FormData = {
-      importRequest: jsonImportRequest,
-      files: fs.createReadStream(path.resolve(getCwd(), file.fileName)),
-    };
+  const formData: FormData = {
+    importRequest: jsonImportRequest,
+    files: importFiles.map(file =>
+      fs.createReadStream(path.resolve(getCwd(), file.fileName))
+    ),
+  };
 
-    return http.post(accountId, {
-      url: `${HUBSPOT_CRM_IMPORT_PATH}`,
-      data: formData,
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
+  return http.post(accountId, {
+    url: `${HUBSPOT_CRM_IMPORT_PATH}`,
+    data: formData,
+    headers: { 'Content-Type': 'multipart/form-data' },
   });
 }
 
