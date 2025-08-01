@@ -925,14 +925,17 @@ function loadEnvironmentVariableConfig(options: {
   return setConfig(handleLegacyCmsPublishMode(envConfig));
 }
 
-export function isConfigFlagEnabled(flag: keyof CLIConfig_DEPRECATED): boolean {
+export function isConfigFlagEnabled(
+  flag: keyof CLIConfig_DEPRECATED,
+  defaultValue = false
+): boolean {
   if (!configFileExists() || configFileIsBlank()) {
-    return false;
+    return defaultValue;
   }
 
   const config = getAndLoadConfigIfNeeded();
 
-  return Boolean(config[flag] || false);
+  return Boolean(config[flag] || defaultValue);
 }
 
 function handleLegacyCmsPublishMode(

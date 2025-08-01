@@ -219,11 +219,14 @@ export function deleteConfigFile(): void {
   }
 }
 
-export function isConfigFlagEnabled(flag: keyof CLIConfig): boolean {
+export function isConfigFlagEnabled(
+  flag: keyof CLIConfig,
+  defaultValue = false
+): boolean {
   if (CLIConfiguration.isActive()) {
-    return CLIConfiguration.isConfigFlagEnabled(flag);
+    return CLIConfiguration.isConfigFlagEnabled(flag, defaultValue);
   }
-  return config_DEPRECATED.isConfigFlagEnabled(flag);
+  return config_DEPRECATED.isConfigFlagEnabled(flag, defaultValue);
 }
 
 export function isTrackingAllowed() {
