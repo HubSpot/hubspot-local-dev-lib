@@ -256,84 +256,58 @@ export async function uploadFolder(
     };
   }
 
-  // Step 1: Collect and separate meta.json files from all other files
-  const allMetaJsonFiles: string[] = [];
-  const allOtherFiles: string[] = [];
+  // Find and upload net-new module meta.json files first
+  const moduleMetaJsonFiles = filesByType[FILE_TYPES.module]?.filter(isMetaJsonFile) || [];
+  const filesToUploadLater: string[] = [];
 
+
+  for (const metaFile of moduleMetaJsonFiles) {
+    const fieldsJsFileInfo = fieldsJsPaths.find(f => f.outputPath === metaFile);
+    const relativePath = metaFile.replace(
+      fieldsJsFileInfo ? tmpDirRegex : regex,
+      ''
+    );
+    const destPath = convertToUnixPath(path.join(dest, relativePath));
+    const modulePath = path.dirname(destPath);
+    
+    const isNew = await isModuleNew(accountId, modulePath, apiOptions);
+    if (isNew) {
+      // Upload net-new meta.json file immediately
+      const originalFilePath = fieldsJsFileInfo ? fieldsJsFileInfo.filePath : metaFile;
+      _onAttemptCallback(originalFilePath, destPath);
+
+      try {
+        await upload(accountId, metaFile, destPath, apiOptions);
+        _onSuccessCallback(originalFilePath, destPath);
+      } catch (err) {
+        if (isAuthError(err)) {
+          throw err;
+        }
+        _onFirstErrorCallback(metaFile, destPath, err);
+        failures.push({ file: metaFile, destPath });
+      }
+    } else {
+      // Add existing module meta.json to regular upload queue
+      filesToUploadLater.push(metaFile);
+    }
+  }
+
+  // Upload all remaining files concurrently
   for (let i = 0; i < fileList.length; i++) {
     const filesToUpload = fileList[i];
     const fileType = Object.keys(filesByType)[i] as FileType;
 
     if (fileType === FILE_TYPES.module) {
-      const metaJsonFiles = filesToUpload.filter(isMetaJsonFile);
-      const otherModuleFiles = filesToUpload.filter(f => !isMetaJsonFile(f));
-
-      allMetaJsonFiles.push(...metaJsonFiles);
-      allOtherFiles.push(...otherModuleFiles);
+      // Add non-meta.json module files
+      filesToUploadLater.push(...filesToUpload.filter(f => !isMetaJsonFile(f)));
     } else {
-      // Non-module files go to the "other files" stream
-      allOtherFiles.push(...filesToUpload);
+      // Add all non-module files
+      filesToUploadLater.push(...filesToUpload);
     }
   }
 
-  // Step 2: Check which modules are net-new and upload meta.json accordingly
-  if (allMetaJsonFiles.length > 0) {
-    const newModuleMetaFiles: string[] = [];
-    const existingModuleMetaFiles: string[] = [];
-
-    // Check each meta.json file to see if it's for a net-new module
-    for (const metaFile of allMetaJsonFiles) {
-      const fieldsJsFileInfo = fieldsJsPaths.find(f => f.outputPath === metaFile);
-      const relativePath = metaFile.replace(
-        fieldsJsFileInfo ? tmpDirRegex : regex,
-        ''
-      );
-      const destPath = convertToUnixPath(path.join(dest, relativePath));
-      const modulePath = path.dirname(destPath); // Get module directory path
-      
-      const isNew = await isModuleNew(accountId, modulePath, apiOptions);
-      if (isNew) {
-        newModuleMetaFiles.push(metaFile);
-      } else {
-        existingModuleMetaFiles.push(metaFile);
-      }
-    }
-
-    // Upload net-new module meta.json files sequentially
-    if (newModuleMetaFiles.length > 0) {
-      for (const metaFile of newModuleMetaFiles) {
-        const fieldsJsFileInfo = fieldsJsPaths.find(f => f.outputPath === metaFile);
-        const originalFilePath = fieldsJsFileInfo ? fieldsJsFileInfo.filePath : metaFile;
-        const relativePath = metaFile.replace(
-          fieldsJsFileInfo ? tmpDirRegex : regex,
-          ''
-        );
-        const destPath = convertToUnixPath(path.join(dest, relativePath));
-
-        _onAttemptCallback(originalFilePath, destPath);
-
-        try {
-          await upload(accountId, metaFile, destPath, apiOptions);
-          _onSuccessCallback(originalFilePath, destPath);
-        } catch (err) {
-          if (isAuthError(err)) {
-            throw err;
-          }
-          _onFirstErrorCallback(metaFile, destPath, err);
-          failures.push({ file: metaFile, destPath });
-        }
-      }
-    }
-
-    // Add existing module meta.json files to the concurrent upload stream
-    if (existingModuleMetaFiles.length > 0) {
-      allOtherFiles.unshift(...existingModuleMetaFiles);
-    }
-  }
-
-  // Step 3: Upload all other files concurrently (after meta.json completes)
-  if (allOtherFiles.length > 0) {
-    await queue.addAll(allOtherFiles.map(uploadFile));
+  if (filesToUploadLater.length > 0) {
+    await queue.addAll(filesToUploadLater.map(uploadFile));
   }
 
   const results = await queue
