@@ -8,7 +8,7 @@ import {
   cleanupTmpDirSync,
 } from './handleFieldsJS';
 import { getFileMapperQueryValues } from '../fileMapper';
-import { upload } from '../../api/fileMapper';
+import { upload, download } from '../../api/fileMapper';
 import { isModuleFolderChild } from '../../utils/cms/modules';
 import { escapeRegExp } from '../escapeRegExp';
 import { convertToUnixPath, getExt } from '../path';
@@ -52,6 +52,23 @@ function getFileType(filePath: string): FileType {
 
 function isMetaJsonFile(filePath: string): boolean {
   return path.basename(filePath).toLowerCase() === 'meta.json';
+}
+
+async function isModuleNew(
+  accountId: number, 
+  modulePath: string,
+  apiOptions: any
+): Promise<boolean> {
+  try {
+    await download(accountId, modulePath, apiOptions);
+    return false; // Module exists
+  } catch (error: any) {
+    if (error.response?.status === 404 || error.status === 404) {
+      return true; // Module doesn't exist (net-new)
+    }
+    // For other errors, assume module exists to be safe
+    return false;
+  }
 }
 
 export async function getFilesByType(
@@ -292,55 +309,76 @@ export async function uploadFolder(
     }
   }
 
-  // Step 2: Upload ALL meta.json files sequentially, one at a time
+  // Step 2: Check which modules are net-new and upload meta.json accordingly
   if (allMetaJsonFiles.length > 0) {
-    console.log(
-      'Starting sequential meta.json uploads for',
-      allMetaJsonFiles.length,
-      'files'
-    );
+    console.log('Checking module existence for', allMetaJsonFiles.length, 'meta.json files');
+    
+    const newModuleMetaFiles: string[] = [];
+    const existingModuleMetaFiles: string[] = [];
 
+    // Check each meta.json file to see if it's for a net-new module
     for (const metaFile of allMetaJsonFiles) {
-      const fieldsJsFileInfo = fieldsJsPaths.find(
-        f => f.outputPath === metaFile
-      );
-      const originalFilePath = fieldsJsFileInfo
-        ? fieldsJsFileInfo.filePath
-        : metaFile;
+      const fieldsJsFileInfo = fieldsJsPaths.find(f => f.outputPath === metaFile);
       const relativePath = metaFile.replace(
         fieldsJsFileInfo ? tmpDirRegex : regex,
         ''
       );
       const destPath = convertToUnixPath(path.join(dest, relativePath));
-
-      console.log('Uploading meta.json:', path.basename(metaFile));
-      _onAttemptCallback(originalFilePath, destPath);
-
-      try {
-        // Wait for complete upload and backend processing
-        await upload(accountId, metaFile, destPath, apiOptions);
-
-        // Log success immediately
-        logger.log(
-          i18n(`${i18nKey}.uploadFolder.success`, {
-            file: originalFilePath || '',
-            destPath,
-          })
-        );
-        console.log('Meta.json upload completed:', path.basename(metaFile));
-      } catch (err) {
-        if (isAuthError(err)) {
-          throw err;
-        }
-        _onFirstErrorCallback(metaFile, destPath, err);
-        failures.push({
-          file: metaFile,
-          destPath,
-        });
-        console.log('Meta.json upload failed:', path.basename(metaFile), err);
+      const modulePath = path.dirname(destPath); // Get module directory path
+      
+      const isNew = await isModuleNew(accountId, modulePath, apiOptions);
+      if (isNew) {
+        newModuleMetaFiles.push(metaFile);
+        console.log('Net-new module detected:', path.basename(metaFile));
+      } else {
+        existingModuleMetaFiles.push(metaFile);  
+        console.log('Existing module detected:', path.basename(metaFile));
       }
     }
-    console.log('All meta.json files completed. Starting remaining files...');
+
+    // Upload net-new module meta.json files sequentially
+    if (newModuleMetaFiles.length > 0) {
+      console.log('Uploading', newModuleMetaFiles.length, 'net-new module meta.json files sequentially');
+      
+      for (const metaFile of newModuleMetaFiles) {
+        const fieldsJsFileInfo = fieldsJsPaths.find(f => f.outputPath === metaFile);
+        const originalFilePath = fieldsJsFileInfo ? fieldsJsFileInfo.filePath : metaFile;
+        const relativePath = metaFile.replace(
+          fieldsJsFileInfo ? tmpDirRegex : regex,
+          ''
+        );
+        const destPath = convertToUnixPath(path.join(dest, relativePath));
+
+        console.log('Uploading net-new meta.json:', path.basename(metaFile));
+        _onAttemptCallback(originalFilePath, destPath);
+
+        try {
+          await upload(accountId, metaFile, destPath, apiOptions);
+          logger.log(
+            i18n(`${i18nKey}.uploadFolder.success`, {
+              file: originalFilePath || '',
+              destPath,
+            })
+          );
+          console.log('Net-new meta.json upload completed:', path.basename(metaFile));
+        } catch (err) {
+          if (isAuthError(err)) {
+            throw err;
+          }
+          _onFirstErrorCallback(metaFile, destPath, err);
+          failures.push({ file: metaFile, destPath });
+          console.log('Net-new meta.json upload failed:', path.basename(metaFile));
+        }
+      }
+    }
+
+    // Add existing module meta.json files to the concurrent upload stream
+    if (existingModuleMetaFiles.length > 0) {
+      console.log('Adding', existingModuleMetaFiles.length, 'existing module meta.json files to concurrent upload');
+      allOtherFiles.unshift(...existingModuleMetaFiles);
+    }
+
+    console.log('Meta.json processing completed. Starting remaining files...');
   }
 
   // Step 3: Upload all other files concurrently (after meta.json completes)
