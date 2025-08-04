@@ -8,8 +8,8 @@ import {
   cleanupTmpDirSync,
 } from './handleFieldsJS';
 import { getFileMapperQueryValues } from '../fileMapper';
-import { upload, download } from '../../api/fileMapper';
-import { isModuleFolderChild } from '../../utils/cms/modules';
+import { upload } from '../../api/fileMapper';
+import { isModuleFolderChild, isModuleNew } from '../../utils/cms/modules';
 import { escapeRegExp } from '../escapeRegExp';
 import { convertToUnixPath, getExt } from '../path';
 import { isAuthError, isHubSpotHttpError } from '../../errors';
@@ -54,22 +54,6 @@ function isMetaJsonFile(filePath: string): boolean {
   return path.basename(filePath).toLowerCase() === 'meta.json';
 }
 
-async function isModuleNew(
-  accountId: number, 
-  modulePath: string,
-  apiOptions: any
-): Promise<boolean> {
-  try {
-    await download(accountId, modulePath, apiOptions);
-    return false; // Module exists
-  } catch (error: any) {
-    if (error.response?.status === 404 || error.status === 404) {
-      return true; // Module doesn't exist (net-new)
-    }
-    // For other errors, assume module exists to be safe
-    return false;
-  }
-}
 
 export async function getFilesByType(
   filePaths: Array<string>,
