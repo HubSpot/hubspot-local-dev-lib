@@ -129,23 +129,6 @@ export async function getFilesByType(
     }
   }
 
-  // Log module files for debugging - meta.json will be uploaded with priority
-  if (filePathsByType[FILE_TYPES.module].length > 0) {
-    const metaJsonFiles =
-      filePathsByType[FILE_TYPES.module].filter(isMetaJsonFile);
-    const otherModuleFiles = filePathsByType[FILE_TYPES.module].filter(
-      f => !isMetaJsonFile(f)
-    );
-
-    console.log(
-      'Module files - Priority upload (meta.json):',
-      metaJsonFiles.map(f => path.basename(f))
-    );
-    console.log(
-      'Module files - Concurrent upload (others) waiting for meta.json:',
-      otherModuleFiles.map(f => path.basename(f))
-    );
-  }
 
   return [filePathsByType, fieldsJsObjects];
 }
@@ -311,8 +294,6 @@ export async function uploadFolder(
 
   // Step 2: Check which modules are net-new and upload meta.json accordingly
   if (allMetaJsonFiles.length > 0) {
-    console.log('Checking module existence for', allMetaJsonFiles.length, 'meta.json files');
-    
     const newModuleMetaFiles: string[] = [];
     const existingModuleMetaFiles: string[] = [];
 
@@ -329,17 +310,13 @@ export async function uploadFolder(
       const isNew = await isModuleNew(accountId, modulePath, apiOptions);
       if (isNew) {
         newModuleMetaFiles.push(metaFile);
-        console.log('Net-new module detected:', path.basename(metaFile));
       } else {
-        existingModuleMetaFiles.push(metaFile);  
-        console.log('Existing module detected:', path.basename(metaFile));
+        existingModuleMetaFiles.push(metaFile);
       }
     }
 
     // Upload net-new module meta.json files sequentially
     if (newModuleMetaFiles.length > 0) {
-      console.log('Uploading', newModuleMetaFiles.length, 'net-new module meta.json files sequentially');
-      
       for (const metaFile of newModuleMetaFiles) {
         const fieldsJsFileInfo = fieldsJsPaths.find(f => f.outputPath === metaFile);
         const originalFilePath = fieldsJsFileInfo ? fieldsJsFileInfo.filePath : metaFile;
@@ -349,45 +326,29 @@ export async function uploadFolder(
         );
         const destPath = convertToUnixPath(path.join(dest, relativePath));
 
-        console.log('Uploading net-new meta.json:', path.basename(metaFile));
         _onAttemptCallback(originalFilePath, destPath);
 
         try {
           await upload(accountId, metaFile, destPath, apiOptions);
-          logger.log(
-            i18n(`${i18nKey}.uploadFolder.success`, {
-              file: originalFilePath || '',
-              destPath,
-            })
-          );
-          console.log('Net-new meta.json upload completed:', path.basename(metaFile));
+          _onSuccessCallback(originalFilePath, destPath);
         } catch (err) {
           if (isAuthError(err)) {
             throw err;
           }
           _onFirstErrorCallback(metaFile, destPath, err);
           failures.push({ file: metaFile, destPath });
-          console.log('Net-new meta.json upload failed:', path.basename(metaFile));
         }
       }
     }
 
     // Add existing module meta.json files to the concurrent upload stream
     if (existingModuleMetaFiles.length > 0) {
-      console.log('Adding', existingModuleMetaFiles.length, 'existing module meta.json files to concurrent upload');
       allOtherFiles.unshift(...existingModuleMetaFiles);
     }
-
-    console.log('Meta.json processing completed. Starting remaining files...');
   }
 
   // Step 3: Upload all other files concurrently (after meta.json completes)
   if (allOtherFiles.length > 0) {
-    console.log(
-      'Uploading',
-      allOtherFiles.length,
-      'remaining files concurrently'
-    );
     await queue.addAll(allOtherFiles.map(uploadFile));
   }
 
