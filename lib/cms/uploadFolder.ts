@@ -50,6 +50,10 @@ function getFileType(filePath: string): FileType {
   }
 }
 
+function isMetaJsonFile(filePath: string): boolean {
+  return path.basename(filePath).toLowerCase() === 'meta.json';
+}
+
 export async function getFilesByType(
   filePaths: Array<string>,
   projectDir: string,
@@ -107,6 +111,25 @@ export async function getFilesByType(
       filePathsByType[fileType].push(filePath);
     }
   }
+
+  // Log module files for debugging - meta.json will be uploaded with priority
+  if (filePathsByType[FILE_TYPES.module].length > 0) {
+    const metaJsonFiles =
+      filePathsByType[FILE_TYPES.module].filter(isMetaJsonFile);
+    const otherModuleFiles = filePathsByType[FILE_TYPES.module].filter(
+      f => !isMetaJsonFile(f)
+    );
+
+    console.log(
+      'Module files - Priority upload (meta.json):',
+      metaJsonFiles.map(f => path.basename(f))
+    );
+    console.log(
+      'Module files - Concurrent upload (others) waiting for meta.json:',
+      otherModuleFiles.map(f => path.basename(f))
+    );
+  }
+
   return [filePathsByType, fieldsJsObjects];
 }
 
@@ -249,9 +272,85 @@ export async function uploadFolder(
     };
   }
 
+  // Step 1: Collect and separate meta.json files from all other files
+  const allMetaJsonFiles: string[] = [];
+  const allOtherFiles: string[] = [];
+
   for (let i = 0; i < fileList.length; i++) {
     const filesToUpload = fileList[i];
-    await queue.addAll(filesToUpload.map(uploadFile));
+    const fileType = Object.keys(filesByType)[i] as FileType;
+
+    if (fileType === FILE_TYPES.module) {
+      const metaJsonFiles = filesToUpload.filter(isMetaJsonFile);
+      const otherModuleFiles = filesToUpload.filter(f => !isMetaJsonFile(f));
+
+      allMetaJsonFiles.push(...metaJsonFiles);
+      allOtherFiles.push(...otherModuleFiles);
+    } else {
+      // Non-module files go to the "other files" stream
+      allOtherFiles.push(...filesToUpload);
+    }
+  }
+
+  // Step 2: Upload ALL meta.json files sequentially, one at a time
+  if (allMetaJsonFiles.length > 0) {
+    console.log(
+      'Starting sequential meta.json uploads for',
+      allMetaJsonFiles.length,
+      'files'
+    );
+
+    for (const metaFile of allMetaJsonFiles) {
+      const fieldsJsFileInfo = fieldsJsPaths.find(
+        f => f.outputPath === metaFile
+      );
+      const originalFilePath = fieldsJsFileInfo
+        ? fieldsJsFileInfo.filePath
+        : metaFile;
+      const relativePath = metaFile.replace(
+        fieldsJsFileInfo ? tmpDirRegex : regex,
+        ''
+      );
+      const destPath = convertToUnixPath(path.join(dest, relativePath));
+
+      console.log('Uploading meta.json:', path.basename(metaFile));
+      _onAttemptCallback(originalFilePath, destPath);
+
+      try {
+        // Wait for complete upload and backend processing
+        await upload(accountId, metaFile, destPath, apiOptions);
+
+        // Log success immediately
+        logger.log(
+          i18n(`${i18nKey}.uploadFolder.success`, {
+            file: originalFilePath || '',
+            destPath,
+          })
+        );
+        console.log('Meta.json upload completed:', path.basename(metaFile));
+      } catch (err) {
+        if (isAuthError(err)) {
+          throw err;
+        }
+        _onFirstErrorCallback(metaFile, destPath, err);
+        failures.push({
+          file: metaFile,
+          destPath,
+        });
+        console.log('Meta.json upload failed:', path.basename(metaFile), err);
+      }
+    }
+    console.log('All meta.json files completed. Starting remaining files...');
+  }
+
+  // Step 3: Upload all other files concurrently (after meta.json completes)
+  if (allOtherFiles.length > 0) {
+    console.log(
+      'Uploading',
+      allOtherFiles.length,
+      'remaining files concurrently'
+    );
+    await queue.addAll(allOtherFiles.map(uploadFile));
   }
 
   const results = await queue
