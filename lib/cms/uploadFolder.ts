@@ -62,16 +62,12 @@ function resolveUploadPath(
   dest: string
 ) {
   const fieldsJsFileInfo = fieldsJsPaths.find(f => f.outputPath === file);
-  const relativePath = file.replace(
-    fieldsJsFileInfo ? tmpDirRegex : regex,
-    ''
-  );
+  const relativePath = file.replace(fieldsJsFileInfo ? tmpDirRegex : regex, '');
   const destPath = convertToUnixPath(path.join(dest, relativePath));
   const originalFilePath = fieldsJsFileInfo ? fieldsJsFileInfo.filePath : file;
-  
+
   return { fieldsJsFileInfo, relativePath, destPath, originalFilePath };
 }
-
 
 export async function getFilesByType(
   filePaths: Array<string>,
@@ -130,7 +126,6 @@ export async function getFilesByType(
       filePathsByType[fileType].push(filePath);
     }
   }
-
 
   return [filePathsByType, fieldsJsObjects];
 }
@@ -275,15 +270,23 @@ export async function uploadFolder(
   }
 
   // Find and upload net-new module meta.json files first
-  const moduleMetaJsonFiles = filesByType[FILE_TYPES.module]?.filter(isMetaJsonFile) || [];
+  const moduleMetaJsonFiles =
+    filesByType[FILE_TYPES.module]?.filter(isMetaJsonFile) || [];
   const filesToUploadLater: string[] = [];
 
   // Batch check which modules are new - parallelize API calls for better performance
   const moduleChecks = await Promise.allSettled(
-    moduleMetaJsonFiles.map(async (metaFile) => {
-      const { destPath } = resolveUploadPath(metaFile, fieldsJsPaths, tmpDirRegex, regex, dest);
+    moduleMetaJsonFiles.map(async metaFile => {
+      const { destPath } = resolveUploadPath(
+        metaFile,
+        fieldsJsPaths,
+        tmpDirRegex,
+        regex,
+        dest
+      );
       const modulePath = path.dirname(destPath);
       const isNew = await isModuleNew(accountId, modulePath, apiOptions);
+      console.log('isNew', isNew);
       return { metaFile, isNew };
     })
   );
@@ -292,10 +295,16 @@ export async function uploadFolder(
   for (const result of moduleChecks) {
     if (result.status === 'fulfilled') {
       const { metaFile, isNew } = result.value;
-      
+
       if (isNew) {
         // Upload net-new meta.json file immediately
-        const { originalFilePath, destPath } = resolveUploadPath(metaFile, fieldsJsPaths, tmpDirRegex, regex, dest);
+        const { originalFilePath, destPath } = resolveUploadPath(
+          metaFile,
+          fieldsJsPaths,
+          tmpDirRegex,
+          regex,
+          dest
+        );
         _onAttemptCallback(originalFilePath, destPath);
 
         try {
@@ -314,8 +323,8 @@ export async function uploadFolder(
       }
     } else {
       // If module check failed, add to regular queue to be safe
-      const metaFile = moduleMetaJsonFiles.find(f => 
-        moduleChecks.indexOf(result) === moduleMetaJsonFiles.indexOf(f)
+      const metaFile = moduleMetaJsonFiles.find(
+        f => moduleChecks.indexOf(result) === moduleMetaJsonFiles.indexOf(f)
       );
       if (metaFile) {
         filesToUploadLater.push(metaFile);

@@ -62,7 +62,7 @@ export function isModuleFolderChild(
  * @returns Promise<boolean> - true if module is new (doesn't exist), false if it exists
  */
 export async function isModuleNew(
-  accountId: number, 
+  accountId: number,
   modulePath: string,
   apiOptions: any
 ): Promise<boolean> {
