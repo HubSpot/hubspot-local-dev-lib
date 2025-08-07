@@ -298,7 +298,7 @@ export async function uploadFolder(
   );
   const failures: Array<{ file: string; destPath: string }> = [];
   let fieldsJsPaths: Array<Partial<FieldsJs>> = [];
-  let tmpDirRegex: RegExp;
+  const tmpDirRegex = new RegExp(`^${escapeRegExp(tmpDir || '')}`);
 
   const [filesByType, fieldsJsObjects] = await getFilesByType(
     filePaths,
@@ -311,7 +311,6 @@ export async function uploadFolder(
     fieldsJsPaths = fieldsJsObjects.map(fieldsJs => {
       return { outputPath: fieldsJs.outputPath, filePath: fieldsJs.filePath };
     });
-    tmpDirRegex = new RegExp(`^${escapeRegExp(tmpDir || '')}`);
   }
 
   function uploadFile(file: string): () => Promise<void> {
