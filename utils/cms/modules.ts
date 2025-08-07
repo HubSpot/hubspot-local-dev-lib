@@ -3,7 +3,6 @@ import { getExt, splitHubSpotPath, splitLocalPath } from '../../lib/path';
 import { MODULE_EXTENSION } from '../../constants/extensions';
 import { PathInput } from '../../types/Modules';
 import { i18n } from '../lang';
-
 const i18nKey = 'utils.cms.modules';
 
 const isBool = (x: boolean | undefined) => !!x === x;
@@ -52,3 +51,4 @@ export function isModuleFolderChild(
     .slice(0, length - 1)
     .some(part => isModuleFolder({ ...pathInput, path: part }));
 }
+
