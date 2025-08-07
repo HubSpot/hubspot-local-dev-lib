@@ -99,9 +99,9 @@ describe('lib/cms/uploadFolder', () => {
       const uploadedFilesInOrder = [
         'folder/images/image.png',
         'folder/images/image.jpg',
+        'folder/sample.module/meta.json',
         'folder/sample.module/module.css',
         'folder/sample.module/module.js',
-        'folder/sample.module/meta.json',
         'folder/sample.module/module.html',
         'folder/css/file.css',
         'folder/js/file.js',
