@@ -14,7 +14,7 @@ export type QueryParams = {
 };
 
 export type FormData = {
-  [key: string]: string | ReadStream | Array<ReadStream>;
+  [key: string]: string | ReadStream;
 };
 
 export type HttpOptions = {
