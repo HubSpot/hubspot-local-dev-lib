@@ -231,7 +231,7 @@ export async function uploadFolder(
     tmpDir,
     commandOptions
   );
-  const fileList = Object.values(filesByType);
+
   if (fieldsJsObjects.length) {
     fieldsJsPaths = fieldsJsObjects.map(fieldsJs => {
       return { outputPath: fieldsJs.outputPath, filePath: fieldsJs.filePath };
@@ -240,17 +240,13 @@ export async function uploadFolder(
   }
 
   function uploadFile(file: string): () => Promise<void> {
-    const fieldsJsFileInfo = fieldsJsPaths.find(f => f.outputPath === file);
-    const originalFilePath = fieldsJsFileInfo
-      ? fieldsJsFileInfo.filePath
-      : file;
-
-    // files in fieldsJsPaths always belong to the tmp directory.
-    const relativePath = file.replace(
-      fieldsJsFileInfo ? tmpDirRegex : regex,
-      ''
+    const { originalFilePath, destPath } = resolveUploadPath(
+      file,
+      fieldsJsPaths,
+      tmpDirRegex,
+      regex,
+      dest
     );
-    const destPath = convertToUnixPath(path.join(dest, relativePath));
     return async () => {
       _onAttemptCallback(originalFilePath, destPath);
       try {
@@ -277,34 +273,30 @@ export async function uploadFolder(
   // Batch check which modules are new - parallelize API calls for better performance
   const moduleChecks = await Promise.allSettled(
     moduleMetaJsonFiles.map(async metaFile => {
-      const { destPath } = resolveUploadPath(
+      const pathInfo = resolveUploadPath(
         metaFile,
         fieldsJsPaths,
         tmpDirRegex,
         regex,
         dest
       );
-      const modulePath = path.dirname(destPath);
+      const modulePath = path.dirname(pathInfo.destPath);
       const isNew = await isModuleNew(accountId, modulePath, apiOptions);
-      console.log('isNew', isNew);
-      return { metaFile, isNew };
+      return { metaFile, isNew, pathInfo };
     })
   );
 
   // Process results and upload net-new meta.json files sequentially
-  for (const result of moduleChecks) {
+  for (let i = 0; i < moduleChecks.length; i++) {
+    const result = moduleChecks[i];
+    const metaFile = moduleMetaJsonFiles[i];
+
     if (result.status === 'fulfilled') {
-      const { metaFile, isNew } = result.value;
+      const { isNew, pathInfo } = result.value;
 
       if (isNew) {
-        // Upload net-new meta.json file immediately
-        const { originalFilePath, destPath } = resolveUploadPath(
-          metaFile,
-          fieldsJsPaths,
-          tmpDirRegex,
-          regex,
-          dest
-        );
+        // Upload net-new meta.json file immediately using cached path info
+        const { originalFilePath, destPath } = pathInfo;
         _onAttemptCallback(originalFilePath, destPath);
 
         try {
@@ -323,12 +315,10 @@ export async function uploadFolder(
       }
     } else {
       // If module check failed, add to regular queue to be safe
-      const metaFile = moduleMetaJsonFiles.find(
-        f => moduleChecks.indexOf(result) === moduleMetaJsonFiles.indexOf(f)
+      logger.debug(
+        `Module existence check failed for ${path.basename(metaFile)}: ${result.reason}`
       );
-      if (metaFile) {
-        filesToUploadLater.push(metaFile);
-      }
+      filesToUploadLater.push(metaFile);
     }
   }
 
