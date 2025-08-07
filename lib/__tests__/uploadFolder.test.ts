@@ -97,9 +97,9 @@ describe('lib/cms/uploadFolder', () => {
       upload.mockResolvedValue(mockAxiosResponse());
 
       const uploadedFilesInOrder = [
+        'folder/sample.module/meta.json',
         'folder/images/image.png',
         'folder/images/image.jpg',
-        'folder/sample.module/meta.json',
         'folder/sample.module/module.css',
         'folder/sample.module/module.js',
         'folder/sample.module/module.html',
