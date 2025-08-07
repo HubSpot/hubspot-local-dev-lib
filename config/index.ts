@@ -203,6 +203,14 @@ export function updateAllowUsageTracking(isEnabled: boolean): void {
   }
 }
 
+export function updateAutoOpenBrowser(isEnabled: boolean): void {
+  if (CLIConfiguration.isActive()) {
+    CLIConfiguration.updateAutoOpenBrowser(isEnabled);
+  } else {
+    config_DEPRECATED.updateAutoOpenBrowser(isEnabled);
+  }
+}
+
 export function deleteConfigFile(): void {
   if (CLIConfiguration.isActive()) {
     newDeleteConfigFile();
@@ -211,11 +219,14 @@ export function deleteConfigFile(): void {
   }
 }
 
-export function isConfigFlagEnabled(flag: keyof CLIConfig): boolean {
+export function isConfigFlagEnabled(
+  flag: keyof CLIConfig,
+  defaultValue = false
+): boolean {
   if (CLIConfiguration.isActive()) {
-    return CLIConfiguration.isConfigFlagEnabled(flag);
+    return CLIConfiguration.isConfigFlagEnabled(flag, defaultValue);
   }
-  return config_DEPRECATED.isConfigFlagEnabled(flag);
+  return config_DEPRECATED.isConfigFlagEnabled(flag, defaultValue);
 }
 
 export function isTrackingAllowed() {
@@ -285,6 +296,29 @@ export function getCWDAccountOverride() {
 export function getDefaultAccountOverrideFilePath() {
   if (CLIConfiguration.isActive()) {
     return CLIConfiguration.getDefaultAccountOverrideFilePath();
+  }
+}
+
+export function hasLocalStateFlag(flag: string): boolean {
+  if (CLIConfiguration.isActive()) {
+    return CLIConfiguration.hasLocalStateFlag(flag);
+  }
+  return config_DEPRECATED.hasLocalStateFlag(flag);
+}
+
+export function addLocalStateFlag(flag: string): void {
+  if (CLIConfiguration.isActive()) {
+    CLIConfiguration.addLocalStateFlag(flag);
+  } else {
+    config_DEPRECATED.addLocalStateFlag(flag);
+  }
+}
+
+export function removeLocalStateFlag(flag: string): void {
+  if (CLIConfiguration.isActive()) {
+    CLIConfiguration.removeLocalStateFlag(flag);
+  } else {
+    config_DEPRECATED.removeLocalStateFlag(flag);
   }
 }
 

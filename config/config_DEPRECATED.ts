@@ -662,6 +662,20 @@ export function updateAllowUsageTracking(isEnabled: boolean): void {
   writeConfig();
 }
 
+export function updateAutoOpenBrowser(isEnabled: boolean): void {
+  if (typeof isEnabled !== 'boolean') {
+    throw new Error(
+      `Unable to update autoOpenBrowser. The value ${isEnabled} is invalid. The value must be a boolean.`
+    );
+  }
+
+  const config = getAndLoadConfigIfNeeded();
+  config.autoOpenBrowser = isEnabled;
+
+  setDefaultConfigPathIfUnset();
+  writeConfig();
+}
+
 /**
  * @throws {Error}
  */
@@ -911,14 +925,17 @@ function loadEnvironmentVariableConfig(options: {
   return setConfig(handleLegacyCmsPublishMode(envConfig));
 }
 
-export function isConfigFlagEnabled(flag: keyof CLIConfig_DEPRECATED): boolean {
+export function isConfigFlagEnabled(
+  flag: keyof CLIConfig_DEPRECATED,
+  defaultValue = false
+): boolean {
   if (!configFileExists() || configFileIsBlank()) {
-    return false;
+    return defaultValue;
   }
 
   const config = getAndLoadConfigIfNeeded();
 
-  return Boolean(config[flag] || false);
+  return Boolean(config[flag] || defaultValue);
 }
 
 function handleLegacyCmsPublishMode(
@@ -929,4 +946,34 @@ function handleLegacyCmsPublishMode(
     delete config.defaultMode;
   }
   return config;
+}
+
+export function hasLocalStateFlag(flag: string): boolean {
+  if (!_config) {
+    return false;
+  }
+
+  return _config.flags?.includes(flag) || false;
+}
+
+export function addLocalStateFlag(flag: string): void {
+  if (!_config) {
+    throw new Error('No config loaded');
+  }
+
+  if (!hasLocalStateFlag(flag)) {
+    _config.flags = [...(_config.flags || []), flag];
+  }
+
+  writeConfig();
+}
+
+export function removeLocalStateFlag(flag: string): void {
+  if (!_config) {
+    throw new Error('No config loaded');
+  }
+
+  _config.flags = _config.flags?.filter(f => f !== flag) || [];
+
+  writeConfig();
 }

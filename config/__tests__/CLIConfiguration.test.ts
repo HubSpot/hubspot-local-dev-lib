@@ -141,4 +141,88 @@ describe('config/CLIConfiguration', () => {
       expect(config.isTrackingAllowed()).toBe(true);
     });
   });
+
+  describe('hasLocalStateFlag()', () => {
+    it('returns false when no config is loaded', () => {
+      expect(config.hasLocalStateFlag('test-flag')).toBe(false);
+    });
+
+    it('returns false when flag is not in config flags array', () => {
+      config.config = { accounts: [], flags: ['other-flag'] };
+      expect(config.hasLocalStateFlag('test-flag')).toBe(false);
+    });
+
+    it('returns true when flag is in config flags array', () => {
+      config.config = { accounts: [], flags: ['test-flag', 'other-flag'] };
+      expect(config.hasLocalStateFlag('test-flag')).toBe(true);
+    });
+  });
+
+  describe('addLocalStateFlag()', () => {
+    beforeEach(() => {
+      // Mock the write method to prevent actual file operations
+      jest.spyOn(config, 'write').mockImplementation(() => null);
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('throws when no config is loaded', () => {
+      config.config = null;
+      expect(() => {
+        config.addLocalStateFlag('test-flag');
+      }).toThrow();
+    });
+
+    it('adds flag when flags array does not exist', () => {
+      config.config = { accounts: [] };
+      config.addLocalStateFlag('test-flag');
+
+      expect(config.config.flags).toEqual(['test-flag']);
+      expect(config.write).toHaveBeenCalled();
+    });
+
+    it('adds flag to existing flags array', () => {
+      config.config = { accounts: [], flags: ['existing-flag'] };
+      config.addLocalStateFlag('test-flag');
+
+      expect(config.config.flags).toEqual(['existing-flag', 'test-flag']);
+      expect(config.write).toHaveBeenCalled();
+    });
+  });
+
+  describe('removeLocalStateFlag()', () => {
+    beforeEach(() => {
+      // Mock the write method to prevent actual file operations
+      jest.spyOn(config, 'write').mockImplementation(() => null);
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('throws when no config is loaded', () => {
+      config.config = null;
+      expect(() => {
+        config.removeLocalStateFlag('test-flag');
+      }).toThrow();
+    });
+
+    it('removes flag from flags array', () => {
+      config.config = { accounts: [], flags: ['test-flag', 'other-flag'] };
+      config.removeLocalStateFlag('test-flag');
+
+      expect(config.config.flags).toEqual(['other-flag']);
+      expect(config.write).toHaveBeenCalled();
+    });
+
+    it('handles removing non-existent flag gracefully', () => {
+      config.config = { accounts: [], flags: ['existing-flag'] };
+      config.removeLocalStateFlag('non-existent-flag');
+
+      expect(config.config.flags).toEqual(['existing-flag']);
+      expect(config.write).toHaveBeenCalled();
+    });
+  });
 });
