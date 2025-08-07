@@ -3,8 +3,6 @@ import { getExt, splitHubSpotPath, splitLocalPath } from '../../lib/path';
 import { MODULE_EXTENSION } from '../../constants/extensions';
 import { PathInput } from '../../types/Modules';
 import { i18n } from '../lang';
-import { download } from '../../api/fileMapper';
-
 const i18nKey = 'utils.cms.modules';
 
 const isBool = (x: boolean | undefined) => !!x === x;
@@ -54,26 +52,3 @@ export function isModuleFolderChild(
     .some(part => isModuleFolder({ ...pathInput, path: part }));
 }
 
-/**
- * Checks if a module is new (doesn't exist on the server yet) by attempting to download it.
- * @param accountId The HubSpot account ID
- * @param modulePath The module path to check
- * @param apiOptions API options for the request
- * @returns Promise<boolean> - true if module is new (doesn't exist), false if it exists
- */
-export async function isModuleNew(
-  accountId: number,
-  modulePath: string,
-  apiOptions: any
-): Promise<boolean> {
-  try {
-    await download(accountId, modulePath, apiOptions);
-    return false; // Module exists
-  } catch (error: any) {
-    if (error.response?.status === 404 || error.status === 404) {
-      return true; // Module doesn't exist (net-new)
-    }
-    // For other errors, assume module exists to be safe
-    return false;
-  }
-}

@@ -192,11 +192,8 @@ async function uploadMetaJsonFiles(
 ): Promise<void> {
   const moduleMetaJsonFiles = moduleFiles.filter(isMetaJsonFile);
   
-  console.log(`Found ${moduleMetaJsonFiles.length} meta.json files to upload first`);
   if (moduleMetaJsonFiles.length > 0) {
-    console.log('Uploading meta.json files:', moduleMetaJsonFiles.map(f => path.basename(f)));
     await queue.addAll(moduleMetaJsonFiles.map(uploadFile));
-    console.log('Completed uploading all meta.json files');
   }
 }
 export async function uploadFolder(
@@ -279,7 +276,6 @@ export async function uploadFolder(
   }
 
   // Upload all meta.json files first
-  console.log('Starting meta.json file upload phase...');
   await uploadMetaJsonFiles(filesByType[FILE_TYPES.module] || [], uploadFile);
 
   // Collect all remaining files for upload
@@ -287,21 +283,16 @@ export async function uploadFolder(
   Object.entries(filesByType).forEach(([fileType, files]) => {
     if (fileType === FILE_TYPES.module) {
       // Add non-meta.json module files
-      const nonMetaModuleFiles = files.filter(f => !isMetaJsonFile(f));
-      console.log(`Adding ${nonMetaModuleFiles.length} non-meta.json module files to deferred queue`);
-      deferredFiles.push(...nonMetaModuleFiles);
+      deferredFiles.push(...files.filter(f => !isMetaJsonFile(f)));
     } else {
       // Add all non-module files
-      console.log(`Adding ${files.length} ${fileType} files to deferred queue`);
       deferredFiles.push(...files);
     }
   });
 
   // Upload all remaining files concurrently
-  console.log(`Starting concurrent upload of ${deferredFiles.length} remaining files...`);
   if (deferredFiles.length > 0) {
     await queue.addAll(deferredFiles.map(uploadFile));
-    console.log('Completed uploading all remaining files');
   }
 
   const results = await queue
