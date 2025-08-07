@@ -96,6 +96,7 @@ describe('lib/cms/uploadFolder', () => {
       walk.mockResolvedValue(filesProto);
       upload.mockResolvedValue(mockAxiosResponse());
 
+      // meta.json should be uploaded first, then the rest of the files
       const uploadedFilesInOrder = [
         'folder/sample.module/meta.json',
         'folder/images/image.png',
