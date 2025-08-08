@@ -78,6 +78,14 @@
         "invalidPersonalAccessKey": "Error while retrieving new access token: {{ errorMessage }}"
       }
     },
+    "crm": {
+      "importData": {
+        "errors": {
+          "fileNotFound": "The file {{ fileName }} does not exist",
+          "notJson": "You must provide a JSON file for the import data request schema."
+        }
+      }
+    },
     "cms": {
       "modules": {
         "createModule": {
