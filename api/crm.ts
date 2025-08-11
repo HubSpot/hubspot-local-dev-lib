@@ -5,7 +5,7 @@ import FormData from 'form-data';
 import { http } from '../http';
 import { getCwd } from '../lib/path';
 import { HubSpotPromise } from '../types/Http';
-import { ImportRequest } from '../types/Crm';
+import { ImportRequest, ImportResponse } from '../types/Crm';
 
 const HUBSPOT_CRM_IMPORT_PATH = '/crm/v3/imports';
 
@@ -13,7 +13,7 @@ export function createImport(
   accountId: number,
   importRequest: ImportRequest,
   dataFileNames: string[]
-): HubSpotPromise {
+): HubSpotPromise<ImportResponse> {
   const jsonImportRequest = JSON.stringify(importRequest);
 
   const formData = new FormData();

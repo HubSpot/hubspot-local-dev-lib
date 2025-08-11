@@ -21,3 +21,8 @@ export interface ImportRequest {
     };
   }>;
 }
+
+export interface ImportResponse {
+  id: string;
+  state: 'STARTED' | 'PROCESSING' | 'DONE' | 'FAILED' | 'CANCELED' | 'DEFERRED';
+}
