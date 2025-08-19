@@ -18,6 +18,16 @@ export function getImportDataRequest(fileName: string): {
     file => file.fileName
   );
 
+  // allow relative paths in the provided import request
+  importRequest.files = importRequest.files.map(file => ({
+    ...file,
+    fileName: path.basename(file.fileName),
+  }));
+
+  if (dataFileNames.length === 0) {
+    throw new Error(i18n('lib.crm.importData.errors.noFiles'));
+  }
+
   dataFileNames.forEach(fileName => {
     if (!fileExists(fileName)) {
       throw new Error(
