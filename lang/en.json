@@ -82,7 +82,8 @@
       "importData": {
         "errors": {
           "fileNotFound": "The file {{ fileName }} does not exist",
-          "notJson": "You must provide a JSON file for the import data request schema."
+          "notJson": "You must provide a JSON file for the import data request schema.",
+          "noFiles": "You must provide at least one data file for the import data request schema."
         }
       }
     },
