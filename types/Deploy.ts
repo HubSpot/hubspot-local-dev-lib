@@ -46,7 +46,7 @@ export type ProjectDeployResponseQueued = {
   links: { status: string };
 };
 
-type SubdeployValidationIssue = {
+export type SubdeployValidationIssue = {
   uid: string;
   componentTypeName: string;
   errorMessages: string[];
