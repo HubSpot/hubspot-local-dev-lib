@@ -252,13 +252,13 @@
         "empty": "The config file was empty. Initializing an empty config."
       },
       "validate": {
-        "noConfig": "Valiation failed: No config was found.",
-        "noConfigAccounts": "Valiation failed: config.accounts[] is not defined.",
-        "emptyAccountConfig": "Valiation failed: config.accounts[] has an empty entry.",
-        "noAccountId": "Valiation failed: config.accounts[] has an entry missing accountId.",
-        "duplicateAccountIds": "Valiation failed: config.accounts[] has multiple entries with {{ accountId }}.",
-        "duplicateAccountNames": "Valiation failed: config.accounts[] has multiple entries with {{ accountName }}.",
-        "nameContainsSpaces": "Valiation failed: config.name {{ accountName }} cannot contain spaces."
+        "noConfig": "Validation failed: No config was found.",
+        "noConfigAccounts": "Validation failed: config.accounts[] is not defined.",
+        "emptyAccountConfig": "Validation failed: config.accounts[] has an empty entry.",
+        "noAccountId": "Validation failed: config.accounts[] has an entry missing accountId.",
+        "duplicateAccountIds": "Validation failed: config.accounts[] has multiple entries with {{ accountId }}.",
+        "duplicateAccountNames": "Validation failed: config.accounts[] has multiple entries with {{ accountName }}.",
+        "nameContainsSpaces": "Validation failed: config.name {{ accountName }} cannot contain spaces."
       },
       "updateAccount": {
         "noConfigToUpdate": "No config to update.",
