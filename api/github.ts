@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { ResponseType } from 'axios';
 import { getDefaultUserAgentHeader } from '../http/getAxiosConfig';
 import { GithubReleaseData, GithubRepoFile, RepoPath } from '../types/Github';
 import { HubSpotPromise } from '../types/Http';
@@ -27,6 +27,34 @@ function getAdditionalHeaders(): AdditionalGitHubHeaders {
   return headers;
 }
 
+function githubRequestWithFallback<T>(
+  url: string,
+  responseType?: ResponseType
+): HubSpotPromise<T> {
+  const headersWithAuth = {
+    ...getDefaultUserAgentHeader(),
+    ...getAdditionalHeaders(),
+  };
+
+  if (headersWithAuth.authorization) {
+    return axios
+      .get<T>(url, { headers: headersWithAuth, responseType })
+      .catch(error => {
+        // 404 with an auth token might mean an SSO issue so retry without the authorization header
+        if (error.response?.status === 404) {
+          return axios.get<T>(url, {
+            headers: { ...getDefaultUserAgentHeader() },
+            responseType,
+          });
+        }
+        throw error;
+      });
+  }
+
+  // No auth token, proceed normally
+  return axios.get<T>(url, { headers: headersWithAuth, responseType });
+}
+
 // Returns information about the repo's releases. Defaults to "latest" if no tag is provided
 // https://docs.github.com/en/rest/releases/releases?apiVersion=2022-11-28#get-a-release-by-tag-name
 export function fetchRepoReleaseData(
@@ -35,14 +63,8 @@ export function fetchRepoReleaseData(
 ): HubSpotPromise<GithubReleaseData> {
   const URL = `${GITHUB_REPOS_API}/${repoPath}/releases`;
 
-  return axios.get<GithubReleaseData>(
-    `${URL}/${tag ? `tags/${tag}` : 'latest'}`,
-    {
-      headers: {
-        ...getDefaultUserAgentHeader(),
-        ...getAdditionalHeaders(),
-      },
-    }
+  return githubRequestWithFallback<GithubReleaseData>(
+    `${URL}/${tag ? `tags/${tag}` : 'latest'}`
   );
 }
 
@@ -61,25 +83,15 @@ export function fetchRepoFile<T = Buffer>(
   filePath: string,
   ref: string
 ): HubSpotPromise<T> {
-  return axios.get<T>(
-    `${GITHUB_RAW_CONTENT_API_PATH}/${repoPath}/${ref}/${filePath}`,
-    {
-      headers: {
-        ...getDefaultUserAgentHeader(),
-        ...getAdditionalHeaders(),
-      },
-    }
-  );
+  const url = `${GITHUB_RAW_CONTENT_API_PATH}/${repoPath}/${ref}/${filePath}`;
+  return githubRequestWithFallback<T>(url);
 }
 
 // Returns the raw file contents via the raw.githubusercontent endpoint
 export function fetchRepoFileByDownloadUrl(
   downloadUrl: string
 ): HubSpotPromise<Buffer> {
-  return axios.get<Buffer>(downloadUrl, {
-    headers: { ...getDefaultUserAgentHeader(), ...getAdditionalHeaders() },
-    responseType: 'arraybuffer',
-  });
+  return githubRequestWithFallback<Buffer>(downloadUrl, 'arraybuffer');
 }
 
 // Returns the contents of a file or directory in a repository by path
@@ -91,13 +103,7 @@ export function fetchRepoContents(
 ): HubSpotPromise<Array<GithubRepoFile>> {
   const refQuery = ref ? `?ref=${ref}` : '';
 
-  return axios.get<Array<GithubRepoFile>>(
-    `${GITHUB_REPOS_API}/${repoPath}/contents/${path}${refQuery}`,
-    {
-      headers: {
-        ...getDefaultUserAgentHeader(),
-        ...getAdditionalHeaders(),
-      },
-    }
+  return githubRequestWithFallback<Array<GithubRepoFile>>(
+    `${GITHUB_REPOS_API}/${repoPath}/contents/${path}${refQuery}`
   );
 }
