@@ -2,6 +2,7 @@ import axios, { ResponseType } from 'axios';
 import { getDefaultUserAgentHeader } from '../http/getAxiosConfig';
 import { GithubReleaseData, GithubRepoFile, RepoPath } from '../types/Github';
 import { HubSpotPromise } from '../types/Http';
+import { isSpecifiedError } from '../errors';
 
 const GITHUB_REPOS_API = 'https://api.github.com/repos';
 const GITHUB_RAW_CONTENT_API_PATH = 'https://raw.githubusercontent.com';
@@ -41,7 +42,7 @@ function githubRequestWithFallback<T>(
       .get<T>(url, { headers: headersWithAuth, responseType })
       .catch(error => {
         // 404 with an auth token might mean an SSO issue so retry without the authorization header
-        if (error.response?.status === 404) {
+        if (isSpecifiedError(error, { statusCode: 404 })) {
           return axios.get<T>(url, {
             headers: { ...getDefaultUserAgentHeader() },
             responseType,
@@ -83,7 +84,7 @@ export function fetchRepoFile<T = Buffer>(
   filePath: string,
   ref: string
 ): HubSpotPromise<T> {
-  const url = `${GITHUB_RAW_CONTENT_API_PATH}/${repoPath}/${ref}/${filePath}`;
+  const url = `${GITHUB_RAW_CONTENT_API_PATH}/${repoPath}/${ref}/${filePath}dd`;
   return githubRequestWithFallback<T>(url);
 }
 
