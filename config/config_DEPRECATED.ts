@@ -17,7 +17,6 @@ import {
 import { CMS_PUBLISH_MODE } from '../constants/files';
 import { getValidEnv } from '../lib/environment';
 import { logger } from '../lib/logger';
-import { isConfigPathInGitRepo } from '../utils/git';
 import {
   logErrorInstance,
   logFileSystemErrorInstance,
@@ -242,11 +241,10 @@ function readConfigFile(): { source?: string; error?: BaseError } {
     return { source, error };
   }
   try {
-    isConfigPathInGitRepo(_configPath);
     source = fs.readFileSync(_configPath);
   } catch (err) {
     error = err as BaseError;
-    logger.error('Config file could not be read "%s"', _configPath);
+    logger.error(`Config file could not be read: ${_configPath}`);
     logFileSystemErrorInstance(error, {
       filepath: _configPath,
       operation: 'read',
@@ -268,7 +266,7 @@ function parseConfig(configSource?: string): {
     parsed = yaml.load(configSource) as CLIConfig_DEPRECATED;
   } catch (err) {
     error = err as BaseError;
-    logger.error('Config file could not be parsed "%s"', _configPath);
+    logger.error(`Config file could not be parsed: ${_configPath}`);
     logErrorInstance(err as BaseError);
   }
   return { parsed, error };
