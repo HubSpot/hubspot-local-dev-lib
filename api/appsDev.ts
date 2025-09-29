@@ -59,3 +59,15 @@ export function installStaticAuthAppOnTestAccount(
     },
   });
 }
+
+export function fetchAppMetadataByUid(
+  appUid: string,
+  accountId: number
+): HubSpotPromise<PublicApp> {
+  return http.get<PublicApp>(accountId, {
+    url: `${APPS_DEV_API_PATH}/full/portal/sourceId`,
+    params: {
+      sourceId: appUid,
+    },
+  });
+}
