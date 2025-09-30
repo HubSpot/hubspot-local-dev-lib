@@ -84,7 +84,7 @@ export function fetchRepoFile<T = Buffer>(
   filePath: string,
   ref: string
 ): HubSpotPromise<T> {
-  const url = `${GITHUB_RAW_CONTENT_API_PATH}/${repoPath}/${ref}/${filePath}dd`;
+  const url = `${GITHUB_RAW_CONTENT_API_PATH}/${repoPath}/${ref}/${filePath}`;
   return githubRequestWithFallback<T>(url);
 }
 
