@@ -51,4 +51,3 @@ export function isModuleFolderChild(
     .slice(0, length - 1)
     .some(part => isModuleFolder({ ...pathInput, path: part }));
 }
-
