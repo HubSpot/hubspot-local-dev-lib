@@ -191,7 +191,7 @@ async function uploadMetaJsonFiles(
   uploadFile: (file: string) => () => Promise<void>
 ): Promise<void> {
   const moduleMetaJsonFiles = moduleFiles.filter(isMetaJsonFile);
-  
+
   if (moduleMetaJsonFiles.length > 0) {
     await queue.addAll(moduleMetaJsonFiles.map(uploadFile));
   }
