@@ -168,5 +168,17 @@ describe('lib/portManager', () => {
       expect(port1).toBe(PORT_1);
       expect(port2).toBe(PORT_2);
     });
+
+    it('throws an error for unknown server instances', async () => {
+      await expect(
+        getServerPortByInstanceId('unknown-instance')
+      ).rejects.toThrow();
+    });
+
+    it('throws an error when requesting port for deleted server instance', async () => {
+      await requestPorts(PORT_DATA);
+      await deleteServerInstance(INSTANCE_ID_1);
+      await expect(getServerPortByInstanceId(INSTANCE_ID_1)).rejects.toThrow();
+    });
   });
 });
