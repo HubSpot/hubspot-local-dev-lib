@@ -5,15 +5,15 @@ import {
   listGithubRepoContents,
   fetchFileFromRepository,
   fetchGitHubRepoContentFromDownloadUrl,
-} from '../github';
+} from '../github.js';
 import {
   fetchRepoFile as __fetchRepoFile,
   fetchRepoReleaseData as __fetchRepoReleaseData,
   fetchRepoAsZip as __fetchRepoAsZip,
   fetchRepoContents as __fetchRepoContents,
   fetchRepoFileByDownloadUrl as __fetchRepoFileByDownloadUrl,
-} from '../../api/github';
-import { extractZipArchive as __extractZipArchive } from '../archive';
+} from '../../api/github.js';
+import { extractZipArchive as __extractZipArchive } from '../archive.js';
 
 jest.mock('fs-extra');
 jest.mock('../../api/github');

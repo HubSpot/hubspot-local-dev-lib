@@ -1,9 +1,9 @@
-import { CLIAccount } from '../types/Accounts';
+import { CLIAccount } from '../types/Accounts.js';
 import {
   CLIConfig,
   CLIConfig_DEPRECATED,
   CLIConfig_NEW,
-} from '../types/Config';
+} from '../types/Config.js';
 
 export function getAccounts(config?: CLIConfig | null): Array<CLIAccount> {
   if (!config) {

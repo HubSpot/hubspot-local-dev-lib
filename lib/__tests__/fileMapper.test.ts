@@ -8,13 +8,13 @@ import {
   fetchFolderFromApi,
   getTypeDataFromPath,
   downloadFileOrFolder,
-} from '../fileMapper';
+} from '../fileMapper.js';
 import {
   download as __download,
   fetchFileStream as __fetchFileStream,
-} from '../../api/fileMapper';
+} from '../../api/fileMapper.js';
 import folderWithoutSources from './fixtures/fileMapper/folderWithoutSources.json';
-import { mockAxiosResponse } from './__utils__/mockAxiosResponse';
+import { mockAxiosResponse } from './__utils__/mockAxiosResponse.js';
 
 jest.mock('../../api/fileMapper');
 const utimesSpy = jest.spyOn(fs, 'utimes');

@@ -1,8 +1,8 @@
-import { uploadFolder } from '../fileManager';
-import { uploadFile } from '../../api/fileManager';
-import { walk } from '../fs';
-import { createIgnoreFilter } from '../ignoreRules';
-import { mockAxiosResponse } from './__utils__/mockAxiosResponse';
+import { uploadFolder } from '../fileManager.js';
+import { uploadFile } from '../../api/fileManager.js';
+import { walk } from '../fs.js';
+import { createIgnoreFilter } from '../ignoreRules.js';
+import { mockAxiosResponse } from './__utils__/mockAxiosResponse.js';
 
 jest.mock('../fs');
 jest.mock('../../api/fileManager');

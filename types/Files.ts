@@ -1,11 +1,11 @@
-import { ValueOf } from '../types/Utils';
+import { ValueOf } from '../types/Utils.js';
 import {
   STAT_TYPES,
   FILE_TYPES,
   FILE_UPLOAD_RESULT_TYPES,
-} from '../constants/files';
-import { CMS_PUBLISH_MODE } from '../constants/files';
-import { HttpOptions } from './Http';
+} from '../constants/files.js';
+import { CMS_PUBLISH_MODE } from '../constants/files.js';
+import { HttpOptions } from './Http.js';
 import { AxiosError } from 'axios';
 
 export type StatType = ValueOf<typeof STAT_TYPES>;

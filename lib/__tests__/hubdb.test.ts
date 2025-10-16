@@ -3,21 +3,21 @@ import {
   downloadHubDbTable,
   createHubDbTable,
   clearHubDbTableRows,
-} from '../hubdb';
+} from '../hubdb.js';
 import {
   createRows as __createRows,
   createTable as __createTable,
   fetchRows as __fetchRows,
   fetchTable as __fetchTable,
   publishTable as __publishTable,
-} from '../../api/hubdb';
-import { getCwd as __getCwd } from '../path';
+} from '../../api/hubdb.js';
+import { getCwd as __getCwd } from '../path.js';
 import hubdbFetchRowResponse from './fixtures/hubdb/fetchRowsResponse.json';
 import hubdbFetchRowsResponseWithPaging from './fixtures/hubdb/fetchRowsResponseWithPaging.json';
 import hubdbTableResponse from './fixtures/hubdb/tableResponse.json';
 import hubdbCreateRowsResponse from './fixtures/hubdb/createRowsResponse.json';
-import { Table } from '../../types/Hubdb';
-import { mockAxiosResponse } from './__utils__/mockAxiosResponse';
+import { Table } from '../../types/Hubdb.js';
+import { mockAxiosResponse } from './__utils__/mockAxiosResponse.js';
 
 jest.mock('fs-extra');
 jest.mock('../path');

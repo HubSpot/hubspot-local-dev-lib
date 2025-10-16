@@ -1,31 +1,31 @@
 import moment from 'moment';
-import { ENVIRONMENTS } from '../constants/environments';
-import { PERSONAL_ACCESS_KEY_AUTH_METHOD } from '../constants/auth';
+import { ENVIRONMENTS } from '../constants/environments.js';
+import { PERSONAL_ACCESS_KEY_AUTH_METHOD } from '../constants/auth.js';
 import {
   fetchAccessToken,
   fetchScopeAuthorizationData,
-} from '../api/localDevAuth';
-import { fetchSandboxHubData } from '../api/sandboxHubs';
+} from '../api/localDevAuth.js';
+import { fetchSandboxHubData } from '../api/sandboxHubs.js';
 import {
   CLIAccount,
   PersonalAccessKeyAccount,
   ScopeGroupAuthorization,
-} from '../types/Accounts';
-import { Environment } from '../types/Config';
+} from '../types/Accounts.js';
+import { Environment } from '../types/Config.js';
 import {
   getAccountConfig,
   updateAccountConfig,
   writeConfig,
   getEnv,
   updateDefaultAccount,
-} from '../config';
-import { HUBSPOT_ACCOUNT_TYPES } from '../constants/config';
-import { fetchDeveloperTestAccountData } from '../api/developerTestAccounts';
-import { logger } from './logger';
-import { CLIConfiguration } from '../config/CLIConfiguration';
-import { i18n } from '../utils/lang';
-import { isHubSpotHttpError } from '../errors';
-import { AccessToken } from '../types/Accounts';
+} from '../config/index.js';
+import { HUBSPOT_ACCOUNT_TYPES } from '../constants/config.js';
+import { fetchDeveloperTestAccountData } from '../api/developerTestAccounts.js';
+import { logger } from './logger.js';
+import { CLIConfiguration } from '../config/CLIConfiguration.js';
+import { i18n } from '../utils/lang.js';
+import { isHubSpotHttpError } from '../errors/index.js';
+import { AccessToken } from '../types/Accounts.js';
 
 const i18nKey = 'lib.personalAccessKey';
 

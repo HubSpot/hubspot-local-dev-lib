@@ -1,4 +1,4 @@
-import { commaSeparatedValues, toKebabCase } from '../text';
+import { commaSeparatedValues, toKebabCase } from '../text.js';
 
 describe('lib/text', () => {
   describe('commaSeparatedValues()', () => {

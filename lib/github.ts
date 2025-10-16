@@ -1,28 +1,28 @@
 import path from 'path';
 import fs from 'fs-extra';
 
-import { extractZipArchive } from './archive';
-import { logger } from './logger';
+import { extractZipArchive } from './archive.js';
+import { logger } from './logger.js';
 import {
   GithubReleaseData,
   GithubRepoFile,
   RepoPath,
   DownloadGithubRepoZipOptions,
   CloneGithubRepoOptions,
-} from '../types/Github';
+} from '../types/Github.js';
 import {
   fetchRepoFile,
   fetchRepoFileByDownloadUrl,
   fetchRepoAsZip,
   fetchRepoReleaseData,
   fetchRepoContents,
-} from '../api/github';
-import { i18n } from '../utils/lang';
+} from '../api/github.js';
+import { i18n } from '../utils/lang.js';
 import {
   isGithubRateLimitError,
   isHubSpotHttpError,
   isSystemError,
-} from '../errors';
+} from '../errors/index.js';
 
 const i18nKey = 'lib.github';
 

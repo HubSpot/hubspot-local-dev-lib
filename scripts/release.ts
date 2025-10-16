@@ -1,6 +1,6 @@
 import { buildReleaseScript } from '@hubspot/npm-scripts/src/release';
 import path from 'path';
-import { build } from './lib/build';
+import { build } from './lib/build.js';
 
 const packageJsonLocation = path.resolve(
   path.join(__dirname, '..', 'package.json')

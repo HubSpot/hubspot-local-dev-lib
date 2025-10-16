@@ -10,8 +10,8 @@ import {
   sanitizeFileName,
   isValidPath,
   untildify,
-} from '../path';
-import { ALLOWED_EXTENSIONS } from '../../constants/extensions';
+} from '../path.js';
+import { ALLOWED_EXTENSIONS } from '../../constants/extensions.js';
 
 jest.mock('os', () => ({
   homedir: jest.fn(),

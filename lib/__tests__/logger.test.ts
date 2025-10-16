@@ -7,7 +7,7 @@ import {
   LOG_LEVEL,
   logger,
   shouldLog,
-} from '../logger';
+} from '../logger.js';
 
 describe('lib/logger', () => {
   afterEach(() => {

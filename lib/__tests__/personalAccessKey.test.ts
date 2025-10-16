@@ -3,19 +3,19 @@ import {
   getAndLoadConfigIfNeeded as __getAndLoadConfigIfNeeded,
   getAccountConfig as __getAccountConfig,
   updateAccountConfig as __updateAccountConfig,
-} from '../../config';
-import { fetchAccessToken as __fetchAccessToken } from '../../api/localDevAuth';
-import { fetchSandboxHubData as __fetchSandboxHubData } from '../../api/sandboxHubs';
-import { fetchDeveloperTestAccountData as __fetchDeveloperTestAccountData } from '../../api/developerTestAccounts';
-import { ENVIRONMENTS } from '../../constants/environments';
-import { HUBSPOT_ACCOUNT_TYPES } from '../../constants/config';
+} from '../../config/index.js';
+import { fetchAccessToken as __fetchAccessToken } from '../../api/localDevAuth.js';
+import { fetchSandboxHubData as __fetchSandboxHubData } from '../../api/sandboxHubs.js';
+import { fetchDeveloperTestAccountData as __fetchDeveloperTestAccountData } from '../../api/developerTestAccounts.js';
+import { ENVIRONMENTS } from '../../constants/environments.js';
+import { HUBSPOT_ACCOUNT_TYPES } from '../../constants/config.js';
 import {
   accessTokenForPersonalAccessKey,
   getAccessToken,
   updateConfigWithAccessToken,
-} from '../personalAccessKey';
-import { AuthType } from '../../types/Accounts';
-import { mockAxiosResponse } from './__utils__/mockAxiosResponse';
+} from '../personalAccessKey.js';
+import { AuthType } from '../../types/Accounts.js';
+import { mockAxiosResponse } from './__utils__/mockAxiosResponse.js';
 
 jest.mock('../../config');
 jest.mock('../logger');

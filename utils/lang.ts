@@ -4,7 +4,7 @@ import {
   GenericLanguageObject,
   LangKey,
   InterpolationData,
-} from '../types/Lang';
+} from '../types/Lang.js';
 
 const LANGUAGES: { [language: string]: LanguageObject } = {
   en,

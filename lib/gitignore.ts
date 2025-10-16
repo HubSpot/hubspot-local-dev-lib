@@ -5,10 +5,10 @@ import {
   isConfigPathInGitRepo,
   getGitignoreFiles,
   configFilenameIsIgnoredByGitignore,
-} from '../utils/git';
-import { DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME } from '../constants/config';
-import { i18n } from '../utils/lang';
-import { GitInclusionResult } from '../types/Config';
+} from '../utils/git.js';
+import { DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME } from '../constants/config.js';
+import { i18n } from '../utils/lang.js';
+import { GitInclusionResult } from '../types/Config.js';
 
 const i18nKey = 'lib.gitignore';
 

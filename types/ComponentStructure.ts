@@ -1,5 +1,5 @@
-import { COMPONENT_TYPES, SUBCOMPONENT_TYPES } from '../enums/build';
-import { ValueOf } from './Utils';
+import { COMPONENT_TYPES, SUBCOMPONENT_TYPES } from '../enums/build.js';
+import { ValueOf } from './Utils.js';
 
 export type ComponentStructure = {
   [key: string]: Array<string>;

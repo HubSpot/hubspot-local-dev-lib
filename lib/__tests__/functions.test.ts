@@ -1,13 +1,13 @@
 import fs, { PathLike } from 'fs-extra';
 import findup from 'findup-sync';
-import { getCwd } from '../path';
-import { fetchFileFromRepository as __fetchFileFromRepository } from '../github';
+import { getCwd } from '../path.js';
+import { fetchFileFromRepository as __fetchFileFromRepository } from '../github.js';
 import {
   createFunction,
   isObjectOrFunction,
   createEndpoint,
   createConfig,
-} from '../cms/functions';
+} from '../cms/functions.js';
 
 jest.mock('fs-extra');
 jest.mock('findup-sync');

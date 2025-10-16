@@ -9,15 +9,15 @@ import {
   getExt,
   convertToLocalFileSystemPath,
   isAllowedExtension,
-} from './path';
-import { logger } from './logger';
-import { fetchFileStream, download, downloadDefault } from '../api/fileMapper';
+} from './path.js';
+import { logger } from './logger.js';
+import { fetchFileStream, download, downloadDefault } from '../api/fileMapper.js';
 import {
   MODULE_EXTENSION,
   FUNCTIONS_EXTENSION,
   JSR_ALLOWED_EXTENSIONS,
-} from '../constants/extensions';
-import { CMS_PUBLISH_MODE } from '../constants/files';
+} from '../constants/extensions.js';
+import { CMS_PUBLISH_MODE } from '../constants/files.js';
 import {
   FileMapperNode,
   CmsPublishMode,
@@ -25,10 +25,10 @@ import {
   FileMapperInputOptions,
   PathTypeData,
   RecursiveFileMapperCallback,
-} from '../types/Files';
-import { isTimeoutError } from '../errors';
-import { i18n } from '../utils/lang';
-import { FileSystemError } from '../models/FileSystemError';
+} from '../types/Files.js';
+import { isTimeoutError } from '../errors/index.js';
+import { i18n } from '../utils/lang.js';
+import { FileSystemError } from '../models/FileSystemError.js';
 
 const i18nKey = 'lib.fileMapper';
 

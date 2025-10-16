@@ -3,8 +3,8 @@ import {
   getAnnotationValue,
   isCodedFile,
   createTemplate,
-} from '../cms/templates';
-import { cloneGithubRepo as __cloneGithubRepo } from '../github';
+} from '../cms/templates.js';
+import { cloneGithubRepo as __cloneGithubRepo } from '../github.js';
 
 jest.mock('fs-extra');
 jest.mock('../github');

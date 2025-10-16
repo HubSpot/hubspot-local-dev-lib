@@ -1,16 +1,16 @@
-import { addOauthToAccountConfig, getOauthManager } from '../oauth';
+import { addOauthToAccountConfig, getOauthManager } from '../oauth.js';
 
 jest.mock('../../config/getAccountIdentifier');
 jest.mock('../../config');
 jest.mock('../logger');
 jest.mock('../../errors');
 
-import { updateAccountConfig, writeConfig } from '../../config';
-import { OAuth2Manager } from '../../models/OAuth2Manager';
-import { FlatAccountFields_NEW } from '../../types/Accounts';
-import { ENVIRONMENTS } from '../../constants/environments';
-import { AUTH_METHODS } from '../../constants/auth';
-import { logger } from '../logger';
+import { updateAccountConfig, writeConfig } from '../../config/index.js';
+import { OAuth2Manager } from '../../models/OAuth2Manager.js';
+import { FlatAccountFields_NEW } from '../../types/Accounts.js';
+import { ENVIRONMENTS } from '../../constants/environments.js';
+import { AUTH_METHODS } from '../../constants/auth.js';
+import { logger } from '../logger.js';
 
 const OAuth2ManagerFromConfigMock = jest.spyOn(OAuth2Manager, 'fromConfig');
 

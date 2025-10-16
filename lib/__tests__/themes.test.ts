@@ -1,8 +1,8 @@
 import findup from 'findup-sync';
-import { getHubSpotWebsiteOrigin } from '../urls';
-import { getThemeJSONPath, getThemePreviewUrl } from '../cms/themes';
-import { getEnv } from '../../config';
-import { ENVIRONMENTS } from '../../constants/environments';
+import { getHubSpotWebsiteOrigin } from '../urls.js';
+import { getThemeJSONPath, getThemePreviewUrl } from '../cms/themes.js';
+import { getEnv } from '../../config/index.js';
+import { ENVIRONMENTS } from '../../constants/environments.js';
 
 jest.mock('findup-sync');
 jest.mock('../urls');

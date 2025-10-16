@@ -1,11 +1,11 @@
 jest.mock('../../http');
-import { http } from '../../http';
+import { http } from '../../http.js';
 import {
   addAppSecret,
   updateAppSecret,
   deleteAppSecret,
   fetchAppSecrets,
-} from '../devSecrets';
+} from '../devSecrets.js';
 
 const httpPostMock = http.post as jest.MockedFunction<typeof http.post>;
 const httpPatchMock = http.patch as jest.MockedFunction<typeof http.patch>;

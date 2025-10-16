@@ -1,5 +1,5 @@
-import { MAX_PORT_NUMBER } from '../../constants/ports';
-import { PortManagerServer } from '../../utils/PortManagerServer';
+import { MAX_PORT_NUMBER } from '../../constants/ports.js';
+import { PortManagerServer } from '../../utils/PortManagerServer.js';
 import {
   deleteServerInstance,
   getServerPortByInstanceId,
@@ -7,7 +7,7 @@ import {
   requestPorts,
   startPortManagerServer,
   stopPortManagerServer,
-} from '../portManager';
+} from '../portManager.js';
 
 const INSTANCE_ID_1 = 'test1';
 const INSTANCE_ID_2 = 'test2';
@@ -38,6 +38,22 @@ const BAD_PORT_DATA = [
 ];
 
 describe('lib/portManager', () => {
+  // Global cleanup to ensure clean state between all tests
+  beforeEach(async () => {
+    // Ensure server is stopped and state is clean before each test
+    await PortManagerServer.close();
+  });
+
+  afterEach(async () => {
+    // Ensure server is stopped after each test
+    await PortManagerServer.close();
+  });
+
+  afterAll(async () => {
+    // Final cleanup after all tests
+    await PortManagerServer.close();
+  });
+
   describe('startPortManagerServer()', () => {
     it('starts the PortManagerServer', async () => {
       expect(PortManagerServer.server).toBeUndefined();
@@ -72,9 +88,6 @@ describe('lib/portManager', () => {
   describe('requestPorts()', () => {
     beforeEach(async () => {
       await startPortManagerServer();
-    });
-    afterEach(async () => {
-      await stopPortManagerServer();
     });
     it('returns ports when none are specified', async () => {
       const portData = await requestPorts(EMPTY_PORT_DATA);
@@ -111,9 +124,6 @@ describe('lib/portManager', () => {
     beforeEach(async () => {
       await startPortManagerServer();
     });
-    afterEach(async () => {
-      await stopPortManagerServer();
-    });
 
     it('deletes port data for a server instance', async () => {
       await requestPorts(PORT_DATA);
@@ -131,9 +141,6 @@ describe('lib/portManager', () => {
     beforeEach(async () => {
       await startPortManagerServer();
     });
-    afterEach(async () => {
-      await stopPortManagerServer();
-    });
 
     it('returns false when no servers are active', async () => {
       const hasActiveServers = await portManagerHasActiveServers();
@@ -150,9 +157,6 @@ describe('lib/portManager', () => {
   describe('getServerPortByInstanceId()', () => {
     beforeEach(async () => {
       await startPortManagerServer();
-    });
-    afterEach(async () => {
-      await stopPortManagerServer();
     });
 
     it('returns the port for known server instances', async () => {

@@ -15,12 +15,12 @@ import {
   setConfigPath,
   createEmptyConfigFile,
   configFileExists,
-} from '../index';
-import { getAccountIdentifier } from '../getAccountIdentifier';
-import { getAccounts, getDefaultAccount } from '../../utils/accounts';
-import { ENVIRONMENTS } from '../../constants/environments';
-import { HUBSPOT_ACCOUNT_TYPES } from '../../constants/config';
-import { CLIConfig, CLIConfig_DEPRECATED } from '../../types/Config';
+} from '../index.js';
+import { getAccountIdentifier } from '../getAccountIdentifier.js';
+import { getAccounts, getDefaultAccount } from '../../utils/accounts.js';
+import { ENVIRONMENTS } from '../../constants/environments.js';
+import { HUBSPOT_ACCOUNT_TYPES } from '../../constants/config.js';
+import { CLIConfig, CLIConfig_DEPRECATED } from '../../types/Config.js';
 import {
   APIKeyAccount_DEPRECATED,
   AuthType,
@@ -30,9 +30,9 @@ import {
   APIKeyAccount,
   PersonalAccessKeyAccount,
   PersonalAccessKeyAccount_DEPRECATED,
-} from '../../types/Accounts';
-import * as configFile from '../configFile';
-import * as config_DEPRECATED from '../config_DEPRECATED';
+} from '../../types/Accounts.js';
+import * as configFile from '../configFile.js';
+import * as config_DEPRECATED from '../config_DEPRECATED.js';
 
 const CONFIG_PATHS = {
   none: null,

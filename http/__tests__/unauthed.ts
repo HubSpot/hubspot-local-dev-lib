@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { http } from '../unauthed';
+import { http } from '../unauthed.js';
 import { version } from '../../package.json';
 
 jest.mock('axios');

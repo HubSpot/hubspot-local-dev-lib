@@ -1,6 +1,6 @@
 import path from 'path';
 import unixify from 'unixify';
-import { ALLOWED_EXTENSIONS } from '../constants/extensions';
+import { ALLOWED_EXTENSIONS } from '../constants/extensions.js';
 import os from 'os';
 
 export function convertToUnixPath(_path: string): string {

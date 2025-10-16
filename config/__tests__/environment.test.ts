@@ -1,6 +1,6 @@
-import { loadConfigFromEnvironment } from '../environment';
-import { ENVIRONMENT_VARIABLES } from '../../constants/environments';
-import { PERSONAL_ACCESS_KEY_AUTH_METHOD } from '../../constants/auth';
+import { loadConfigFromEnvironment } from '../environment.js';
+import { ENVIRONMENT_VARIABLES } from '../../constants/environments.js';
+import { PERSONAL_ACCESS_KEY_AUTH_METHOD } from '../../constants/auth.js';
 
 describe('config/environment', () => {
   describe('loadConfigFromEnvironment()', () => {

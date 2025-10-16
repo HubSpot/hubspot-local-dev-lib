@@ -10,12 +10,12 @@ import {
   parseConfig,
   loadConfigFromFile,
   writeConfigToFile,
-} from '../configFile';
+} from '../configFile.js';
 import {
   HUBSPOT_CONFIGURATION_FILE,
   HUBSPOT_CONFIGURATION_FOLDER,
-} from '../../constants/config';
-import { CLIConfig_NEW } from '../../types/Config';
+} from '../../constants/config.js';
+import { CLIConfig_NEW } from '../../types/Config.js';
 
 // fs spy
 const existsSyncSpy = jest.spyOn(fs, 'existsSync');

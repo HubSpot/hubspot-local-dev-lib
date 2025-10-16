@@ -2,11 +2,11 @@ import fs from 'fs-extra';
 import os from 'os';
 import path from 'path';
 import { fork } from 'child_process';
-import { escapeRegExp } from '../escapeRegExp';
-import { isModuleFolderChild } from '../../utils/cms/modules';
-import { logger } from '../logger';
-import { BaseError } from '../../types/Error';
-import { i18n } from '../../utils/lang';
+import { escapeRegExp } from '../escapeRegExp.js';
+import { isModuleFolderChild } from '../../utils/cms/modules.js';
+import { logger } from '../logger.js';
+import { BaseError } from '../../types/Error.js';
+import { i18n } from '../../utils/lang.js';
 
 const i18nKey = 'lib.cms.handleFieldsJs';
 

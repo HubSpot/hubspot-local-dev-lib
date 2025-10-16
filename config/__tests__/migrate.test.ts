@@ -1,13 +1,13 @@
-import * as migrate from '../migrate';
-import * as config_DEPRECATED from '../config_DEPRECATED';
-import { CLIConfiguration } from '../CLIConfiguration';
-import * as configIndex from '../index';
-import * as configFile from '../configFile';
-import { CLIConfig_DEPRECATED, CLIConfig_NEW } from '../../types/Config';
-import { ENVIRONMENTS } from '../../constants/environments';
-import { OAUTH_AUTH_METHOD } from '../../constants/auth';
-import { ARCHIVED_HUBSPOT_CONFIG_YAML_FILE_NAME } from '../../constants/config';
-import { i18n } from '../../utils/lang';
+import * as migrate from '../migrate.js';
+import * as config_DEPRECATED from '../config_DEPRECATED.js';
+import { CLIConfiguration } from '../CLIConfiguration.js';
+import * as configIndex from '../index.js';
+import * as configFile from '../configFile.js';
+import { CLIConfig_DEPRECATED, CLIConfig_NEW } from '../../types/Config.js';
+import { ENVIRONMENTS } from '../../constants/environments.js';
+import { OAUTH_AUTH_METHOD } from '../../constants/auth.js';
+import { ARCHIVED_HUBSPOT_CONFIG_YAML_FILE_NAME } from '../../constants/config.js';
+import { i18n } from '../../utils/lang.js';
 import fs from 'fs';
 import path from 'path';
 

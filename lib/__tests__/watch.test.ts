@@ -1,9 +1,9 @@
 import chokidar from 'chokidar';
 import PQueue from 'p-queue';
 
-import { uploadFolder } from '../cms/uploadFolder';
-import { watch } from '../cms/watch';
-import { CMS_PUBLISH_MODE } from '../../constants/files';
+import { uploadFolder } from '../cms/uploadFolder.js';
+import { watch } from '../cms/watch.js';
+import { CMS_PUBLISH_MODE } from '../../constants/files.js';
 
 jest.mock('chokidar');
 jest.mock('axios');

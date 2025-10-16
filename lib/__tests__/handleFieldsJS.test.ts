@@ -1,4 +1,4 @@
-import { FieldsJs, isConvertableFieldJs } from '../cms/handleFieldsJS';
+import { FieldsJs, isConvertableFieldJs } from '../cms/handleFieldsJS.js';
 import fs from 'fs-extra';
 import child_process from 'child_process';
 

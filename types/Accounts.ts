@@ -1,7 +1,7 @@
-import { HUBSPOT_ACCOUNT_TYPES } from '../constants/config';
-import { CmsPublishMode } from './Files';
-import { Environment } from './Config';
-import { ValueOf } from './Utils';
+import { HUBSPOT_ACCOUNT_TYPES } from '../constants/config.js';
+import { CmsPublishMode } from './Files.js';
+import { Environment } from './Config.js';
+import { ValueOf } from './Utils.js';
 
 export type AuthType = 'personalaccesskey' | 'apikey' | 'oauth2';
 

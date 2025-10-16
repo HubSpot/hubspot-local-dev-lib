@@ -1,21 +1,21 @@
 import path from 'path';
 import fs from 'fs-extra';
-import { getCwd } from '../path';
-import { walk } from '../fs';
-import { listGithubRepoContents, cloneGithubRepo } from '../github';
-import { logger } from '../logger';
+import { getCwd } from '../path.js';
+import { walk } from '../fs.js';
+import { listGithubRepoContents, cloneGithubRepo } from '../github.js';
+import { logger } from '../logger.js';
 import {
   isPathInput,
   isModuleFolder,
   isModuleFolderChild,
-} from '../../utils/cms/modules';
+} from '../../utils/cms/modules.js';
 import {
   PathInput,
   ValidationResult,
   ModuleDefinition,
-} from '../../types/Modules';
-import { GithubRepoFile } from '../../types/Github';
-import { i18n } from '../../utils/lang';
+} from '../../types/Modules.js';
+import { GithubRepoFile } from '../../types/Github.js';
+import { i18n } from '../../utils/lang.js';
 
 const i18nKey = 'lib.cms.modules';
 

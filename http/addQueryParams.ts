@@ -1,4 +1,4 @@
-import { HttpOptions, QueryParams } from '../types/Http';
+import { HttpOptions, QueryParams } from '../types/Http.js';
 
 export function addQueryParams(
   configOptions: HttpOptions,

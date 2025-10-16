@@ -1,4 +1,4 @@
-import { DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME } from '../../constants/config';
+import { DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME } from '../../constants/config.js';
 
 jest.mock('../../utils/git');
 jest.mock('path');
@@ -9,8 +9,8 @@ import {
   configFilenameIsIgnoredByGitignore,
   getGitignoreFiles,
   isConfigPathInGitRepo,
-} from '../../utils/git';
-import { checkAndAddConfigToGitignore, checkGitInclusion } from '../gitignore';
+} from '../../utils/git.js';
+import { checkAndAddConfigToGitignore, checkGitInclusion } from '../gitignore.js';
 import { readFileSync, writeFileSync } from 'fs-extra';
 import path from 'path';
 

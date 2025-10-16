@@ -1,7 +1,7 @@
 import { version } from '../package.json';
-import { getAndLoadConfigIfNeeded } from '../config';
-import { getHubSpotApiOrigin } from '../lib/urls';
-import { HttpOptions } from '../types/Http';
+import { getAndLoadConfigIfNeeded } from '../config/index.js';
+import { getHubSpotApiOrigin } from '../lib/urls.js';
+import { HttpOptions } from '../types/Http.js';
 import { AxiosRequestConfig } from 'axios';
 import https from 'https';
 import http from 'http';

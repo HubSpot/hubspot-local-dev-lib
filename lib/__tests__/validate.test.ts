@@ -1,9 +1,9 @@
 import fs, { Stats } from 'fs-extra';
-import { validateHubl } from '../../api/validateHubl';
-import { walk } from '../fs';
-import { lint } from '../cms/validate';
-import { LintResult, Validation } from '../../types/HublValidation';
-import { HubSpotPromise } from '../../types/Http';
+import { validateHubl } from '../../api/validateHubl.js';
+import { walk } from '../fs.js';
+import { lint } from '../cms/validate.js';
+import { LintResult, Validation } from '../../types/HublValidation.js';
+import { HubSpotPromise } from '../../types/Http.js';
 
 jest.mock('fs-extra');
 jest.mock('../../api/validateHubl');

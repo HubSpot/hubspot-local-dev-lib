@@ -4,11 +4,11 @@ import moment from 'moment';
 import {
   getAndLoadConfigIfNeeded as __getAndLoadConfigIfNeeded,
   getAccountConfig as __getAccountConfig,
-} from '../../config';
-import { ENVIRONMENTS } from '../../constants/environments';
-import { http } from '../';
+} from '../../config/index.js';
+import { ENVIRONMENTS } from '../../constants/environments.js';
+import { http } from '../.js';
 import { version } from '../../package.json';
-import { AuthType } from '../../types/Accounts';
+import { AuthType } from '../../types/Accounts.js';
 
 jest.mock('fs-extra');
 jest.mock('axios');

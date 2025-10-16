@@ -1,11 +1,11 @@
 import axios from 'axios';
-import { trackUsage } from '../trackUsage';
+import { trackUsage } from '../trackUsage.js';
 import {
   getAccountConfig as __getAccountConfig,
   getAndLoadConfigIfNeeded as __getAndLoadConfigIfNeeded,
-} from '../../config';
-import { AuthType } from '../../types/Accounts';
-import { ENVIRONMENTS } from '../../constants/environments';
+} from '../../config/index.js';
+import { AuthType } from '../../types/Accounts.js';
+import { ENVIRONMENTS } from '../../constants/environments.js';
 
 jest.mock('axios');
 jest.mock('../../config');

@@ -3,9 +3,9 @@ import {
   isGatingError,
   isSpecifiedError,
   isSystemError,
-} from '../index';
-import { BaseError } from '../../types/Error';
-import { HubSpotHttpError } from '../../models/HubSpotHttpError';
+} from '../index.js';
+import { BaseError } from '../../types/Error.js';
+import { HubSpotHttpError } from '../../models/HubSpotHttpError.js';
 
 export const newError = (overrides = {}): BaseError => {
   return {

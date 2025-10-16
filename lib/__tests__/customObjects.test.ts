@@ -3,15 +3,15 @@ import {
   downloadSchema,
   downloadSchemas,
   writeSchemaToDisk,
-} from '../customObjects';
+} from '../customObjects.js';
 import {
   fetchObjectSchema as __fetchObjectSchema,
   fetchObjectSchemas as __fetchObjectSchemas,
-} from '../../api/customObjects';
+} from '../../api/customObjects.js';
 import basicSchema from './fixtures/customObjects/basicSchema.json';
 import fullSchema from './fixtures/customObjects/fullSchema.json';
 import multipleSchemas from './fixtures/customObjects/multipleSchemas.json';
-import { mockAxiosResponse } from './__utils__/mockAxiosResponse';
+import { mockAxiosResponse } from './__utils__/mockAxiosResponse.js';
 
 jest.mock('fs-extra');
 jest.mock('../../api/customObjects');

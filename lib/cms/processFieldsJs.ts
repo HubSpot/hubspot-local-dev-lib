@@ -4,9 +4,9 @@ import path from 'path';
 import fs from 'fs';
 import semver from 'semver';
 import { pathToFileURL } from 'url';
-import { getExt } from '../path';
-import { FieldsJs } from './handleFieldsJS';
-import { i18n } from '../../utils/lang';
+import { getExt } from '../path.js';
+import { FieldsJs } from './handleFieldsJS.js';
+import { i18n } from '../../utils/lang.js';
 
 const i18nKey = 'lib.cms.processFieldsJs';
 
@@ -98,20 +98,12 @@ async function fieldsArrayToJson(fields: Array<FieldsJs>): Promise<string> {
 }
 
 /**
- * Takes in a path to a javascript file and either dynamically imports it or requires it, and returns, depending on node version.
+ * Takes in a path to a javascript file and dynamically imports it.
  * @param {string} filePath - Path to javascript file
- * @returns {Promise | undefined} - Returns _default_ exported content if ESM, or exported module content if CJS, or undefined if node version < 13.2 and file is .mjs.
+ * @returns {Promise} - Returns _default_ exported content if ESM, or exported module content if CJS.
  */
 async function dynamicImport(filePath: string): Promise<any> {
-  if (semver.gte(process.version, '13.2.0')) {
-    const exported = await new Function(
-      `return import("${pathToFileURL(filePath)}")`
-    )();
-    return exported.default;
-  } else {
-    if (getExt(filePath) == 'mjs') {
-      throw new Error(i18n(`${i18nKey}.errors.invalidMjsFile`));
-    }
-    return require(filePath);
-  }
+  // Since we're now using ESM, we can always use dynamic import
+  const exported = await import(pathToFileURL(filePath).href);
+  return exported.default || exported;
 }

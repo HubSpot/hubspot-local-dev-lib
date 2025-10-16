@@ -1,7 +1,7 @@
 jest.mock('../../http');
 jest.mock('fs');
 import { createReadStream } from 'fs';
-import { http } from '../../http';
+import { http } from '../../http.js';
 import {
   cancelStagedBuild,
   checkCloneStatus,
@@ -30,7 +30,7 @@ import {
   queueBuild,
   uploadFileToBuild,
   uploadProject,
-} from '../projects';
+} from '../projects.js';
 
 const createReadStreamMock = createReadStream as jest.MockedFunction<
   typeof createReadStream

@@ -1,10 +1,10 @@
 import axios from 'axios';
-import { getAxiosConfig } from '../http/getAxiosConfig';
-import { logger } from './logger';
-import { http } from '../http';
-import { getAccountConfig, getEnv } from '../config';
-import { FILE_MAPPER_API_PATH } from '../api/fileMapper';
-import { i18n } from '../utils/lang';
+import { getAxiosConfig } from '../http/getAxiosConfig.js';
+import { logger } from './logger.js';
+import { http } from '../http/index.js';
+import { getAccountConfig, getEnv } from '../config/index.js';
+import { FILE_MAPPER_API_PATH } from '../api/fileMapper.js';
+import { i18n } from '../utils/lang.js';
 
 const i18nKey = 'lib.trackUsage';
 

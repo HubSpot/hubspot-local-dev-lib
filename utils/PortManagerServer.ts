@@ -2,17 +2,17 @@ import express, { Express, Request, Response } from 'express';
 import { Server } from 'http';
 import cors from 'cors';
 
-import { detectPort } from './detectPort';
+import { detectPort } from './detectPort.js';
 import {
   MIN_PORT_NUMBER,
   MAX_PORT_NUMBER,
   PORT_MANAGER_SERVER_PORT,
-} from '../constants/ports';
-import { isSystemError } from '../errors';
-import { logger } from '../lib/logger';
-import { i18n } from './lang';
-import { BaseError } from '../types/Error';
-import { RequestPortsData, ServerPortMap } from '../types/PortManager';
+} from '../constants/ports.js';
+import { isSystemError } from '../errors/index.js';
+import { logger } from '../lib/logger.js';
+import { i18n } from './lang.js';
+import { BaseError } from '../types/Error.js';
+import { RequestPortsData, ServerPortMap } from '../types/PortManager.js';
 
 const i18nKey = 'utils.PortManagerServer';
 
@@ -57,6 +57,19 @@ class _PortManagerServer {
     this.app = undefined;
     this.server = undefined;
     this.serverPortMap = {};
+  }
+
+  async close(): Promise<void> {
+    return new Promise<void>(resolve => {
+      if (this.server) {
+        this.server.close(() => {
+          this.reset();
+          resolve();
+        });
+      } else {
+        resolve();
+      }
+    });
   }
 
   listen(): Promise<Server> {
@@ -194,12 +207,12 @@ class _PortManagerServer {
   };
 
   closeServer = (req: Request, res: Response): void => {
-    if (this.server) {
-      logger.debug(i18n(`${i18nKey}.close`));
-      res.sendStatus(200);
-      this.server.close();
-      this.reset();
-    }
+    logger.debug(i18n(`${i18nKey}.close`));
+    res.sendStatus(200);
+    // Close asynchronously after response is sent
+    setImmediate(() => {
+      this.close();
+    });
   };
 }
 

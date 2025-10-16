@@ -1,5 +1,5 @@
 import fileStreamResponse from './fixtures/fileStreamResponse.json';
-import { createFileMapperNodeFromStreamResponse } from '../fileMapper';
+import { createFileMapperNodeFromStreamResponse } from '../fileMapper.js';
 
 describe('api/fileMapper', () => {
   describe('createFileMapperNodeFromStreamResponse()', () => {

@@ -1,17 +1,17 @@
 import path from 'path';
 import fs from 'fs-extra';
-import { uploadFolder, getFilesByType } from '../cms/uploadFolder';
-import { FILE_TYPES } from '../../constants/files';
-import { upload as __upload } from '../../api/fileMapper';
-import { walk as __walk } from '../fs';
-import { createIgnoreFilter as __createIgnoreFilter } from '../ignoreRules';
+import { uploadFolder, getFilesByType } from '../cms/uploadFolder.js';
+import { FILE_TYPES } from '../../constants/files.js';
+import { upload as __upload } from '../../api/fileMapper.js';
+import { walk as __walk } from '../fs.js';
+import { createIgnoreFilter as __createIgnoreFilter } from '../ignoreRules.js';
 import {
   FieldsJs as __FieldsJs,
   isConvertableFieldJs as __isConvertableFields,
   cleanupTmpDirSync as __cleanupTmpDirSync,
   createTmpDirSync as __createTmpDirSync,
-} from '../cms/handleFieldsJS';
-import { mockAxiosResponse } from './__utils__/mockAxiosResponse';
+} from '../cms/handleFieldsJS.js';
+import { mockAxiosResponse } from './__utils__/mockAxiosResponse.js';
 
 jest.mock('../fs');
 jest.mock('../../api/fileMapper');

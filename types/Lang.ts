@@ -1,5 +1,5 @@
 import lang from '../lang/en.json';
-import { Leaves } from './Utils';
+import { Leaves } from './Utils.js';
 
 export type GenericLanguageObject = {
   [key: string]: string | GenericLanguageObject;

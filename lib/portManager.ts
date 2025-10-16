@@ -4,11 +4,11 @@ import {
   HEALTH_CHECK_PATH,
   PortManagerServer,
   SERVICE_HEALTHY,
-} from '../utils/PortManagerServer';
-import { PORT_MANAGER_SERVER_PORT } from '../constants/ports';
-import { RequestPortsData } from '../types/PortManager';
-import { detectPort } from '../utils/detectPort';
-import { logger } from './logger';
+} from '../utils/PortManagerServer.js';
+import { PORT_MANAGER_SERVER_PORT } from '../constants/ports.js';
+import { RequestPortsData } from '../types/PortManager.js';
+import { detectPort } from '../utils/detectPort.js';
+import { logger } from './logger.js';
 
 export const BASE_URL = `http://localhost:${PORT_MANAGER_SERVER_PORT}`;
 
@@ -41,6 +41,12 @@ export async function stopPortManagerServer(): Promise<void> {
 
   if (isRunning) {
     await axios.post(`${BASE_URL}/close`);
+    // Wait for server to actually close
+    let attempts = 0;
+    while ((await isPortManagerServerRunning()) && attempts < 10) {
+      await new Promise(resolve => setImmediate(resolve));
+      attempts++;
+    }
   }
 }
 

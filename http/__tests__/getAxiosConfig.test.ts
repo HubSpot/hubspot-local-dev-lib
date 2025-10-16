@@ -1,6 +1,6 @@
-import { getAndLoadConfigIfNeeded as __getAndLoadConfigIfNeeded } from '../../config';
-import { ENVIRONMENTS } from '../../constants/environments';
-import { getAxiosConfig } from '../getAxiosConfig';
+import { getAndLoadConfigIfNeeded as __getAndLoadConfigIfNeeded } from '../../config/index.js';
+import { ENVIRONMENTS } from '../../constants/environments.js';
+import { getAxiosConfig } from '../getAxiosConfig.js';
 
 jest.mock('../../config');
 

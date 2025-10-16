@@ -6,11 +6,11 @@ jest.mock('os');
 jest.mock('../logger');
 jest.mock('../fs');
 
-import { extractZipArchive } from '../archive';
-import { logger } from '../logger';
+import { extractZipArchive } from '../archive.js';
+import { logger } from '../logger.js';
 import fs from 'fs-extra';
 import extract from 'extract-zip';
-import { walk } from '../fs';
+import { walk } from '../fs.js';
 
 const writeFileMock = fs.writeFile as jest.MockedFunction<typeof fs.writeFile>;
 const makeDirMock = fs.mkdtemp as jest.MockedFunction<typeof fs.mkdtemp>;

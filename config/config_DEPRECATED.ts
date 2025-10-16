@@ -1,27 +1,27 @@
 import fs from 'fs-extra';
 import yaml from 'js-yaml';
 import findup from 'findup-sync';
-import { getCwd } from '../lib/path';
+import { getCwd } from '../lib/path.js';
 import {
   DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME,
   MIN_HTTP_TIMEOUT,
   HUBSPOT_ACCOUNT_TYPES,
-} from '../constants/config';
-import { ENVIRONMENTS, ENVIRONMENT_VARIABLES } from '../constants/environments';
+} from '../constants/config.js';
+import { ENVIRONMENTS, ENVIRONMENT_VARIABLES } from '../constants/environments.js';
 import {
   API_KEY_AUTH_METHOD,
   OAUTH_AUTH_METHOD,
   PERSONAL_ACCESS_KEY_AUTH_METHOD,
   OAUTH_SCOPES,
-} from '../constants/auth';
-import { CMS_PUBLISH_MODE } from '../constants/files';
-import { getValidEnv } from '../lib/environment';
-import { logger } from '../lib/logger';
+} from '../constants/auth.js';
+import { CMS_PUBLISH_MODE } from '../constants/files.js';
+import { getValidEnv } from '../lib/environment.js';
+import { logger } from '../lib/logger.js';
 import {
   logErrorInstance,
   logFileSystemErrorInstance,
-} from '../errors/errors_DEPRECATED';
-import { CLIConfig_DEPRECATED, Environment } from '../types/Config';
+} from '../errors/errors_DEPRECATED.js';
+import { CLIConfig_DEPRECATED, Environment } from '../types/Config.js';
 import {
   APIKeyAccount_DEPRECATED,
   AccountType,
@@ -29,10 +29,10 @@ import {
   FlatAccountFields_DEPRECATED,
   OAuthAccount_DEPRECATED,
   UpdateAccountConfigOptions,
-} from '../types/Accounts';
-import { BaseError } from '../types/Error';
-import { CmsPublishMode } from '../types/Files';
-import { CLIOptions, WriteConfigOptions } from '../types/CLIOptions';
+} from '../types/Accounts.js';
+import { BaseError } from '../types/Error.js';
+import { CmsPublishMode } from '../types/Files.js';
+import { CLIOptions, WriteConfigOptions } from '../types/CLIOptions.js';
 
 const ALL_CMS_PUBLISH_MODES = Object.values(CMS_PUBLISH_MODE);
 let _config: CLIConfig_DEPRECATED | null;

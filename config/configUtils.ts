@@ -1,10 +1,10 @@
-import { logger } from '../lib/logger';
+import { logger } from '../lib/logger.js';
 import {
   API_KEY_AUTH_METHOD,
   OAUTH_AUTH_METHOD,
   PERSONAL_ACCESS_KEY_AUTH_METHOD,
-} from '../constants/auth';
-import { CLIConfig_NEW } from '../types/Config';
+} from '../constants/auth.js';
+import { CLIConfig_NEW } from '../types/Config.js';
 import {
   AuthType,
   CLIAccount_NEW,
@@ -14,8 +14,8 @@ import {
   PersonalAccessKeyOptions,
   OAuthOptions,
   APIKeyOptions,
-} from '../types/Accounts';
-import { i18n } from '../utils/lang';
+} from '../types/Accounts.js';
+import { i18n } from '../utils/lang.js';
 
 const i18nKey = 'config.configUtils';
 

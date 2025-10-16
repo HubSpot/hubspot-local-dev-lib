@@ -1,6 +1,6 @@
-import { HubSpotHttpError } from '../models/HubSpotHttpError';
-import { BaseError } from '../types/Error';
-import { FileSystemError } from '../models/FileSystemError';
+import { HubSpotHttpError } from '../models/HubSpotHttpError.js';
+import { BaseError } from '../types/Error.js';
+import { FileSystemError } from '../models/FileSystemError.js';
 
 export function isSpecifiedError(
   err: unknown,

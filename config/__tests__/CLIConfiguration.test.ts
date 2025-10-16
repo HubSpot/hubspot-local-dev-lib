@@ -1,6 +1,6 @@
-import { HUBSPOT_ACCOUNT_TYPES } from '../../constants/config';
-import { ENVIRONMENTS } from '../../constants/environments';
-import { CLIConfiguration as config } from '../CLIConfiguration';
+import { HUBSPOT_ACCOUNT_TYPES } from '../../constants/config.js';
+import { ENVIRONMENTS } from '../../constants/environments.js';
+import { CLIConfiguration as config } from '../CLIConfiguration.js';
 
 describe('config/CLIConfiguration', () => {
   afterAll(() => {

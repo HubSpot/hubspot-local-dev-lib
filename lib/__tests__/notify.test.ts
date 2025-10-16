@@ -1,5 +1,5 @@
 jest.mock('fs');
-import { triggerNotify } from '../notify';
+import { triggerNotify } from '../notify.js';
 import fs from 'fs';
 const fsAppendSyncMock = fs.appendFileSync as jest.MockedFunction<
   typeof fs.appendFileSync

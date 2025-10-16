@@ -1,7 +1,7 @@
 import {
   configFilenameIsIgnoredByGitignore,
   getGitignoreFiles,
-} from '../../utils/git';
+} from '../../utils/git.js';
 import fs from 'fs-extra';
 jest.mock('findup-sync');
 

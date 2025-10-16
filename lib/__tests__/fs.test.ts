@@ -1,6 +1,6 @@
 import fs, { Stats } from 'fs';
-import { flattenAndRemoveSymlinks, getFileInfoAsync } from '../fs';
-import { STAT_TYPES } from '../../constants/files';
+import { flattenAndRemoveSymlinks, getFileInfoAsync } from '../fs.js';
+import { STAT_TYPES } from '../../constants/files.js';
 
 jest.mock('fs');
 
