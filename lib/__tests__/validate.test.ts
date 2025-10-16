@@ -10,12 +10,10 @@ vi.mock('fs-extra');
 vi.mock('../../api/validateHubl');
 vi.mock('../fs');
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const mockedFsStat = fs.stat as MockedFunction<any>;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const mockedFsReadFile = fs.readFile as MockedFunction<any>;
-const mockedWalk = walk as MockedFunction<typeof walk>;
-const mockedValidateHubl = validateHubl as MockedFunction<typeof validateHubl>;
+const mockedFsStat = vi.mocked(fs.stat);
+const mockedFsReadFile = vi.mocked(fs.readFile);
+const mockedWalk = vi.mocked(walk);
+const mockedValidateHubl = vi.mocked(validateHubl);
 
 const mockFsStats = {
   isDirectory: vi.fn(() => true),
@@ -54,7 +52,7 @@ describe('lib/cms/validate', () => {
   const filePath = 'test.html';
 
   it('should return an empty array if directory has no files', async () => {
-    mockedFsStat.mockResolvedValue(mockFsStats);
+    mockedFsStat.mockResolvedValue(mockFsStats as any);
     mockedWalk.mockResolvedValue([]);
 
     const result = await lint(accountId, filePath);
@@ -62,8 +60,8 @@ describe('lib/cms/validate', () => {
   });
 
   it('should return the correct object if a file has no content', async () => {
-    mockedFsStat.mockResolvedValue({ isDirectory: () => false });
-    mockedFsReadFile.mockResolvedValue('  ');
+    mockedFsStat.mockResolvedValue({ isDirectory: () => false } as any);
+    mockedFsReadFile.mockResolvedValue('  ' as any);
 
     const result = await lint(accountId, filePath);
     expect(result).toEqual([{ file: filePath, validation: null }]);
@@ -71,11 +69,15 @@ describe('lib/cms/validate', () => {
 
   it('should call validateHubl with the correct parameters', async () => {
     const mockSource = 'valid HUBL content';
-    mockedFsStat.mockResolvedValue({ isDirectory: () => false });
-    mockedFsReadFile.mockResolvedValue(mockSource);
+    mockedFsStat.mockResolvedValue({ isDirectory: () => false } as any);
+    mockedFsReadFile.mockResolvedValue(mockSource as any);
     mockedValidateHubl.mockResolvedValue({
       data: mockValidation,
-    } as unknown as HubSpotPromise<Validation>);
+      status: 200,
+      statusText: 'OK',
+      headers: {} as any,
+      config: { headers: {} } as any,
+    });
     const result = await lint(accountId, filePath);
     expect(validateHubl).toHaveBeenCalledWith(accountId, mockSource);
     expect(result).toEqual([{ file: filePath, validation: mockValidation }]);
@@ -83,12 +85,16 @@ describe('lib/cms/validate', () => {
 
   it('should filter out files with invalid extensions', async () => {
     const invalidFile = 'test.txt';
-    mockedFsStat.mockResolvedValue({ isDirectory: () => true });
+    mockedFsStat.mockResolvedValue({ isDirectory: () => true } as any);
     mockedWalk.mockResolvedValue([invalidFile, filePath]);
-    mockedFsReadFile.mockResolvedValue('valid HUBL content');
+    mockedFsReadFile.mockResolvedValue('valid HUBL content' as any);
     mockedValidateHubl.mockResolvedValue({
       data: mockValidation,
-    } as unknown as HubSpotPromise<Validation>);
+      status: 200,
+      statusText: 'OK',
+      headers: {} as any,
+      config: { headers: {} } as any,
+    });
 
     const result = await lint(accountId, filePath);
 
@@ -99,11 +105,15 @@ describe('lib/cms/validate', () => {
   it('should execute callback if provided', async () => {
     const mockCallback = vi.fn();
     const mockSource = 'valid HUBL content';
-    mockedFsStat.mockResolvedValue({ isDirectory: () => false });
-    mockedFsReadFile.mockResolvedValue(mockSource);
+    mockedFsStat.mockResolvedValue({ isDirectory: () => false } as any);
+    mockedFsReadFile.mockResolvedValue(mockSource as any);
     mockedValidateHubl.mockResolvedValue({
       data: mockValidation,
-    } as unknown as HubSpotPromise<Validation>);
+      status: 200,
+      statusText: 'OK',
+      headers: {} as any,
+      config: { headers: {} } as any,
+    });
 
     await lint(accountId, filePath, mockCallback);
     expect(mockCallback).toHaveBeenCalledWith({

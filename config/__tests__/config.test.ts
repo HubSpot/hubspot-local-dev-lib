@@ -33,7 +33,7 @@ import {
 } from '../../types/Accounts.js';
 import * as configFile from '../configFile.js';
 import * as config_DEPRECATED from '../config_DEPRECATED.js';
-import { vi } from 'vitest';
+import { vi, type MockedFunction } from 'vitest';
 
 const CONFIG_PATHS = {
   none: null,
@@ -648,7 +648,7 @@ describe('config/config', () => {
 
     describe('when a standard config is present', () => {
       it('returns the standard config path when useHiddenConfig is false', () => {
-        (configFile.getConfigFilePath as vi.Mock).mockReturnValue(
+        vi.mocked(configFile.getConfigFilePath).mockReturnValue(
           CONFIG_PATHS.default
         );
         const configPath = getConfigPath('', false);
@@ -656,7 +656,7 @@ describe('config/config', () => {
       });
 
       it('returns the hidden config path when useHiddenConfig is true', () => {
-        (configFile.getConfigFilePath as vi.Mock).mockReturnValue(
+        vi.mocked(configFile.getConfigFilePath).mockReturnValue(
           CONFIG_PATHS.hidden
         );
         const hiddenConfigPath = getConfigPath(undefined, true);
@@ -672,7 +672,7 @@ describe('config/config', () => {
       });
 
       it('returns the hidden config path when useHiddenConfig is true, ignoring the passed path', () => {
-        (configFile.getConfigFilePath as vi.Mock).mockReturnValue(
+        vi.mocked(configFile.getConfigFilePath).mockReturnValue(
           CONFIG_PATHS.hidden
         );
         const hiddenConfigPath = getConfigPath(
@@ -689,13 +689,13 @@ describe('config/config', () => {
       });
 
       it('returns default directory when useHiddenConfig is false', () => {
-        (configFile.getConfigFilePath as vi.Mock).mockReturnValue(null);
+        vi.mocked(configFile.getConfigFilePath).mockReturnValue(null as any);
         const configPath = getConfigPath(undefined, false);
         expect(configPath).toBe(CONFIG_PATHS.default);
       });
 
       it('returns null when useHiddenConfig is true and no hidden config exists', () => {
-        (configFile.getConfigFilePath as vi.Mock).mockReturnValue(null);
+        vi.mocked(configFile.getConfigFilePath).mockReturnValue(null as any);
         const hiddenConfigPath = getConfigPath(undefined, true);
         expect(hiddenConfigPath).toBeNull();
       });
@@ -704,13 +704,13 @@ describe('config/config', () => {
     describe('when a non-standard config is present', () => {
       beforeAll(() => {
         fsExistsSyncSpy.mockReturnValue(true);
-        (configFile.getConfigFilePath as vi.Mock).mockReturnValue(
+        vi.mocked(configFile.getConfigFilePath).mockReturnValue(
           CONFIG_PATHS.nonStandard
         );
       });
 
       it('returns the hidden config path when useHiddenConfig is true', () => {
-        (configFile.getConfigFilePath as vi.Mock).mockReturnValue(
+        vi.mocked(configFile.getConfigFilePath).mockReturnValue(
           CONFIG_PATHS.hidden
         );
         const hiddenConfigPath = getConfigPath(undefined, true);
@@ -803,7 +803,7 @@ describe('config/config', () => {
     });
 
     it('returns true when useHiddenConfig is true and newConfigFileExists returns true', () => {
-      (configFile.configFileExists as vi.Mock).mockReturnValue(true);
+      vi.mocked(configFile.configFileExists).mockReturnValue(true);
 
       const result = configFileExists(true);
 
@@ -812,7 +812,7 @@ describe('config/config', () => {
     });
 
     it('returns false when useHiddenConfig is true and newConfigFileExists returns false', () => {
-      (configFile.configFileExists as vi.Mock).mockReturnValue(false);
+      vi.mocked(configFile.configFileExists).mockReturnValue(false);
 
       const result = configFileExists(true);
 

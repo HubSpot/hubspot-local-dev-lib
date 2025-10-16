@@ -10,7 +10,7 @@ import { ARCHIVED_HUBSPOT_CONFIG_YAML_FILE_NAME } from '../../constants/config.j
 import { i18n } from '../../utils/lang.js';
 import fs from 'fs';
 import path from 'path';
-import { vi } from 'vitest';
+import { vi, type MockedFunction } from 'vitest';
 
 // Mock dependencies
 vi.mock('../config_DEPRECATED');
@@ -178,16 +178,16 @@ describe('migrate', () => {
   describe('migrateConfig', () => {
     beforeEach(() => {
       mockI18n.mockImplementation(key => `translated-${key}`);
-      mockConfigIndex.createEmptyConfigFile.mockImplementation();
-      mockConfigIndex.loadConfig.mockImplementation();
-      mockConfigIndex.writeConfig.mockImplementation();
-      mockConfigIndex.deleteEmptyConfigFile.mockImplementation();
+      mockConfigIndex.createEmptyConfigFile.mockImplementation(() => {});
+      mockConfigIndex.loadConfig.mockImplementation(() => null);
+      mockConfigIndex.writeConfig.mockImplementation(() => {});
+      mockConfigIndex.deleteEmptyConfigFile.mockImplementation(() => {});
       mockConfig_DEPRECATED.getConfigPath.mockReturnValue('/old/config/path');
       mockPath.dirname.mockReturnValue('/old/config');
       mockPath.join.mockReturnValue(
         `/old/config/${ARCHIVED_HUBSPOT_CONFIG_YAML_FILE_NAME}`
       );
-      mockFs.renameSync.mockImplementation();
+      mockFs.renameSync.mockImplementation(() => {});
     });
 
     it('should throw error when deprecatedConfig is null', () => {
@@ -426,7 +426,7 @@ describe('migrate', () => {
 
   describe('mergeExistingConfigs', () => {
     beforeEach(() => {
-      mockConfigIndex.writeConfig.mockImplementation();
+      mockConfigIndex.writeConfig.mockImplementation(() => {});
     });
 
     it('should merge accounts and return skipped account IDs', () => {

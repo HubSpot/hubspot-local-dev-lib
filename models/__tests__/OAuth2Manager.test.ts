@@ -6,7 +6,7 @@ import { vi, type MockedFunction } from 'vitest';
 
 vi.mock('axios');
 
-const axiosMock = axios as MockedFunction<typeof axios>;
+const axiosMock = vi.mocked(axios);
 
 const mockRefreshTokenResponse = {
   refresh_token: 'new-token',

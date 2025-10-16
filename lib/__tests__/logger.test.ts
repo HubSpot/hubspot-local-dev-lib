@@ -19,7 +19,7 @@ describe('lib/logger', () => {
     it('stylizes input', () => {
       const res = stylize('[ERROR]', Styles.error, ['test']);
 
-      expect(res[0]).toEqual(`${chalk.reset.red('[ERROR]')} test`);
+      expect(res[0]).toEqual(`${(chalk as any).red('[ERROR]')} test`);
     });
   });
 

@@ -13,15 +13,15 @@ import extract from 'extract-zip';
 import { walk } from '../fs.js';
 import { vi, type MockedFunction } from 'vitest';
 
-const writeFileMock = fs.writeFile as MockedFunction<typeof fs.writeFile>;
-const makeDirMock = fs.mkdtemp as MockedFunction<typeof fs.mkdtemp>;
-const readDirMock = fs.readdir as MockedFunction<typeof fs.readdir>;
-const osTmpDirMock = os.tmpdir as MockedFunction<typeof os.tmpdir>;
-const extractMock = extract as MockedFunction<typeof extract>;
-const fsCopyMock = fs.copy as MockedFunction<typeof fs.copy>;
-const fsRemoveMock = fs.remove as MockedFunction<typeof fs.remove>;
-const fsExistsSyncMock = fs.existsSync as MockedFunction<typeof fs.existsSync>;
-const walkMock = walk as MockedFunction<typeof walk>;
+const writeFileMock = vi.mocked(fs.writeFile);
+const makeDirMock = vi.mocked(fs.mkdtemp);
+const readDirMock = vi.mocked(fs.readdir);
+const osTmpDirMock = vi.mocked(os.tmpdir);
+const extractMock = vi.mocked(extract);
+const fsCopyMock = vi.mocked(fs.copy);
+const fsRemoveMock = vi.mocked(fs.remove);
+const fsExistsSyncMock = vi.mocked(fs.existsSync);
+const walkMock = vi.mocked(walk);
 
 describe('lib/archive', () => {
   const rootDir = 'rootdir';
