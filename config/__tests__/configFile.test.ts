@@ -16,17 +16,18 @@ import {
   HUBSPOT_CONFIGURATION_FOLDER,
 } from '../../constants/config.js';
 import { CLIConfig_NEW } from '../../types/Config.js';
+import { vi } from 'vitest';
 
 // fs spy
-const existsSyncSpy = jest.spyOn(fs, 'existsSync');
-const readFileSyncSpy = jest.spyOn(fs, 'readFileSync');
-const unlinkSyncSpy = jest.spyOn(fs, 'unlinkSync');
-const ensureFileSyncSpy = jest.spyOn(fs, 'ensureFileSync');
-const writeFileSyncSpy = jest.spyOn(fs, 'writeFileSync');
+const existsSyncSpy = vi.spyOn(fs, 'existsSync');
+const readFileSyncSpy = vi.spyOn(fs, 'readFileSync');
+const unlinkSyncSpy = vi.spyOn(fs, 'unlinkSync');
+const ensureFileSyncSpy = vi.spyOn(fs, 'ensureFileSync');
+const writeFileSyncSpy = vi.spyOn(fs, 'writeFileSync');
 
 // yamp spy
-const loadSpy = jest.spyOn(yaml, 'load');
-const dumpSpy = jest.spyOn(yaml, 'dump');
+const loadSpy = vi.spyOn(yaml, 'load');
+const dumpSpy = vi.spyOn(yaml, 'dump');
 
 const CONFIG = {
   defaultAccount: '',

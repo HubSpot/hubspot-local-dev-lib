@@ -15,14 +15,15 @@ import {
 } from '../../api/fileMapper.js';
 import folderWithoutSources from './fixtures/fileMapper/folderWithoutSources.json';
 import { mockAxiosResponse } from './__utils__/mockAxiosResponse.js';
+import { vi, type MockedFunction } from 'vitest';
 
-jest.mock('../../api/fileMapper');
-const utimesSpy = jest.spyOn(fs, 'utimes');
-const ensureDirSpy = jest.spyOn(fs, 'ensureDir');
-const pathExistsSpy = jest.spyOn(fs, 'pathExists');
+vi.mock('../../api/fileMapper');
+const utimesSpy = vi.spyOn(fs, 'utimes');
+const ensureDirSpy = vi.spyOn(fs, 'ensureDir');
+const pathExistsSpy = vi.spyOn(fs, 'pathExists');
 
-const download = __download as jest.MockedFunction<typeof __download>;
-const fetchFileStream = __fetchFileStream as jest.MockedFunction<
+const download = __download as MockedFunction<typeof __download>;
+const fetchFileStream = __fetchFileStream as MockedFunction<
   typeof __fetchFileStream
 >;
 

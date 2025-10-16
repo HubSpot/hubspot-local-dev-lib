@@ -41,12 +41,6 @@ export async function stopPortManagerServer(): Promise<void> {
 
   if (isRunning) {
     await axios.post(`${BASE_URL}/close`);
-    // Wait for server to actually close
-    let attempts = 0;
-    while ((await isPortManagerServerRunning()) && attempts < 10) {
-      await new Promise(resolve => setImmediate(resolve));
-      attempts++;
-    }
   }
 }
 

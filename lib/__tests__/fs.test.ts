@@ -1,8 +1,9 @@
 import fs, { Stats } from 'fs';
 import { flattenAndRemoveSymlinks, getFileInfoAsync } from '../fs.js';
 import { STAT_TYPES } from '../../constants/files.js';
+import { vi } from 'vitest';
 
-jest.mock('fs');
+vi.mock('fs');
 
 function buildLstatMock(opts: {
   isFile?: boolean;
@@ -25,9 +26,7 @@ function buildLstatMock(opts: {
 describe('lib/fs', () => {
   describe('getFileInfoAsync()', () => {
     it('returns filepath and type for files', async () => {
-      (fs.lstat as unknown as jest.Mock).mockImplementation(
-        buildLstatMock({ isFile: true })
-      );
+      (fs.lstat as any).mockImplementation(buildLstatMock({ isFile: true }));
       const fileData = await getFileInfoAsync('modules', 'module.html');
 
       expect(fileData.filepath).toBe('modules/module.html');
@@ -35,7 +34,7 @@ describe('lib/fs', () => {
     });
 
     it('returns filepath and type for directories', async () => {
-      (fs.lstat as unknown as jest.Mock).mockImplementation(
+      (fs.lstat as any).mockImplementation(
         buildLstatMock({ isDirectory: true })
       );
       const fileData = await getFileInfoAsync('modules', 'module.html');
@@ -45,7 +44,7 @@ describe('lib/fs', () => {
     });
 
     it('returns filepath and type for symbolic links', async () => {
-      (fs.lstat as unknown as jest.Mock).mockImplementation(
+      (fs.lstat as any).mockImplementation(
         buildLstatMock({ isSymbolicLink: true })
       );
       const fileData = await getFileInfoAsync('modules', 'module.html');

@@ -10,31 +10,33 @@ import { ARCHIVED_HUBSPOT_CONFIG_YAML_FILE_NAME } from '../../constants/config.j
 import { i18n } from '../../utils/lang.js';
 import fs from 'fs';
 import path from 'path';
+import { vi } from 'vitest';
 
 // Mock dependencies
-jest.mock('../config_DEPRECATED');
-jest.mock('../CLIConfiguration');
-jest.mock('../index');
-jest.mock('../configFile');
-jest.mock('../../utils/lang');
-jest.mock('fs');
-jest.mock('path');
+vi.mock('../config_DEPRECATED');
+vi.mock('../CLIConfiguration');
+vi.mock('../index');
+vi.mock('../configFile');
+vi.mock('../../utils/lang');
+vi.mock('fs');
+vi.mock('path');
 
-const mockConfig_DEPRECATED = config_DEPRECATED as jest.Mocked<
-  typeof config_DEPRECATED
->;
-const mockCLIConfiguration = CLIConfiguration as jest.Mocked<
-  typeof CLIConfiguration
->;
-const mockConfigIndex = configIndex as jest.Mocked<typeof configIndex>;
-const mockConfigFile = configFile as jest.Mocked<typeof configFile>;
-const mockI18n = i18n as jest.MockedFunction<typeof i18n>;
-const mockFs = fs as jest.Mocked<typeof fs>;
-const mockPath = path as jest.Mocked<typeof path>;
+const mockConfig_DEPRECATED = vi.mocked(config_DEPRECATED);
+const mockCLIConfiguration = vi.mocked(CLIConfiguration);
+const mockConfigIndex = vi.mocked(configIndex);
+const mockConfigFile = vi.mocked(configFile);
+const mockI18n = vi.mocked(i18n);
+const mockFs = vi.mocked(fs);
+const mockPath = vi.mocked(path);
 
 describe('migrate', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
+
+    // Mock fs operations to prevent actual file system operations
+    mockFs.renameSync = vi.fn();
+    mockPath.dirname = vi.fn().mockReturnValue('/old/config');
+    mockPath.join = vi.fn().mockImplementation((...args) => args.join('/'));
   });
 
   describe('getDeprecatedConfig', () => {

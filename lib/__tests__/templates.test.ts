@@ -5,11 +5,12 @@ import {
   createTemplate,
 } from '../cms/templates.js';
 import { cloneGithubRepo as __cloneGithubRepo } from '../github.js';
+import { vi, type MockedFunction } from 'vitest';
 
-jest.mock('fs-extra');
-jest.mock('../github');
+vi.mock('fs-extra');
+vi.mock('../github');
 
-const cloneGithubRepo = __cloneGithubRepo as jest.MockedFunction<
+const cloneGithubRepo = __cloneGithubRepo as MockedFunction<
   typeof __cloneGithubRepo
 >;
 
@@ -58,8 +59,8 @@ describe('lib/cms/templates', () => {
 
   describe('createTemplate()', () => {
     it('downloads a template from the HubSpot/cms-sample-assets repo', async () => {
-      jest.spyOn(fs, 'mkdirp').mockReturnValue();
-      jest.spyOn(fs, 'existsSync').mockReturnValue(false);
+      vi.spyOn(fs, 'mkdirp').mockReturnValue();
+      vi.spyOn(fs, 'existsSync').mockReturnValue(false);
       await createTemplate('my-template', '/', 'page-template');
 
       expect(cloneGithubRepo).toHaveBeenCalledWith(

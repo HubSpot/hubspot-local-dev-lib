@@ -2,9 +2,7 @@
 
 import path from 'path';
 import fs from 'fs';
-import semver from 'semver';
 import { pathToFileURL } from 'url';
-import { getExt } from '../path.js';
 import { FieldsJs } from './handleFieldsJS.js';
 import { i18n } from '../../utils/lang.js';
 
@@ -103,7 +101,6 @@ async function fieldsArrayToJson(fields: Array<FieldsJs>): Promise<string> {
  * @returns {Promise} - Returns _default_ exported content if ESM, or exported module content if CJS.
  */
 async function dynamicImport(filePath: string): Promise<any> {
-  // Since we're now using ESM, we can always use dynamic import
   const exported = await import(pathToFileURL(filePath).href);
   return exported.default || exported;
 }

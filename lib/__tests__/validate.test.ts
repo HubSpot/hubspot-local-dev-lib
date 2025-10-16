@@ -4,23 +4,22 @@ import { walk } from '../fs.js';
 import { lint } from '../cms/validate.js';
 import { LintResult, Validation } from '../../types/HublValidation.js';
 import { HubSpotPromise } from '../../types/Http.js';
+import { vi, type MockedFunction } from 'vitest';
 
-jest.mock('fs-extra');
-jest.mock('../../api/validateHubl');
-jest.mock('../fs');
+vi.mock('fs-extra');
+vi.mock('../../api/validateHubl');
+vi.mock('../fs');
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const mockedFsStat = fs.stat as jest.MockedFunction<any>;
+const mockedFsStat = fs.stat as MockedFunction<any>;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const mockedFsReadFile = fs.readFile as jest.MockedFunction<any>;
-const mockedWalk = walk as jest.MockedFunction<typeof walk>;
-const mockedValidateHubl = validateHubl as jest.MockedFunction<
-  typeof validateHubl
->;
+const mockedFsReadFile = fs.readFile as MockedFunction<any>;
+const mockedWalk = walk as MockedFunction<typeof walk>;
+const mockedValidateHubl = validateHubl as MockedFunction<typeof validateHubl>;
 
-const mockFsStats = jest.createMockFromModule<Stats>('fs-extra');
-
-mockFsStats.isDirectory = jest.fn(() => true);
+const mockFsStats = {
+  isDirectory: vi.fn(() => true),
+} as unknown as Stats;
 
 const mockValidation: Validation = {
   meta: {
@@ -98,7 +97,7 @@ describe('lib/cms/validate', () => {
   });
 
   it('should execute callback if provided', async () => {
-    const mockCallback = jest.fn();
+    const mockCallback = vi.fn();
     const mockSource = 'valid HUBL content';
     mockedFsStat.mockResolvedValue({ isDirectory: () => false });
     mockedFsReadFile.mockResolvedValue(mockSource);

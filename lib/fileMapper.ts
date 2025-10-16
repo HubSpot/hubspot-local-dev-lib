@@ -11,7 +11,11 @@ import {
   isAllowedExtension,
 } from './path.js';
 import { logger } from './logger.js';
-import { fetchFileStream, download, downloadDefault } from '../api/fileMapper.js';
+import {
+  fetchFileStream,
+  download,
+  downloadDefault,
+} from '../api/fileMapper.js';
 import {
   MODULE_EXTENSION,
   FUNCTIONS_EXTENSION,

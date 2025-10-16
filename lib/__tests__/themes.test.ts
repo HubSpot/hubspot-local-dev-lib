@@ -3,23 +3,23 @@ import { getHubSpotWebsiteOrigin } from '../urls.js';
 import { getThemeJSONPath, getThemePreviewUrl } from '../cms/themes.js';
 import { getEnv } from '../../config/index.js';
 import { ENVIRONMENTS } from '../../constants/environments.js';
+import { vi, type MockedFunction } from 'vitest';
 
-jest.mock('findup-sync');
-jest.mock('../urls');
-jest.mock('../../config');
-jest.mock('../../constants/environments', () => ({
+vi.mock('findup-sync');
+vi.mock('../urls');
+vi.mock('../../config');
+vi.mock('../../constants/environments', () => ({
   ENVIRONMENTS: {
     PROD: 'https://prod.hubspot.com',
     QA: 'https://qa.hubspot.com',
   },
 }));
 
-const mockedFindup = findup as jest.MockedFunction<typeof findup>;
-const mockedGetEnv = getEnv as jest.MockedFunction<typeof getEnv>;
-const mockedGetHubSpotWebsiteOrigin =
-  getHubSpotWebsiteOrigin as jest.MockedFunction<
-    typeof getHubSpotWebsiteOrigin
-  >;
+const mockedFindup = findup as MockedFunction<typeof findup>;
+const mockedGetEnv = getEnv as MockedFunction<typeof getEnv>;
+const mockedGetHubSpotWebsiteOrigin = getHubSpotWebsiteOrigin as MockedFunction<
+  typeof getHubSpotWebsiteOrigin
+>;
 
 describe('lib/cms/themes', () => {
   describe('getThemeJSONPath', () => {

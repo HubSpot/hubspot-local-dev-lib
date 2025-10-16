@@ -6,18 +6,18 @@ import {
 } from '../../config/index.js';
 import { AuthType } from '../../types/Accounts.js';
 import { ENVIRONMENTS } from '../../constants/environments.js';
+import { vi, type MockedFunction } from 'vitest';
 
-jest.mock('axios');
-jest.mock('../../config');
+vi.mock('axios');
+vi.mock('../../config');
 
-const mockedAxios = jest.mocked(axios);
-const getAccountConfig = __getAccountConfig as jest.MockedFunction<
+const mockedAxios = vi.mocked(axios);
+const getAccountConfig = __getAccountConfig as MockedFunction<
   typeof __getAccountConfig
 >;
-const getAndLoadConfigIfNeeded =
-  __getAndLoadConfigIfNeeded as jest.MockedFunction<
-    typeof __getAndLoadConfigIfNeeded
-  >;
+const getAndLoadConfigIfNeeded = __getAndLoadConfigIfNeeded as MockedFunction<
+  typeof __getAndLoadConfigIfNeeded
+>;
 
 mockedAxios.mockResolvedValue({});
 getAndLoadConfigIfNeeded.mockReturnValue({});

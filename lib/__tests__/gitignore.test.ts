@@ -1,40 +1,32 @@
+import { vi } from 'vitest';
 import { DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME } from '../../constants/config.js';
 
-jest.mock('../../utils/git');
-jest.mock('path');
-jest.mock('fs-extra');
-jest.mock('path');
+vi.mock('../../utils/git');
+vi.mock('path');
+vi.mock('fs-extra', () => ({
+  readFileSync: vi.fn(),
+  writeFileSync: vi.fn(),
+}));
 
 import {
   configFilenameIsIgnoredByGitignore,
   getGitignoreFiles,
   isConfigPathInGitRepo,
 } from '../../utils/git.js';
-import { checkAndAddConfigToGitignore, checkGitInclusion } from '../gitignore.js';
+import {
+  checkAndAddConfigToGitignore,
+  checkGitInclusion,
+} from '../gitignore.js';
 import { readFileSync, writeFileSync } from 'fs-extra';
 import path from 'path';
 
-const isConfigPathInGitRepoMock = isConfigPathInGitRepo as jest.MockedFunction<
-  typeof isConfigPathInGitRepo
->;
-const getGitignoreFilesMock = getGitignoreFiles as jest.MockedFunction<
-  typeof getGitignoreFiles
->;
-const configFilenameIsIgnoredByGitignoreMock =
-  configFilenameIsIgnoredByGitignore as jest.MockedFunction<
-    typeof configFilenameIsIgnoredByGitignore
-  >;
+const isConfigPathInGitRepoMock = vi.mocked(isConfigPathInGitRepo);
+const getGitignoreFilesMock = vi.mocked(getGitignoreFiles);
+const configFilenameIsIgnoredByGitignoreMock = vi.mocked(
+  configFilenameIsIgnoredByGitignore
+);
 
-const pathResolveMock = path.resolve as jest.MockedFunction<
-  typeof path.resolve
->;
-const pathDirnameMock = path.dirname as jest.MockedFunction<
-  typeof path.dirname
->;
-const pathJoinMock = path.join as jest.MockedFunction<typeof path.join>;
-const readFileSyncMock = readFileSync as jest.MockedFunction<
-  typeof readFileSync
->;
+// We'll set up the mocks in beforeEach
 
 describe('lib/gitignore', () => {
   const gitIgnoreFiles = ['/some/cool/file', 'some/other/file'];
@@ -47,10 +39,14 @@ describe('lib/gitignore', () => {
     isConfigPathInGitRepoMock.mockReturnValue(true);
     getGitignoreFilesMock.mockReturnValue(gitIgnoreFiles);
     configFilenameIsIgnoredByGitignoreMock.mockReturnValue(false);
-    pathResolveMock.mockReturnValue(pathResolveReturnValue);
-    pathDirnameMock.mockReturnValue(configDirectoryPath);
-    pathJoinMock.mockReturnValue(pathResolveReturnValue);
-    readFileSyncMock.mockReturnValue(fileContents);
+
+    // Set up path mocks
+    vi.mocked(path.resolve).mockReturnValue(pathResolveReturnValue);
+    vi.mocked(path.dirname).mockReturnValue(configDirectoryPath);
+    vi.mocked(path.join).mockReturnValue(pathResolveReturnValue);
+
+    // Set up fs mocks
+    vi.mocked(readFileSync).mockReturnValue(fileContents);
   });
 
   describe('checkAndAddConfigToGitIgnore', () => {
@@ -88,7 +84,7 @@ describe('lib/gitignore', () => {
       isConfigPathInGitRepoMock.mockReturnValue(true);
       configFilenameIsIgnoredByGitignoreMock.mockReturnValue(false);
       const error = new Error('OH NO');
-      readFileSyncMock.mockImplementationOnce(() => {
+      vi.mocked(readFileSync).mockImplementationOnce(() => {
         throw error;
       });
 

@@ -3,10 +3,11 @@ import { uploadFile } from '../../api/fileManager.js';
 import { walk } from '../fs.js';
 import { createIgnoreFilter } from '../ignoreRules.js';
 import { mockAxiosResponse } from './__utils__/mockAxiosResponse.js';
+import { vi } from 'vitest';
 
-jest.mock('../fs');
-jest.mock('../../api/fileManager');
-jest.mock('../ignoreRules');
+vi.mock('../fs');
+vi.mock('../../api/fileManager');
+vi.mock('../ignoreRules');
 
 describe('lib/fileManager', () => {
   describe('uploadFolder()', () => {
@@ -18,9 +19,9 @@ describe('lib/fileManager', () => {
         'folder/video/video.mp4',
       ];
 
-      const mockedWalk = jest.mocked(walk);
-      const mockedUploadFile = jest.mocked(uploadFile);
-      const mockedCreateIgnoreFilter = jest.mocked(createIgnoreFilter);
+      const mockedWalk = vi.mocked(walk);
+      const mockedUploadFile = vi.mocked(uploadFile);
+      const mockedCreateIgnoreFilter = vi.mocked(createIgnoreFilter);
 
       mockedWalk.mockResolvedValue(files);
       mockedUploadFile.mockImplementation(() =>

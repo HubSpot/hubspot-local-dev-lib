@@ -18,20 +18,19 @@ import hubdbTableResponse from './fixtures/hubdb/tableResponse.json';
 import hubdbCreateRowsResponse from './fixtures/hubdb/createRowsResponse.json';
 import { Table } from '../../types/Hubdb.js';
 import { mockAxiosResponse } from './__utils__/mockAxiosResponse.js';
+import { vi, type MockedFunction } from 'vitest';
 
-jest.mock('fs-extra');
-jest.mock('../path');
-jest.mock('../../api/hubdb');
+vi.mock('fs-extra');
+vi.mock('../path');
+vi.mock('../../api/hubdb');
 
-const mockedFS = fs as jest.Mocked<typeof fs>;
-const getCwd = __getCwd as jest.MockedFunction<typeof __getCwd>;
-const createRows = __createRows as jest.MockedFunction<typeof __createRows>;
-const createTable = __createTable as jest.MockedFunction<typeof __createTable>;
-const fetchRows = __fetchRows as jest.MockedFunction<typeof __fetchRows>;
-const fetchTable = __fetchTable as jest.MockedFunction<typeof __fetchTable>;
-const publishTable = __publishTable as jest.MockedFunction<
-  typeof __publishTable
->;
+const mockedFS = vi.mocked(fs);
+const getCwd = __getCwd as MockedFunction<typeof __getCwd>;
+const createRows = __createRows as MockedFunction<typeof __createRows>;
+const createTable = __createTable as MockedFunction<typeof __createTable>;
+const fetchRows = __fetchRows as MockedFunction<typeof __fetchRows>;
+const fetchTable = __fetchTable as MockedFunction<typeof __fetchTable>;
+const publishTable = __publishTable as MockedFunction<typeof __publishTable>;
 
 describe('lib/hubdb', () => {
   describe('downloadHubDbTable()', () => {

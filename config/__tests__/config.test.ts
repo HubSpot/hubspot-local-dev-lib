@@ -33,6 +33,7 @@ import {
 } from '../../types/Accounts.js';
 import * as configFile from '../configFile.js';
 import * as config_DEPRECATED from '../config_DEPRECATED.js';
+import { vi } from 'vitest';
 
 const CONFIG_PATHS = {
   none: null,
@@ -44,18 +45,18 @@ const CONFIG_PATHS = {
 
 let mockedConfigPath: string | null = CONFIG_PATHS.default;
 
-jest.mock('findup-sync', () => {
-  return jest.fn(() => mockedConfigPath);
-});
+vi.mock('findup-sync', () => ({
+  default: vi.fn(() => mockedConfigPath),
+}));
 
-jest.mock('../../lib/logger');
+vi.mock('../../lib/logger');
 
-const fsReadFileSyncSpy = jest.spyOn(fs, 'readFileSync');
-const fsWriteFileSyncSpy = jest.spyOn(fs, 'writeFileSync');
+const fsReadFileSyncSpy = vi.spyOn(fs, 'readFileSync');
+const fsWriteFileSyncSpy = vi.spyOn(fs, 'writeFileSync');
 
-jest.mock('../configFile', () => ({
-  getConfigFilePath: jest.fn(),
-  configFileExists: jest.fn(),
+vi.mock('../configFile', () => ({
+  getConfigFilePath: vi.fn(),
+  configFileExists: vi.fn(),
 }));
 
 const API_KEY_CONFIG: APIKeyAccount_DEPRECATED = {
@@ -114,8 +115,8 @@ function getAccountByAuthType(
 describe('config/config', () => {
   const globalConsole = global.console;
   beforeAll(() => {
-    global.console.error = jest.fn();
-    global.console.debug = jest.fn();
+    global.console.error = vi.fn();
+    global.console.debug = vi.fn();
   });
   afterAll(() => {
     global.console = globalConsole;
@@ -236,20 +237,20 @@ describe('config/config', () => {
 
   describe('deleteEmptyConfigFile()', () => {
     it('does not delete config file if there are contents', () => {
-      jest
-        .spyOn(fs, 'readFileSync')
-        .mockImplementation(() => 'defaultPortal: "test"');
-      jest.spyOn(fs, 'existsSync').mockImplementation(() => true);
-      fs.unlinkSync = jest.fn();
+      vi.spyOn(fs, 'readFileSync').mockImplementation(
+        () => 'defaultPortal: "test"'
+      );
+      vi.spyOn(fs, 'existsSync').mockImplementation(() => true);
+      fs.unlinkSync = vi.fn();
 
       deleteEmptyConfigFile();
       expect(fs.unlinkSync).not.toHaveBeenCalled();
     });
 
     it('deletes config file if empty', () => {
-      jest.spyOn(fs, 'readFileSync').mockImplementation(() => '');
-      jest.spyOn(fs, 'existsSync').mockImplementation(() => true);
-      fs.unlinkSync = jest.fn();
+      vi.spyOn(fs, 'readFileSync').mockImplementation(() => '');
+      vi.spyOn(fs, 'existsSync').mockImplementation(() => true);
+      fs.unlinkSync = vi.fn();
 
       deleteEmptyConfigFile();
       expect(fs.unlinkSync).toHaveBeenCalled();
@@ -475,7 +476,7 @@ describe('config/config', () => {
     });
 
     it('loads a config from file if no combination of environment variables is sufficient', () => {
-      const readFileSyncSpy = jest.spyOn(fs, 'readFileSync');
+      const readFileSyncSpy = vi.spyOn(fs, 'readFileSync');
 
       getAndLoadConfigIfNeeded();
       expect(fs.readFileSync).toHaveBeenCalled();
@@ -633,10 +634,10 @@ describe('config/config', () => {
   });
 
   describe('getConfigPath()', () => {
-    let fsExistsSyncSpy: jest.SpyInstance;
+    let fsExistsSyncSpy: any;
 
     beforeAll(() => {
-      fsExistsSyncSpy = jest.spyOn(fs, 'existsSync').mockImplementation(() => {
+      fsExistsSyncSpy = vi.spyOn(fs, 'existsSync').mockImplementation(() => {
         return false;
       });
     });
@@ -647,7 +648,7 @@ describe('config/config', () => {
 
     describe('when a standard config is present', () => {
       it('returns the standard config path when useHiddenConfig is false', () => {
-        (configFile.getConfigFilePath as jest.Mock).mockReturnValue(
+        (configFile.getConfigFilePath as vi.Mock).mockReturnValue(
           CONFIG_PATHS.default
         );
         const configPath = getConfigPath('', false);
@@ -655,7 +656,7 @@ describe('config/config', () => {
       });
 
       it('returns the hidden config path when useHiddenConfig is true', () => {
-        (configFile.getConfigFilePath as jest.Mock).mockReturnValue(
+        (configFile.getConfigFilePath as vi.Mock).mockReturnValue(
           CONFIG_PATHS.hidden
         );
         const hiddenConfigPath = getConfigPath(undefined, true);
@@ -671,7 +672,7 @@ describe('config/config', () => {
       });
 
       it('returns the hidden config path when useHiddenConfig is true, ignoring the passed path', () => {
-        (configFile.getConfigFilePath as jest.Mock).mockReturnValue(
+        (configFile.getConfigFilePath as vi.Mock).mockReturnValue(
           CONFIG_PATHS.hidden
         );
         const hiddenConfigPath = getConfigPath(
@@ -688,13 +689,13 @@ describe('config/config', () => {
       });
 
       it('returns default directory when useHiddenConfig is false', () => {
-        (configFile.getConfigFilePath as jest.Mock).mockReturnValue(null);
+        (configFile.getConfigFilePath as vi.Mock).mockReturnValue(null);
         const configPath = getConfigPath(undefined, false);
         expect(configPath).toBe(CONFIG_PATHS.default);
       });
 
       it('returns null when useHiddenConfig is true and no hidden config exists', () => {
-        (configFile.getConfigFilePath as jest.Mock).mockReturnValue(null);
+        (configFile.getConfigFilePath as vi.Mock).mockReturnValue(null);
         const hiddenConfigPath = getConfigPath(undefined, true);
         expect(hiddenConfigPath).toBeNull();
       });
@@ -703,13 +704,13 @@ describe('config/config', () => {
     describe('when a non-standard config is present', () => {
       beforeAll(() => {
         fsExistsSyncSpy.mockReturnValue(true);
-        (configFile.getConfigFilePath as jest.Mock).mockReturnValue(
+        (configFile.getConfigFilePath as vi.Mock).mockReturnValue(
           CONFIG_PATHS.nonStandard
         );
       });
 
       it('returns the hidden config path when useHiddenConfig is true', () => {
-        (configFile.getConfigFilePath as jest.Mock).mockReturnValue(
+        (configFile.getConfigFilePath as vi.Mock).mockReturnValue(
           CONFIG_PATHS.hidden
         );
         const hiddenConfigPath = getConfigPath(undefined, true);
@@ -720,16 +721,14 @@ describe('config/config', () => {
 
   describe('createEmptyConfigFile()', () => {
     describe('when no config is present', () => {
-      let fsExistsSyncSpy: jest.SpyInstance;
+      let fsExistsSyncSpy: any;
 
       beforeEach(() => {
         setConfigPath(CONFIG_PATHS.none);
         mockedConfigPath = CONFIG_PATHS.none;
-        fsExistsSyncSpy = jest
-          .spyOn(fs, 'existsSync')
-          .mockImplementation(() => {
-            return false;
-          });
+        fsExistsSyncSpy = vi.spyOn(fs, 'existsSync').mockImplementation(() => {
+          return false;
+        });
       });
 
       afterAll(() => {
@@ -746,12 +745,12 @@ describe('config/config', () => {
     });
 
     describe('when a config is present', () => {
-      let fsExistsSyncAndReturnTrueSpy: jest.SpyInstance;
+      let fsExistsSyncAndReturnTrueSpy: any;
 
       beforeAll(() => {
         setConfigPath(CONFIG_PATHS.cwd);
         mockedConfigPath = CONFIG_PATHS.cwd;
-        fsExistsSyncAndReturnTrueSpy = jest
+        fsExistsSyncAndReturnTrueSpy = vi
           .spyOn(fs, 'existsSync')
           .mockImplementation(pathToCheck => {
             if (pathToCheck === CONFIG_PATHS.cwd) {
@@ -789,14 +788,14 @@ describe('config/config', () => {
   });
 
   describe('configFileExists', () => {
-    let getConfigPathSpy: jest.SpyInstance;
+    let getConfigPathSpy: any;
 
     beforeAll(() => {
-      getConfigPathSpy = jest.spyOn(config_DEPRECATED, 'getConfigPath');
+      getConfigPathSpy = vi.spyOn(config_DEPRECATED, 'getConfigPath');
     });
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     afterAll(() => {
@@ -804,7 +803,7 @@ describe('config/config', () => {
     });
 
     it('returns true when useHiddenConfig is true and newConfigFileExists returns true', () => {
-      (configFile.configFileExists as jest.Mock).mockReturnValue(true);
+      (configFile.configFileExists as vi.Mock).mockReturnValue(true);
 
       const result = configFileExists(true);
 
@@ -813,7 +812,7 @@ describe('config/config', () => {
     });
 
     it('returns false when useHiddenConfig is true and newConfigFileExists returns false', () => {
-      (configFile.configFileExists as jest.Mock).mockReturnValue(false);
+      (configFile.configFileExists as vi.Mock).mockReturnValue(false);
 
       const result = configFileExists(true);
 

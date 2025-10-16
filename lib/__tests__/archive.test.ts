@@ -1,28 +1,27 @@
 import os from 'os';
 
-jest.mock('fs-extra');
-jest.mock('extract-zip');
-jest.mock('os');
-jest.mock('../logger');
-jest.mock('../fs');
+vi.mock('fs-extra');
+vi.mock('extract-zip');
+vi.mock('os');
+vi.mock('../logger');
+vi.mock('../fs');
 
 import { extractZipArchive } from '../archive.js';
 import { logger } from '../logger.js';
 import fs from 'fs-extra';
 import extract from 'extract-zip';
 import { walk } from '../fs.js';
+import { vi, type MockedFunction } from 'vitest';
 
-const writeFileMock = fs.writeFile as jest.MockedFunction<typeof fs.writeFile>;
-const makeDirMock = fs.mkdtemp as jest.MockedFunction<typeof fs.mkdtemp>;
-const readDirMock = fs.readdir as jest.MockedFunction<typeof fs.readdir>;
-const osTmpDirMock = os.tmpdir as jest.MockedFunction<typeof os.tmpdir>;
-const extractMock = extract as jest.MockedFunction<typeof extract>;
-const fsCopyMock = fs.copy as jest.MockedFunction<typeof fs.copy>;
-const fsRemoveMock = fs.remove as jest.MockedFunction<typeof fs.remove>;
-const fsExistsSyncMock = fs.existsSync as jest.MockedFunction<
-  typeof fs.existsSync
->;
-const walkMock = walk as jest.MockedFunction<typeof walk>;
+const writeFileMock = fs.writeFile as MockedFunction<typeof fs.writeFile>;
+const makeDirMock = fs.mkdtemp as MockedFunction<typeof fs.mkdtemp>;
+const readDirMock = fs.readdir as MockedFunction<typeof fs.readdir>;
+const osTmpDirMock = os.tmpdir as MockedFunction<typeof os.tmpdir>;
+const extractMock = extract as MockedFunction<typeof extract>;
+const fsCopyMock = fs.copy as MockedFunction<typeof fs.copy>;
+const fsRemoveMock = fs.remove as MockedFunction<typeof fs.remove>;
+const fsExistsSyncMock = fs.existsSync as MockedFunction<typeof fs.existsSync>;
+const walkMock = walk as MockedFunction<typeof walk>;
 
 describe('lib/archive', () => {
   const rootDir = 'rootdir';
@@ -166,7 +165,7 @@ describe('lib/archive', () => {
 
     it('should call handleCollision when destination exists and collisions are detected', async () => {
       const sourceDir = 'sourceDir';
-      const handleCollisionMock = jest.fn();
+      const handleCollisionMock = vi.fn();
 
       fsExistsSyncMock.mockReturnValue(true);
       walkMock
@@ -195,7 +194,7 @@ describe('lib/archive', () => {
 
     it('should call handleCollision for each source directory when multiple dirs have collisions', async () => {
       const sourceDir = ['sourceDir1', 'sourceDir2'];
-      const handleCollisionMock = jest.fn();
+      const handleCollisionMock = vi.fn();
 
       fsExistsSyncMock.mockReturnValue(true);
       walkMock
@@ -223,7 +222,7 @@ describe('lib/archive', () => {
 
     it('should not call handleCollision when destination does not exist', async () => {
       const sourceDir = 'sourceDir';
-      const handleCollisionMock = jest.fn();
+      const handleCollisionMock = vi.fn();
 
       fsExistsSyncMock.mockReturnValue(false);
 
@@ -257,7 +256,7 @@ describe('lib/archive', () => {
 
     it('should not call handleCollisions where there are no collisions', async () => {
       const sourceDir = 'sourceDir';
-      const handleCollisionMock = jest.fn();
+      const handleCollisionMock = vi.fn();
 
       fsExistsSyncMock.mockReturnValue(true);
       walkMock
@@ -276,7 +275,7 @@ describe('lib/archive', () => {
 
     it('should normalize paths when detecting collisions', async () => {
       const sourceDir = 'sourceDir';
-      const handleCollisionMock = jest.fn();
+      const handleCollisionMock = vi.fn();
 
       fsExistsSyncMock.mockReturnValue(true);
       walkMock
@@ -320,7 +319,7 @@ describe('lib/archive', () => {
 
     it('should handle async handleCollision function', async () => {
       const sourceDir = 'sourceDir';
-      const handleCollisionMock = jest.fn().mockResolvedValue(undefined);
+      const handleCollisionMock = vi.fn().mockResolvedValue(undefined);
 
       fsExistsSyncMock.mockReturnValue(true);
       walkMock
@@ -345,7 +344,7 @@ describe('lib/archive', () => {
 
     it('should handle synchronous handleCollision function wrapped in Promise.resolve', async () => {
       const sourceDir = 'sourceDir';
-      const handleCollisionMock = jest.fn().mockReturnValue('sync result');
+      const handleCollisionMock = vi.fn().mockReturnValue('sync result');
 
       fsExistsSyncMock.mockReturnValue(true);
       walkMock
@@ -369,7 +368,7 @@ describe('lib/archive', () => {
 
     it('should copy non-collided files when collisions are handled', async () => {
       const sourceDir = 'sourceDir';
-      const handleCollisionMock = jest.fn();
+      const handleCollisionMock = vi.fn();
 
       fsExistsSyncMock.mockReturnValue(true);
       walkMock
@@ -399,7 +398,7 @@ describe('lib/archive', () => {
 
     it('should copy all non-collided files when some files have collisions', async () => {
       const sourceDir = 'sourceDir';
-      const handleCollisionMock = jest.fn();
+      const handleCollisionMock = vi.fn();
 
       fsExistsSyncMock.mockReturnValue(true);
       walkMock

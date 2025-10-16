@@ -1,6 +1,7 @@
 import os from 'os';
 import {
   convertToUnixPath,
+  convertToLocalFileSystemPath,
   splitLocalPath,
   splitHubSpotPath,
   getCwd,
@@ -12,31 +13,53 @@ import {
   untildify,
 } from '../path.js';
 import { ALLOWED_EXTENSIONS } from '../../constants/extensions.js';
+import { vi } from 'vitest';
 
-jest.mock('os', () => ({
-  homedir: jest.fn(),
+vi.mock('os', () => ({
+  default: {
+    homedir: vi.fn(),
+  },
 }));
 
-jest.mock('path', () => ({
-  ...jest.requireActual('path'),
-  sep: '/',
-  posix: {
-    sep: '/',
-  },
-  win32: {
-    sep: '\\',
-  },
+// Create a controllable mock for path.sep
+const mockPath = vi.hoisted(() => {
+  let mockSep = '/';
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const actualPath = require('path');
+
+  return {
+    ...actualPath,
+    get sep() {
+      return mockSep;
+    },
+    setSep: (newSep: string) => {
+      mockSep = newSep;
+    },
+    posix: { sep: '/' },
+    win32: { sep: '\\' },
+    normalize: (p: string) => {
+      if (mockSep === '\\') {
+        return p.replace(/\//g, '\\');
+      }
+      return actualPath.normalize(p);
+    },
+  };
+});
+
+vi.mock('path', () => ({
+  default: mockPath,
+  ...mockPath,
 }));
 
 describe('path utility functions', () => {
   describe('convertToUnixPath()', () => {
-    test('converts Windows path to Unix path', () => {
+    it('converts Windows path to Unix path', () => {
       expect(convertToUnixPath('C:\\Users\\test\\file.txt')).toBe(
         '/Users/test/file.txt'
       );
     });
 
-    test('normalizes Unix path', () => {
+    it('normalizes Unix path', () => {
       expect(convertToUnixPath('/home//user/./file.txt')).toBe(
         '/home/user/file.txt'
       );
@@ -45,20 +68,19 @@ describe('path utility functions', () => {
 
   describe('convertToLocalFileSystemPath()', () => {
     afterEach(() => {
-      jest.resetModules();
+      // Reset to Unix separator
+      mockPath.setSep('/');
     });
 
-    test('converts to Unix path when on Unix-like system', async () => {
-      jest.doMock('path', () => ({ ...jest.requireActual('path'), sep: '/' }));
-      const { convertToLocalFileSystemPath } = await import('../path');
+    it('converts to Unix path when on Unix-like system', () => {
+      mockPath.setSep('/');
       expect(convertToLocalFileSystemPath('/home/user/file.txt')).toBe(
         '/home/user/file.txt'
       );
     });
 
-    test('converts to Windows path when on Windows system', async () => {
-      jest.doMock('path', () => ({ ...jest.requireActual('path'), sep: '\\' }));
-      const { convertToLocalFileSystemPath } = await import('../path');
+    it('converts to Windows path when on Windows system', () => {
+      mockPath.setSep('\\');
       expect(convertToLocalFileSystemPath('C:/Users/test/file.txt')).toBe(
         'C:\\Users\\test\\file.txt'
       );
@@ -66,7 +88,7 @@ describe('path utility functions', () => {
   });
 
   describe('splitLocalPath()', () => {
-    test('splits Unix path correctly', () => {
+    it('splits Unix path correctly', () => {
       expect(
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
@@ -77,7 +99,7 @@ describe('path utility functions', () => {
       ).toEqual(['/', 'home', 'user', 'file.txt']);
     });
 
-    test('splits Windows path correctly', () => {
+    it('splits Windows path correctly', () => {
       expect(
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
@@ -88,13 +110,13 @@ describe('path utility functions', () => {
       ).toEqual(['C:', 'Users', 'test', 'file.txt']);
     });
 
-    test('handles empty path', () => {
+    it('handles empty path', () => {
       expect(splitLocalPath('')).toEqual([]);
     });
   });
 
   describe('splitHubSpotPath()', () => {
-    test('splits HubSpot path correctly', () => {
+    it('splits HubSpot path correctly', () => {
       expect(splitHubSpotPath('/project/My Module.module/js/main.js')).toEqual([
         '/',
         'project',
@@ -104,11 +126,11 @@ describe('path utility functions', () => {
       ]);
     });
 
-    test('handles root path', () => {
+    it('handles root path', () => {
       expect(splitHubSpotPath('/')).toEqual(['/']);
     });
 
-    test('handles empty path', () => {
+    it('handles empty path', () => {
       expect(splitHubSpotPath('')).toEqual([]);
     });
   });
@@ -119,7 +141,7 @@ describe('path utility functions', () => {
 
     beforeEach(() => {
       process.env = { ...originalEnv };
-      process.cwd = jest.fn().mockReturnValue('/mocked/cwd');
+      process.cwd = vi.fn().mockReturnValue('/mocked/cwd');
     });
 
     afterEach(() => {
@@ -127,27 +149,27 @@ describe('path utility functions', () => {
       process.cwd = originalCwd;
     });
 
-    test('returns INIT_CWD if set', () => {
+    it('returns INIT_CWD if set', () => {
       process.env.INIT_CWD = '/custom/init/cwd';
       expect(getCwd()).toBe('/custom/init/cwd');
     });
 
-    test('returns process.cwd() if INIT_CWD not set', () => {
+    it('returns process.cwd() if INIT_CWD not set', () => {
       delete process.env.INIT_CWD;
       expect(getCwd()).toBe('/mocked/cwd');
     });
   });
 
   describe('getExt()', () => {
-    test('returns lowercase extension without dot', () => {
+    it('returns lowercase extension without dot', () => {
       expect(getExt('file.TXT')).toBe('txt');
     });
 
-    test('returns empty string for no extension', () => {
+    it('returns empty string for no extension', () => {
       expect(getExt('file')).toBe('');
     });
 
-    test('handles non-string input', () => {
+    it('handles non-string input', () => {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       expect(getExt(null as '')).toBe('');
@@ -155,56 +177,56 @@ describe('path utility functions', () => {
   });
 
   describe('getAllowedExtensions()', () => {
-    test('returns default allowed extensions', () => {
+    it('returns default allowed extensions', () => {
       const result = getAllowedExtensions();
       expect(result).toBeInstanceOf(Set);
       expect(result).toEqual(new Set(ALLOWED_EXTENSIONS));
     });
 
-    test('includes additional extensions', () => {
+    it('includes additional extensions', () => {
       const result = getAllowedExtensions(['custom']);
       expect(result.has('custom')).toBe(true);
     });
   });
 
   describe('isAllowedExtension()', () => {
-    test('returns true for allowed extension', () => {
+    it('returns true for allowed extension', () => {
       expect(isAllowedExtension('file.txt')).toBe(true);
     });
 
-    test('returns false for disallowed extension', () => {
+    it('returns false for disallowed extension', () => {
       expect(isAllowedExtension('file.exe')).toBe(false);
     });
 
-    test('allows custom extensions', () => {
+    it('allows custom extensions', () => {
       expect(isAllowedExtension('file.custom', ['custom'])).toBe(true);
     });
   });
 
   describe('sanitizeFileName()', () => {
-    test('replaces invalid characters', () => {
+    it('replaces invalid characters', () => {
       expect(sanitizeFileName('file:name?.txt')).toBe('file-name-.txt');
     });
 
-    test('handles reserved names', () => {
+    it('handles reserved names', () => {
       expect(sanitizeFileName('CON')).toBe('-CON');
     });
 
-    test('removes trailing periods and spaces', () => {
+    it('removes trailing periods and spaces', () => {
       expect(sanitizeFileName('file.txt. ')).toBe('file.txt');
     });
   });
 
   describe('isValidPath()', () => {
-    test('returns true for valid path', () => {
+    it('returns true for valid path', () => {
       expect(isValidPath('/valid/path/file.txt')).toBe(true);
     });
 
-    test('returns false for path with invalid characters', () => {
+    it('returns false for path with invalid characters', () => {
       expect(isValidPath('/invalid/path/file?.txt')).toBe(false);
     });
 
-    test('returns false for reserved names', () => {
+    it('returns false for reserved names', () => {
       expect(isValidPath('/some/path/CON')).toBe(false);
     });
   });
@@ -213,26 +235,26 @@ describe('path utility functions', () => {
     const originalHomedir = os.homedir;
 
     beforeEach(() => {
-      (os.homedir as jest.Mock) = jest.fn().mockReturnValue('/home/user');
+      (os.homedir as any) = vi.fn().mockReturnValue('/home/user');
     });
 
     afterEach(() => {
       os.homedir = originalHomedir;
     });
 
-    test('replaces tilde with home directory', () => {
+    it('replaces tilde with home directory', () => {
       expect(untildify('~/documents/file.txt')).toBe(
         '/home/user/documents/file.txt'
       );
     });
 
-    test('does not modify paths without tilde', () => {
+    it('does not modify paths without tilde', () => {
       expect(untildify('/absolute/path/file.txt')).toBe(
         '/absolute/path/file.txt'
       );
     });
 
-    test('throws TypeError for non-string input', () => {
+    it('throws TypeError for non-string input', () => {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       expect(() => untildify(null as '')).toThrow(TypeError);

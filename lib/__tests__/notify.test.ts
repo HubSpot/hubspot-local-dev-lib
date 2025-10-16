@@ -1,7 +1,8 @@
-jest.mock('fs');
+vi.mock('fs');
 import { triggerNotify } from '../notify.js';
 import fs from 'fs';
-const fsAppendSyncMock = fs.appendFileSync as jest.MockedFunction<
+import { vi, type MockedFunction } from 'vitest';
+const fsAppendSyncMock = fs.appendFileSync as MockedFunction<
   typeof fs.appendFileSync
 >;
 
@@ -10,7 +11,7 @@ describe('lib/notify', () => {
   beforeEach(() => {
     now = Date.now();
     // Use fake timers so we can test the debounce functionality
-    jest.useFakeTimers({ now });
+    vi.useFakeTimers({ now });
   });
   describe('triggerNotify', () => {
     const filePathToNotify = '/my/super/cool/file/to/notify';
@@ -28,7 +29,7 @@ describe('lib/notify', () => {
       );
 
       // Advance all of the timers to trigger the debounce
-      await jest.runAllTimersAsync();
+      await vi.runAllTimersAsync();
 
       expect(fsAppendSyncMock).toHaveBeenCalledTimes(1);
       expect(fsAppendSyncMock).toHaveBeenCalledWith(
@@ -55,7 +56,7 @@ describe('lib/notify', () => {
       }
 
       // Advance all of the timers to trigger the debounce
-      await jest.runAllTimersAsync();
+      await vi.runAllTimersAsync();
 
       // Make sure the 10 calls still only lead to 1 write
       expect(fsAppendSyncMock).toHaveBeenCalledTimes(1);

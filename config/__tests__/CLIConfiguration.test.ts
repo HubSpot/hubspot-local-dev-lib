@@ -1,6 +1,7 @@
 import { HUBSPOT_ACCOUNT_TYPES } from '../../constants/config.js';
 import { ENVIRONMENTS } from '../../constants/environments.js';
 import { CLIConfiguration as config } from '../CLIConfiguration.js';
+import { vi } from 'vitest';
 
 describe('config/CLIConfiguration', () => {
   afterAll(() => {
@@ -161,11 +162,11 @@ describe('config/CLIConfiguration', () => {
   describe('addLocalStateFlag()', () => {
     beforeEach(() => {
       // Mock the write method to prevent actual file operations
-      jest.spyOn(config, 'write').mockImplementation(() => null);
+      vi.spyOn(config, 'write').mockImplementation(() => null);
     });
 
     afterEach(() => {
-      jest.restoreAllMocks();
+      vi.restoreAllMocks();
     });
 
     it('throws when no config is loaded', () => {
@@ -195,11 +196,11 @@ describe('config/CLIConfiguration', () => {
   describe('removeLocalStateFlag()', () => {
     beforeEach(() => {
       // Mock the write method to prevent actual file operations
-      jest.spyOn(config, 'write').mockImplementation(() => null);
+      vi.spyOn(config, 'write').mockImplementation(() => null);
     });
 
     afterEach(() => {
-      jest.restoreAllMocks();
+      vi.restoreAllMocks();
     });
 
     it('throws when no config is loaded', () => {

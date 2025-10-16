@@ -38,19 +38,11 @@ const BAD_PORT_DATA = [
 ];
 
 describe('lib/portManager', () => {
-  // Global cleanup to ensure clean state between all tests
   beforeEach(async () => {
-    // Ensure server is stopped and state is clean before each test
     await PortManagerServer.close();
   });
 
   afterEach(async () => {
-    // Ensure server is stopped after each test
-    await PortManagerServer.close();
-  });
-
-  afterAll(async () => {
-    // Final cleanup after all tests
     await PortManagerServer.close();
   });
 

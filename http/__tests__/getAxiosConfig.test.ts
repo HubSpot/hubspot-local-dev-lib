@@ -1,13 +1,13 @@
 import { getAndLoadConfigIfNeeded as __getAndLoadConfigIfNeeded } from '../../config/index.js';
 import { ENVIRONMENTS } from '../../constants/environments.js';
 import { getAxiosConfig } from '../getAxiosConfig.js';
+import { vi, type MockedFunction } from 'vitest';
 
-jest.mock('../../config');
+vi.mock('../../config');
 
-const getAndLoadConfigIfNeeded =
-  __getAndLoadConfigIfNeeded as jest.MockedFunction<
-    typeof __getAndLoadConfigIfNeeded
-  >;
+const getAndLoadConfigIfNeeded = __getAndLoadConfigIfNeeded as MockedFunction<
+  typeof __getAndLoadConfigIfNeeded
+>;
 
 const url = 'https://app.hubspot.com';
 

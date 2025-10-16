@@ -1,4 +1,5 @@
 import chalk from 'chalk';
+import { vi } from 'vitest';
 import {
   Styles,
   stylize,
@@ -78,21 +79,21 @@ describe('lib/logger', () => {
   });
 
   describe('logger()', () => {
-    let warnSpy: jest.SpyInstance;
-    let logSpy: jest.SpyInstance;
-    let debugSpy: jest.SpyInstance;
-    let infoSpy: jest.SpyInstance;
-    let groupSpy: jest.SpyInstance;
-    let groupEndSpy: jest.SpyInstance;
+    let warnSpy: any;
+    let logSpy: any;
+    let debugSpy: any;
+    let infoSpy: any;
+    let groupSpy: any;
+    let groupEndSpy: any;
 
     beforeEach(() => {
       setLogLevel(LOG_LEVEL.LOG);
-      warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => null);
-      logSpy = jest.spyOn(console, 'log').mockImplementation(() => null);
-      debugSpy = jest.spyOn(console, 'debug').mockImplementation(() => null);
-      infoSpy = jest.spyOn(console, 'info').mockImplementation(() => null);
-      groupSpy = jest.spyOn(console, 'group').mockImplementation(() => null);
-      groupEndSpy = jest
+      warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => null);
+      logSpy = vi.spyOn(console, 'log').mockImplementation(() => null);
+      debugSpy = vi.spyOn(console, 'debug').mockImplementation(() => null);
+      infoSpy = vi.spyOn(console, 'info').mockImplementation(() => null);
+      groupSpy = vi.spyOn(console, 'group').mockImplementation(() => null);
+      groupEndSpy = vi
         .spyOn(console, 'groupEnd')
         .mockImplementation(() => null);
     });

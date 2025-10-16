@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended'],
   root: true,
   env: {
@@ -6,7 +6,6 @@ module.exports = {
     node: true,
     commonjs: true,
     es6: true,
-    jest: true,
   },
   parser: '@typescript-eslint/parser',
   parserOptions: {
@@ -23,8 +22,17 @@ module.exports = {
     {
       files: ['**/__tests__/**/*.ts', '**/__mocks__/**/*.ts'],
       env: {
-        jest: true,
         node: true,
+      },
+      globals: {
+        vi: 'readonly',
+        describe: 'readonly',
+        it: 'readonly',
+        expect: 'readonly',
+        beforeEach: 'readonly',
+        afterEach: 'readonly',
+        beforeAll: 'readonly',
+        afterAll: 'readonly',
       },
     },
     {

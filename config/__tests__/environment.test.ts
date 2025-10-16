@@ -1,13 +1,14 @@
 import { loadConfigFromEnvironment } from '../environment.js';
 import { ENVIRONMENT_VARIABLES } from '../../constants/environments.js';
 import { PERSONAL_ACCESS_KEY_AUTH_METHOD } from '../../constants/auth.js';
+import { vi } from 'vitest';
 
 describe('config/environment', () => {
   describe('loadConfigFromEnvironment()', () => {
     const INITIAL_ENV = process.env;
 
     beforeEach(() => {
-      jest.resetModules();
+      vi.resetModules();
       process.env = { ...INITIAL_ENV };
     });
 

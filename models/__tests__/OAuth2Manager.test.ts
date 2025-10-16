@@ -2,10 +2,11 @@ import axios from 'axios';
 import moment from 'moment';
 import { OAuth2Manager } from '../OAuth2Manager.js';
 import { ENVIRONMENTS } from '../../constants/environments.js';
+import { vi, type MockedFunction } from 'vitest';
 
-jest.mock('axios');
+vi.mock('axios');
 
-const axiosMock = axios as jest.MockedFunction<typeof axios>;
+const axiosMock = axios as MockedFunction<typeof axios>;
 
 const mockRefreshTokenResponse = {
   refresh_token: 'new-token',

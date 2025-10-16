@@ -6,38 +6,42 @@ import {
   getAccountConfig as __getAccountConfig,
 } from '../../config/index.js';
 import { ENVIRONMENTS } from '../../constants/environments.js';
-import { http } from '../.js';
+import { http } from '../index.js';
 import { version } from '../../package.json';
 import { AuthType } from '../../types/Accounts.js';
+import { vi, type MockedFunction } from 'vitest';
 
-jest.mock('fs-extra');
-jest.mock('axios');
-jest.mock('../../config');
-jest.mock('../../lib/logger');
+vi.mock('fs-extra');
+vi.mock('axios');
+vi.mock('../../config');
+vi.mock('../../lib/logger');
 
-jest.mock('http', () => ({
-  Agent: jest.fn().mockReturnValue({
-    options: { keepAlive: true, maxSockets: 5, maxTotalSockets: 25 },
-  }),
+vi.mock('http', () => ({
+  default: {
+    Agent: vi.fn().mockReturnValue({
+      options: { keepAlive: true, maxSockets: 5, maxTotalSockets: 25 },
+    }),
+  },
 }));
 
-jest.mock('https', () => ({
-  Agent: jest.fn().mockReturnValue({
-    options: { keepAlive: true, maxSockets: 6, maxTotalSockets: 26 },
-  }),
+vi.mock('https', () => ({
+  default: {
+    Agent: vi.fn().mockReturnValue({
+      options: { keepAlive: true, maxSockets: 6, maxTotalSockets: 26 },
+    }),
+  },
 }));
 
-const mockedAxios = jest.mocked(axios);
-const getAndLoadConfigIfNeeded =
-  __getAndLoadConfigIfNeeded as jest.MockedFunction<
-    typeof __getAndLoadConfigIfNeeded
-  >;
-const getAccountConfig = __getAccountConfig as jest.MockedFunction<
+const mockedAxios = vi.mocked(axios);
+const getAndLoadConfigIfNeeded = __getAndLoadConfigIfNeeded as MockedFunction<
+  typeof __getAndLoadConfigIfNeeded
+>;
+const getAccountConfig = __getAccountConfig as MockedFunction<
   typeof __getAccountConfig
 >;
 
-fs.createWriteStream = jest.fn().mockReturnValue({
-  on: jest.fn((event, callback) => {
+fs.createWriteStream = vi.fn().mockReturnValue({
+  on: vi.fn((event, callback) => {
     if (event === 'close') {
       callback();
     }
@@ -74,7 +78,7 @@ describe('http/index', () => {
         status: 200,
         headers: [],
         data: {
-          pipe: jest.fn(),
+          pipe: vi.fn(),
         },
       });
       await http.getOctetStream(
@@ -99,7 +103,7 @@ describe('http/index', () => {
         status: 404,
         headers: [],
         data: {
-          pipe: jest.fn(),
+          pipe: vi.fn(),
         },
       });
 

@@ -59,19 +59,6 @@ class _PortManagerServer {
     this.serverPortMap = {};
   }
 
-  async close(): Promise<void> {
-    return new Promise<void>(resolve => {
-      if (this.server) {
-        this.server.close(() => {
-          this.reset();
-          resolve();
-        });
-      } else {
-        resolve();
-      }
-    });
-  }
-
   listen(): Promise<Server> {
     return new Promise<Server>((resolve, reject) => {
       const server = this.app!.listen(PORT_MANAGER_SERVER_PORT, () => {
@@ -206,10 +193,23 @@ class _PortManagerServer {
     }
   };
 
+  async close(): Promise<void> {
+    return new Promise<void>(resolve => {
+      if (this.server) {
+        this.server.close(() => {
+          this.reset();
+          resolve();
+        });
+      } else {
+        resolve();
+      }
+    });
+  }
+
   closeServer = (req: Request, res: Response): void => {
     logger.debug(i18n(`${i18nKey}.close`));
     res.sendStatus(200);
-    // Close asynchronously after response is sent
+
     setImmediate(() => {
       this.close();
     });

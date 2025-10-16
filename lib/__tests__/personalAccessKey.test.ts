@@ -16,31 +16,31 @@ import {
 } from '../personalAccessKey.js';
 import { AuthType } from '../../types/Accounts.js';
 import { mockAxiosResponse } from './__utils__/mockAxiosResponse.js';
+import { vi, type MockedFunction } from 'vitest';
 
-jest.mock('../../config');
-jest.mock('../logger');
-jest.mock('../../api/localDevAuth');
-jest.mock('../../api/sandboxHubs');
-jest.mock('../../api/developerTestAccounts');
+vi.mock('../../config');
+vi.mock('../logger');
+vi.mock('../../api/localDevAuth');
+vi.mock('../../api/sandboxHubs');
+vi.mock('../../api/developerTestAccounts');
 
-const updateAccountConfig = __updateAccountConfig as jest.MockedFunction<
+const updateAccountConfig = __updateAccountConfig as MockedFunction<
   typeof __updateAccountConfig
 >;
-const getAccountConfig = __getAccountConfig as jest.MockedFunction<
+const getAccountConfig = __getAccountConfig as MockedFunction<
   typeof __getAccountConfig
 >;
-const getAndLoadConfigIfNeeded =
-  __getAndLoadConfigIfNeeded as jest.MockedFunction<
-    typeof __getAndLoadConfigIfNeeded
-  >;
-const fetchAccessToken = __fetchAccessToken as jest.MockedFunction<
+const getAndLoadConfigIfNeeded = __getAndLoadConfigIfNeeded as MockedFunction<
+  typeof __getAndLoadConfigIfNeeded
+>;
+const fetchAccessToken = __fetchAccessToken as MockedFunction<
   typeof __fetchAccessToken
 >;
-const fetchSandboxHubData = __fetchSandboxHubData as jest.MockedFunction<
+const fetchSandboxHubData = __fetchSandboxHubData as MockedFunction<
   typeof __fetchSandboxHubData
 >;
 const fetchDeveloperTestAccountData =
-  __fetchDeveloperTestAccountData as jest.MockedFunction<
+  __fetchDeveloperTestAccountData as MockedFunction<
     typeof __fetchDeveloperTestAccountData
   >;
 

@@ -1,9 +1,9 @@
 import { addOauthToAccountConfig, getOauthManager } from '../oauth.js';
 
-jest.mock('../../config/getAccountIdentifier');
-jest.mock('../../config');
-jest.mock('../logger');
-jest.mock('../../errors');
+vi.mock('../../config/getAccountIdentifier');
+vi.mock('../../config');
+vi.mock('../logger');
+vi.mock('../../errors');
 
 import { updateAccountConfig, writeConfig } from '../../config/index.js';
 import { OAuth2Manager } from '../../models/OAuth2Manager.js';
@@ -11,8 +11,9 @@ import { FlatAccountFields_NEW } from '../../types/Accounts.js';
 import { ENVIRONMENTS } from '../../constants/environments.js';
 import { AUTH_METHODS } from '../../constants/auth.js';
 import { logger } from '../logger.js';
+import { vi } from 'vitest';
 
-const OAuth2ManagerFromConfigMock = jest.spyOn(OAuth2Manager, 'fromConfig');
+const OAuth2ManagerFromConfigMock = vi.spyOn(OAuth2Manager, 'fromConfig');
 
 describe('lib/oauth', () => {
   const accountId = 123;
