@@ -1,6 +1,6 @@
 {
   "name": "@hubspot/local-dev-lib",
-  "version": "3.20.2",
+  "version": "3.21.0-beta.0",
   "description": "Provides library functionality for HubSpot local development tooling, including the HubSpot CLI",
   "repository": {
     "type": "git",
