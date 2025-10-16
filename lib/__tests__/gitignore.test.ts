@@ -28,14 +28,19 @@ const configFilenameIsIgnoredByGitignoreMock =
 const pathResolveMock = path.resolve as jest.MockedFunction<
   typeof path.resolve
 >;
+const pathDirnameMock = path.dirname as jest.MockedFunction<
+  typeof path.dirname
+>;
+const pathJoinMock = path.join as jest.MockedFunction<typeof path.join>;
 const readFileSyncMock = readFileSync as jest.MockedFunction<
   typeof readFileSync
 >;
 
 describe('lib/gitignore', () => {
   const gitIgnoreFiles = ['/some/cool/file', 'some/other/file'];
-  const configPath = '/path/to/the/config/file';
-  const pathResolveReturnValue = `${configPath}/.gitignore`;
+  const configDirectoryPath = '/path/to/the/config/file';
+  const configPath = `${configDirectoryPath}/hubspot.config.yml`;
+  const pathResolveReturnValue = `${configDirectoryPath}/.gitignore`;
   const fileContents = 'the contents of the files';
 
   beforeEach(() => {
@@ -43,6 +48,8 @@ describe('lib/gitignore', () => {
     getGitignoreFilesMock.mockReturnValue(gitIgnoreFiles);
     configFilenameIsIgnoredByGitignoreMock.mockReturnValue(false);
     pathResolveMock.mockReturnValue(pathResolveReturnValue);
+    pathDirnameMock.mockReturnValue(configDirectoryPath);
+    pathJoinMock.mockReturnValue(pathResolveReturnValue);
     readFileSyncMock.mockReturnValue(fileContents);
   });
 
