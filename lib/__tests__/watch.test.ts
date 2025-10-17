@@ -1,11 +1,10 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import chokidar from 'chokidar';
 import PQueue from 'p-queue';
 
 import { uploadFolder } from '../cms/uploadFolder.js';
 import { watch } from '../cms/watch.js';
 import { CMS_PUBLISH_MODE } from '../../constants/files.js';
-import { vi } from 'vitest';
+import { vi, MockInstance } from 'vitest';
 
 vi.mock('chokidar');
 vi.mock('axios');
@@ -13,16 +12,15 @@ vi.mock('p-queue');
 vi.mock('../cms/uploadFolder');
 
 describe('lib/cms/watch', () => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let chokidarMock: any;
-  let pQueueAddMock: any;
+  let chokidarMock: { watch: MockInstance; on: MockInstance };
+  let pQueueAddMock: MockInstance;
 
   beforeEach(() => {
     chokidarMock = {
       watch: vi.fn().mockReturnThis(),
       on: vi.fn().mockReturnThis(),
     };
-    (chokidar.watch as any).mockReturnValue(chokidarMock);
+    vi.mocked(chokidar.watch).mockReturnValue(chokidarMock);
 
     pQueueAddMock = vi.fn();
 
@@ -68,7 +66,7 @@ describe('lib/cms/watch', () => {
     };
     const postInitialUploadCallback = vi.fn();
 
-    (uploadFolder as any).mockResolvedValueOnce([]);
+    vi.mocked(uploadFolder).mockResolvedValueOnce([]);
 
     await watch(accountId, src, dest, options, postInitialUploadCallback);
 

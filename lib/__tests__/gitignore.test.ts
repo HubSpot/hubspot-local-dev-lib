@@ -26,8 +26,6 @@ const configFilenameIsIgnoredByGitignoreMock = vi.mocked(
   configFilenameIsIgnoredByGitignore
 );
 
-// We'll set up the mocks in beforeEach
-
 describe('lib/gitignore', () => {
   const gitIgnoreFiles = ['/some/cool/file', 'some/other/file'];
   const configDirectoryPath = '/path/to/the/config/file';
@@ -40,12 +38,10 @@ describe('lib/gitignore', () => {
     getGitignoreFilesMock.mockReturnValue(gitIgnoreFiles);
     configFilenameIsIgnoredByGitignoreMock.mockReturnValue(false);
 
-    // Set up path mocks
     vi.mocked(path.resolve).mockReturnValue(pathResolveReturnValue);
     vi.mocked(path.dirname).mockReturnValue(configDirectoryPath);
     vi.mocked(path.join).mockReturnValue(pathResolveReturnValue);
 
-    // Set up fs mocks
     vi.mocked(readFileSync).mockReturnValue(fileContents);
   });
 

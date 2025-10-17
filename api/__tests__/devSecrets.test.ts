@@ -1,4 +1,3 @@
-vi.mock('../../http');
 import { http } from '../../http/index.js';
 import { vi, type MockedFunction } from 'vitest';
 import {
@@ -7,6 +6,8 @@ import {
   deleteAppSecret,
   fetchAppSecrets,
 } from '../devSecrets.js';
+
+vi.mock('../../http');
 
 const httpPostMock = http.post as MockedFunction<typeof http.post>;
 const httpPatchMock = http.patch as MockedFunction<typeof http.patch>;

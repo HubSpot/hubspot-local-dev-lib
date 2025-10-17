@@ -52,7 +52,7 @@ describe('lib/cms/validate', () => {
   const filePath = 'test.html';
 
   it('should return an empty array if directory has no files', async () => {
-    mockedFsStat.mockResolvedValue(mockFsStats as any);
+    mockedFsStat.mockResolvedValue(mockFsStats);
     mockedWalk.mockResolvedValue([]);
 
     const result = await lint(accountId, filePath);
@@ -60,7 +60,9 @@ describe('lib/cms/validate', () => {
   });
 
   it('should return the correct object if a file has no content', async () => {
-    mockedFsStat.mockResolvedValue({ isDirectory: () => false } as any);
+    mockedFsStat.mockResolvedValue({
+      isDirectory: () => false,
+    } as unknown as Stats);
     mockedFsReadFile.mockResolvedValue('  ' as any);
 
     const result = await lint(accountId, filePath);
@@ -69,7 +71,9 @@ describe('lib/cms/validate', () => {
 
   it('should call validateHubl with the correct parameters', async () => {
     const mockSource = 'valid HUBL content';
-    mockedFsStat.mockResolvedValue({ isDirectory: () => false } as any);
+    mockedFsStat.mockResolvedValue({
+      isDirectory: () => false,
+    } as unknown as Stats);
     mockedFsReadFile.mockResolvedValue(mockSource as any);
     mockedValidateHubl.mockResolvedValue({
       data: mockValidation,
@@ -85,7 +89,9 @@ describe('lib/cms/validate', () => {
 
   it('should filter out files with invalid extensions', async () => {
     const invalidFile = 'test.txt';
-    mockedFsStat.mockResolvedValue({ isDirectory: () => true } as any);
+    mockedFsStat.mockResolvedValue({
+      isDirectory: () => true,
+    } as unknown as Stats);
     mockedWalk.mockResolvedValue([invalidFile, filePath]);
     mockedFsReadFile.mockResolvedValue('valid HUBL content' as any);
     mockedValidateHubl.mockResolvedValue({

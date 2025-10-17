@@ -39,7 +39,6 @@ describe('lib/cms/functions', () => {
     const mockDest = '/mock/dest';
 
     beforeEach(() => {
-      // Reset specific mocks
       mockedGetCwd.mockReset();
       mockedFindup.mockReset();
       mockedFsExistsSync.mockReset();

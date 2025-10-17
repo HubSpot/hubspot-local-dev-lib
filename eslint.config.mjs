@@ -13,7 +13,6 @@ export default [
         ecmaVersion: 2022,
       },
       globals: {
-        // Node.js globals
         console: 'readonly',
         process: 'readonly',
         Buffer: 'readonly',
@@ -43,8 +42,8 @@ export default [
       'no-return-await': 'error',
       '@typescript-eslint/no-non-null-assertion': 'off',
       'import/no-default-export': 'error',
-      'no-redeclare': 'off', // Allow function overloads
-      '@typescript-eslint/no-redeclare': 'off', // Allow function overloads
+      'no-redeclare': 'off',
+      '@typescript-eslint/no-redeclare': 'off',
     },
   },
   {
@@ -73,7 +72,7 @@ export default [
     },
   },
   {
-    files: ['*.config.*', 'setupTests.ts'],
+    files: ['*.config.*'],
     rules: {
       'import/no-default-export': 'off',
     },

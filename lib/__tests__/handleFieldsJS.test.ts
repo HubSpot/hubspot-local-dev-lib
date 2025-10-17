@@ -9,14 +9,13 @@ vi.mock('child_process');
 describe('lib/cms/handleFieldsJs', () => {
   describe('FieldsJs()', () => {
     beforeEach(() => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (child_process.fork as any).mockImplementation(() => {
+      vi.mocked(child_process.fork).mockImplementation(() => {
         return {
           pid: 123,
           on: () => {
             return {};
           },
-        };
+        } as unknown as ReturnType<typeof child_process.fork>;
       });
       vi.resetModules();
     });

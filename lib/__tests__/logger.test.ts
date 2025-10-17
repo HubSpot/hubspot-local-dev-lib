@@ -1,6 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import chalk from 'chalk';
-import { vi } from 'vitest';
+import { vi, MockInstance } from 'vitest';
 import {
   Styles,
   stylize,
@@ -80,12 +79,12 @@ describe('lib/logger', () => {
   });
 
   describe('logger()', () => {
-    let warnSpy: any;
-    let logSpy: any;
-    let debugSpy: any;
-    let infoSpy: any;
-    let groupSpy: any;
-    let groupEndSpy: any;
+    let warnSpy: MockInstance;
+    let logSpy: MockInstance;
+    let debugSpy: MockInstance;
+    let infoSpy: MockInstance;
+    let groupSpy: MockInstance;
+    let groupEndSpy: MockInstance;
 
     beforeEach(() => {
       setLogLevel(LOG_LEVEL.LOG);

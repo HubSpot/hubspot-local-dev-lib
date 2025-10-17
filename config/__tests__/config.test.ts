@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import fs from 'fs-extra';
 import {
   setConfig,
@@ -34,7 +33,7 @@ import {
 } from '../../types/Accounts.js';
 import * as configFile from '../configFile.js';
 import * as config_DEPRECATED from '../config_DEPRECATED.js';
-import { vi } from 'vitest';
+import { vi, MockInstance } from 'vitest';
 
 const CONFIG_PATHS = {
   none: null,
@@ -635,7 +634,7 @@ describe('config/config', () => {
   });
 
   describe('getConfigPath()', () => {
-    let fsExistsSyncSpy: any;
+    let fsExistsSyncSpy: MockInstance;
 
     beforeAll(() => {
       fsExistsSyncSpy = vi.spyOn(fs, 'existsSync').mockImplementation(() => {
@@ -690,15 +689,17 @@ describe('config/config', () => {
       });
 
       it('returns default directory when useHiddenConfig is false', () => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        vi.mocked(configFile.getConfigFilePath).mockReturnValue(null as any);
+        vi.mocked(configFile.getConfigFilePath).mockReturnValue(
+          null as unknown as string
+        );
         const configPath = getConfigPath(undefined, false);
         expect(configPath).toBe(CONFIG_PATHS.default);
       });
 
       it('returns null when useHiddenConfig is true and no hidden config exists', () => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        vi.mocked(configFile.getConfigFilePath).mockReturnValue(null as any);
+        vi.mocked(configFile.getConfigFilePath).mockReturnValue(
+          null as unknown as string
+        );
         const hiddenConfigPath = getConfigPath(undefined, true);
         expect(hiddenConfigPath).toBeNull();
       });
@@ -724,7 +725,7 @@ describe('config/config', () => {
 
   describe('createEmptyConfigFile()', () => {
     describe('when no config is present', () => {
-      let fsExistsSyncSpy: any;
+      let fsExistsSyncSpy: MockInstance;
 
       beforeEach(() => {
         setConfigPath(CONFIG_PATHS.none);
@@ -748,7 +749,7 @@ describe('config/config', () => {
     });
 
     describe('when a config is present', () => {
-      let fsExistsSyncAndReturnTrueSpy: any;
+      let fsExistsSyncAndReturnTrueSpy: MockInstance;
 
       beforeAll(() => {
         setConfigPath(CONFIG_PATHS.cwd);
@@ -791,7 +792,7 @@ describe('config/config', () => {
   });
 
   describe('configFileExists', () => {
-    let getConfigPathSpy: any;
+    let getConfigPathSpy: MockInstance;
 
     beforeAll(() => {
       getConfigPathSpy = vi.spyOn(config_DEPRECATED, 'getConfigPath');

@@ -1,6 +1,7 @@
 import path from 'path';
 import fs from 'fs-extra';
 import { AxiosResponse } from 'axios';
+import { format } from 'prettier';
 import {
   createTable,
   updateTable,
@@ -186,8 +187,6 @@ export async function downloadHubDbTable(
   const rows = await fetchAllRows(accountId, tableId);
   const tableToWrite = JSON.stringify(convertToJSON(table, rows));
 
-  // Use dynamic import for prettier to handle ESM compatibility
-  const { format } = await import('prettier');
   const tableJson = await format(tableToWrite, {
     parser: 'json',
   });

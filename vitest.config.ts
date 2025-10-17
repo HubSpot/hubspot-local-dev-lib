@@ -5,9 +5,6 @@ export default defineConfig({
     // Test environment - use node for library tests
     environment: 'node',
 
-    // Global setup
-    setupFiles: ['./setupTests.ts'],
-
     // Coverage configuration
     coverage: {
       provider: 'v8',

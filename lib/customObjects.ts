@@ -3,6 +3,7 @@ import path from 'path';
 import { getCwd } from '../lib/path.js';
 import { fetchObjectSchemas, fetchObjectSchema } from '../api/customObjects.js';
 import { Schema } from '../types/Schemas.js';
+import { format } from 'prettier';
 
 export function getResolvedPath(dest?: string, name?: string): string {
   if (name) return path.resolve(getCwd(), dest || '', `${name}.json`);
@@ -14,8 +15,6 @@ export async function writeSchemaToDisk(
   schema: Schema,
   dest?: string
 ): Promise<void> {
-  // Use dynamic import for prettier to handle ESM compatibility
-  const { format } = await import('prettier');
   const formattedSchema = await format(JSON.stringify(schema), {
     parser: 'json',
   });

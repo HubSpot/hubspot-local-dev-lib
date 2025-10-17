@@ -12,7 +12,6 @@ import fs from 'fs';
 import path from 'path';
 import { vi } from 'vitest';
 
-// Mock dependencies
 vi.mock('../config_DEPRECATED');
 vi.mock('../CLIConfiguration');
 vi.mock('../index');
@@ -33,7 +32,6 @@ describe('migrate', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    // Mock fs operations to prevent actual file system operations
     mockFs.renameSync = vi.fn();
     mockPath.dirname = vi.fn().mockReturnValue('/old/config');
     mockPath.join = vi.fn().mockImplementation((...args) => args.join('/'));
@@ -179,14 +177,14 @@ describe('migrate', () => {
     beforeEach(() => {
       mockI18n.mockImplementation(key => `translated-${key}`);
       mockConfigIndex.createEmptyConfigFile.mockImplementation(() => {
-        // Mock implementation for createEmptyConfigFile
+        return;
       });
       mockConfigIndex.loadConfig.mockImplementation(() => null);
       mockConfigIndex.writeConfig.mockImplementation(() => {
-        // Mock implementation for writeConfig
+        return;
       });
       mockConfigIndex.deleteEmptyConfigFile.mockImplementation(() => {
-        // Mock implementation for deleteEmptyConfigFile
+        return;
       });
       mockConfig_DEPRECATED.getConfigPath.mockReturnValue('/old/config/path');
       mockPath.dirname.mockReturnValue('/old/config');
@@ -194,7 +192,7 @@ describe('migrate', () => {
         `/old/config/${ARCHIVED_HUBSPOT_CONFIG_YAML_FILE_NAME}`
       );
       mockFs.renameSync.mockImplementation(() => {
-        // Mock implementation for renameSync
+        return;
       });
     });
 
@@ -435,7 +433,7 @@ describe('migrate', () => {
   describe('mergeExistingConfigs', () => {
     beforeEach(() => {
       mockConfigIndex.writeConfig.mockImplementation(() => {
-        // Mock implementation for writeConfig
+        return;
       });
     });
 
