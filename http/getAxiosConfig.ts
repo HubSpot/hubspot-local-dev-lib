@@ -1,7 +1,7 @@
-import { version } from '../package.json';
-import { getAndLoadConfigIfNeeded } from '../config';
-import { getHubSpotApiOrigin } from '../lib/urls';
-import { HttpOptions } from '../types/Http';
+import pkg from '../package.json' with { type: 'json' };
+import { getAndLoadConfigIfNeeded } from '../config/index.js';
+import { getHubSpotApiOrigin } from '../lib/urls.js';
+import { HttpOptions } from '../types/Http.js';
 import { AxiosRequestConfig } from 'axios';
 import https from 'https';
 import http from 'http';
@@ -25,7 +25,7 @@ const httpsAgent = new https.Agent({
 });
 
 export const USER_AGENTS: { [key: string]: string } = {
-  'HubSpot Local Dev Lib': version,
+  'HubSpot Local Dev Lib': pkg.version,
 };
 
 export function getDefaultUserAgentHeader(): { 'User-Agent': string } {

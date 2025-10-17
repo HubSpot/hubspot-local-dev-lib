@@ -1,12 +1,12 @@
-import { ValueOf } from './Utils';
+import { ValueOf } from './Utils.js';
 import {
   BUILD_STATUS,
   SUBBUILD_TYPES,
   DEPLOYABLE_STATES,
-} from '../enums/build';
-import { ActivitySource } from './Activity';
-import { DeployStatusTaskLocator } from './Deploy';
-import { ProjectStandardError } from './Project';
+} from '../enums/build.js';
+import { ActivitySource } from './Activity.js';
+import { DeployStatusTaskLocator } from './Deploy.js';
+import { ProjectStandardError } from './Project.js';
 
 export type SubbuildStatus = {
   buildName: string;

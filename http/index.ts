@@ -8,17 +8,17 @@ import axios, {
   isAxiosError,
 } from 'axios';
 
-import { getAccountConfig } from '../config';
-import { USER_AGENTS, getAxiosConfig } from './getAxiosConfig';
-import { addQueryParams } from './addQueryParams';
-import { accessTokenForPersonalAccessKey } from '../lib/personalAccessKey';
-import { getOauthManager } from '../lib/oauth';
-import { FlatAccountFields } from '../types/Accounts';
-import { HttpOptions, HubSpotPromise } from '../types/Http';
-import { logger } from '../lib/logger';
-import { i18n } from '../utils/lang';
-import { HubSpotHttpError } from '../models/HubSpotHttpError';
-import { LOCALDEVAUTH_ACCESS_TOKEN_PATH } from '../api/localDevAuth';
+import { getAccountConfig } from '../config/index.js';
+import { USER_AGENTS, getAxiosConfig } from './getAxiosConfig.js';
+import { addQueryParams } from './addQueryParams.js';
+import { accessTokenForPersonalAccessKey } from '../lib/personalAccessKey.js';
+import { getOauthManager } from '../lib/oauth.js';
+import { FlatAccountFields } from '../types/Accounts.js';
+import { HttpOptions, HubSpotPromise } from '../types/Http.js';
+import { logger } from '../lib/logger.js';
+import { i18n } from '../utils/lang.js';
+import { HubSpotHttpError } from '../models/HubSpotHttpError.js';
+import { LOCALDEVAUTH_ACCESS_TOKEN_PATH } from '../api/localDevAuth.js';
 import * as util from 'util';
 
 const i18nKey = 'http.index';

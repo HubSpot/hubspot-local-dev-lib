@@ -1,40 +1,40 @@
-import * as migrate from '../migrate';
-import * as config_DEPRECATED from '../config_DEPRECATED';
-import { CLIConfiguration } from '../CLIConfiguration';
-import * as configIndex from '../index';
-import * as configFile from '../configFile';
-import { CLIConfig_DEPRECATED, CLIConfig_NEW } from '../../types/Config';
-import { ENVIRONMENTS } from '../../constants/environments';
-import { OAUTH_AUTH_METHOD } from '../../constants/auth';
-import { ARCHIVED_HUBSPOT_CONFIG_YAML_FILE_NAME } from '../../constants/config';
-import { i18n } from '../../utils/lang';
+import * as migrate from '../migrate.js';
+import * as config_DEPRECATED from '../config_DEPRECATED.js';
+import { CLIConfiguration } from '../CLIConfiguration.js';
+import * as configIndex from '../index.js';
+import * as configFile from '../configFile.js';
+import { CLIConfig_DEPRECATED, CLIConfig_NEW } from '../../types/Config.js';
+import { ENVIRONMENTS } from '../../constants/environments.js';
+import { OAUTH_AUTH_METHOD } from '../../constants/auth.js';
+import { ARCHIVED_HUBSPOT_CONFIG_YAML_FILE_NAME } from '../../constants/config.js';
+import { i18n } from '../../utils/lang.js';
 import fs from 'fs';
 import path from 'path';
+import { vi } from 'vitest';
 
-// Mock dependencies
-jest.mock('../config_DEPRECATED');
-jest.mock('../CLIConfiguration');
-jest.mock('../index');
-jest.mock('../configFile');
-jest.mock('../../utils/lang');
-jest.mock('fs');
-jest.mock('path');
+vi.mock('../config_DEPRECATED');
+vi.mock('../CLIConfiguration');
+vi.mock('../index');
+vi.mock('../configFile');
+vi.mock('../../utils/lang');
+vi.mock('fs');
+vi.mock('path');
 
-const mockConfig_DEPRECATED = config_DEPRECATED as jest.Mocked<
-  typeof config_DEPRECATED
->;
-const mockCLIConfiguration = CLIConfiguration as jest.Mocked<
-  typeof CLIConfiguration
->;
-const mockConfigIndex = configIndex as jest.Mocked<typeof configIndex>;
-const mockConfigFile = configFile as jest.Mocked<typeof configFile>;
-const mockI18n = i18n as jest.MockedFunction<typeof i18n>;
-const mockFs = fs as jest.Mocked<typeof fs>;
-const mockPath = path as jest.Mocked<typeof path>;
+const mockConfig_DEPRECATED = vi.mocked(config_DEPRECATED);
+const mockCLIConfiguration = vi.mocked(CLIConfiguration);
+const mockConfigIndex = vi.mocked(configIndex);
+const mockConfigFile = vi.mocked(configFile);
+const mockI18n = vi.mocked(i18n);
+const mockFs = vi.mocked(fs);
+const mockPath = vi.mocked(path);
 
 describe('migrate', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
+
+    mockFs.renameSync = vi.fn();
+    mockPath.dirname = vi.fn().mockReturnValue('/old/config');
+    mockPath.join = vi.fn().mockImplementation((...args) => args.join('/'));
   });
 
   describe('getDeprecatedConfig', () => {
@@ -176,16 +176,24 @@ describe('migrate', () => {
   describe('migrateConfig', () => {
     beforeEach(() => {
       mockI18n.mockImplementation(key => `translated-${key}`);
-      mockConfigIndex.createEmptyConfigFile.mockImplementation();
-      mockConfigIndex.loadConfig.mockImplementation();
-      mockConfigIndex.writeConfig.mockImplementation();
-      mockConfigIndex.deleteEmptyConfigFile.mockImplementation();
+      mockConfigIndex.createEmptyConfigFile.mockImplementation(() => {
+        return;
+      });
+      mockConfigIndex.loadConfig.mockImplementation(() => null);
+      mockConfigIndex.writeConfig.mockImplementation(() => {
+        return;
+      });
+      mockConfigIndex.deleteEmptyConfigFile.mockImplementation(() => {
+        return;
+      });
       mockConfig_DEPRECATED.getConfigPath.mockReturnValue('/old/config/path');
       mockPath.dirname.mockReturnValue('/old/config');
       mockPath.join.mockReturnValue(
         `/old/config/${ARCHIVED_HUBSPOT_CONFIG_YAML_FILE_NAME}`
       );
-      mockFs.renameSync.mockImplementation();
+      mockFs.renameSync.mockImplementation(() => {
+        return;
+      });
     });
 
     it('should throw error when deprecatedConfig is null', () => {
@@ -424,7 +432,9 @@ describe('migrate', () => {
 
   describe('mergeExistingConfigs', () => {
     beforeEach(() => {
-      mockConfigIndex.writeConfig.mockImplementation();
+      mockConfigIndex.writeConfig.mockImplementation(() => {
+        return;
+      });
     });
 
     it('should merge accounts and return skipped account IDs', () => {

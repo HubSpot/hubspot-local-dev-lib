@@ -1,9 +1,9 @@
 import path from 'path';
 
-import { validateSrcAndDestPaths, ValidationIds } from '../cms/modules';
+import { validateSrcAndDestPaths, ValidationIds } from '../cms/modules.js';
 
-import { PathInput } from '../../types/Modules';
-import { ValueOf } from '../../types/Utils';
+import { PathInput } from '../../types/Modules.js';
+import { ValueOf } from '../../types/Utils.js';
 
 const isLocal = true;
 const isHubSpot = true;

@@ -1,11 +1,11 @@
-import { http } from '../http';
+import { http } from '../http/index.js';
 import {
   InitiateSyncResponse,
   FetchTypesResponse,
   TaskRequestData,
-} from '../types/Sandbox';
-import { SANDBOX_TIMEOUT } from '../constants/api';
-import { HubSpotPromise } from '../types/Http';
+} from '../types/Sandbox.js';
+import { SANDBOX_TIMEOUT } from '../constants/api.js';
+import { HubSpotPromise } from '../types/Http.js';
 const SANDBOXES_SYNC_API_PATH = 'sandboxes-sync/v1';
 
 export async function initiateSync(

@@ -1,22 +1,22 @@
-import * as config_DEPRECATED from './config_DEPRECATED';
-import { CLIConfiguration } from './CLIConfiguration';
+import * as config_DEPRECATED from './config_DEPRECATED.js';
+import { CLIConfiguration } from './CLIConfiguration.js';
 import {
   CLIConfig,
   CLIConfig_DEPRECATED,
   CLIConfig_NEW,
   Environment,
-} from '../types/Config';
-import { CmsPublishMode } from '../types/Files';
+} from '../types/Config.js';
+import { CmsPublishMode } from '../types/Files.js';
 import {
   writeConfig,
   createEmptyConfigFile,
   loadConfig,
   deleteEmptyConfigFile,
-} from './index';
+} from './index.js';
 import {
   getConfigFilePath,
   configFileExists as newConfigFileExists,
-} from './configFile';
+} from './configFile.js';
 import {
   GLOBAL_CONFIG_PATH,
   DEFAULT_CMS_PUBLISH_MODE,
@@ -27,8 +27,8 @@ import {
   DEFAULT_ACCOUNT,
   DEFAULT_PORTAL,
   ARCHIVED_HUBSPOT_CONFIG_YAML_FILE_NAME,
-} from '../constants/config';
-import { i18n } from '../utils/lang';
+} from '../constants/config.js';
+import { i18n } from '../utils/lang.js';
 import fs from 'fs';
 import path from 'path';
 

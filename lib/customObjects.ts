@@ -1,9 +1,9 @@
 import fs from 'fs-extra';
 import path from 'path';
-import prettier from 'prettier';
-import { getCwd } from '../lib/path';
-import { fetchObjectSchemas, fetchObjectSchema } from '../api/customObjects';
-import { Schema } from '../types/Schemas';
+import { getCwd } from '../lib/path.js';
+import { fetchObjectSchemas, fetchObjectSchema } from '../api/customObjects.js';
+import { Schema } from '../types/Schemas.js';
+import { format } from 'prettier';
 
 export function getResolvedPath(dest?: string, name?: string): string {
   if (name) return path.resolve(getCwd(), dest || '', `${name}.json`);
@@ -15,7 +15,7 @@ export async function writeSchemaToDisk(
   schema: Schema,
   dest?: string
 ): Promise<void> {
-  const formattedSchema = await prettier.format(JSON.stringify(schema), {
+  const formattedSchema = await format(JSON.stringify(schema), {
     parser: 'json',
   });
   fs.outputFileSync(getResolvedPath(dest, schema.name), formattedSchema);

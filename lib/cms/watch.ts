@@ -4,26 +4,26 @@ import PQueue from 'p-queue';
 import debounce from 'debounce';
 import { AxiosError } from 'axios';
 
-import { isConvertableFieldJs, FieldsJs } from './handleFieldsJS';
-import { uploadFolder } from './uploadFolder';
-import { shouldIgnoreFile, ignoreFile } from '../ignoreRules';
-import { getFileMapperQueryValues } from '../fileMapper';
-import { upload, deleteFile } from '../../api/fileMapper';
-import { escapeRegExp } from '../escapeRegExp';
-import { convertToUnixPath, isAllowedExtension, getCwd } from '../path';
-import { triggerNotify } from '../notify';
-import { getThemePreviewUrl, getThemeJSONPath } from './themes';
-import { logger } from '../logger';
+import { isConvertableFieldJs, FieldsJs } from './handleFieldsJS.js';
+import { uploadFolder } from './uploadFolder.js';
+import { shouldIgnoreFile, ignoreFile } from '../ignoreRules.js';
+import { getFileMapperQueryValues } from '../fileMapper.js';
+import { upload, deleteFile } from '../../api/fileMapper.js';
+import { escapeRegExp } from '../escapeRegExp.js';
+import { convertToUnixPath, isAllowedExtension, getCwd } from '../path.js';
+import { triggerNotify } from '../notify.js';
+import { getThemePreviewUrl, getThemeJSONPath } from './themes.js';
+import { logger } from '../logger.js';
 import {
   UploadFileOptions,
   CmsPublishMode,
   WatchOptions,
   WatchErrorHandler,
-} from '../../types/Files';
-import { UploadFolderResults } from '../../types/Files';
-import { i18n } from '../../utils/lang';
-import { HubSpotHttpError } from '../../models/HubSpotHttpError';
-import { isHubSpotHttpError } from '../../errors';
+} from '../../types/Files.js';
+import { UploadFolderResults } from '../../types/Files.js';
+import { i18n } from '../../utils/lang.js';
+import { HubSpotHttpError } from '../../models/HubSpotHttpError.js';
+import { isHubSpotHttpError } from '../../errors/index.js';
 
 const i18nKey = 'lib.cms.watch';
 

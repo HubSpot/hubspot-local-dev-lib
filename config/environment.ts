@@ -2,18 +2,18 @@ import {
   CLIConfig_NEW,
   Environment,
   EnvironmentConfigVariables,
-} from '../types/Config';
-import { logger } from '../lib/logger';
-import { ENVIRONMENT_VARIABLES } from '../constants/environments';
+} from '../types/Config.js';
+import { logger } from '../lib/logger.js';
+import { ENVIRONMENT_VARIABLES } from '../constants/environments.js';
 import {
   API_KEY_AUTH_METHOD,
   OAUTH_AUTH_METHOD,
   PERSONAL_ACCESS_KEY_AUTH_METHOD,
   OAUTH_SCOPES,
-} from '../constants/auth';
-import { generateConfig } from './configUtils';
-import { getValidEnv } from '../lib/environment';
-import { i18n } from '../utils/lang';
+} from '../constants/auth.js';
+import { generateConfig } from './configUtils.js';
+import { getValidEnv } from '../lib/environment.js';
+import { i18n } from '../utils/lang.js';
 
 const i18nKey = 'config.environment';
 

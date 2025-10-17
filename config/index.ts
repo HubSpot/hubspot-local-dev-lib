@@ -1,21 +1,21 @@
-import * as config_DEPRECATED from './config_DEPRECATED';
-import { CLIConfiguration } from './CLIConfiguration';
+import * as config_DEPRECATED from './config_DEPRECATED.js';
+import { CLIConfiguration } from './CLIConfiguration.js';
 import {
   configFileExists as newConfigFileExists,
   getConfigFilePath,
   deleteConfigFile as newDeleteConfigFile,
-} from './configFile';
-import { CLIConfig_NEW, CLIConfig } from '../types/Config';
-import { CLIOptions, WriteConfigOptions } from '../types/CLIOptions';
+} from './configFile.js';
+import { CLIConfig_NEW, CLIConfig } from '../types/Config.js';
+import { CLIOptions, WriteConfigOptions } from '../types/CLIOptions.js';
 import {
   AccountType,
   CLIAccount,
   CLIAccount_NEW,
   CLIAccount_DEPRECATED,
   FlatAccountFields,
-} from '../types/Accounts';
-import { getAccountIdentifier } from './getAccountIdentifier';
-import { CmsPublishMode } from '../types/Files';
+} from '../types/Accounts.js';
+import { getAccountIdentifier } from './getAccountIdentifier.js';
+import { CmsPublishMode } from '../types/Files.js';
 
 // Use new config if it exists
 export function loadConfig(

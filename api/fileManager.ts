@@ -1,13 +1,13 @@
 import fs from 'fs';
 import path from 'path';
-import { http } from '../http';
-import { FormData, HubSpotPromise } from '../types/Http';
+import { http } from '../http/index.js';
+import { FormData, HubSpotPromise } from '../types/Http.js';
 import {
   FetchStatResponse,
   FetchFilesResponse,
   FetchFolderResponse,
   UploadResponse,
-} from '../types/FileManager';
+} from '../types/FileManager.js';
 
 const FILE_MANAGER_V2_API_PATH = 'filemanager/api/v2';
 const FILE_MANAGER_V3_API_PATH = 'filemanager/api/v3';

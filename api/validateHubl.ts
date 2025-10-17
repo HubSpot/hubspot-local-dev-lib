@@ -1,6 +1,6 @@
-import { http } from '../http';
-import { Validation, HublValidationOptions } from '../types/HublValidation';
-import { HubSpotPromise } from '../types/Http';
+import { http } from '../http/index.js';
+import { Validation, HublValidationOptions } from '../types/HublValidation.js';
+import { HubSpotPromise } from '../types/Http.js';
 
 const HUBL_VALIDATE_API_PATH = 'cos-rendering/v1/internal/validate';
 

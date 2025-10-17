@@ -5,37 +5,36 @@ import {
   listGithubRepoContents,
   fetchFileFromRepository,
   fetchGitHubRepoContentFromDownloadUrl,
-} from '../github';
+} from '../github.js';
 import {
   fetchRepoFile as __fetchRepoFile,
   fetchRepoReleaseData as __fetchRepoReleaseData,
   fetchRepoAsZip as __fetchRepoAsZip,
   fetchRepoContents as __fetchRepoContents,
   fetchRepoFileByDownloadUrl as __fetchRepoFileByDownloadUrl,
-} from '../../api/github';
-import { extractZipArchive as __extractZipArchive } from '../archive';
+} from '../../api/github.js';
+import { extractZipArchive as __extractZipArchive } from '../archive.js';
+import { vi, type MockedFunction } from 'vitest';
 
-jest.mock('fs-extra');
-jest.mock('../../api/github');
-jest.mock('../archive');
+vi.mock('fs-extra');
+vi.mock('../../api/github');
+vi.mock('../archive');
 
-const fetchRepoFile = __fetchRepoFile as jest.MockedFunction<
-  typeof __fetchRepoFile
->;
-const fetchRepoReleaseData = __fetchRepoReleaseData as jest.MockedFunction<
+const fetchRepoFile = __fetchRepoFile as MockedFunction<typeof __fetchRepoFile>;
+const fetchRepoReleaseData = __fetchRepoReleaseData as MockedFunction<
   typeof __fetchRepoReleaseData
 >;
-const fetchRepoAsZip = __fetchRepoAsZip as jest.MockedFunction<
+const fetchRepoAsZip = __fetchRepoAsZip as MockedFunction<
   typeof __fetchRepoAsZip
 >;
-const fetchRepoContents = __fetchRepoContents as jest.MockedFunction<
+const fetchRepoContents = __fetchRepoContents as MockedFunction<
   typeof __fetchRepoContents
 >;
-const extractZipArchive = __extractZipArchive as jest.MockedFunction<
+const extractZipArchive = __extractZipArchive as MockedFunction<
   typeof __extractZipArchive
 >;
 const fetchRepoFileByDownloadUrl =
-  __fetchRepoFileByDownloadUrl as jest.MockedFunction<
+  __fetchRepoFileByDownloadUrl as MockedFunction<
     typeof __fetchRepoFileByDownloadUrl
   >;
 

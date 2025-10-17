@@ -1,6 +1,6 @@
-import { ACTIVITY_SOURCE } from '../enums/project';
-import { ValueOf } from './Utils';
-import { GithubSourceData } from './Github';
+import { ACTIVITY_SOURCE } from '../enums/project.js';
+import { ValueOf } from './Utils.js';
+import { GithubSourceData } from './Github.js';
 
 export interface GithubActivitySource extends GithubSourceData {
   authorEmail: string;

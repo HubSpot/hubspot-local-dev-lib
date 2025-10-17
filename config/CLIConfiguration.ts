@@ -1,37 +1,37 @@
 import fs from 'fs';
 import findup from 'findup-sync';
-import { getCwd } from '../lib/path';
-import { logger } from '../lib/logger';
-import { loadConfigFromEnvironment } from './environment';
-import { getValidEnv } from '../lib/environment';
+import { getCwd } from '../lib/path.js';
+import { logger } from '../lib/logger.js';
+import { loadConfigFromEnvironment } from './environment.js';
+import { getValidEnv } from '../lib/environment.js';
 import {
   loadConfigFromFile,
   writeConfigToFile,
   configFileExists,
   configFileIsBlank,
   deleteConfigFile,
-} from './configFile';
-import { commaSeparatedValues } from '../lib/text';
-import { ENVIRONMENTS } from '../constants/environments';
-import { API_KEY_AUTH_METHOD } from '../constants/auth';
+} from './configFile.js';
+import { commaSeparatedValues } from '../lib/text.js';
+import { ENVIRONMENTS } from '../constants/environments.js';
+import { API_KEY_AUTH_METHOD } from '../constants/auth.js';
 import {
   HUBSPOT_ACCOUNT_TYPES,
   MIN_HTTP_TIMEOUT,
   DEFAULT_ACCOUNT_OVERRIDE_FILE_NAME,
   DEFAULT_ACCOUNT_OVERRIDE_ERROR_INVALID_ID,
   DEFAULT_ACCOUNT_OVERRIDE_ERROR_ACCOUNT_NOT_FOUND,
-} from '../constants/config';
-import { CMS_PUBLISH_MODE } from '../constants/files';
-import { CLIConfig_NEW, Environment } from '../types/Config';
+} from '../constants/config.js';
+import { CMS_PUBLISH_MODE } from '../constants/files.js';
+import { CLIConfig_NEW, Environment } from '../types/Config.js';
 import {
   CLIAccount_NEW,
   OAuthAccount_NEW,
   FlatAccountFields_NEW,
   AccountType,
-} from '../types/Accounts';
-import { CLIOptions } from '../types/CLIOptions';
-import { i18n } from '../utils/lang';
-import { CmsPublishMode } from '../types/Files';
+} from '../types/Accounts.js';
+import { CLIOptions } from '../types/CLIOptions.js';
+import { i18n } from '../utils/lang.js';
+import { CmsPublishMode } from '../types/Files.js';
 
 const i18nKey = 'config.cliConfiguration';
 

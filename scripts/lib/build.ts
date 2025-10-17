@@ -2,7 +2,7 @@ import { spawn, exec as _exec } from 'child_process';
 import { promisify } from 'util';
 import fs from 'fs';
 
-import { logger, setLogLevel, LOG_LEVEL } from '../../lib/logger';
+import { logger, setLogLevel, LOG_LEVEL } from '../../lib/logger.js';
 
 const exec = promisify(_exec);
 

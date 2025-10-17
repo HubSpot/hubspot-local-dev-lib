@@ -1,22 +1,28 @@
 import axios from 'axios';
-import { http } from '../unauthed';
-import { version } from '../../package.json';
+import { http } from '../unauthed.js';
+import pkg from '../../package.json' with { type: 'json' };
 
-jest.mock('axios');
+import { vi } from 'vitest';
 
-jest.mock('http', () => ({
-  Agent: jest.fn().mockReturnValue({
-    options: { keepAlive: true, maxSockets: 5, maxTotalSockets: 25 },
-  }),
+vi.mock('axios');
+
+vi.mock('http', () => ({
+  default: {
+    Agent: vi.fn().mockReturnValue({
+      options: { keepAlive: true, maxSockets: 5, maxTotalSockets: 25 },
+    }),
+  },
 }));
 
-jest.mock('https', () => ({
-  Agent: jest.fn().mockReturnValue({
-    options: { keepAlive: true, maxSockets: 6, maxTotalSockets: 26 },
-  }),
+vi.mock('https', () => ({
+  default: {
+    Agent: vi.fn().mockReturnValue({
+      options: { keepAlive: true, maxSockets: 6, maxTotalSockets: 26 },
+    }),
+  },
 }));
 
-const mockedAxios = jest.mocked(axios);
+const mockedAxios = vi.mocked(axios);
 
 describe('http/index', () => {
   describe('http.get()', () => {
@@ -30,7 +36,7 @@ describe('http/index', () => {
         baseURL: `https://api.hubapiqa.com`,
         url: 'some/endpoint/path',
         headers: {
-          'User-Agent': `HubSpot Local Dev Lib/${version}`,
+          'User-Agent': `HubSpot Local Dev Lib/${pkg.version}`,
         },
         timeout: 15000,
         params: {},
