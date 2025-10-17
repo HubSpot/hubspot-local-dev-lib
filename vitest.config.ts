@@ -47,12 +47,7 @@ export default defineConfig({
     // Global test configuration
     globals: true,
 
-    // Pool options for better performance
-    pool: 'forks',
-    poolOptions: {
-      forks: {
-        singleFork: true,
-      },
-    },
+    // Test isolation
+    isolate: true,
   },
 });
