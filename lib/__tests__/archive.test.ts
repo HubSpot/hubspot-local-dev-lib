@@ -44,7 +44,7 @@ describe('lib/archive', () => {
     fsCopyMock.mockReset();
     fsRemoveMock.mockReset();
     extractMock.mockReset();
-    
+
     // Set up default implementations
     makeDirMock.mockImplementation(value => Promise.resolve(value));
     readDirMock.mockImplementation(() => [rootDir]);
@@ -185,7 +185,7 @@ describe('lib/archive', () => {
       const sourceDir = 'sourceDir';
       const handleCollisionMock = vi.fn();
 
-      fsExistsSyncMock.mockImplementation((path) => {
+      fsExistsSyncMock.mockImplementation(path => {
         return path === dest;
       });
       walkMock
@@ -216,7 +216,7 @@ describe('lib/archive', () => {
       const sourceDir = ['sourceDir1', 'sourceDir2'];
       const handleCollisionMock = vi.fn();
 
-      fsExistsSyncMock.mockImplementation((path) => {
+      fsExistsSyncMock.mockImplementation(path => {
         return path === dest;
       });
       walkMock
@@ -263,7 +263,7 @@ describe('lib/archive', () => {
     it('should not call handleCollision when no collision handler is provided', async () => {
       const sourceDir = 'sourceDir';
 
-      fsExistsSyncMock.mockImplementation((path) => {
+      fsExistsSyncMock.mockImplementation(path => {
         return path === dest;
       });
 
@@ -282,7 +282,7 @@ describe('lib/archive', () => {
       const sourceDir = 'sourceDir';
       const handleCollisionMock = vi.fn();
 
-      fsExistsSyncMock.mockImplementation((path) => {
+      fsExistsSyncMock.mockImplementation(path => {
         return path === dest;
       });
       walkMock
@@ -303,7 +303,7 @@ describe('lib/archive', () => {
       const sourceDir = 'sourceDir';
       const handleCollisionMock = vi.fn();
 
-      fsExistsSyncMock.mockImplementation((path) => {
+      fsExistsSyncMock.mockImplementation(path => {
         return path === dest;
       });
       walkMock
@@ -349,7 +349,7 @@ describe('lib/archive', () => {
       const sourceDir = 'sourceDir';
       const handleCollisionMock = vi.fn().mockResolvedValue(undefined);
 
-      fsExistsSyncMock.mockImplementation((path) => {
+      fsExistsSyncMock.mockImplementation(path => {
         return path === dest;
       });
       walkMock
@@ -376,7 +376,7 @@ describe('lib/archive', () => {
       const sourceDir = 'sourceDir';
       const handleCollisionMock = vi.fn().mockReturnValue('sync result');
 
-      fsExistsSyncMock.mockImplementation((path) => {
+      fsExistsSyncMock.mockImplementation(path => {
         return path === dest;
       });
       walkMock
@@ -402,7 +402,7 @@ describe('lib/archive', () => {
       const sourceDir = 'sourceDir';
       const handleCollisionMock = vi.fn();
 
-      fsExistsSyncMock.mockImplementation((path) => {
+      fsExistsSyncMock.mockImplementation(path => {
         return path === dest;
       });
       walkMock
@@ -434,7 +434,7 @@ describe('lib/archive', () => {
       const sourceDir = 'sourceDir';
       const handleCollisionMock = vi.fn();
 
-      fsExistsSyncMock.mockImplementation((path) => {
+      fsExistsSyncMock.mockImplementation(path => {
         return path === dest;
       });
       walkMock

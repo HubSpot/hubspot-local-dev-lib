@@ -38,40 +38,40 @@ describe('lib/cms/functions', () => {
     };
     const mockDest = '/mock/dest';
 
-  beforeEach(() => {
-    // Reset specific mocks
-    mockedGetCwd.mockReset();
-    mockedFindup.mockReset();
-    mockedFsExistsSync.mockReset();
-    mockedFsReadFileSync.mockReset();
-    vi.mocked(fs.mkdirp).mockReset();
-    vi.mocked(fs.writeFile).mockReset();
-    fetchFileFromRepository.mockReset();
-    
-    mockedGetCwd.mockReturnValue('/mock/cwd');
-    mockedFindup.mockReturnValue(null);
+    beforeEach(() => {
+      // Reset specific mocks
+      mockedGetCwd.mockReset();
+      mockedFindup.mockReset();
+      mockedFsExistsSync.mockReset();
+      mockedFsReadFileSync.mockReset();
+      vi.mocked(fs.mkdirp).mockReset();
+      vi.mocked(fs.writeFile).mockReset();
+      fetchFileFromRepository.mockReset();
 
-    // Set up fs.existsSync to return different values for different paths
-    mockedFsExistsSync.mockImplementation((path: PathLike) => {
-      if (path === '/mock/dest/testFolder.functions/testFunction.js') {
+      mockedGetCwd.mockReturnValue('/mock/cwd');
+      mockedFindup.mockReturnValue(null);
+
+      // Set up fs.existsSync to return different values for different paths
+      mockedFsExistsSync.mockImplementation((path: PathLike) => {
+        if (path === '/mock/dest/testFolder.functions/testFunction.js') {
+          return false;
+        }
+        if (path === '/mock/dest/testFolder.functions/serverless.json') {
+          return true;
+        }
+        if (path === '/mock/dest/testFolder.functions') {
+          return true;
+        }
         return false;
-      }
-      if (path === '/mock/dest/testFolder.functions/serverless.json') {
-        return true;
-      }
-      if (path === '/mock/dest/testFolder.functions') {
-        return true;
-      }
-      return false;
-    });
+      });
 
-    // Mock fs.readFileSync to return a valid JSON for the config file
-    mockedFsReadFileSync.mockReturnValue(
-      JSON.stringify({
-        endpoints: {},
-      })
-    );
-  });
+      // Mock fs.readFileSync to return a valid JSON for the config file
+      mockedFsReadFileSync.mockReturnValue(
+        JSON.stringify({
+          endpoints: {},
+        })
+      );
+    });
 
     it('should create a new function successfully', async () => {
       const functionSourceCode = 'function code';
