@@ -7,7 +7,10 @@ import {
   MIN_HTTP_TIMEOUT,
   HUBSPOT_ACCOUNT_TYPES,
 } from '../constants/config.js';
-import { ENVIRONMENTS, ENVIRONMENT_VARIABLES } from '../constants/environments.js';
+import {
+  ENVIRONMENTS,
+  ENVIRONMENT_VARIABLES,
+} from '../constants/environments.js';
 import {
   API_KEY_AUTH_METHOD,
   OAUTH_AUTH_METHOD,

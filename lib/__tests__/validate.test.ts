@@ -1,10 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import fs, { Stats } from 'fs-extra';
 import { validateHubl } from '../../api/validateHubl.js';
 import { walk } from '../fs.js';
 import { lint } from '../cms/validate.js';
 import { LintResult, Validation } from '../../types/HublValidation.js';
-import { HubSpotPromise } from '../../types/Http.js';
-import { vi, type MockedFunction } from 'vitest';
+import { vi } from 'vitest';
 
 vi.mock('fs-extra');
 vi.mock('../../api/validateHubl');

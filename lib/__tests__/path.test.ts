@@ -235,6 +235,7 @@ describe('path utility functions', () => {
     const originalHomedir = os.homedir;
 
     beforeEach(() => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (os.homedir as any) = vi.fn().mockReturnValue('/home/user');
     });
 

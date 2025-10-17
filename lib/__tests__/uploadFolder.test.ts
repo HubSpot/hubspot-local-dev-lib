@@ -26,6 +26,7 @@ const listFilesInDir = vi.fn((dir: string) => {
     .map(file => file.name);
 });
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const FieldsJs = __FieldsJs as any;
 const isConvertableFieldJs = __isConvertableFields as MockedFunction<
   typeof __isConvertableFields

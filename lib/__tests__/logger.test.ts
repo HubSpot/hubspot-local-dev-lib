@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import chalk from 'chalk';
 import { vi } from 'vitest';
 import {
@@ -19,7 +20,7 @@ describe('lib/logger', () => {
     it('stylizes input', () => {
       const res = stylize('[ERROR]', Styles.error, ['test']);
 
-      expect(res[0]).toEqual(`${(chalk as any).red('[ERROR]')} test`);
+      expect(res[0]).toEqual(`${chalk.red('[ERROR]')} test`);
     });
   });
 

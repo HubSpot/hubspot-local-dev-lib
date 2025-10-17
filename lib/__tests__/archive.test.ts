@@ -11,7 +11,7 @@ import { logger } from '../logger.js';
 import fs from 'fs-extra';
 import extract from 'extract-zip';
 import { walk } from '../fs.js';
-import { vi, type MockedFunction } from 'vitest';
+import { vi } from 'vitest';
 
 const writeFileMock = vi.mocked(fs.writeFile);
 const makeDirMock = vi.mocked(fs.mkdtemp);

@@ -2,7 +2,7 @@ import axios from 'axios';
 import moment from 'moment';
 import { OAuth2Manager } from '../OAuth2Manager.js';
 import { ENVIRONMENTS } from '../../constants/environments.js';
-import { vi, type MockedFunction } from 'vitest';
+import { vi } from 'vitest';
 
 vi.mock('axios');
 

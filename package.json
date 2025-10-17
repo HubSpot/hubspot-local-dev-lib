@@ -64,7 +64,7 @@
   "dependencies": {
     "address": "2.0.2",
     "axios": "1.12.0",
-    "chalk": "2.4.2",
+    "chalk": "5.6.2",
     "chokidar": "3.6.0",
     "content-disposition": "0.5.4",
     "cors": "2.8.5",

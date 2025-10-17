@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import fs from 'fs-extra';
 import {
   setConfig,
@@ -33,7 +34,7 @@ import {
 } from '../../types/Accounts.js';
 import * as configFile from '../configFile.js';
 import * as config_DEPRECATED from '../config_DEPRECATED.js';
-import { vi, type MockedFunction } from 'vitest';
+import { vi } from 'vitest';
 
 const CONFIG_PATHS = {
   none: null,
@@ -689,12 +690,14 @@ describe('config/config', () => {
       });
 
       it('returns default directory when useHiddenConfig is false', () => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         vi.mocked(configFile.getConfigFilePath).mockReturnValue(null as any);
         const configPath = getConfigPath(undefined, false);
         expect(configPath).toBe(CONFIG_PATHS.default);
       });
 
       it('returns null when useHiddenConfig is true and no hidden config exists', () => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         vi.mocked(configFile.getConfigFilePath).mockReturnValue(null as any);
         const hiddenConfigPath = getConfigPath(undefined, true);
         expect(hiddenConfigPath).toBeNull();

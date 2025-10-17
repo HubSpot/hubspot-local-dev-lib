@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { vi } from 'vitest';
 
 // Clear out the env variable HUBAPI_DOMAIN_OVERRIDE so it doesn't impact tests

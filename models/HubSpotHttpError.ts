@@ -1,7 +1,10 @@
 import { isAxiosError, AxiosError } from 'axios';
 import { HubSpotHttpErrorContext, ValidationError } from '../types/Error.js';
 import { HttpMethod } from '../types/Api.js';
-import { HTTP_METHOD_PREPOSITIONS, HTTP_METHOD_VERBS } from '../constants/api.js';
+import {
+  HTTP_METHOD_PREPOSITIONS,
+  HTTP_METHOD_VERBS,
+} from '../constants/api.js';
 import { i18n } from '../utils/lang.js';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

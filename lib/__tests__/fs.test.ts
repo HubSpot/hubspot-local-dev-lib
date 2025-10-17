@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import fs, { Stats } from 'fs';
 import { flattenAndRemoveSymlinks, getFileInfoAsync } from '../fs.js';
 import { STAT_TYPES } from '../../constants/files.js';

@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import * as chalk from 'chalk';
-import { Chalk } from 'chalk';
+import chalk, { type ChalkInstance } from 'chalk';
 
 export const LOG_LEVEL = {
   NONE: 0,
@@ -15,15 +14,15 @@ export const LOG_LEVEL = {
  * Chalk styles for logger strings.
  */
 export const Styles = {
-  debug: (chalk as any).blue,
-  log: (chalk as any).white,
-  success: (chalk as any).green,
-  info: (chalk as any).white,
-  warn: (chalk as any).yellow,
-  error: (chalk as any).red,
+  debug: chalk.blue,
+  log: chalk.white,
+  success: chalk.green,
+  info: chalk.white,
+  warn: chalk.yellow,
+  error: chalk.red,
 };
 
-export function stylize(label: string, style: Chalk, args: any[]) {
+export function stylize(label: string, style: ChalkInstance, args: any[]) {
   const styledLabel = style(label);
   const [firstArg, ...rest] = args;
   if (typeof firstArg === 'string') {

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import chokidar from 'chokidar';
 import PQueue from 'p-queue';
 

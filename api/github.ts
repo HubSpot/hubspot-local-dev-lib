@@ -1,6 +1,10 @@
 import axios, { ResponseType } from 'axios';
 import { getDefaultUserAgentHeader } from '../http/getAxiosConfig.js';
-import { GithubReleaseData, GithubRepoFile, RepoPath } from '../types/Github.js';
+import {
+  GithubReleaseData,
+  GithubRepoFile,
+  RepoPath,
+} from '../types/Github.js';
 import { HubSpotPromise } from '../types/Http.js';
 import { isSpecifiedError } from '../errors/index.js';
 
