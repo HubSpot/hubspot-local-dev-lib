@@ -20,7 +20,9 @@ describe('lib/cms/watch', () => {
       watch: vi.fn().mockReturnThis(),
       on: vi.fn().mockReturnThis(),
     };
-    vi.mocked(chokidar.watch).mockReturnValue(chokidarMock);
+    vi.mocked(chokidar.watch).mockReturnValue(
+      chokidarMock as unknown as ReturnType<typeof chokidar.watch>
+    );
 
     pQueueAddMock = vi.fn();
 

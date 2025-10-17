@@ -26,7 +26,7 @@ const listFilesInDir = vi.fn((dir: string) => {
     .map(file => file.name);
 });
 
-const FieldsJs = __FieldsJs as MockedFunction<typeof __FieldsJs>;
+const FieldsJs = vi.mocked(__FieldsJs);
 const isConvertableFieldJs = __isConvertableFields as MockedFunction<
   typeof __isConvertableFields
 >;
@@ -46,23 +46,23 @@ const cleanupTmpDirSync = __cleanupTmpDirSync as MockedFunction<
 // We add the .converted to differentiate from a unconverted fields.json
 const defaultFieldsJsImplementation = vi.fn(
   (src: string, filePath: string, rootWriteDir: string | undefined | null) => {
-    const fieldsJs = Object.create(FieldsJs.prototype);
     const outputPath =
       filePath.substring(0, filePath.lastIndexOf('.')) + '.converted.json';
     return {
-      init: vi.fn().mockReturnValue(
-        Object.assign(fieldsJs, {
-          src,
-          outputPath,
-          rootWriteDir,
-          getOutputPathPromise: vi.fn().mockResolvedValue(outputPath),
-          rejected: false,
-        })
-      ),
+      projectDir: src,
+      filePath,
+      rootWriteDir,
+      rejected: false,
+      fieldOptions: '',
+      outputPath,
+      init: vi.fn().mockReturnValue({
+        outputPath,
+      }),
     };
   }
 );
-FieldsJs.mockImplementation(defaultFieldsJsImplementation);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+(FieldsJs as any).mockImplementation(defaultFieldsJsImplementation);
 
 isConvertableFieldJs.mockImplementation((src: string, filePath: string) => {
   const fileName = path.basename(filePath);
@@ -189,14 +189,14 @@ describe('lib/cms/uploadFolder', () => {
       'folder',
       'folder/fields.json',
       'folder'
-    ).init();
+    ).init() as unknown as { outputPath: string };
     const convertedFilePath = convertedFieldsObj.outputPath;
 
     const convertedModuleFieldsObj = new FieldsJs(
       'folder',
       'folder/sample.module/fields.json',
       'folder'
-    ).init();
+    ).init() as unknown as { outputPath: string };
     const convertedModuleFilePath = convertedModuleFieldsObj.outputPath;
 
     beforeEach(() => {

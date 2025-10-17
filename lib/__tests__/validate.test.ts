@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import fs, { Stats } from 'fs-extra';
+import fs from 'fs-extra';
 import { validateHubl } from '../../api/validateHubl.js';
 import { walk } from '../fs.js';
 import { lint } from '../cms/validate.js';
@@ -17,7 +17,7 @@ const mockedValidateHubl = vi.mocked(validateHubl);
 
 const mockFsStats = {
   isDirectory: vi.fn(() => true),
-} as unknown as Stats;
+} as any;
 
 const mockValidation: Validation = {
   meta: {
@@ -52,7 +52,7 @@ describe('lib/cms/validate', () => {
   const filePath = 'test.html';
 
   it('should return an empty array if directory has no files', async () => {
-    mockedFsStat.mockResolvedValue(mockFsStats);
+    mockedFsStat.mockResolvedValue(mockFsStats as any);
     mockedWalk.mockResolvedValue([]);
 
     const result = await lint(accountId, filePath);
@@ -62,7 +62,7 @@ describe('lib/cms/validate', () => {
   it('should return the correct object if a file has no content', async () => {
     mockedFsStat.mockResolvedValue({
       isDirectory: () => false,
-    } as unknown as Stats);
+    } as any);
     mockedFsReadFile.mockResolvedValue('  ' as any);
 
     const result = await lint(accountId, filePath);
@@ -73,7 +73,7 @@ describe('lib/cms/validate', () => {
     const mockSource = 'valid HUBL content';
     mockedFsStat.mockResolvedValue({
       isDirectory: () => false,
-    } as unknown as Stats);
+    } as any);
     mockedFsReadFile.mockResolvedValue(mockSource as any);
     mockedValidateHubl.mockResolvedValue({
       data: mockValidation,
@@ -91,7 +91,7 @@ describe('lib/cms/validate', () => {
     const invalidFile = 'test.txt';
     mockedFsStat.mockResolvedValue({
       isDirectory: () => true,
-    } as unknown as Stats);
+    } as any);
     mockedWalk.mockResolvedValue([invalidFile, filePath]);
     mockedFsReadFile.mockResolvedValue('valid HUBL content' as any);
     mockedValidateHubl.mockResolvedValue({

@@ -1,4 +1,4 @@
-import lang from '../lang/en.json';
+import lang from '../lang/en.json' with { type: 'json' };
 import { Leaves } from './Utils.js';
 
 export type GenericLanguageObject = {

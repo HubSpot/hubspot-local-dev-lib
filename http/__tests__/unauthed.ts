@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { http } from '../unauthed.js';
-import { version } from '../../package.json';
+import pkg from '../../package.json' with { type: 'json' };
 
 import { vi } from 'vitest';
 
@@ -36,7 +36,7 @@ describe('http/index', () => {
         baseURL: `https://api.hubapiqa.com`,
         url: 'some/endpoint/path',
         headers: {
-          'User-Agent': `HubSpot Local Dev Lib/${version}`,
+          'User-Agent': `HubSpot Local Dev Lib/${pkg.version}`,
         },
         timeout: 15000,
         params: {},

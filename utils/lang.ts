@@ -1,4 +1,4 @@
-import en from '../lang/en.json';
+import en from '../lang/en.json' with { type: 'json' };
 import {
   LanguageObject,
   GenericLanguageObject,

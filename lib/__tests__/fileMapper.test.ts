@@ -13,7 +13,7 @@ import {
   download as __download,
   fetchFileStream as __fetchFileStream,
 } from '../../api/fileMapper.js';
-import folderWithoutSources from './fixtures/fileMapper/folderWithoutSources.json';
+import folderWithoutSources from './fixtures/fileMapper/folderWithoutSources.json' with { type: 'json' };
 import { mockAxiosResponse } from './__utils__/mockAxiosResponse.js';
 import { vi, type MockedFunction } from 'vitest';
 

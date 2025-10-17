@@ -7,7 +7,7 @@ import {
 } from '../../config/index.js';
 import { ENVIRONMENTS } from '../../constants/environments.js';
 import { http } from '../index.js';
-import { version } from '../../package.json';
+import pkg from '../../package.json' with { type: 'json' };
 import { AuthType } from '../../types/Accounts.js';
 import { vi, type MockedFunction } from 'vitest';
 
@@ -156,7 +156,7 @@ describe('http/index', () => {
         baseURL: `https://api.hubapi.com`,
         url: 'some/endpoint/path',
         headers: {
-          'User-Agent': `HubSpot Local Dev Lib/${version}`,
+          'User-Agent': `HubSpot Local Dev Lib/${pkg.version}`,
           Authorization: `Bearer ${accessToken}`,
         },
         timeout: 15000,
@@ -199,7 +199,7 @@ describe('http/index', () => {
         baseURL: `https://api.hubapi.com`,
         url: 'some/endpoint/path',
         headers: {
-          'User-Agent': `HubSpot Local Dev Lib/${version}`,
+          'User-Agent': `HubSpot Local Dev Lib/${pkg.version}`,
           Authorization: `Bearer ${accessToken}`,
         },
         timeout: 15000,
@@ -241,7 +241,7 @@ describe('http/index', () => {
         baseURL: `https://api.hubapi.com`,
         url: 'some/endpoint/path',
         headers: {
-          'User-Agent': `HubSpot Local Dev Lib/${version}`,
+          'User-Agent': `HubSpot Local Dev Lib/${pkg.version}`,
         },
         timeout: 1000,
         params: {

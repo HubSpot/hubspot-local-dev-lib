@@ -8,9 +8,9 @@ import {
   fetchObjectSchema as __fetchObjectSchema,
   fetchObjectSchemas as __fetchObjectSchemas,
 } from '../../api/customObjects.js';
-import basicSchema from './fixtures/customObjects/basicSchema.json';
-import fullSchema from './fixtures/customObjects/fullSchema.json';
-import multipleSchemas from './fixtures/customObjects/multipleSchemas.json';
+import basicSchema from './fixtures/customObjects/basicSchema.json' with { type: 'json' };
+import fullSchema from './fixtures/customObjects/fullSchema.json' with { type: 'json' };
+import multipleSchemas from './fixtures/customObjects/multipleSchemas.json' with { type: 'json' };
 import { mockAxiosResponse } from './__utils__/mockAxiosResponse.js';
 import { vi, type MockedFunction } from 'vitest';
 

@@ -12,10 +12,10 @@ import {
   publishTable as __publishTable,
 } from '../../api/hubdb.js';
 import { getCwd as __getCwd } from '../path.js';
-import hubdbFetchRowResponse from './fixtures/hubdb/fetchRowsResponse.json';
-import hubdbFetchRowsResponseWithPaging from './fixtures/hubdb/fetchRowsResponseWithPaging.json';
-import hubdbTableResponse from './fixtures/hubdb/tableResponse.json';
-import hubdbCreateRowsResponse from './fixtures/hubdb/createRowsResponse.json';
+import hubdbFetchRowResponse from './fixtures/hubdb/fetchRowsResponse.json' with { type: 'json' };
+import hubdbFetchRowsResponseWithPaging from './fixtures/hubdb/fetchRowsResponseWithPaging.json' with { type: 'json' };
+import hubdbTableResponse from './fixtures/hubdb/tableResponse.json' with { type: 'json' };
+import hubdbCreateRowsResponse from './fixtures/hubdb/createRowsResponse.json' with { type: 'json' };
 import { Table } from '../../types/Hubdb.js';
 import { mockAxiosResponse } from './__utils__/mockAxiosResponse.js';
 import { vi, type MockedFunction } from 'vitest';
