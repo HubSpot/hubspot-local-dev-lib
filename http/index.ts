@@ -45,6 +45,7 @@ function logRequest(response: AxiosResponse) {
         )
       );
     }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     // Ignore any errors that occur while logging the response
   }
@@ -60,6 +61,7 @@ axios.interceptors.response.use(
       if (isAxiosError(error) && error.response) {
         logRequest(error.response);
       }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (e) {
       // Ignore any errors that occur while logging the response
     }

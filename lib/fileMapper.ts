@@ -99,6 +99,7 @@ function validateFileMapperNode(node: FileMapperNode): void {
   let json;
   try {
     json = JSON.stringify(node, null, 2);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (err) {
     json = node;
   }
@@ -237,6 +238,7 @@ async function writeFileMapperNode(
         options
       );
       return true;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
       return false;
     }

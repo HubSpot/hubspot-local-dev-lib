@@ -24,7 +24,7 @@ vi.mock('os', () => ({
 // Create a controllable mock for path.sep
 const mockPath = vi.hoisted(() => {
   let mockSep = '/';
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const actualPath = require('path');
 
   return {

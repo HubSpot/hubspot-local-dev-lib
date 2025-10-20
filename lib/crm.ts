@@ -62,6 +62,7 @@ function fileExists(_path: string): boolean {
     if (!isFile) {
       return false;
     }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (e) {
     return false;
   }

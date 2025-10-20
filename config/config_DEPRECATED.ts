@@ -316,7 +316,9 @@ export function loadConfig(
     logger.debug('Loaded environment variable config');
     environmentVariableConfigLoaded = true;
   } else {
-    path && logger.debug(`Loading config from ${path}`);
+    if (path) {
+      logger.debug(`Loading config from ${path}`);
+    }
     loadConfigFromFile(path, options);
     environmentVariableConfigLoaded = false;
   }
@@ -762,11 +764,15 @@ export function createEmptyConfigFile({ path }: { path?: string } = {}): void {
 }
 
 export function deleteEmptyConfigFile(): void {
-  configFileExists() && configFileIsBlank() && fs.unlinkSync(_configPath || '');
+  if (configFileExists() && configFileIsBlank()) {
+    fs.unlinkSync(_configPath || '');
+  }
 }
 
 export function deleteConfigFile(): void {
-  configFileExists() && fs.unlinkSync(_configPath || '');
+  if (configFileExists()) {
+    fs.unlinkSync(_configPath || '');
+  }
 }
 
 function getConfigVariablesFromEnv() {
@@ -874,7 +880,10 @@ export function loadConfigFromEnvironment({
     'Unable to load config from environment variables.';
 
   if (!portalId) {
-    useEnv && logger.error(unableToLoadEnvConfigError);
+    if (useEnv) {
+      logger.error(unableToLoadEnvConfigError);
+    }
+
     return;
   }
 
@@ -904,7 +913,9 @@ export function loadConfigFromEnvironment({
   } else if (apiKey) {
     return generateApiKeyConfig(portalId, apiKey, env);
   } else {
-    useEnv && logger.error(unableToLoadEnvConfigError);
+    if (useEnv) {
+      logger.error(unableToLoadEnvConfigError);
+    }
     return;
   }
 }

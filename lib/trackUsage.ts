@@ -51,6 +51,7 @@ export async function trackUsage(
         resolveWithFullResponse: true,
       });
       return;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (e) {
       logger.debug(i18n(`${i18nKey}.retryingEventUnauthenticated`));
     }
