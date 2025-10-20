@@ -44,20 +44,23 @@ const cleanupTmpDirSync = __cleanupTmpDirSync as MockedFunction<
 
 //folder/fields.js -> folder/fields.converted.js
 // We add the .converted to differentiate from a unconverted fields.json
+const mockSaveOutput = vi.fn();
 const defaultFieldsJsImplementation = vi.fn(
   (src: string, filePath: string, rootWriteDir: string | undefined | null) => {
     const outputPath =
       filePath.substring(0, filePath.lastIndexOf('.')) + '.converted.json';
-    return {
+    const instance = {
       projectDir: src,
       filePath,
       rootWriteDir,
       rejected: false,
       fieldOptions: '',
       outputPath,
-      init: vi.fn().mockReturnValue({
-        outputPath,
-      }),
+      saveOutput: mockSaveOutput,
+    };
+    return {
+      ...instance,
+      init: vi.fn().mockReturnValue(instance),
     };
   }
 );
@@ -147,8 +150,7 @@ describe('lib/cms/uploadFolder', () => {
     });
 
     it('tries to save output of each fields file', async () => {
-      const saveOutputSpy = vi.spyOn(FieldsJs.prototype, 'saveOutput');
-
+      mockSaveOutput.mockClear();
       createTmpDirSync.mockReturnValue('folder');
       upload.mockResolvedValue(mockAxiosResponse());
 
@@ -162,7 +164,7 @@ describe('lib/cms/uploadFolder', () => {
         'publish'
       );
 
-      expect(saveOutputSpy).toHaveBeenCalledTimes(2);
+      expect(mockSaveOutput).toHaveBeenCalledTimes(2);
     });
 
     it('deletes the temporary directory', async () => {
@@ -187,14 +189,14 @@ describe('lib/cms/uploadFolder', () => {
   describe('getFilesByType()', () => {
     const convertedFieldsObj = new FieldsJs(
       'folder',
-      'folder/fields.json',
+      'folder/fields.js',
       'folder'
     ).init() as unknown as { outputPath: string };
     const convertedFilePath = convertedFieldsObj.outputPath;
 
     const convertedModuleFieldsObj = new FieldsJs(
       'folder',
-      'folder/sample.module/fields.json',
+      'folder/sample.module/fields.js',
       'folder'
     ).init() as unknown as { outputPath: string };
     const convertedModuleFilePath = convertedModuleFieldsObj.outputPath;

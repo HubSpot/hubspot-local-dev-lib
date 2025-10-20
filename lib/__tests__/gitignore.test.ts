@@ -3,10 +3,19 @@ import { DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME } from '../../constants/config.js
 
 vi.mock('../../utils/git');
 vi.mock('path');
-vi.mock('fs-extra', () => ({
-  readFileSync: vi.fn(),
-  writeFileSync: vi.fn(),
-}));
+
+vi.mock('fs-extra', () => {
+  const mockReadFileSync = vi.fn();
+  const mockWriteFileSync = vi.fn();
+  return {
+    default: {
+      readFileSync: mockReadFileSync,
+      writeFileSync: mockWriteFileSync,
+    },
+    readFileSync: mockReadFileSync,
+    writeFileSync: mockWriteFileSync,
+  };
+});
 
 import {
   configFilenameIsIgnoredByGitignore,
