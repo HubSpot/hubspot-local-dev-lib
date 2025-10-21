@@ -185,9 +185,7 @@ describe('lib/archive', () => {
       const sourceDir = 'sourceDir';
       const handleCollisionMock = vi.fn();
 
-      fsExistsSyncMock.mockImplementation(path => {
-        return path === dest;
-      });
+      fsExistsSyncMock.mockReturnValue(true);
       walkMock
         .mockResolvedValueOnce([
           `${dest}/file1.txt`,
@@ -216,9 +214,7 @@ describe('lib/archive', () => {
       const sourceDir = ['sourceDir1', 'sourceDir2'];
       const handleCollisionMock = vi.fn();
 
-      fsExistsSyncMock.mockImplementation(path => {
-        return path === dest;
-      });
+      fsExistsSyncMock.mockReturnValue(true);
       walkMock
         .mockResolvedValueOnce([`${dest}/shared.txt`])
         .mockResolvedValueOnce([
@@ -263,9 +259,7 @@ describe('lib/archive', () => {
     it('should not call handleCollision when no collision handler is provided', async () => {
       const sourceDir = 'sourceDir';
 
-      fsExistsSyncMock.mockImplementation(path => {
-        return path === dest;
-      });
+      fsExistsSyncMock.mockReturnValue(true);
 
       await extractZipArchive(zip, name, dest, {
         sourceDir,
@@ -282,9 +276,7 @@ describe('lib/archive', () => {
       const sourceDir = 'sourceDir';
       const handleCollisionMock = vi.fn();
 
-      fsExistsSyncMock.mockImplementation(path => {
-        return path === dest;
-      });
+      fsExistsSyncMock.mockReturnValue(true);
       walkMock
         .mockResolvedValueOnce([`${dest}/existing.txt`])
         .mockResolvedValueOnce([
@@ -303,9 +295,7 @@ describe('lib/archive', () => {
       const sourceDir = 'sourceDir';
       const handleCollisionMock = vi.fn();
 
-      fsExistsSyncMock.mockImplementation(path => {
-        return path === dest;
-      });
+      fsExistsSyncMock.mockReturnValue(true);
       walkMock
         .mockResolvedValueOnce([`${dest}/path/to/file.txt`])
         .mockResolvedValueOnce([
@@ -349,9 +339,7 @@ describe('lib/archive', () => {
       const sourceDir = 'sourceDir';
       const handleCollisionMock = vi.fn().mockResolvedValue(undefined);
 
-      fsExistsSyncMock.mockImplementation(path => {
-        return path === dest;
-      });
+      fsExistsSyncMock.mockReturnValue(true);
       walkMock
         .mockResolvedValueOnce([`${dest}/file1.txt`, `${dest}/README.md`])
         .mockResolvedValueOnce([
@@ -376,9 +364,7 @@ describe('lib/archive', () => {
       const sourceDir = 'sourceDir';
       const handleCollisionMock = vi.fn().mockReturnValue('sync result');
 
-      fsExistsSyncMock.mockImplementation(path => {
-        return path === dest;
-      });
+      fsExistsSyncMock.mockReturnValue(true);
       walkMock
         .mockResolvedValueOnce([`${dest}/file1.txt`])
         .mockResolvedValueOnce([
@@ -402,9 +388,7 @@ describe('lib/archive', () => {
       const sourceDir = 'sourceDir';
       const handleCollisionMock = vi.fn();
 
-      fsExistsSyncMock.mockImplementation(path => {
-        return path === dest;
-      });
+      fsExistsSyncMock.mockReturnValue(true);
       walkMock
         .mockResolvedValueOnce([`${dest}/file1.txt`, `${dest}/README.md`])
         .mockResolvedValueOnce([
@@ -434,9 +418,7 @@ describe('lib/archive', () => {
       const sourceDir = 'sourceDir';
       const handleCollisionMock = vi.fn();
 
-      fsExistsSyncMock.mockImplementation(path => {
-        return path === dest;
-      });
+      fsExistsSyncMock.mockReturnValue(true);
       walkMock
         .mockResolvedValueOnce([`${dest}/existing.txt`])
         .mockResolvedValueOnce([
