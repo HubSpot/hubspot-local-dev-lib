@@ -14,12 +14,12 @@ export const LOG_LEVEL = {
  * Chalk styles for logger strings.
  */
 export const Styles = {
-  debug: chalk.blue,
-  log: chalk.white,
-  success: chalk.green,
-  info: chalk.white,
-  warn: chalk.yellow,
-  error: chalk.red,
+  debug: chalk.reset.blue,
+  log: chalk.reset.white,
+  success: chalk.reset.green,
+  info: chalk.reset.white,
+  warn: chalk.reset.yellow,
+  error: chalk.reset.red,
 };
 
 export function stylize(label: string, style: ChalkInstance, args: any[]) {
