@@ -320,6 +320,24 @@
     "configUtils": {
       "unknownType": "Unknown auth type {{ type }}"
     },
+    "state": {
+      "ensureStateDirectory": {
+        "errors": {
+          "cannotCreateDirectory": "Cannot create CLI state directory: {{ error }}"
+        }
+      },
+      "getStateValue": {
+        "errors": {
+          "errorReading": "Error reading CLI state: {{ error }}"
+        }
+      },
+      "setStateValue": {
+        "errors": {
+          "errorReadingDefaults": "Error reading CLI state, using defaults: {{ error }}",
+          "failedToWrite": "Failed to write CLI state: {{ error }}"
+        }
+      }
+    },
     "environment": {
       "loadConfig": {
         "missingAccountId": "Unable to load config from environment variables: Missing accountId",
