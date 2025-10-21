@@ -47,7 +47,7 @@
   },
   "exports": {
     "./*": "./lib/*.js",
-    "./*/*": "./lib/*/*.js",
+    "./*/cms/*": "./lib/cms/*.js",
     "./api/*": "./api/*.js",
     "./errors/*": "./errors/*.js",
     "./http": "./http/index.js",
