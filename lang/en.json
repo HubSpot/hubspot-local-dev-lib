@@ -321,7 +321,7 @@
       "unknownType": "Unknown auth type {{ type }}"
     },
     "state": {
-      "ensureStateDirectory": {
+      "ensureCLIDirectory": {
         "errors": {
           "cannotCreateDirectory": "Cannot create CLI state directory: {{ error }}"
         }

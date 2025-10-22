@@ -1,10 +1,9 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import * as os from 'os';
 import { logger } from '../lib/logger';
 import { i18n } from '../utils/lang';
+import { STATE_FILE_PATH } from '../constants/config';
 
-const STATE_FILE_PATH = path.join(os.homedir(), '.hscli', 'state.json');
 const i18nKey = 'config.state';
 
 interface CLIState {
@@ -15,9 +14,7 @@ const DEFAULT_STATE: CLIState = {
   mcpTotalToolCalls: 0,
 };
 
-ensureStateDirectory(); // module initialization so all functions assume dir exists
-
-function ensureStateDirectory(): void {
+function ensureCLIDirectory(): void {
   try {
     const dir = path.dirname(STATE_FILE_PATH);
     if (!fs.existsSync(dir)) {
@@ -25,13 +22,15 @@ function ensureStateDirectory(): void {
     }
   } catch (error) {
     logger.error(
-      i18n(`${i18nKey}.ensureStateDirectory.errors.cannotCreateDirectory`),
+      i18n(`${i18nKey}.ensureCLIDirectory.errors.cannotCreateDirectory`),
       error
     );
   }
 }
 
 export function getStateValue<K extends keyof CLIState>(key: K): CLIState[K] {
+  ensureCLIDirectory();
+
   try {
     if (fs.existsSync(STATE_FILE_PATH)) {
       const data = fs.readFileSync(STATE_FILE_PATH, 'utf-8');
@@ -49,6 +48,8 @@ export function setStateValue<K extends keyof CLIState>(
   key: K,
   value: CLIState[K]
 ): boolean {
+  ensureCLIDirectory();
+
   let currentState: CLIState = DEFAULT_STATE;
 
   try {
