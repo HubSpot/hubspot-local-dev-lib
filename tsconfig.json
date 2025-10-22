@@ -25,5 +25,5 @@
     "types",
     "utils"
   ],
-  "exclude": ["node_modules", "**/__mocks__/*"]
+  "exclude": ["node_modules", "**/__mocks__/*", "**/__tests__/*"]
 }
