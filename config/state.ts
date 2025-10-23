@@ -1,6 +1,5 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { logger } from '../lib/logger';
 import { i18n } from '../utils/lang';
 import { STATE_FILE_PATH } from '../constants/config';
 

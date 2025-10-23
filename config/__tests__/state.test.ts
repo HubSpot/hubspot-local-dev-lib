@@ -1,11 +1,7 @@
 import fs from 'fs';
 import path from 'path';
-import os from 'os';
 import { getStateValue, setStateValue } from '../state';
-import { logger } from '../../lib/logger';
 import { STATE_FILE_PATH } from '../../constants/config';
-
-jest.mock('../../lib/logger');
 jest.mock('../../utils/lang', () => ({
   i18n: jest.fn((key: string) => key),
 }));
@@ -43,32 +39,24 @@ describe('config/state', () => {
       expect(result).toBe(0);
     });
 
-    it('returns default value when reading file throws error', () => {
+    it('throws error when reading file fails', () => {
       existsSyncSpy.mockReturnValue(true);
       readFileSyncSpy.mockImplementation(() => {
         throw new Error('Read error');
       });
 
-      const result = getStateValue('mcpTotalToolCalls');
-
-      expect(logger.error).toHaveBeenCalledWith(
-        'config.state.getStateValue.errors.errorReading',
-        expect.any(Error)
+      expect(() => getStateValue('mcpTotalToolCalls')).toThrow(
+        'config.state.getStateValue.errors.errorReading'
       );
-      expect(result).toBe(0);
     });
 
-    it('returns default value when JSON parsing fails', () => {
+    it('throws error when JSON parsing fails', () => {
       existsSyncSpy.mockReturnValue(true);
       readFileSyncSpy.mockReturnValue('invalid json');
 
-      const result = getStateValue('mcpTotalToolCalls');
-
-      expect(logger.error).toHaveBeenCalledWith(
-        'config.state.getStateValue.errors.errorReading',
-        expect.any(Error)
+      expect(() => getStateValue('mcpTotalToolCalls')).toThrow(
+        'config.state.getStateValue.errors.errorReading'
       );
-      expect(result).toBe(0);
     });
   });
 
@@ -104,59 +92,37 @@ describe('config/state', () => {
       expect(result).toBe(true);
     });
 
-    it('returns false when write fails', () => {
+    it('throws error when write fails', () => {
       existsSyncSpy.mockReturnValue(false);
       writeFileSyncSpy.mockImplementation(() => {
         throw new Error('Write error');
       });
 
-      const result = setStateValue('mcpTotalToolCalls', 15);
-
-      expect(logger.error).toHaveBeenCalledWith(
-        'config.state.setStateValue.errors.failedToWrite',
-        expect.any(Error)
+      expect(() => setStateValue('mcpTotalToolCalls', 15)).toThrow(
+        'config.state.setStateValue.errors.failedToWrite'
       );
-      expect(result).toBe(false);
     });
 
-    it('uses default state when reading existing file fails', () => {
+    it('throws error when reading existing file fails', () => {
       existsSyncSpy.mockReturnValue(true);
       readFileSyncSpy.mockImplementation(() => {
         throw new Error('Read error');
       });
       writeFileSyncSpy.mockImplementation(() => undefined);
 
-      const result = setStateValue('mcpTotalToolCalls', 25);
-
-      expect(logger.error).toHaveBeenCalledWith(
-        'config.state.setStateValue.errors.errorReadingDefaults',
-        expect.any(Error)
+      expect(() => setStateValue('mcpTotalToolCalls', 25)).toThrow(
+        'config.state.setStateValue.errors.errorReadingDefaults'
       );
-      expect(writeFileSyncSpy).toHaveBeenCalledWith(
-        STATE_FILE_PATH,
-        JSON.stringify({ mcpTotalToolCalls: 25 }, null, 2),
-        'utf-8'
-      );
-      expect(result).toBe(true);
     });
 
-    it('uses default state when JSON parsing fails', () => {
+    it('throws error when JSON parsing fails', () => {
       existsSyncSpy.mockReturnValue(true);
       readFileSyncSpy.mockReturnValue('invalid json');
       writeFileSyncSpy.mockImplementation(() => undefined);
 
-      const result = setStateValue('mcpTotalToolCalls', 30);
-
-      expect(logger.error).toHaveBeenCalledWith(
-        'config.state.setStateValue.errors.errorReadingDefaults',
-        expect.any(Error)
+      expect(() => setStateValue('mcpTotalToolCalls', 30)).toThrow(
+        'config.state.setStateValue.errors.errorReadingDefaults'
       );
-      expect(writeFileSyncSpy).toHaveBeenCalledWith(
-        STATE_FILE_PATH,
-        JSON.stringify({ mcpTotalToolCalls: 30 }, null, 2),
-        'utf-8'
-      );
-      expect(result).toBe(true);
     });
 
     it('preserves other state values when updating one value', () => {
@@ -209,17 +175,14 @@ describe('config/state', () => {
       expect(mkdirSyncSpy).not.toHaveBeenCalled();
     });
 
-    it('logs error when directory creation fails', () => {
+    it('throws error when directory creation fails', () => {
       existsSyncSpy.mockReturnValue(false);
       mkdirSyncSpy.mockImplementation(() => {
         throw new Error('Permission denied');
       });
 
-      getStateValue('mcpTotalToolCalls');
-
-      expect(logger.error).toHaveBeenCalledWith(
-        'config.state.ensureCLIDirectory.errors.cannotCreateDirectory',
-        expect.any(Error)
+      expect(() => getStateValue('mcpTotalToolCalls')).toThrow(
+        'config.state.ensureCLIDirectory.errors.cannotCreateDirectory'
       );
     });
   });
