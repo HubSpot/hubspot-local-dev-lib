@@ -329,6 +329,3 @@ export const getOrderedConfig = config_DEPRECATED.getOrderedConfig;
 export const setConfig = config_DEPRECATED.setConfig;
 export const setConfigPath = config_DEPRECATED.setConfigPath;
 export const findConfig = config_DEPRECATED.findConfig;
-
-// CLI State management
-export { getStateValue, setStateValue } from './state';

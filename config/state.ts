@@ -2,12 +2,10 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { i18n } from '../utils/lang';
 import { STATE_FILE_PATH } from '../constants/config';
+import { logger } from '../lib/logger';
+import { CLIState } from '../types/Config';
 
 const i18nKey = 'config.state';
-
-interface CLIState {
-  mcpTotalToolCalls: number;
-}
 
 const DEFAULT_STATE: CLIState = {
   mcpTotalToolCalls: 0,
@@ -28,11 +26,15 @@ function ensureCLIDirectory(): void {
   }
 }
 
+function stateFileExists(): boolean {
+  return fs.existsSync(STATE_FILE_PATH);
+}
+
 export function getStateValue<K extends keyof CLIState>(key: K): CLIState[K] {
   ensureCLIDirectory();
 
   try {
-    if (fs.existsSync(STATE_FILE_PATH)) {
+    if (stateFileExists()) {
       const data = fs.readFileSync(STATE_FILE_PATH, 'utf-8');
       const state = JSON.parse(data) as CLIState;
       return state[key];
@@ -51,18 +53,18 @@ export function getStateValue<K extends keyof CLIState>(key: K): CLIState[K] {
 export function setStateValue<K extends keyof CLIState>(
   key: K,
   value: CLIState[K]
-): boolean {
+): void {
   ensureCLIDirectory();
 
   let currentState: CLIState = DEFAULT_STATE;
 
   try {
-    if (fs.existsSync(STATE_FILE_PATH)) {
+    if (stateFileExists()) {
       const data = fs.readFileSync(STATE_FILE_PATH, 'utf-8');
       currentState = JSON.parse(data) as CLIState;
     }
   } catch (error) {
-    throw new Error(
+    logger.debug(
       i18n(`${i18nKey}.setStateValue.errors.errorReadingDefaults`, {
         error: error instanceof Error ? error.message : String(error),
       })
@@ -76,7 +78,6 @@ export function setStateValue<K extends keyof CLIState>(
       JSON.stringify(newState, null, 2),
       'utf-8'
     );
-    return true;
   } catch (error) {
     throw new Error(
       i18n(`${i18nKey}.setStateValue.errors.failedToWrite`, {
