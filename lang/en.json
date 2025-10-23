@@ -326,14 +326,13 @@
           "cannotCreateDirectory": "Cannot create CLI state directory: {{ error }}"
         }
       },
-      "getStateValue": {
+      "getCurrentState": {
         "errors": {
-          "errorReading": "Error reading CLI state: {{ error }}"
+          "errorReading": "Error reading CLI state, using defaults: {{ error }}"
         }
       },
       "setStateValue": {
         "errors": {
-          "errorReadingDefaults": "Error reading CLI state, using defaults: {{ error }}",
           "failedToWrite": "Failed to write CLI state: {{ error }}"
         }
       }

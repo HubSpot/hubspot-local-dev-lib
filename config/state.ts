@@ -26,28 +26,35 @@ function ensureCLIDirectory(): void {
   }
 }
 
-function stateFileExists(): boolean {
-  return fs.existsSync(STATE_FILE_PATH);
+function getCurrentState(throwOnError = true): CLIState {
+  try {
+    if (fs.existsSync(STATE_FILE_PATH)) {
+      const data = fs.readFileSync(STATE_FILE_PATH, 'utf-8');
+      return JSON.parse(data) as CLIState;
+    }
+  } catch (error) {
+    const errorMessage = i18n(
+      `${i18nKey}.getCurrentState.errors.errorReading`,
+      {
+        error: error instanceof Error ? error.message : String(error),
+      }
+    );
+
+    if (throwOnError) {
+      throw new Error(errorMessage);
+    } else {
+      logger.debug(errorMessage);
+    }
+  }
+
+  return DEFAULT_STATE;
 }
 
 export function getStateValue<K extends keyof CLIState>(key: K): CLIState[K] {
   ensureCLIDirectory();
 
-  try {
-    if (stateFileExists()) {
-      const data = fs.readFileSync(STATE_FILE_PATH, 'utf-8');
-      const state = JSON.parse(data) as CLIState;
-      return state[key];
-    }
-  } catch (error) {
-    throw new Error(
-      i18n(`${i18nKey}.getStateValue.errors.errorReading`, {
-        error: error instanceof Error ? error.message : String(error),
-      })
-    );
-  }
-
-  return DEFAULT_STATE[key];
+  const state = getCurrentState();
+  return state[key];
 }
 
 export function setStateValue<K extends keyof CLIState>(
@@ -56,20 +63,7 @@ export function setStateValue<K extends keyof CLIState>(
 ): void {
   ensureCLIDirectory();
 
-  let currentState: CLIState = DEFAULT_STATE;
-
-  try {
-    if (stateFileExists()) {
-      const data = fs.readFileSync(STATE_FILE_PATH, 'utf-8');
-      currentState = JSON.parse(data) as CLIState;
-    }
-  } catch (error) {
-    logger.debug(
-      i18n(`${i18nKey}.setStateValue.errors.errorReadingDefaults`, {
-        error: error instanceof Error ? error.message : String(error),
-      })
-    );
-  }
+  const currentState = getCurrentState(false);
 
   const newState = { ...currentState, [key]: value };
   try {

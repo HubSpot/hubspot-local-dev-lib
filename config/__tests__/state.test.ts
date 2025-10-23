@@ -46,7 +46,7 @@ describe('config/state', () => {
       });
 
       expect(() => getStateValue('mcpTotalToolCalls')).toThrow(
-        'config.state.getStateValue.errors.errorReading'
+        'config.state.getCurrentState.errors.errorReading'
       );
     });
 
@@ -55,7 +55,7 @@ describe('config/state', () => {
       readFileSyncSpy.mockReturnValue('invalid json');
 
       expect(() => getStateValue('mcpTotalToolCalls')).toThrow(
-        'config.state.getStateValue.errors.errorReading'
+        'config.state.getCurrentState.errors.errorReading'
       );
     });
   });
