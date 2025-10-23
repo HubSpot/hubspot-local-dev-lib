@@ -21,9 +21,10 @@ function ensureCLIDirectory(): void {
       fs.mkdirSync(dir, { recursive: true });
     }
   } catch (error) {
-    logger.error(
-      i18n(`${i18nKey}.ensureCLIDirectory.errors.cannotCreateDirectory`),
-      error
+    throw new Error(
+      i18n(`${i18nKey}.ensureCLIDirectory.errors.cannotCreateDirectory`, {
+        error: error instanceof Error ? error.message : String(error),
+      })
     );
   }
 }
@@ -38,7 +39,11 @@ export function getStateValue<K extends keyof CLIState>(key: K): CLIState[K] {
       return state[key];
     }
   } catch (error) {
-    logger.error(i18n(`${i18nKey}.getStateValue.errors.errorReading`), error);
+    throw new Error(
+      i18n(`${i18nKey}.getStateValue.errors.errorReading`, {
+        error: error instanceof Error ? error.message : String(error),
+      })
+    );
   }
 
   return DEFAULT_STATE[key];
@@ -58,9 +63,10 @@ export function setStateValue<K extends keyof CLIState>(
       currentState = JSON.parse(data) as CLIState;
     }
   } catch (error) {
-    logger.error(
-      i18n(`${i18nKey}.setStateValue.errors.errorReadingDefaults`),
-      error
+    throw new Error(
+      i18n(`${i18nKey}.setStateValue.errors.errorReadingDefaults`, {
+        error: error instanceof Error ? error.message : String(error),
+      })
     );
   }
 
@@ -73,7 +79,10 @@ export function setStateValue<K extends keyof CLIState>(
     );
     return true;
   } catch (error) {
-    logger.error(i18n(`${i18nKey}.setStateValue.errors.failedToWrite`), error);
-    return false;
+    throw new Error(
+      i18n(`${i18nKey}.setStateValue.errors.failedToWrite`, {
+        error: error instanceof Error ? error.message : String(error),
+      })
+    );
   }
 }
