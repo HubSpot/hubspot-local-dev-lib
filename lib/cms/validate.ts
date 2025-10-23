@@ -1,9 +1,9 @@
 import fs from 'fs-extra';
-import { HUBL_EXTENSIONS } from '../../constants/extensions';
-import { validateHubl } from '../../api/validateHubl';
-import { walk } from '../fs';
-import { getExt } from '../path';
-import { LintResult } from '../../types/HublValidation';
+import { HUBL_EXTENSIONS } from '../../constants/extensions.js';
+import { validateHubl } from '../../api/validateHubl.js';
+import { walk } from '../fs.js';
+import { getExt } from '../path.js';
+import { LintResult } from '../../types/HublValidation.js';
 
 export async function lint(
   accountId: number,

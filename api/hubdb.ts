@@ -1,5 +1,5 @@
-import { http } from '../http';
-import { HubSpotPromise, QueryParams } from '../types/Http';
+import { http } from '../http/index.js';
+import { HubSpotPromise, QueryParams } from '../types/Http.js';
 import {
   CreateRowsResponse,
   FetchRowsResponse,
@@ -7,7 +7,7 @@ import {
   Schema,
   Table,
   FetchTablesResponse,
-} from '../types/Hubdb';
+} from '../types/Hubdb.js';
 
 const HUBDB_API_PATH = 'cms/v3/hubdb';
 

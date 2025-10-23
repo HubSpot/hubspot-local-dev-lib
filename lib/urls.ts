@@ -1,4 +1,4 @@
-import { ENVIRONMENTS } from '../constants/environments';
+import { ENVIRONMENTS } from '../constants/environments.js';
 
 function getEnvUrlString(env?: string): string {
   if (typeof env !== 'string') {

@@ -2,13 +2,13 @@ import {
   generateConfig,
   getOrderedAccount,
   getOrderedConfig,
-} from '../configUtils';
-import { CLIConfig } from '../../types/Config';
+} from '../configUtils.js';
+import { CLIConfig } from '../../types/Config.js';
 import {
   CLIAccount,
   OAuthAccount,
   PersonalAccessKeyAccount,
-} from '../../types/Accounts';
+} from '../../types/Accounts.js';
 
 const PAK_ACCOUNT: PersonalAccessKeyAccount = {
   accountId: 111,

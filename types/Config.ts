@@ -1,7 +1,7 @@
-import { ENVIRONMENTS } from '../constants/environments';
-import { CLIAccount_NEW, CLIAccount_DEPRECATED } from './Accounts';
-import { CmsPublishMode } from './Files';
-import { ValueOf } from './Utils';
+import { ENVIRONMENTS } from '../constants/environments.js';
+import { CLIAccount_NEW, CLIAccount_DEPRECATED } from './Accounts.js';
+import { CmsPublishMode } from './Files.js';
+import { ValueOf } from './Utils.js';
 
 export interface CLIConfig_NEW {
   accounts: Array<CLIAccount_NEW>;

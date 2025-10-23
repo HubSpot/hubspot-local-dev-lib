@@ -1,9 +1,9 @@
-import { http } from '../http';
-import { HubSpotPromise, QueryParams } from '../types/Http';
+import { http } from '../http/index.js';
+import { HubSpotPromise, QueryParams } from '../types/Http.js';
 import {
   FetchThemesResponse,
   FetchBuiltinMappingResponse,
-} from '../types/DesignManager';
+} from '../types/DesignManager.js';
 
 const DESIGN_MANAGER_API_PATH = 'designmanager/v1';
 

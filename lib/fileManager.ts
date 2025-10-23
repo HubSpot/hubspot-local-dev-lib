@@ -8,22 +8,22 @@ import {
   fetchStat,
   fetchFiles,
   fetchFolders,
-} from '../api/fileManager';
-import { walk } from './fs';
-import { logger } from './logger';
-import { createIgnoreFilter } from './ignoreRules';
-import { http } from '../http';
-import { escapeRegExp } from './escapeRegExp';
+} from '../api/fileManager.js';
+import { walk } from './fs.js';
+import { logger } from './logger.js';
+import { createIgnoreFilter } from './ignoreRules.js';
+import { http } from '../http/index.js';
+import { escapeRegExp } from './escapeRegExp.js';
 import {
   getCwd,
   convertToUnixPath,
   convertToLocalFileSystemPath,
-} from './path';
+} from './path.js';
 
-import { File, SimplifiedFolder } from '../types/FileManager';
-import { i18n } from '../utils/lang';
-import { isAuthError, isHubSpotHttpError } from '../errors';
-import { FileSystemError } from '../models/FileSystemError';
+import { File, SimplifiedFolder } from '../types/FileManager.js';
+import { i18n } from '../utils/lang.js';
+import { isAuthError, isHubSpotHttpError } from '../errors/index.js';
+import { FileSystemError } from '../models/FileSystemError.js';
 
 const i18nKey = 'lib.fileManager';
 

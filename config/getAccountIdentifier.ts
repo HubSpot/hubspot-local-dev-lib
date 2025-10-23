@@ -1,4 +1,4 @@
-import { GenericAccount } from '../types/Accounts';
+import { GenericAccount } from '../types/Accounts.js';
 
 export function getAccountIdentifier(
   account?: GenericAccount | null

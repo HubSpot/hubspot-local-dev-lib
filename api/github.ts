@@ -1,14 +1,17 @@
 import axios, { ResponseType } from 'axios';
-import { getDefaultUserAgentHeader } from '../http/getAxiosConfig';
-import { GithubReleaseData, GithubRepoFile, RepoPath } from '../types/Github';
-import { HubSpotPromise } from '../types/Http';
-import { isSpecifiedError } from '../errors';
+import { getDefaultUserAgentHeader } from '../http/getAxiosConfig.js';
+import {
+  GithubReleaseData,
+  GithubRepoFile,
+  RepoPath,
+} from '../types/Github.js';
+import { HubSpotPromise } from '../types/Http.js';
+import { isSpecifiedError } from '../errors/index.js';
 
 const GITHUB_REPOS_API = 'https://api.github.com/repos';
 const GITHUB_RAW_CONTENT_API_PATH = 'https://raw.githubusercontent.com';
 
 declare global {
-  // eslint-disable-next-line no-var
   var githubToken: string;
 }
 

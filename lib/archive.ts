@@ -3,11 +3,11 @@ import path, { join } from 'path';
 import { tmpdir } from 'os';
 import extract from 'extract-zip';
 
-import { logger } from './logger';
-import { i18n } from '../utils/lang';
-import { ZipData, CopySourceToDestOptions } from '../types/Archive';
-import { FileSystemError } from '../models/FileSystemError';
-import { walk } from './fs';
+import { logger } from './logger.js';
+import { i18n } from '../utils/lang.js';
+import { ZipData, CopySourceToDestOptions } from '../types/Archive.js';
+import { FileSystemError } from '../models/FileSystemError.js';
+import { walk } from './fs.js';
 
 const i18nKey = 'lib.archive';
 
@@ -172,6 +172,7 @@ async function cleanupTempDir(tmpDir: string): Promise<void> {
   if (!tmpDir) return;
   try {
     await fs.remove(tmpDir);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (e) {
     logger.debug(i18n(`${i18nKey}.cleanupTempDir.error`, { tmpDir }));
   }

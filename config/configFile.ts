@@ -1,11 +1,11 @@
 import fs from 'fs-extra';
 import yaml from 'js-yaml';
-import { logger } from '../lib/logger';
-import { GLOBAL_CONFIG_PATH } from '../constants/config';
-import { getOrderedConfig } from './configUtils';
-import { CLIConfig_NEW } from '../types/Config';
-import { i18n } from '../utils/lang';
-import { FileSystemError } from '../models/FileSystemError';
+import { logger } from '../lib/logger.js';
+import { GLOBAL_CONFIG_PATH } from '../constants/config.js';
+import { getOrderedConfig } from './configUtils.js';
+import { CLIConfig_NEW } from '../types/Config.js';
+import { i18n } from '../utils/lang.js';
+import { FileSystemError } from '../models/FileSystemError.js';
 
 const i18nKey = 'config.configFile';
 

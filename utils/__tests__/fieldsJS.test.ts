@@ -1,4 +1,4 @@
-import { fieldsArrayToJson } from '../cms/fieldsJS';
+import { fieldsArrayToJson } from '../cms/fieldsJS.js';
 
 describe('utils/cms/fieldsJS', () => {
   describe('fieldsArrayToJson()', () => {

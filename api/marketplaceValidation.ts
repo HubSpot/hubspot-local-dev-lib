@@ -1,6 +1,6 @@
-import { http } from '../http';
-import { Data, HubSpotPromise, QueryParams } from '../types/Http';
-import { GetValidationResultsResponse } from '../types/MarketplaceValidation';
+import { http } from '../http/index.js';
+import { Data, HubSpotPromise, QueryParams } from '../types/Http.js';
+import { GetValidationResultsResponse } from '../types/MarketplaceValidation.js';
 
 const VALIDATION_API_BASE = 'quality-engine/v1/validation';
 

@@ -1,11 +1,11 @@
-import { http } from '../http';
-import { HubSpotPromise, QueryParams } from '../types/Http';
+import { http } from '../http/index.js';
+import { HubSpotPromise, QueryParams } from '../types/Http.js';
 import {
   GetBuildStatusResponse,
   FunctionLog,
   GetRoutesResponse,
   GetFunctionLogsResponse,
-} from '../types/Functions';
+} from '../types/Functions.js';
 
 const FUNCTION_API_PATH = 'cms/v3/functions';
 

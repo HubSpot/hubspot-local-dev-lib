@@ -1,67 +1,71 @@
 import path from 'path';
 import fs from 'fs-extra';
-import { uploadFolder, getFilesByType } from '../cms/uploadFolder';
-import { FILE_TYPES } from '../../constants/files';
-import { upload as __upload } from '../../api/fileMapper';
-import { walk as __walk } from '../fs';
-import { createIgnoreFilter as __createIgnoreFilter } from '../ignoreRules';
+import { uploadFolder, getFilesByType } from '../cms/uploadFolder.js';
+import { FILE_TYPES } from '../../constants/files.js';
+import { upload as __upload } from '../../api/fileMapper.js';
+import { walk as __walk } from '../fs.js';
+import { createIgnoreFilter as __createIgnoreFilter } from '../ignoreRules.js';
 import {
   FieldsJs as __FieldsJs,
   isConvertableFieldJs as __isConvertableFields,
   cleanupTmpDirSync as __cleanupTmpDirSync,
   createTmpDirSync as __createTmpDirSync,
-} from '../cms/handleFieldsJS';
-import { mockAxiosResponse } from './__utils__/mockAxiosResponse';
+} from '../cms/handleFieldsJS.js';
+import { mockAxiosResponse } from './__utils__/mockAxiosResponse.js';
+import { vi, type MockedFunction } from 'vitest';
 
-jest.mock('../fs');
-jest.mock('../../api/fileMapper');
-jest.mock('../ignoreRules');
-jest.mock('../cms/handleFieldsJS');
+vi.mock('../fs');
+vi.mock('../../api/fileMapper');
+vi.mock('../ignoreRules');
+vi.mock('../cms/handleFieldsJS');
 
-const listFilesInDir = jest.fn((dir: string) => {
+const listFilesInDir = vi.fn((dir: string) => {
   return fs
     .readdirSync(dir, { withFileTypes: true })
     .filter(file => !file.isDirectory())
     .map(file => file.name);
 });
 
-const FieldsJs = __FieldsJs as jest.Mock;
-const isConvertableFieldJs = __isConvertableFields as jest.MockedFunction<
+const FieldsJs = vi.mocked(__FieldsJs);
+const isConvertableFieldJs = __isConvertableFields as MockedFunction<
   typeof __isConvertableFields
 >;
-const createIgnoreFilter = __createIgnoreFilter as jest.MockedFunction<
+const createIgnoreFilter = __createIgnoreFilter as MockedFunction<
   typeof __createIgnoreFilter
 >;
-const createTmpDirSync = __createTmpDirSync as jest.MockedFunction<
+const createTmpDirSync = __createTmpDirSync as MockedFunction<
   typeof __createTmpDirSync
 >;
-const walk = __walk as jest.MockedFunction<typeof __walk>;
-const upload = __upload as jest.MockedFunction<typeof __upload>;
-const cleanupTmpDirSync = __cleanupTmpDirSync as jest.MockedFunction<
+const walk = __walk as MockedFunction<typeof __walk>;
+const upload = __upload as MockedFunction<typeof __upload>;
+const cleanupTmpDirSync = __cleanupTmpDirSync as MockedFunction<
   typeof __cleanupTmpDirSync
 >;
 
 //folder/fields.js -> folder/fields.converted.js
 // We add the .converted to differentiate from a unconverted fields.json
-const defaultFieldsJsImplementation = jest.fn(
+const mockSaveOutput = vi.fn();
+const defaultFieldsJsImplementation = vi.fn(
   (src: string, filePath: string, rootWriteDir: string | undefined | null) => {
-    const fieldsJs = Object.create(FieldsJs.prototype);
     const outputPath =
       filePath.substring(0, filePath.lastIndexOf('.')) + '.converted.json';
+    const instance = {
+      projectDir: src,
+      filePath,
+      rootWriteDir,
+      rejected: false,
+      fieldOptions: '',
+      outputPath,
+      saveOutput: mockSaveOutput,
+    };
     return {
-      init: jest.fn().mockReturnValue(
-        Object.assign(fieldsJs, {
-          src,
-          outputPath,
-          rootWriteDir,
-          getOutputPathPromise: jest.fn().mockResolvedValue(outputPath),
-          rejected: false,
-        })
-      ),
+      ...instance,
+      init: vi.fn().mockReturnValue(instance),
     };
   }
 );
-FieldsJs.mockImplementation(defaultFieldsJsImplementation);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+(FieldsJs as any).mockImplementation(defaultFieldsJsImplementation);
 
 isConvertableFieldJs.mockImplementation((src: string, filePath: string) => {
   const fileName = path.basename(filePath);
@@ -146,8 +150,7 @@ describe('lib/cms/uploadFolder', () => {
     });
 
     it('tries to save output of each fields file', async () => {
-      const saveOutputSpy = jest.spyOn(FieldsJs.prototype, 'saveOutput');
-
+      mockSaveOutput.mockClear();
       createTmpDirSync.mockReturnValue('folder');
       upload.mockResolvedValue(mockAxiosResponse());
 
@@ -161,7 +164,7 @@ describe('lib/cms/uploadFolder', () => {
         'publish'
       );
 
-      expect(saveOutputSpy).toHaveBeenCalledTimes(2);
+      expect(mockSaveOutput).toHaveBeenCalledTimes(2);
     });
 
     it('deletes the temporary directory', async () => {
@@ -186,20 +189,20 @@ describe('lib/cms/uploadFolder', () => {
   describe('getFilesByType()', () => {
     const convertedFieldsObj = new FieldsJs(
       'folder',
-      'folder/fields.json',
+      'folder/fields.js',
       'folder'
-    ).init();
+    ).init() as unknown as { outputPath: string };
     const convertedFilePath = convertedFieldsObj.outputPath;
 
     const convertedModuleFieldsObj = new FieldsJs(
       'folder',
-      'folder/sample.module/fields.json',
+      'folder/sample.module/fields.js',
       'folder'
-    ).init();
+    ).init() as unknown as { outputPath: string };
     const convertedModuleFilePath = convertedModuleFieldsObj.outputPath;
 
     beforeEach(() => {
-      jest.resetModules();
+      vi.resetModules();
     });
     it('outputs getFilesByType with no processing if convertFields is false', async () => {
       const files = [...filesProto];

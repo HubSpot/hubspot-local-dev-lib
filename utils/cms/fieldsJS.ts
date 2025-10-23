@@ -1,4 +1,4 @@
-import { FieldsArray } from '../../types/FieldsJS';
+import { FieldsArray } from '../../types/FieldsJS.js';
 
 /*
  * Polyfill for `Array.flat(Infinity)` since the `flat` is only available for Node v11+

@@ -1,6 +1,6 @@
-import { http } from '../http';
-import { FireAlarm } from '../types/FireAlarm';
-import { HubSpotPromise } from '../types/Http';
+import { http } from '../http/index.js';
+import { FireAlarm } from '../types/FireAlarm.js';
+import { HubSpotPromise } from '../types/Http.js';
 
 const FIREALARM_API_AUTH_PATH = 'firealarm/v4/alarm';
 

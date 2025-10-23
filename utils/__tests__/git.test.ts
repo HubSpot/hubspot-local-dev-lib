@@ -1,14 +1,15 @@
 import {
   configFilenameIsIgnoredByGitignore,
   getGitignoreFiles,
-} from '../../utils/git';
+} from '../../utils/git.js';
 import fs from 'fs-extra';
-jest.mock('findup-sync');
+vi.mock('findup-sync');
 
 import findup from 'findup-sync';
 import path from 'path';
+import { vi, type MockedFunction } from 'vitest';
 
-const findupMock = findup as jest.MockedFunction<typeof findup>;
+const findupMock = findup as MockedFunction<typeof findup>;
 
 describe('utils/cms/git', () => {
   const projectBaseDir = '/Users/fakeuser/someproject';
@@ -23,7 +24,7 @@ describe('utils/cms/git', () => {
     it('returns false if the config file is not ignored', () => {
       const gitignoreContent = '';
 
-      jest.spyOn(fs, 'readFileSync').mockImplementation(() => {
+      vi.spyOn(fs, 'readFileSync').mockImplementation(() => {
         return Buffer.from(gitignoreContent);
       });
 
@@ -37,7 +38,7 @@ describe('utils/cms/git', () => {
 
     it('identifies if a config file is ignored with a specific ignore statement', () => {
       const gitignoreContent = 'hubspot.config.yml';
-      const readFileSyncSpy = jest
+      const readFileSyncSpy = vi
         .spyOn(fs, 'readFileSync')
         .mockImplementation(() => {
           return Buffer.from(gitignoreContent);
@@ -54,7 +55,7 @@ describe('utils/cms/git', () => {
 
     it('identifies if a config file is ignored with a wildcard statement', () => {
       const gitignoreContent = 'hubspot.config.*';
-      const readFileSyncSpy = jest
+      const readFileSyncSpy = vi
         .spyOn(fs, 'readFileSync')
         .mockImplementation(() => {
           return Buffer.from(gitignoreContent);
@@ -73,7 +74,7 @@ describe('utils/cms/git', () => {
       const gitignoreContent = 'hubspot.config.yml';
       findupMock.mockImplementation(() => customConfigPath);
 
-      const readFileSyncSpy = jest
+      const readFileSyncSpy = vi
         .spyOn(fs, 'readFileSync')
         .mockImplementation(() => {
           return Buffer.from(gitignoreContent);
@@ -92,7 +93,7 @@ describe('utils/cms/git', () => {
       const gitignoreContent = 'my.custom.name.yml';
       findupMock.mockImplementation(() => customConfigPath);
 
-      const readFileSyncSpy = jest
+      const readFileSyncSpy = vi
         .spyOn(fs, 'readFileSync')
         .mockImplementation(() => {
           return Buffer.from(gitignoreContent);
@@ -117,10 +118,10 @@ describe('utils/cms/git', () => {
 
     it('should return an array of the gitignore files', () => {
       const gitignoreFile = `${projectBaseDir}/.gitignore`;
-      jest.spyOn(path, 'resolve').mockImplementation(() => {
+      vi.spyOn(path, 'resolve').mockImplementation(() => {
         return gitignoreFile;
       });
-      jest.spyOn(path, 'dirname').mockImplementation(() => {
+      vi.spyOn(path, 'dirname').mockImplementation(() => {
         return projectBaseDir;
       });
 

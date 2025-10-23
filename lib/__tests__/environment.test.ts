@@ -1,5 +1,5 @@
-import { getValidEnv } from '../environment';
-import { ENVIRONMENTS } from '../../constants/environments';
+import { getValidEnv } from '../environment.js';
+import { ENVIRONMENTS } from '../../constants/environments.js';
 
 const { QA, PROD } = ENVIRONMENTS;
 
