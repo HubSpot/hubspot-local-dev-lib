@@ -11,9 +11,7 @@ export function getValidEnv(
       : ENVIRONMENTS.PROD;
 
   const returnVal =
-    typeof env &&
-    typeof env === 'string' &&
-    env.toLowerCase() === ENVIRONMENTS.QA
+    env && typeof env === 'string' && env.toLowerCase() === ENVIRONMENTS.QA
       ? ENVIRONMENTS.QA
       : prodValue;
 

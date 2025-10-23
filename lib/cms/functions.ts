@@ -36,7 +36,7 @@ export function createConfig({
   functionFile,
 }: FunctionConfigInfo): FunctionConfig {
   return {
-    runtime: 'nodejs20.x',
+    runtime: 'nodejs18.x',
     version: '1.0',
     environment: {},
     secrets: [],

@@ -429,7 +429,6 @@ class _CLIConfiguration {
     // Allow everything except for 'undefined' values to override the existing values
     function safelyApplyUpdates<T extends keyof FlatAccountFields_NEW>(
       fieldName: T,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       newValue: FlatAccountFields_NEW[T]
     ) {
       if (typeof newValue !== 'undefined') {
@@ -455,7 +454,6 @@ class _CLIConfiguration {
       safelyApplyUpdates('apiKey', apiKey);
     }
     if (typeof updatedDefaultCmsPublishMode !== 'undefined') {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       safelyApplyUpdates(
         'defaultCmsPublishMode',
         CMS_PUBLISH_MODE[updatedDefaultCmsPublishMode]

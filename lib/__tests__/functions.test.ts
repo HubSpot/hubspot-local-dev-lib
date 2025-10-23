@@ -106,7 +106,6 @@ describe('lib/cms/functions', () => {
     });
 
     it('should return true for functions', () => {
-      // eslint-disable-next-line @typescript-eslint/no-empty-function
       expect(isObjectOrFunction(() => {})).toBe(true);
     });
 
@@ -152,7 +151,7 @@ describe('lib/cms/functions', () => {
       });
 
       expect(result).toEqual({
-        runtime: 'nodejs20.x',
+        runtime: 'nodejs18.x',
         version: '1.0',
         environment: {},
         secrets: [],
