@@ -67,7 +67,7 @@ describe('config/state', () => {
       readFileSyncSpy.mockReturnValue(JSON.stringify(existingState));
       writeFileSyncSpy.mockImplementation(() => undefined);
 
-      const result = setStateValue('mcpTotalToolCalls', 20);
+      setStateValue('mcpTotalToolCalls', 20);
 
       expect(readFileSyncSpy).toHaveBeenCalledWith(STATE_FILE_PATH, 'utf-8');
       expect(writeFileSyncSpy).toHaveBeenCalledWith(
@@ -75,21 +75,19 @@ describe('config/state', () => {
         JSON.stringify({ mcpTotalToolCalls: 20 }, null, 2),
         'utf-8'
       );
-      expect(result).toBe(true);
     });
 
     it('creates new state file with default values when file does not exist', () => {
       existsSyncSpy.mockReturnValue(false);
       writeFileSyncSpy.mockImplementation(() => undefined);
 
-      const result = setStateValue('mcpTotalToolCalls', 5);
+      setStateValue('mcpTotalToolCalls', 5);
 
       expect(writeFileSyncSpy).toHaveBeenCalledWith(
         STATE_FILE_PATH,
         JSON.stringify({ mcpTotalToolCalls: 5 }, null, 2),
         'utf-8'
       );
-      expect(result).toBe(true);
     });
 
     it('throws error when write fails', () => {
@@ -103,25 +101,33 @@ describe('config/state', () => {
       );
     });
 
-    it('throws error when reading existing file fails', () => {
+    it('uses default state when reading existing file fails', () => {
       existsSyncSpy.mockReturnValue(true);
       readFileSyncSpy.mockImplementation(() => {
         throw new Error('Read error');
       });
       writeFileSyncSpy.mockImplementation(() => undefined);
 
-      expect(() => setStateValue('mcpTotalToolCalls', 25)).toThrow(
-        'config.state.setStateValue.errors.errorReadingDefaults'
+      setStateValue('mcpTotalToolCalls', 25);
+
+      expect(writeFileSyncSpy).toHaveBeenCalledWith(
+        STATE_FILE_PATH,
+        JSON.stringify({ mcpTotalToolCalls: 25 }, null, 2),
+        'utf-8'
       );
     });
 
-    it('throws error when JSON parsing fails', () => {
+    it('uses default state when JSON parsing fails', () => {
       existsSyncSpy.mockReturnValue(true);
       readFileSyncSpy.mockReturnValue('invalid json');
       writeFileSyncSpy.mockImplementation(() => undefined);
 
-      expect(() => setStateValue('mcpTotalToolCalls', 30)).toThrow(
-        'config.state.setStateValue.errors.errorReadingDefaults'
+      setStateValue('mcpTotalToolCalls', 30);
+
+      expect(writeFileSyncSpy).toHaveBeenCalledWith(
+        STATE_FILE_PATH,
+        JSON.stringify({ mcpTotalToolCalls: 30 }, null, 2),
+        'utf-8'
       );
     });
 
@@ -131,14 +137,13 @@ describe('config/state', () => {
       readFileSyncSpy.mockReturnValue(JSON.stringify(existingState));
       writeFileSyncSpy.mockImplementation(() => undefined);
 
-      const result = setStateValue('mcpTotalToolCalls', 150);
+      setStateValue('mcpTotalToolCalls', 150);
 
       expect(writeFileSyncSpy).toHaveBeenCalledWith(
         STATE_FILE_PATH,
         JSON.stringify({ mcpTotalToolCalls: 150 }, null, 2),
         'utf-8'
       );
-      expect(result).toBe(true);
     });
   });
 
