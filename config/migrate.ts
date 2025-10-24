@@ -27,6 +27,8 @@ import {
   DEFAULT_ACCOUNT,
   DEFAULT_PORTAL,
   ARCHIVED_HUBSPOT_CONFIG_YAML_FILE_NAME,
+  AUTO_OPEN_BROWSER,
+  ALLOW_AUTO_UPDATES,
 } from '../constants/config';
 import { i18n } from '../utils/lang';
 import fs from 'fs';
@@ -137,6 +139,8 @@ export function mergeConfigProperties(
     ENV,
     HTTP_USE_LOCALHOST,
     ALLOW_USAGE_TRACKING,
+    AUTO_OPEN_BROWSER,
+    ALLOW_AUTO_UPDATES,
   ];
   const conflicts: Array<ConflictProperty> = [];
 
