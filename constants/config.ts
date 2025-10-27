@@ -26,6 +26,8 @@ export const HTTP_TIMEOUT = 'httpTimeout';
 export const ENV = 'env';
 export const HTTP_USE_LOCALHOST = 'httpUseLocalhost';
 export const ALLOW_USAGE_TRACKING = 'allowUsageTracking';
+export const AUTO_OPEN_BROWSER = 'autoOpenBrowser';
+export const ALLOW_AUTO_UPDATES = 'allowAutoUpdates';
 export const DEFAULT_ACCOUNT = 'defaultAccount';
 export const DEFAULT_PORTAL = 'defaultPortal';
 
