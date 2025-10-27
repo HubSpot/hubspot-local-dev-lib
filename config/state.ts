@@ -26,11 +26,49 @@ function ensureCLIDirectory(): void {
   }
 }
 
+function validateStateShape(obj: unknown): obj is CLIState {
+  if (!obj || typeof obj !== 'object' || Array.isArray(obj)) {
+    return false;
+  }
+
+  const state = obj as Record<string, unknown>;
+
+  for (const key in DEFAULT_STATE) {
+    const typedKey = key as keyof CLIState;
+    if (key in state && typeof state[key] !== typeof DEFAULT_STATE[typedKey]) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+function mergeWithDefaults(parsed: Partial<CLIState>): CLIState {
+  return {
+    ...DEFAULT_STATE,
+    ...parsed,
+  };
+}
+
 function getCurrentState(): CLIState {
   try {
     if (fs.existsSync(STATE_FILE_PATH)) {
       const data = fs.readFileSync(STATE_FILE_PATH, 'utf-8');
-      return JSON.parse(data) as CLIState;
+
+      if (!data || !data.trim()) {
+        logger.debug(i18n(`${i18nKey}.getCurrentState.debug.emptyStateFile`));
+        return DEFAULT_STATE;
+      }
+
+      const parsed = JSON.parse(data);
+
+      if (!validateStateShape(parsed)) {
+        throw new Error(
+          i18n(`${i18nKey}.getCurrentState.errors.invalidStructure`)
+        );
+      }
+
+      return mergeWithDefaults(parsed);
     }
   } catch (error) {
     throw new Error(
@@ -46,8 +84,13 @@ function getCurrentState(): CLIState {
 export function getStateValue<K extends keyof CLIState>(key: K): CLIState[K] {
   ensureCLIDirectory();
 
-  const state = getCurrentState();
-  return state[key];
+  try {
+    const state = getCurrentState();
+    return state[key];
+  } catch (error) {
+    logger.debug(error);
+    return DEFAULT_STATE[key];
+  }
 }
 
 export function setStateValue<K extends keyof CLIState>(

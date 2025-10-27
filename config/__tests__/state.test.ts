@@ -36,27 +36,124 @@ describe('config/state', () => {
 
       expect(existsSyncSpy).toHaveBeenCalledWith(STATE_FILE_PATH);
       expect(readFileSyncSpy).not.toHaveBeenCalled();
+      expect(writeFileSyncSpy).not.toHaveBeenCalled();
       expect(result).toBe(0);
     });
 
-    it('throws error when reading file fails', () => {
+    it('returns default state when file is empty', () => {
+      existsSyncSpy.mockReturnValue(true);
+      readFileSyncSpy.mockReturnValue('');
+
+      const result = getStateValue('mcpTotalToolCalls');
+
+      expect(readFileSyncSpy).toHaveBeenCalledWith(STATE_FILE_PATH, 'utf-8');
+      expect(writeFileSyncSpy).not.toHaveBeenCalled();
+      expect(result).toBe(0);
+    });
+
+    it('returns default state when file is whitespace-only', () => {
+      existsSyncSpy.mockReturnValue(true);
+      readFileSyncSpy.mockReturnValue('   \n  \t  ');
+
+      const result = getStateValue('mcpTotalToolCalls');
+
+      expect(readFileSyncSpy).toHaveBeenCalledWith(STATE_FILE_PATH, 'utf-8');
+      expect(writeFileSyncSpy).not.toHaveBeenCalled();
+      expect(result).toBe(0);
+    });
+
+    it('returns default value when reading file fails', () => {
       existsSyncSpy.mockReturnValue(true);
       readFileSyncSpy.mockImplementation(() => {
         throw new Error('Read error');
       });
 
-      expect(() => getStateValue('mcpTotalToolCalls')).toThrow(
-        'config.state.getCurrentState.errors.errorReading'
-      );
+      const result = getStateValue('mcpTotalToolCalls');
+
+      expect(result).toBe(0);
     });
 
-    it('throws error when JSON parsing fails', () => {
+    it('returns default value when JSON parsing fails', () => {
       existsSyncSpy.mockReturnValue(true);
       readFileSyncSpy.mockReturnValue('invalid json');
 
-      expect(() => getStateValue('mcpTotalToolCalls')).toThrow(
-        'config.state.getCurrentState.errors.errorReading'
+      const result = getStateValue('mcpTotalToolCalls');
+
+      expect(result).toBe(0);
+    });
+
+    it('returns default value when JSON has trailing comma', () => {
+      existsSyncSpy.mockReturnValue(true);
+      readFileSyncSpy.mockReturnValue('{"mcpTotalToolCalls": 1,}');
+
+      const result = getStateValue('mcpTotalToolCalls');
+
+      expect(result).toBe(0);
+    });
+
+    it('merges with defaults when state file is empty object', () => {
+      existsSyncSpy.mockReturnValue(true);
+      readFileSyncSpy.mockReturnValue(JSON.stringify({}));
+
+      const result = getStateValue('mcpTotalToolCalls');
+
+      expect(result).toBe(0);
+    });
+
+    it('merges with defaults when state file has only unrecognized keys', () => {
+      existsSyncSpy.mockReturnValue(true);
+      readFileSyncSpy.mockReturnValue(
+        JSON.stringify({ wrongKey: 42, other: 'value' })
       );
+
+      const result = getStateValue('mcpTotalToolCalls');
+
+      expect(result).toBe(0);
+    });
+
+    it('returns default value when state file has invalid structure (wrong type)', () => {
+      existsSyncSpy.mockReturnValue(true);
+      readFileSyncSpy.mockReturnValue(
+        JSON.stringify({ mcpTotalToolCalls: 'not-a-number' })
+      );
+
+      const result = getStateValue('mcpTotalToolCalls');
+
+      expect(result).toBe(0);
+    });
+
+    it('ignores extra keys in state file', () => {
+      const mockState = {
+        mcpTotalToolCalls: 42,
+        extraKey: 'should-be-ignored',
+        anotherKey: 123,
+      };
+      existsSyncSpy.mockReturnValue(true);
+      readFileSyncSpy.mockReturnValue(JSON.stringify(mockState));
+
+      const result = getStateValue('mcpTotalToolCalls');
+
+      expect(result).toBe(42);
+    });
+
+    it('merges with defaults when state file is missing potential future keys', () => {
+      const oldState = { mcpTotalToolCalls: 100 };
+      existsSyncSpy.mockReturnValue(true);
+      readFileSyncSpy.mockReturnValue(JSON.stringify(oldState));
+
+      const result = getStateValue('mcpTotalToolCalls');
+
+      expect(result).toBe(100);
+    });
+
+    it('merges partial state with extra keys', () => {
+      const partialState = { extraKey: 'ignored' };
+      existsSyncSpy.mockReturnValue(true);
+      readFileSyncSpy.mockReturnValue(JSON.stringify(partialState));
+
+      const result = getStateValue('mcpTotalToolCalls');
+
+      expect(result).toBe(0);
     });
   });
 
