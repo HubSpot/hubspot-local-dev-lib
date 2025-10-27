@@ -8,11 +8,18 @@ export const ARCHIVED_HUBSPOT_CONFIG_YAML_FILE_NAME =
 
 export const HUBSPOT_CONFIGURATION_FOLDER = '.hscli';
 export const HUBSPOT_CONFIGURATION_FILE = 'config.yml';
+export const HUBSPOT_STATE_FILE = 'state.json';
 
 export const GLOBAL_CONFIG_PATH = path.join(
   os.homedir(),
   HUBSPOT_CONFIGURATION_FOLDER,
   HUBSPOT_CONFIGURATION_FILE
+);
+
+export const STATE_FILE_PATH = path.join(
+  os.homedir(),
+  HUBSPOT_CONFIGURATION_FOLDER,
+  HUBSPOT_STATE_FILE
 );
 
 export const DEFAULT_ACCOUNT_OVERRIDE_FILE_NAME = '.hsaccount';

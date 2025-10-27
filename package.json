@@ -52,6 +52,7 @@
     "./http/*": "./http/*.js",
     "./config/getAccountIdentifier": "./config/getAccountIdentifier.js",
     "./config/migrate": "./config/migrate.js",
+    "./config/state": "./config/state.js",
     "./config": "./config/index.js",
     "./constants/*": "./constants/*.js",
     "./models/*": "./models/*.js",

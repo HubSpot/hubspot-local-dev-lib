@@ -50,3 +50,7 @@ export type GitInclusionResult = {
   configIgnored: boolean;
   gitignoreFiles: Array<string>;
 };
+
+export type CLIState = {
+  mcpTotalToolCalls: number;
+};
