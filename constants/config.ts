@@ -3,14 +3,23 @@ import path from 'path';
 import os from 'os';
 
 export const DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME = 'hubspot.config.yml';
+export const ARCHIVED_HUBSPOT_CONFIG_YAML_FILE_NAME =
+  'archived.hubspot.config.yml';
 
 export const HUBSPOT_CONFIGURATION_FOLDER = '.hscli';
 export const HUBSPOT_CONFIGURATION_FILE = 'config.yml';
+export const HUBSPOT_STATE_FILE = 'state.json';
 
 export const GLOBAL_CONFIG_PATH = path.join(
   os.homedir(),
   HUBSPOT_CONFIGURATION_FOLDER,
   HUBSPOT_CONFIGURATION_FILE
+);
+
+export const STATE_FILE_PATH = path.join(
+  os.homedir(),
+  HUBSPOT_CONFIGURATION_FOLDER,
+  HUBSPOT_STATE_FILE
 );
 
 export const DEFAULT_ACCOUNT_OVERRIDE_FILE_NAME = '.hsaccount';
@@ -24,6 +33,8 @@ export const HTTP_TIMEOUT = 'httpTimeout';
 export const ENV = 'env';
 export const HTTP_USE_LOCALHOST = 'httpUseLocalhost';
 export const ALLOW_USAGE_TRACKING = 'allowUsageTracking';
+export const AUTO_OPEN_BROWSER = 'autoOpenBrowser';
+export const ALLOW_AUTO_UPDATES = 'allowAutoUpdates';
 export const DEFAULT_ACCOUNT = 'defaultAccount';
 export const DEFAULT_PORTAL = 'defaultPortal';
 

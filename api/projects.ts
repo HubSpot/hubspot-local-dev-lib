@@ -28,7 +28,7 @@ const PROJECTS_DEPLOY_API_PATH = 'dfs/deploy/v1';
 const PROJECTS_DEPLOY_API_PATH_V3 = 'dfs/deploy/v3';
 const PROJECTS_LOGS_API_PATH = 'dfs/logging/v1';
 const DEVELOPER_PROJECTS_API_PATH = 'developer/projects/v1';
-const MIGRATIONS_API_PATH = 'dfs/migrations/v1';
+const MIGRATIONS_API_PATH_V1 = 'dfs/migrations/v1';
 
 const PROJECTS_V3_API_PATH = 'project-components-external/v3';
 
@@ -187,7 +187,8 @@ export function deployProject(
   accountId: number,
   projectName: string,
   buildId: number,
-  useNewDeployApi = false
+  useNewDeployApi = false,
+  force = false
 ): HubSpotPromise<ProjectDeployResponse> {
   if (useNewDeployApi) {
     return http.post<ProjectDeployResponse>(accountId, {
@@ -195,6 +196,7 @@ export function deployProject(
       data: {
         projectName,
         targetBuildId: buildId,
+        ignoreWarnings: force,
       },
     });
   }
@@ -203,6 +205,7 @@ export function deployProject(
     data: {
       projectName,
       buildId,
+      skipRemovalWarning: force,
     },
   });
 }
@@ -334,13 +337,16 @@ export function fetchDeployWarnLogs(
   });
 }
 
+/**
+ * @deprecated
+ */
 export function migrateApp(
   accountId: number,
   appId: number,
   projectName: string
 ): HubSpotPromise<MigrateAppResponse> {
   return http.post<MigrateAppResponse>(accountId, {
-    url: `${MIGRATIONS_API_PATH}/migrations`,
+    url: `${MIGRATIONS_API_PATH_V1}/migrations`,
     data: {
       componentId: appId,
       componentType: 'PUBLIC_APP_ID',
@@ -349,21 +355,27 @@ export function migrateApp(
   });
 }
 
+/**
+ * @deprecated
+ */
 export function checkMigrationStatus(
   accountId: number,
   id: number
 ): HubSpotPromise<PollAppResponse> {
   return http.get<PollAppResponse>(accountId, {
-    url: `${MIGRATIONS_API_PATH}/migrations/${id}`,
+    url: `${MIGRATIONS_API_PATH_V1}/migrations/${id}`,
   });
 }
 
+/**
+ * @deprecated
+ */
 export function cloneApp(
   accountId: number,
   appId: number
 ): HubSpotPromise<CloneAppResponse> {
   return http.post<CloneAppResponse>(accountId, {
-    url: `${MIGRATIONS_API_PATH}/exports`,
+    url: `${MIGRATIONS_API_PATH_V1}/exports`,
     data: {
       componentId: appId,
       componentType: 'PUBLIC_APP_ID',
@@ -371,21 +383,27 @@ export function cloneApp(
   });
 }
 
+/**
+ * @deprecated
+ */
 export function checkCloneStatus(
   accountId: number,
   exportId: number
 ): HubSpotPromise<CloneAppResponse> {
   return http.get<CloneAppResponse>(accountId, {
-    url: `${MIGRATIONS_API_PATH}/exports/${exportId}/status`,
+    url: `${MIGRATIONS_API_PATH_V1}/exports/${exportId}/status`,
   });
 }
 
+/**
+ * @deprecated
+ */
 export function downloadClonedProject(
   accountId: number,
   exportId: number
 ): HubSpotPromise<Buffer> {
   return http.get<Buffer>(accountId, {
-    url: `${MIGRATIONS_API_PATH}/exports/${exportId}/download-as-clone`,
+    url: `${MIGRATIONS_API_PATH_V1}/exports/${exportId}/download-as-clone`,
     responseType: 'arraybuffer',
   });
 }

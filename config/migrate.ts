@@ -9,6 +9,8 @@ import {
   HTTP_USE_LOCALHOST,
   ALLOW_USAGE_TRACKING,
   DEFAULT_ACCOUNT,
+  AUTO_OPEN_BROWSER,
+  ALLOW_AUTO_UPDATES,
 } from '../constants/config';
 import {
   getGlobalConfigFilePath,
@@ -53,6 +55,8 @@ export function mergeConfigProperties(
     toConfig.env = fromConfig.env;
     toConfig.httpUseLocalhost = fromConfig.httpUseLocalhost;
     toConfig.allowUsageTracking = fromConfig.allowUsageTracking;
+    toConfig.autoOpenBrowser = fromConfig.autoOpenBrowser;
+    toConfig.allowAutoUpdates = fromConfig.allowAutoUpdates;
     toConfig.defaultAccount = fromConfig.defaultAccount;
   } else {
     toConfig.defaultCmsPublishMode ||= fromConfig.defaultCmsPublishMode;
@@ -66,6 +70,14 @@ export function mergeConfigProperties(
       toConfig.allowUsageTracking === undefined
         ? fromConfig.allowUsageTracking
         : toConfig.allowUsageTracking;
+    toConfig.autoOpenBrowser =
+      toConfig.autoOpenBrowser === undefined
+        ? fromConfig.autoOpenBrowser
+        : toConfig.autoOpenBrowser;
+    toConfig.allowAutoUpdates =
+      toConfig.allowAutoUpdates === undefined
+        ? fromConfig.allowAutoUpdates
+        : toConfig.allowAutoUpdates;
     toConfig.defaultAccount ||= fromConfig.defaultAccount;
 
     const propertiesToCheck = [
@@ -74,6 +86,8 @@ export function mergeConfigProperties(
       ENV,
       HTTP_USE_LOCALHOST,
       ALLOW_USAGE_TRACKING,
+      AUTO_OPEN_BROWSER,
+      ALLOW_AUTO_UPDATES,
       DEFAULT_ACCOUNT,
     ] as const;
 
@@ -86,6 +100,13 @@ export function mergeConfigProperties(
         });
       }
     });
+  }
+
+  // Merge flags
+  if (toConfig.flags || fromConfig.flags) {
+    toConfig.flags = Array.from(
+      new Set([...(toConfig.flags || []), ...(fromConfig.flags || [])])
+    );
   }
 
   return { configWithMergedProperties: toConfig, conflicts };

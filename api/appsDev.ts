@@ -8,6 +8,7 @@ import {
 import { HubSpotPromise } from '../types/Http';
 
 const APPS_DEV_API_PATH = 'apps-dev/external/public/v3';
+const APPS_HUBLETS_API_PATH = 'apps-hublets/external/static-token/v3';
 
 export function fetchPublicAppsForPortal(
   accountId: number
@@ -41,5 +42,32 @@ export function fetchPublicAppMetadata(
 ): HubSpotPromise<PublicApp> {
   return http.get<PublicApp>(accountId, {
     url: `${APPS_DEV_API_PATH}/${appId}/full`,
+  });
+}
+
+export function installStaticAuthAppOnTestAccount(
+  appId: number,
+  accountId: number,
+  scopeGroupIds: number[]
+) {
+  return http.post<void>(accountId, {
+    url: APPS_HUBLETS_API_PATH,
+    data: {
+      appId,
+      targetInstallPortalId: accountId,
+      scopeGroupIds,
+    },
+  });
+}
+
+export function fetchAppMetadataByUid(
+  appUid: string,
+  accountId: number
+): HubSpotPromise<PublicApp> {
+  return http.get<PublicApp>(accountId, {
+    url: `${APPS_DEV_API_PATH}/full/portal/sourceId`,
+    params: {
+      sourceId: appUid,
+    },
   });
 }

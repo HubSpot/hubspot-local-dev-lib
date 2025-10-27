@@ -71,6 +71,17 @@ export function isHubSpotHttpError(error?: unknown): error is HubSpotHttpError {
   return !!error && error instanceof HubSpotHttpError;
 }
 
+export function isGithubRateLimitError(err: unknown): boolean {
+  if (!isHubSpotHttpError(err)) {
+    return false;
+  }
+  return (
+    !!err.headers &&
+    err.headers['x-ratelimit-remaining'] === '0' &&
+    'x-github-request-id' in err.headers
+  );
+}
+
 export function isSystemError(err: unknown): err is BaseError {
   return (
     err instanceof Error &&

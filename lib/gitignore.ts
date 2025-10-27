@@ -23,7 +23,7 @@ export function checkAndAddConfigToGitignore(configPath: string): void {
       gitignoreFiles && gitignoreFiles.length ? gitignoreFiles[0] : null;
 
     if (!gitignoreFilePath) {
-      gitignoreFilePath = path.resolve(configPath, GITIGNORE_FILE);
+      gitignoreFilePath = path.join(path.dirname(configPath), GITIGNORE_FILE);
       writeFileSync(gitignoreFilePath, '');
     }
 

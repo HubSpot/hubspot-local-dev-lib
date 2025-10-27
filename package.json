@@ -1,6 +1,6 @@
 {
   "name": "@hubspot/local-dev-lib",
-  "version": "3.4.1",
+  "version": "3.21.0",
   "description": "Provides library functionality for HubSpot local development tooling, including the HubSpot CLI",
   "repository": {
     "type": "git",
@@ -20,6 +20,7 @@
   },
   "license": "Apache-2.0",
   "devDependencies": {
+    "@hubspot/npm-scripts": "0.0.4",
     "@inquirer/prompts": "^7.0.1",
     "@types/content-disposition": "^0.5.5",
     "@types/cors": "^2.8.15",
@@ -51,14 +52,18 @@
     "./http/*": "./http/*.js",
     "./config/getAccountIdentifier": "./config/getAccountIdentifier.js",
     "./config/migrate": "./config/migrate.js",
+    "./config/state": "./config/state.js",
     "./config": "./config/index.js",
     "./constants/*": "./constants/*.js",
     "./models/*": "./models/*.js",
-    "./types/*": "./types/*.d.ts"
+    "./types/*": {
+      "types": "./types/*.d.ts",
+      "default": "./types/*.js"
+    }
   },
   "dependencies": {
     "address": "2.0.2",
-    "axios": "1.8.3",
+    "axios": "1.12.0",
     "chalk": "2.4.2",
     "chokidar": "3.6.0",
     "content-disposition": "0.5.4",
@@ -67,6 +72,7 @@
     "express": "4.21.2",
     "extract-zip": "2.0.1",
     "findup-sync": "5.0.0",
+    "form-data": "^4.0.4",
     "fs-extra": "11.2.0",
     "ignore": "5.3.1",
     "js-yaml": "4.1.0",

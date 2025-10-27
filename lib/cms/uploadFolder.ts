@@ -50,6 +50,25 @@ function getFileType(filePath: string): FileType {
   }
 }
 
+function isMetaJsonFile(filePath: string): boolean {
+  return path.basename(filePath).toLowerCase() === 'meta.json';
+}
+
+function resolveUploadPath(
+  file: string,
+  fieldsJsPaths: Array<Partial<FieldsJs>>,
+  tmpDirRegex: RegExp,
+  regex: RegExp,
+  dest: string
+) {
+  const fieldsJsFileInfo = fieldsJsPaths.find(f => f.outputPath === file);
+  const relativePath = file.replace(fieldsJsFileInfo ? tmpDirRegex : regex, '');
+  const destPath = convertToUnixPath(path.join(dest, relativePath));
+  const originalFilePath = fieldsJsFileInfo ? fieldsJsFileInfo.filePath : file;
+
+  return { fieldsJsFileInfo, relativePath, destPath, originalFilePath };
+}
+
 export async function getFilesByType(
   filePaths: Array<string>,
   projectDir: string,
@@ -107,6 +126,7 @@ export async function getFilesByType(
       filePathsByType[fileType].push(filePath);
     }
   }
+
   return [filePathsByType, fieldsJsObjects];
 }
 
@@ -165,6 +185,17 @@ const defaultUploadFinalErrorCallback = (
     }
   );
 };
+
+async function uploadMetaJsonFiles(
+  moduleFiles: string[],
+  uploadFile: (file: string) => () => Promise<void>
+): Promise<void> {
+  const moduleMetaJsonFiles = moduleFiles.filter(isMetaJsonFile);
+
+  if (moduleMetaJsonFiles.length > 0) {
+    await queue.addAll(moduleMetaJsonFiles.map(uploadFile));
+  }
+}
 export async function uploadFolder(
   accountId: number,
   src: string,
@@ -203,7 +234,7 @@ export async function uploadFolder(
   );
   const failures: Array<{ file: string; destPath: string }> = [];
   let fieldsJsPaths: Array<Partial<FieldsJs>> = [];
-  let tmpDirRegex: RegExp;
+  const tmpDirRegex = new RegExp(`^${escapeRegExp(tmpDir || '')}`);
 
   const [filesByType, fieldsJsObjects] = await getFilesByType(
     filePaths,
@@ -211,26 +242,21 @@ export async function uploadFolder(
     tmpDir,
     commandOptions
   );
-  const fileList = Object.values(filesByType);
+
   if (fieldsJsObjects.length) {
     fieldsJsPaths = fieldsJsObjects.map(fieldsJs => {
       return { outputPath: fieldsJs.outputPath, filePath: fieldsJs.filePath };
     });
-    tmpDirRegex = new RegExp(`^${escapeRegExp(tmpDir || '')}`);
   }
 
   function uploadFile(file: string): () => Promise<void> {
-    const fieldsJsFileInfo = fieldsJsPaths.find(f => f.outputPath === file);
-    const originalFilePath = fieldsJsFileInfo
-      ? fieldsJsFileInfo.filePath
-      : file;
-
-    // files in fieldsJsPaths always belong to the tmp directory.
-    const relativePath = file.replace(
-      fieldsJsFileInfo ? tmpDirRegex : regex,
-      ''
+    const { originalFilePath, destPath } = resolveUploadPath(
+      file,
+      fieldsJsPaths,
+      tmpDirRegex,
+      regex,
+      dest
     );
-    const destPath = convertToUnixPath(path.join(dest, relativePath));
     return async () => {
       _onAttemptCallback(originalFilePath, destPath);
       try {
@@ -249,9 +275,24 @@ export async function uploadFolder(
     };
   }
 
-  for (let i = 0; i < fileList.length; i++) {
-    const filesToUpload = fileList[i];
-    await queue.addAll(filesToUpload.map(uploadFile));
+  // Upload all meta.json files first
+  await uploadMetaJsonFiles(filesByType[FILE_TYPES.module] || [], uploadFile);
+
+  // Collect all remaining files for upload
+  const deferredFiles: string[] = [];
+  Object.entries(filesByType).forEach(([fileType, files]) => {
+    if (fileType === FILE_TYPES.module) {
+      // Add non-meta.json module files
+      deferredFiles.push(...files.filter(f => !isMetaJsonFile(f)));
+    } else {
+      // Add all non-module files
+      deferredFiles.push(...files);
+    }
+  });
+
+  // Upload all remaining files concurrently
+  if (deferredFiles.length > 0) {
+    await queue.addAll(deferredFiles.map(uploadFile));
   }
 
   const results = await queue

@@ -230,6 +230,72 @@ describe('config/migrate', () => {
       });
       expect(result.conflicts).toHaveLength(0);
     });
+
+    it('should merge flags from both configs', () => {
+      const toConfig: HubSpotConfig = {
+        accounts: [],
+        flags: ['flag1', 'flag2'],
+      };
+
+      const fromConfig: HubSpotConfig = {
+        accounts: [],
+        flags: ['flag2', 'flag3'],
+      };
+
+      const result = mergeConfigProperties(toConfig, fromConfig);
+
+      expect(result.configWithMergedProperties.flags).toEqual([
+        'flag1',
+        'flag2',
+        'flag3',
+      ]);
+      expect(result.conflicts).toHaveLength(0);
+    });
+
+    it('should merge autoOpenBrowser and allowAutoUpdates fields', () => {
+      const toConfig: HubSpotConfig = {
+        accounts: [],
+      };
+
+      const fromConfig: HubSpotConfig = {
+        accounts: [],
+        autoOpenBrowser: true,
+        allowAutoUpdates: false,
+      };
+
+      const result = mergeConfigProperties(toConfig, fromConfig);
+
+      expect(result.configWithMergedProperties.autoOpenBrowser).toBe(true);
+      expect(result.configWithMergedProperties.allowAutoUpdates).toBe(false);
+      expect(result.conflicts).toHaveLength(0);
+    });
+
+    it('should detect conflicts for autoOpenBrowser and allowAutoUpdates when values differ', () => {
+      const toConfig: HubSpotConfig = {
+        accounts: [],
+        autoOpenBrowser: false,
+        allowAutoUpdates: true,
+      };
+
+      const fromConfig: HubSpotConfig = {
+        accounts: [],
+        autoOpenBrowser: true,
+        allowAutoUpdates: false,
+      };
+
+      const result = mergeConfigProperties(toConfig, fromConfig, false);
+
+      expect(result.conflicts).toContainEqual({
+        property: 'autoOpenBrowser',
+        oldValue: true,
+        newValue: false,
+      });
+      expect(result.conflicts).toContainEqual({
+        property: 'allowAutoUpdates',
+        oldValue: false,
+        newValue: true,
+      });
+    });
   });
 
   describe('mergeConfigAccounts', () => {

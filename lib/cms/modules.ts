@@ -14,6 +14,7 @@ import {
   ValidationResult,
   ModuleDefinition,
 } from '../../types/Modules';
+import { GithubRepoFile } from '../../types/Github';
 import { i18n } from '../../utils/lang';
 
 const i18nKey = 'lib.cms.modules';
@@ -271,10 +272,15 @@ export async function createModule(
   }
 }
 
+export async function retrieveDefaultModule(): Promise<GithubRepoFile[]>;
 export async function retrieveDefaultModule(
-  name: string | undefined,
+  name: string,
   dest: string
-) {
+): Promise<void>;
+export async function retrieveDefaultModule(
+  name?: string,
+  dest?: string
+): Promise<GithubRepoFile[] | void> {
   if (!name) {
     const defaultReactModules = await listGithubRepoContents(
       'HubSpot/cms-react',
@@ -284,9 +290,11 @@ export async function retrieveDefaultModule(
     return defaultReactModules;
   }
 
-  await cloneGithubRepo('HubSpot/cms-react', dest, {
-    sourceDir: `default-react-modules/src/components/modules/${name}`,
-  });
+  if (dest) {
+    await cloneGithubRepo('HubSpot/cms-react', dest, {
+      sourceDir: `default-react-modules/src/components/modules/${name}`,
+    });
+  }
 }
 
 const MODULE_HTML_EXTENSION_REGEX = new RegExp(

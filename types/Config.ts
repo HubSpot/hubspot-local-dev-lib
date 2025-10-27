@@ -10,12 +10,16 @@ import { ValueOf } from './Utils';
 export interface HubSpotConfig {
   accounts: Array<HubSpotConfigAccount>;
   allowUsageTracking?: boolean;
+  allowAutoUpdates?: boolean;
   defaultAccount?: number;
+  defaultMode?: CmsPublishMode; // Deprecated - left in to handle existing configs with this field
   defaultCmsPublishMode?: CmsPublishMode;
   httpTimeout?: number;
   env?: Environment;
   httpUseLocalhost?: boolean;
+  autoOpenBrowser?: boolean;
   useCustomObjectHubfile?: boolean;
+  flags?: Array<string>;
 }
 
 export type DeprecatedHubSpotConfigFields = {
@@ -33,3 +37,7 @@ export type GitInclusionResult = {
 };
 
 export type ConfigFlag = ValueOf<typeof CONFIG_FLAGS>;
+
+export type CLIState = {
+  mcpTotalToolCalls: number;
+};

@@ -339,6 +339,7 @@ describe('api/projects', () => {
         data: {
           projectName,
           buildId,
+          skipRemovalWarning: false,
         },
       });
     });
@@ -351,6 +352,7 @@ describe('api/projects', () => {
         data: {
           projectName,
           targetBuildId: buildId,
+          ignoreWarnings: false,
         },
       });
     });
@@ -630,6 +632,17 @@ describe('api/projects', () => {
       expect(http.get).toHaveBeenCalledWith(accountId, {
         url: `dfs/migrations/v1/exports/${exportId}/download-as-clone`,
         responseType: 'arraybuffer',
+      });
+    });
+  });
+
+  describe('checkMigrationStatus', () => {
+    it('should call v1 api for stable platform version', async () => {
+      const migrationId = 123456;
+      await checkMigrationStatus(accountId, migrationId);
+      expect(http.get).toHaveBeenCalledTimes(1);
+      expect(http.get).toHaveBeenCalledWith(accountId, {
+        url: `dfs/migrations/v1/migrations/${migrationId}`,
       });
     });
   });

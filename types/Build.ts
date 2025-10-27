@@ -37,6 +37,7 @@ export type Build = {
   subbuildStatuses: Array<SubbuildStatus>;
   uploadMessage: string;
   autoDeployId: number;
+  platformVersion: string;
 };
 
 export type FetchProjectBuildsResponse = {

@@ -31,6 +31,7 @@
       }
     },
     "github": {
+      "rateLimitError": "Github rate limit hit. Set the GITHUB_TOKEN env variable with your github PATH. This will increase the github api's rate limit.",
       "fetchFileFromRepository": {
         "fetching": "Fetching {{ path }}...",
         "errors": {
@@ -76,6 +77,15 @@
         "accountNotFound": "Account with id {{ accountId }} does not exist.",
         "invalidPersonalAccessKey": "Error while retrieving new access token: {{ errorMessage }}",
         "invalidAuthType": "Error fetching access token: account {{ accountId }} uses an auth type other than personalaccesskey"
+      }
+    },
+    "crm": {
+      "importData": {
+        "errors": {
+          "fileNotFound": "The file {{ fileName }} does not exist",
+          "notJson": "You must provide a JSON file for the import data request schema.",
+          "noFiles": "You must provide at least one data file for the import data request schema."
+        }
       }
     },
     "cms": {
@@ -301,6 +311,50 @@
       "getDefaultAccountOverrideAccountId": {
         "errorHeader": "Error in {{ hsAccountFile }}",
         "readFileError": "Error reading account override file."
+      }
+    },
+    "updateAutoOpenBrowser": {
+      "invalidInput": "Unable to update autoOpenBrowser. The value {{ isEnabled }} is invalid. The value must be a boolean."
+    },
+    "configFile": {
+      "errorReading": "Config file could not be read: {{ configPath }}",
+      "writeSuccess": "Successfully wrote updated config data to {{ configPath }}",
+      "errorLoading": "A configuration file could not be found at {{ configPath }}.",
+      "errors": {
+        "parsing": "Config file could not be parsed"
+      }
+    },
+    "configUtils": {
+      "unknownType": "Unknown auth type {{ type }}"
+    },
+    "state": {
+      "ensureCLIDirectory": {
+        "errors": {
+          "cannotCreateDirectory": "Cannot create CLI state directory: {{ error }}"
+        }
+      },
+      "getCurrentState": {
+        "errors": {
+          "errorReading": "Error reading CLI state, using defaults: {{ error }}"
+        }
+      },
+      "setStateValue": {
+        "errors": {
+          "failedToWrite": "Failed to write CLI state: {{ error }}"
+        }
+      }
+    },
+    "environment": {
+      "loadConfig": {
+        "missingAccountId": "Unable to load config from environment variables: Missing accountId",
+        "missingEnv": "Unable to load config from environment variables: Missing env",
+        "unknownAuthType": "Unable to load config from environment variables: Unknown auth type"
+      }
+    },
+    "migrate": {
+      "errors": {
+        "writeConfig": "Unable to write global configuration file at {{ configPath }}.",
+        "noDeprecatedConfig": "No deprecated configuration file found. Skipping migration to global config."
       }
     }
   },

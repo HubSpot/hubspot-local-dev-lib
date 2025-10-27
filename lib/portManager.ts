@@ -54,6 +54,13 @@ export async function requestPorts(
   return data.ports;
 }
 
+export async function getServerPortByInstanceId(
+  serverInstanceId: string
+): Promise<number> {
+  const { data } = await axios.get(`${BASE_URL}/servers/${serverInstanceId}`);
+  return data.port;
+}
+
 export async function deleteServerInstance(
   serverInstanceId: string
 ): Promise<void> {

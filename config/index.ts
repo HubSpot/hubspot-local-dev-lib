@@ -418,6 +418,30 @@ export function updateAllowUsageTracking(isAllowed: boolean): void {
   writeConfigFile(config, getConfigFilePath());
 }
 
+export function updateAllowAutoUpdates(enabled: boolean): void {
+  const config = getConfig();
+
+  config.allowAutoUpdates = enabled;
+
+  writeConfigFile(config, getConfigFilePath());
+}
+
+export function updateAutoOpenBrowser(isEnabled: boolean): void {
+  if (typeof isEnabled !== 'boolean') {
+    throw new Error(
+      i18n('config.updateAutoOpenBrowser.invalidInput', {
+        isEnabled: `${isEnabled}`,
+      })
+    );
+  }
+
+  const config = getConfig();
+
+  config.autoOpenBrowser = isEnabled;
+
+  writeConfigFile(config, getConfigFilePath());
+}
+
 export function updateDefaultCmsPublishMode(
   cmsPublishMode: CmsPublishMode
 ): void {
@@ -448,4 +472,28 @@ export function isConfigFlagEnabled(
   }
 
   return Boolean(config[flag]);
+}
+
+export function hasLocalStateFlag(flag: string): boolean {
+  const config = getConfig();
+
+  return config.flags?.includes(flag) || false;
+}
+
+export function addLocalStateFlag(flag: string): void {
+  const config = getConfig();
+
+  if (!hasLocalStateFlag(flag)) {
+    config.flags = [...(config.flags || []), flag];
+  }
+
+  writeConfigFile(config, getConfigFilePath());
+}
+
+export function removeLocalStateFlag(flag: string): void {
+  const config = getConfig();
+
+  config.flags = config.flags?.filter(f => f !== flag) || [];
+
+  writeConfigFile(config, getConfigFilePath());
 }

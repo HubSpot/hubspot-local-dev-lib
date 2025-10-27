@@ -1,5 +1,5 @@
 import fs from 'fs-extra';
-import { join } from 'path';
+import path, { join } from 'path';
 import { tmpdir } from 'os';
 import extract from 'extract-zip';
 
@@ -7,6 +7,7 @@ import { logger } from './logger';
 import { i18n } from '../utils/lang';
 import { ZipData, CopySourceToDestOptions } from '../types/Archive';
 import { FileSystemError } from '../models/FileSystemError';
+import { walk } from './fs';
 
 const i18nKey = 'lib.archive';
 
@@ -67,6 +68,7 @@ async function copySourceToDest(
     sourceDir,
     includesRootDir = true,
     hideLogs = false,
+    handleCollision,
   }: CopySourceToDestOptions = {}
 ): Promise<boolean> {
   try {
@@ -88,13 +90,70 @@ async function copySourceToDest(
       srcDirPath.push(rootDir);
     }
 
+    const sourceDirs = [];
+
     if (sourceDir) {
-      srcDirPath.push(sourceDir);
+      sourceDirs.push(
+        ...(Array.isArray(sourceDir) ? new Set(sourceDir) : [sourceDir])
+      );
     }
 
-    const projectSrcDir = join(...srcDirPath);
+    if (sourceDirs.length === 0) {
+      const projectSrcDir = join(...srcDirPath);
+      await fs.copy(projectSrcDir, dest);
+    } else {
+      for (let i = 0; i < sourceDirs.length; i++) {
+        const projectSrcDir = join(...srcDirPath, sourceDirs[i]);
 
-    await fs.copy(projectSrcDir, dest);
+        let collisions: string[] = [];
+        let filesWithoutCollisions: string[] = [];
+
+        if (
+          fs.existsSync(dest) &&
+          handleCollision &&
+          typeof handleCollision === 'function'
+        ) {
+          const existingFiles = (await walk(dest, ['node_modules'])).map(file =>
+            path.normalize(path.relative(dest, file))
+          );
+          const newFiles = (await walk(projectSrcDir, ['node_modules'])).map(
+            file => path.relative(projectSrcDir, file)
+          );
+
+          // Find files that exist in the same positions in both directories
+          collisions = existingFiles.filter(currentFile =>
+            newFiles.includes(currentFile)
+          );
+
+          filesWithoutCollisions = newFiles.filter(
+            currentFile => !collisions.includes(currentFile)
+          );
+        }
+
+        if (
+          collisions.length &&
+          handleCollision &&
+          typeof handleCollision === 'function'
+        ) {
+          await handleCollision({
+            dest,
+            src: projectSrcDir,
+            collisions,
+          });
+          await Promise.all(
+            filesWithoutCollisions.map(currentFile =>
+              fs.copy(
+                path.join(projectSrcDir, currentFile),
+                path.join(dest, currentFile)
+              )
+            )
+          );
+        } else {
+          await fs.copy(projectSrcDir, dest);
+        }
+      }
+    }
+
     logger.debug(i18n(`${i18nKey}.copySourceToDest.success`));
     return true;
   } catch (err) {
@@ -122,7 +181,12 @@ export async function extractZipArchive(
   zip: Buffer,
   name: string,
   dest: string,
-  { sourceDir, includesRootDir, hideLogs }: CopySourceToDestOptions = {}
+  {
+    sourceDir,
+    includesRootDir,
+    hideLogs,
+    handleCollision,
+  }: CopySourceToDestOptions = {}
 ): Promise<boolean> {
   let success = false;
 
@@ -134,6 +198,7 @@ export async function extractZipArchive(
         sourceDir,
         includesRootDir,
         hideLogs,
+        handleCollision,
       });
     }
 

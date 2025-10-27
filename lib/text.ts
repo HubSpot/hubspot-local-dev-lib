@@ -12,7 +12,11 @@ export function commaSeparatedValues(
   return arr.join(', ');
 }
 
-export function toKebabCase(str: string): string {
+export function toKebabCase(str: string | null | undefined): string {
+  if (!str) {
+    return '';
+  }
+
   return (
     str
       .replace(/[.,/#!$%^&*;:{}=\-_'"`~()]/g, '')
