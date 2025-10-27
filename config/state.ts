@@ -26,25 +26,18 @@ function ensureCLIDirectory(): void {
   }
 }
 
-function getCurrentState(throwOnError = true): CLIState {
+function getCurrentState(): CLIState {
   try {
     if (fs.existsSync(STATE_FILE_PATH)) {
       const data = fs.readFileSync(STATE_FILE_PATH, 'utf-8');
       return JSON.parse(data) as CLIState;
     }
   } catch (error) {
-    const errorMessage = i18n(
-      `${i18nKey}.getCurrentState.errors.errorReading`,
-      {
+    throw new Error(
+      i18n(`${i18nKey}.getCurrentState.errors.errorReading`, {
         error: error instanceof Error ? error.message : String(error),
-      }
+      })
     );
-
-    if (throwOnError) {
-      throw new Error(errorMessage);
-    } else {
-      logger.debug(errorMessage);
-    }
   }
 
   return DEFAULT_STATE;
@@ -63,7 +56,13 @@ export function setStateValue<K extends keyof CLIState>(
 ): void {
   ensureCLIDirectory();
 
-  const currentState = getCurrentState(false);
+  let currentState: CLIState = DEFAULT_STATE;
+
+  try {
+    currentState = getCurrentState();
+  } catch (error) {
+    logger.debug(error);
+  }
 
   const newState = { ...currentState, [key]: value };
   try {
