@@ -3,11 +3,11 @@ import * as path from 'path';
 import { i18n } from '../utils/lang';
 import { STATE_FILE_PATH } from '../constants/config';
 import { logger } from '../lib/logger';
-import { CLIState } from '../types/Config';
+import { HubSpotState } from '../types/Config';
 
 const i18nKey = 'config.state';
 
-const DEFAULT_STATE: CLIState = {
+const DEFAULT_STATE: HubSpotState = {
   mcpTotalToolCalls: 0,
 };
 
@@ -26,18 +26,21 @@ function ensureCLIDirectory(): void {
   }
 }
 
-function sanitizeAndMerge(parsed: unknown): CLIState {
+function sanitizeAndMerge(parsed: unknown): HubSpotState {
   if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
     return structuredClone(DEFAULT_STATE);
   }
 
-  const state = parsed as Record<string, unknown>;
-  const result: CLIState = structuredClone(DEFAULT_STATE);
+  const state = parsed as HubSpotState;
+  const result: HubSpotState = structuredClone(DEFAULT_STATE);
 
   for (const key in DEFAULT_STATE) {
-    const typedKey = key as keyof CLIState;
-    if (key in state && typeof state[key] === typeof DEFAULT_STATE[typedKey]) {
-      (result as any)[typedKey] = state[key];
+    const typedKey = key as keyof HubSpotState;
+    if (
+      key in state &&
+      typeof state[typedKey] === typeof DEFAULT_STATE[typedKey]
+    ) {
+      result[typedKey] = state[typedKey];
     }
     // keys not in parsed file remain as DEFAULT values
   }
@@ -45,7 +48,7 @@ function sanitizeAndMerge(parsed: unknown): CLIState {
   return result;
 }
 
-function getCurrentState(): CLIState {
+function getCurrentState(): HubSpotState {
   try {
     if (!fs.existsSync(STATE_FILE_PATH)) {
       return structuredClone(DEFAULT_STATE);
@@ -70,20 +73,21 @@ function getCurrentState(): CLIState {
   }
 }
 
-export function getStateValue<K extends keyof CLIState>(key: K): CLIState[K] {
+export function getStateValue<K extends keyof HubSpotState>(
+  key: K
+): HubSpotState[K] {
   ensureCLIDirectory();
 
   const state = getCurrentState();
   return state[key];
 }
 
-export function setStateValue<K extends keyof CLIState>(
+export function setStateValue<K extends keyof HubSpotState>(
   key: K,
-  value: CLIState[K]
+  value: HubSpotState[K]
 ): void {
   ensureCLIDirectory();
 
-  // getCurrentState never throws - it returns DEFAULT_STATE on any error
   const currentState = getCurrentState();
   const newState = { ...currentState, [key]: value };
   try {
