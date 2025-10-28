@@ -151,7 +151,7 @@ describe('config/state', () => {
     it('creates directory when it does not exist', () => {
       const stateDir = path.dirname(STATE_FILE_PATH);
 
-      existsSyncSpy.mockImplementation((filePath: fs.PathLike) => {
+      existsSyncSpy.mockImplementation(() => {
         // Directory doesn't exist, but state file also doesn't exist
         return false;
       });

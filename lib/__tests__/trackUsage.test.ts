@@ -1,30 +1,28 @@
 import axios from 'axios';
 import { trackUsage } from '../trackUsage';
 import {
-  getAccountConfig as __getAccountConfig,
-  getAndLoadConfigIfNeeded as __getAndLoadConfigIfNeeded,
+  getConfigAccountById as __getConfigAccountById,
+  getConfig as __getConfig,
 } from '../../config';
-import { AuthType } from '../../types/Accounts';
+import { HubSpotConfigAccount } from '../../types/Accounts';
 import { ENVIRONMENTS } from '../../constants/environments';
 
 jest.mock('axios');
 jest.mock('../../config');
 
 const mockedAxios = jest.mocked(axios);
-const getAccountConfig = __getAccountConfig as jest.MockedFunction<
-  typeof __getAccountConfig
+const getConfigAccountById = __getConfigAccountById as jest.MockedFunction<
+  typeof __getConfigAccountById
 >;
-const getAndLoadConfigIfNeeded =
-  __getAndLoadConfigIfNeeded as jest.MockedFunction<
-    typeof __getAndLoadConfigIfNeeded
-  >;
+const getConfig = __getConfig as jest.MockedFunction<typeof __getConfig>;
 
 mockedAxios.mockResolvedValue({});
-getAndLoadConfigIfNeeded.mockReturnValue({});
+getConfig.mockReturnValue({ accounts: [] });
 
-const account = {
+const account: HubSpotConfigAccount = {
+  name: 'test-account',
   accountId: 12345,
-  authType: 'personalaccesskey' as AuthType,
+  authType: 'personalaccesskey',
   personalAccessKey: 'let-me-in-3',
   auth: {
     tokenInfo: {
@@ -43,8 +41,8 @@ const usageTrackingMeta = {
 describe('lib/trackUsage', () => {
   describe('trackUsage()', () => {
     beforeEach(() => {
-      getAccountConfig.mockReset();
-      getAccountConfig.mockReturnValue(account);
+      getConfigAccountById.mockReset();
+      getConfigAccountById.mockReturnValue(account);
     });
 
     it('tracks correctly for unauthenticated accounts', async () => {
@@ -56,7 +54,7 @@ describe('lib/trackUsage', () => {
       expect(mockedAxios).toHaveBeenCalled();
       expect(requestArgs!.data.eventName).toEqual('test-action');
       expect(requestArgs!.url.includes('authenticated')).toBeFalsy();
-      expect(getAccountConfig).not.toHaveBeenCalled();
+      expect(getConfigAccountById).not.toHaveBeenCalled();
     });
 
     it('tracks correctly for authenticated accounts', async () => {
@@ -68,7 +66,7 @@ describe('lib/trackUsage', () => {
       expect(mockedAxios).toHaveBeenCalled();
       expect(requestArgs!.data.eventName).toEqual('test-action');
       expect(requestArgs!.url.includes('authenticated')).toBeTruthy();
-      expect(getAccountConfig).toHaveBeenCalled();
+      expect(getConfigAccountById).toHaveBeenCalled();
     });
   });
 });

@@ -50,7 +50,7 @@
     "./errors/*": "./errors/*.js",
     "./http": "./http/index.js",
     "./http/*": "./http/*.js",
-    "./config/getAccountIdentifier": "./config/getAccountIdentifier.js",
+    "./config/defaultAccountOverride": "./config/defaultAccountOverride.js",
     "./config/migrate": "./config/migrate.js",
     "./config/state": "./config/state.js",
     "./config": "./config/index.js",
