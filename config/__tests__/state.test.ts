@@ -155,6 +155,35 @@ describe('config/state', () => {
 
       expect(result).toBe(0);
     });
+
+    it('returns default state when JSON parses to an array', () => {
+      existsSyncSpy.mockReturnValue(true);
+      readFileSyncSpy.mockReturnValue(JSON.stringify([1, 2, 3]));
+
+      const result = getStateValue('mcpTotalToolCalls');
+
+      expect(result).toBe(0);
+    });
+
+    it('returns default state when JSON parses to null', () => {
+      existsSyncSpy.mockReturnValue(true);
+      readFileSyncSpy.mockReturnValue('null');
+
+      const result = getStateValue('mcpTotalToolCalls');
+
+      expect(result).toBe(0);
+    });
+
+    it('returns default value when reading throws non-Error', () => {
+      existsSyncSpy.mockReturnValue(true);
+      readFileSyncSpy.mockImplementation(() => {
+        throw 'string error';
+      });
+
+      const result = getStateValue('mcpTotalToolCalls');
+
+      expect(result).toBe(0);
+    });
   });
 
   describe('setStateValue()', () => {
@@ -242,13 +271,24 @@ describe('config/state', () => {
         'utf-8'
       );
     });
+
+    it('throws error when write fails with non-Error', () => {
+      existsSyncSpy.mockReturnValue(false);
+      writeFileSyncSpy.mockImplementation(() => {
+        throw 'string error';
+      });
+
+      expect(() => setStateValue('mcpTotalToolCalls', 15)).toThrow(
+        'config.state.setStateValue.errors.failedToWrite'
+      );
+    });
   });
 
   describe('ensureCLIDirectory()', () => {
     it('creates directory when it does not exist', () => {
       const stateDir = path.dirname(STATE_FILE_PATH);
 
-      existsSyncSpy.mockImplementation((filePath: fs.PathLike) => {
+      existsSyncSpy.mockImplementation(() => {
         // Directory doesn't exist, but state file also doesn't exist
         return false;
       });
@@ -281,6 +321,17 @@ describe('config/state', () => {
       existsSyncSpy.mockReturnValue(false);
       mkdirSyncSpy.mockImplementation(() => {
         throw new Error('Permission denied');
+      });
+
+      expect(() => getStateValue('mcpTotalToolCalls')).toThrow(
+        'config.state.ensureCLIDirectory.errors.cannotCreateDirectory'
+      );
+    });
+
+    it('throws error when directory creation fails with non-Error', () => {
+      existsSyncSpy.mockReturnValue(false);
+      mkdirSyncSpy.mockImplementation(() => {
+        throw 'Permission denied string';
       });
 
       expect(() => getStateValue('mcpTotalToolCalls')).toThrow(

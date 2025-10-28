@@ -26,71 +26,55 @@ function ensureCLIDirectory(): void {
   }
 }
 
-function validateStateShape(obj: unknown): obj is CLIState {
-  if (!obj || typeof obj !== 'object' || Array.isArray(obj)) {
-    return false;
+function sanitizeAndMerge(parsed: unknown): CLIState {
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    return structuredClone(DEFAULT_STATE);
   }
 
-  const state = obj as Record<string, unknown>;
+  const state = parsed as Record<string, unknown>;
+  const result: CLIState = structuredClone(DEFAULT_STATE);
 
   for (const key in DEFAULT_STATE) {
     const typedKey = key as keyof CLIState;
-    if (key in state && typeof state[key] !== typeof DEFAULT_STATE[typedKey]) {
-      return false;
+    if (key in state && typeof state[key] === typeof DEFAULT_STATE[typedKey]) {
+      (result as any)[typedKey] = state[key];
     }
+    // keys not in parsed file remain as DEFAULT values
   }
 
-  return true;
-}
-
-function mergeWithDefaults(parsed: Partial<CLIState>): CLIState {
-  return {
-    ...DEFAULT_STATE,
-    ...parsed,
-  };
+  return result;
 }
 
 function getCurrentState(): CLIState {
   try {
-    if (fs.existsSync(STATE_FILE_PATH)) {
-      const data = fs.readFileSync(STATE_FILE_PATH, 'utf-8');
-
-      if (!data || !data.trim()) {
-        logger.debug(i18n(`${i18nKey}.getCurrentState.debug.emptyStateFile`));
-        return DEFAULT_STATE;
-      }
-
-      const parsed = JSON.parse(data);
-
-      if (!validateStateShape(parsed)) {
-        throw new Error(
-          i18n(`${i18nKey}.getCurrentState.errors.invalidStructure`)
-        );
-      }
-
-      return mergeWithDefaults(parsed);
+    if (!fs.existsSync(STATE_FILE_PATH)) {
+      return structuredClone(DEFAULT_STATE);
     }
+
+    const data = fs.readFileSync(STATE_FILE_PATH, 'utf-8');
+
+    if (!data?.trim()) {
+      logger.debug(i18n(`${i18nKey}.getCurrentState.debug.emptyStateFile`));
+      return structuredClone(DEFAULT_STATE);
+    }
+
+    const parsed = JSON.parse(data);
+    return sanitizeAndMerge(parsed);
   } catch (error) {
-    throw new Error(
+    logger.debug(
       i18n(`${i18nKey}.getCurrentState.errors.errorReading`, {
         error: error instanceof Error ? error.message : String(error),
       })
     );
+    return structuredClone(DEFAULT_STATE);
   }
-
-  return DEFAULT_STATE;
 }
 
 export function getStateValue<K extends keyof CLIState>(key: K): CLIState[K] {
   ensureCLIDirectory();
 
-  try {
-    const state = getCurrentState();
-    return state[key];
-  } catch (error) {
-    logger.debug(error);
-    return DEFAULT_STATE[key];
-  }
+  const state = getCurrentState();
+  return state[key];
 }
 
 export function setStateValue<K extends keyof CLIState>(
@@ -99,14 +83,8 @@ export function setStateValue<K extends keyof CLIState>(
 ): void {
   ensureCLIDirectory();
 
-  let currentState: CLIState = DEFAULT_STATE;
-
-  try {
-    currentState = getCurrentState();
-  } catch (error) {
-    logger.debug(error);
-  }
-
+  // getCurrentState never throws - it returns DEFAULT_STATE on any error
+  const currentState = getCurrentState();
   const newState = { ...currentState, [key]: value };
   try {
     fs.writeFileSync(
