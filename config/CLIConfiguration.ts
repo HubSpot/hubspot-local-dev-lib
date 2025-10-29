@@ -586,7 +586,11 @@ class _CLIConfiguration {
       logger.debug(
         i18n(`${i18nKey}.removeAccountFromConfig.deleting`, { accountId })
       );
+
       const index = this.getAccountIndex(accountId);
+      if (index === -1) {
+        return removedAccountIsDefault;
+      }
       this.config.accounts?.splice(index, 1);
 
       if (this.getDefaultAccount() === accountConfig.name) {

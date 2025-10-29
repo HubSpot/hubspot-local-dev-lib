@@ -51,7 +51,7 @@ export function getOrderedConfig(
     httpTimeout,
     allowUsageTracking,
     ...rest,
-    accounts: accounts?.map(getOrderedAccount),
+    accounts: accounts?.map(getOrderedAccount) || [],
   };
 }
 
