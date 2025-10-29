@@ -51,6 +51,6 @@ export type GitInclusionResult = {
   gitignoreFiles: Array<string>;
 };
 
-export type CLIState = {
+export type HubSpotState = {
   mcpTotalToolCalls: number;
 };
