@@ -73,7 +73,7 @@ describe('config/configUtils', () => {
     });
     it('returns a config with accounts ordered', () => {
       const orderedConfig = getOrderedConfig(CONFIG);
-      const accountKeys = Object.keys(orderedConfig.accounts[0]);
+      const accountKeys = Object.keys(orderedConfig.accounts![0]);
 
       expect(accountKeys[0]).toBe('name');
       expect(accountKeys[1]).toBe('accountId');
@@ -91,7 +91,7 @@ describe('config/configUtils', () => {
       expect(pakConfig).toBeDefined();
       if (pakConfig) {
         expect(pakConfig.accounts).toBeDefined();
-        expect(pakConfig.accounts[0].authType).toBe('personalaccesskey');
+        expect(pakConfig.accounts![0].authType).toBe('personalaccesskey');
       }
     });
     it('returns an oauth auth account', () => {
@@ -107,7 +107,7 @@ describe('config/configUtils', () => {
       expect(oauthConfig).toBeDefined();
       if (oauthConfig) {
         expect(oauthConfig.accounts).toBeDefined();
-        expect(oauthConfig.accounts[0].authType).toBe('oauth2');
+        expect(oauthConfig.accounts![0].authType).toBe('oauth2');
       }
     });
     it('returns an apikey account', () => {
@@ -120,7 +120,7 @@ describe('config/configUtils', () => {
       expect(apikeyConfig).toBeDefined();
       if (apikeyConfig) {
         expect(apikeyConfig.accounts).toBeDefined();
-        expect(apikeyConfig.accounts[0].authType).toBe('apikey');
+        expect(apikeyConfig.accounts![0].authType).toBe('apikey');
       }
     });
   });

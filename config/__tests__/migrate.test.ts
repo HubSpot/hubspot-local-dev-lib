@@ -491,7 +491,7 @@ describe('migrate', () => {
       );
 
       expect(result.finalConfig.accounts).toHaveLength(1);
-      expect(result.finalConfig.accounts[0]).toEqual({
+      expect(result.finalConfig.accounts![0]).toEqual({
         name: 'new-account',
         accountId: 123,
         env: ENVIRONMENTS.PROD,

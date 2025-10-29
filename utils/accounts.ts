@@ -8,10 +8,10 @@ import {
 export function getAccounts(config?: CLIConfig | null): Array<CLIAccount> {
   if (!config) {
     return [];
-  } else if (Object.hasOwn(config, 'portals')) {
-    return (config as CLIConfig_DEPRECATED).portals;
-  } else if (Object.hasOwn(config, 'accounts')) {
-    return (config as CLIConfig_NEW).accounts;
+  } else if ('portals' in config && Array.isArray(config.portals)) {
+    return config.portals;
+  } else if ('accounts' in config && Array.isArray(config.accounts)) {
+    return config.accounts;
   }
   return [];
 }

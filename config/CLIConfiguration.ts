@@ -69,7 +69,7 @@ class _CLIConfiguration {
       if (configFromEnv) {
         logger.debug(
           i18n(`${i18nKey}.load.configFromEnv`, {
-            accountId: configFromEnv.accounts[0].accountId,
+            accountId: `${configFromEnv.accounts?.[0].accountId}`,
           })
         );
         this.useEnvConfig = true;
@@ -215,12 +215,12 @@ class _CLIConfiguration {
 
     let account: CLIAccount_NEW | null = null;
     if (name) {
-      account = this.config.accounts.find(a => a.name === name) || null;
+      account = this.config.accounts?.find(a => a.name === name) || null;
     }
 
     if (accountId && !account) {
       account =
-        this.config.accounts.find(a => accountId === a.accountId) || null;
+        this.config.accounts?.find(a => accountId === a.accountId) || null;
     }
 
     return account;
@@ -302,7 +302,7 @@ class _CLIConfiguration {
   }
 
   getAccountIndex(accountId: number): number {
-    return this.config
+    return this.config && Array.isArray(this.config.accounts)
       ? this.config.accounts.findIndex(
           account => account.accountId === accountId
         )
@@ -320,12 +320,12 @@ class _CLIConfiguration {
     if (typeof nameOrId === 'string') {
       return (
         !!this.config &&
-        this.config.accounts &&
+        !!this.config.accounts &&
         !!this.getAccountId(nameOrId.toLowerCase())
       );
     }
     return (
-      !!this.config && this.config.accounts && !!this.getAccountId(nameOrId)
+      !!this.config && !!this.config.accounts && !!this.getAccountId(nameOrId)
     );
   }
 
@@ -473,9 +473,10 @@ class _CLIConfiguration {
     safelyApplyUpdates('parentAccountId', parentAccountId);
 
     const completedAccountConfig = nextAccountConfig as FlatAccountFields_NEW;
-    if (!Object.hasOwn(this.config, 'accounts')) {
+    if (!Array.isArray(this.config.accounts)) {
       this.config.accounts = [];
     }
+
     if (currentAccountConfig) {
       logger.debug(
         i18n(`${i18nKey}.updateAccount.updating`, {
@@ -586,7 +587,7 @@ class _CLIConfiguration {
         i18n(`${i18nKey}.removeAccountFromConfig.deleting`, { accountId })
       );
       const index = this.getAccountIndex(accountId);
-      this.config.accounts.splice(index, 1);
+      this.config.accounts?.splice(index, 1);
 
       if (this.getDefaultAccount() === accountConfig.name) {
         removedAccountIsDefault = true;

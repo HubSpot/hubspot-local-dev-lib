@@ -4,7 +4,7 @@ import { CmsPublishMode } from './Files';
 import { ValueOf } from './Utils';
 
 export interface CLIConfig_NEW {
-  accounts: Array<CLIAccount_NEW>;
+  accounts?: Array<CLIAccount_NEW>;
   allowUsageTracking?: boolean;
   allowAutoUpdates?: boolean;
   defaultAccount?: string | number;

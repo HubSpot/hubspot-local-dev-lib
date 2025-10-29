@@ -26,8 +26,18 @@ describe('config/CLIConfiguration', () => {
   });
 
   describe('getAccount()', () => {
+    afterEach(() => {
+      config.config = null;
+    });
+
     it('returns null when no config is loaded', () => {
       expect(config.getAccount('account-name')).toBe(null);
+    });
+
+    it('returns null when config.accounts is undefined', () => {
+      config.config = {};
+      expect(config.getAccount('account-name')).toBe(null);
+      expect(config.getAccount(123)).toBe(null);
     });
   });
 
@@ -52,7 +62,28 @@ describe('config/CLIConfiguration', () => {
   });
 
   describe('getAccountIndex()', () => {
+    afterEach(() => {
+      config.config = null;
+    });
+
     it('returns -1 when no config is loaded', () => {
+      expect(config.getAccountIndex(123)).toBe(-1);
+    });
+
+    it('returns -1 when config.accounts is undefined', () => {
+      config.config = {};
+      expect(config.getAccountIndex(123)).toBe(-1);
+    });
+
+    it('returns -1 when config.accounts is null', () => {
+      // @ts-expect-error making mistake on purpose
+      config.config = { accounts: null };
+      expect(config.getAccountIndex(123)).toBe(-1);
+    });
+
+    it('returns -1 when config.accounts is not an array', () => {
+      // @ts-expect-error making mistake on purpose
+      config.config = { accounts: 'not-an-array' };
       expect(config.getAccountIndex(123)).toBe(-1);
     });
   });
