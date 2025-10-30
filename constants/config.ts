@@ -40,6 +40,8 @@ export const DEFAULT_PORTAL = 'defaultPortal';
 
 export const MIN_HTTP_TIMEOUT = 3000;
 
+export const MCP_TOTAL_TOOL_CALLS_STATE = 'mcpTotalToolCalls';
+
 export const HUBSPOT_ACCOUNT_TYPES = {
   DEVELOPMENT_SANDBOX: 'DEVELOPMENT_SANDBOX',
   DEVELOPER_TEST: 'DEVELOPER_TEST',
