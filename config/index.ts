@@ -23,6 +23,7 @@ import { CMS_PUBLISH_MODE } from '../constants/files';
 import { Environment } from '../types/Config';
 import { i18n } from '../utils/lang';
 import { getDefaultAccountOverrideAccountId } from './defaultAccountOverride';
+import { getValidEnv } from '../lib/environment';
 
 export function localConfigFileExists(): boolean {
   return Boolean(getLocalConfigFilePath());
@@ -250,11 +251,11 @@ export function getConfigAccountEnvironment(
     );
 
     if (account) {
-      return account.env;
+      return getValidEnv(account.env);
     }
   }
   const defaultAccount = getConfigDefaultAccount();
-  return defaultAccount.env;
+  return getValidEnv(defaultAccount.env);
 }
 
 export function addConfigAccount(accountToAdd: HubSpotConfigAccount): void {

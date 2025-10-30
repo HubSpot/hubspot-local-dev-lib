@@ -36,7 +36,7 @@ export function migrateConfigAtPath(path: string): void {
 export type ConflictProperty = {
   property: keyof HubSpotConfig;
   oldValue: ValueOf<HubSpotConfig>;
-  newValue: ValueOf<HubSpotConfig>;
+  newValue: ValueOf<Required<HubSpotConfig>>;
 };
 
 export function mergeConfigProperties(
@@ -96,7 +96,7 @@ export function mergeConfigProperties(
         conflicts.push({
           property: prop,
           oldValue: fromConfig[prop],
-          newValue: toConfig[prop],
+          newValue: toConfig[prop]!,
         });
       }
     });
