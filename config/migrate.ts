@@ -23,7 +23,7 @@ import { ValueOf } from '../types/Utils';
 export function getConfigAtPath(path: string): HubSpotConfig {
   const configFileSource = readConfigFile(path);
 
-  return parseConfig(configFileSource);
+  return parseConfig(configFileSource, path);
 }
 
 export function migrateConfigAtPath(path: string): void {

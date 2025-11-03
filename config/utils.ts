@@ -8,6 +8,8 @@ import {
   ENVIRONMENT_VARIABLES,
   ACCOUNT_IDENTIFIERS,
   GLOBAL_CONFIG_PATH,
+  HUBSPOT_CONFIG_ERROR_TYPES,
+  HUBSPOT_CONFIG_OPERATIONS,
 } from '../constants/config';
 import {
   PERSONAL_ACCESS_KEY_AUTH_METHOD,
@@ -29,6 +31,7 @@ import { getCwd } from '../lib/path';
 import { CMS_PUBLISH_MODE } from '../constants/files';
 import { i18n } from '../utils/lang';
 import { ValueOf } from '../types/Utils';
+import { HubSpotConfigError } from '../models/HubSpotConfigError';
 
 export function getGlobalConfigFilePath(): string {
   return GLOBAL_CONFIG_PATH;
@@ -56,10 +59,12 @@ export function getConfigPathEnvironmentVariables(): {
     'true';
 
   if (configFilePathFromEnvironment && useEnvironmentConfig) {
-    throw new Error(
+    throw new HubSpotConfigError(
       i18n(
         'config.utils.getConfigPathEnvironmentVariables.invalidEnvironmentVariables'
-      )
+      ),
+      HUBSPOT_CONFIG_ERROR_TYPES.INVALID_ENVIRONMENT_VARIABLES,
+      HUBSPOT_CONFIG_OPERATIONS.READ
     );
   }
 
@@ -230,14 +235,22 @@ export function normalizeParsedConfig(
   return parsedConfig;
 }
 
-export function parseConfig(configSource: string): HubSpotConfig {
+export function parseConfig(
+  configSource: string,
+  configPath: string
+): HubSpotConfig {
   let parsedYaml: HubSpotConfig & DeprecatedHubSpotConfigFields;
 
   try {
     parsedYaml = yaml.load(configSource) as HubSpotConfig &
       DeprecatedHubSpotConfigFields;
   } catch (err) {
-    throw new Error(i18n('config.utils.parseConfig.error'), { cause: err });
+    throw new HubSpotConfigError(
+      i18n('config.utils.parseConfig.error', { configPath: configPath }),
+      HUBSPOT_CONFIG_ERROR_TYPES.YAML_PARSING,
+      HUBSPOT_CONFIG_OPERATIONS.READ,
+      { cause: err }
+    );
   }
 
   return normalizeParsedConfig(parsedYaml);
@@ -264,8 +277,10 @@ export function buildConfigFromEnvironment(): HubSpotConfig {
     process.env[ENVIRONMENT_VARIABLES.DEFAULT_CMS_PUBLISH_MODE];
 
   if (!accountIdVar) {
-    throw new Error(
-      i18n('config.utils.buildConfigFromEnvironment.missingAccountId')
+    throw new HubSpotConfigError(
+      i18n('config.utils.buildConfigFromEnvironment.missingAccountId'),
+      HUBSPOT_CONFIG_ERROR_TYPES.INVALID_ENVIRONMENT_VARIABLES,
+      HUBSPOT_CONFIG_OPERATIONS.READ
     );
   }
 
@@ -322,8 +337,10 @@ export function buildConfigFromEnvironment(): HubSpotConfig {
       name: accountIdVar,
     };
   } else {
-    throw new Error(
-      i18n('config.utils.buildConfigFromEnvironment.invalidAuthType')
+    throw new HubSpotConfigError(
+      i18n('config.utils.buildConfigFromEnvironment.invalidAuthType'),
+      HUBSPOT_CONFIG_ERROR_TYPES.INVALID_ENVIRONMENT_VARIABLES,
+      HUBSPOT_CONFIG_OPERATIONS.READ
     );
   }
 

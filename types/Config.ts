@@ -1,4 +1,8 @@
-import { CONFIG_FLAGS } from '../constants/config';
+import {
+  CONFIG_FLAGS,
+  HUBSPOT_CONFIG_ERROR_TYPES,
+  HUBSPOT_CONFIG_OPERATIONS,
+} from '../constants/config';
 import { ENVIRONMENTS } from '../constants/environments';
 import {
   DeprecatedHubSpotConfigAccountFields,
@@ -41,3 +45,7 @@ export type ConfigFlag = ValueOf<typeof CONFIG_FLAGS>;
 export type CLIState = {
   mcpTotalToolCalls: number;
 };
+
+export type HubSpotConfigErrorType = ValueOf<typeof HUBSPOT_CONFIG_ERROR_TYPES>;
+
+export type HubSpotConfigOperation = ValueOf<typeof HUBSPOT_CONFIG_OPERATIONS>;

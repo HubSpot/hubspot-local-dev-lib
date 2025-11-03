@@ -244,9 +244,13 @@
   },
   "config": {
     "getDefaultConfigFilePath": {
-      "error": "Error getting config file path: no config file found"
+      "error": "Attempted to get config file path, but no config file was found."
     },
-    "getConfig": "Reading config from {{ path }}",
+    "getConfig": {
+      "reading": "Reading config from {{ path }}",
+      "error": "No config file found.",
+      "errorWithPath": "No config file found at {{ path }}."
+    },
     "isConfigValid": {
       "missingAccounts": "Invalid config: no accounts found",
       "duplicateAccountIds": "Invalid config: multiple accounts with accountId: {{ accountId }}",
@@ -254,35 +258,35 @@
       "invalidAccountName": "Invalid config: account name {{ accountName }} contains spaces"
     },
     "getConfigAccountById": {
-      "error": "Error getting config account: no account with id {{ accountId }} exists in config"
+      "error": "No account with id {{ accountId }} exists in config"
     },
     "getConfigAccountByName": {
-      "error": "Error getting config account: no account with name {{ accountName }} exists in config"
+      "error": "No account with name {{ accountName }} exists in config"
     },
     "getConfigDefaultAccount": {
-      "fieldMissingError": "Error getting config default account: no default account field found in config",
-      "accountMissingError": "Error getting config default account: default account is set to {{ defaultAccount }} but no account with that id exists in config"
+      "fieldMissingError": "Attempted to get default account, but no default account was found in config",
+      "accountMissingError": "Default account is set to {{ defaultAccount }}, but no account with that id exists in config"
     },
     "addConfigAccount": {
-      "invalidAccount": "Error adding config account: account is invalid",
-      "duplicateAccount": "Error adding config account: account with id {{ accountId }} already exists in config"
+      "invalidAccount": "Attempting to add account, but account is invalid",
+      "duplicateAccount": "Attempting to add account, but account with id {{ accountId }} already exists in config"
     },
     "updateConfigAccount": {
-      "invalidAccount": "Error updating config account: account is invalid",
-      "accountNotFound": "Error updating config account: account with id {{ accountId }} not found in config"
+      "invalidAccount": "Attempting to update account {{ name }}, but account is invalid",
+      "accountNotFound": "Attempting to update account with id {{ id }}, but that account was not found in config"
     },
     "setConfigAccountAsDefault": {
-      "accountNotFound": "Error setting config default account: account with id {{ accountId }} not found in config"
+      "accountNotFound": "Attempted to set account with id {{ accountId }} as default, but that account was not found in config"
     },
     "renameConfigAccount": {
-      "accountNotFound": "Error renaming config account: account with name {{ currentName }} not found in config",
-      "duplicateAccount": "Error renaming config account: account with name {{ newName}} already exists in config"
+      "accountNotFound": "Attempted to rename account with name {{ currentName }}, but that account was not found in config",
+      "duplicateAccount": "Attempted to rename account {{ currentName }} to {{ newName }}, but an account with that name already exists in config"
     },
     "removeAccountFromConfig": {
-      "accountNotFound": "Error removing config account: account with id {{ accountId }} not found in config"
+      "accountNotFound": "Attempted to remove account with id {{ accountId }}, but that account was not found in config"
     },
     "updateHttpTimeout": {
-      "invalidTimeout": "Error updating config http timeout: timeout must be greater than {{ minTimeout }}"
+      "invalidTimeout": "HTTP timeout must be greater than {{ minTimeout }}. Received {{ timeout }}"
     },
     "updateDefaultCmsPublishMode": {
       "invalidCmsPublishMode": "Error updating config default CMS publish mode: CMS publish can only be set to 'draft' or 'publish'"
@@ -297,14 +301,14 @@
         "missingPersonalAccessKey": "Invalid config: account {{ accountId }} has authType of personalAccessKey but is missing the personalAccessKey field"
       },
       "getConfigPathEnvironmentVariables": {
-        "invalidEnvironmentVariables": "Error loading config: USE_ENVIRONMENT_HUBSPOT_CONFIG and HUBSPOT_CONFIG_PATH cannot both be set simultaneously"
+        "invalidEnvironmentVariables": "USE_ENVIRONMENT_HUBSPOT_CONFIG and HUBSPOT_CONFIG_PATH cannot both be set simultaneously"
       },
       "parseConfig": {
-        "error": "An error occurred parsing the config file."
+        "error": "File could not be parsed. Confirm that your config file {{ configPath }} is valid YAML."
       },
       "buildConfigFromEnvironment": {
-        "missingAccountId": "Error loading config from environment: HUBSPOT_ACCOUNT_ID not set",
-        "invalidAuthType": "Error loading config from environment: auth is invalid. Use HUBSPOT_CLIENT_ID, HUBSPOT_CLIENT_SECRET, and HUBSPOT_REFRESH_TOKEN to authenticate with Oauth2, PERSONAL_ACCESS_KEY to authenticate with Personal Access Key, or API_KEY to authenticate with API Key."
+        "missingAccountId": "HUBSPOT_ACCOUNT_ID is required, but not currently set",
+        "invalidAuthType": "Auth type is invalid. Use HUBSPOT_CLIENT_ID, HUBSPOT_CLIENT_SECRET, and HUBSPOT_REFRESH_TOKEN to authenticate with Oauth2, PERSONAL_ACCESS_KEY to authenticate with Personal Access Key, or API_KEY to authenticate with API Key."
       }
     },
     "defaultAccountOverride": {
@@ -312,6 +316,12 @@
         "errorHeader": "Error in {{ hsAccountFile }}",
         "readFileError": "Error reading account override file."
       }
+    },
+    "updateAllowUsageTracking": {
+      "invalidInput": "Unable to update allowUsageTracking. The value {{ isAllowed }} is invalid. The value must be a boolean."
+    },
+    "updateAllowAutoUpdates": {
+      "invalidInput": "Unable to update allowAutoUpdates. The value {{ isEnabled }} is invalid. The value must be a boolean."
     },
     "updateAutoOpenBrowser": {
       "invalidInput": "Unable to update autoOpenBrowser. The value {{ isEnabled }} is invalid. The value must be a boolean."
@@ -367,6 +377,9 @@
         "missingRefreshToken": "The account {{ accountId }} has not been authenticated with Oauth2",
         "auth": "Error while retrieving new token: {{ token }}"
       }
+    },
+    "HubSpotConfigError": {
+      "baseMessage": "An error occurred while {{ operation }} your HubSpot config {{ configType }}: {{ message }}"
     }
   },
   "utils": {

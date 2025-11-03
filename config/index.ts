@@ -1,6 +1,10 @@
 import fs from 'fs-extra';
 
-import { ACCOUNT_IDENTIFIERS, MIN_HTTP_TIMEOUT } from '../constants/config';
+import {
+  ACCOUNT_IDENTIFIERS,
+  HUBSPOT_CONFIG_OPERATIONS,
+  MIN_HTTP_TIMEOUT,
+} from '../constants/config';
 import { HubSpotConfigAccount } from '../types/Accounts';
 import { HubSpotConfig, ConfigFlag } from '../types/Config';
 import { CmsPublishMode } from '../types/Files';
@@ -24,6 +28,8 @@ import { Environment } from '../types/Config';
 import { i18n } from '../utils/lang';
 import { getDefaultAccountOverrideAccountId } from './defaultAccountOverride';
 import { getValidEnv } from '../lib/environment';
+import { HubSpotConfigError } from '../models/HubSpotConfigError';
+import { HUBSPOT_CONFIG_ERROR_TYPES } from '../constants/config';
 
 export function localConfigFileExists(): boolean {
   return Boolean(getLocalConfigFilePath());
@@ -43,7 +49,11 @@ function getConfigDefaultFilePath(): string {
   const localConfigFilePath = getLocalConfigFilePath();
 
   if (!localConfigFilePath) {
-    throw new Error(i18n('config.getDefaultConfigFilePath.error'));
+    throw new HubSpotConfigError(
+      i18n('config.getDefaultConfigFilePath.error'),
+      HUBSPOT_CONFIG_ERROR_TYPES.CONFIG_NOT_FOUND,
+      HUBSPOT_CONFIG_OPERATIONS.READ
+    );
   }
 
   return localConfigFilePath;
@@ -56,18 +66,30 @@ export function getConfigFilePath(): string {
 }
 
 export function getConfig(): HubSpotConfig {
-  const { useEnvironmentConfig } = getConfigPathEnvironmentVariables();
+  let pathToRead: string | undefined;
+  try {
+    const { useEnvironmentConfig } = getConfigPathEnvironmentVariables();
 
-  if (useEnvironmentConfig) {
-    return buildConfigFromEnvironment();
+    if (useEnvironmentConfig) {
+      return buildConfigFromEnvironment();
+    }
+
+    pathToRead = getConfigFilePath();
+
+    logger.debug(i18n('config.getConfig.reading', { path: pathToRead }));
+    const configFileSource = readConfigFile(pathToRead);
+
+    return parseConfig(configFileSource, pathToRead);
+  } catch (err) {
+    throw new HubSpotConfigError(
+      pathToRead
+        ? i18n('config.getConfig.errorWithPath', { path: pathToRead })
+        : i18n('config.getConfig.error'),
+      HUBSPOT_CONFIG_ERROR_TYPES.CONFIG_NOT_FOUND,
+      HUBSPOT_CONFIG_OPERATIONS.READ,
+      { cause: err }
+    );
   }
-
-  const pathToRead = getConfigFilePath();
-
-  logger.debug(i18n('config.getConfig', { path: pathToRead }));
-  const configFileSource = readConfigFile(pathToRead);
-
-  return parseConfig(configFileSource);
 }
 
 export function isConfigValid(): boolean {
@@ -144,7 +166,11 @@ export function getConfigAccountById(accountId: number): HubSpotConfigAccount {
   );
 
   if (!account) {
-    throw new Error(i18n('config.getConfigAccountById.error', { accountId }));
+    throw new HubSpotConfigError(
+      i18n('config.getConfigAccountById.error', { accountId }),
+      HUBSPOT_CONFIG_ERROR_TYPES.ACCOUNT_NOT_FOUND,
+      HUBSPOT_CONFIG_OPERATIONS.READ
+    );
   }
 
   return account;
@@ -162,8 +188,10 @@ export function getConfigAccountByName(
   );
 
   if (!account) {
-    throw new Error(
-      i18n('config.getConfigAccountByName.error', { accountName })
+    throw new HubSpotConfigError(
+      i18n('config.getConfigAccountByName.error', { accountName }),
+      HUBSPOT_CONFIG_ERROR_TYPES.ACCOUNT_NOT_FOUND,
+      HUBSPOT_CONFIG_OPERATIONS.READ
     );
   }
 
@@ -189,7 +217,11 @@ export function getConfigDefaultAccount(): HubSpotConfigAccount {
   }
 
   if (!defaultAccountToUse) {
-    throw new Error(i18n('config.getConfigDefaultAccount.fieldMissingError'));
+    throw new HubSpotConfigError(
+      i18n('config.getConfigDefaultAccount.fieldMissingError'),
+      HUBSPOT_CONFIG_ERROR_TYPES.NO_DEFAULT_ACCOUNT,
+      HUBSPOT_CONFIG_OPERATIONS.READ
+    );
   }
 
   const account = getConfigAccountByInferredIdentifier(
@@ -198,10 +230,12 @@ export function getConfigDefaultAccount(): HubSpotConfigAccount {
   );
 
   if (!account) {
-    throw new Error(
+    throw new HubSpotConfigError(
       i18n('config.getConfigDefaultAccount.accountMissingError', {
         defaultAccountToUse,
-      })
+      }),
+      HUBSPOT_CONFIG_ERROR_TYPES.ACCOUNT_NOT_FOUND,
+      HUBSPOT_CONFIG_OPERATIONS.READ
     );
   }
 
@@ -260,7 +294,11 @@ export function getConfigAccountEnvironment(
 
 export function addConfigAccount(accountToAdd: HubSpotConfigAccount): void {
   if (!isConfigAccountValid(accountToAdd)) {
-    throw new Error(i18n('config.addConfigAccount.invalidAccount'));
+    throw new HubSpotConfigError(
+      i18n('config.addConfigAccount.invalidAccount'),
+      HUBSPOT_CONFIG_ERROR_TYPES.INVALID_ACCOUNT,
+      HUBSPOT_CONFIG_OPERATIONS.WRITE
+    );
   }
 
   const config = getConfig();
@@ -272,10 +310,12 @@ export function addConfigAccount(accountToAdd: HubSpotConfigAccount): void {
   );
 
   if (accountInConfig) {
-    throw new Error(
+    throw new HubSpotConfigError(
       i18n('config.addConfigAccount.duplicateAccount', {
         accountId: accountToAdd.accountId,
-      })
+      }),
+      HUBSPOT_CONFIG_ERROR_TYPES.INVALID_ACCOUNT,
+      HUBSPOT_CONFIG_OPERATIONS.WRITE
     );
   }
 
@@ -288,7 +328,13 @@ export function updateConfigAccount(
   updatedAccount: HubSpotConfigAccount
 ): void {
   if (!isConfigAccountValid(updatedAccount)) {
-    throw new Error(i18n('config.updateConfigAccount.invalidAccount'));
+    throw new HubSpotConfigError(
+      i18n('config.updateConfigAccount.invalidAccount', {
+        name: updatedAccount.name,
+      }),
+      HUBSPOT_CONFIG_ERROR_TYPES.INVALID_ACCOUNT,
+      HUBSPOT_CONFIG_OPERATIONS.WRITE
+    );
   }
 
   const config = getConfig();
@@ -299,10 +345,12 @@ export function updateConfigAccount(
   );
 
   if (accountIndex < 0) {
-    throw new Error(
+    throw new HubSpotConfigError(
       i18n('config.updateConfigAccount.accountNotFound', {
         accountId: updatedAccount.accountId,
-      })
+      }),
+      HUBSPOT_CONFIG_ERROR_TYPES.ACCOUNT_NOT_FOUND,
+      HUBSPOT_CONFIG_OPERATIONS.WRITE
     );
   }
 
@@ -320,10 +368,12 @@ export function setConfigAccountAsDefault(identifier: number | string): void {
   );
 
   if (!account) {
-    throw new Error(
+    throw new HubSpotConfigError(
       i18n('config.setConfigAccountAsDefault.accountNotFound', {
         accountId: identifier,
-      })
+      }),
+      HUBSPOT_CONFIG_ERROR_TYPES.ACCOUNT_NOT_FOUND,
+      HUBSPOT_CONFIG_OPERATIONS.WRITE
     );
   }
 
@@ -344,10 +394,12 @@ export function renameConfigAccount(
   );
 
   if (!account) {
-    throw new Error(
+    throw new HubSpotConfigError(
       i18n('config.renameConfigAccount.accountNotFound', {
         currentName,
-      })
+      }),
+      HUBSPOT_CONFIG_ERROR_TYPES.ACCOUNT_NOT_FOUND,
+      HUBSPOT_CONFIG_OPERATIONS.WRITE
     );
   }
 
@@ -358,10 +410,13 @@ export function renameConfigAccount(
   );
 
   if (duplicateAccount) {
-    throw new Error(
+    throw new HubSpotConfigError(
       i18n('config.renameConfigAccount.duplicateAccount', {
+        currentName,
         newName,
-      })
+      }),
+      HUBSPOT_CONFIG_ERROR_TYPES.INVALID_ACCOUNT,
+      HUBSPOT_CONFIG_OPERATIONS.WRITE
     );
   }
 
@@ -376,10 +431,12 @@ export function removeAccountFromConfig(accountId: number): void {
   const index = getConfigAccountIndexById(config.accounts, accountId);
 
   if (index < 0) {
-    throw new Error(
+    throw new HubSpotConfigError(
       i18n('config.removeAccountFromConfig.accountNotFound', {
         accountId,
-      })
+      }),
+      HUBSPOT_CONFIG_ERROR_TYPES.ACCOUNT_NOT_FOUND,
+      HUBSPOT_CONFIG_OPERATIONS.WRITE
     );
   }
 
@@ -397,10 +454,13 @@ export function updateHttpTimeout(timeout: string | number): void {
     typeof timeout === 'string' ? parseInt(timeout) : timeout;
 
   if (isNaN(parsedTimeout) || parsedTimeout < MIN_HTTP_TIMEOUT) {
-    throw new Error(
+    throw new HubSpotConfigError(
       i18n('config.updateHttpTimeout.invalidTimeout', {
         minTimeout: MIN_HTTP_TIMEOUT,
-      })
+        timeout: parsedTimeout,
+      }),
+      HUBSPOT_CONFIG_ERROR_TYPES.INVALID_FIELD,
+      HUBSPOT_CONFIG_OPERATIONS.WRITE
     );
   }
 
@@ -412,6 +472,16 @@ export function updateHttpTimeout(timeout: string | number): void {
 }
 
 export function updateAllowUsageTracking(isAllowed: boolean): void {
+  if (typeof isAllowed !== 'boolean') {
+    throw new HubSpotConfigError(
+      i18n('config.updateAllowUsageTracking.invalidInput', {
+        isAllowed: `${isAllowed}`,
+      }),
+      HUBSPOT_CONFIG_ERROR_TYPES.INVALID_FIELD,
+      HUBSPOT_CONFIG_OPERATIONS.WRITE
+    );
+  }
+
   const config = getConfig();
 
   config.allowUsageTracking = isAllowed;
@@ -419,20 +489,31 @@ export function updateAllowUsageTracking(isAllowed: boolean): void {
   writeConfigFile(config, getConfigFilePath());
 }
 
-export function updateAllowAutoUpdates(enabled: boolean): void {
+export function updateAllowAutoUpdates(isEnabled: boolean): void {
+  if (typeof isEnabled !== 'boolean') {
+    throw new HubSpotConfigError(
+      i18n('config.updateAllowAutoUpdates.invalidInput', {
+        isEnabled: `${isEnabled}`,
+      }),
+      HUBSPOT_CONFIG_ERROR_TYPES.INVALID_FIELD,
+      HUBSPOT_CONFIG_OPERATIONS.WRITE
+    );
+  }
   const config = getConfig();
 
-  config.allowAutoUpdates = enabled;
+  config.allowAutoUpdates = isEnabled;
 
   writeConfigFile(config, getConfigFilePath());
 }
 
 export function updateAutoOpenBrowser(isEnabled: boolean): void {
   if (typeof isEnabled !== 'boolean') {
-    throw new Error(
+    throw new HubSpotConfigError(
       i18n('config.updateAutoOpenBrowser.invalidInput', {
         isEnabled: `${isEnabled}`,
-      })
+      }),
+      HUBSPOT_CONFIG_ERROR_TYPES.INVALID_FIELD,
+      HUBSPOT_CONFIG_OPERATIONS.WRITE
     );
   }
 
@@ -450,8 +531,12 @@ export function updateDefaultCmsPublishMode(
     !cmsPublishMode ||
     !Object.values(CMS_PUBLISH_MODE).includes(cmsPublishMode)
   ) {
-    throw new Error(
-      i18n('config.updateDefaultCmsPublishMode.invalidCmsPublishMode')
+    throw new HubSpotConfigError(
+      i18n('config.updateDefaultCmsPublishMode.invalidCmsPublishMode', {
+        cmsPublishMode,
+      }),
+      HUBSPOT_CONFIG_ERROR_TYPES.INVALID_FIELD,
+      HUBSPOT_CONFIG_OPERATIONS.WRITE
     );
   }
 
