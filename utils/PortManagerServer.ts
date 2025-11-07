@@ -87,10 +87,12 @@ class _PortManagerServer {
     this.app.delete('/servers/:instanceId', this.deleteServerInstance);
     this.app.post('/close', this.closeServer);
 
-    this.app.use(HEALTH_CHECK_PATH, (req, res) => {
-      res.status(200).send({ status: SERVICE_HEALTHY });
-    });
+    this.app.use(HEALTH_CHECK_PATH, this.healthCheck);
   }
+
+  private healthCheck = (req: Request, res: Response): void => {
+    res.status(200).send({ status: SERVICE_HEALTHY });
+  };
 
   private setPort(instanceId: string, port: number) {
     logger.debug(i18n(`${i18nKey}.setPort`, { instanceId, port }));

@@ -155,28 +155,44 @@ describe('PortManagerServer', () => {
 
       expect(mockExpressApp.get).toHaveBeenCalledWith(
         '/servers',
-        expect.any(Function)
+        // @ts-expect-error accessing private method for testing
+        PortManagerServer.getServers
       );
       expect(mockExpressApp.get).toHaveBeenCalledWith(
         '/servers/:instanceId',
-        expect.any(Function)
+        // @ts-expect-error accessing private method for testing
+        PortManagerServer.getServerPortByInstanceId
       );
       expect(mockExpressApp.post).toHaveBeenCalledWith(
         '/servers',
-        expect.any(Function)
+        // @ts-expect-error accessing private method for testing
+        PortManagerServer.assignPortsToServers
       );
       expect(mockExpressApp.delete).toHaveBeenCalledWith(
         '/servers/:instanceId',
-        expect.any(Function)
+        // @ts-expect-error accessing private method for testing
+        PortManagerServer.deleteServerInstance
       );
       expect(mockExpressApp.post).toHaveBeenCalledWith(
         '/close',
-        expect.any(Function)
+        // @ts-expect-error accessing private method for testing
+        PortManagerServer.closeServer
       );
       expect(mockExpressApp.use).toHaveBeenCalledWith(
         '/port-manager-health-check',
-        expect.any(Function)
+        // @ts-expect-error accessing private method for testing
+        PortManagerServer.healthCheck
       );
+    });
+  });
+
+  describe('healthCheck()', () => {
+    it('should return 200 status with OK status', () => {
+      // @ts-expect-error testing private method
+      PortManagerServer.healthCheck(mockRequest, mockResponse as Response);
+
+      expect(mockResponse.status).toHaveBeenCalledWith(200);
+      expect(mockResponse.send).toHaveBeenCalledWith({ status: 'OK' });
     });
   });
 
@@ -266,19 +282,15 @@ describe('PortManagerServer', () => {
       mockRequest.params = { instanceId };
 
       // @ts-expect-error testing private method
-      jest.spyOn(PortManagerServer, 'send404').mockImplementation();
-
-      // @ts-expect-error testing private method
       PortManagerServer.getServerPortByInstanceId(
         // @ts-expect-error partial mock for testing
         mockRequest,
         mockResponse as Response
       );
 
-      // @ts-expect-error testing private method
-      expect(PortManagerServer.send404).toHaveBeenCalledWith(
-        mockResponse,
-        instanceId
+      expect(mockResponse.status).toHaveBeenCalledWith(404);
+      expect(mockResponse.send).toHaveBeenCalledWith(
+        `Could not find a server with instanceId ${instanceId}`
       );
     });
   });
@@ -356,17 +368,16 @@ describe('PortManagerServer', () => {
       mockRequest.params = { instanceId };
 
       // @ts-expect-error testing private method
-      jest.spyOn(PortManagerServer, 'deletePort').mockImplementation();
-
-      // @ts-expect-error testing private method
       PortManagerServer.deleteServerInstance(
         // @ts-expect-error partial mock for testing
         mockRequest,
         mockResponse as Response
       );
 
-      // @ts-expect-error testing private method
-      expect(PortManagerServer.deletePort).toHaveBeenCalledWith(instanceId);
+      expect(PortManagerServer.serverPortMap[instanceId]).toBeUndefined();
+      expect(mockedLogger.debug).toHaveBeenCalledWith(
+        `Server with instanceId ${instanceId} unassigned from port ${port}`
+      );
       expect(mockResponse.sendStatus).toHaveBeenCalledWith(200);
     });
 
@@ -375,19 +386,15 @@ describe('PortManagerServer', () => {
       mockRequest.params = { instanceId };
 
       // @ts-expect-error testing private method
-      jest.spyOn(PortManagerServer, 'send404').mockImplementation();
-
-      // @ts-expect-error testing private method
       PortManagerServer.deleteServerInstance(
         // @ts-expect-error partial mock for testing
         mockRequest,
         mockResponse as Response
       );
 
-      // @ts-expect-error testing private method
-      expect(PortManagerServer.send404).toHaveBeenCalledWith(
-        mockResponse,
-        instanceId
+      expect(mockResponse.status).toHaveBeenCalledWith(404);
+      expect(mockResponse.send).toHaveBeenCalledWith(
+        `Could not find a server with instanceId ${instanceId}`
       );
     });
   });
@@ -397,9 +404,9 @@ describe('PortManagerServer', () => {
       const mockServer = { close: jest.fn() };
       // @ts-expect-error partial mock of Server
       PortManagerServer.server = mockServer;
-
-      // @ts-expect-error testing private method
-      jest.spyOn(PortManagerServer, 'reset').mockImplementation();
+      // @ts-expect-error partial mock of Express app
+      PortManagerServer.app = mockExpressApp;
+      PortManagerServer.serverPortMap = { test: 3000 };
 
       // @ts-expect-error testing private method
       PortManagerServer.closeServer(
@@ -413,8 +420,10 @@ describe('PortManagerServer', () => {
       );
       expect(mockResponse.sendStatus).toHaveBeenCalledWith(200);
       expect(mockServer.close).toHaveBeenCalled();
-      // @ts-expect-error testing private method
-      expect(PortManagerServer.reset).toHaveBeenCalled();
+      // Check that reset was called by verifying state is cleared
+      expect(PortManagerServer.app).toBeUndefined();
+      expect(PortManagerServer.server).toBeUndefined();
+      expect(PortManagerServer.serverPortMap).toEqual({});
     });
 
     it('should do nothing when server does not exist', () => {
