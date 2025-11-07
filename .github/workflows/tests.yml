@@ -18,6 +18,8 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
-      - run: yarn install --no-lockfile
+      - run: yarn install --no-lockfile --ignore-scripts
       - run: yarn build
       - run: yarn test
+      - run: yarn install --no-lockfile --cwd acceptance-tests --ignore-scripts
+      - run: yarn test:acceptance

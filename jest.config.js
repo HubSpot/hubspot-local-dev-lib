@@ -7,6 +7,10 @@ module.exports = {
   },
   setupFiles: ['./setupTests.ts'],
   transformIgnorePatterns: ['node_modules/(?!variables/.*)'],
-  modulePathIgnorePatterns: ['<rootDir>/dist/', '/__utils__/'],
+  modulePathIgnorePatterns: [
+    '<rootDir>/dist/',
+    '/__utils__/',
+    'acceptance-tests',
+  ],
   clearMocks: true,
 };
