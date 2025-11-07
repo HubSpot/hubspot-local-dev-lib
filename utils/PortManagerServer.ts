@@ -12,7 +12,6 @@ import { logger } from '../lib/logger';
 import { i18n } from './lang';
 import { BaseError } from '../types/Error';
 import { RequestPortsData, ServerPortMap } from '../types/PortManager';
-import { isPortManagerPortAvailable } from '../lib/portManager';
 
 const i18nKey = 'utils.PortManagerServer';
 
@@ -29,7 +28,7 @@ class _PortManagerServer {
   }
 
   async init(): Promise<void> {
-    if (!(await isPortManagerPortAvailable())) {
+    if (!(await this.portAvailable())) {
       throw new Error(
         i18n(`${i18nKey}.errors.portInUse`, {
           port: PORT_MANAGER_SERVER_PORT,
@@ -53,6 +52,12 @@ class _PortManagerServer {
     this.app = undefined;
     this.server = undefined;
     this.serverPortMap = {};
+  }
+
+  async portAvailable(): Promise<boolean> {
+    return (
+      (await detectPort(PORT_MANAGER_SERVER_PORT)) === PORT_MANAGER_SERVER_PORT
+    );
   }
 
   private listen(): Promise<Server> {

@@ -1,9 +1,5 @@
-import {
-  MAX_PORT_NUMBER,
-  PORT_MANAGER_SERVER_PORT,
-} from '../../constants/ports';
+import { MAX_PORT_NUMBER } from '../../constants/ports';
 import { PortManagerServer } from '../../utils/PortManagerServer';
-import { detectPort } from '../../utils/detectPort';
 import {
   deleteServerInstance,
   getServerPortByInstanceId,
@@ -22,14 +18,10 @@ jest.mock('../../utils/PortManagerServer', () => ({
     server: undefined,
     serverPortMap: {},
     init: jest.fn(),
+    portAvailable: jest.fn(),
   },
   HEALTH_CHECK_PATH: '/port-manager-health-check',
   SERVICE_HEALTHY: 'OK',
-}));
-
-// Mock detectPort utility
-jest.mock('../../utils/detectPort', () => ({
-  detectPort: jest.fn(),
 }));
 
 // Mock axios for HTTP requests
@@ -42,7 +34,6 @@ jest.mock('axios', () => ({
 const mockedPortManagerServer = PortManagerServer as jest.Mocked<
   typeof PortManagerServer
 >;
-const mockedDetectPort = detectPort as jest.MockedFunction<typeof detectPort>;
 const axios = _axios as jest.Mocked<typeof _axios>;
 
 const INSTANCE_ID_1 = 'test1';
@@ -82,21 +73,21 @@ describe('lib/portManager', () => {
 
   describe('isPortManagerPortAvailable()', () => {
     it('returns true when port is available', async () => {
-      mockedDetectPort.mockResolvedValue(PORT_MANAGER_SERVER_PORT);
+      mockedPortManagerServer.portAvailable.mockResolvedValue(true);
 
       const result = await isPortManagerPortAvailable();
 
       expect(result).toBe(true);
-      expect(mockedDetectPort).toHaveBeenCalledWith(PORT_MANAGER_SERVER_PORT);
+      expect(mockedPortManagerServer.portAvailable).toHaveBeenCalled();
     });
 
     it('returns false when port is not available', async () => {
-      mockedDetectPort.mockResolvedValue(PORT_MANAGER_SERVER_PORT + 1);
+      mockedPortManagerServer.portAvailable.mockResolvedValue(false);
 
       const result = await isPortManagerPortAvailable();
 
       expect(result).toBe(false);
-      expect(mockedDetectPort).toHaveBeenCalledWith(PORT_MANAGER_SERVER_PORT);
+      expect(mockedPortManagerServer.portAvailable).toHaveBeenCalled();
     });
   });
   describe('startPortManagerServer()', () => {
