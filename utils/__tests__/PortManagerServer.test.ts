@@ -2,7 +2,6 @@ import { Request, Response } from 'express';
 import { PortManagerServer } from '../PortManagerServer';
 import { detectPort } from '../detectPort';
 import { logger } from '../../lib/logger';
-import { i18n } from '../lang';
 import { PORT_MANAGER_SERVER_PORT } from '../../constants/ports';
 
 // Mock express
@@ -36,17 +35,10 @@ jest.mock('../../lib/logger', () => ({
   },
 }));
 
-// Mock i18n
-jest.mock('../lang', () => ({
-  i18n: jest.fn(
-    (key: string, params?: Record<string, unknown>) =>
-      `Mocked i18n: ${key} ${JSON.stringify(params || {})}`
-  ),
-}));
+// Import i18n without mocking to test actual strings
 
 const mockedDetectPort = detectPort as jest.MockedFunction<typeof detectPort>;
 const mockedLogger = logger as jest.Mocked<typeof logger>;
-const mockedI18n = i18n as jest.MockedFunction<typeof i18n>;
 
 describe('PortManagerServer', () => {
   let mockRequest: Partial<Request>;
@@ -77,13 +69,8 @@ describe('PortManagerServer', () => {
     it('should throw an error if port is not available', async () => {
       mockedDetectPort.mockResolvedValue(PORT_MANAGER_SERVER_PORT + 1);
 
-      await expect(PortManagerServer.init()).rejects.toThrow();
-
-      expect(mockedI18n).toHaveBeenCalledWith(
-        'utils.PortManagerServer.errors.portInUse',
-        {
-          port: PORT_MANAGER_SERVER_PORT,
-        }
+      await expect(PortManagerServer.init()).rejects.toThrow(
+        `Failed to start PortManagerServer. Port ${PORT_MANAGER_SERVER_PORT} is already in use.`
       );
     });
 
@@ -92,10 +79,8 @@ describe('PortManagerServer', () => {
       // @ts-expect-error partial mock to simulate app already initialized
       PortManagerServer.app = {};
 
-      await expect(PortManagerServer.init()).rejects.toThrow();
-
-      expect(mockedI18n).toHaveBeenCalledWith(
-        'utils.PortManagerServer.errors.duplicateInstance'
+      await expect(PortManagerServer.init()).rejects.toThrow(
+        'Failed to start PortManagerServer. An instance of PortManagerServer is already running.'
       );
     });
 
@@ -204,11 +189,9 @@ describe('PortManagerServer', () => {
       PortManagerServer.setPort(instanceId, port);
 
       expect(PortManagerServer.serverPortMap[instanceId]).toBe(port);
-      expect(mockedI18n).toHaveBeenCalledWith(
-        'utils.PortManagerServer.setPort',
-        { instanceId, port }
+      expect(mockedLogger.debug).toHaveBeenCalledWith(
+        `Server with instanceId ${instanceId} assigned to port ${port}`
       );
-      expect(mockedLogger.debug).toHaveBeenCalled();
     });
   });
 
@@ -222,11 +205,9 @@ describe('PortManagerServer', () => {
       PortManagerServer.deletePort(instanceId);
 
       expect(PortManagerServer.serverPortMap[instanceId]).toBeUndefined();
-      expect(mockedI18n).toHaveBeenCalledWith(
-        'utils.PortManagerServer.deletedPort',
-        { instanceId, port }
+      expect(mockedLogger.debug).toHaveBeenCalledWith(
+        `Server with instanceId ${instanceId} unassigned from port ${port}`
       );
-      expect(mockedLogger.debug).toHaveBeenCalled();
     });
   });
 
@@ -239,9 +220,8 @@ describe('PortManagerServer', () => {
 
       expect(mockResponse.status).toHaveBeenCalledWith(404);
       expect(mockResponse.send).toHaveBeenCalled();
-      expect(mockedI18n).toHaveBeenCalledWith(
-        'utils.PortManagerServer.errors.404',
-        { instanceId }
+      expect(mockResponse.send).toHaveBeenCalledWith(
+        `Could not find a server with instanceId ${instanceId}`
       );
     });
   });
@@ -345,13 +325,8 @@ describe('PortManagerServer', () => {
       );
 
       expect(mockResponse.status).toHaveBeenCalledWith(409);
-      expect(mockResponse.send).toHaveBeenCalled();
-      expect(mockedI18n).toHaveBeenCalledWith(
-        'utils.PortManagerServer.errors.409',
-        {
-          instanceId,
-          port: existingPort,
-        }
+      expect(mockResponse.send).toHaveBeenCalledWith(
+        `Failed to assign port. Server with instanceId ${instanceId} is already running on port ${existingPort}`
       );
     });
 
@@ -367,10 +342,8 @@ describe('PortManagerServer', () => {
       );
 
       expect(mockResponse.status).toHaveBeenCalledWith(400);
-      expect(mockResponse.send).toHaveBeenCalled();
-      expect(mockedI18n).toHaveBeenCalledWith(
-        'utils.PortManagerServer.errors.400',
-        expect.any(Object)
+      expect(mockResponse.send).toHaveBeenCalledWith(
+        'Invalid port requested. Port must be between 1024 and 65535.'
       );
     });
   });
@@ -435,8 +408,9 @@ describe('PortManagerServer', () => {
         mockResponse as Response
       );
 
-      expect(mockedLogger.debug).toHaveBeenCalled();
-      expect(mockedI18n).toHaveBeenCalledWith('utils.PortManagerServer.close');
+      expect(mockedLogger.debug).toHaveBeenCalledWith(
+        'PortManagerServer shutting down.'
+      );
       expect(mockResponse.sendStatus).toHaveBeenCalledWith(200);
       expect(mockServer.close).toHaveBeenCalled();
       // @ts-expect-error testing private method
@@ -473,12 +447,8 @@ describe('PortManagerServer', () => {
       const result = await PortManagerServer.listen();
 
       expect(result).toEqual(mockServer);
-      expect(mockedLogger.debug).toHaveBeenCalled();
-      expect(mockedI18n).toHaveBeenCalledWith(
-        'utils.PortManagerServer.started',
-        {
-          port: PORT_MANAGER_SERVER_PORT,
-        }
+      expect(mockedLogger.debug).toHaveBeenCalledWith(
+        `PortManagerServer running on port ${PORT_MANAGER_SERVER_PORT}`
       );
     });
 
@@ -502,7 +472,7 @@ describe('PortManagerServer', () => {
       PortManagerServer.app = mockExpressApp;
 
       // @ts-expect-error testing private method
-      await expect(PortManagerServer.listen()).rejects.toThrow('Listen failed');
+      await expect(PortManagerServer.listen()).rejects.toThrow(error);
     });
   });
 });
