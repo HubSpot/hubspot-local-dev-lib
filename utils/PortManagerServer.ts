@@ -8,7 +8,6 @@ import {
   MAX_PORT_NUMBER,
   PORT_MANAGER_SERVER_PORT,
 } from '../constants/ports';
-import { isSystemError } from '../errors';
 import { logger } from '../lib/logger';
 import { i18n } from './lang';
 import { BaseError } from '../types/Error';
@@ -46,20 +45,8 @@ class _PortManagerServer {
     this.app.use(cors());
     this.setupRoutes();
 
-    try {
-      this.server = await this.listen();
-      logger.debug(this.server);
-    } catch (e) {
-      if (isSystemError(e) && e.code === 'EADDRINUSE') {
-        throw new Error(
-          i18n(`${i18nKey}.errors.portInUse`, {
-            port: PORT_MANAGER_SERVER_PORT,
-          }),
-          { cause: e }
-        );
-      }
-      throw e;
-    }
+    this.server = await this.listen();
+    logger.debug(this.server);
   }
 
   private reset() {
