@@ -7,8 +7,8 @@ import { FILE_MAPPER_API_PATH } from '../api/fileMapper';
 import { i18n } from '../utils/lang';
 
 const i18nKey = 'lib.trackUsage';
-export const CMS_CLI_USAGE_PATH = `${FILE_MAPPER_API_PATH}/'cms-cli-usage'`;
-export const VSCODE_USAGE_PATH = `${FILE_MAPPER_API_PATH}/'vscode-extension-usage'`;
+export const CMS_CLI_USAGE_PATH = `${FILE_MAPPER_API_PATH}/cms-cli-usage`;
+export const VSCODE_USAGE_PATH = `${FILE_MAPPER_API_PATH}/vscode-extension-usage`;
 
 export async function trackUsage(
   eventName: string,
