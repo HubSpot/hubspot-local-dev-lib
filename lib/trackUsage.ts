@@ -7,6 +7,8 @@ import { FILE_MAPPER_API_PATH } from '../api/fileMapper';
 import { i18n } from '../utils/lang';
 
 const i18nKey = 'lib.trackUsage';
+export const CMS_CLI_USAGE_PATH = `${FILE_MAPPER_API_PATH}/cms-cli-usage`;
+export const VSCODE_USAGE_PATH = `${FILE_MAPPER_API_PATH}/vscode-extension-usage`;
 
 export async function trackUsage(
   eventName: string,
@@ -25,20 +27,18 @@ export async function trackUsage(
     CLI_INTERACTION: 'cli-interaction',
   };
 
-  let analyticsEndpoint;
+  let path = FILE_MAPPER_API_PATH;
 
   switch (eventName) {
     case EVENT_TYPES.CLI_INTERACTION:
-      analyticsEndpoint = 'cms-cli-usage';
+      path = CMS_CLI_USAGE_PATH;
       break;
     case EVENT_TYPES.VSCODE_EXTENSION_INTERACTION:
-      analyticsEndpoint = 'vscode-extension-usage';
+      path = VSCODE_USAGE_PATH;
       break;
     default:
       logger.debug(i18n(`${i18nKey}.invalidEvent`, { eventName }));
   }
-
-  const path = `${FILE_MAPPER_API_PATH}/${analyticsEndpoint}`;
 
   const accountConfig = accountId && getAccountConfig(accountId);
 

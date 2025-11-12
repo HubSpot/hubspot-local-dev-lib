@@ -20,31 +20,43 @@ import { i18n } from '../utils/lang';
 import { HubSpotHttpError } from '../models/HubSpotHttpError';
 import { LOCALDEVAUTH_ACCESS_TOKEN_PATH } from '../api/localDevAuth';
 import * as util from 'util';
+import { CMS_CLI_USAGE_PATH, VSCODE_USAGE_PATH } from '../lib/trackUsage';
 
 const i18nKey = 'http.index';
 
+const IGNORE_URLS_NETWORK_DEBUG = [
+  LOCALDEVAUTH_ACCESS_TOKEN_PATH,
+  CMS_CLI_USAGE_PATH,
+  VSCODE_USAGE_PATH,
+];
+
 function logRequest(response: AxiosResponse) {
   try {
-    if (process.env.HUBSPOT_NETWORK_LOGGING) {
-      if (response.config.url === LOCALDEVAUTH_ACCESS_TOKEN_PATH) {
-        // Don't log access tokens
-        return;
-      }
-      logger.debug(
-        util.inspect(
-          {
-            method: response.config.method,
-            baseURL: response.config.baseURL,
-            url: response.config.url,
-            data: response.data,
-            status: response.status,
-          },
-          false,
-          null,
-          true
-        )
-      );
+    if (!process.env.HUBSPOT_NETWORK_LOGGING) {
+      return;
     }
+
+    if (
+      response?.config?.url &&
+      IGNORE_URLS_NETWORK_DEBUG.includes(response.config.url)
+    ) {
+      return;
+    }
+
+    logger.debug(
+      util.inspect(
+        {
+          method: response.config.method,
+          baseURL: response.config.baseURL,
+          url: response.config.url,
+          data: response.data,
+          status: response.status,
+        },
+        false,
+        null,
+        true
+      )
+    );
   } catch (error) {
     // Ignore any errors that occur while logging the response
   }
