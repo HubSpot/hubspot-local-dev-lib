@@ -344,6 +344,9 @@
         }
       },
       "getCurrentState": {
+        "debug": {
+          "emptyStateFile": "State file is empty, using default state"
+        },
         "errors": {
           "errorReading": "Error reading CLI state, using defaults: {{ error }}"
         }

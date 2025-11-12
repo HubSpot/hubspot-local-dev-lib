@@ -42,7 +42,7 @@ export type GitInclusionResult = {
 
 export type ConfigFlag = ValueOf<typeof CONFIG_FLAGS>;
 
-export type CLIState = {
+export type HubSpotState = {
   mcpTotalToolCalls: number;
 };
 

@@ -8,7 +8,6 @@ import {
   MAX_PORT_NUMBER,
   PORT_MANAGER_SERVER_PORT,
 } from '../constants/ports';
-import { isSystemError } from '../errors';
 import { logger } from '../lib/logger';
 import { i18n } from './lang';
 import { BaseError } from '../types/Error';
@@ -29,6 +28,14 @@ class _PortManagerServer {
   }
 
   async init(): Promise<void> {
+    if (!(await this.portAvailable())) {
+      throw new Error(
+        i18n(`${i18nKey}.errors.portInUse`, {
+          port: PORT_MANAGER_SERVER_PORT,
+        })
+      );
+    }
+
     if (this.app) {
       throw new Error(i18n(`${i18nKey}.errors.duplicateInstance`));
     }
@@ -37,29 +44,23 @@ class _PortManagerServer {
     this.app.use(cors());
     this.setupRoutes();
 
-    try {
-      this.server = await this.listen();
-      logger.debug(this.server);
-    } catch (e) {
-      if (isSystemError(e) && e.code === 'EADDRINUSE') {
-        throw new Error(
-          i18n(`${i18nKey}.errors.portInUse`, {
-            port: PORT_MANAGER_SERVER_PORT,
-          }),
-          { cause: e }
-        );
-      }
-      throw e;
-    }
+    this.server = await this.listen();
+    logger.debug(this.server);
   }
 
-  reset() {
+  private reset() {
     this.app = undefined;
     this.server = undefined;
     this.serverPortMap = {};
   }
 
-  listen(): Promise<Server> {
+  async portAvailable(): Promise<boolean> {
+    return (
+      (await detectPort(PORT_MANAGER_SERVER_PORT)) === PORT_MANAGER_SERVER_PORT
+    );
+  }
+
+  private listen(): Promise<Server> {
     return new Promise<Server>((resolve, reject) => {
       const server = this.app!.listen(PORT_MANAGER_SERVER_PORT, () => {
         logger.debug(
@@ -74,7 +75,7 @@ class _PortManagerServer {
     });
   }
 
-  setupRoutes(): void {
+  private setupRoutes(): void {
     if (!this.app) {
       return;
     }
@@ -90,12 +91,12 @@ class _PortManagerServer {
     });
   }
 
-  setPort(instanceId: string, port: number) {
+  private setPort(instanceId: string, port: number) {
     logger.debug(i18n(`${i18nKey}.setPort`, { instanceId, port }));
     this.serverPortMap[instanceId] = port;
   }
 
-  deletePort(instanceId: string) {
+  private deletePort(instanceId: string) {
     logger.debug(
       i18n(`${i18nKey}.deletedPort`, {
         instanceId,
@@ -105,20 +106,20 @@ class _PortManagerServer {
     delete this.serverPortMap[instanceId];
   }
 
-  send404(res: Response, instanceId: string) {
+  private send404(res: Response, instanceId: string) {
     res
       .status(404)
       .send(i18n(`${i18nKey}.errors.404`, { instanceId: instanceId }));
   }
 
-  getServers = async (req: Request, res: Response): Promise<void> => {
+  private getServers = async (req: Request, res: Response): Promise<void> => {
     res.send({
       servers: this.serverPortMap,
       count: Object.keys(this.serverPortMap).length,
     });
   };
 
-  getServerPortByInstanceId = (req: Request, res: Response): void => {
+  private getServerPortByInstanceId = (req: Request, res: Response): void => {
     const { instanceId } = req.params;
     const port = this.serverPortMap[instanceId];
 
@@ -129,7 +130,7 @@ class _PortManagerServer {
     }
   };
 
-  assignPortsToServers = async (
+  private assignPortsToServers = async (
     req: Request<never, never, { portData: Array<RequestPortsData> }>,
     res: Response
   ): Promise<void> => {
@@ -181,7 +182,7 @@ class _PortManagerServer {
     res.send({ ports });
   };
 
-  deleteServerInstance = (req: Request, res: Response): void => {
+  private deleteServerInstance = (req: Request, res: Response): void => {
     const { instanceId } = req.params;
     const port = this.serverPortMap[instanceId];
 
@@ -193,7 +194,7 @@ class _PortManagerServer {
     }
   };
 
-  closeServer = (req: Request, res: Response): void => {
+  private closeServer = (req: Request, res: Response): void => {
     if (this.server) {
       logger.debug(i18n(`${i18nKey}.close`));
       res.sendStatus(200);
