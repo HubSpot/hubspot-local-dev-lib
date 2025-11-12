@@ -13,10 +13,11 @@ import {
 import { Environment } from '../types/Config';
 import {
   getConfigAccountById,
-  getConfigAccountByName,
+  getConfigAccountIfExists,
+  getConfigDefaultAccountIfExists,
   updateConfigAccount,
+  addConfigAccount,
   setConfigAccountAsDefault,
-  getConfigDefaultAccount,
 } from '../config';
 import { HUBSPOT_ACCOUNT_TYPES } from '../constants/config';
 import { fetchDeveloperTestAccountData } from '../api/developerTestAccounts';
@@ -183,9 +184,9 @@ export async function updateConfigWithAccessToken(
 ): Promise<PersonalAccessKeyConfigAccount> {
   const { portalId, accessToken, expiresAt, accountType } = token;
   const account = name
-    ? getConfigAccountByName(name)
-    : getConfigDefaultAccount();
-  const accountEnv = env || account.env;
+    ? getConfigAccountIfExists(name)
+    : getConfigDefaultAccountIfExists();
+  const accountEnv = env || account?.env || ENVIRONMENTS.PROD;
 
   let parentAccountId;
   try {
@@ -230,17 +231,22 @@ export async function updateConfigWithAccessToken(
     accountId: portalId,
     accountType,
     personalAccessKey,
-    name: name || account.name,
+    name: name || account?.name || token.hubName,
     authType: PERSONAL_ACCESS_KEY_AUTH_METHOD.value,
     auth: { tokenInfo: { accessToken, expiresAt } },
     parentAccountId,
     env: accountEnv,
   };
 
-  updateConfigAccount(updatedAccount);
+  // Add new account if it doesn't exist, otherwise update existing account
+  if (account) {
+    updateConfigAccount(updatedAccount);
+  } else {
+    addConfigAccount(updatedAccount);
+  }
 
-  if (makeDefault && name) {
-    setConfigAccountAsDefault(name);
+  if (makeDefault) {
+    setConfigAccountAsDefault(updatedAccount.accountId);
   }
 
   return updatedAccount;
