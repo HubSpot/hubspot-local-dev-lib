@@ -17,7 +17,7 @@
     "prettier:write": "prettier . --write",
     "release": "ts-node ./scripts/release.ts release",
     "test": "NODE_NO_WARNINGS=1 node --experimental-vm-modules ./node_modules/.bin/jest",
-    "test:acceptance": "npm test --prefix acceptance-tests"
+    "test:acceptance": "yarn --cwd acceptance-tests test"
   },
   "license": "Apache-2.0",
   "devDependencies": {
