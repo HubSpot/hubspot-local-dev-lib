@@ -21,3 +21,5 @@ jobs:
       - run: yarn install --no-lockfile
       - run: yarn build
       - run: yarn test
+      - run: yarn install --no-lockfile --cwd acceptance-tests
+      - run: yarn test:acceptance

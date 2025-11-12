@@ -22,5 +22,10 @@
     "types",
     "utils"
   ],
-  "exclude": ["node_modules", "**/__tests__/*", "**/__mocks__/*"]
+  "exclude": [
+    "node_modules",
+    "**/__tests__/*",
+    "**/__mocks__/*",
+    "acceptance-tests"
+  ]
 }

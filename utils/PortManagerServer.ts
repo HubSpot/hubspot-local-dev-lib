@@ -44,7 +44,7 @@ class _PortManagerServer {
     this.app.use(cors());
     this.setupRoutes();
 
-    this.server = await this.listen();
+    await this.listen();
     logger.debug(this.server);
   }
 
@@ -60,16 +60,17 @@ class _PortManagerServer {
     );
   }
 
-  private listen(): Promise<Server> {
-    return new Promise<Server>((resolve, reject) => {
-      const server = this.app!.listen(PORT_MANAGER_SERVER_PORT, () => {
+  private listen(): Promise<Server | undefined> {
+    return new Promise<Server | undefined>((resolve, reject) => {
+      this.server = this.app!.listen(PORT_MANAGER_SERVER_PORT, () => {
         logger.debug(
           i18n(`${i18nKey}.started`, {
             port: PORT_MANAGER_SERVER_PORT,
           })
         );
-        resolve(server);
-      }).on('error', (err: BaseError) => {
+        resolve(this.server);
+      });
+      this.server.on('error', (err: BaseError) => {
         reject(err);
       });
     });
@@ -86,10 +87,12 @@ class _PortManagerServer {
     this.app.delete('/servers/:instanceId', this.deleteServerInstance);
     this.app.post('/close', this.closeServer);
 
-    this.app.use(HEALTH_CHECK_PATH, (req, res) => {
-      res.status(200).send({ status: SERVICE_HEALTHY });
-    });
+    this.app.use(HEALTH_CHECK_PATH, this.healthCheck);
   }
+
+  private healthCheck = (req: Request, res: Response): void => {
+    res.status(200).send({ status: SERVICE_HEALTHY });
+  };
 
   private setPort(instanceId: string, port: number) {
     logger.debug(i18n(`${i18nKey}.setPort`, { instanceId, port }));

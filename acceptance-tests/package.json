@@ -1,0 +1,14 @@
+{
+  "name": "@hubspot/local-dev-lib-acceptance-tests",
+  "version": "1.0.0",
+  "description": "Acceptance tests for @hubspot/local-dev-lib",
+  "private": true,
+  "scripts": {
+    "test": "vitest run --config vite.config.ts",
+    "test:watch": "vitest --config vite.config.ts"
+  },
+  "devDependencies": {
+    "axios": "1.12.0",
+    "vitest": "^4.0.0"
+  }
+}
