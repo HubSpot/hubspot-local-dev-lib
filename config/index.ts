@@ -2,6 +2,7 @@ import fs from 'fs-extra';
 
 import {
   ACCOUNT_IDENTIFIERS,
+  ENVIRONMENT_VARIABLES,
   HUBSPOT_CONFIG_OPERATIONS,
   MIN_HTTP_TIMEOUT,
 } from '../constants/config';
@@ -37,6 +38,14 @@ export function localConfigFileExists(): boolean {
 
 export function globalConfigFileExists(): boolean {
   return fs.existsSync(getGlobalConfigFilePath());
+}
+
+export function configFileExists(): boolean {
+  try {
+    return fs.existsSync(getConfigFilePath());
+  } catch (error) {
+    return false;
+  }
 }
 
 function getConfigDefaultFilePath(): string {
