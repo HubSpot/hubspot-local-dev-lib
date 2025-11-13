@@ -210,7 +210,9 @@ export function getConfigDefaultAccount(): HubSpotConfigAccount {
 
   let defaultAccountToUse = defaultAccount;
 
-  if (globalConfigFileExists()) {
+  const currentConfigPath = getConfigFilePath();
+  const globalConfigPath = getGlobalConfigFilePath();
+  if (currentConfigPath === globalConfigPath && globalConfigFileExists()) {
     const defaultAccountOverrideAccountId =
       getDefaultAccountOverrideAccountId();
     defaultAccountToUse = defaultAccountOverrideAccountId || defaultAccount;
@@ -249,7 +251,10 @@ export function getConfigDefaultAccountIfExists():
 
   let defaultAccountToUse = defaultAccount;
 
-  if (globalConfigFileExists()) {
+  // Only check for default account override if we're using the global config
+  const currentConfigPath = getConfigFilePath();
+  const globalConfigPath = getGlobalConfigFilePath();
+  if (currentConfigPath === globalConfigPath && globalConfigFileExists()) {
     const defaultAccountOverrideAccountId =
       getDefaultAccountOverrideAccountId();
     defaultAccountToUse = defaultAccountOverrideAccountId || defaultAccount;
