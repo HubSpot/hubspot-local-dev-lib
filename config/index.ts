@@ -1,331 +1,599 @@
-import * as config_DEPRECATED from './config_DEPRECATED';
-import { CLIConfiguration } from './CLIConfiguration';
+import fs from 'fs-extra';
+
 import {
-  configFileExists as newConfigFileExists,
-  getConfigFilePath,
-  deleteConfigFile as newDeleteConfigFile,
-} from './configFile';
-import { CLIConfig_NEW, CLIConfig } from '../types/Config';
-import { CLIOptions, WriteConfigOptions } from '../types/CLIOptions';
-import {
-  AccountType,
-  CLIAccount,
-  CLIAccount_NEW,
-  CLIAccount_DEPRECATED,
-  FlatAccountFields,
-} from '../types/Accounts';
-import { getAccountIdentifier } from './getAccountIdentifier';
+  ACCOUNT_IDENTIFIERS,
+  ENVIRONMENT_VARIABLES,
+  HUBSPOT_CONFIG_OPERATIONS,
+  MIN_HTTP_TIMEOUT,
+} from '../constants/config';
+import { HubSpotConfigAccount } from '../types/Accounts';
+import { HubSpotConfig, ConfigFlag } from '../types/Config';
 import { CmsPublishMode } from '../types/Files';
+import { logger } from '../lib/logger';
+import {
+  getGlobalConfigFilePath,
+  getLocalConfigFilePath,
+  readConfigFile,
+  parseConfig,
+  buildConfigFromEnvironment,
+  writeConfigFile,
+  getLocalConfigDefaultFilePath,
+  getConfigAccountByIdentifier,
+  isConfigAccountValid,
+  getConfigAccountIndexById,
+  getConfigPathEnvironmentVariables,
+  getConfigAccountByInferredIdentifier,
+} from './utils';
+import { CMS_PUBLISH_MODE } from '../constants/files';
+import { Environment } from '../types/Config';
+import { i18n } from '../utils/lang';
+import { getDefaultAccountOverrideAccountId } from './defaultAccountOverride';
+import { getValidEnv } from '../lib/environment';
+import { HubSpotConfigError } from '../models/HubSpotConfigError';
+import { HUBSPOT_CONFIG_ERROR_TYPES } from '../constants/config';
 
-// Use new config if it exists
-export function loadConfig(
-  path: string,
-  options: CLIOptions = {}
-): CLIConfig | null {
-  // Attempt to load the root config
-  if (newConfigFileExists()) {
-    return CLIConfiguration.init(options);
-  }
-  return config_DEPRECATED.loadConfig(path, options);
+export function localConfigFileExists(): boolean {
+  return Boolean(getLocalConfigFilePath());
 }
 
-export function getAndLoadConfigIfNeeded(
-  options?: CLIOptions
-): Partial<CLIConfig> | null {
-  if (CLIConfiguration.isActive()) {
-    return CLIConfiguration.config;
-  }
-  return config_DEPRECATED.getAndLoadConfigIfNeeded(options);
+export function globalConfigFileExists(): boolean {
+  return fs.existsSync(getGlobalConfigFilePath());
 }
 
-export function validateConfig(): boolean {
-  if (CLIConfiguration.isActive()) {
-    return CLIConfiguration.validate();
-  }
-  return config_DEPRECATED.validateConfig();
-}
-
-export function loadConfigFromEnvironment(): boolean {
-  if (CLIConfiguration.isActive()) {
-    return CLIConfiguration.useEnvConfig;
-  }
-  return Boolean(config_DEPRECATED.loadConfigFromEnvironment());
-}
-
-export function createEmptyConfigFile(
-  options: { path?: string } = {},
-  useHiddenConfig = false
-): void {
-  if (useHiddenConfig) {
-    CLIConfiguration.write({ accounts: [] });
-  } else {
-    return config_DEPRECATED.createEmptyConfigFile(options);
+export function configFileExists(): boolean {
+  try {
+    return fs.existsSync(getConfigFilePath());
+  } catch (error) {
+    return false;
   }
 }
 
-export function deleteEmptyConfigFile() {
-  if (CLIConfiguration.isActive()) {
-    return CLIConfiguration.delete();
+function getConfigDefaultFilePath(): string {
+  const globalConfigFilePath = getGlobalConfigFilePath();
+
+  if (fs.existsSync(globalConfigFilePath)) {
+    return globalConfigFilePath;
   }
-  return config_DEPRECATED.deleteEmptyConfigFile();
+
+  const localConfigFilePath = getLocalConfigFilePath();
+
+  if (!localConfigFilePath) {
+    throw new HubSpotConfigError(
+      i18n('config.getDefaultConfigFilePath.error'),
+      HUBSPOT_CONFIG_ERROR_TYPES.CONFIG_NOT_FOUND,
+      HUBSPOT_CONFIG_OPERATIONS.READ
+    );
+  }
+
+  return localConfigFilePath;
 }
 
-export function getConfig(): CLIConfig | null {
-  if (CLIConfiguration.isActive()) {
-    return CLIConfiguration.config;
-  }
-  return config_DEPRECATED.getConfig();
+export function getConfigFilePath(): string {
+  const { configFilePathFromEnvironment } = getConfigPathEnvironmentVariables();
+
+  return configFilePathFromEnvironment || getConfigDefaultFilePath();
 }
 
-export function writeConfig(options: WriteConfigOptions = {}): void {
-  if (CLIConfiguration.isActive()) {
-    const config = options.source
-      ? (JSON.parse(options.source) as CLIConfig_NEW)
-      : undefined;
-    CLIConfiguration.write(config);
-  } else {
-    config_DEPRECATED.writeConfig(options);
+export function getConfig(): HubSpotConfig {
+  let pathToRead: string | undefined;
+  try {
+    const { useEnvironmentConfig } = getConfigPathEnvironmentVariables();
+
+    if (useEnvironmentConfig) {
+      return buildConfigFromEnvironment();
+    }
+
+    pathToRead = getConfigFilePath();
+
+    logger.debug(i18n('config.getConfig.reading', { path: pathToRead }));
+    const configFileSource = readConfigFile(pathToRead);
+
+    return parseConfig(configFileSource, pathToRead);
+  } catch (err) {
+    throw new HubSpotConfigError(
+      pathToRead
+        ? i18n('config.getConfig.errorWithPath', { path: pathToRead })
+        : i18n('config.getConfig.error'),
+      HUBSPOT_CONFIG_ERROR_TYPES.CONFIG_NOT_FOUND,
+      HUBSPOT_CONFIG_OPERATIONS.READ,
+      { cause: err }
+    );
   }
 }
 
-export function getConfigPath(
-  path?: string,
-  useHiddenConfig = false
-): string | null {
-  if (useHiddenConfig || CLIConfiguration.isActive()) {
-    return getConfigFilePath();
-  }
-  return config_DEPRECATED.getConfigPath(path);
-}
+export function isConfigValid(): boolean {
+  const config = getConfig();
 
-export function configFileExists(useHiddenConfig?: boolean): boolean {
-  return useHiddenConfig
-    ? newConfigFileExists()
-    : Boolean(config_DEPRECATED.getConfigPath());
-}
-
-export function getAccountConfig(accountId?: number): CLIAccount | null {
-  if (CLIConfiguration.isActive()) {
-    return CLIConfiguration.getAccount(accountId);
+  if (config.accounts.length === 0) {
+    logger.debug(i18n('config.isConfigValid.missingAccounts'));
+    return false;
   }
-  return config_DEPRECATED.getAccountConfig(accountId) || null;
-}
 
-export function accountNameExistsInConfig(name: string): boolean {
-  if (CLIConfiguration.isActive()) {
-    return CLIConfiguration.isAccountInConfig(name);
-  }
-  return config_DEPRECATED.accountNameExistsInConfig(name);
-}
+  const accountIdsMap: { [key: number]: boolean } = {};
+  const accountNamesMap: { [key: string]: boolean } = {};
 
-export function updateAccountConfig(
-  configOptions: Partial<FlatAccountFields>
-): FlatAccountFields | null {
-  const accountIdentifier = getAccountIdentifier(configOptions);
-  if (CLIConfiguration.isActive()) {
-    return CLIConfiguration.addOrUpdateAccount({
-      ...configOptions,
-      accountId: accountIdentifier,
-    });
-  }
-  return config_DEPRECATED.updateAccountConfig({
-    ...configOptions,
-    portalId: accountIdentifier,
+  return config.accounts.every(account => {
+    if (!isConfigAccountValid(account)) {
+      return false;
+    }
+    if (accountIdsMap[account.accountId]) {
+      logger.debug(
+        i18n('config.isConfigValid.duplicateAccountIds', {
+          accountId: account.accountId,
+        })
+      );
+      return false;
+    }
+    if (account.name) {
+      if (accountNamesMap[account.name.toLowerCase()]) {
+        logger.debug(
+          i18n('config.isConfigValid.duplicateAccountNames', {
+            accountName: account.name,
+          })
+        );
+        return false;
+      }
+      if (/\s+/.test(account.name)) {
+        logger.debug(
+          i18n('config.isConfigValid.invalidAccountName', {
+            accountName: account.name,
+          })
+        );
+        return false;
+      }
+      accountNamesMap[account.name] = true;
+    }
+
+    accountIdsMap[account.accountId] = true;
+    return true;
   });
 }
 
-export function updateDefaultAccount(nameOrId: string | number): void {
-  if (CLIConfiguration.isActive()) {
-    CLIConfiguration.updateDefaultAccount(nameOrId);
-  } else {
-    config_DEPRECATED.updateDefaultAccount(nameOrId);
-  }
-}
+export function createEmptyConfigFile(useGlobalConfig = false): void {
+  const { configFilePathFromEnvironment } = getConfigPathEnvironmentVariables();
+  const defaultPath = useGlobalConfig
+    ? getGlobalConfigFilePath()
+    : getLocalConfigDefaultFilePath();
 
-export async function renameAccount(
-  currentName: string,
-  newName: string
-): Promise<void> {
-  if (CLIConfiguration.isActive()) {
-    return CLIConfiguration.renameAccount(currentName, newName);
-  } else {
-    return config_DEPRECATED.renameAccount(currentName, newName);
-  }
-}
+  const pathToWrite = configFilePathFromEnvironment || defaultPath;
 
-export function getAccountId(nameOrId?: string | number): number | null {
-  if (CLIConfiguration.isActive()) {
-    return CLIConfiguration.getAccountId(nameOrId);
-  }
-  return config_DEPRECATED.getAccountId(nameOrId) || null;
-}
-
-export function removeSandboxAccountFromConfig(
-  nameOrId: string | number
-): boolean {
-  if (CLIConfiguration.isActive()) {
-    return CLIConfiguration.removeAccountFromConfig(nameOrId);
-  }
-  return config_DEPRECATED.removeSandboxAccountFromConfig(nameOrId);
-}
-
-export async function deleteAccount(
-  accountName: string
-): Promise<void | boolean> {
-  if (CLIConfiguration.isActive()) {
-    return CLIConfiguration.removeAccountFromConfig(accountName);
-  } else {
-    return config_DEPRECATED.deleteAccount(accountName);
-  }
-}
-
-export function updateHttpTimeout(timeout: string): void {
-  if (CLIConfiguration.isActive()) {
-    CLIConfiguration.updateHttpTimeout(timeout);
-  } else {
-    config_DEPRECATED.updateHttpTimeout(timeout);
-  }
-}
-
-export function updateAllowAutoUpdates(enabled: boolean): void {
-  if (CLIConfiguration.isActive()) {
-    CLIConfiguration.updateAllowAutoUpdates(enabled);
-  } else {
-    config_DEPRECATED.updateAllowAutoUpdates(enabled);
-  }
-}
-
-export function updateAllowUsageTracking(isEnabled: boolean): void {
-  if (CLIConfiguration.isActive()) {
-    CLIConfiguration.updateAllowUsageTracking(isEnabled);
-  } else {
-    config_DEPRECATED.updateAllowUsageTracking(isEnabled);
-  }
-}
-
-export function updateAutoOpenBrowser(isEnabled: boolean): void {
-  if (CLIConfiguration.isActive()) {
-    CLIConfiguration.updateAutoOpenBrowser(isEnabled);
-  } else {
-    config_DEPRECATED.updateAutoOpenBrowser(isEnabled);
-  }
+  writeConfigFile({ accounts: [] }, pathToWrite);
 }
 
 export function deleteConfigFile(): void {
-  if (CLIConfiguration.isActive()) {
-    newDeleteConfigFile();
-  } else {
-    config_DEPRECATED.deleteConfigFile();
-  }
+  const pathToDelete = getConfigFilePath();
+  fs.unlinkSync(pathToDelete);
 }
 
-export function isConfigFlagEnabled(
-  flag: keyof CLIConfig,
-  defaultValue = false
-): boolean {
-  if (CLIConfiguration.isActive()) {
-    return CLIConfiguration.isConfigFlagEnabled(flag, defaultValue);
+export function getConfigAccountById(accountId: number): HubSpotConfigAccount {
+  const { accounts } = getConfig();
+
+  const account = getConfigAccountByIdentifier(
+    accounts,
+    ACCOUNT_IDENTIFIERS.ACCOUNT_ID,
+    accountId
+  );
+
+  if (!account) {
+    throw new HubSpotConfigError(
+      i18n('config.getConfigAccountById.error', { accountId }),
+      HUBSPOT_CONFIG_ERROR_TYPES.ACCOUNT_NOT_FOUND,
+      HUBSPOT_CONFIG_OPERATIONS.READ
+    );
   }
-  return config_DEPRECATED.isConfigFlagEnabled(flag, defaultValue);
+
+  return account;
 }
 
-export function isTrackingAllowed() {
-  if (CLIConfiguration.isActive()) {
-    return CLIConfiguration.isTrackingAllowed();
+export function getConfigAccountByName(
+  accountName: string
+): HubSpotConfigAccount {
+  const { accounts } = getConfig();
+
+  const account = getConfigAccountByIdentifier(
+    accounts,
+    ACCOUNT_IDENTIFIERS.NAME,
+    accountName
+  );
+
+  if (!account) {
+    throw new HubSpotConfigError(
+      i18n('config.getConfigAccountByName.error', { accountName }),
+      HUBSPOT_CONFIG_ERROR_TYPES.ACCOUNT_NOT_FOUND,
+      HUBSPOT_CONFIG_OPERATIONS.READ
+    );
   }
-  return config_DEPRECATED.isTrackingAllowed();
+
+  return account;
 }
 
-export function getEnv(nameOrId?: string | number) {
-  if (CLIConfiguration.isActive()) {
-    return CLIConfiguration.getEnv(nameOrId);
-  }
-  return config_DEPRECATED.getEnv(nameOrId);
+export function getConfigAccountIfExists(
+  identifier: number | string
+): HubSpotConfigAccount | undefined {
+  const config = getConfig();
+  return getConfigAccountByInferredIdentifier(config.accounts, identifier);
 }
 
-export function getAccountType(
-  accountType?: AccountType,
-  sandboxAccountType?: string | null
-): AccountType {
-  if (CLIConfiguration.isActive()) {
-    return CLIConfiguration.getAccountType(accountType, sandboxAccountType);
+export function getConfigDefaultAccount(): HubSpotConfigAccount {
+  const { accounts, defaultAccount } = getConfig();
+
+  let defaultAccountToUse = defaultAccount;
+
+  const currentConfigPath = getConfigFilePath();
+  const globalConfigPath = getGlobalConfigFilePath();
+  if (currentConfigPath === globalConfigPath && globalConfigFileExists()) {
+    const defaultAccountOverrideAccountId =
+      getDefaultAccountOverrideAccountId();
+    defaultAccountToUse = defaultAccountOverrideAccountId || defaultAccount;
   }
-  return config_DEPRECATED.getAccountType(accountType, sandboxAccountType);
+
+  if (!defaultAccountToUse) {
+    throw new HubSpotConfigError(
+      i18n('config.getConfigDefaultAccount.fieldMissingError'),
+      HUBSPOT_CONFIG_ERROR_TYPES.NO_DEFAULT_ACCOUNT,
+      HUBSPOT_CONFIG_OPERATIONS.READ
+    );
+  }
+
+  const account = getConfigAccountByInferredIdentifier(
+    accounts,
+    defaultAccountToUse
+  );
+
+  if (!account) {
+    throw new HubSpotConfigError(
+      i18n('config.getConfigDefaultAccount.accountMissingError', {
+        defaultAccountToUse,
+      }),
+      HUBSPOT_CONFIG_ERROR_TYPES.ACCOUNT_NOT_FOUND,
+      HUBSPOT_CONFIG_OPERATIONS.READ
+    );
+  }
+
+  return account;
 }
 
-export function getConfigDefaultAccount(): string | number | null | undefined {
-  if (CLIConfiguration.isActive()) {
-    return CLIConfiguration.getDefaultAccount();
-  }
-  return config_DEPRECATED.getConfigDefaultAccount();
-}
-
-export function getDisplayDefaultAccount(): string | number | null | undefined {
-  if (CLIConfiguration.isActive()) {
-    return CLIConfiguration.config?.defaultAccount;
-  }
-  return config_DEPRECATED.getConfigDefaultAccount();
-}
-
-export function getConfigAccounts():
-  | Array<CLIAccount_NEW>
-  | Array<CLIAccount_DEPRECATED>
-  | null
+export function getConfigDefaultAccountIfExists():
+  | HubSpotConfigAccount
   | undefined {
-  if (CLIConfiguration.isActive()) {
-    return CLIConfiguration.getConfigAccounts();
+  const { accounts, defaultAccount } = getConfig();
+
+  let defaultAccountToUse = defaultAccount;
+
+  // Only check for default account override if we're using the global config
+  const currentConfigPath = getConfigFilePath();
+  const globalConfigPath = getGlobalConfigFilePath();
+  if (currentConfigPath === globalConfigPath && globalConfigFileExists()) {
+    const defaultAccountOverrideAccountId =
+      getDefaultAccountOverrideAccountId();
+    defaultAccountToUse = defaultAccountOverrideAccountId || defaultAccount;
   }
-  return config_DEPRECATED.getConfigAccounts();
+
+  if (!defaultAccountToUse) {
+    return;
+  }
+
+  const account = getConfigAccountByInferredIdentifier(
+    accounts,
+    defaultAccountToUse
+  );
+
+  return account;
+}
+
+export function getAllConfigAccounts(): HubSpotConfigAccount[] {
+  const { accounts } = getConfig();
+
+  return accounts;
+}
+
+export function getConfigAccountEnvironment(
+  identifier?: number | string
+): Environment {
+  if (identifier) {
+    const config = getConfig();
+
+    const account = getConfigAccountByInferredIdentifier(
+      config.accounts,
+      identifier
+    );
+
+    if (account) {
+      return getValidEnv(account.env);
+    }
+  }
+  const defaultAccount = getConfigDefaultAccount();
+  return getValidEnv(defaultAccount.env);
+}
+
+export function addConfigAccount(accountToAdd: HubSpotConfigAccount): void {
+  if (!isConfigAccountValid(accountToAdd)) {
+    throw new HubSpotConfigError(
+      i18n('config.addConfigAccount.invalidAccount'),
+      HUBSPOT_CONFIG_ERROR_TYPES.INVALID_ACCOUNT,
+      HUBSPOT_CONFIG_OPERATIONS.WRITE
+    );
+  }
+
+  const config = getConfig();
+
+  const accountInConfig = getConfigAccountByIdentifier(
+    config.accounts,
+    ACCOUNT_IDENTIFIERS.ACCOUNT_ID,
+    accountToAdd.accountId
+  );
+
+  if (accountInConfig) {
+    throw new HubSpotConfigError(
+      i18n('config.addConfigAccount.duplicateAccount', {
+        accountId: accountToAdd.accountId,
+      }),
+      HUBSPOT_CONFIG_ERROR_TYPES.INVALID_ACCOUNT,
+      HUBSPOT_CONFIG_OPERATIONS.WRITE
+    );
+  }
+
+  config.accounts.push(accountToAdd);
+
+  writeConfigFile(config, getConfigFilePath());
+}
+
+export function updateConfigAccount(
+  updatedAccount: HubSpotConfigAccount
+): void {
+  if (!isConfigAccountValid(updatedAccount)) {
+    throw new HubSpotConfigError(
+      i18n('config.updateConfigAccount.invalidAccount', {
+        name: updatedAccount.name,
+      }),
+      HUBSPOT_CONFIG_ERROR_TYPES.INVALID_ACCOUNT,
+      HUBSPOT_CONFIG_OPERATIONS.WRITE
+    );
+  }
+
+  const config = getConfig();
+
+  const accountIndex = getConfigAccountIndexById(
+    config.accounts,
+    updatedAccount.accountId
+  );
+
+  if (accountIndex < 0) {
+    throw new HubSpotConfigError(
+      i18n('config.updateConfigAccount.accountNotFound', {
+        accountId: updatedAccount.accountId,
+      }),
+      HUBSPOT_CONFIG_ERROR_TYPES.ACCOUNT_NOT_FOUND,
+      HUBSPOT_CONFIG_OPERATIONS.WRITE
+    );
+  }
+
+  config.accounts[accountIndex] = updatedAccount;
+
+  writeConfigFile(config, getConfigFilePath());
+}
+
+export function setConfigAccountAsDefault(identifier: number | string): void {
+  const config = getConfig();
+
+  const account = getConfigAccountByInferredIdentifier(
+    config.accounts,
+    identifier
+  );
+
+  if (!account) {
+    throw new HubSpotConfigError(
+      i18n('config.setConfigAccountAsDefault.accountNotFound', {
+        accountId: identifier,
+      }),
+      HUBSPOT_CONFIG_ERROR_TYPES.ACCOUNT_NOT_FOUND,
+      HUBSPOT_CONFIG_OPERATIONS.WRITE
+    );
+  }
+
+  config.defaultAccount = account.accountId;
+  writeConfigFile(config, getConfigFilePath());
+}
+
+export function renameConfigAccount(
+  currentName: string,
+  newName: string
+): void {
+  const config = getConfig();
+
+  const account = getConfigAccountByIdentifier(
+    config.accounts,
+    ACCOUNT_IDENTIFIERS.NAME,
+    currentName
+  );
+
+  if (!account) {
+    throw new HubSpotConfigError(
+      i18n('config.renameConfigAccount.accountNotFound', {
+        currentName,
+      }),
+      HUBSPOT_CONFIG_ERROR_TYPES.ACCOUNT_NOT_FOUND,
+      HUBSPOT_CONFIG_OPERATIONS.WRITE
+    );
+  }
+
+  const duplicateAccount = getConfigAccountByIdentifier(
+    config.accounts,
+    ACCOUNT_IDENTIFIERS.NAME,
+    newName
+  );
+
+  if (duplicateAccount) {
+    throw new HubSpotConfigError(
+      i18n('config.renameConfigAccount.duplicateAccount', {
+        currentName,
+        newName,
+      }),
+      HUBSPOT_CONFIG_ERROR_TYPES.INVALID_ACCOUNT,
+      HUBSPOT_CONFIG_OPERATIONS.WRITE
+    );
+  }
+
+  account.name = newName;
+
+  writeConfigFile(config, getConfigFilePath());
+}
+
+export function removeAccountFromConfig(accountId: number): void {
+  const config = getConfig();
+
+  const index = getConfigAccountIndexById(config.accounts, accountId);
+
+  if (index < 0) {
+    throw new HubSpotConfigError(
+      i18n('config.removeAccountFromConfig.accountNotFound', {
+        accountId,
+      }),
+      HUBSPOT_CONFIG_ERROR_TYPES.ACCOUNT_NOT_FOUND,
+      HUBSPOT_CONFIG_OPERATIONS.WRITE
+    );
+  }
+
+  config.accounts.splice(index, 1);
+
+  if (config.defaultAccount === accountId) {
+    delete config.defaultAccount;
+  }
+
+  writeConfigFile(config, getConfigFilePath());
+}
+
+export function updateHttpTimeout(timeout: string | number): void {
+  const parsedTimeout =
+    typeof timeout === 'string' ? parseInt(timeout) : timeout;
+
+  if (isNaN(parsedTimeout) || parsedTimeout < MIN_HTTP_TIMEOUT) {
+    throw new HubSpotConfigError(
+      i18n('config.updateHttpTimeout.invalidTimeout', {
+        minTimeout: MIN_HTTP_TIMEOUT,
+        timeout: parsedTimeout,
+      }),
+      HUBSPOT_CONFIG_ERROR_TYPES.INVALID_FIELD,
+      HUBSPOT_CONFIG_OPERATIONS.WRITE
+    );
+  }
+
+  const config = getConfig();
+
+  config.httpTimeout = parsedTimeout;
+
+  writeConfigFile(config, getConfigFilePath());
+}
+
+export function updateAllowUsageTracking(isAllowed: boolean): void {
+  if (typeof isAllowed !== 'boolean') {
+    throw new HubSpotConfigError(
+      i18n('config.updateAllowUsageTracking.invalidInput', {
+        isAllowed: `${isAllowed}`,
+      }),
+      HUBSPOT_CONFIG_ERROR_TYPES.INVALID_FIELD,
+      HUBSPOT_CONFIG_OPERATIONS.WRITE
+    );
+  }
+
+  const config = getConfig();
+
+  config.allowUsageTracking = isAllowed;
+
+  writeConfigFile(config, getConfigFilePath());
+}
+
+export function updateAllowAutoUpdates(isEnabled: boolean): void {
+  if (typeof isEnabled !== 'boolean') {
+    throw new HubSpotConfigError(
+      i18n('config.updateAllowAutoUpdates.invalidInput', {
+        isEnabled: `${isEnabled}`,
+      }),
+      HUBSPOT_CONFIG_ERROR_TYPES.INVALID_FIELD,
+      HUBSPOT_CONFIG_OPERATIONS.WRITE
+    );
+  }
+  const config = getConfig();
+
+  config.allowAutoUpdates = isEnabled;
+
+  writeConfigFile(config, getConfigFilePath());
+}
+
+export function updateAutoOpenBrowser(isEnabled: boolean): void {
+  if (typeof isEnabled !== 'boolean') {
+    throw new HubSpotConfigError(
+      i18n('config.updateAutoOpenBrowser.invalidInput', {
+        isEnabled: `${isEnabled}`,
+      }),
+      HUBSPOT_CONFIG_ERROR_TYPES.INVALID_FIELD,
+      HUBSPOT_CONFIG_OPERATIONS.WRITE
+    );
+  }
+
+  const config = getConfig();
+
+  config.autoOpenBrowser = isEnabled;
+
+  writeConfigFile(config, getConfigFilePath());
 }
 
 export function updateDefaultCmsPublishMode(
   cmsPublishMode: CmsPublishMode
-): void | CLIConfig_NEW | null {
-  if (CLIConfiguration.isActive()) {
-    return CLIConfiguration.updateDefaultCmsPublishMode(cmsPublishMode);
+): void {
+  if (
+    !cmsPublishMode ||
+    !Object.values(CMS_PUBLISH_MODE).includes(cmsPublishMode)
+  ) {
+    throw new HubSpotConfigError(
+      i18n('config.updateDefaultCmsPublishMode.invalidCmsPublishMode', {
+        cmsPublishMode,
+      }),
+      HUBSPOT_CONFIG_ERROR_TYPES.INVALID_FIELD,
+      HUBSPOT_CONFIG_OPERATIONS.WRITE
+    );
   }
-  return config_DEPRECATED.updateDefaultCmsPublishMode(cmsPublishMode);
+
+  const config = getConfig();
+
+  config.defaultCmsPublishMode = cmsPublishMode;
+
+  writeConfigFile(config, getConfigFilePath());
 }
 
-export function getCWDAccountOverride() {
-  if (CLIConfiguration.isActive()) {
-    return CLIConfiguration.getCWDAccountOverride();
-  }
-}
+export function isConfigFlagEnabled(
+  flag: ConfigFlag,
+  defaultValue?: boolean
+): boolean {
+  const config = getConfig();
 
-export function getDefaultAccountOverrideFilePath() {
-  if (CLIConfiguration.isActive()) {
-    return CLIConfiguration.getDefaultAccountOverrideFilePath();
+  if (typeof config[flag] === 'undefined') {
+    return defaultValue || false;
   }
+
+  return Boolean(config[flag]);
 }
 
 export function hasLocalStateFlag(flag: string): boolean {
-  if (CLIConfiguration.isActive()) {
-    return CLIConfiguration.hasLocalStateFlag(flag);
-  }
-  return config_DEPRECATED.hasLocalStateFlag(flag);
+  const config = getConfig();
+
+  return config.flags?.includes(flag) || false;
 }
 
 export function addLocalStateFlag(flag: string): void {
-  if (CLIConfiguration.isActive()) {
-    CLIConfiguration.addLocalStateFlag(flag);
-  } else {
-    config_DEPRECATED.addLocalStateFlag(flag);
+  const config = getConfig();
+
+  if (!hasLocalStateFlag(flag)) {
+    config.flags = [...(config.flags || []), flag];
   }
+
+  writeConfigFile(config, getConfigFilePath());
 }
 
 export function removeLocalStateFlag(flag: string): void {
-  if (CLIConfiguration.isActive()) {
-    CLIConfiguration.removeLocalStateFlag(flag);
-  } else {
-    config_DEPRECATED.removeLocalStateFlag(flag);
-  }
-}
+  const config = getConfig();
 
-// These functions are not supported with the new config setup
-export const getConfigAccountId = config_DEPRECATED.getConfigAccountId;
-export const getOrderedAccount = config_DEPRECATED.getOrderedAccount;
-export const getOrderedConfig = config_DEPRECATED.getOrderedConfig;
-export const setConfig = config_DEPRECATED.setConfig;
-export const setConfigPath = config_DEPRECATED.setConfigPath;
-export const findConfig = config_DEPRECATED.findConfig;
+  config.flags = config.flags?.filter(f => f !== flag) || [];
+
+  writeConfigFile(config, getConfigFilePath());
+}

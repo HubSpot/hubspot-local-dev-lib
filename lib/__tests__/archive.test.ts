@@ -1,11 +1,13 @@
-import os from 'os';
-
 jest.mock('fs-extra');
 jest.mock('extract-zip');
-jest.mock('os');
+jest.mock('os', () => ({
+  tmpdir: jest.fn(() => '/tmp'),
+  homedir: jest.fn(() => '/home/user'),
+}));
 jest.mock('../logger');
 jest.mock('../fs');
 
+import os from 'os';
 import { extractZipArchive } from '../archive';
 import { logger } from '../logger';
 import fs from 'fs-extra';
