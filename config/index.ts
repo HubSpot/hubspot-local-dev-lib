@@ -32,7 +32,7 @@ import { HubSpotConfigError } from '../models/HubSpotConfigError';
 import { HUBSPOT_CONFIG_ERROR_TYPES } from '../constants/config';
 
 export function localConfigFileExists(): boolean {
-  return Boolean(getLocalConfigDefaultFilePath());
+  return Boolean(getLocalConfigFilePath());
 }
 
 export function globalConfigFileExists(): boolean {
