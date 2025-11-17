@@ -38,6 +38,7 @@ export function getGlobalConfigFilePath(): string {
 }
 
 export function getLocalConfigFilePath(): string | null {
+  console.log('Search for', DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME);
   return findup([
     DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME,
     DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME.replace('.yml', '.yaml'),

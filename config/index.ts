@@ -2,7 +2,6 @@ import fs from 'fs-extra';
 
 import {
   ACCOUNT_IDENTIFIERS,
-  ENVIRONMENT_VARIABLES,
   HUBSPOT_CONFIG_OPERATIONS,
   MIN_HTTP_TIMEOUT,
 } from '../constants/config';
@@ -33,7 +32,10 @@ import { HubSpotConfigError } from '../models/HubSpotConfigError';
 import { HUBSPOT_CONFIG_ERROR_TYPES } from '../constants/config';
 
 export function localConfigFileExists(): boolean {
-  return Boolean(getLocalConfigFilePath());
+  const localConfigFilePath = getLocalConfigFilePath();
+  console.log('localConfigFilePath', localConfigFilePath);
+
+  return Boolean(localConfigFilePath);
 }
 
 export function globalConfigFileExists(): boolean {
