@@ -12,22 +12,36 @@ There are a handful of standard config utils that anyone working in this library
 
 #### getConfig()
 
-Locates and parses the hubspot config file. This function will automatically find the correct config file. Typically, it defaults to the nearest config file by working up the direcotry tree. Custom config locations can be set using the following environment variables
+Locates and parses the hubspot config file. This function will automatically find the correct config file using the following criteria:
+1. Checks to see if a config was specified via environment variables (see below)
+2. If no environment variables are present, looks for a global config file (located at `~/.hscli/config.yml`)
+3. If no global config file is found, looks up the file tree for a local config file.
+4. If no local config file is found, throws an error
 
-- `USE_ENVIRONTMENT_CONFIG` - load config account from environment variables
-- `HUBSPOT_CONFIG_PATH` - specify a path to a specific config file
+
+##### Custom config location environment variables
+- `HUBSPOT_CONFIG_PATH` - specify a file path to a specific config file
+- `USE_ENVIRONMENT_HUBSPOT_CONFIG` - load config account from environment variables. The following environment variables are supported:
+  - `HUBSPOT_PERSONAL_ACCESS_KEY`
+  - `HUBSPOT_ACCOUNT_ID`
+  - `HTTP_TIMEOUT`
+  - `DEFAULT_CMS_PUBLISH_MODE`
 
 #### updateConfigAccount()
 
-Safely writes updated values to the `hubspot.config.yml` file.
+Safely writes updated values to the HubSpot config file.
 
 #### getConfigAccountById() and getConfigAccountByName()
 
-Returns config data for a specific account, given the account's ID or name.
+Returns config data for a specific account, given the account's ID or name. Errors if an account is not found.
+
+#### getAccountIfExist
+
+Returns config data for a specific account, given either a name or an ID. Returns null without erroring if an account is not found
 
 ## Example config
 
-Here is an example of a basic hubspot config file with a single account configured.
+Here is an example of a basic HubSpot config file with a single account configured.
 
 ```yml
 defaultPortal: my-hubspot-account
