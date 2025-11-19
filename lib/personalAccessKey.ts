@@ -14,7 +14,6 @@ import { Environment } from '../types/Config';
 import {
   getConfigAccountById,
   getConfigAccountIfExists,
-  getConfigDefaultAccountIfExists,
   updateConfigAccount,
   addConfigAccount,
   setConfigAccountAsDefault,
@@ -183,9 +182,7 @@ export async function updateConfigWithAccessToken(
   makeDefault = false
 ): Promise<PersonalAccessKeyConfigAccount> {
   const { portalId, accessToken, expiresAt, accountType } = token;
-  const account = name
-    ? getConfigAccountIfExists(name)
-    : getConfigDefaultAccountIfExists();
+  const account = name ? getConfigAccountIfExists(name) : undefined;
   const accountEnv = env || account?.env || ENVIRONMENTS.PROD;
 
   let parentAccountId;
