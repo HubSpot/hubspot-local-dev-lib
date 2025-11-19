@@ -657,7 +657,7 @@ describe('lib/personalAccessKey', () => {
       );
     });
 
-    it('uses existing account name when name not provided', async () => {
+    it('uses existing account name when updating by name', async () => {
       const existingAccount = {
         accountId: 123,
         name: 'existing-name',
@@ -671,7 +671,7 @@ describe('lib/personalAccessKey', () => {
           },
         },
       };
-      getConfigDefaultAccountIfExists.mockReturnValue(existingAccount);
+      getConfigAccountIfExists.mockReturnValue(existingAccount);
 
       const freshAccessToken = 'fresh-token';
       fetchAccessToken.mockResolvedValue(
@@ -689,7 +689,12 @@ describe('lib/personalAccessKey', () => {
 
       const token = await getAccessToken('pak_123', ENVIRONMENTS.QA, 123);
 
-      await updateConfigWithAccessToken(token, 'pak_123', ENVIRONMENTS.QA);
+      await updateConfigWithAccessToken(
+        token,
+        'pak_123',
+        ENVIRONMENTS.QA,
+        'existing-name'
+      );
 
       expect(updateConfigAccount).toHaveBeenCalledWith(
         expect.objectContaining({

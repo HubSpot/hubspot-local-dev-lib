@@ -15,6 +15,7 @@ import {
   isConfigAccountValid,
   getAccountIdentifierAndType,
 } from '../utils';
+import { HubSpotConfigError } from '../../models/HubSpotConfigError';
 import { getCwd } from '../../lib/path';
 import {
   DeprecatedHubSpotConfigAccountFields,
@@ -195,12 +196,12 @@ describe('config/utils', () => {
       expect(result).toBe('config contents');
     });
 
-    it('throws FileSystemError on read failure', () => {
+    it('throws HubSpotConfigError on read failure', () => {
       mockFs.readFileSync.mockImplementation(() => {
         throw new Error('Read error');
       });
 
-      expect(() => readConfigFile('test')).toThrow(FileSystemError);
+      expect(() => readConfigFile('test')).toThrow(HubSpotConfigError);
     });
   });
 

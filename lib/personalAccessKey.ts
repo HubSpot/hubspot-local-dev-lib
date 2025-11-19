@@ -182,7 +182,7 @@ export async function updateConfigWithAccessToken(
   makeDefault = false
 ): Promise<PersonalAccessKeyConfigAccount> {
   const { portalId, accessToken, expiresAt, accountType } = token;
-  const account = name ? getConfigAccountIfExists(name) : undefined;
+  const account = getConfigAccountIfExists(portalId);
   const accountEnv = env || account?.env || ENVIRONMENTS.PROD;
 
   let parentAccountId;

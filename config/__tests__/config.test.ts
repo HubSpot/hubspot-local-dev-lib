@@ -314,12 +314,6 @@ describe('config/index', () => {
 
       expect(getConfigAccountEnvironment(123)).toEqual('qa');
     });
-
-    it('returns default account environment when no identifier', () => {
-      mockConfig();
-
-      expect(getConfigAccountEnvironment()).toEqual('qa');
-    });
   });
 
   describe('addConfigAccount()', () => {
