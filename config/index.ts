@@ -32,6 +32,9 @@ import { getDefaultAccountOverrideAccountId } from './defaultAccountOverride';
 import { getValidEnv } from '../lib/environment';
 import { HubSpotConfigError } from '../models/HubSpotConfigError';
 import { HUBSPOT_CONFIG_ERROR_TYPES } from '../constants/config';
+import { isDeepEqual } from '../lib/isDeepEqual';
+
+const EMPTY_CONFIG = { accounts: [] };
 
 export function localConfigFileExists(): boolean {
   return Boolean(getLocalConfigFilePath());
@@ -158,14 +161,16 @@ export function createEmptyConfigFile(useGlobalConfig = false): void {
 
   const pathToWrite = configFilePathFromEnvironment || defaultPath;
 
-  writeConfigFile({ accounts: [] }, pathToWrite);
+  writeConfigFile(EMPTY_CONFIG, pathToWrite);
 }
 
 export function deleteConfigFileIfEmpty(): void {
   const pathToDelete = getConfigFilePath();
 
   try {
-    if (fs.readFileSync(pathToDelete).length === 0) {
+    const config = getConfig();
+
+    if (isDeepEqual(config, EMPTY_CONFIG)) {
       fs.unlinkSync(pathToDelete);
     }
   } catch (error) {
