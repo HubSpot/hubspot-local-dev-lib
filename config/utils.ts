@@ -17,7 +17,11 @@ import {
   OAUTH_AUTH_METHOD,
   OAUTH_SCOPES,
 } from '../constants/auth';
-import { HubSpotConfig, DeprecatedHubSpotConfigFields } from '../types/Config';
+import {
+  HubSpotConfig,
+  DeprecatedHubSpotConfigFields,
+  HubSpotConfigErrorType,
+} from '../types/Config';
 import { FileSystemError } from '../models/FileSystemError';
 import { logger } from '../lib/logger';
 import {
@@ -77,22 +81,32 @@ export function getConfigPathEnvironmentVariables(): {
   };
 }
 
-export function readConfigFile(configPath: string): string {
-  let source = '';
-
+export function doesConfigFileExistAtPath(path: string): boolean {
   try {
-    source = fs.readFileSync(configPath).toString();
-  } catch (err) {
-    throw new FileSystemError(
-      { cause: err },
-      {
-        filepath: configPath,
-        operation: 'read',
-      }
+    return fs.existsSync(path);
+  } catch (error) {
+    const { message, type } = handleConfigFileSystemError(error, path);
+    throw new HubSpotConfigError(
+      message,
+      type,
+      HUBSPOT_CONFIG_OPERATIONS.READ,
+      { cause: error }
     );
   }
+}
 
-  return source;
+export function readConfigFile(configPath: string): string {
+  try {
+    return fs.readFileSync(configPath).toString();
+  } catch (err) {
+    const { message, type } = handleConfigFileSystemError(err, configPath);
+    throw new HubSpotConfigError(
+      message,
+      type,
+      HUBSPOT_CONFIG_OPERATIONS.READ,
+      { cause: err }
+    );
+  }
 }
 
 export function removeUndefinedFieldsFromConfigAccount<
@@ -170,9 +184,7 @@ export function writeConfigFile(
   config: HubSpotConfig,
   configPath: string
 ): void {
-  const source = yaml.dump(
-    JSON.parse(JSON.stringify(formatConfigForWrite(config), null, 2))
-  );
+  const source = yaml.dump(formatConfigForWrite(config));
 
   try {
     fs.ensureFileSync(configPath);
@@ -203,6 +215,10 @@ function getAccountType(sandboxAccountType?: string): AccountType {
 export function normalizeParsedConfig(
   parsedConfig: HubSpotConfig & DeprecatedHubSpotConfigFields
 ): HubSpotConfig {
+  if (!parsedConfig.portals && !parsedConfig.accounts) {
+    parsedConfig.accounts = [];
+  }
+
   if (parsedConfig.portals) {
     parsedConfig.accounts = parsedConfig.portals.map(account => {
       if (account.portalId) {
@@ -463,4 +479,30 @@ export function isConfigAccountValid(
   }
 
   return valid;
+}
+
+export function handleConfigFileSystemError(
+  error: unknown,
+  path: string
+): { message?: string; type: HubSpotConfigErrorType } {
+  let message;
+  let type: HubSpotConfigErrorType = HUBSPOT_CONFIG_ERROR_TYPES.UNKNOWN;
+
+  if (error instanceof Error && 'code' in error) {
+    if (error.code === 'ENOENT') {
+      message = i18n(
+        'config.utils.handleConfigFileSystemError.configNotFoundError',
+        { path }
+      );
+      type = HUBSPOT_CONFIG_ERROR_TYPES.CONFIG_NOT_FOUND;
+    } else if (error.code === 'EACCES') {
+      message = i18n(
+        'config.utils.handleConfigFileSystemError.insufficientPermissionsError',
+        { path }
+      );
+      type = HUBSPOT_CONFIG_ERROR_TYPES.INSUFFICIENT_PERMISSIONS;
+    }
+  }
+
+  return { message, type };
 }

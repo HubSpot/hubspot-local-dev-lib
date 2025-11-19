@@ -22,6 +22,8 @@ import {
   getConfigAccountIndexById,
   getConfigPathEnvironmentVariables,
   getConfigAccountByInferredIdentifier,
+  handleConfigFileSystemError,
+  doesConfigFileExistAtPath,
 } from './utils';
 import { CMS_PUBLISH_MODE } from '../constants/files';
 import { Environment } from '../types/Config';
@@ -36,12 +38,12 @@ export function localConfigFileExists(): boolean {
 }
 
 export function globalConfigFileExists(): boolean {
-  return fs.existsSync(getGlobalConfigFilePath());
+  return doesConfigFileExistAtPath(getGlobalConfigFilePath());
 }
 
 export function configFileExists(): boolean {
   try {
-    return fs.existsSync(getConfigFilePath());
+    return doesConfigFileExistAtPath(getConfigFilePath());
   } catch (error) {
     return false;
   }
@@ -50,7 +52,7 @@ export function configFileExists(): boolean {
 function getConfigDefaultFilePath(): string {
   const globalConfigFilePath = getGlobalConfigFilePath();
 
-  if (fs.existsSync(globalConfigFilePath)) {
+  if (doesConfigFileExistAtPath(globalConfigFilePath)) {
     return globalConfigFilePath;
   }
 
@@ -161,7 +163,21 @@ export function createEmptyConfigFile(useGlobalConfig = false): void {
 
 export function deleteConfigFile(): void {
   const pathToDelete = getConfigFilePath();
-  fs.unlinkSync(pathToDelete);
+
+  try {
+    fs.unlinkSync(pathToDelete);
+  } catch (error) {
+    const { message, type } = handleConfigFileSystemError(error, pathToDelete);
+
+    throw new HubSpotConfigError(
+      message,
+      type,
+      HUBSPOT_CONFIG_OPERATIONS.DELETE,
+      {
+        cause: error,
+      }
+    );
+  }
 }
 
 export function getConfigAccountById(accountId: number): HubSpotConfigAccount {
@@ -287,22 +303,26 @@ export function getAllConfigAccounts(): HubSpotConfigAccount[] {
 }
 
 export function getConfigAccountEnvironment(
-  identifier?: number | string
+  identifier: number | string
 ): Environment {
-  if (identifier) {
-    const config = getConfig();
+  const config = getConfig();
 
-    const account = getConfigAccountByInferredIdentifier(
-      config.accounts,
-      identifier
+  const account = getConfigAccountByInferredIdentifier(
+    config.accounts,
+    identifier
+  );
+
+  if (!account) {
+    throw new HubSpotConfigError(
+      i18n('config.getConfigAccountEnvironment.accountNotFound', {
+        identifier,
+      }),
+      HUBSPOT_CONFIG_ERROR_TYPES.ACCOUNT_NOT_FOUND,
+      HUBSPOT_CONFIG_OPERATIONS.READ
     );
-
-    if (account) {
-      return getValidEnv(account.env);
-    }
   }
-  const defaultAccount = getConfigDefaultAccount();
-  return getValidEnv(defaultAccount.env);
+
+  return getValidEnv(account.env);
 }
 
 export function addConfigAccount(accountToAdd: HubSpotConfigAccount): void {

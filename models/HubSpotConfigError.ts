@@ -10,6 +10,12 @@ import { i18n } from '../utils/lang';
 
 const NAME = 'HubSpotConfigError';
 
+const OPERATION_TEXT = {
+  [HUBSPOT_CONFIG_OPERATIONS.READ]: 'reading',
+  [HUBSPOT_CONFIG_OPERATIONS.WRITE]: 'writing to',
+  [HUBSPOT_CONFIG_OPERATIONS.DELETE]: 'deleting',
+};
+
 function isEnvironmentError(type: HubSpotConfigErrorType): boolean {
   return type === HUBSPOT_CONFIG_ERROR_TYPES.INVALID_ENVIRONMENT_VARIABLES;
 }
@@ -19,7 +25,7 @@ export class HubSpotConfigError extends Error {
   public operation: HubSpotConfigOperation;
 
   constructor(
-    message: string,
+    message: string | undefined,
     type: HubSpotConfigErrorType,
     operation: HubSpotConfigOperation,
     options?: ErrorOptions
@@ -28,12 +34,11 @@ export class HubSpotConfigError extends Error {
       ? 'environment variables'
       : 'file';
 
-    const operationText =
-      operation === HUBSPOT_CONFIG_OPERATIONS.WRITE ? 'writing to' : 'reading';
+    const operationText = OPERATION_TEXT[operation];
 
     const withBaseMessage = i18n('models.HubSpotConfigError.baseMessage', {
       configType,
-      message,
+      message: message ? `: ${message}` : '',
       operation: operationText,
     });
 

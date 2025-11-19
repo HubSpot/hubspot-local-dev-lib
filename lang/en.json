@@ -291,7 +291,14 @@
     "updateDefaultCmsPublishMode": {
       "invalidCmsPublishMode": "Error updating config default CMS publish mode: CMS publish can only be set to 'draft' or 'publish'"
     },
+    "getConfigAccountEnvironment": {
+      "accountNotFound": "Attempted to get environment for account with identifier {{ identifier }}, but that account was not found in config"
+    },
     "utils": {
+      "handleConfigFileSystemError": {
+        "configNotFoundError": "No config file found at {{ path }}.",
+        "insufficientPermissionsError": "Insufficient permissions to access config file at {{ path }}"
+      },
       "isConfigAccountValid": {
         "missingAccount": "Invalid config: at least one account in config is missing data",
         "missingAuthType": "Invalid config: account {{ accountId }} has no authType",
@@ -382,7 +389,7 @@
       }
     },
     "HubSpotConfigError": {
-      "baseMessage": "An error occurred while {{ operation }} your HubSpot config {{ configType }}: {{ message }}"
+      "baseMessage": "An error occurred while {{ operation }} your HubSpot config {{ configType }}{{ message }}"
     }
   },
   "utils": {
