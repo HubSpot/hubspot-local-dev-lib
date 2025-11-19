@@ -9,7 +9,7 @@ import {
   getConfig,
   isConfigValid,
   createEmptyConfigFile,
-  deleteConfigFile,
+  deleteConfigFileIfEmpty,
   getConfigAccountById,
   getConfigAccountByName,
   getConfigDefaultAccount,
@@ -240,12 +240,21 @@ describe('config/index', () => {
     });
   });
 
-  describe('deleteConfigFile()', () => {
-    it('deletes the config file', () => {
+  describe('deleteConfigFileIfEmpty()', () => {
+    it('deletes the config file if it is empty', () => {
       mockFs.existsSync.mockReturnValue(true);
-      deleteConfigFile();
+      mockFs.readFileSync.mockReturnValueOnce('');
+      deleteConfigFileIfEmpty();
 
       expect(mockFs.unlinkSync).toHaveBeenCalledWith(getConfigFilePath());
+    });
+
+    it('does not delete the config file if it is not empty', () => {
+      mockFs.existsSync.mockReturnValue(true);
+      mockFs.readFileSync.mockReturnValueOnce('test-config-content');
+      deleteConfigFileIfEmpty();
+
+      expect(mockFs.unlinkSync).not.toHaveBeenCalled();
     });
   });
 

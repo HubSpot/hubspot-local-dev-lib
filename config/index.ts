@@ -161,11 +161,13 @@ export function createEmptyConfigFile(useGlobalConfig = false): void {
   writeConfigFile({ accounts: [] }, pathToWrite);
 }
 
-export function deleteConfigFile(): void {
+export function deleteConfigFileIfEmpty(): void {
   const pathToDelete = getConfigFilePath();
 
   try {
-    fs.unlinkSync(pathToDelete);
+    if (fs.readFileSync(pathToDelete).length === 0) {
+      fs.unlinkSync(pathToDelete);
+    }
   } catch (error) {
     const { message, type } = handleConfigFileSystemError(error, pathToDelete);
 
