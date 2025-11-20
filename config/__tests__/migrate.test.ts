@@ -9,11 +9,7 @@ import {
   mergeConfigAccounts,
 } from '../migrate';
 import { HubSpotConfig } from '../../types/Config';
-import {
-  getGlobalConfigFilePath,
-  readConfigFile,
-  writeConfigFile,
-} from '../utils';
+import { readConfigFile, writeConfigFile } from '../utils';
 import {
   DEFAULT_CMS_PUBLISH_MODE,
   HTTP_TIMEOUT,
@@ -25,7 +21,7 @@ import {
 import { ENVIRONMENTS } from '../../constants/environments';
 import { PERSONAL_ACCESS_KEY_AUTH_METHOD } from '../../constants/auth';
 import { PersonalAccessKeyConfigAccount } from '../../types/Accounts';
-import { createEmptyConfigFile } from '../index';
+import { createEmptyConfigFile, getGlobalConfigFilePath } from '../index';
 
 jest.mock('fs', () => ({
   ...jest.requireActual('fs'),
@@ -36,12 +32,12 @@ jest.mock('../utils', () => ({
   ...jest.requireActual('../utils'),
   readConfigFile: jest.fn(),
   writeConfigFile: jest.fn(),
-  getGlobalConfigFilePath: jest.fn(),
 }));
 
 jest.mock('../index', () => ({
   ...jest.requireActual('../index'),
   createEmptyConfigFile: jest.fn(),
+  getGlobalConfigFilePath: jest.fn(),
 }));
 
 describe('config/migrate', () => {

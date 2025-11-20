@@ -37,20 +37,6 @@ import { i18n } from '../utils/lang';
 import { ValueOf } from '../types/Utils';
 import { HubSpotConfigError } from '../models/HubSpotConfigError';
 
-export function getGlobalConfigFilePath(): string {
-  return GLOBAL_CONFIG_PATH;
-}
-
-export function getLocalConfigFilePath(): string | null {
-  return findup(
-    [
-      DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME,
-      DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME.replace('.yml', '.yaml'),
-    ],
-    { cwd: getCwd() }
-  );
-}
-
 export function getLocalConfigDefaultFilePath(): string {
   return `${getCwd()}/${DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME}`;
 }

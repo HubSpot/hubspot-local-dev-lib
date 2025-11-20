@@ -24,6 +24,8 @@ import {
   updateAllowUsageTracking,
   updateDefaultCmsPublishMode,
   isConfigFlagEnabled,
+  getGlobalConfigFilePath,
+  getLocalConfigFilePathIfExists,
 } from '../index';
 import { HubSpotConfigAccount } from '../../types/Accounts';
 import { HubSpotConfig } from '../../types/Config';
@@ -37,13 +39,13 @@ import {
   OAUTH_AUTH_METHOD,
   API_KEY_AUTH_METHOD,
 } from '../../constants/auth';
-import {
-  getGlobalConfigFilePath,
-  getLocalConfigDefaultFilePath,
-  formatConfigForWrite,
-} from '../utils';
+import { getLocalConfigDefaultFilePath, formatConfigForWrite } from '../utils';
 import { getDefaultAccountOverrideAccountId } from '../defaultAccountOverride';
-import { CONFIG_FLAGS, ENVIRONMENT_VARIABLES } from '../../constants/config';
+import {
+  CONFIG_FLAGS,
+  ENVIRONMENT_VARIABLES,
+  HUBSPOT_CONFIGURATION_FOLDER,
+} from '../../constants/config';
 import * as utils from '../utils';
 import { CmsPublishMode } from '../../types/Files';
 
@@ -126,6 +128,32 @@ function mockConfig(config = CONFIG) {
 describe('config/index', () => {
   afterEach(() => {
     cleanup();
+  });
+
+  describe('getGlobalConfigFilePath()', () => {
+    it('returns the global config file path', () => {
+      const globalConfigFilePath = getGlobalConfigFilePath();
+      expect(globalConfigFilePath).toBeDefined();
+      expect(globalConfigFilePath).toContain(
+        `${HUBSPOT_CONFIGURATION_FOLDER}/config.yml`
+      );
+    });
+  });
+
+  describe('getLocalConfigFilePathIfExists()', () => {
+    it('returns the nearest config file path', () => {
+      const mockConfigPath = '/mock/path/hubspot.config.yml';
+      mockFindup.mockReturnValue(mockConfigPath);
+
+      const localConfigPath = getLocalConfigFilePathIfExists();
+      expect(localConfigPath).toBe(mockConfigPath);
+    });
+
+    it('returns null if no config file found', () => {
+      mockFindup.mockReturnValue(null);
+      const localConfigPath = getLocalConfigFilePathIfExists();
+      expect(localConfigPath).toBeNull();
+    });
   });
 
   describe('localConfigFileExists()', () => {
@@ -243,7 +271,10 @@ describe('config/index', () => {
   describe('deleteConfigFileIfEmpty()', () => {
     it('deletes the config file if it is empty', () => {
       mockFs.existsSync.mockReturnValue(true);
-      mockFs.readFileSync.mockReturnValueOnce('');
+      mockFs.readFileSync.mockReturnValueOnce(yaml.dump({ accounts: [] }));
+      jest
+        .spyOn(utils, 'parseConfig')
+        .mockReturnValueOnce({ accounts: [] } as HubSpotConfig);
       deleteConfigFileIfEmpty();
 
       expect(mockFs.unlinkSync).toHaveBeenCalledWith(getConfigFilePath());
@@ -251,7 +282,10 @@ describe('config/index', () => {
 
     it('does not delete the config file if it is not empty', () => {
       mockFs.existsSync.mockReturnValue(true);
-      mockFs.readFileSync.mockReturnValueOnce('test-config-content');
+      mockFs.readFileSync.mockReturnValueOnce(yaml.dump(CONFIG));
+      jest
+        .spyOn(utils, 'parseConfig')
+        .mockReturnValueOnce(structuredClone(CONFIG));
       deleteConfigFileIfEmpty();
 
       expect(mockFs.unlinkSync).not.toHaveBeenCalled();

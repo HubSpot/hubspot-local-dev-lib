@@ -1,7 +1,10 @@
 import fs from 'fs-extra';
+import findup from 'findup-sync';
 
 import {
   ACCOUNT_IDENTIFIERS,
+  DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME,
+  GLOBAL_CONFIG_PATH,
   HUBSPOT_CONFIG_OPERATIONS,
   MIN_HTTP_TIMEOUT,
 } from '../constants/config';
@@ -10,8 +13,6 @@ import { HubSpotConfig, ConfigFlag } from '../types/Config';
 import { CmsPublishMode } from '../types/Files';
 import { logger } from '../lib/logger';
 import {
-  getGlobalConfigFilePath,
-  getLocalConfigFilePath,
   readConfigFile,
   parseConfig,
   buildConfigFromEnvironment,
@@ -33,11 +34,26 @@ import { getValidEnv } from '../lib/environment';
 import { HubSpotConfigError } from '../models/HubSpotConfigError';
 import { HUBSPOT_CONFIG_ERROR_TYPES } from '../constants/config';
 import { isDeepEqual } from '../lib/isDeepEqual';
+import { getCwd } from '../lib/path';
 
 const EMPTY_CONFIG = { accounts: [] };
 
+export function getGlobalConfigFilePath(): string {
+  return GLOBAL_CONFIG_PATH;
+}
+
+export function getLocalConfigFilePathIfExists(): string | null {
+  return findup(
+    [
+      DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME,
+      DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME.replace('.yml', '.yaml'),
+    ],
+    { cwd: getCwd() }
+  );
+}
+
 export function localConfigFileExists(): boolean {
-  return Boolean(getLocalConfigFilePath());
+  return Boolean(getLocalConfigFilePathIfExists());
 }
 
 export function globalConfigFileExists(): boolean {
@@ -59,7 +75,7 @@ function getConfigDefaultFilePath(): string {
     return globalConfigFilePath;
   }
 
-  const localConfigFilePath = getLocalConfigFilePath();
+  const localConfigFilePath = getLocalConfigFilePathIfExists();
 
   if (!localConfigFilePath) {
     throw new HubSpotConfigError(

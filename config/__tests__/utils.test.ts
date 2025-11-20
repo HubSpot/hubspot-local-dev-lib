@@ -1,8 +1,6 @@
 import findup from 'findup-sync';
 import fs from 'fs-extra';
 import {
-  getGlobalConfigFilePath,
-  getLocalConfigFilePath,
   getLocalConfigDefaultFilePath,
   getConfigPathEnvironmentVariables,
   readConfigFile,
@@ -132,32 +130,6 @@ describe('config/utils', () => {
 
   afterEach(() => {
     cleanupEnvironmentVariables();
-  });
-
-  describe('getGlobalConfigFilePath()', () => {
-    it('returns the global config file path', () => {
-      const globalConfigFilePath = getGlobalConfigFilePath();
-      expect(globalConfigFilePath).toBeDefined();
-      expect(globalConfigFilePath).toContain(
-        `${HUBSPOT_CONFIGURATION_FOLDER}/config.yml`
-      );
-    });
-  });
-
-  describe('getLocalConfigFilePath()', () => {
-    it('returns the nearest config file path', () => {
-      const mockConfigPath = '/mock/path/hubspot.config.yml';
-      mockFindup.mockReturnValue(mockConfigPath);
-
-      const localConfigPath = getLocalConfigFilePath();
-      expect(localConfigPath).toBe(mockConfigPath);
-    });
-
-    it('returns null if no config file found', () => {
-      mockFindup.mockReturnValue(null);
-      const localConfigPath = getLocalConfigFilePath();
-      expect(localConfigPath).toBeNull();
-    });
   });
 
   describe('getLocalConfigDefaultFilePath()', () => {

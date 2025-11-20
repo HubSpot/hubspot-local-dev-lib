@@ -1,7 +1,7 @@
 import fs from 'fs';
 
 import { HubSpotConfig } from '../types/Config';
-import { createEmptyConfigFile } from './index';
+import { createEmptyConfigFile, getGlobalConfigFilePath } from './index';
 import {
   DEFAULT_CMS_PUBLISH_MODE,
   HTTP_TIMEOUT,
@@ -12,12 +12,7 @@ import {
   AUTO_OPEN_BROWSER,
   ALLOW_AUTO_UPDATES,
 } from '../constants/config';
-import {
-  getGlobalConfigFilePath,
-  parseConfig,
-  readConfigFile,
-  writeConfigFile,
-} from './utils';
+import { parseConfig, readConfigFile, writeConfigFile } from './utils';
 import { ValueOf } from '../types/Utils';
 
 export function getConfigAtPath(path: string): HubSpotConfig {
