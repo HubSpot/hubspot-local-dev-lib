@@ -252,10 +252,10 @@
       "errorWithPath": "No config file found at {{ path }}."
     },
     "validateConfig": {
-      "missingAccounts": "Invalid config: no accounts found",
-      "duplicateAccountIds": "Invalid config: multiple accounts with accountId: {{ accountId }}",
-      "duplicateAccountNames": "Invalid config: multiple accounts with name: {{ accountName }}",
-      "invalidAccountName": "Invalid config: account name {{ accountName }} contains spaces"
+      "missingAccounts": "No accounts found",
+      "duplicateAccountIds": "Multiple accounts with accountId: {{ accountId }}",
+      "duplicateAccountNames": "Multiple accounts with name: {{ accountName }}",
+      "invalidAccountName": "Account name {{ accountName }} contains spaces"
     },
     "getConfigAccountById": {
       "error": "No account with id {{ accountId }} exists in config"
@@ -300,12 +300,12 @@
         "insufficientPermissionsError": "Insufficient permissions to access config file at {{ path }}"
       },
       "validateConfigAccount": {
-        "missingAccount": "Invalid config: at least one account in config is missing data",
-        "missingAuthType": "Invalid config: account {{ accountId }} has no authType",
-        "missingAccountId": "Invalid config: at least one account in config is missing accountId",
-        "missingApiKey": "Invalid config: account {{ accountId }} has authType of apikey but is missing the apiKey field",
-        "missingAuth": "Invalid config: account {{ accountId }} has authtype of oauth2 but is missing auth data",
-        "missingPersonalAccessKey": "Invalid config: account {{ accountId }} has authType of personalAccessKey but is missing the personalAccessKey field"
+        "missingAccount": "At least one account in config is missing data",
+        "missingAuthType": "Account {{ accountId }} has no authType",
+        "missingAccountId": "At least one account in config is missing accountId",
+        "missingApiKey": "Account {{ accountId }} has authType of apikey but is missing the apiKey field",
+        "missingAuth": "Account {{ accountId }} has authtype of oauth2 but is missing auth data",
+        "missingPersonalAccessKey": "Account {{ accountId }} has authType of personalAccessKey but is missing the personalAccessKey field"
       },
       "getConfigPathEnvironmentVariables": {
         "invalidEnvironmentVariables": "USE_ENVIRONMENT_HUBSPOT_CONFIG and HUBSPOT_CONFIG_PATH cannot both be set simultaneously"
