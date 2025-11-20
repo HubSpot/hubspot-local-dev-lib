@@ -228,12 +228,12 @@ export async function updateConfigWithAccessToken(
     accountId: portalId,
     accountType,
     personalAccessKey,
-    name: name || account?.name || token.hubName,
+    name: name || account?.name,
     authType: PERSONAL_ACCESS_KEY_AUTH_METHOD.value,
     auth: { tokenInfo: { accessToken, expiresAt } },
     parentAccountId,
     env: accountEnv,
-  };
+  } as PersonalAccessKeyConfigAccount; // Account may temporarily not have a name before prompted to add one in the CLI
 
   // Add new account if it doesn't exist, otherwise update existing account
   if (account) {
