@@ -143,7 +143,7 @@ export function validateConfig(): HubSpotConfigValidationResult {
   config.accounts.forEach(account => {
     const accountValidationResult = validateConfigAccount(account);
     if (!accountValidationResult.isValid) {
-      return accountValidationResult;
+      validationErrors.push(...accountValidationResult.errors);
     }
     if (accountIdsMap[account.accountId]) {
       validationErrors.push(
