@@ -11,9 +11,11 @@ import {
   DEFAULT_ACCOUNT,
   AUTO_OPEN_BROWSER,
   ALLOW_AUTO_UPDATES,
+  ARCHIVED_HUBSPOT_CONFIG_YAML_FILE_NAME,
 } from '../constants/config';
 import { parseConfig, readConfigFile, writeConfigFile } from './utils';
 import { ValueOf } from '../types/Utils';
+import path from 'path';
 
 export function getConfigAtPath(path: string): HubSpotConfig {
   const configFileSource = readConfigFile(path);
@@ -25,7 +27,6 @@ export function migrateConfigAtPath(path: string): void {
   createEmptyConfigFile(true);
   const configToMigrate = getConfigAtPath(path);
   writeConfigFile(configToMigrate, getGlobalConfigFilePath());
-  fs.unlinkSync(path);
 }
 
 export type ConflictProperty = {
@@ -145,4 +146,13 @@ export function mergeConfigAccounts(
 
   writeConfigFile(configWithMergedAccounts, getGlobalConfigFilePath());
   return { configWithMergedAccounts, skippedAccountIds };
+}
+
+export function archiveConfigAtPath(configPath: string): void {
+  const dir = path.dirname(configPath);
+  const archivedConfigPath = path.join(
+    dir,
+    ARCHIVED_HUBSPOT_CONFIG_YAML_FILE_NAME
+  );
+  fs.renameSync(configPath, archivedConfigPath);
 }
