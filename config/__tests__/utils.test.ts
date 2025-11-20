@@ -10,7 +10,7 @@ import {
   buildConfigFromEnvironment,
   getConfigAccountByIdentifier,
   getConfigAccountIndexById,
-  isConfigAccountValid,
+  validateConfigAccount,
   getAccountIdentifierAndType,
 } from '../utils';
 import { HubSpotConfigError } from '../../models/HubSpotConfigError';
@@ -36,6 +36,7 @@ import {
   OAUTH_AUTH_METHOD,
   API_KEY_AUTH_METHOD,
 } from '../../constants/auth';
+import { i18n } from '../../utils/lang';
 
 jest.mock('findup-sync');
 jest.mock('../../lib/path');
@@ -319,32 +320,51 @@ describe('config/utils', () => {
     });
   });
 
-  describe('isConfigAccountValid()', () => {
+  describe('validateConfigAccount()', () => {
     it('validates personal access key account', () => {
-      expect(isConfigAccountValid(PAK_ACCOUNT)).toBe(true);
+      expect(validateConfigAccount(PAK_ACCOUNT)).toEqual({
+        isValid: true,
+        errors: [],
+      });
     });
 
     it('validates OAuth account', () => {
-      expect(isConfigAccountValid(OAUTH_ACCOUNT)).toBe(true);
+      expect(validateConfigAccount(OAUTH_ACCOUNT)).toEqual({
+        isValid: true,
+        errors: [],
+      });
     });
 
     it('validates API key account', () => {
-      expect(isConfigAccountValid(API_KEY_ACCOUNT)).toBe(true);
+      expect(validateConfigAccount(API_KEY_ACCOUNT)).toEqual({
+        isValid: true,
+        errors: [],
+      });
     });
 
     it('returns false for invalid account', () => {
       expect(
-        isConfigAccountValid({
+        validateConfigAccount({
           ...PAK_ACCOUNT,
           personalAccessKey: undefined,
         })
-      ).toBe(false);
+      ).toEqual({
+        isValid: false,
+        errors: [
+          i18n('config.utils.validateConfigAccount.missingPersonalAccessKey', {
+            accountId: PAK_ACCOUNT.accountId,
+          }),
+        ],
+      });
       expect(
-        isConfigAccountValid({
+        validateConfigAccount({
           ...PAK_ACCOUNT,
           accountId: undefined,
         })
-      ).toBe(false);
+      ).toEqual({
+        isValid: false,
+        errors: [i18n('config.utils.validateConfigAccount.missingAccountId')],
+      });
     });
   });
 

@@ -49,3 +49,8 @@ export type HubSpotState = {
 export type HubSpotConfigErrorType = ValueOf<typeof HUBSPOT_CONFIG_ERROR_TYPES>;
 
 export type HubSpotConfigOperation = ValueOf<typeof HUBSPOT_CONFIG_OPERATIONS>;
+
+export type HubSpotConfigValidationResult = {
+  isValid: boolean;
+  errors: Array<string>;
+};

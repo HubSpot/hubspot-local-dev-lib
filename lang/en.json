@@ -251,7 +251,7 @@
       "error": "No config file found.",
       "errorWithPath": "No config file found at {{ path }}."
     },
-    "isConfigValid": {
+    "validateConfig": {
       "missingAccounts": "Invalid config: no accounts found",
       "duplicateAccountIds": "Invalid config: multiple accounts with accountId: {{ accountId }}",
       "duplicateAccountNames": "Invalid config: multiple accounts with name: {{ accountName }}",
@@ -299,7 +299,7 @@
         "configNotFoundError": "No config file found at {{ path }}.",
         "insufficientPermissionsError": "Insufficient permissions to access config file at {{ path }}"
       },
-      "isConfigAccountValid": {
+      "validateConfigAccount": {
         "missingAccount": "Invalid config: at least one account in config is missing data",
         "missingAuthType": "Invalid config: account {{ accountId }} has no authType",
         "missingAccountId": "Invalid config: at least one account in config is missing accountId",

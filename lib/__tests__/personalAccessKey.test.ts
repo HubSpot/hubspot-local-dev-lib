@@ -628,9 +628,8 @@ describe('lib/personalAccessKey', () => {
       );
     });
 
-    it('uses token hubName when name not provided and no existing account', async () => {
+    it('creates account with undefined name when name not provided and no existing account', async () => {
       getConfigAccountIfExists.mockReturnValue(undefined);
-      getConfigDefaultAccountIfExists.mockReturnValue(undefined);
 
       const freshAccessToken = 'fresh-token';
       fetchAccessToken.mockResolvedValue(
@@ -652,15 +651,16 @@ describe('lib/personalAccessKey', () => {
 
       expect(addConfigAccount).toHaveBeenCalledWith(
         expect.objectContaining({
-          name: 'hub-from-token',
+          accountId: 123,
+          name: undefined,
         })
       );
     });
 
-    it('uses existing account name when updating by name', async () => {
+    it('uses provided name when updating existing account found by portalId', async () => {
       const existingAccount = {
         accountId: 123,
-        name: 'existing-name',
+        name: 'old-name',
         authType: 'personalaccesskey' as const,
         personalAccessKey: 'old-key',
         env: ENVIRONMENTS.PROD,
@@ -693,11 +693,54 @@ describe('lib/personalAccessKey', () => {
         token,
         'pak_123',
         ENVIRONMENTS.QA,
-        'existing-name'
+        'new-name'
       );
 
       expect(updateConfigAccount).toHaveBeenCalledWith(
         expect.objectContaining({
+          accountId: 123,
+          name: 'new-name',
+        })
+      );
+    });
+
+    it('uses existing account name when no name provided and account exists', async () => {
+      const existingAccount = {
+        accountId: 123,
+        name: 'existing-name',
+        authType: 'personalaccesskey' as const,
+        personalAccessKey: 'old-key',
+        env: ENVIRONMENTS.PROD,
+        auth: {
+          tokenInfo: {
+            accessToken: 'old-token',
+            expiresAt: moment().add(1, 'hours').toISOString(),
+          },
+        },
+      };
+      getConfigAccountIfExists.mockReturnValue(existingAccount);
+
+      const freshAccessToken = 'fresh-token';
+      fetchAccessToken.mockResolvedValue(
+        mockAxiosResponse({
+          oauthAccessToken: freshAccessToken,
+          expiresAtMillis: moment().add(1, 'hours').valueOf(),
+          encodedOAuthRefreshToken: 'let-me-in-13',
+          scopeGroups: ['content'],
+          hubId: 123,
+          userId: 456,
+          hubName: 'hub-from-token',
+          accountType: HUBSPOT_ACCOUNT_TYPES.STANDARD,
+        })
+      );
+
+      const token = await getAccessToken('pak_123', ENVIRONMENTS.QA, 123);
+
+      await updateConfigWithAccessToken(token, 'pak_123', ENVIRONMENTS.QA);
+
+      expect(updateConfigAccount).toHaveBeenCalledWith(
+        expect.objectContaining({
+          accountId: 123,
           name: 'existing-name',
         })
       );

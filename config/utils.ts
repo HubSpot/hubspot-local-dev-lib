@@ -21,6 +21,7 @@ import {
   HubSpotConfig,
   DeprecatedHubSpotConfigFields,
   HubSpotConfigErrorType,
+  HubSpotConfigValidationResult,
 } from '../types/Config';
 import { FileSystemError } from '../models/FileSystemError';
 import { logger } from '../lib/logger';
@@ -403,37 +404,40 @@ export function getConfigAccountIndexById(
   return accounts.findIndex(account => account.accountId === id);
 }
 
-export function isConfigAccountValid(
+export function validateConfigAccount(
   account: Partial<HubSpotConfigAccount>
-): boolean {
+): HubSpotConfigValidationResult {
+  const validationErrors = [];
   if (!account || typeof account !== 'object') {
-    logger.debug(i18n('config.utils.isConfigAccountValid.missingAccount'));
-    return false;
+    validationErrors.push(
+      i18n('config.utils.validateConfigAccount.missingAccount')
+    );
+    return { isValid: false, errors: validationErrors };
   }
 
   if (!account.accountId) {
-    logger.debug(i18n('config.utils.isConfigAccountValid.missingAccountId'));
-    return false;
+    validationErrors.push(
+      i18n('config.utils.validateConfigAccount.missingAccountId')
+    );
+    return { isValid: false, errors: validationErrors };
   }
 
   if (!account.authType) {
-    logger.debug(
-      i18n('config.utils.isConfigAccountValid.missingAuthType', {
+    validationErrors.push(
+      i18n('config.utils.validateConfigAccount.missingAuthType', {
         accountId: account.accountId,
       })
     );
-    return false;
+    return { isValid: false, errors: validationErrors };
   }
 
-  let valid = false;
-
   if (account.authType === PERSONAL_ACCESS_KEY_AUTH_METHOD.value) {
-    valid =
+    const isValidPersonalAccessKeyAccount =
       'personalAccessKey' in account && Boolean(account.personalAccessKey);
 
-    if (!valid) {
-      logger.debug(
-        i18n('config.utils.isConfigAccountValid.missingPersonalAccessKey', {
+    if (!isValidPersonalAccessKeyAccount) {
+      validationErrors.push(
+        i18n('config.utils.validateConfigAccount.missingPersonalAccessKey', {
           accountId: account.accountId,
         })
       );
@@ -441,11 +445,11 @@ export function isConfigAccountValid(
   }
 
   if (account.authType === OAUTH_AUTH_METHOD.value) {
-    valid = 'auth' in account && Boolean(account.auth);
+    const isValidOAuthAccount = 'auth' in account && Boolean(account.auth);
 
-    if (!valid) {
-      logger.debug(
-        i18n('config.utils.isConfigAccountValid.missingAuth', {
+    if (!isValidOAuthAccount) {
+      validationErrors.push(
+        i18n('config.utils.validateConfigAccount.missingAuth', {
           accountId: account.accountId,
         })
       );
@@ -453,18 +457,18 @@ export function isConfigAccountValid(
   }
 
   if (account.authType === API_KEY_AUTH_METHOD.value) {
-    valid = 'apiKey' in account && Boolean(account.apiKey);
+    const isValidAPIKeyAccount = 'apiKey' in account && Boolean(account.apiKey);
 
-    if (!valid) {
-      logger.debug(
-        i18n('config.utils.isConfigAccountValid.missingApiKey', {
+    if (!isValidAPIKeyAccount) {
+      validationErrors.push(
+        i18n('config.utils.validateConfigAccount.missingApiKey', {
           accountId: account.accountId,
         })
       );
     }
   }
 
-  return valid;
+  return { isValid: validationErrors.length === 0, errors: validationErrors };
 }
 
 export function handleConfigFileSystemError(

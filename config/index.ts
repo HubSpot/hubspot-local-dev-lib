@@ -9,7 +9,11 @@ import {
   MIN_HTTP_TIMEOUT,
 } from '../constants/config';
 import { HubSpotConfigAccount } from '../types/Accounts';
-import { HubSpotConfig, ConfigFlag } from '../types/Config';
+import {
+  HubSpotConfig,
+  ConfigFlag,
+  HubSpotConfigValidationResult,
+} from '../types/Config';
 import { CmsPublishMode } from '../types/Files';
 import { logger } from '../lib/logger';
 import {
@@ -19,7 +23,7 @@ import {
   writeConfigFile,
   getLocalConfigDefaultFilePath,
   getConfigAccountByIdentifier,
-  isConfigAccountValid,
+  validateConfigAccount,
   getConfigAccountIndexById,
   getConfigPathEnvironmentVariables,
   getConfigAccountByInferredIdentifier,
@@ -121,52 +125,55 @@ export function getConfig(): HubSpotConfig {
   }
 }
 
-export function isConfigValid(): boolean {
+export function validateConfig(): HubSpotConfigValidationResult {
   const config = getConfig();
 
   if (config.accounts.length === 0) {
-    logger.debug(i18n('config.isConfigValid.missingAccounts'));
-    return false;
+    return {
+      isValid: false,
+      errors: [i18n('config.validateConfig.missingAccounts')],
+    };
   }
 
   const accountIdsMap: { [key: number]: boolean } = {};
   const accountNamesMap: { [key: string]: boolean } = {};
 
-  return config.accounts.every(account => {
-    if (!isConfigAccountValid(account)) {
-      return false;
+  const validationErrors: string[] = [];
+
+  config.accounts.forEach(account => {
+    const accountValidationResult = validateConfigAccount(account);
+    if (!accountValidationResult.isValid) {
+      return accountValidationResult;
     }
     if (accountIdsMap[account.accountId]) {
-      logger.debug(
-        i18n('config.isConfigValid.duplicateAccountIds', {
+      validationErrors.push(
+        i18n('config.validateConfig.duplicateAccountIds', {
           accountId: account.accountId,
         })
       );
-      return false;
     }
     if (account.name) {
       if (accountNamesMap[account.name.toLowerCase()]) {
         logger.debug(
-          i18n('config.isConfigValid.duplicateAccountNames', {
+          i18n('config.validateConfig.duplicateAccountNames', {
             accountName: account.name,
           })
         );
-        return false;
       }
       if (/\s+/.test(account.name)) {
         logger.debug(
-          i18n('config.isConfigValid.invalidAccountName', {
+          i18n('config.validateConfig.invalidAccountName', {
             accountName: account.name,
           })
         );
-        return false;
       }
       accountNamesMap[account.name] = true;
     }
 
     accountIdsMap[account.accountId] = true;
-    return true;
   });
+
+  return { isValid: validationErrors.length === 0, errors: validationErrors };
 }
 
 export function createEmptyConfigFile(useGlobalConfig = false): void {
@@ -349,7 +356,7 @@ export function getConfigAccountEnvironment(
 }
 
 export function addConfigAccount(accountToAdd: HubSpotConfigAccount): void {
-  if (!isConfigAccountValid(accountToAdd)) {
+  if (!validateConfigAccount(accountToAdd)) {
     throw new HubSpotConfigError(
       i18n('config.addConfigAccount.invalidAccount'),
       HUBSPOT_CONFIG_ERROR_TYPES.INVALID_ACCOUNT,
@@ -383,7 +390,7 @@ export function addConfigAccount(accountToAdd: HubSpotConfigAccount): void {
 export function updateConfigAccount(
   updatedAccount: HubSpotConfigAccount
 ): void {
-  if (!isConfigAccountValid(updatedAccount)) {
+  if (!validateConfigAccount(updatedAccount)) {
     throw new HubSpotConfigError(
       i18n('config.updateConfigAccount.invalidAccount', {
         name: updatedAccount.name,

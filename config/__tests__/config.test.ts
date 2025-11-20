@@ -7,7 +7,7 @@ import {
   globalConfigFileExists,
   getConfigFilePath,
   getConfig,
-  isConfigValid,
+  validateConfig,
   createEmptyConfigFile,
   deleteConfigFileIfEmpty,
   getConfigAccountById,
@@ -48,6 +48,7 @@ import {
 } from '../../constants/config';
 import * as utils from '../utils';
 import { CmsPublishMode } from '../../types/Files';
+import { i18n } from '../../utils/lang';
 
 jest.mock('findup-sync');
 jest.mock('../../lib/path');
@@ -226,23 +227,33 @@ describe('config/index', () => {
     });
   });
 
-  describe('isConfigValid()', () => {
+  describe('validateConfig()', () => {
     it('returns true for valid config', () => {
       mockConfig();
 
-      expect(isConfigValid()).toBe(true);
+      expect(validateConfig()).toEqual({ isValid: true, errors: [] });
     });
 
     it('returns false for config with no accounts', () => {
       mockConfig({ accounts: [] });
 
-      expect(isConfigValid()).toBe(false);
+      expect(validateConfig()).toEqual({
+        isValid: false,
+        errors: [i18n('config.validateConfig.missingAccounts')],
+      });
     });
 
     it('returns false for config with duplicate account ids', () => {
       mockConfig({ accounts: [PAK_ACCOUNT, PAK_ACCOUNT] });
 
-      expect(isConfigValid()).toBe(false);
+      expect(validateConfig()).toEqual({
+        isValid: false,
+        errors: [
+          i18n('config.validateConfig.duplicateAccountIds', {
+            accountId: PAK_ACCOUNT.accountId,
+          }),
+        ],
+      });
     });
   });
 
