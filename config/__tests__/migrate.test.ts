@@ -7,6 +7,7 @@ import {
   migrateConfigAtPath,
   mergeConfigProperties,
   mergeConfigAccounts,
+  archiveConfigAtPath,
 } from '../migrate';
 import { HubSpotConfig } from '../../types/Config';
 import { readConfigFile, writeConfigFile } from '../utils';
@@ -17,6 +18,7 @@ import {
   HTTP_USE_LOCALHOST,
   ALLOW_USAGE_TRACKING,
   DEFAULT_ACCOUNT,
+  ARCHIVED_HUBSPOT_CONFIG_YAML_FILE_NAME,
 } from '../../constants/config';
 import { ENVIRONMENTS } from '../../constants/environments';
 import { PERSONAL_ACCESS_KEY_AUTH_METHOD } from '../../constants/auth';
@@ -26,6 +28,7 @@ import { createEmptyConfigFile, getGlobalConfigFilePath } from '../index';
 jest.mock('fs', () => ({
   ...jest.requireActual('fs'),
   unlinkSync: jest.fn(),
+  renameSync: jest.fn(),
 }));
 
 jest.mock('../utils', () => ({
@@ -100,7 +103,6 @@ describe('config/migrate', () => {
         mockConfig,
         mockGlobalConfigPath
       );
-      expect(fs.unlinkSync).toHaveBeenCalledWith(mockConfigPath);
     });
   });
 
@@ -448,6 +450,22 @@ describe('config/migrate', () => {
       expect(writeConfigFile).toHaveBeenCalledWith(
         result.configWithMergedAccounts,
         mockGlobalConfigPath
+      );
+    });
+  });
+
+  describe('archiveConfigAtPath', () => {
+    const mockRenameSync = fs.renameSync as jest.Mock;
+
+    it('should rename config file to archived config file', () => {
+      const configPath = '/home/user/project/hubspot.config.yml';
+      const expectedArchivedPath = `/home/user/project/${ARCHIVED_HUBSPOT_CONFIG_YAML_FILE_NAME}`;
+
+      archiveConfigAtPath(configPath);
+
+      expect(mockRenameSync).toHaveBeenCalledWith(
+        configPath,
+        expectedArchivedPath
       );
     });
   });
