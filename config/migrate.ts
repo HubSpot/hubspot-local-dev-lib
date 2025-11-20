@@ -88,7 +88,11 @@ export function mergeConfigProperties(
     ] as const;
 
     propertiesToCheck.forEach(prop => {
-      if (toConfig[prop] !== undefined && toConfig[prop] !== fromConfig[prop]) {
+      if (
+        toConfig[prop] !== undefined &&
+        fromConfig[prop] !== undefined &&
+        toConfig[prop] !== fromConfig[prop]
+      ) {
         conflicts.push({
           property: prop,
           oldValue: fromConfig[prop],
