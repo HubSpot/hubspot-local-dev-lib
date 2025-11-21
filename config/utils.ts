@@ -8,6 +8,7 @@ import {
   ACCOUNT_IDENTIFIERS,
   HUBSPOT_CONFIG_ERROR_TYPES,
   HUBSPOT_CONFIG_OPERATIONS,
+  GLOBAL_CONFIG_PATH,
 } from '../constants/config';
 import {
   PERSONAL_ACCESS_KEY_AUTH_METHOD,
@@ -27,6 +28,7 @@ import {
   OAuthConfigAccount,
   AccountType,
   TokenInfo,
+  DeprecatedHubSpotConfigAccountFields,
 } from '../types/Accounts';
 import { getValidEnv } from '../lib/environment';
 import { getCwd } from '../lib/path';
@@ -132,7 +134,7 @@ export function removeUndefinedFieldsFromConfigAccount<
 }
 
 // Ensure written config files have fields in a consistent order
-export function formatConfigForWrite(config: HubSpotConfig) {
+export function formatConfigForWrite(config: HubSpotConfig): HubSpotConfig {
   const {
     defaultAccount,
     defaultCmsPublishMode,
@@ -151,23 +153,33 @@ export function formatConfigForWrite(config: HubSpotConfig) {
     accounts: accounts.map(account => {
       const { name, accountId, env, authType, ...rest } = account;
 
-      return {
+      const orderedAccount = {
         name,
         accountId,
         env,
         authType,
         ...rest,
-      };
+        // using ...rest messes with the typing
+      } as HubSpotConfigAccount;
+
+      return removeUndefinedFieldsFromConfigAccount(orderedAccount);
     }),
   };
 
-  return removeUndefinedFieldsFromConfigAccount(orderedConfig);
+  return orderedConfig;
 }
 
 export function writeConfigFile(
   config: HubSpotConfig,
   configPath: string
 ): void {
+  const formattedConfig = formatConfigForWrite(config);
+
+  const configToWrite =
+    configPath == GLOBAL_CONFIG_PATH
+      ? formattedConfig
+      : convertToDeprecatedConfig(formattedConfig);
+
   const source = yaml.dump(formatConfigForWrite(config));
 
   try {
@@ -236,6 +248,45 @@ export function normalizeParsedConfig(
   }
 
   return parsedConfig;
+}
+
+export function convertToDeprecatedConfig(
+  config: HubSpotConfig
+): Partial<HubSpotConfig> & Partial<DeprecatedHubSpotConfigFields> {
+  const deprecatedConfig: Partial<HubSpotConfig> &
+    DeprecatedHubSpotConfigFields = structuredClone(config);
+
+  if (config.defaultAccount) {
+    const defaultAccount = getConfigAccountByIdentifier(
+      config.accounts,
+      ACCOUNT_IDENTIFIERS.ACCOUNT_ID,
+      config.defaultAccount
+    );
+    if (defaultAccount) {
+      deprecatedConfig.defaultPortal = defaultAccount.name;
+      delete deprecatedConfig.defaultAccount;
+    }
+  }
+
+  const portals: Array<
+    HubSpotConfigAccount & DeprecatedHubSpotConfigAccountFields
+  > = config.accounts.map(account => {
+    if (account.accountId) {
+      const deprecatedAccount: HubSpotConfigAccount &
+        DeprecatedHubSpotConfigAccountFields = structuredClone(account);
+      deprecatedAccount.portalId = account.accountId;
+      // @ts-expect-error deleting accountId is intential since using deprecated config format
+      delete deprecatedAccount.accountId;
+
+      return deprecatedAccount;
+    }
+    return account;
+  });
+
+  deprecatedConfig.portals = portals;
+  delete deprecatedConfig.accounts;
+
+  return deprecatedConfig;
 }
 
 export function parseConfig(
