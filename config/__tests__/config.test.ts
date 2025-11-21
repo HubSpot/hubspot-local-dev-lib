@@ -252,6 +252,9 @@ describe('config/index', () => {
           i18n('config.validateConfig.duplicateAccountIds', {
             accountId: PAK_ACCOUNT.accountId,
           }),
+          i18n('config.validateConfig.duplicateAccountNames', {
+            accountName: PAK_ACCOUNT.name,
+          }),
         ],
       });
     });
