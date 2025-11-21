@@ -1,49 +1,38 @@
+import {
+  CONFIG_FLAGS,
+  HUBSPOT_CONFIG_ERROR_TYPES,
+  HUBSPOT_CONFIG_OPERATIONS,
+} from '../constants/config';
 import { ENVIRONMENTS } from '../constants/environments';
-import { CLIAccount_NEW, CLIAccount_DEPRECATED } from './Accounts';
+import {
+  DeprecatedHubSpotConfigAccountFields,
+  HubSpotConfigAccount,
+} from './Accounts';
 import { CmsPublishMode } from './Files';
 import { ValueOf } from './Utils';
 
-export interface CLIConfig_NEW {
-  accounts?: Array<CLIAccount_NEW>;
+export interface HubSpotConfig {
+  accounts: Array<HubSpotConfigAccount>;
   allowUsageTracking?: boolean;
   allowAutoUpdates?: boolean;
-  defaultAccount?: string | number;
+  defaultAccount?: number;
   defaultMode?: CmsPublishMode; // Deprecated - left in to handle existing configs with this field
   defaultCmsPublishMode?: CmsPublishMode;
   httpTimeout?: number;
   env?: Environment;
   httpUseLocalhost?: boolean;
   autoOpenBrowser?: boolean;
+  useCustomObjectHubfile?: boolean;
   flags?: Array<string>;
 }
 
-export interface CLIConfig_DEPRECATED {
-  portals: Array<CLIAccount_DEPRECATED>;
-  allowUsageTracking?: boolean;
-  allowAutoUpdates?: boolean;
-  defaultPortal?: string | number;
-  defaultMode?: CmsPublishMode; // Deprecated - left in to handle existing configs with this field
-  defaultCmsPublishMode?: CmsPublishMode;
-  httpTimeout?: number;
-  env?: Environment;
-  httpUseLocalhost?: boolean;
-  autoOpenBrowser?: boolean;
-  flags?: Array<string>;
-}
-
-export type CLIConfig = CLIConfig_NEW | CLIConfig_DEPRECATED;
+export type DeprecatedHubSpotConfigFields = {
+  portals?: Array<HubSpotConfigAccount & DeprecatedHubSpotConfigAccountFields>;
+  defaultPortal?: string;
+  defaultMode?: CmsPublishMode;
+};
 
 export type Environment = ValueOf<typeof ENVIRONMENTS> | '';
-
-export type EnvironmentConfigVariables = {
-  apiKey?: string;
-  clientId?: string;
-  clientSecret?: string;
-  personalAccessKey?: string;
-  accountId?: number;
-  refreshToken?: string;
-  env?: Environment;
-};
 
 export type GitInclusionResult = {
   inGit: boolean;
@@ -51,6 +40,17 @@ export type GitInclusionResult = {
   gitignoreFiles: Array<string>;
 };
 
+export type ConfigFlag = ValueOf<typeof CONFIG_FLAGS>;
+
 export type HubSpotState = {
   mcpTotalToolCalls: number;
+};
+
+export type HubSpotConfigErrorType = ValueOf<typeof HUBSPOT_CONFIG_ERROR_TYPES>;
+
+export type HubSpotConfigOperation = ValueOf<typeof HUBSPOT_CONFIG_OPERATIONS>;
+
+export type HubSpotConfigValidationResult = {
+  isValid: boolean;
+  errors: Array<string>;
 };

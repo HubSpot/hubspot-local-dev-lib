@@ -2,13 +2,13 @@ import axios, { AxiosError } from 'axios';
 import fs from 'fs-extra';
 import moment from 'moment';
 import {
-  getAndLoadConfigIfNeeded as __getAndLoadConfigIfNeeded,
-  getAccountConfig as __getAccountConfig,
+  getConfig as __getConfig,
+  getConfigAccountById as __getConfigAccountById,
 } from '../../config';
 import { ENVIRONMENTS } from '../../constants/environments';
 import { http } from '../';
 import { version } from '../../package.json';
-import { AuthType } from '../../types/Accounts';
+import { HubSpotConfigAccount } from '../../types/Accounts';
 
 jest.mock('fs-extra');
 jest.mock('axios');
@@ -28,13 +28,18 @@ jest.mock('https', () => ({
 }));
 
 const mockedAxios = jest.mocked(axios);
-const getAndLoadConfigIfNeeded =
-  __getAndLoadConfigIfNeeded as jest.MockedFunction<
-    typeof __getAndLoadConfigIfNeeded
-  >;
-const getAccountConfig = __getAccountConfig as jest.MockedFunction<
-  typeof __getAccountConfig
+const getConfig = __getConfig as jest.MockedFunction<typeof __getConfig>;
+const getConfigAccountById = __getConfigAccountById as jest.MockedFunction<
+  typeof __getConfigAccountById
 >;
+
+const ACCOUNT: HubSpotConfigAccount = {
+  name: 'test-account',
+  accountId: 123,
+  apiKey: 'abc',
+  env: ENVIRONMENTS.QA,
+  authType: 'apikey',
+};
 
 fs.createWriteStream = jest.fn().mockReturnValue({
   on: jest.fn((event, callback) => {
@@ -46,27 +51,17 @@ fs.createWriteStream = jest.fn().mockReturnValue({
 
 describe('http/index', () => {
   afterEach(() => {
-    getAndLoadConfigIfNeeded.mockReset();
-    getAccountConfig.mockReset();
+    getConfig.mockReset();
+    getConfigAccountById.mockReset();
   });
 
   describe('http.getOctetStream()', () => {
     beforeEach(() => {
-      getAndLoadConfigIfNeeded.mockReturnValue({
+      getConfig.mockReturnValue({
         httpTimeout: 1000,
-        accounts: [
-          {
-            accountId: 123,
-            apiKey: 'abc',
-            env: ENVIRONMENTS.QA,
-          },
-        ],
+        accounts: [ACCOUNT],
       });
-      getAccountConfig.mockReturnValue({
-        accountId: 123,
-        apiKey: 'abc',
-        env: ENVIRONMENTS.QA,
-      });
+      getConfigAccountById.mockReturnValue(ACCOUNT);
     });
 
     it('makes a get request', async () => {
@@ -126,10 +121,11 @@ describe('http/index', () => {
   describe('http.get()', () => {
     it('adds authorization header when using OAuth2 with valid access token', async () => {
       const accessToken = 'let-me-in';
-      const account = {
+      const account: HubSpotConfigAccount = {
+        name: 'test-account',
         accountId: 123,
         env: ENVIRONMENTS.PROD,
-        authType: 'oauth2' as AuthType,
+        authType: 'oauth2',
         auth: {
           clientId: 'd996372f-2b53-30d3-9c3b-4fdde4bce3a2',
           clientSecret: 'f90a6248-fbc0-3b03-b0db-ec58c95e791',
@@ -141,10 +137,10 @@ describe('http/index', () => {
           },
         },
       };
-      getAndLoadConfigIfNeeded.mockReturnValue({
+      getConfig.mockReturnValue({
         accounts: [account],
       });
-      getAccountConfig.mockReturnValue(account);
+      getConfigAccountById.mockReturnValue(account);
 
       await http.get(123, { url: 'some/endpoint/path' });
 
@@ -172,10 +168,11 @@ describe('http/index', () => {
     });
     it('adds authorization header when using a user token', async () => {
       const accessToken = 'let-me-in';
-      const account = {
+      const account: HubSpotConfigAccount = {
+        name: 'test-account',
         accountId: 123,
         env: ENVIRONMENTS.PROD,
-        authType: 'personalaccesskey' as AuthType,
+        authType: 'personalaccesskey',
         personalAccessKey: 'some-secret',
         auth: {
           tokenInfo: {
@@ -184,10 +181,10 @@ describe('http/index', () => {
           },
         },
       };
-      getAndLoadConfigIfNeeded.mockReturnValue({
+      getConfig.mockReturnValue({
         accounts: [account],
       });
-      getAccountConfig.mockReturnValue(account);
+      getConfigAccountById.mockReturnValue(account);
 
       await http.get(123, { url: 'some/endpoint/path' });
 
@@ -215,26 +212,16 @@ describe('http/index', () => {
     });
 
     it('supports setting a custom timeout', async () => {
-      getAndLoadConfigIfNeeded.mockReturnValue({
+      getConfig.mockReturnValue({
         httpTimeout: 1000,
-        accounts: [
-          {
-            accountId: 123,
-            apiKey: 'abc',
-            env: ENVIRONMENTS.PROD,
-          },
-        ],
+        accounts: [ACCOUNT],
       });
-      getAccountConfig.mockReturnValue({
-        accountId: 123,
-        apiKey: 'abc',
-        env: ENVIRONMENTS.PROD,
-      });
+      getConfigAccountById.mockReturnValue(ACCOUNT);
 
       await http.get(123, { url: 'some/endpoint/path' });
 
       expect(mockedAxios).toHaveBeenCalledWith({
-        baseURL: `https://api.hubapi.com`,
+        baseURL: `https://api.hubapiqa.com`,
         url: 'some/endpoint/path',
         headers: {
           'User-Agent': `HubSpot Local Dev Lib/${version}`,

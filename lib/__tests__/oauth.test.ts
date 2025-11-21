@@ -1,62 +1,62 @@
 import { addOauthToAccountConfig, getOauthManager } from '../oauth';
 
-jest.mock('../../config/getAccountIdentifier');
 jest.mock('../../config');
 jest.mock('../logger');
 jest.mock('../../errors');
+jest.mock('../../models/OAuth2Manager');
 
-import { updateAccountConfig, writeConfig } from '../../config';
-import { OAuth2Manager } from '../../models/OAuth2Manager';
-import { FlatAccountFields_NEW } from '../../types/Accounts';
+import { updateConfigAccount } from '../../config';
+import * as OAuth2ManagerModule from '../../models/OAuth2Manager';
 import { ENVIRONMENTS } from '../../constants/environments';
 import { AUTH_METHODS } from '../../constants/auth';
 import { logger } from '../logger';
+import { HubSpotConfigAccount } from '../../types/Accounts';
 
-const OAuth2ManagerFromConfigMock = jest.spyOn(OAuth2Manager, 'fromConfig');
+const UnmockedOAuth2Manager = jest.requireActual('../../models/OAuth2Manager');
+const OAuth2Manager = UnmockedOAuth2Manager.OAuth2Manager;
+
+const OAuth2ManagerMock = jest.spyOn(OAuth2ManagerModule, 'OAuth2Manager');
 
 describe('lib/oauth', () => {
   const accountId = 123;
-  const accountConfig: FlatAccountFields_NEW = {
+  const account: HubSpotConfigAccount = {
+    name: 'my-account',
     accountId,
     env: ENVIRONMENTS.QA,
-    clientId: 'my-client-id',
-    clientSecret: "shhhh, it's a secret",
-    scopes: [],
-    apiKey: '',
-    personalAccessKey: '',
+    authType: AUTH_METHODS.oauth.value,
+    auth: {
+      clientId: 'my-client-id',
+      clientSecret: "shhhh, it's a secret",
+      scopes: [],
+      tokenInfo: {},
+    },
   };
-  const account = {
-    name: 'my-account',
-  };
+
   describe('getOauthManager', () => {
     it('should create a OAuth2Manager for accounts that are not cached', () => {
-      getOauthManager(accountId, accountConfig);
-      expect(OAuth2ManagerFromConfigMock).toHaveBeenCalledTimes(1);
-      expect(OAuth2ManagerFromConfigMock).toHaveBeenCalledWith(
-        accountConfig,
+      getOauthManager(account);
+      expect(OAuth2ManagerMock).toHaveBeenCalledTimes(1);
+      expect(OAuth2ManagerMock).toHaveBeenCalledWith(
+        account,
         expect.any(Function)
       );
     });
 
     it('should use the cached OAuth2Manager if it exists', () => {
-      getOauthManager(accountId, accountConfig);
-      expect(OAuth2ManagerFromConfigMock).not.toHaveBeenCalled();
+      getOauthManager(account);
+      expect(OAuth2ManagerMock).not.toHaveBeenCalled();
     });
+
+    jest.clearAllMocks();
   });
 
   describe('addOauthToAccountConfig', () => {
     it('should update the config', () => {
-      addOauthToAccountConfig(new OAuth2Manager(account));
-      expect(updateAccountConfig).toHaveBeenCalledTimes(1);
-      expect(updateAccountConfig).toHaveBeenCalledWith({
-        ...account,
-        authType: AUTH_METHODS.oauth.value,
-      });
-    });
-
-    it('should write the updated config', () => {
-      addOauthToAccountConfig(new OAuth2Manager(account));
-      expect(writeConfig).toHaveBeenCalledTimes(1);
+      const oauthManager = new OAuth2Manager(account, () => null);
+      console.log('oauthManager', oauthManager.account);
+      addOauthToAccountConfig(oauthManager);
+      expect(updateConfigAccount).toHaveBeenCalledTimes(1);
+      expect(updateConfigAccount).toHaveBeenCalledWith(account);
     });
 
     it('should log messages letting the user know the status of the operation', () => {

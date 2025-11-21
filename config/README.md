@@ -10,21 +10,38 @@ The config file is named `huspot.config.yml`.
 
 There are a handful of standard config utils that anyone working in this library should be familiar with.
 
-#### getAndLoadConfigIfNeeded()
+#### getConfig()
 
-Locates, parses, and stores the `hubspot.config.yml` file in memory. This should be the first thing that you do if you plan to access any of the config file values. If the config has already been loaded, this function will simply return the already-parsed config values.
+Locates and parses the hubspot config file. This function will automatically find the correct config file using the following criteria:
+1. Checks to see if a config was specified via environment variables (see below)
+2. If no environment variables are present, looks for a global config file (located at `~/.hscli/config.yml`)
+3. If no global config file is found, looks up the file tree for a local config file.
+4. If no local config file is found, throws an error
 
-#### updateAccountConfig()
 
-Safely writes updated values to the `hubspot.config.yml` file. This will also refresh the in-memory values that have been stored for the targeted account.
+##### Custom config location environment variables
+- `HUBSPOT_CONFIG_PATH` - specify a file path to a specific config file
+- `USE_ENVIRONMENT_HUBSPOT_CONFIG` - load config account from environment variables. The following environment variables are supported:
+  - `HUBSPOT_PERSONAL_ACCESS_KEY`
+  - `HUBSPOT_ACCOUNT_ID`
+  - `HTTP_TIMEOUT`
+  - `DEFAULT_CMS_PUBLISH_MODE`
 
-#### getAccountConfig()
+#### updateConfigAccount()
 
-Returns config data for a specific account, given the account's ID.
+Safely writes updated values to the HubSpot config file.
+
+#### getConfigAccountById() and getConfigAccountByName()
+
+Returns config data for a specific account, given the account's ID or name. Errors if an account is not found.
+
+#### getAccountIfExist
+
+Returns config data for a specific account, given either a name or an ID. Returns null without erroring if an account is not found
 
 ## Example config
 
-Here is an example of a basic hubspot config file with a single account configured.
+Here is an example of a basic HubSpot config file with a single account configured.
 
 ```yml
 defaultPortal: my-hubspot-account
@@ -39,7 +56,3 @@ portals:
     accountType: STANDARD
     personalAccessKey: 'my-personal-access-key'
 ```
-
-## config_DEPRECATED.ts explained
-
-You may notice that we have a few configuration files in our `config/` folder. This is because we are in the middle of exploring a new method for storing account information. Despite its naming, config_DEPRECATED.ts is still the configuration file that handles all of our config logic. We have a proxy file named `config/index.ts` that will always choose to use the soon-to-be deprecated configuration file. This proxy file will enable us to slowly port config functionality over to the new pattern (i.e. `config/CLIConfiguration.ts`). For now, it is recommended to use config_DEPRECATED.ts and the utils it provides. We ask that any updates made to config_DEPRECATED.ts are also made to the newer CLIConfiguration.ts file whenever applicable.
