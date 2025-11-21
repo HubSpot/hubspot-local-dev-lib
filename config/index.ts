@@ -154,14 +154,14 @@ export function validateConfig(): HubSpotConfigValidationResult {
     }
     if (account.name) {
       if (accountNamesMap[account.name.toLowerCase()]) {
-        logger.debug(
+        validationErrors.push(
           i18n('config.validateConfig.duplicateAccountNames', {
             accountName: account.name,
           })
         );
       }
       if (/\s+/.test(account.name)) {
-        logger.debug(
+        validationErrors.push(
           i18n('config.validateConfig.invalidAccountName', {
             accountName: account.name,
           })

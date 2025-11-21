@@ -1,13 +1,11 @@
 import fs from 'fs-extra';
 import yaml from 'js-yaml';
-import findup from 'findup-sync';
 
 import {
   HUBSPOT_ACCOUNT_TYPES,
   DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME,
   ENVIRONMENT_VARIABLES,
   ACCOUNT_IDENTIFIERS,
-  GLOBAL_CONFIG_PATH,
   HUBSPOT_CONFIG_ERROR_TYPES,
   HUBSPOT_CONFIG_OPERATIONS,
 } from '../constants/config';
@@ -24,7 +22,6 @@ import {
   HubSpotConfigValidationResult,
 } from '../types/Config';
 import { FileSystemError } from '../models/FileSystemError';
-import { logger } from '../lib/logger';
 import {
   HubSpotConfigAccount,
   OAuthConfigAccount,
