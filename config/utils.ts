@@ -180,7 +180,7 @@ export function writeConfigFile(
       ? formattedConfig
       : convertToDeprecatedConfig(formattedConfig);
 
-  const source = yaml.dump(formatConfigForWrite(config));
+  const source = yaml.dump(configToWrite);
 
   try {
     fs.ensureFileSync(configPath);
