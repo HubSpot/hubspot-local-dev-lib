@@ -277,7 +277,7 @@ describe('config/index', () => {
 
       expect(mockFs.writeFileSync).toHaveBeenCalledWith(
         getLocalConfigDefaultFilePath(),
-        yaml.dump({ accounts: [] })
+        yaml.dump({ portals: [] })
       );
     });
   });
