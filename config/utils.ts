@@ -391,7 +391,23 @@ export function getConfigAccountByInferredIdentifier(
 ): HubSpotConfigAccount | undefined {
   const { identifier, identifierType } =
     getAccountIdentifierAndType(accountIdentifier);
-  return accounts.find(account => account[identifierType] === identifier);
+
+  const account = getConfigAccountByIdentifier(
+    accounts,
+    identifierType,
+    identifier
+  );
+
+  if (account) {
+    return account;
+  }
+
+  // Fallback to handle accounts with numbers as names
+  return getConfigAccountByIdentifier(
+    accounts,
+    ACCOUNT_IDENTIFIERS.NAME,
+    String(accountIdentifier)
+  );
 }
 
 export function getConfigAccountIndexById(

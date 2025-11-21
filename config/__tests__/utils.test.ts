@@ -26,10 +26,7 @@ import {
   DeprecatedHubSpotConfigFields,
   HubSpotConfig,
 } from '../../types/Config';
-import {
-  ENVIRONMENT_VARIABLES,
-  HUBSPOT_CONFIGURATION_FOLDER,
-} from '../../constants/config';
+import { ENVIRONMENT_VARIABLES } from '../../constants/config';
 import { FileSystemError } from '../../models/FileSystemError';
 import {
   PERSONAL_ACCESS_KEY_AUTH_METHOD,

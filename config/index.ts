@@ -433,7 +433,7 @@ export function setConfigAccountAsDefault(identifier: number | string): void {
   if (!account) {
     throw new HubSpotConfigError(
       i18n('config.setConfigAccountAsDefault.accountNotFound', {
-        accountId: identifier,
+        identifier,
       }),
       HUBSPOT_CONFIG_ERROR_TYPES.ACCOUNT_NOT_FOUND,
       HUBSPOT_CONFIG_OPERATIONS.WRITE

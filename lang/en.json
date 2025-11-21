@@ -276,7 +276,7 @@
       "accountNotFound": "Attempting to update account with id {{ id }}, but that account was not found in config"
     },
     "setConfigAccountAsDefault": {
-      "accountNotFound": "Attempted to set account with id {{ accountId }} as default, but that account was not found in config"
+      "accountNotFound": "Attempted to set account with identifier {{ identifier }} as default, but that account was not found in config"
     },
     "renameConfigAccount": {
       "accountNotFound": "Attempted to rename account with name {{ currentName }}, but that account was not found in config",
