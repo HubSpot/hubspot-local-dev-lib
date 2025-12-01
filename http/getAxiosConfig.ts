@@ -4,8 +4,9 @@ import { getHubSpotApiOrigin } from '../lib/urls';
 import { HttpOptions } from '../types/Http';
 import { HubSpotConfig } from '../types/Config';
 import { AxiosRequestConfig } from 'axios';
-import https from 'https';
 import http from 'http';
+import https from 'https';
+import { HttpsProxyAgent } from 'https-proxy-agent';
 
 // Total number of sockets across all hosts
 const MAX_TOTAL_SOCKETS = 25;
@@ -24,6 +25,24 @@ const httpsAgent = new https.Agent({
   maxTotalSockets: MAX_TOTAL_SOCKETS,
   maxSockets: MAX_SOCKETS_PER_HOST,
 });
+
+function getHttpsProxyAgent(): HttpsProxyAgent<string> | null {
+  const proxyUrl =
+    process.env.HTTPS_PROXY ||
+    process.env.https_proxy ||
+    process.env.HTTP_PROXY ||
+    process.env.http_proxy ||
+    process.env.ALL_PROXY ||
+    process.env.all_proxy;
+  if (!proxyUrl) {
+    return null;
+  }
+  return new HttpsProxyAgent(proxyUrl, {
+    keepAlive: true,
+    maxTotalSockets: MAX_TOTAL_SOCKETS,
+    maxSockets: MAX_SOCKETS_PER_HOST,
+  });
+}
 
 export const USER_AGENTS: { [key: string]: string } = {
   'HubSpot Local Dev Lib': version,
@@ -47,6 +66,55 @@ const DEFAULT_TRANSITIONAL = {
   clarifyTimeoutError: true,
 };
 
+function hostnameMatchesNoProxyPattern(
+  hostname: string,
+  pattern: string
+): boolean {
+  const normalizedHostname = hostname.toLowerCase();
+  const normalizedPattern = pattern.trim().toLowerCase();
+
+  if (normalizedPattern === '*') {
+    return true;
+  }
+
+  if (normalizedPattern.startsWith('.')) {
+    return normalizedHostname.endsWith(normalizedPattern);
+  }
+
+  return (
+    normalizedHostname === normalizedPattern ||
+    normalizedHostname.endsWith(`.${normalizedPattern}`)
+  );
+}
+
+function shouldUseProxy(baseURL: string): boolean {
+  if (
+    !process.env.HTTPS_PROXY &&
+    !process.env.https_proxy &&
+    !process.env.HTTP_PROXY &&
+    !process.env.http_proxy &&
+    !process.env.ALL_PROXY &&
+    !process.env.all_proxy
+  ) {
+    return false;
+  }
+
+  const noProxy = process.env.NO_PROXY || process.env.no_proxy;
+  if (noProxy) {
+    const hostname = new URL(baseURL).hostname;
+    const noProxyList = noProxy.split(',').filter(Boolean);
+    if (
+      noProxyList.some(pattern =>
+        hostnameMatchesNoProxyPattern(hostname, pattern)
+      )
+    ) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 export function getAxiosConfig(options: HttpOptions): AxiosRequestConfig {
   const { env, localHostOverride, headers, ...rest } = options;
   let config: HubSpotConfig | null;
@@ -67,11 +135,13 @@ export function getAxiosConfig(options: HttpOptions): AxiosRequestConfig {
     httpUseLocalhost = config.httpUseLocalhost;
   }
 
+  const baseURL = getHubSpotApiOrigin(
+    env,
+    localHostOverride ? false : httpUseLocalhost
+  );
+
   return {
-    baseURL: getHubSpotApiOrigin(
-      env,
-      localHostOverride ? false : httpUseLocalhost
-    ),
+    baseURL,
     headers: {
       ...getDefaultUserAgentHeader(),
       ...(headers || {}),
@@ -79,7 +149,7 @@ export function getAxiosConfig(options: HttpOptions): AxiosRequestConfig {
     timeout: httpTimeout,
     transitional: DEFAULT_TRANSITIONAL,
     httpAgent,
-    httpsAgent,
+    httpsAgent: shouldUseProxy(baseURL) ? getHttpsProxyAgent() || httpsAgent : httpsAgent,
     ...rest,
   };
 }
