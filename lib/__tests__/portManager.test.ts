@@ -2,6 +2,7 @@ import { MAX_PORT_NUMBER } from '../../constants/ports';
 import { PortManagerServer } from '../../utils/PortManagerServer';
 import {
   deleteServerInstance,
+  getActiveServers,
   getServerPortByInstanceId,
   isPortManagerPortAvailable,
   portManagerHasActiveServers,
@@ -286,6 +287,32 @@ describe('lib/portManager', () => {
       const hasActiveServers = await portManagerHasActiveServers();
 
       expect(hasActiveServers).toBe(true);
+    });
+  });
+
+  describe('getActiveServers()', () => {
+    beforeEach(() => {
+      // @ts-expect-error partial mock
+      mockedPortManagerServer.server = {}; // Mock running server
+    });
+
+    it('returns the servers', async () => {
+      const mockResponse = {
+        data: {
+          servers: {
+            [INSTANCE_ID_1]: PORT_1,
+            [INSTANCE_ID_2]: PORT_2,
+          },
+        },
+      };
+      axios.get.mockResolvedValue(mockResponse);
+
+      const servers = await getActiveServers();
+
+      expect(servers).toEqual({
+        [INSTANCE_ID_1]: PORT_1,
+        [INSTANCE_ID_2]: PORT_2,
+      });
     });
   });
 

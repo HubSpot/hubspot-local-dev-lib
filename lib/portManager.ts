@@ -6,7 +6,7 @@ import {
   SERVICE_HEALTHY,
 } from '../utils/PortManagerServer';
 import { PORT_MANAGER_SERVER_PORT } from '../constants/ports';
-import { RequestPortsData } from '../types/PortManager';
+import { RequestPortsData, ServerPortMap } from '../types/PortManager';
 import { logger } from './logger';
 
 export const BASE_URL = `http://localhost:${PORT_MANAGER_SERVER_PORT}`;
@@ -49,6 +49,11 @@ export async function requestPorts(
   });
 
   return data.ports;
+}
+
+export async function getActiveServers(): Promise<ServerPortMap> {
+  const { data } = await axios.get(`${BASE_URL}/servers`);
+  return data.servers;
 }
 
 export async function getServerPortByInstanceId(
