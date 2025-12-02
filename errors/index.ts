@@ -60,7 +60,7 @@ export function isAuthError(err: unknown): err is HubSpotHttpError {
   );
 }
 
-export function isValidationError(err: unknown): boolean {
+export function isValidationError(err: unknown): err is HubSpotHttpError {
   return (
     isHubSpotHttpError(err) &&
     isSpecifiedError(err, { statusCode: 400 }) &&
@@ -72,7 +72,7 @@ export function isHubSpotHttpError(error?: unknown): error is HubSpotHttpError {
   return !!error && error instanceof HubSpotHttpError;
 }
 
-export function isGithubRateLimitError(err: unknown): boolean {
+export function isGithubRateLimitError(err: unknown): err is HubSpotHttpError {
   if (!isHubSpotHttpError(err)) {
     return false;
   }
