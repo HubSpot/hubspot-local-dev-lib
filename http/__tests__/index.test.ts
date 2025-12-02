@@ -158,6 +158,7 @@ describe('http/index', () => {
         transitional: {
           clarifyTimeoutError: true,
         },
+        proxy: false,
         httpAgent: {
           options: { keepAlive: true, maxSockets: 5, maxTotalSockets: 25 },
         },
@@ -202,6 +203,7 @@ describe('http/index', () => {
         transitional: {
           clarifyTimeoutError: true,
         },
+        proxy: false,
         httpAgent: {
           options: { keepAlive: true, maxSockets: 5, maxTotalSockets: 25 },
         },
@@ -234,6 +236,7 @@ describe('http/index', () => {
         transitional: {
           clarifyTimeoutError: true,
         },
+        proxy: false,
         httpAgent: {
           options: { keepAlive: true, maxSockets: 5, maxTotalSockets: 25 },
         },

@@ -6,6 +6,7 @@ import { HubSpotConfig } from '../types/Config';
 import { AxiosRequestConfig } from 'axios';
 import http from 'http';
 import https from 'https';
+import { HttpProxyAgent } from 'http-proxy-agent';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 
 // Total number of sockets across all hosts
@@ -25,6 +26,22 @@ const httpsAgent = new https.Agent({
   maxTotalSockets: MAX_TOTAL_SOCKETS,
   maxSockets: MAX_SOCKETS_PER_HOST,
 });
+
+function getHttpProxyAgent(): HttpProxyAgent<string> | null {
+  const proxyUrl =
+    process.env.HTTP_PROXY ||
+    process.env.http_proxy ||
+    process.env.ALL_PROXY ||
+    process.env.all_proxy;
+  if (!proxyUrl) {
+    return null;
+  }
+  return new HttpProxyAgent(proxyUrl, {
+    keepAlive: true,
+    maxTotalSockets: MAX_TOTAL_SOCKETS,
+    maxSockets: MAX_SOCKETS_PER_HOST,
+  });
+}
 
 function getHttpsProxyAgent(): HttpsProxyAgent<string> | null {
   const proxyUrl =
@@ -66,7 +83,7 @@ const DEFAULT_TRANSITIONAL = {
   clarifyTimeoutError: true,
 };
 
-function hostnameMatchesNoProxyPattern(
+export function hostnameMatchesNoProxyPattern(
   hostname: string,
   pattern: string
 ): boolean {
@@ -87,7 +104,7 @@ function hostnameMatchesNoProxyPattern(
   );
 }
 
-function shouldUseProxy(baseURL: string): boolean {
+export function shouldUseProxy(baseURL: string): boolean {
   if (
     !process.env.HTTPS_PROXY &&
     !process.env.https_proxy &&
@@ -148,7 +165,9 @@ export function getAxiosConfig(options: HttpOptions): AxiosRequestConfig {
     },
     timeout: httpTimeout,
     transitional: DEFAULT_TRANSITIONAL,
-    httpAgent,
+    // Disable axios's built-in proxy handling - we use custom agents instead
+    proxy: false,
+    httpAgent: shouldUseProxy(baseURL) ? getHttpProxyAgent() || httpAgent : httpAgent,
     httpsAgent: shouldUseProxy(baseURL) ? getHttpsProxyAgent() || httpsAgent : httpsAgent,
     ...rest,
   };
