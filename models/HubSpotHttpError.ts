@@ -4,6 +4,8 @@ import { HttpMethod } from '../types/Api';
 import { HTTP_METHOD_PREPOSITIONS, HTTP_METHOD_VERBS } from '../constants/api';
 import { i18n } from '../utils/lang';
 
+export const HubSpotHttpErrorName = 'HubSpotHttpError';
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export class HubSpotHttpError<T = any> extends Error {
   public status?: number;
@@ -27,7 +29,7 @@ export class HubSpotHttpError<T = any> extends Error {
     context?: HubSpotHttpErrorContext
   ) {
     super(message, options);
-    this.name = 'HubSpotHttpError';
+    this.name = HubSpotHttpErrorName;
     this.context = context;
     this.cause = options?.cause;
 
