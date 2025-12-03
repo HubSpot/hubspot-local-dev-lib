@@ -1,8 +1,10 @@
 import axios from 'axios';
+import { getConfig as __getConfig } from '../../config';
 import { http } from '../unauthed';
 import { version } from '../../package.json';
 
 jest.mock('axios');
+jest.mock('../../config');
 
 jest.mock('http', () => ({
   Agent: jest.fn().mockReturnValue({
@@ -17,10 +19,15 @@ jest.mock('https', () => ({
 }));
 
 const mockedAxios = jest.mocked(axios);
+const getConfig = __getConfig as jest.MockedFunction<typeof __getConfig>;
 
 describe('http/index', () => {
   describe('http.get()', () => {
     it('supports making unauthed requests', async () => {
+      getConfig.mockReturnValue({
+        accounts: [],
+      });
+
       await http.get({
         url: 'some/endpoint/path',
         env: 'qa',
@@ -37,6 +44,7 @@ describe('http/index', () => {
         transitional: {
           clarifyTimeoutError: true,
         },
+        proxy: false,
         httpAgent: {
           options: { keepAlive: true, maxSockets: 5, maxTotalSockets: 25 },
         },
