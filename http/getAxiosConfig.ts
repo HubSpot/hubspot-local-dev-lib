@@ -4,7 +4,7 @@ import { getHubSpotApiOrigin } from '../lib/urls';
 import { HttpOptions } from '../types/Http';
 import { HubSpotConfig } from '../types/Config';
 import { AxiosRequestConfig } from 'axios';
-import http from 'http';
+import http, { Agent } from 'http';
 import https from 'https';
 import { HttpProxyAgent } from 'http-proxy-agent';
 import { HttpsProxyAgent } from 'https-proxy-agent';
@@ -27,14 +27,22 @@ const httpsAgent = new https.Agent({
   maxSockets: MAX_SOCKETS_PER_HOST,
 });
 
-function getHttpProxyAgent(): HttpProxyAgent<string> | null {
-  const proxyUrl =
-    process.env.HTTP_PROXY ||
-    process.env.http_proxy ||
-    process.env.ALL_PROXY ||
-    process.env.all_proxy;
+function getHttpProxyEnvVariable(): string | undefined {
+  return process.env.HTTP_PROXY || process.env.http_proxy;
+}
+
+function getHttpsProxyEnvVariable(): string | undefined {
+  return process.env.HTTPS_PROXY || process.env.https_proxy;
+}
+
+function getAllProxyEnvVariable(): string | undefined {
+  return process.env.ALL_PROXY || process.env.all_proxy;
+}
+
+function getHttpProxyAgent(): HttpProxyAgent<string> | Agent {
+  const proxyUrl = getHttpProxyEnvVariable() || getAllProxyEnvVariable();
   if (!proxyUrl) {
-    return null;
+    return httpAgent;
   }
   return new HttpProxyAgent(proxyUrl, {
     keepAlive: true,
@@ -43,16 +51,13 @@ function getHttpProxyAgent(): HttpProxyAgent<string> | null {
   });
 }
 
-function getHttpsProxyAgent(): HttpsProxyAgent<string> | null {
+function getHttpsProxyAgent(): HttpsProxyAgent<string> | Agent {
   const proxyUrl =
-    process.env.HTTPS_PROXY ||
-    process.env.https_proxy ||
-    process.env.HTTP_PROXY ||
-    process.env.http_proxy ||
-    process.env.ALL_PROXY ||
-    process.env.all_proxy;
+    getHttpProxyEnvVariable() ||
+    getHttpsProxyEnvVariable() ||
+    getAllProxyEnvVariable();
   if (!proxyUrl) {
-    return null;
+    return httpsAgent;
   }
   return new HttpsProxyAgent(proxyUrl, {
     keepAlive: true,
@@ -87,31 +92,28 @@ export function hostnameMatchesNoProxyPattern(
   hostname: string,
   pattern: string
 ): boolean {
-  const normalizedHostname = hostname.toLowerCase();
-  const normalizedPattern = pattern.trim().toLowerCase();
+  const hostnameNormalized = hostname.toLowerCase();
+  const patternNormalized = pattern.trim().toLowerCase();
 
-  if (normalizedPattern === '*') {
+  if (patternNormalized === '*') {
     return true;
   }
 
-  if (normalizedPattern.startsWith('.')) {
-    return normalizedHostname.endsWith(normalizedPattern);
+  if (patternNormalized.startsWith('.')) {
+    return hostnameNormalized.endsWith(patternNormalized);
   }
 
   return (
-    normalizedHostname === normalizedPattern ||
-    normalizedHostname.endsWith(`.${normalizedPattern}`)
+    hostnameNormalized === patternNormalized || // exact match (e.g. "api.hubapi.com" matches "api.hubapi.com")
+    hostnameNormalized.endsWith(`.${patternNormalized}`) // domain suffix match (e.g. "api.hubapi.com" matches ".hubapi.com")
   );
 }
 
 export function shouldUseProxy(baseURL: string): boolean {
   if (
-    !process.env.HTTPS_PROXY &&
-    !process.env.https_proxy &&
-    !process.env.HTTP_PROXY &&
-    !process.env.http_proxy &&
-    !process.env.ALL_PROXY &&
-    !process.env.all_proxy
+    !getHttpProxyEnvVariable() &&
+    !getHttpsProxyEnvVariable() &&
+    !getAllProxyEnvVariable()
   ) {
     return false;
   }
@@ -167,8 +169,8 @@ export function getAxiosConfig(options: HttpOptions): AxiosRequestConfig {
     transitional: DEFAULT_TRANSITIONAL,
     // Disable axios's built-in proxy handling - we use custom agents instead
     proxy: false,
-    httpAgent: shouldUseProxy(baseURL) ? getHttpProxyAgent() || httpAgent : httpAgent,
-    httpsAgent: shouldUseProxy(baseURL) ? getHttpsProxyAgent() || httpsAgent : httpsAgent,
+    httpAgent: shouldUseProxy(baseURL) ? getHttpProxyAgent() : httpAgent,
+    httpsAgent: shouldUseProxy(baseURL) ? getHttpsProxyAgent() : httpsAgent,
     ...rest,
   };
 }
