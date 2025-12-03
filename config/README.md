@@ -13,13 +13,14 @@ There are a handful of standard config utils that anyone working in this library
 #### getConfig()
 
 Locates and parses the hubspot config file. This function will automatically find the correct config file using the following criteria:
+
 1. Checks to see if a config was specified via environment variables (see below)
 2. If no environment variables are present, looks for a global config file (located at `~/.hscli/config.yml`)
 3. If no global config file is found, looks up the file tree for a local config file.
 4. If no local config file is found, throws an error
 
-
 ##### Custom config location environment variables
+
 - `HUBSPOT_CONFIG_PATH` - specify a file path to a specific config file
 - `USE_ENVIRONMENT_HUBSPOT_CONFIG` - load config account from environment variables. The following environment variables are supported:
   - `HUBSPOT_PERSONAL_ACCESS_KEY`

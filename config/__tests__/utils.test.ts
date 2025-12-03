@@ -547,7 +547,7 @@ describe('config/utils', () => {
           {
             ...PAK_ACCOUNT,
             someUndefinedField: undefined,
-          } as any,
+          },
         ],
       };
       const formattedConfig = formatConfigForWrite(configWithUndefined);
