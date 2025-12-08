@@ -40,17 +40,21 @@ export type DeployStatusTaskLocator = {
   links: Array<{ status: string }>;
 };
 
-export type ProjectDeployResponseQueued = {
-  id: string;
-  buildResultType: 'DEPLOY_QUEUED';
-  links: { status: string };
-};
-
 export type SubdeployValidationIssue = {
   uid: string;
   componentTypeName: string;
   errorMessages: string[];
   blockingMessages: { message: string; isWarning: boolean }[];
+};
+
+export type DeployResponseLinks = {
+  status: string;
+};
+
+export type ProjectDeployResponseQueued = {
+  id: string;
+  buildResultType: 'DEPLOY_QUEUED';
+  links: DeployResponseLinks;
 };
 
 export type ProjectDeployResponseBlocked = {
@@ -61,3 +65,19 @@ export type ProjectDeployResponseBlocked = {
 export type ProjectDeployResponse =
   | ProjectDeployResponseQueued
   | ProjectDeployResponseBlocked;
+
+export type ProjectDeployResponseV1Queued = {
+  id: string;
+  links: DeployResponseLinks;
+};
+
+export type ProjectDeployResponseV1Error = {
+  message: string;
+  correlationId: string;
+  category: string;
+  links: DeployResponseLinks;
+};
+
+export type ProjectDeployResponseV1 =
+  | ProjectDeployResponseV1Queued
+  | ProjectDeployResponseV1Error;
