@@ -186,27 +186,15 @@ export function getBuildStructure(
     )}/builds/${buildId}/structure`,
   });
 }
-export function deployProject(
-  accountId: number,
-  projectName: string,
-  buildId: number,
-  useNewDeployApi: true,
-  force: boolean
-): HubSpotPromise<ProjectDeployResponse>;
-export function deployProject(
-  accountId: number,
-  projectName: string,
-  buildId: number,
-  useNewDeployApi: false,
-  force: boolean
-): HubSpotPromise<ProjectDeployResponseV1>;
+
+// DEPRECATED - Use the separate deployProjectV1 and deployProjectV2
 export function deployProject(
   accountId: number,
   projectName: string,
   buildId: number,
   useNewDeployApi = false,
   force = false
-): HubSpotPromise<ProjectDeployResponse | ProjectDeployResponseV1> {
+): HubSpotPromise<ProjectDeployResponse> {
   if (useNewDeployApi) {
     return http.post<ProjectDeployResponse>(accountId, {
       url: `${PROJECTS_DEPLOY_API_PATH_V3}/deploys/queue/async`,
@@ -223,6 +211,38 @@ export function deployProject(
       projectName,
       buildId,
       skipRemovalWarning: force,
+    },
+  });
+}
+
+export function deployProjectV1(
+  accountId: number,
+  projectName: string,
+  buildId: number,
+  force = false
+): HubSpotPromise<ProjectDeployResponseV1> {
+  return http.post<ProjectDeployResponseV1>(accountId, {
+    url: `${PROJECTS_DEPLOY_API_PATH}/deploys/queue/async`,
+    data: {
+      projectName,
+      buildId,
+      skipRemovalWarning: force,
+    },
+  });
+}
+
+export function deployProjectV2(
+  accountId: number,
+  projectName: string,
+  buildId: number,
+  force = false
+): HubSpotPromise<ProjectDeployResponse> {
+  return http.post<ProjectDeployResponse>(accountId, {
+    url: `${PROJECTS_DEPLOY_API_PATH_V3}/deploys/queue/async`,
+    data: {
+      projectName,
+      targetBuildId: buildId,
+      ignoreWarnings: force,
     },
   });
 }

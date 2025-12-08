@@ -66,18 +66,7 @@ export type ProjectDeployResponse =
   | ProjectDeployResponseQueued
   | ProjectDeployResponseBlocked;
 
-export type ProjectDeployResponseV1Queued = {
+export type ProjectDeployResponseV1 = {
   id: string;
   links: DeployResponseLinks;
 };
-
-export type ProjectDeployResponseV1Error = {
-  message: string;
-  correlationId: string;
-  category: string;
-  links: DeployResponseLinks;
-};
-
-export type ProjectDeployResponseV1 =
-  | ProjectDeployResponseV1Queued
-  | ProjectDeployResponseV1Error;
