@@ -187,7 +187,9 @@ export function getBuildStructure(
   });
 }
 
-// DEPRECATED - Use the separate deployProjectV1 and deployProjectV2
+/**
+ * @deprecated Use the separate deployProjectV1 and deployProjectV2
+ */
 export function deployProject(
   accountId: number,
   projectName: string,
