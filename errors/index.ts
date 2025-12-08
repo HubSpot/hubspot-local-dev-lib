@@ -1,6 +1,12 @@
-import { HubSpotHttpError } from '../models/HubSpotHttpError';
+import {
+  HubSpotHttpError,
+  HubSpotHttpErrorName,
+} from '../models/HubSpotHttpError';
 import { BaseError } from '../types/Error';
-import { FileSystemError } from '../models/FileSystemError';
+import {
+  FilerSystemErrorName,
+  FileSystemError,
+} from '../models/FileSystemError';
 import { HubSpotConfigError } from '../models/HubSpotConfigError';
 
 export function isSpecifiedError(
@@ -60,7 +66,7 @@ export function isAuthError(err: unknown): err is HubSpotHttpError {
   );
 }
 
-export function isValidationError(err: unknown): boolean {
+export function isValidationError(err: unknown): err is HubSpotHttpError {
   return (
     isHubSpotHttpError(err) &&
     isSpecifiedError(err, { statusCode: 400 }) &&
@@ -69,10 +75,12 @@ export function isValidationError(err: unknown): boolean {
 }
 
 export function isHubSpotHttpError(error?: unknown): error is HubSpotHttpError {
-  return !!error && error instanceof HubSpotHttpError;
+  return (
+    !!error && error instanceof Error && error.name === HubSpotHttpErrorName
+  );
 }
 
-export function isGithubRateLimitError(err: unknown): boolean {
+export function isGithubRateLimitError(err: unknown): err is HubSpotHttpError {
   if (!isHubSpotHttpError(err)) {
     return false;
   }
@@ -96,7 +104,7 @@ export function isSystemError(err: unknown): err is BaseError {
 }
 
 export function isFileSystemError(err: unknown): err is FileSystemError {
-  return err instanceof FileSystemError;
+  return err instanceof Error && err.name === FilerSystemErrorName;
 }
 
 export function isHubSpotConfigError(err: unknown): err is HubSpotConfigError {
