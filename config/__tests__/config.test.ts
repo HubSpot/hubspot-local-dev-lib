@@ -155,6 +155,14 @@ describe('config/index', () => {
       const localConfigPath = getLocalConfigFilePathIfExists();
       expect(localConfigPath).toBeNull();
     });
+
+    it('returns the nearest config file path when cwd is provided', () => {
+      const mockConfigPath = '/mock/path/hubspot.config.yml';
+      mockFindup.mockReturnValue(mockConfigPath);
+
+      const localConfigPath = getLocalConfigFilePathIfExists('/mock/path');
+      expect(localConfigPath).toBe(mockConfigPath);
+    });
   });
 
   describe('localConfigFileExists()', () => {
