@@ -24,6 +24,7 @@ import {
   API_KEY_AUTH_METHOD,
 } from '../constants/auth';
 import { LOCALDEVAUTH_ACCESS_TOKEN_PATH } from '../api/localDevAuth';
+import { FIREALARM_API_AUTH_PATH } from '../api/fireAlarm';
 import * as util from 'util';
 import { CMS_CLI_USAGE_PATH, VSCODE_USAGE_PATH } from '../lib/trackUsage';
 
@@ -33,6 +34,7 @@ const IGNORE_URLS_NETWORK_DEBUG = [
   LOCALDEVAUTH_ACCESS_TOKEN_PATH,
   CMS_CLI_USAGE_PATH,
   VSCODE_USAGE_PATH,
+  FIREALARM_API_AUTH_PATH,
 ];
 
 function logRequest(response: AxiosResponse) {
@@ -42,8 +44,10 @@ function logRequest(response: AxiosResponse) {
     }
 
     if (
-      response?.config?.url &&
-      IGNORE_URLS_NETWORK_DEBUG.includes(response.config.url)
+      !process.env.HUBSPOT_DEBUG_LOGGING_VERBOSE &&
+      IGNORE_URLS_NETWORK_DEBUG.some(
+        url => response?.config?.url && response.config.url.includes(url)
+      )
     ) {
       return;
     }
