@@ -44,7 +44,7 @@ function logRequest(response: AxiosResponse) {
     }
 
     if (
-      !process.env.HUBSPOT_NETWORK_LOGGING_VERBOSE &&
+      !process.env.HUBSPOT_DEBUG_LOGGING_VERBOSE &&
       IGNORE_URLS_NETWORK_DEBUG.some(
         url => response?.config?.url && response.config.url.includes(url)
       )
