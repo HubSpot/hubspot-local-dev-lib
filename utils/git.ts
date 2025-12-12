@@ -7,7 +7,7 @@ const GITIGNORE_FILE = '.gitignore';
 
 function makeComparisonDir(filepath: string | null): string | null {
   if (typeof filepath !== 'string') return null;
-  let dir = path.dirname(path.resolve(filepath)).toLowerCase();
+  const dir = path.dirname(path.resolve(filepath)).toLowerCase();
   // Append sep to make comparisons easier e.g. 'foos'.startsWith('foo')
   return dir + (!dir.endsWith(path.sep) ? path.sep : '');
 }

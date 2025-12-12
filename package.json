@@ -20,7 +20,7 @@
   },
   "license": "Apache-2.0",
   "devDependencies": {
-    "@hubspot/npm-scripts": "0.0.4",
+    "@hubspot/npm-scripts": "0.0.6",
     "@types/content-disposition": "^0.5.5",
     "@types/cors": "^2.8.15",
     "@types/debounce": "^1.2.1",
