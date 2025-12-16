@@ -1,12 +1,7 @@
 import path from 'path';
 import fs from 'fs-extra';
 import contentDisposition from 'content-disposition';
-import {
-  AxiosRequestConfig,
-  AxiosResponse,
-  AxiosPromise,
-  isAxiosError,
-} from 'axios';
+import { AxiosRequestConfig, AxiosResponse, AxiosPromise } from 'axios';
 
 import { getConfigAccountById } from '../config';
 import { USER_AGENTS, getAxiosConfig } from './getAxiosConfig';
@@ -16,7 +11,6 @@ import { getOauthManager } from '../lib/oauth';
 import { HttpOptions, HubSpotPromise } from '../types/Http';
 import { logger } from '../lib/logger';
 import { i18n } from '../utils/lang';
-import { HubSpotHttpError } from '../models/HubSpotHttpError';
 import { OAuthConfigAccount } from '../types/Accounts';
 import {
   PERSONAL_ACCESS_KEY_AUTH_METHOD,
