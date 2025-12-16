@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'fs-extra';
 import contentDisposition from 'content-disposition';
-import axios, {
+import {
   AxiosRequestConfig,
   AxiosResponse,
   AxiosPromise,
@@ -27,6 +27,7 @@ import { LOCALDEVAUTH_ACCESS_TOKEN_PATH } from '../api/localDevAuth';
 import { FIREALARM_API_AUTH_PATH } from '../api/fireAlarm';
 import * as util from 'util';
 import { CMS_CLI_USAGE_PATH, VSCODE_USAGE_PATH } from '../lib/trackUsage';
+import { httpClient } from './client';
 
 const i18nKey = 'http.index';
 
@@ -36,11 +37,6 @@ const IGNORE_URLS_NETWORK_DEBUG = [
   VSCODE_USAGE_PATH,
   FIREALARM_API_AUTH_PATH,
 ];
-
-// Create an isolated axios instance for this copy of local-dev-lib.
-// This prevents issues when multiple copies are loaded and share the global
-// register interceptors on the shared instance causing errors to be wrapped multiple times.
-const httpClient = axios.create();
 
 function logRequest(response: AxiosResponse) {
   try {
