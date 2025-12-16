@@ -16,10 +16,7 @@ import { getOauthManager } from '../lib/oauth';
 import { HttpOptions, HubSpotPromise } from '../types/Http';
 import { logger } from '../lib/logger';
 import { i18n } from '../utils/lang';
-import {
-  HubSpotHttpError,
-  HubSpotHttpErrorName,
-} from '../models/HubSpotHttpError';
+import { HubSpotHttpError } from '../models/HubSpotHttpError';
 import { OAuthConfigAccount } from '../types/Accounts';
 import {
   PERSONAL_ACCESS_KEY_AUTH_METHOD,
@@ -39,6 +36,11 @@ const IGNORE_URLS_NETWORK_DEBUG = [
   VSCODE_USAGE_PATH,
   FIREALARM_API_AUTH_PATH,
 ];
+
+// Create an isolated axios instance for this copy of local-dev-lib.
+// This prevents issues when multiple copies are loaded and share the global
+// register interceptors on the shared instance causing errors to be wrapped multiple times.
+const httpClient = axios.create();
 
 function logRequest(response: AxiosResponse) {
   try {
@@ -74,7 +76,8 @@ function logRequest(response: AxiosResponse) {
   }
 }
 
-axios.interceptors.response.use(
+// Register interceptor on our isolated instance
+httpClient.interceptors.response.use(
   (response: AxiosResponse) => {
     logRequest(response);
     return response;
@@ -88,17 +91,7 @@ axios.interceptors.response.use(
       // Ignore any errors that occur while logging the response
     }
 
-    // Don't re-wrap if already a HubSpotHttpError. This can happen when
-    // multiple copies of local-dev-lib are loaded and share the same axios
-    // instance, causing multiple interceptors to be registered.
-    if (
-      error instanceof HubSpotHttpError ||
-      error?.name === HubSpotHttpErrorName
-    ) {
-      return Promise.reject(error);
-    }
-
-    // Wrap all axios errors in our own Error class.  Attach the error
+    // Wrap all axios errors in our own Error class. Attach the error
     // as the cause for the new error, so we maintain the stack trace
     return Promise.reject(
       new HubSpotHttpError(error.message, { cause: error })
@@ -211,7 +204,7 @@ async function getRequest<T>(
   const optionsWithParams = addQueryParams(rest, params);
   const requestConfig = await withAuth(accountId, optionsWithParams);
 
-  return axios<T>(requestConfig);
+  return httpClient<T>(requestConfig);
 }
 
 async function postRequest<T>(
@@ -219,7 +212,7 @@ async function postRequest<T>(
   options: HttpOptions
 ): HubSpotPromise<T> {
   const requestConfig = await withAuth(accountId, options);
-  return axios<T>({ ...requestConfig, method: 'post' });
+  return httpClient<T>({ ...requestConfig, method: 'post' });
 }
 
 async function putRequest<T>(
@@ -227,7 +220,7 @@ async function putRequest<T>(
   options: HttpOptions
 ): HubSpotPromise<T> {
   const requestConfig = await withAuth(accountId, options);
-  return axios<T>({ ...requestConfig, method: 'put' });
+  return httpClient<T>({ ...requestConfig, method: 'put' });
 }
 
 async function patchRequest<T>(
@@ -235,7 +228,7 @@ async function patchRequest<T>(
   options: HttpOptions
 ): HubSpotPromise<T> {
   const requestConfig = await withAuth(accountId, options);
-  return axios<T>({ ...requestConfig, method: 'patch' });
+  return httpClient<T>({ ...requestConfig, method: 'patch' });
 }
 
 async function deleteRequest<T>(
@@ -243,7 +236,7 @@ async function deleteRequest<T>(
   options: HttpOptions
 ): HubSpotPromise<T> {
   const requestConfig = await withAuth(accountId, options);
-  return axios<T>({ ...requestConfig, method: 'delete' });
+  return httpClient<T>({ ...requestConfig, method: 'delete' });
 }
 
 function createGetRequestStream(contentType: string) {
@@ -259,7 +252,7 @@ function createGetRequestStream(contentType: string) {
     return new Promise<AxiosResponse>(async (resolve, reject) => {
       try {
         const { headers, ...opts } = await withAuth(accountId, axiosConfig);
-        const res = await axios({
+        const res = await httpClient({
           method: 'get',
           ...opts,
           headers: {
