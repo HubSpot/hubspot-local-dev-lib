@@ -1,4 +1,5 @@
-import axios, { AxiosError } from 'axios';
+import { AxiosError } from 'axios';
+import { httpClient } from '../client';
 import fs from 'fs-extra';
 import moment from 'moment';
 import {
@@ -11,7 +12,7 @@ import { version } from '../../package.json';
 import { HubSpotConfigAccount } from '../../types/Accounts';
 
 jest.mock('fs-extra');
-jest.mock('axios');
+jest.mock('../client');
 jest.mock('../../config');
 jest.mock('../../lib/logger');
 
@@ -27,7 +28,7 @@ jest.mock('https', () => ({
   }),
 }));
 
-const mockedAxios = jest.mocked(axios);
+const mockedAxios = jest.mocked(httpClient);
 const getConfig = __getConfig as jest.MockedFunction<typeof __getConfig>;
 const getConfigAccountById = __getConfigAccountById as jest.MockedFunction<
   typeof __getConfigAccountById

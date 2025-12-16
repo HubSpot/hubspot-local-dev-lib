@@ -1,9 +1,9 @@
-import axios from 'axios';
+import { httpClient } from '../client';
 import { getConfig as __getConfig } from '../../config';
 import { http } from '../unauthed';
 import { version } from '../../package.json';
 
-jest.mock('axios');
+jest.mock('../client');
 jest.mock('../../config');
 
 jest.mock('http', () => ({
@@ -18,7 +18,7 @@ jest.mock('https', () => ({
   }),
 }));
 
-const mockedAxios = jest.mocked(axios);
+const mockedAxios = jest.mocked(httpClient);
 const getConfig = __getConfig as jest.MockedFunction<typeof __getConfig>;
 
 describe('http/index', () => {
