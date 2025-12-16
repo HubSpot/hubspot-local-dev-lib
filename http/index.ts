@@ -16,7 +16,10 @@ import { getOauthManager } from '../lib/oauth';
 import { HttpOptions, HubSpotPromise } from '../types/Http';
 import { logger } from '../lib/logger';
 import { i18n } from '../utils/lang';
-import { HubSpotHttpError } from '../models/HubSpotHttpError';
+import {
+  HubSpotHttpError,
+  HubSpotHttpErrorName,
+} from '../models/HubSpotHttpError';
 import { OAuthConfigAccount } from '../types/Accounts';
 import {
   PERSONAL_ACCESS_KEY_AUTH_METHOD,
@@ -83,6 +86,16 @@ axios.interceptors.response.use(
       }
     } catch (e) {
       // Ignore any errors that occur while logging the response
+    }
+
+    // Don't re-wrap if already a HubSpotHttpError. This can happen when
+    // multiple copies of local-dev-lib are loaded and share the same axios
+    // instance, causing multiple interceptors to be registered.
+    if (
+      error instanceof HubSpotHttpError ||
+      error?.name === HubSpotHttpErrorName
+    ) {
+      return Promise.reject(error);
     }
 
     // Wrap all axios errors in our own Error class.  Attach the error
