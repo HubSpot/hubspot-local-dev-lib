@@ -16,7 +16,10 @@ import { getOauthManager } from '../lib/oauth';
 import { HttpOptions, HubSpotPromise } from '../types/Http';
 import { logger } from '../lib/logger';
 import { i18n } from '../utils/lang';
-import { HubSpotHttpError } from '../models/HubSpotHttpError';
+import {
+  HubSpotHttpError,
+  HubSpotHttpErrorName,
+} from '../models/HubSpotHttpError';
 import { OAuthConfigAccount } from '../types/Accounts';
 import {
   PERSONAL_ACCESS_KEY_AUTH_METHOD,
