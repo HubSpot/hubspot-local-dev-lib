@@ -1,4 +1,4 @@
-import axios from 'axios';
+import { httpClient } from '../../http/client';
 import {
   trackUsage,
   CMS_CLI_USAGE_PATH,
@@ -14,12 +14,12 @@ import { FILE_MAPPER_API_PATH } from '../../api/fileMapper';
 import { logger } from '../logger';
 import { http } from '../../http';
 
-jest.mock('axios');
 jest.mock('../../config');
 jest.mock('../logger');
 jest.mock('../../http');
+jest.mock('../../http/client');
 
-const mockedAxios = jest.mocked(axios);
+const mockedAxios = jest.mocked(httpClient);
 const mockedLogger = jest.mocked(logger);
 const mockedHttp = jest.mocked(http);
 const getConfigAccountById = __getConfigAccountById as jest.MockedFunction<
