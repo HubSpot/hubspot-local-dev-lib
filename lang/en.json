@@ -4,7 +4,8 @@
       "invalidEvent": "Usage tracking event {{ eventName }} is not a valid event type.",
       "sendingEventAuthenticated": "Sending usage event to authenticated endpoint",
       "retryingEventUnauthenticated": "Failed to send the usage event as authenticated. Trying again as unauthenticated.",
-      "sendingEventUnauthenticated": "Sending usage event to unauthenticated endpoint"
+      "sendingEventUnauthenticated": "Sending usage event to unauthenticated endpoint",
+      "unauthenticatedSendFailed": "Failed to send usage event to unauthenticated endpoint"
     },
     "archive": {
       "extractZip": {
