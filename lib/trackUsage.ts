@@ -67,5 +67,10 @@ export async function trackUsage(
     resolveWithFullResponse: true,
   });
   logger.debug(i18n(`${i18nKey}.sendingEventUnauthenticated`));
-  return httpClient({ ...axiosConfig, method: 'post' });
+
+  try {
+    await httpClient({ ...axiosConfig, method: 'post' });
+  } catch (e) {
+    logger.debug(i18n(`${i18nKey}.unauthenticatedSendFailed`));
+  }
 }
