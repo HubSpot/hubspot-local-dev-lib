@@ -1,12 +1,12 @@
 import {
   HUBSPOT_CONFIG_ERROR_TYPES,
   HUBSPOT_CONFIG_OPERATIONS,
-} from '../constants/config';
+} from '../constants/config.js';
 import {
   HubSpotConfigErrorType,
   HubSpotConfigOperation,
-} from '../types/Config';
-import { i18n } from '../utils/lang';
+} from '../types/Config.js';
+import { i18n } from '../utils/lang.js';
 
 const NAME = 'HubSpotConfigError';
 

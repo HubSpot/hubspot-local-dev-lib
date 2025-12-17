@@ -1,19 +1,21 @@
+import { vi, describe, it, expect, beforeEach } from 'vitest';
 import fs from 'fs';
 import path from 'path';
 import { getStateValue, setStateValue } from '../state';
 import { STATE_FILE_PATH } from '../../constants/config';
-jest.mock('../../utils/lang', () => ({
-  i18n: jest.fn((key: string) => key),
+
+vi.mock('../../utils/lang', () => ({
+  i18n: vi.fn((key: string) => key),
 }));
 
-const existsSyncSpy = jest.spyOn(fs, 'existsSync');
-const readFileSyncSpy = jest.spyOn(fs, 'readFileSync');
-const writeFileSyncSpy = jest.spyOn(fs, 'writeFileSync');
-const mkdirSyncSpy = jest.spyOn(fs, 'mkdirSync');
+const existsSyncSpy = vi.spyOn(fs, 'existsSync');
+const readFileSyncSpy = vi.spyOn(fs, 'readFileSync');
+const writeFileSyncSpy = vi.spyOn(fs, 'writeFileSync');
+const mkdirSyncSpy = vi.spyOn(fs, 'mkdirSync');
 
 describe('config/state', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('getStateValue()', () => {

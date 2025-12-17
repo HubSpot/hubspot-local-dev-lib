@@ -1,3 +1,4 @@
+import { vi, describe, it, expect, afterEach, MockedFunction, Mocked } from 'vitest';
 import fs from 'fs-extra';
 import {
   getLocalConfigDefaultFilePath,
@@ -40,12 +41,12 @@ import {
 } from '../../constants/auth';
 import { i18n } from '../../utils/lang';
 
-jest.mock('findup-sync');
-jest.mock('../../lib/path');
-jest.mock('fs-extra');
+vi.mock('findup-sync');
+vi.mock('../../lib/path');
+vi.mock('fs-extra');
 
-const mockCwd = getCwd as jest.MockedFunction<typeof getCwd>;
-const mockFs = fs as jest.Mocked<typeof fs>;
+const mockCwd = getCwd as MockedFunction<typeof getCwd>;
+const mockFs = fs as Mocked<typeof fs>;
 
 const PAK_ACCOUNT: PersonalAccessKeyConfigAccount = {
   name: 'test-account',

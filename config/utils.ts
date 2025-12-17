@@ -9,33 +9,33 @@ import {
   HUBSPOT_CONFIG_ERROR_TYPES,
   HUBSPOT_CONFIG_OPERATIONS,
   GLOBAL_CONFIG_PATH,
-} from '../constants/config';
+} from '../constants/config.js';
 import {
   PERSONAL_ACCESS_KEY_AUTH_METHOD,
   API_KEY_AUTH_METHOD,
   OAUTH_AUTH_METHOD,
   OAUTH_SCOPES,
-} from '../constants/auth';
+} from '../constants/auth.js';
 import {
   HubSpotConfig,
   DeprecatedHubSpotConfigFields,
   HubSpotConfigErrorType,
   HubSpotConfigValidationResult,
-} from '../types/Config';
-import { FileSystemError } from '../models/FileSystemError';
+} from '../types/Config.js';
+import { FileSystemError } from '../models/FileSystemError.js';
 import {
   HubSpotConfigAccount,
   OAuthConfigAccount,
   AccountType,
   TokenInfo,
   DeprecatedHubSpotConfigAccountFields,
-} from '../types/Accounts';
-import { getValidEnv } from '../lib/environment';
-import { getCwd } from '../lib/path';
-import { CMS_PUBLISH_MODE } from '../constants/files';
-import { i18n } from '../utils/lang';
-import { ValueOf } from '../types/Utils';
-import { HubSpotConfigError } from '../models/HubSpotConfigError';
+} from '../types/Accounts.js';
+import { getValidEnv } from '../lib/environment.js';
+import { getCwd } from '../lib/path.js';
+import { CMS_PUBLISH_MODE } from '../constants/files.js';
+import { i18n } from '../utils/lang.js';
+import { ValueOf } from '../types/Utils.js';
+import { HubSpotConfigError } from '../models/HubSpotConfigError.js';
 
 export function getLocalConfigDefaultFilePath(): string {
   return `${getCwd()}/${DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME}`;

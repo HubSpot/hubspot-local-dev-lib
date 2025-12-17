@@ -1,10 +1,10 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { i18n } from '../utils/lang';
-import { STATE_FILE_PATH } from '../constants/config';
-import { logger } from '../lib/logger';
-import { HubSpotState } from '../types/Config';
-import { MCP_TOTAL_TOOL_CALLS_STATE } from '../constants/config';
+import { i18n } from '../utils/lang.js';
+import { STATE_FILE_PATH } from '../constants/config.js';
+import { logger } from '../lib/logger.js';
+import { HubSpotState } from '../types/Config.js';
+import { MCP_TOTAL_TOOL_CALLS_STATE } from '../constants/config.js';
 
 const i18nKey = 'config.state';
 

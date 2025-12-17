@@ -1,4 +1,4 @@
-import { vi } from 'vitest';
+import { vi, describe, it, expect, MockedFunction } from 'vitest';
 
 import { httpClient } from '../client.js';
 import { getConfig as __getConfig } from '../../config/index.js';
@@ -26,8 +26,8 @@ vi.mock('https', () => ({
   },
 }));
 
-const mockedAxios = jest.mocked(httpClient);
-const getConfig = __getConfig as jest.MockedFunction<typeof __getConfig>;
+const mockedAxios = vi.mocked(httpClient);
+const getConfig = __getConfig as MockedFunction<typeof __getConfig>;
 
 describe('http/index', () => {
   describe('http.get()', () => {
