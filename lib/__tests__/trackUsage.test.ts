@@ -1,30 +1,40 @@
-import axios from 'axios';
-import { trackUsage } from '../trackUsage.js';
+import { vi, MockedFunction } from 'vitest';
+import { httpClient } from '../../http/client';
 import {
-  getAccountConfig as __getAccountConfig,
-  getAndLoadConfigIfNeeded as __getAndLoadConfigIfNeeded,
-} from '../../config/index.js';
-import { AuthType } from '../../types/Accounts.js';
-import { ENVIRONMENTS } from '../../constants/environments.js';
-import { vi, type MockedFunction } from 'vitest';
+  trackUsage,
+  CMS_CLI_USAGE_PATH,
+  VSCODE_USAGE_PATH,
+} from '../trackUsage';
+import {
+  getConfigAccountById as __getConfigAccountById,
+  getConfig as __getConfig,
+} from '../../config';
+import { HubSpotConfigAccount } from '../../types/Accounts';
+import { ENVIRONMENTS } from '../../constants/environments';
+import { FILE_MAPPER_API_PATH } from '../../api/fileMapper';
+import { logger } from '../logger';
+import { http } from '../../http';
 
-vi.mock('axios');
 vi.mock('../../config');
+vi.mock('../logger');
+vi.mock('../../http');
+vi.mock('../../http/client');
 
-const mockedAxios = vi.mocked(axios);
-const getAccountConfig = __getAccountConfig as MockedFunction<
-  typeof __getAccountConfig
+const mockedAxios = vi.mocked(httpClient);
+const mockedLogger = vi.mocked(logger);
+const mockedHttp = vi.mocked(http);
+const getConfigAccountById = __getConfigAccountById as MockedFunction<
+  typeof __getConfigAccountById
 >;
-const getAndLoadConfigIfNeeded = __getAndLoadConfigIfNeeded as MockedFunction<
-  typeof __getAndLoadConfigIfNeeded
->;
+const getConfig = __getConfig as MockedFunction<typeof __getConfig>;
 
 mockedAxios.mockResolvedValue({});
-getAndLoadConfigIfNeeded.mockReturnValue({});
+getConfig.mockReturnValue({ accounts: [] });
 
-const account = {
+const account: HubSpotConfigAccount = {
+  name: 'test-account',
   accountId: 12345,
-  authType: 'personalaccesskey' as AuthType,
+  authType: 'personalaccesskey',
   personalAccessKey: 'let-me-in-3',
   auth: {
     tokenInfo: {
@@ -43,8 +53,11 @@ const usageTrackingMeta = {
 describe('lib/trackUsage', () => {
   describe('trackUsage()', () => {
     beforeEach(() => {
-      getAccountConfig.mockReset();
-      getAccountConfig.mockReturnValue(account);
+      getConfigAccountById.mockReset();
+      getConfigAccountById.mockReturnValue(account);
+      mockedAxios.mockReset();
+      mockedLogger.debug.mockReset();
+      mockedHttp.post.mockReset();
     });
 
     it('tracks correctly for unauthenticated accounts', async () => {
@@ -56,19 +69,181 @@ describe('lib/trackUsage', () => {
       expect(mockedAxios).toHaveBeenCalled();
       expect(requestArgs!.data.eventName).toEqual('test-action');
       expect(requestArgs!.url.includes('authenticated')).toBeFalsy();
-      expect(getAccountConfig).not.toHaveBeenCalled();
+      expect(getConfigAccountById).not.toHaveBeenCalled();
     });
 
     it('tracks correctly for authenticated accounts', async () => {
       await trackUsage('test-action', 'INTERACTION', usageTrackingMeta, 12345);
-      const requestArgs = mockedAxios.mock.lastCall
-        ? mockedAxios.mock.lastCall[0]
-        : ({} as any); // eslint-disable-line @typescript-eslint/no-explicit-any
 
-      expect(mockedAxios).toHaveBeenCalled();
-      expect(requestArgs!.data.eventName).toEqual('test-action');
-      expect(requestArgs!.url.includes('authenticated')).toBeTruthy();
-      expect(getAccountConfig).toHaveBeenCalled();
+      expect(mockedHttp.post).toHaveBeenCalledWith(12345, {
+        url: `${FILE_MAPPER_API_PATH}/authenticated`,
+        data: {
+          accountId: 12345,
+          eventName: 'test-action',
+          eventClass: 'INTERACTION',
+          meta: usageTrackingMeta,
+        },
+        resolveWithFullResponse: true,
+      });
+      expect(getConfigAccountById).toHaveBeenCalled();
+    });
+
+    describe('eventName routing - unauthenticated requests', () => {
+      it('routes cli-interaction eventName to CMS_CLI_USAGE_PATH', async () => {
+        await trackUsage('cli-interaction', 'INTERACTION', usageTrackingMeta);
+        const requestArgs = mockedAxios.mock.lastCall
+          ? mockedAxios.mock.lastCall[0]
+          : ({} as any); // eslint-disable-line @typescript-eslint/no-explicit-any
+
+        expect(mockedAxios).toHaveBeenCalled();
+        expect(requestArgs!.url).toBe(CMS_CLI_USAGE_PATH);
+        expect(requestArgs!.data.eventName).toBe('cli-interaction');
+        expect(mockedLogger.debug).not.toHaveBeenCalledWith(
+          expect.stringContaining('invalidEvent')
+        );
+      });
+
+      it('routes vscode-extension-interaction eventName to VSCODE_USAGE_PATH', async () => {
+        await trackUsage(
+          'vscode-extension-interaction',
+          'INTERACTION',
+          usageTrackingMeta
+        );
+        const requestArgs = mockedAxios.mock.lastCall
+          ? mockedAxios.mock.lastCall[0]
+          : ({} as any); // eslint-disable-line @typescript-eslint/no-explicit-any
+
+        expect(mockedAxios).toHaveBeenCalled();
+        expect(requestArgs!.url).toBe(VSCODE_USAGE_PATH);
+        expect(requestArgs!.data.eventName).toBe(
+          'vscode-extension-interaction'
+        );
+        expect(mockedLogger.debug).not.toHaveBeenCalledWith(
+          expect.stringContaining('invalidEvent')
+        );
+      });
+
+      it('routes unknown eventName to FILE_MAPPER_API_PATH and logs debug message', async () => {
+        const unknownEventName = 'unknown-event-type';
+        await trackUsage(unknownEventName, 'INTERACTION', usageTrackingMeta);
+        const requestArgs = mockedAxios.mock.lastCall
+          ? mockedAxios.mock.lastCall[0]
+          : ({} as any); // eslint-disable-line @typescript-eslint/no-explicit-any
+
+        expect(mockedAxios).toHaveBeenCalled();
+        expect(requestArgs!.url).toBe(FILE_MAPPER_API_PATH);
+        expect(requestArgs!.data.eventName).toBe(unknownEventName);
+        expect(mockedLogger.debug).toHaveBeenCalledWith(
+          `Usage tracking event ${unknownEventName} is not a valid event type.`
+        );
+      });
+    });
+
+    describe('eventName routing - authenticated requests', () => {
+      it('routes cli-interaction eventName to authenticated CMS_CLI_USAGE_PATH for authenticated accounts', async () => {
+        await trackUsage(
+          'cli-interaction',
+          'INTERACTION',
+          usageTrackingMeta,
+          12345
+        );
+
+        expect(mockedHttp.post).toHaveBeenCalledWith(12345, {
+          url: `${CMS_CLI_USAGE_PATH}/authenticated`,
+          data: {
+            accountId: 12345,
+            eventName: 'cli-interaction',
+            eventClass: 'INTERACTION',
+            meta: usageTrackingMeta,
+          },
+          resolveWithFullResponse: true,
+        });
+        expect(getConfigAccountById).toHaveBeenCalledWith(12345);
+        expect(mockedLogger.debug).not.toHaveBeenCalledWith(
+          expect.stringContaining('invalidEvent')
+        );
+      });
+
+      it('routes vscode-extension-interaction eventName to authenticated VSCODE_USAGE_PATH for authenticated accounts', async () => {
+        await trackUsage(
+          'vscode-extension-interaction',
+          'INTERACTION',
+          usageTrackingMeta,
+          12345
+        );
+
+        expect(mockedHttp.post).toHaveBeenCalledWith(12345, {
+          url: `${VSCODE_USAGE_PATH}/authenticated`,
+          data: {
+            accountId: 12345,
+            eventName: 'vscode-extension-interaction',
+            eventClass: 'INTERACTION',
+            meta: usageTrackingMeta,
+          },
+          resolveWithFullResponse: true,
+        });
+        expect(getConfigAccountById).toHaveBeenCalledWith(12345);
+        expect(mockedLogger.debug).not.toHaveBeenCalledWith(
+          expect.stringContaining('invalidEvent')
+        );
+      });
+
+      it('routes unknown eventName to authenticated FILE_MAPPER_API_PATH and logs debug message for authenticated accounts', async () => {
+        const unknownEventName = 'another-unknown-event';
+        await trackUsage(
+          unknownEventName,
+          'INTERACTION',
+          usageTrackingMeta,
+          12345
+        );
+
+        expect(mockedHttp.post).toHaveBeenCalledWith(12345, {
+          url: `${FILE_MAPPER_API_PATH}/authenticated`,
+          data: {
+            accountId: 12345,
+            eventName: unknownEventName,
+            eventClass: 'INTERACTION',
+            meta: usageTrackingMeta,
+          },
+          resolveWithFullResponse: true,
+        });
+        expect(getConfigAccountById).toHaveBeenCalledWith(12345);
+        expect(mockedLogger.debug).toHaveBeenCalledWith(
+          `Usage tracking event ${unknownEventName} is not a valid event type.`
+        );
+      });
+
+      it('falls back to unauthenticated request when authenticated request fails', async () => {
+        mockedHttp.post.mockRejectedValueOnce(new Error('Auth failed'));
+
+        await trackUsage(
+          'cli-interaction',
+          'INTERACTION',
+          usageTrackingMeta,
+          12345
+        );
+
+        // Should try authenticated first
+        expect(mockedHttp.post).toHaveBeenCalledWith(12345, {
+          url: `${CMS_CLI_USAGE_PATH}/authenticated`,
+          data: {
+            accountId: 12345,
+            eventName: 'cli-interaction',
+            eventClass: 'INTERACTION',
+            meta: usageTrackingMeta,
+          },
+          resolveWithFullResponse: true,
+        });
+
+        // Then fall back to unauthenticated
+        const requestArgs = mockedAxios.mock.lastCall
+          ? mockedAxios.mock.lastCall[0]
+          : ({} as any); // eslint-disable-line @typescript-eslint/no-explicit-any
+
+        expect(mockedAxios).toHaveBeenCalled();
+        expect(requestArgs!.url).toBe(CMS_CLI_USAGE_PATH);
+        expect(requestArgs!.data.eventName).toBe('cli-interaction');
+      });
     });
   });
 });

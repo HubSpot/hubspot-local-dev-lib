@@ -7,6 +7,8 @@ import {
 } from '../constants/api.js';
 import { i18n } from '../utils/lang.js';
 
+export const HubSpotHttpErrorName = 'HubSpotHttpError';
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export class HubSpotHttpError<T = any> extends Error {
   public status?: number;
@@ -30,7 +32,7 @@ export class HubSpotHttpError<T = any> extends Error {
     context?: HubSpotHttpErrorContext
   ) {
     super(message, options);
-    this.name = 'HubSpotHttpError';
+    this.name = HubSpotHttpErrorName;
     this.context = context;
     this.cause = options?.cause;
 
@@ -80,11 +82,18 @@ export class HubSpotHttpError<T = any> extends Error {
     }
   }
 
-  public updateContext(context: Partial<HubSpotHttpErrorContext>) {
+  public updateContext(
+    context: Partial<HubSpotHttpErrorContext>,
+    additionalDebugContext?: string
+  ) {
     this.context = { ...this.context, ...context };
     // Update the error messages when the context is updated
     if (isAxiosError(this.cause)) {
-      this.message = this.joinErrorMessages(this.cause, this.context);
+      this.message = this.joinErrorMessages(
+        this.cause,
+        this.context,
+        additionalDebugContext
+      );
     }
   }
 
@@ -179,9 +188,9 @@ export class HubSpotHttpError<T = any> extends Error {
 
   private joinErrorMessages(
     error: AxiosError<{ message: string; errors: { message: string }[] }>,
-    context: HubSpotHttpErrorContext = {}
+    context: HubSpotHttpErrorContext = {},
+    additionalDebugContext?: string
   ): string {
-    const i18nKey = 'errors.apiErrors';
     const status = error.response?.status;
     const method = error.config?.method as HttpMethod;
 
@@ -199,55 +208,73 @@ export class HubSpotHttpError<T = any> extends Error {
         ? `${action} ${preposition} '${context.request}'`
         : action;
 
-      messageDetail = i18n(`${i18nKey}.messageDetail`, {
+      messageDetail = i18n(`errors.apiErrors.messageDetail`, {
         accountId: context.accountId,
         requestName,
       });
     } else {
-      messageDetail = i18n(`${i18nKey}.genericMessageDetail`);
+      messageDetail = i18n(`errors.apiErrors.genericMessageDetail`);
     }
 
     const errorMessage: Array<string> = [];
 
     if ((method === 'put' || method === 'post') && context.payload) {
       errorMessage.push(
-        i18n(`${i18nKey}.unableToUpload`, { payload: context.payload })
+        i18n(`errors.apiErrors.unableToUpload`, { payload: context.payload })
       );
     }
 
+    let statusBasedMessage: string | undefined;
+
     switch (status) {
       case 400:
-        errorMessage.push(i18n(`${i18nKey}.codes.400`, { messageDetail }));
+        statusBasedMessage = i18n(`errors.apiErrors.codes.400`, {
+          messageDetail,
+        });
         break;
       case 401:
-        errorMessage.push(i18n(`${i18nKey}.codes.401`, { messageDetail }));
+        statusBasedMessage = i18n(`errors.apiErrors.codes.401`, {
+          messageDetail,
+        });
         break;
       case 403:
         break;
       case 404:
-        errorMessage.push(i18n(`${i18nKey}.codes.404`, { messageDetail }));
+        statusBasedMessage = i18n(`errors.apiErrors.codes.404`, {
+          messageDetail,
+        });
         break;
       case 429:
-        errorMessage.push(i18n(`${i18nKey}.codes.429`, { messageDetail }));
+        statusBasedMessage = i18n(`errors.apiErrors.codes.429`, {
+          messageDetail,
+        });
         break;
       case 503:
-        errorMessage.push(i18n(`${i18nKey}.codes.503`, { messageDetail }));
+        statusBasedMessage = i18n(`errors.apiErrors.codes.503`, {
+          messageDetail,
+        });
         break;
       default:
         if (status && status >= 500 && status < 600) {
-          errorMessage.push(
-            i18n(`${i18nKey}.codes.500Generic`, { messageDetail })
-          );
+          statusBasedMessage = i18n(`errors.apiErrors.codes.500Generic`, {
+            messageDetail,
+          });
         } else if (status && status >= 400 && status < 500) {
-          errorMessage.push(
-            i18n(`${i18nKey}.codes.400Generic`, { messageDetail })
-          );
+          statusBasedMessage = i18n(`errors.apiErrors.codes.400Generic`, {
+            messageDetail,
+          });
         } else {
-          errorMessage.push(
-            i18n(`${i18nKey}.codes.generic`, { messageDetail })
-          );
+          statusBasedMessage = i18n(`errors.apiErrors.codes.generic`, {
+            messageDetail,
+          });
         }
         break;
+    }
+
+    if (statusBasedMessage) {
+      errorMessage.push(
+        `${statusBasedMessage}${additionalDebugContext ? ` ${additionalDebugContext}` : ''}`
+      );
     }
 
     if (error?.response?.data) {

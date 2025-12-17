@@ -1,8 +1,12 @@
-import axios from 'axios';
+import { vi } from 'vitest';
+
+import { httpClient } from '../client.js';
+import { getConfig as __getConfig } from '../../config/index.js';
 import { http } from '../unauthed.js';
 import pkg from '../../package.json' with { type: 'json' };
 
-import { vi } from 'vitest';
+vi.mock('../client');
+vi.mock('../../config');
 
 vi.mock('axios');
 
@@ -22,11 +26,16 @@ vi.mock('https', () => ({
   },
 }));
 
-const mockedAxios = vi.mocked(axios);
+const mockedAxios = jest.mocked(httpClient);
+const getConfig = __getConfig as jest.MockedFunction<typeof __getConfig>;
 
 describe('http/index', () => {
   describe('http.get()', () => {
     it('supports making unauthed requests', async () => {
+      getConfig.mockReturnValue({
+        accounts: [],
+      });
+
       await http.get({
         url: 'some/endpoint/path',
         env: 'qa',
@@ -43,6 +52,7 @@ describe('http/index', () => {
         transitional: {
           clarifyTimeoutError: true,
         },
+        proxy: false,
         httpAgent: {
           options: { keepAlive: true, maxSockets: 5, maxTotalSockets: 25 },
         },

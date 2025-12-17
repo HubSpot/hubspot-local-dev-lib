@@ -1,4 +1,5 @@
-import axios, { AxiosPromise } from 'axios';
+import { AxiosPromise } from 'axios';
+import { httpClient } from '../http/client.js';
 import { http } from '../http/index.js';
 import { getAxiosConfig } from '../http/getAxiosConfig.js';
 import { ENVIRONMENTS } from '../constants/environments.js';
@@ -63,7 +64,7 @@ export function fetchSandboxHubData(
     },
   };
 
-  return axios<SandboxHubData>(reqWithToken);
+  return httpClient<SandboxHubData>(reqWithToken);
 }
 
 export function createV2Sandbox(

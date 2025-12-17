@@ -7,7 +7,7 @@ import { CMS_PUBLISH_MODE } from '../../constants/files.js';
 import { vi, MockInstance } from 'vitest';
 
 vi.mock('chokidar');
-vi.mock('axios');
+vi.mock('../../http/client');
 vi.mock('p-queue');
 vi.mock('../cms/uploadFolder');
 

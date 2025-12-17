@@ -2,7 +2,10 @@ import os from 'os';
 
 vi.mock('fs-extra');
 vi.mock('extract-zip');
-vi.mock('os');
+vi.mock('os', () => ({
+  tmpdir: vi.fn(() => '/tmp'),
+  homedir: vi.fn(() => '/home/user'),
+}));
 vi.mock('../logger');
 vi.mock('../fs');
 

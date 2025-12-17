@@ -1,9 +1,9 @@
 import findup from 'findup-sync';
+import { vi, MockedFunction } from 'vitest';
 import { getHubSpotWebsiteOrigin } from '../urls.js';
 import { getThemeJSONPath, getThemePreviewUrl } from '../cms/themes.js';
-import { getEnv } from '../../config/index.js';
+import { getConfigAccountEnvironment } from '../../config/index.js';
 import { ENVIRONMENTS } from '../../constants/environments.js';
-import { vi, type MockedFunction } from 'vitest';
 
 vi.mock('findup-sync');
 vi.mock('../urls');
@@ -16,7 +16,10 @@ vi.mock('../../constants/environments', () => ({
 }));
 
 const mockedFindup = findup as MockedFunction<typeof findup>;
-const mockedGetEnv = getEnv as MockedFunction<typeof getEnv>;
+const mockedGetConfigAccountEnvironment =
+  getConfigAccountEnvironment as MockedFunction<
+    typeof getConfigAccountEnvironment
+  >;
 const mockedGetHubSpotWebsiteOrigin = getHubSpotWebsiteOrigin as MockedFunction<
   typeof getHubSpotWebsiteOrigin
 >;
@@ -51,12 +54,12 @@ describe('lib/cms/themes', () => {
   describe('getThemePreviewUrl', () => {
     it('should return the correct theme preview URL for PROD environment', () => {
       mockedFindup.mockReturnValue('/src/my-theme/theme.json');
-      mockedGetEnv.mockReturnValue('prod');
+      mockedGetConfigAccountEnvironment.mockReturnValue('prod');
       mockedGetHubSpotWebsiteOrigin.mockReturnValue('https://prod.hubspot.com');
 
       const result = getThemePreviewUrl('/path/to/file', 12345);
 
-      expect(getEnv).toHaveBeenCalledWith(12345);
+      expect(getConfigAccountEnvironment).toHaveBeenCalledWith(12345);
       expect(getHubSpotWebsiteOrigin).toHaveBeenCalledWith(ENVIRONMENTS.PROD);
       expect(result).toBe(
         'https://prod.hubspot.com/theme-previewer/12345/edit/my-theme'
@@ -65,12 +68,12 @@ describe('lib/cms/themes', () => {
 
     it('should return the correct theme preview URL for QA environment', () => {
       mockedFindup.mockReturnValue('/src/my-theme/theme.json');
-      mockedGetEnv.mockReturnValue('qa');
+      mockedGetConfigAccountEnvironment.mockReturnValue('qa');
       mockedGetHubSpotWebsiteOrigin.mockReturnValue('https://qa.hubspot.com');
 
       const result = getThemePreviewUrl('/path/to/file', 12345);
 
-      expect(getEnv).toHaveBeenCalledWith(12345);
+      expect(getConfigAccountEnvironment).toHaveBeenCalledWith(12345);
       expect(getHubSpotWebsiteOrigin).toHaveBeenCalledWith(ENVIRONMENTS.QA);
       expect(result).toBe(
         'https://qa.hubspot.com/theme-previewer/12345/edit/my-theme'

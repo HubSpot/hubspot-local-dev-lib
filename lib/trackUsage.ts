@@ -1,12 +1,18 @@
-import axios from 'axios';
+import { httpClient } from '../http/client.js';
 import { getAxiosConfig } from '../http/getAxiosConfig.js';
 import { logger } from './logger.js';
 import { http } from '../http/index.js';
-import { getAccountConfig, getEnv } from '../config/index.js';
+import {
+  getConfigAccountById,
+  getConfigAccountEnvironment,
+} from '../config/index.js';
 import { FILE_MAPPER_API_PATH } from '../api/fileMapper.js';
 import { i18n } from '../utils/lang.js';
+import { getValidEnv } from './environment.js';
 
 const i18nKey = 'lib.trackUsage';
+export const CMS_CLI_USAGE_PATH = `${FILE_MAPPER_API_PATH}/cms-cli-usage`;
+export const VSCODE_USAGE_PATH = `${FILE_MAPPER_API_PATH}/vscode-extension-usage`;
 
 export async function trackUsage(
   eventName: string,
@@ -25,24 +31,22 @@ export async function trackUsage(
     CLI_INTERACTION: 'cli-interaction',
   };
 
-  let analyticsEndpoint;
+  let path = FILE_MAPPER_API_PATH;
 
   switch (eventName) {
     case EVENT_TYPES.CLI_INTERACTION:
-      analyticsEndpoint = 'cms-cli-usage';
+      path = CMS_CLI_USAGE_PATH;
       break;
     case EVENT_TYPES.VSCODE_EXTENSION_INTERACTION:
-      analyticsEndpoint = 'vscode-extension-usage';
+      path = VSCODE_USAGE_PATH;
       break;
     default:
       logger.debug(i18n(`${i18nKey}.invalidEvent`, { eventName }));
   }
 
-  const path = `${FILE_MAPPER_API_PATH}/${analyticsEndpoint}`;
+  const account = accountId && getConfigAccountById(accountId);
 
-  const accountConfig = accountId && getAccountConfig(accountId);
-
-  if (accountConfig && accountConfig.authType === 'personalaccesskey') {
+  if (account && account.authType === 'personalaccesskey') {
     logger.debug(i18n(`${i18nKey}.sendingEventAuthenticated`));
     try {
       await http.post(accountId, {
@@ -57,7 +61,9 @@ export async function trackUsage(
     }
   }
 
-  const env = getEnv(accountId);
+  const env = accountId
+    ? getConfigAccountEnvironment(accountId)
+    : getValidEnv();
   const axiosConfig = getAxiosConfig({
     env,
     url: path,
@@ -65,5 +71,10 @@ export async function trackUsage(
     resolveWithFullResponse: true,
   });
   logger.debug(i18n(`${i18nKey}.sendingEventUnauthenticated`));
-  return axios({ ...axiosConfig, method: 'post' });
+
+  try {
+    await httpClient({ ...axiosConfig, method: 'post' });
+  } catch (e) {
+    logger.debug(i18n(`${i18nKey}.unauthenticatedSendFailed`));
+  }
 }

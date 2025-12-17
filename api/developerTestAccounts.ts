@@ -1,4 +1,4 @@
-import axios from 'axios';
+import { httpClient } from '../http/client.js';
 import { http } from '../http/index.js';
 import { getAxiosConfig } from '../http/getAxiosConfig.js';
 import { ENVIRONMENTS } from '../constants/environments.js';
@@ -88,7 +88,7 @@ export function fetchDeveloperTestAccountData(
     },
   };
 
-  return axios<DeveloperTestAccount>(reqWithToken);
+  return httpClient<DeveloperTestAccount>(reqWithToken);
 }
 
 export function installOauthAppIntoDeveloperTestAccount(

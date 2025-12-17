@@ -6,16 +6,13 @@ import {
   SERVICE_HEALTHY,
 } from '../utils/PortManagerServer.js';
 import { PORT_MANAGER_SERVER_PORT } from '../constants/ports.js';
-import { RequestPortsData } from '../types/PortManager.js';
-import { detectPort } from '../utils/detectPort.js';
+import { RequestPortsData, ServerPortMap } from '../types/PortManager.js';
 import { logger } from './logger.js';
 
 export const BASE_URL = `http://localhost:${PORT_MANAGER_SERVER_PORT}`;
 
 export async function isPortManagerPortAvailable(): Promise<boolean> {
-  return (
-    (await detectPort(PORT_MANAGER_SERVER_PORT)) === PORT_MANAGER_SERVER_PORT
-  );
+  return PortManagerServer.portAvailable();
 }
 
 export async function isPortManagerServerRunning(): Promise<boolean> {
@@ -52,6 +49,11 @@ export async function requestPorts(
   });
 
   return data.ports;
+}
+
+export async function getActiveServers(): Promise<ServerPortMap> {
+  const { data } = await axios.get(`${BASE_URL}/servers`);
+  return data.servers;
 }
 
 export async function getServerPortByInstanceId(

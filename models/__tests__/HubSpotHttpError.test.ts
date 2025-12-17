@@ -133,6 +133,50 @@ describe('models/HubSpotHttpError', () => {
         payload: 'payload',
       });
     });
+
+    it('should append additional debug context to the error message when provided', () => {
+      const cause = newAxiosError();
+      const hubspotHttpError = new HubSpotHttpError('', { cause });
+      const additionalDebugContext = 'Extra debug info';
+      hubspotHttpError.updateContext(
+        { accountId: portalId },
+        additionalDebugContext
+      );
+      expect(hubspotHttpError.message).toContain(additionalDebugContext);
+    });
+
+    it('should not modify the error message when additional debug context is not provided', () => {
+      const cause = newAxiosError();
+      const hubspotHttpError = new HubSpotHttpError('', { cause });
+      const originalMessage = hubspotHttpError.message;
+      hubspotHttpError.updateContext({ accountId: portalId });
+      expect(hubspotHttpError.message).toBe(originalMessage);
+    });
+
+    it('should handle additional debug context when cause is not an AxiosError', () => {
+      const hubspotHttpError = new HubSpotHttpError('Test error');
+      const additionalDebugContext = 'Extra debug info';
+      expect(() => {
+        hubspotHttpError.updateContext(
+          { accountId: portalId },
+          additionalDebugContext
+        );
+      }).not.toThrow();
+      expect(hubspotHttpError.context).toStrictEqual({ accountId: portalId });
+    });
+
+    it('should append additional debug context with proper spacing', () => {
+      const cause = newAxiosError();
+      const hubspotHttpError = new HubSpotHttpError('', { cause });
+      const additionalDebugContext = 'Debug: Connection timeout';
+      hubspotHttpError.updateContext(
+        { accountId: portalId },
+        additionalDebugContext
+      );
+      expect(hubspotHttpError.message).toMatch(
+        /was bad\.\s+Debug: Connection timeout/
+      );
+    });
   });
 
   describe('toString', () => {

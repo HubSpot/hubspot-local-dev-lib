@@ -8,7 +8,7 @@ import {
   EnabledFeaturesResponse,
   ScopeAuthorizationResponse,
 } from '../types/Accounts.js';
-import axios from 'axios';
+import { httpClient } from '../http/client.js';
 import { PublicAppInstallationData } from '../types/Apps.js';
 import { HubSpotPromise } from '../types/Http.js';
 
@@ -31,7 +31,7 @@ export function fetchAccessToken(
     params: portalId ? { portalId } : {},
   });
 
-  return axios<AccessTokenResponse>({
+  return httpClient<AccessTokenResponse>({
     ...axiosConfig,
     method: 'post',
   });

@@ -4,12 +4,14 @@ import { isSystemError } from '../errors/index.js';
 
 const i18nKey = 'errors.fileSystemErrors';
 
+export const FilerSystemErrorName = 'FilerSystemError';
+
 export class FileSystemError extends Error {
   private context: FileSystemErrorContext | undefined;
 
   constructor(options?: ErrorOptions, context?: FileSystemErrorContext) {
     super('', options);
-    this.name = 'FileSystemError';
+    this.name = FilerSystemErrorName;
     this.context = context;
 
     if (context) {

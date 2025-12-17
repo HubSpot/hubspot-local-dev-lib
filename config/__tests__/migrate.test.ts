@@ -1,550 +1,483 @@
-import * as migrate from '../migrate.js';
-import * as config_DEPRECATED from '../config_DEPRECATED.js';
-import { CLIConfiguration } from '../CLIConfiguration.js';
-import * as configIndex from '../index.js';
-import * as configFile from '../configFile.js';
-import { CLIConfig_DEPRECATED, CLIConfig_NEW } from '../../types/Config.js';
-import { ENVIRONMENTS } from '../../constants/environments.js';
-import { OAUTH_AUTH_METHOD } from '../../constants/auth.js';
-import { ARCHIVED_HUBSPOT_CONFIG_YAML_FILE_NAME } from '../../constants/config.js';
-import { i18n } from '../../utils/lang.js';
+import { vi, describe, it, expect, beforeEach, Mock } from 'vitest';
 import fs from 'fs';
 import path from 'path';
-import { vi } from 'vitest';
+import os from 'os';
 
-vi.mock('../config_DEPRECATED');
-vi.mock('../CLIConfiguration');
-vi.mock('../index');
-vi.mock('../configFile');
-vi.mock('../../utils/lang');
-vi.mock('fs');
-vi.mock('path');
+import {
+  getConfigAtPath,
+  migrateConfigAtPath,
+  mergeConfigProperties,
+  mergeConfigAccounts,
+  archiveConfigAtPath,
+} from '../migrate';
+import { HubSpotConfig } from '../../types/Config';
+import { readConfigFile, writeConfigFile } from '../utils';
+import {
+  DEFAULT_CMS_PUBLISH_MODE,
+  HTTP_TIMEOUT,
+  ENV,
+  HTTP_USE_LOCALHOST,
+  ALLOW_USAGE_TRACKING,
+  DEFAULT_ACCOUNT,
+  ARCHIVED_HUBSPOT_CONFIG_YAML_FILE_NAME,
+} from '../../constants/config';
+import { ENVIRONMENTS } from '../../constants/environments';
+import { PERSONAL_ACCESS_KEY_AUTH_METHOD } from '../../constants/auth';
+import { PersonalAccessKeyConfigAccount } from '../../types/Accounts';
+import { createEmptyConfigFile, getGlobalConfigFilePath } from '../index';
 
-const mockConfig_DEPRECATED = vi.mocked(config_DEPRECATED);
-const mockCLIConfiguration = vi.mocked(CLIConfiguration);
-const mockConfigIndex = vi.mocked(configIndex);
-const mockConfigFile = vi.mocked(configFile);
-const mockI18n = vi.mocked(i18n);
-const mockFs = vi.mocked(fs);
-const mockPath = vi.mocked(path);
+vi.mock('fs', async () => {
+  const actual = await vi.importActual<typeof import('fs')>('fs');
+  return {
+    ...actual,
+    default: {
+      ...actual,
+      unlinkSync: vi.fn(),
+      renameSync: vi.fn(),
+    },
+  };
+});
 
-describe('migrate', () => {
+vi.mock('../utils', async () => {
+  const actual = await vi.importActual<typeof import('../utils')>('../utils');
+  return {
+    ...actual,
+    readConfigFile: vi.fn(),
+    writeConfigFile: vi.fn(),
+  };
+});
+
+vi.mock('../index', async () => {
+  const actual = await vi.importActual<typeof import('../index')>('../index');
+  return {
+    ...actual,
+    createEmptyConfigFile: vi.fn(),
+    getGlobalConfigFilePath: vi.fn(),
+  };
+});
+
+describe('config/migrate', () => {
+  let mockConfig: HubSpotConfig;
+  let mockConfigSource: string;
+  let mockConfigPath: string;
+  let mockGlobalConfigPath: string;
+
   beforeEach(() => {
     vi.clearAllMocks();
 
-    mockFs.renameSync = vi.fn();
-    mockPath.dirname = vi.fn().mockReturnValue('/old/config');
-    mockPath.join = vi.fn().mockImplementation((...args) => args.join('/'));
-  });
-
-  describe('getDeprecatedConfig', () => {
-    it('should return deprecated config when loadConfig succeeds', () => {
-      const mockDeprecatedConfig: CLIConfig_DEPRECATED = {
-        defaultPortal: 'test-portal',
-        portals: [],
-      };
-      mockConfig_DEPRECATED.loadConfig.mockReturnValue(mockDeprecatedConfig);
-
-      const result = migrate.getDeprecatedConfig('/test/path');
-
-      expect(mockConfig_DEPRECATED.loadConfig).toHaveBeenCalledWith(
-        '/test/path'
-      );
-      expect(result).toBe(mockDeprecatedConfig);
-    });
-
-    it('should return null when loadConfig fails', () => {
-      mockConfig_DEPRECATED.loadConfig.mockReturnValue(null);
-
-      const result = migrate.getDeprecatedConfig();
-
-      expect(mockConfig_DEPRECATED.loadConfig).toHaveBeenCalledWith(undefined);
-      expect(result).toBeNull();
-    });
-
-    it('should call loadConfig with undefined when no configPath provided', () => {
-      mockConfig_DEPRECATED.loadConfig.mockReturnValue(null);
-
-      migrate.getDeprecatedConfig();
-
-      expect(mockConfig_DEPRECATED.loadConfig).toHaveBeenCalledWith(undefined);
-    });
-  });
-
-  describe('getGlobalConfig', () => {
-    it('should return CLIConfiguration config when active', () => {
-      const mockConfig: CLIConfig_NEW = {
-        defaultAccount: 'test-account',
-        accounts: [],
-      };
-      mockCLIConfiguration.isActive.mockReturnValue(true);
-      mockCLIConfiguration.config = mockConfig;
-
-      const result = migrate.getGlobalConfig();
-
-      expect(mockCLIConfiguration.isActive).toHaveBeenCalled();
-      expect(result).toBe(mockConfig);
-    });
-
-    it('should return null when CLIConfiguration is not active', () => {
-      mockCLIConfiguration.isActive.mockReturnValue(false);
-
-      const result = migrate.getGlobalConfig();
-
-      expect(mockCLIConfiguration.isActive).toHaveBeenCalled();
-      expect(result).toBeNull();
-    });
-  });
-
-  describe('configFileExists', () => {
-    it('should check new config file when useHiddenConfig is true', () => {
-      mockConfigFile.configFileExists.mockReturnValue(true);
-
-      const result = migrate.configFileExists(true);
-
-      expect(mockConfigFile.configFileExists).toHaveBeenCalled();
-      expect(result).toBe(true);
-    });
-
-    it('should check deprecated config file when useHiddenConfig is false', () => {
-      const mockConfigPath = '/test/config.yml';
-      mockConfig_DEPRECATED.getConfigPath.mockReturnValue(mockConfigPath);
-
-      const result = migrate.configFileExists(false, '/test/path');
-
-      expect(mockConfig_DEPRECATED.getConfigPath).toHaveBeenCalledWith(
-        '/test/path'
-      );
-      expect(result).toBe(true);
-    });
-
-    it('should return false when deprecated config path is null', () => {
-      mockConfig_DEPRECATED.getConfigPath.mockReturnValue(null);
-
-      const result = migrate.configFileExists(false);
-
-      expect(result).toBe(false);
-    });
-
-    it('should default useHiddenConfig to false', () => {
-      mockConfig_DEPRECATED.getConfigPath.mockReturnValue(null);
-
-      migrate.configFileExists();
-
-      expect(mockConfig_DEPRECATED.getConfigPath).toHaveBeenCalledWith(
-        undefined
-      );
-    });
-  });
-
-  describe('getConfigPath', () => {
-    it('should return new config file path when useHiddenConfig is true', () => {
-      const mockPath = '/test/new/config';
-      mockConfigFile.getConfigFilePath.mockReturnValue(mockPath);
-
-      const result = migrate.getConfigPath('/test/path', true);
-
-      expect(mockConfigFile.getConfigFilePath).toHaveBeenCalled();
-      expect(result).toBe(mockPath);
-    });
-
-    it('should return deprecated config path when useHiddenConfig is false', () => {
-      const mockPath = '/test/deprecated/config';
-      mockConfig_DEPRECATED.getConfigPath.mockReturnValue(mockPath);
-
-      const result = migrate.getConfigPath('/test/path', false);
-
-      expect(mockConfig_DEPRECATED.getConfigPath).toHaveBeenCalledWith(
-        '/test/path'
-      );
-      expect(result).toBe(mockPath);
-    });
-
-    it('should default useHiddenConfig to false', () => {
-      const mockPath = '/test/deprecated/config';
-      mockConfig_DEPRECATED.getConfigPath.mockReturnValue(mockPath);
-
-      const result = migrate.getConfigPath('/test/path');
-
-      expect(mockConfig_DEPRECATED.getConfigPath).toHaveBeenCalledWith(
-        '/test/path'
-      );
-      expect(result).toBe(mockPath);
-    });
-  });
-
-  describe('migrateConfig', () => {
-    beforeEach(() => {
-      mockI18n.mockImplementation(key => `translated-${key}`);
-      mockConfigIndex.createEmptyConfigFile.mockImplementation(() => {
-        return;
-      });
-      mockConfigIndex.loadConfig.mockImplementation(() => null);
-      mockConfigIndex.writeConfig.mockImplementation(() => {
-        return;
-      });
-      mockConfigIndex.deleteEmptyConfigFile.mockImplementation(() => {
-        return;
-      });
-      mockConfig_DEPRECATED.getConfigPath.mockReturnValue('/old/config/path');
-      mockPath.dirname.mockReturnValue('/old/config');
-      mockPath.join.mockReturnValue(
-        `/old/config/${ARCHIVED_HUBSPOT_CONFIG_YAML_FILE_NAME}`
-      );
-      mockFs.renameSync.mockImplementation(() => {
-        return;
-      });
-    });
-
-    it('should throw error when deprecatedConfig is null', () => {
-      expect(() => migrate.migrateConfig(null)).toThrow(
-        'translated-config.migrate.errors.noDeprecatedConfig'
-      );
-      expect(mockI18n).toHaveBeenCalledWith(
-        'config.migrate.errors.noDeprecatedConfig'
-      );
-    });
-
-    it('should migrate config successfully', () => {
-      const deprecatedConfig: CLIConfig_DEPRECATED = {
-        defaultPortal: 'test-portal',
-        portals: [
-          {
-            portalId: 123,
-            name: 'test-account',
-            authType: OAUTH_AUTH_METHOD.value,
-            env: ENVIRONMENTS.PROD,
+    mockConfig = {
+      accounts: [
+        {
+          accountId: 123456,
+          name: 'Test Account',
+          authType: PERSONAL_ACCESS_KEY_AUTH_METHOD.value,
+          personalAccessKey: 'test-key',
+          env: ENVIRONMENTS.PROD,
+          auth: {
+            tokenInfo: {},
           },
-        ],
-        httpTimeout: 30000,
-        allowUsageTracking: true,
-      };
+        } as PersonalAccessKeyConfigAccount,
+      ],
+      defaultCmsPublishMode: 'draft',
+      httpTimeout: 5000,
+      env: ENVIRONMENTS.PROD,
+      httpUseLocalhost: false,
+      allowUsageTracking: true,
+      defaultAccount: 123456,
+    };
 
-      migrate.migrateConfig(deprecatedConfig);
+    mockConfigSource = JSON.stringify(mockConfig);
+    mockConfigPath = '/path/to/config.yml';
+    mockGlobalConfigPath = path.join(os.homedir(), '.hscli', 'config.yml');
 
-      expect(mockConfigIndex.createEmptyConfigFile).toHaveBeenCalledWith(
-        {},
-        true
-      );
-      expect(mockConfigIndex.loadConfig).toHaveBeenCalledWith('');
-      expect(mockConfigIndex.writeConfig).toHaveBeenCalledWith({
-        source: JSON.stringify({
-          httpTimeout: 30000,
-          allowUsageTracking: true,
-          defaultAccount: 'test-portal',
-          accounts: [
-            {
-              name: 'test-account',
-              authType: OAUTH_AUTH_METHOD.value,
-              env: ENVIRONMENTS.PROD,
-              accountId: 123,
-            },
-          ],
-        }),
-      });
+    (readConfigFile as Mock).mockReturnValue(mockConfigSource);
+    (getGlobalConfigFilePath as Mock).mockReturnValue(mockGlobalConfigPath);
+  });
+
+  describe('getConfigAtPath', () => {
+    it('should read and parse config from the given path', () => {
+      const result = getConfigAtPath(mockConfigPath);
+
+      expect(readConfigFile).toHaveBeenCalledWith(mockConfigPath);
+      expect(result).toEqual(mockConfig);
     });
+  });
 
-    it('should handle portals with undefined portalId', () => {
-      const deprecatedConfig: CLIConfig_DEPRECATED = {
-        defaultPortal: 'test-portal',
-        portals: [
-          {
-            portalId: 123,
-            name: 'valid-account',
-            env: ENVIRONMENTS.PROD,
-          },
-          {
-            portalId: undefined,
-            name: 'invalid-account',
-            env: ENVIRONMENTS.PROD,
-          },
-        ],
-      };
+  describe('migrateConfigAtPath', () => {
+    it('should migrate config from the given path to the global config path', () => {
+      (createEmptyConfigFile as Mock).mockImplementation(() => undefined);
+      migrateConfigAtPath(mockConfigPath);
 
-      migrate.migrateConfig(deprecatedConfig);
-
-      const writeConfigCall = mockConfigIndex.writeConfig.mock.calls[0]?.[0];
-      expect(writeConfigCall).toBeDefined();
-      expect(writeConfigCall?.source).toBeDefined();
-      const parsedConfig = JSON.parse(writeConfigCall!.source!);
-
-      expect(parsedConfig.accounts).toHaveLength(1);
-      expect(parsedConfig.accounts[0]).toEqual({
-        name: 'valid-account',
-        accountId: 123,
-        env: ENVIRONMENTS.PROD,
-      });
-    });
-
-    it('should rename old config file after successful migration', () => {
-      const deprecatedConfig: CLIConfig_DEPRECATED = {
-        defaultPortal: 'test-portal',
-        portals: [],
-      };
-
-      migrate.migrateConfig(deprecatedConfig);
-
-      expect(mockConfig_DEPRECATED.getConfigPath).toHaveBeenCalled();
-      expect(mockPath.dirname).toHaveBeenCalledWith('/old/config/path');
-      expect(mockPath.join).toHaveBeenCalledWith(
-        '/old/config',
-        ARCHIVED_HUBSPOT_CONFIG_YAML_FILE_NAME
+      expect(createEmptyConfigFile).toHaveBeenCalledWith(true);
+      expect(readConfigFile).toHaveBeenCalledWith(mockConfigPath);
+      expect(writeConfigFile).toHaveBeenCalledWith(
+        mockConfig,
+        mockGlobalConfigPath
       );
-      expect(mockFs.renameSync).toHaveBeenCalledWith(
-        '/old/config/path',
-        `/old/config/${ARCHIVED_HUBSPOT_CONFIG_YAML_FILE_NAME}`
-      );
-    });
-
-    it('should handle writeConfig error and clean up', () => {
-      const deprecatedConfig: CLIConfig_DEPRECATED = {
-        defaultPortal: 'test-portal',
-        portals: [],
-      };
-      const writeError = new Error('Write failed');
-      mockConfigIndex.writeConfig.mockImplementation(() => {
-        throw writeError;
-      });
-
-      expect(() => migrate.migrateConfig(deprecatedConfig)).toThrow(
-        'translated-config.migrate.errors.writeConfig'
-      );
-      expect(mockConfigIndex.deleteEmptyConfigFile).toHaveBeenCalled();
     });
   });
 
   describe('mergeConfigProperties', () => {
-    it('should merge properties without conflicts when force is true', () => {
-      const globalConfig: CLIConfig_NEW = {
-        defaultAccount: 'global-account',
+    it('should merge properties from fromConfig to toConfig without conflicts when force is false', () => {
+      // Arrange
+      const toConfig: HubSpotConfig = {
         accounts: [],
-        httpTimeout: 10000,
-      };
-      const deprecatedConfig: CLIConfig_DEPRECATED = {
-        defaultPortal: 'deprecated-portal',
-        portals: [],
-        httpTimeout: 20000,
+        defaultCmsPublishMode: 'publish',
+        httpTimeout: 3000,
+        env: ENVIRONMENTS.QA,
+        httpUseLocalhost: true,
         allowUsageTracking: false,
+        defaultAccount: 654321,
       };
 
-      const result = migrate.mergeConfigProperties(
-        globalConfig,
-        deprecatedConfig,
-        true
-      );
-
-      expect(result.initialConfig).toEqual({
-        defaultAccount: 'deprecated-portal',
+      const fromConfig: HubSpotConfig = {
         accounts: [],
-        httpTimeout: 20000,
+        defaultCmsPublishMode: 'draft',
+        httpTimeout: 5000,
+        env: ENVIRONMENTS.PROD,
+        httpUseLocalhost: false,
+        allowUsageTracking: true,
+        defaultAccount: 123456,
+      };
+
+      const result = mergeConfigProperties(toConfig, fromConfig);
+
+      expect(result.configWithMergedProperties).toEqual(toConfig);
+      expect(result.conflicts).toHaveLength(6);
+      expect(result.conflicts).toContainEqual({
+        property: DEFAULT_CMS_PUBLISH_MODE,
+        oldValue: 'draft',
+        newValue: 'publish',
+      });
+      expect(result.conflicts).toContainEqual({
+        property: HTTP_TIMEOUT,
+        oldValue: 5000,
+        newValue: 3000,
+      });
+      expect(result.conflicts).toContainEqual({
+        property: ENV,
+        oldValue: ENVIRONMENTS.PROD,
+        newValue: ENVIRONMENTS.QA,
+      });
+      expect(result.conflicts).toContainEqual({
+        property: HTTP_USE_LOCALHOST,
+        oldValue: false,
+        newValue: true,
+      });
+      expect(result.conflicts).toContainEqual({
+        property: ALLOW_USAGE_TRACKING,
+        oldValue: true,
+        newValue: false,
+      });
+      expect(result.conflicts).toContainEqual({
+        property: DEFAULT_ACCOUNT,
+        oldValue: 123456,
+        newValue: 654321,
+      });
+    });
+
+    it('should merge properties from fromConfig to toConfig without conflicts when force is true', () => {
+      const toConfig: HubSpotConfig = {
+        accounts: [],
+        defaultCmsPublishMode: 'publish',
+        httpTimeout: 3000,
+        env: ENVIRONMENTS.QA,
+        httpUseLocalhost: true,
         allowUsageTracking: false,
+        defaultAccount: 654321,
+      };
+
+      const fromConfig: HubSpotConfig = {
+        accounts: [],
+        defaultCmsPublishMode: 'draft',
+        httpTimeout: 5000,
+        env: ENVIRONMENTS.PROD,
+        httpUseLocalhost: false,
+        allowUsageTracking: true,
+        defaultAccount: 123456,
+      };
+
+      const result = mergeConfigProperties(toConfig, fromConfig, true);
+
+      expect(result.configWithMergedProperties).toEqual({
+        ...toConfig,
+        defaultCmsPublishMode: 'draft',
+        httpTimeout: 5000,
+        env: ENVIRONMENTS.PROD,
+        httpUseLocalhost: false,
+        allowUsageTracking: true,
+        defaultAccount: 123456,
       });
       expect(result.conflicts).toHaveLength(0);
     });
 
-    it('should detect conflicts when force is false and values differ', () => {
-      const globalConfig: CLIConfig_NEW = {
-        defaultAccount: 'global-account',
+    it('should merge properties from fromConfig to toConfig when toConfig has missing properties', () => {
+      const toConfig: HubSpotConfig = {
         accounts: [],
-        httpTimeout: 10000,
-      };
-      const deprecatedConfig: CLIConfig_DEPRECATED = {
-        defaultPortal: 'deprecated-portal',
-        portals: [],
-        httpTimeout: 20000,
       };
 
-      const result = migrate.mergeConfigProperties(
-        globalConfig,
-        deprecatedConfig,
-        false
-      );
+      const fromConfig: HubSpotConfig = {
+        accounts: [],
+        defaultCmsPublishMode: 'draft',
+        httpTimeout: 5000,
+        env: ENVIRONMENTS.PROD,
+        httpUseLocalhost: false,
+        allowUsageTracking: true,
+        defaultAccount: 123456,
+      };
 
-      expect(result.conflicts).toHaveLength(2);
-      expect(result.conflicts).toContainEqual({
-        property: 'httpTimeout',
-        oldValue: 20000,
-        newValue: 10000,
+      const result = mergeConfigProperties(toConfig, fromConfig);
+
+      expect(result.configWithMergedProperties).toEqual({
+        ...toConfig,
+        defaultCmsPublishMode: 'draft',
+        httpTimeout: 5000,
+        env: ENVIRONMENTS.PROD,
+        httpUseLocalhost: false,
+        allowUsageTracking: true,
+        defaultAccount: 123456,
       });
-      expect(result.conflicts).toContainEqual({
-        property: 'defaultAccount',
-        oldValue: 'deprecated-portal',
-        newValue: 'global-account',
-      });
+      expect(result.conflicts).toHaveLength(0);
     });
 
     it('should merge flags from both configs', () => {
-      const globalConfig: CLIConfig_NEW = {
+      const toConfig: HubSpotConfig = {
         accounts: [],
         flags: ['flag1', 'flag2'],
       };
-      const deprecatedConfig: CLIConfig_DEPRECATED = {
-        portals: [],
+
+      const fromConfig: HubSpotConfig = {
+        accounts: [],
         flags: ['flag2', 'flag3'],
       };
 
-      const result = migrate.mergeConfigProperties(
-        globalConfig,
-        deprecatedConfig
-      );
+      const result = mergeConfigProperties(toConfig, fromConfig);
 
-      expect(result.initialConfig.flags).toEqual(['flag1', 'flag2', 'flag3']);
-    });
-
-    it('should handle missing properties gracefully', () => {
-      const globalConfig: CLIConfig_NEW = {
-        accounts: [],
-      };
-      const deprecatedConfig: CLIConfig_DEPRECATED = {
-        portals: [],
-        httpTimeout: 15000,
-      };
-
-      const result = migrate.mergeConfigProperties(
-        globalConfig,
-        deprecatedConfig
-      );
-
-      expect(result.initialConfig.httpTimeout).toBe(15000);
+      expect(result.configWithMergedProperties.flags).toEqual([
+        'flag1',
+        'flag2',
+        'flag3',
+      ]);
       expect(result.conflicts).toHaveLength(0);
     });
 
-    it('should not create conflicts when values are the same', () => {
-      const globalConfig: CLIConfig_NEW = {
+    it('should merge autoOpenBrowser and allowAutoUpdates fields', () => {
+      const toConfig: HubSpotConfig = {
         accounts: [],
-        httpTimeout: 15000,
-        allowUsageTracking: true,
-      };
-      const deprecatedConfig: CLIConfig_DEPRECATED = {
-        portals: [],
-        httpTimeout: 15000,
-        allowUsageTracking: true,
       };
 
-      const result = migrate.mergeConfigProperties(
-        globalConfig,
-        deprecatedConfig
-      );
+      const fromConfig: HubSpotConfig = {
+        accounts: [],
+        autoOpenBrowser: true,
+        allowAutoUpdates: false,
+      };
 
+      const result = mergeConfigProperties(toConfig, fromConfig);
+
+      expect(result.configWithMergedProperties.autoOpenBrowser).toBe(true);
+      expect(result.configWithMergedProperties.allowAutoUpdates).toBe(false);
       expect(result.conflicts).toHaveLength(0);
+    });
+
+    it('should detect conflicts for autoOpenBrowser and allowAutoUpdates when values differ', () => {
+      const toConfig: HubSpotConfig = {
+        accounts: [],
+        autoOpenBrowser: false,
+        allowAutoUpdates: true,
+      };
+
+      const fromConfig: HubSpotConfig = {
+        accounts: [],
+        autoOpenBrowser: true,
+        allowAutoUpdates: false,
+      };
+
+      const result = mergeConfigProperties(toConfig, fromConfig, false);
+
+      expect(result.conflicts).toContainEqual({
+        property: 'autoOpenBrowser',
+        oldValue: true,
+        newValue: false,
+      });
+      expect(result.conflicts).toContainEqual({
+        property: 'allowAutoUpdates',
+        oldValue: false,
+        newValue: true,
+      });
     });
   });
 
-  describe('mergeExistingConfigs', () => {
-    beforeEach(() => {
-      mockConfigIndex.writeConfig.mockImplementation(() => {
-        return;
-      });
-    });
+  describe('mergeConfigAccounts', () => {
+    it('should merge accounts from fromConfig to toConfig and skip existing accounts', () => {
+      const existingAccount = {
+        accountId: 123456,
+        name: 'Existing Account',
+        authType: PERSONAL_ACCESS_KEY_AUTH_METHOD.value,
+        personalAccessKey: 'existing-key',
+        env: ENVIRONMENTS.PROD,
+        auth: {
+          tokenInfo: {},
+        },
+      } as PersonalAccessKeyConfigAccount;
 
-    it('should merge accounts and return skipped account IDs', () => {
-      const globalConfig: CLIConfig_NEW = {
-        accounts: [
-          {
-            accountId: 123,
-            name: 'existing-account',
-            env: ENVIRONMENTS.PROD,
-          },
-        ],
-      };
-      const deprecatedConfig: CLIConfig_DEPRECATED = {
-        portals: [
-          {
-            portalId: 123,
-            name: 'duplicate-account',
-            env: ENVIRONMENTS.PROD,
-          },
-          {
-            portalId: 456,
-            name: 'new-account',
-            env: ENVIRONMENTS.PROD,
-          },
-        ],
+      const newAccount = {
+        accountId: 789012,
+        name: 'New Account',
+        authType: PERSONAL_ACCESS_KEY_AUTH_METHOD.value,
+        personalAccessKey: 'new-key',
+        env: ENVIRONMENTS.PROD,
+        auth: {
+          tokenInfo: {},
+        },
+      } as PersonalAccessKeyConfigAccount;
+
+      const toConfig: HubSpotConfig = {
+        accounts: [existingAccount],
+        defaultCmsPublishMode: 'draft',
+        httpTimeout: 5000,
+        env: ENVIRONMENTS.PROD,
       };
 
-      const result = migrate.mergeExistingConfigs(
-        globalConfig,
-        deprecatedConfig
+      const fromConfig: HubSpotConfig = {
+        accounts: [existingAccount, newAccount],
+        defaultCmsPublishMode: 'draft',
+        httpTimeout: 5000,
+        env: ENVIRONMENTS.PROD,
+      };
+
+      const result = mergeConfigAccounts(toConfig, fromConfig);
+
+      expect(result.configWithMergedAccounts.accounts).toHaveLength(2);
+      expect(result.configWithMergedAccounts.accounts).toContainEqual(
+        existingAccount
       );
-
-      expect(result.finalConfig.accounts).toHaveLength(2);
-      expect(result.finalConfig.accounts).toContainEqual({
-        accountId: 123,
-        name: 'existing-account',
-        env: ENVIRONMENTS.PROD,
-      });
-      expect(result.finalConfig.accounts).toContainEqual({
-        accountId: 456,
-        name: 'new-account',
-        env: ENVIRONMENTS.PROD,
-      });
-      expect(result.skippedAccountIds).toEqual([123]);
+      expect(result.configWithMergedAccounts.accounts).toContainEqual(
+        newAccount
+      );
+      expect(result.skippedAccountIds).toEqual([123456]);
+      expect(writeConfigFile).toHaveBeenCalledWith(
+        result.configWithMergedAccounts,
+        mockGlobalConfigPath
+      );
     });
 
-    it('should handle config without existing accounts', () => {
-      const globalConfig: CLIConfig_NEW = {
+    it('should handle empty accounts arrays', () => {
+      const toConfig: HubSpotConfig = {
         accounts: [],
-      };
-      const deprecatedConfig: CLIConfig_DEPRECATED = {
-        portals: [
-          {
-            portalId: 123,
-            name: 'new-account',
-            env: ENVIRONMENTS.PROD,
-          },
-        ],
-      };
-
-      const result = migrate.mergeExistingConfigs(
-        globalConfig,
-        deprecatedConfig
-      );
-
-      expect(result.finalConfig.accounts).toHaveLength(1);
-      expect(result.finalConfig.accounts[0]).toEqual({
-        name: 'new-account',
-        accountId: 123,
+        defaultCmsPublishMode: 'draft',
+        httpTimeout: 5000,
         env: ENVIRONMENTS.PROD,
-      });
-      expect(result.skippedAccountIds).toHaveLength(0);
-    });
-
-    it('should handle config without deprecated portals', () => {
-      const globalConfig: CLIConfig_NEW = {
-        accounts: [
-          {
-            accountId: 123,
-            name: 'existing-account',
-            env: ENVIRONMENTS.PROD,
-          },
-        ],
-      };
-      const deprecatedConfig: CLIConfig_DEPRECATED = {
-        portals: [],
       };
 
-      const result = migrate.mergeExistingConfigs(
-        globalConfig,
-        deprecatedConfig
-      );
-
-      expect(result.finalConfig.accounts).toHaveLength(1);
-      expect(result.skippedAccountIds).toHaveLength(0);
-    });
-
-    it('should write the final config', () => {
-      const globalConfig: CLIConfig_NEW = {
+      const fromConfig: HubSpotConfig = {
         accounts: [],
-      };
-      const deprecatedConfig: CLIConfig_DEPRECATED = {
-        portals: [],
+        defaultCmsPublishMode: 'draft',
+        httpTimeout: 5000,
+        env: ENVIRONMENTS.PROD,
       };
 
-      migrate.mergeExistingConfigs(globalConfig, deprecatedConfig);
+      const result = mergeConfigAccounts(toConfig, fromConfig);
 
-      expect(mockConfigIndex.writeConfig).toHaveBeenCalledWith({
-        source: JSON.stringify(globalConfig),
-      });
+      expect(result.configWithMergedAccounts.accounts).toHaveLength(0);
+      expect(result.skippedAccountIds).toEqual([]);
+      expect(writeConfigFile).toHaveBeenCalledWith(
+        result.configWithMergedAccounts,
+        mockGlobalConfigPath
+      );
+    });
+
+    it('should handle case when fromConfig has no accounts', () => {
+      const existingAccount = {
+        accountId: 123456,
+        name: 'Existing Account',
+        authType: PERSONAL_ACCESS_KEY_AUTH_METHOD.value,
+        personalAccessKey: 'existing-key',
+        env: ENVIRONMENTS.PROD,
+        auth: {
+          tokenInfo: {},
+        },
+      } as PersonalAccessKeyConfigAccount;
+
+      const toConfig: HubSpotConfig = {
+        accounts: [existingAccount],
+        defaultCmsPublishMode: 'draft',
+        httpTimeout: 5000,
+        env: ENVIRONMENTS.PROD,
+      };
+
+      const fromConfig: HubSpotConfig = {
+        accounts: [],
+        defaultCmsPublishMode: 'draft',
+        httpTimeout: 5000,
+        env: ENVIRONMENTS.PROD,
+      };
+
+      const result = mergeConfigAccounts(toConfig, fromConfig);
+
+      expect(result.configWithMergedAccounts.accounts).toHaveLength(1);
+      expect(result.configWithMergedAccounts.accounts).toContainEqual(
+        existingAccount
+      );
+      expect(result.skippedAccountIds).toEqual([]);
+      expect(writeConfigFile).toHaveBeenCalledWith(
+        result.configWithMergedAccounts,
+        mockGlobalConfigPath
+      );
+    });
+
+    it('should handle case when toConfig has no accounts', () => {
+      const newAccount = {
+        accountId: 789012,
+        name: 'New Account',
+        authType: PERSONAL_ACCESS_KEY_AUTH_METHOD.value,
+        personalAccessKey: 'new-key',
+        env: ENVIRONMENTS.PROD,
+        auth: {
+          tokenInfo: {},
+        },
+      } as PersonalAccessKeyConfigAccount;
+
+      const toConfig: HubSpotConfig = {
+        accounts: [],
+        defaultCmsPublishMode: 'draft',
+        httpTimeout: 5000,
+        env: ENVIRONMENTS.PROD,
+      };
+
+      const fromConfig: HubSpotConfig = {
+        accounts: [newAccount],
+        defaultCmsPublishMode: 'draft',
+        httpTimeout: 5000,
+        env: ENVIRONMENTS.PROD,
+      };
+
+      const result = mergeConfigAccounts(toConfig, fromConfig);
+
+      expect(result.configWithMergedAccounts.accounts).toHaveLength(1);
+      expect(result.configWithMergedAccounts.accounts).toContainEqual(
+        newAccount
+      );
+      expect(result.skippedAccountIds).toEqual([]);
+      expect(writeConfigFile).toHaveBeenCalledWith(
+        result.configWithMergedAccounts,
+        mockGlobalConfigPath
+      );
+    });
+  });
+
+  describe('archiveConfigAtPath', () => {
+    const mockRenameSync = fs.renameSync as Mock;
+
+    it('should rename config file to archived config file', () => {
+      const configPath = '/home/user/project/hubspot.config.yml';
+      const expectedArchivedPath = `/home/user/project/${ARCHIVED_HUBSPOT_CONFIG_YAML_FILE_NAME}`;
+
+      archiveConfigAtPath(configPath);
+
+      expect(mockRenameSync).toHaveBeenCalledWith(
+        configPath,
+        expectedArchivedPath
+      );
     });
   });
 });

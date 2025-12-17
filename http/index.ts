@@ -1,93 +1,41 @@
 import path from 'path';
 import fs from 'fs-extra';
 import contentDisposition from 'content-disposition';
-import axios, {
-  AxiosRequestConfig,
-  AxiosResponse,
-  AxiosPromise,
-  isAxiosError,
-} from 'axios';
+import { AxiosRequestConfig, AxiosResponse, AxiosPromise } from 'axios';
 
-import { getAccountConfig } from '../config/index.js';
+import { getConfigAccountById } from '../config/index.js';
 import { USER_AGENTS, getAxiosConfig } from './getAxiosConfig.js';
 import { addQueryParams } from './addQueryParams.js';
 import { accessTokenForPersonalAccessKey } from '../lib/personalAccessKey.js';
 import { getOauthManager } from '../lib/oauth.js';
-import { FlatAccountFields } from '../types/Accounts.js';
 import { HttpOptions, HubSpotPromise } from '../types/Http.js';
 import { logger } from '../lib/logger.js';
 import { i18n } from '../utils/lang.js';
-import { HubSpotHttpError } from '../models/HubSpotHttpError.js';
-import { LOCALDEVAUTH_ACCESS_TOKEN_PATH } from '../api/localDevAuth.js';
-import * as util from 'util';
+import { OAuthConfigAccount } from '../types/Accounts.js';
+import {
+  PERSONAL_ACCESS_KEY_AUTH_METHOD,
+  OAUTH_AUTH_METHOD,
+  API_KEY_AUTH_METHOD,
+} from '../constants/auth.js';
+import { httpClient } from './client.js';
 
 const i18nKey = 'http.index';
-
-function logRequest(response: AxiosResponse) {
-  try {
-    if (process.env.HUBSPOT_NETWORK_LOGGING) {
-      if (response.config.url === LOCALDEVAUTH_ACCESS_TOKEN_PATH) {
-        // Don't log access tokens
-        return;
-      }
-      logger.debug(
-        util.inspect(
-          {
-            method: response.config.method,
-            baseURL: response.config.baseURL,
-            url: response.config.url,
-            data: response.data,
-            status: response.status,
-          },
-          false,
-          null,
-          true
-        )
-      );
-    }
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  } catch (error) {
-    // Ignore any errors that occur while logging the response
-  }
-}
-
-axios.interceptors.response.use(
-  (response: AxiosResponse) => {
-    logRequest(response);
-    return response;
-  },
-  error => {
-    try {
-      if (isAxiosError(error) && error.response) {
-        logRequest(error.response);
-      }
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (e) {
-      // Ignore any errors that occur while logging the response
-    }
-
-    // Wrap all axios errors in our own Error class.  Attach the error
-    // as the cause for the new error, so we maintain the stack trace
-    return Promise.reject(
-      new HubSpotHttpError(error.message, { cause: error })
-    );
-  }
-);
 
 export function addUserAgentHeader(key: string, value: string) {
   USER_AGENTS[key] = value;
 }
 
 async function withOauth(
-  accountId: number,
-  accountConfig: FlatAccountFields,
+  account: OAuthConfigAccount,
   axiosConfig: AxiosRequestConfig
 ): Promise<AxiosRequestConfig> {
   const { headers } = axiosConfig;
-  const oauth = getOauthManager(accountId, accountConfig);
+  const oauth = getOauthManager(account);
 
   if (!oauth) {
-    throw new Error(i18n(`${i18nKey}.errors.withOauth`, { accountId }));
+    throw new Error(
+      i18n(`${i18nKey}.errors.withOauth`, { accountId: account.accountId })
+    );
   }
 
   const accessToken = await oauth.accessToken();
@@ -134,34 +82,40 @@ async function withAuth(
   accountId: number,
   options: HttpOptions
 ): Promise<AxiosRequestConfig> {
-  const accountConfig = getAccountConfig(accountId);
+  const account = getConfigAccountById(accountId);
 
-  if (!accountConfig) {
-    throw new Error(i18n(`${i18nKey}.errors.withAuth`, { accountId }));
-  }
-
-  const { env, authType, apiKey } = accountConfig;
+  const { env, authType } = account;
   const axiosConfig = withPortalId(
     accountId,
     getAxiosConfig({ env, ...options })
   );
 
-  if (authType === 'personalaccesskey') {
+  if (authType === PERSONAL_ACCESS_KEY_AUTH_METHOD.value) {
     return withPersonalAccessKey(accountId, axiosConfig);
   }
 
-  if (authType === 'oauth2') {
-    return withOauth(accountId, accountConfig, axiosConfig);
+  if (authType === OAUTH_AUTH_METHOD.value) {
+    return withOauth(account, axiosConfig);
   }
-  const { params } = axiosConfig;
 
-  return {
-    ...axiosConfig,
-    params: {
-      ...params,
-      hapikey: apiKey,
-    },
-  };
+  if (authType === API_KEY_AUTH_METHOD.value) {
+    const { params } = axiosConfig;
+
+    return {
+      ...axiosConfig,
+      params: {
+        ...params,
+        hapikey: account.apiKey,
+      },
+    };
+  }
+
+  throw new Error(
+    i18n(`${i18nKey}.errors.invalidAuthType`, {
+      accountId,
+      authType,
+    })
+  );
 }
 
 async function getRequest<T>(
@@ -172,7 +126,7 @@ async function getRequest<T>(
   const optionsWithParams = addQueryParams(rest, params);
   const requestConfig = await withAuth(accountId, optionsWithParams);
 
-  return axios<T>(requestConfig);
+  return httpClient<T>(requestConfig);
 }
 
 async function postRequest<T>(
@@ -180,7 +134,7 @@ async function postRequest<T>(
   options: HttpOptions
 ): HubSpotPromise<T> {
   const requestConfig = await withAuth(accountId, options);
-  return axios<T>({ ...requestConfig, method: 'post' });
+  return httpClient<T>({ ...requestConfig, method: 'post' });
 }
 
 async function putRequest<T>(
@@ -188,7 +142,7 @@ async function putRequest<T>(
   options: HttpOptions
 ): HubSpotPromise<T> {
   const requestConfig = await withAuth(accountId, options);
-  return axios<T>({ ...requestConfig, method: 'put' });
+  return httpClient<T>({ ...requestConfig, method: 'put' });
 }
 
 async function patchRequest<T>(
@@ -196,7 +150,7 @@ async function patchRequest<T>(
   options: HttpOptions
 ): HubSpotPromise<T> {
   const requestConfig = await withAuth(accountId, options);
-  return axios<T>({ ...requestConfig, method: 'patch' });
+  return httpClient<T>({ ...requestConfig, method: 'patch' });
 }
 
 async function deleteRequest<T>(
@@ -204,7 +158,7 @@ async function deleteRequest<T>(
   options: HttpOptions
 ): HubSpotPromise<T> {
   const requestConfig = await withAuth(accountId, options);
-  return axios<T>({ ...requestConfig, method: 'delete' });
+  return httpClient<T>({ ...requestConfig, method: 'delete' });
 }
 
 function createGetRequestStream(contentType: string) {
@@ -220,7 +174,7 @@ function createGetRequestStream(contentType: string) {
     return new Promise<AxiosResponse>(async (resolve, reject) => {
       try {
         const { headers, ...opts } = await withAuth(accountId, axiosConfig);
-        const res = await axios({
+        const res = await httpClient({
           method: 'get',
           ...opts,
           headers: {
