@@ -1,4 +1,4 @@
-import { i18n } from '../utils/lang';
+import { i18n } from '../utils/lang.js';
 import path from 'path';
 import os from 'os';
 

@@ -1,7 +1,7 @@
 import fs from 'fs';
 
-import { HubSpotConfig } from '../types/Config';
-import { createEmptyConfigFile, getGlobalConfigFilePath } from './index';
+import { HubSpotConfig } from '../types/Config.js';
+import { createEmptyConfigFile, getGlobalConfigFilePath } from './index.js';
 import {
   DEFAULT_CMS_PUBLISH_MODE,
   HTTP_TIMEOUT,
@@ -12,9 +12,9 @@ import {
   AUTO_OPEN_BROWSER,
   ALLOW_AUTO_UPDATES,
   ARCHIVED_HUBSPOT_CONFIG_YAML_FILE_NAME,
-} from '../constants/config';
-import { parseConfig, readConfigFile, writeConfigFile } from './utils';
-import { ValueOf } from '../types/Utils';
+} from '../constants/config.js';
+import { parseConfig, readConfigFile, writeConfigFile } from './utils.js';
+import { ValueOf } from '../types/Utils.js';
 import path from 'path';
 
 export function getConfigAtPath(path: string): HubSpotConfig {

@@ -2,7 +2,7 @@ import {
   BaseError,
   FileSystemErrorContext,
   ErrorContext,
-} from '../types/Error';
+} from '../types/Error.js';
 
 function isSystemError(err: BaseError) {
   return err.errno != null && err.code != null && err.syscall != null;

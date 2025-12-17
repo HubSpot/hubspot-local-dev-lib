@@ -1,3 +1,4 @@
+import { vi, describe, it, expect, beforeEach, Mock } from 'vitest';
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
@@ -25,23 +26,35 @@ import { PERSONAL_ACCESS_KEY_AUTH_METHOD } from '../../constants/auth';
 import { PersonalAccessKeyConfigAccount } from '../../types/Accounts';
 import { createEmptyConfigFile, getGlobalConfigFilePath } from '../index';
 
-jest.mock('fs', () => ({
-  ...jest.requireActual('fs'),
-  unlinkSync: jest.fn(),
-  renameSync: jest.fn(),
-}));
+vi.mock('fs', async () => {
+  const actual = await vi.importActual<typeof import('fs')>('fs');
+  return {
+    ...actual,
+    default: {
+      ...actual,
+      unlinkSync: vi.fn(),
+      renameSync: vi.fn(),
+    },
+  };
+});
 
-jest.mock('../utils', () => ({
-  ...jest.requireActual('../utils'),
-  readConfigFile: jest.fn(),
-  writeConfigFile: jest.fn(),
-}));
+vi.mock('../utils', async () => {
+  const actual = await vi.importActual<typeof import('../utils')>('../utils');
+  return {
+    ...actual,
+    readConfigFile: vi.fn(),
+    writeConfigFile: vi.fn(),
+  };
+});
 
-jest.mock('../index', () => ({
-  ...jest.requireActual('../index'),
-  createEmptyConfigFile: jest.fn(),
-  getGlobalConfigFilePath: jest.fn(),
-}));
+vi.mock('../index', async () => {
+  const actual = await vi.importActual<typeof import('../index')>('../index');
+  return {
+    ...actual,
+    createEmptyConfigFile: vi.fn(),
+    getGlobalConfigFilePath: vi.fn(),
+  };
+});
 
 describe('config/migrate', () => {
   let mockConfig: HubSpotConfig;
@@ -50,7 +63,7 @@ describe('config/migrate', () => {
   let mockGlobalConfigPath: string;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockConfig = {
       accounts: [
@@ -77,10 +90,8 @@ describe('config/migrate', () => {
     mockConfigPath = '/path/to/config.yml';
     mockGlobalConfigPath = path.join(os.homedir(), '.hscli', 'config.yml');
 
-    (readConfigFile as jest.Mock).mockReturnValue(mockConfigSource);
-    (getGlobalConfigFilePath as jest.Mock).mockReturnValue(
-      mockGlobalConfigPath
-    );
+    (readConfigFile as Mock).mockReturnValue(mockConfigSource);
+    (getGlobalConfigFilePath as Mock).mockReturnValue(mockGlobalConfigPath);
   });
 
   describe('getConfigAtPath', () => {
@@ -94,7 +105,7 @@ describe('config/migrate', () => {
 
   describe('migrateConfigAtPath', () => {
     it('should migrate config from the given path to the global config path', () => {
-      (createEmptyConfigFile as jest.Mock).mockImplementation(() => undefined);
+      (createEmptyConfigFile as Mock).mockImplementation(() => undefined);
       migrateConfigAtPath(mockConfigPath);
 
       expect(createEmptyConfigFile).toHaveBeenCalledWith(true);
@@ -455,7 +466,7 @@ describe('config/migrate', () => {
   });
 
   describe('archiveConfigAtPath', () => {
-    const mockRenameSync = fs.renameSync as jest.Mock;
+    const mockRenameSync = fs.renameSync as Mock;
 
     it('should rename config file to archived config file', () => {
       const configPath = '/home/user/project/hubspot.config.yml';

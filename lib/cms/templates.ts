@@ -1,8 +1,8 @@
 import fs from 'fs-extra';
 import path from 'path';
-import { cloneGithubRepo } from '../github';
-import { logger } from '../logger';
-import { i18n } from '../../utils/lang';
+import { cloneGithubRepo } from '../github.js';
+import { logger } from '../logger.js';
+import { i18n } from '../../utils/lang.js';
 
 const i18nKey = 'lib.cms.templates';
 

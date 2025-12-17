@@ -1,9 +1,9 @@
-import { http } from '../http';
-import { Data, HubSpotPromise, QueryParams } from '../types/Http';
+import { http } from '../http/index.js';
+import { Data, HubSpotPromise, QueryParams } from '../types/Http.js';
 import {
   GetLighthouseScoreResponse,
   RequestLighthouseScoreResponse,
-} from '../types/Lighthouse';
+} from '../types/Lighthouse.js';
 
 const LIGHTHOUSE_SCORE_API_BASE = 'quality-engine/v1/lighthouse';
 

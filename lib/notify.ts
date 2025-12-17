@@ -1,7 +1,7 @@
 import fs from 'fs';
 import moment from 'moment';
 import debounce from 'debounce';
-import { i18n } from '../utils/lang';
+import { i18n } from '../utils/lang.js';
 
 const i18nKey = 'utils.notify';
 

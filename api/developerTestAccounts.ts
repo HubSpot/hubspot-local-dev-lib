@@ -1,7 +1,7 @@
-import { httpClient } from '../http/client';
-import { http } from '../http';
-import { getAxiosConfig } from '../http/getAxiosConfig';
-import { ENVIRONMENTS } from '../constants/environments';
+import { httpClient } from '../http/client.js';
+import { http } from '../http/index.js';
+import { getAxiosConfig } from '../http/getAxiosConfig.js';
+import { ENVIRONMENTS } from '../constants/environments.js';
 import {
   DeveloperTestAccount,
   CreateDeveloperTestAccountResponse,
@@ -11,10 +11,10 @@ import {
   InstallOauthAppIntoDeveloperTestAccountResponse,
   TestPortalStatusResponse,
   GenerateDeveloperTestAccountPersonalAccessKeyResponse,
-} from '../types/developerTestAccounts';
-import { SANDBOX_TIMEOUT } from '../constants/api';
-import { Environment } from '../types/Config';
-import { HubSpotPromise } from '../types/Http';
+} from '../types/developerTestAccounts.js';
+import { SANDBOX_TIMEOUT } from '../constants/api.js';
+import { Environment } from '../types/Config.js';
+import { HubSpotPromise } from '../types/Http.js';
 
 const TEST_ACCOUNTS_API_PATH = 'integrators/test-portals/v2';
 const TEST_ACCOUNTS_API_PATH_V3 = 'integrators/test-portals/v3';

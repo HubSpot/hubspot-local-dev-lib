@@ -1,11 +1,11 @@
-import { http } from '../http';
+import { http } from '../http/index.js';
 import {
   PublicApp,
   PublicAppInstallCounts,
   PublicAppDeveloperTestAccountInstallData,
   FetchPublicAppsForPortalResponse,
-} from '../types/Apps';
-import { HubSpotPromise } from '../types/Http';
+} from '../types/Apps.js';
+import { HubSpotPromise } from '../types/Http.js';
 
 const APPS_DEV_API_PATH = 'apps-dev/external/public/v3';
 const APPS_HUBLETS_API_PATH = 'apps-hublets/external/static-token/v3';

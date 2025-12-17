@@ -1,4 +1,4 @@
-import { HubSpotHttpError } from '../HubSpotHttpError';
+import { HubSpotHttpError } from '../HubSpotHttpError.js';
 import { AxiosError } from 'axios';
 
 describe('models/HubSpotHttpError', () => {

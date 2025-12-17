@@ -1,28 +1,30 @@
 import chokidar from 'chokidar';
 import PQueue from 'p-queue';
 
-import { uploadFolder } from '../cms/uploadFolder';
-import { watch } from '../cms/watch';
-import { CMS_PUBLISH_MODE } from '../../constants/files';
+import { uploadFolder } from '../cms/uploadFolder.js';
+import { watch } from '../cms/watch.js';
+import { CMS_PUBLISH_MODE } from '../../constants/files.js';
+import { vi, MockInstance } from 'vitest';
 
-jest.mock('chokidar');
-jest.mock('../../http/client');
-jest.mock('p-queue');
-jest.mock('../cms/uploadFolder');
+vi.mock('chokidar');
+vi.mock('../../http/client');
+vi.mock('p-queue');
+vi.mock('../cms/uploadFolder');
 
 describe('lib/cms/watch', () => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let chokidarMock: any;
-  let pQueueAddMock: jest.Mock;
+  let chokidarMock: { watch: MockInstance; on: MockInstance };
+  let pQueueAddMock: MockInstance;
 
   beforeEach(() => {
     chokidarMock = {
-      watch: jest.fn().mockReturnThis(),
-      on: jest.fn().mockReturnThis(),
+      watch: vi.fn().mockReturnThis(),
+      on: vi.fn().mockReturnThis(),
     };
-    (chokidar.watch as jest.Mock).mockReturnValue(chokidarMock);
+    vi.mocked(chokidar.watch).mockReturnValue(
+      chokidarMock as unknown as ReturnType<typeof chokidar.watch>
+    );
 
-    pQueueAddMock = jest.fn();
+    pQueueAddMock = vi.fn();
 
     // @ts-expect-error test case
     PQueue.mockImplementation(() => ({
@@ -64,9 +66,9 @@ describe('lib/cms/watch', () => {
       commandOptions: {},
       filePaths: [],
     };
-    const postInitialUploadCallback = jest.fn();
+    const postInitialUploadCallback = vi.fn();
 
-    (uploadFolder as jest.Mock).mockResolvedValueOnce([]);
+    vi.mocked(uploadFolder).mockResolvedValueOnce([]);
 
     await watch(accountId, src, dest, options, postInitialUploadCallback);
 

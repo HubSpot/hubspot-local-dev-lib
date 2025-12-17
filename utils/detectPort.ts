@@ -25,10 +25,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import net, { AddressInfo } from 'net';
 import { ip } from 'address';
-import { NetError, ListenCallback } from '../types/PortManager';
+import { NetError, ListenCallback } from '../types/PortManager.js';
 
-import { MIN_PORT_NUMBER, MAX_PORT_NUMBER } from '../constants/ports';
-import { i18n } from './lang';
+import { MIN_PORT_NUMBER, MAX_PORT_NUMBER } from '../constants/ports.js';
+import { i18n } from './lang.js';
 
 const i18nKey = 'utils.detectPort';
 

@@ -1,8 +1,8 @@
 import path from 'path';
-import { ImportRequest } from '../types/Crm';
-import { getCwd } from './path';
+import { ImportRequest } from '../types/Crm.js';
+import { getCwd } from './path.js';
 import fs from 'fs-extra';
-import { i18n } from '../utils/lang';
+import { i18n } from '../utils/lang.js';
 
 export function getImportDataRequest(fileName: string): {
   importRequest: ImportRequest;
@@ -62,6 +62,7 @@ function fileExists(_path: string): boolean {
     if (!isFile) {
       return false;
     }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (e) {
     return false;
   }

@@ -1,9 +1,9 @@
 import fs from 'fs';
 import path from 'path';
 
-import { STAT_TYPES } from '../constants/files';
-import { StatType, FileData } from '../types/Files';
-import { FileSystemError } from '../models/FileSystemError';
+import { STAT_TYPES } from '../constants/files.js';
+import { StatType, FileData } from '../types/Files.js';
+import { FileSystemError } from '../models/FileSystemError.js';
 
 export function getFileInfoAsync(dir: string, file: string): Promise<FileData> {
   return new Promise((resolve, reject) => {

@@ -1,15 +1,15 @@
 import findup from 'findup-sync';
 import fs from 'fs-extra';
 
-import { getCwd } from '../lib/path';
+import { getCwd } from '../lib/path.js';
 import {
   DEFAULT_ACCOUNT_OVERRIDE_ERROR_INVALID_ID,
   DEFAULT_ACCOUNT_OVERRIDE_ERROR_ACCOUNT_NOT_FOUND,
   DEFAULT_ACCOUNT_OVERRIDE_FILE_NAME,
-} from '../constants/config';
-import { i18n } from '../utils/lang';
-import { FileSystemError } from '../models/FileSystemError';
-import { getAllConfigAccounts } from './index';
+} from '../constants/config.js';
+import { i18n } from '../utils/lang.js';
+import { FileSystemError } from '../models/FileSystemError.js';
+import { getAllConfigAccounts } from './index.js';
 
 const i18nKey = 'config.defaultAccountOverride';
 

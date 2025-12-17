@@ -1,18 +1,18 @@
 import fs from 'fs-extra';
 import path from 'path';
 import findup from 'findup-sync';
-import { getCwd } from '../path';
-import { fetchFileFromRepository } from '../github';
-import { logger } from '../logger';
-import { i18n } from '../../utils/lang';
-import { FileSystemError } from '../../models/FileSystemError';
+import { getCwd } from '../path.js';
+import { fetchFileFromRepository } from '../github.js';
+import { logger } from '../logger.js';
+import { i18n } from '../../utils/lang.js';
+import { FileSystemError } from '../../models/FileSystemError.js';
 
 import {
   FunctionConfig,
   FunctionConfigInfo,
   FunctionInfo,
   FunctionOptions,
-} from '../../types/Functions';
+} from '../../types/Functions.js';
 const i18nKey = 'lib.cms.functions';
 
 export function isObjectOrFunction(value: object): boolean {

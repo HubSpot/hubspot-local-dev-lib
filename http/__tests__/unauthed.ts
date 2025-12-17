@@ -1,25 +1,33 @@
-import { httpClient } from '../client';
-import { getConfig as __getConfig } from '../../config';
-import { http } from '../unauthed';
-import { version } from '../../package.json';
+import { vi, describe, it, expect, MockedFunction } from 'vitest';
 
-jest.mock('../client');
-jest.mock('../../config');
+import { httpClient } from '../client.js';
+import { getConfig as __getConfig } from '../../config/index.js';
+import { http } from '../unauthed.js';
+import pkg from '../../package.json' with { type: 'json' };
 
-jest.mock('http', () => ({
-  Agent: jest.fn().mockReturnValue({
-    options: { keepAlive: true, maxSockets: 5, maxTotalSockets: 25 },
-  }),
+vi.mock('../client');
+vi.mock('../../config');
+
+vi.mock('axios');
+
+vi.mock('http', () => ({
+  default: {
+    Agent: vi.fn().mockReturnValue({
+      options: { keepAlive: true, maxSockets: 5, maxTotalSockets: 25 },
+    }),
+  },
 }));
 
-jest.mock('https', () => ({
-  Agent: jest.fn().mockReturnValue({
-    options: { keepAlive: true, maxSockets: 6, maxTotalSockets: 26 },
-  }),
+vi.mock('https', () => ({
+  default: {
+    Agent: vi.fn().mockReturnValue({
+      options: { keepAlive: true, maxSockets: 6, maxTotalSockets: 26 },
+    }),
+  },
 }));
 
-const mockedAxios = jest.mocked(httpClient);
-const getConfig = __getConfig as jest.MockedFunction<typeof __getConfig>;
+const mockedAxios = vi.mocked(httpClient);
+const getConfig = __getConfig as MockedFunction<typeof __getConfig>;
 
 describe('http/index', () => {
   describe('http.get()', () => {
@@ -37,7 +45,7 @@ describe('http/index', () => {
         baseURL: `https://api.hubapiqa.com`,
         url: 'some/endpoint/path',
         headers: {
-          'User-Agent': `HubSpot Local Dev Lib/${version}`,
+          'User-Agent': `HubSpot Local Dev Lib/${pkg.version}`,
         },
         timeout: 15000,
         params: {},

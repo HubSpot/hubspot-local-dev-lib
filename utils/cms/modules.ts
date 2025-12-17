@@ -1,8 +1,8 @@
 import path from 'path';
-import { getExt, splitHubSpotPath, splitLocalPath } from '../../lib/path';
-import { MODULE_EXTENSION } from '../../constants/extensions';
-import { PathInput } from '../../types/Modules';
-import { i18n } from '../lang';
+import { getExt, splitHubSpotPath, splitLocalPath } from '../../lib/path.js';
+import { MODULE_EXTENSION } from '../../constants/extensions.js';
+import { PathInput } from '../../types/Modules.js';
+import { i18n } from '../lang.js';
 const i18nKey = 'utils.cms.modules';
 
 const isBool = (x: boolean | undefined) => !!x === x;

@@ -1,28 +1,28 @@
 import findup from 'findup-sync';
-import { getHubSpotWebsiteOrigin } from '../urls';
-import { getThemeJSONPath, getThemePreviewUrl } from '../cms/themes';
-import { getConfigAccountEnvironment } from '../../config';
-import { ENVIRONMENTS } from '../../constants/environments';
+import { vi, MockedFunction } from 'vitest';
+import { getHubSpotWebsiteOrigin } from '../urls.js';
+import { getThemeJSONPath, getThemePreviewUrl } from '../cms/themes.js';
+import { getConfigAccountEnvironment } from '../../config/index.js';
+import { ENVIRONMENTS } from '../../constants/environments.js';
 
-jest.mock('findup-sync');
-jest.mock('../urls');
-jest.mock('../../config');
-jest.mock('../../constants/environments', () => ({
+vi.mock('findup-sync');
+vi.mock('../urls');
+vi.mock('../../config');
+vi.mock('../../constants/environments', () => ({
   ENVIRONMENTS: {
     PROD: 'https://prod.hubspot.com',
     QA: 'https://qa.hubspot.com',
   },
 }));
 
-const mockedFindup = findup as jest.MockedFunction<typeof findup>;
+const mockedFindup = findup as MockedFunction<typeof findup>;
 const mockedGetConfigAccountEnvironment =
-  getConfigAccountEnvironment as jest.MockedFunction<
+  getConfigAccountEnvironment as MockedFunction<
     typeof getConfigAccountEnvironment
   >;
-const mockedGetHubSpotWebsiteOrigin =
-  getHubSpotWebsiteOrigin as jest.MockedFunction<
-    typeof getHubSpotWebsiteOrigin
-  >;
+const mockedGetHubSpotWebsiteOrigin = getHubSpotWebsiteOrigin as MockedFunction<
+  typeof getHubSpotWebsiteOrigin
+>;
 
 describe('lib/cms/themes', () => {
   describe('getThemeJSONPath', () => {

@@ -1,3 +1,12 @@
+import {
+  vi,
+  describe,
+  it,
+  expect,
+  afterEach,
+  MockedFunction,
+  Mocked,
+} from 'vitest';
 import findup from 'findup-sync';
 import fs from 'fs-extra';
 import yaml from 'js-yaml';
@@ -50,15 +59,15 @@ import * as utils from '../utils';
 import { CmsPublishMode } from '../../types/Files';
 import { i18n } from '../../utils/lang';
 
-jest.mock('findup-sync');
-jest.mock('../../lib/path');
-jest.mock('fs-extra');
-jest.mock('../defaultAccountOverride');
+vi.mock('findup-sync');
+vi.mock('../../lib/path');
+vi.mock('fs-extra');
+vi.mock('../defaultAccountOverride');
 
-const mockFindup = findup as jest.MockedFunction<typeof findup>;
-const mockFs = fs as jest.Mocked<typeof fs>;
+const mockFindup = findup as MockedFunction<typeof findup>;
+const mockFs = fs as Mocked<typeof fs>;
 const mockGetDefaultAccountOverrideAccountId =
-  getDefaultAccountOverrideAccountId as jest.MockedFunction<
+  getDefaultAccountOverrideAccountId as MockedFunction<
     typeof getDefaultAccountOverrideAccountId
   >;
 
@@ -117,13 +126,13 @@ function cleanup() {
   mockFs.writeFileSync.mockReset();
   mockFs.unlinkSync.mockReset();
   mockFindup.mockReset();
-  jest.restoreAllMocks();
+  vi.restoreAllMocks();
 }
 
 function mockConfig(config = CONFIG) {
   mockFs.existsSync.mockReturnValue(true);
   mockFs.readFileSync.mockReturnValueOnce('test-config-content');
-  jest.spyOn(utils, 'parseConfig').mockReturnValueOnce(structuredClone(config));
+  vi.spyOn(utils, 'parseConfig').mockReturnValueOnce(structuredClone(config));
 }
 
 describe('config/index', () => {
@@ -294,9 +303,9 @@ describe('config/index', () => {
     it('deletes the config file if it is empty', () => {
       mockFs.existsSync.mockReturnValue(true);
       mockFs.readFileSync.mockReturnValueOnce(yaml.dump({ accounts: [] }));
-      jest
-        .spyOn(utils, 'parseConfig')
-        .mockReturnValueOnce({ accounts: [] } as HubSpotConfig);
+      vi.spyOn(utils, 'parseConfig').mockReturnValueOnce({
+        accounts: [],
+      } as HubSpotConfig);
       deleteConfigFileIfEmpty();
 
       expect(mockFs.unlinkSync).toHaveBeenCalledWith(getConfigFilePath());
@@ -305,9 +314,9 @@ describe('config/index', () => {
     it('does not delete the config file if it is not empty', () => {
       mockFs.existsSync.mockReturnValue(true);
       mockFs.readFileSync.mockReturnValueOnce(yaml.dump(CONFIG));
-      jest
-        .spyOn(utils, 'parseConfig')
-        .mockReturnValueOnce(structuredClone(CONFIG));
+      vi.spyOn(utils, 'parseConfig').mockReturnValueOnce(
+        structuredClone(CONFIG)
+      );
       deleteConfigFileIfEmpty();
 
       expect(mockFs.unlinkSync).not.toHaveBeenCalled();

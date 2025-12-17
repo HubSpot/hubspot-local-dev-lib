@@ -1,8 +1,8 @@
-import { OAuth2Manager } from '../models/OAuth2Manager';
-import { OAuthConfigAccount } from '../types/Accounts';
-import { logger } from './logger';
-import { updateConfigAccount } from '../config';
-import { i18n } from '../utils/lang';
+import { OAuth2Manager } from '../models/OAuth2Manager.js';
+import { OAuthConfigAccount } from '../types/Accounts.js';
+import { logger } from './logger.js';
+import { updateConfigAccount } from '../config/index.js';
+import { i18n } from '../utils/lang.js';
 
 const i18nKey = 'lib.oauth';
 

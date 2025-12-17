@@ -1,4 +1,4 @@
-import { shouldIgnoreFile } from '../ignoreRules';
+import { shouldIgnoreFile } from '../ignoreRules.js';
 
 const CWD = '/Path/To/My/Repo';
 const REPO_FOLDER = `${CWD}/repo-name-here`;

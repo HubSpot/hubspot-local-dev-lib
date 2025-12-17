@@ -1,16 +1,16 @@
 import axios from 'axios';
 import moment from 'moment';
 
-import { getHubSpotApiOrigin } from '../lib/urls';
-import { getValidEnv } from '../lib/environment';
+import { getHubSpotApiOrigin } from '../lib/urls.js';
+import { getValidEnv } from '../lib/environment.js';
 import {
   OAuthConfigAccount,
   WriteTokenInfoFunction,
   RefreshTokenResponse,
   ExchangeProof,
-} from '../types/Accounts';
-import { logger } from '../lib/logger';
-import { i18n } from '../utils/lang';
+} from '../types/Accounts.js';
+import { logger } from '../lib/logger.js';
+import { i18n } from '../utils/lang.js';
 
 const i18nKey = 'models.OAuth2Manager';
 

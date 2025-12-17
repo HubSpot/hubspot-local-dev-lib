@@ -1,16 +1,16 @@
-import { getAxiosConfig } from '../http/getAxiosConfig';
-import { http } from '../http';
-import { ENVIRONMENTS } from '../constants/environments';
-import { Environment } from '../types/Config';
+import { getAxiosConfig } from '../http/getAxiosConfig.js';
+import { http } from '../http/index.js';
+import { ENVIRONMENTS } from '../constants/environments.js';
+import { Environment } from '../types/Config.js';
 import {
   ScopeData,
   AccessTokenResponse,
   EnabledFeaturesResponse,
   ScopeAuthorizationResponse,
-} from '../types/Accounts';
-import { httpClient } from '../http/client';
-import { PublicAppInstallationData } from '../types/Apps';
-import { HubSpotPromise } from '../types/Http';
+} from '../types/Accounts.js';
+import { httpClient } from '../http/client.js';
+import { PublicAppInstallationData } from '../types/Apps.js';
+import { HubSpotPromise } from '../types/Http.js';
 
 const LOCALDEVAUTH_API_AUTH_PATH = 'localdevauth/v1/auth';
 

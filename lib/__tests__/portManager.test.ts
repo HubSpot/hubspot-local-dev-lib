@@ -1,5 +1,6 @@
-import { MAX_PORT_NUMBER } from '../../constants/ports';
-import { PortManagerServer } from '../../utils/PortManagerServer';
+import { vi, describe, it, expect, beforeEach, Mocked } from 'vitest';
+import { MAX_PORT_NUMBER } from '../../constants/ports.js';
+import { PortManagerServer } from '../../utils/PortManagerServer.js';
 import {
   deleteServerInstance,
   getActiveServers,
@@ -9,33 +10,35 @@ import {
   requestPorts,
   startPortManagerServer,
   stopPortManagerServer,
-} from '../portManager';
+} from '../portManager.js';
 
 import _axios from 'axios';
 
 // Mock the PortManagerServer
-jest.mock('../../utils/PortManagerServer', () => ({
+vi.mock('../../utils/PortManagerServer', () => ({
   PortManagerServer: {
     server: undefined,
     serverPortMap: {},
-    init: jest.fn(),
-    portAvailable: jest.fn(),
+    init: vi.fn(),
+    portAvailable: vi.fn(),
   },
   HEALTH_CHECK_PATH: '/port-manager-health-check',
   SERVICE_HEALTHY: 'OK',
 }));
 
 // Mock axios for HTTP requests
-jest.mock('axios', () => ({
-  get: jest.fn(),
-  post: jest.fn(),
-  delete: jest.fn(),
+vi.mock('axios', () => ({
+  default: {
+    get: vi.fn(),
+    post: vi.fn(),
+    delete: vi.fn(),
+  },
 }));
 
-const mockedPortManagerServer = PortManagerServer as jest.Mocked<
+const mockedPortManagerServer = PortManagerServer as Mocked<
   typeof PortManagerServer
 >;
-const axios = _axios as jest.Mocked<typeof _axios>;
+const axios = _axios as Mocked<typeof _axios>;
 
 const INSTANCE_ID_1 = 'test1';
 const INSTANCE_ID_2 = 'test2';
@@ -67,7 +70,7 @@ const BAD_PORT_DATA = [
 
 describe('lib/portManager', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockedPortManagerServer.server = undefined;
     mockedPortManagerServer.serverPortMap = {};
   });
@@ -149,7 +152,6 @@ describe('lib/portManager', () => {
 
   describe('requestPorts()', () => {
     beforeEach(() => {
-      // @ts-expect-error partial mock
       mockedPortManagerServer.server = {}; // Mock running server
     });
 
@@ -227,7 +229,6 @@ describe('lib/portManager', () => {
 
   describe('deleteServerInstance()', () => {
     beforeEach(() => {
-      // @ts-expect-error partial mock
       mockedPortManagerServer.server = {}; // Mock running server
     });
 
@@ -251,7 +252,6 @@ describe('lib/portManager', () => {
 
   describe('portManagerHasActiveServers()', () => {
     beforeEach(() => {
-      // @ts-expect-error partial mock
       mockedPortManagerServer.server = {}; // Mock running server
     });
 
@@ -292,7 +292,6 @@ describe('lib/portManager', () => {
 
   describe('getActiveServers()', () => {
     beforeEach(() => {
-      // @ts-expect-error partial mock
       mockedPortManagerServer.server = {}; // Mock running server
     });
 
@@ -318,7 +317,6 @@ describe('lib/portManager', () => {
 
   describe('getServerPortByInstanceId()', () => {
     beforeEach(() => {
-      // @ts-expect-error partial mock
       mockedPortManagerServer.server = {}; // Mock running server
     });
 

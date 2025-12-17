@@ -1,8 +1,8 @@
-import { version } from '../package.json';
-import { getConfig } from '../config';
-import { getHubSpotApiOrigin } from '../lib/urls';
-import { HttpOptions } from '../types/Http';
-import { HubSpotConfig } from '../types/Config';
+import pkg from '../package.json' with { type: 'json' };
+import { getConfig } from '../config/index.js';
+import { getHubSpotApiOrigin } from '../lib/urls.js';
+import { HttpOptions } from '../types/Http.js';
+import { HubSpotConfig } from '../types/Config.js';
 import { AxiosRequestConfig } from 'axios';
 import http, { Agent } from 'http';
 import https from 'https';
@@ -67,7 +67,7 @@ function getHttpsProxyAgent(): HttpsProxyAgent<string> | Agent {
 }
 
 export const USER_AGENTS: { [key: string]: string } = {
-  'HubSpot Local Dev Lib': version,
+  'HubSpot Local Dev Lib': pkg.version,
 };
 
 export function getDefaultUserAgentHeader(): { 'User-Agent': string } {

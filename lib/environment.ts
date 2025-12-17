@@ -1,5 +1,5 @@
-import { ENVIRONMENTS } from '../constants/environments';
-import { Environment } from '../types/Config';
+import { ENVIRONMENTS } from '../constants/environments.js';
+import { Environment } from '../types/Config.js';
 
 export function getValidEnv(
   env?: string | null,
@@ -11,9 +11,7 @@ export function getValidEnv(
       : ENVIRONMENTS.PROD;
 
   const returnVal =
-    typeof env &&
-    typeof env === 'string' &&
-    env.toLowerCase() === ENVIRONMENTS.QA
+    env && typeof env === 'string' && env.toLowerCase() === ENVIRONMENTS.QA
       ? ENVIRONMENTS.QA
       : prodValue;
 
