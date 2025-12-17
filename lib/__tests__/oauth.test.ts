@@ -1,4 +1,4 @@
-import { vi } from 'vitest';
+import { vi, describe, it, expect } from 'vitest';
 import { addOauthToAccountConfig, getOauthManager } from '../oauth.js';
 
 vi.mock('../../config');
@@ -13,7 +13,9 @@ import { AUTH_METHODS } from '../../constants/auth';
 import { logger } from '../logger';
 import { HubSpotConfigAccount } from '../../types/Accounts';
 
-const UnmockedOAuth2Manager = vi.requireActual('../../models/OAuth2Manager');
+const UnmockedOAuth2Manager = await vi.importActual<typeof OAuth2ManagerModule>(
+  '../../models/OAuth2Manager'
+);
 const OAuth2Manager = UnmockedOAuth2Manager.OAuth2Manager;
 
 const OAuth2ManagerMock = vi.spyOn(OAuth2ManagerModule, 'OAuth2Manager');

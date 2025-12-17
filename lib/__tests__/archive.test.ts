@@ -1,11 +1,20 @@
-import os from 'os';
+import { vi, describe, it, expect, beforeEach, Mock } from 'vitest';
+
+const { osTmpDirMock, osHomeDirMock } = vi.hoisted(() => ({
+  osTmpDirMock: vi.fn(() => '/tmp'),
+  osHomeDirMock: vi.fn(() => '/home/user'),
+}));
 
 vi.mock('fs-extra');
 vi.mock('extract-zip');
-vi.mock('os', () => ({
-  tmpdir: vi.fn(() => '/tmp'),
-  homedir: vi.fn(() => '/home/user'),
-}));
+vi.mock('os', async importOriginal => {
+  const actual = await importOriginal<typeof import('os')>();
+  return {
+    ...actual,
+    tmpdir: osTmpDirMock,
+    homedir: osHomeDirMock,
+  };
+});
 vi.mock('../logger');
 vi.mock('../fs');
 
@@ -14,12 +23,10 @@ import { logger } from '../logger.js';
 import fs from 'fs-extra';
 import extract from 'extract-zip';
 import { walk } from '../fs.js';
-import { vi } from 'vitest';
 
 const writeFileMock = vi.mocked(fs.writeFile);
 const makeDirMock = vi.mocked(fs.mkdtemp);
 const readDirMock = vi.mocked(fs.readdir);
-const osTmpDirMock = vi.mocked(os.tmpdir);
 const extractMock = vi.mocked(extract);
 const fsCopyMock = vi.mocked(fs.copy);
 const fsRemoveMock = vi.mocked(fs.remove);

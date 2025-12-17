@@ -1,21 +1,37 @@
-import { vi, describe, it, expect, beforeEach } from 'vitest';
-import fs from 'fs';
+import { vi, describe, it, expect, beforeEach, afterEach, Mock } from 'vitest';
 import path from 'path';
-import { getStateValue, setStateValue } from '../state';
 import { STATE_FILE_PATH } from '../../constants/config';
 
 vi.mock('../../utils/lang', () => ({
   i18n: vi.fn((key: string) => key),
 }));
 
-const existsSyncSpy = vi.spyOn(fs, 'existsSync');
-const readFileSyncSpy = vi.spyOn(fs, 'readFileSync');
-const writeFileSyncSpy = vi.spyOn(fs, 'writeFileSync');
-const mkdirSyncSpy = vi.spyOn(fs, 'mkdirSync');
+vi.mock('fs', async () => {
+  const actual = await vi.importActual<typeof import('fs')>('fs');
+  return {
+    ...actual,
+    existsSync: vi.fn(),
+    readFileSync: vi.fn(),
+    writeFileSync: vi.fn(),
+    mkdirSync: vi.fn(),
+  };
+});
+
+import * as fs from 'fs';
+import { getStateValue, setStateValue } from '../state';
+
+const existsSyncSpy = fs.existsSync as unknown as Mock;
+const readFileSyncSpy = fs.readFileSync as unknown as Mock;
+const writeFileSyncSpy = fs.writeFileSync as unknown as Mock;
+const mkdirSyncSpy = fs.mkdirSync as unknown as Mock;
 
 describe('config/state', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   describe('getStateValue()', () => {
