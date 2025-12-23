@@ -18,10 +18,7 @@ import {
   addConfigAccount,
   setConfigAccountAsDefault,
 } from '../config';
-import {
-  ENVIRONMENT_VARIABLES,
-  HUBSPOT_ACCOUNT_TYPES,
-} from '../constants/config';
+import { HUBSPOT_ACCOUNT_TYPES } from '../constants/config';
 import { fetchDeveloperTestAccountData } from '../api/developerTestAccounts';
 import { logger } from './logger';
 import { i18n } from '../utils/lang';
@@ -71,17 +68,15 @@ async function refreshAccessToken(
   );
   const { accessToken, expiresAt } = accessTokenResponse;
 
-  if (!process.env[ENVIRONMENT_VARIABLES.USE_ENVIRONMENT_HUBSPOT_CONFIG]) {
-    updateConfigAccount({
-      ...account,
-      auth: {
-        tokenInfo: {
-          accessToken,
-          expiresAt: expiresAt,
-        },
+  updateConfigAccount({
+    ...account,
+    auth: {
+      tokenInfo: {
+        accessToken,
+        expiresAt: expiresAt,
       },
-    });
-  }
+    },
+  });
 
   return accessTokenResponse;
 }
