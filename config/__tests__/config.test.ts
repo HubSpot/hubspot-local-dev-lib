@@ -155,6 +155,14 @@ describe('config/index', () => {
       const localConfigPath = getLocalConfigFilePathIfExists();
       expect(localConfigPath).toBeNull();
     });
+
+    it('returns the nearest config file path when cwd is provided', () => {
+      const mockConfigPath = '/mock/path/hubspot.config.yml';
+      mockFindup.mockReturnValue(mockConfigPath);
+
+      const localConfigPath = getLocalConfigFilePathIfExists('/mock/path');
+      expect(localConfigPath).toBe(mockConfigPath);
+    });
   });
 
   describe('localConfigFileExists()', () => {
@@ -432,6 +440,18 @@ describe('config/index', () => {
       mockConfig();
 
       expect(() => updateConfigAccount(OAUTH_ACCOUNT)).toThrow();
+    });
+
+    it('skips updating config file when using environment variables', () => {
+      mockConfig();
+      process.env[ENVIRONMENT_VARIABLES.USE_ENVIRONMENT_HUBSPOT_CONFIG] =
+        'true';
+
+      const newAccount = { ...PAK_ACCOUNT, name: 'new-name' };
+
+      updateConfigAccount(newAccount);
+
+      expect(mockFs.writeFileSync).not.toHaveBeenCalled();
     });
   });
 

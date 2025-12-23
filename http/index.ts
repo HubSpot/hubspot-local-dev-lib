@@ -1,12 +1,7 @@
 import path from 'path';
 import fs from 'fs-extra';
 import contentDisposition from 'content-disposition';
-import axios, {
-  AxiosRequestConfig,
-  AxiosResponse,
-  AxiosPromise,
-  isAxiosError,
-} from 'axios';
+import { AxiosRequestConfig, AxiosResponse, AxiosPromise } from 'axios';
 
 import { getConfigAccountById } from '../config';
 import { USER_AGENTS, getAxiosConfig } from './getAxiosConfig';
@@ -16,78 +11,15 @@ import { getOauthManager } from '../lib/oauth';
 import { HttpOptions, HubSpotPromise } from '../types/Http';
 import { logger } from '../lib/logger';
 import { i18n } from '../utils/lang';
-import { HubSpotHttpError } from '../models/HubSpotHttpError';
 import { OAuthConfigAccount } from '../types/Accounts';
 import {
   PERSONAL_ACCESS_KEY_AUTH_METHOD,
   OAUTH_AUTH_METHOD,
   API_KEY_AUTH_METHOD,
 } from '../constants/auth';
-import { LOCALDEVAUTH_ACCESS_TOKEN_PATH } from '../api/localDevAuth';
-import * as util from 'util';
-import { CMS_CLI_USAGE_PATH, VSCODE_USAGE_PATH } from '../lib/trackUsage';
+import { httpClient } from './client';
 
 const i18nKey = 'http.index';
-
-const IGNORE_URLS_NETWORK_DEBUG = [
-  LOCALDEVAUTH_ACCESS_TOKEN_PATH,
-  CMS_CLI_USAGE_PATH,
-  VSCODE_USAGE_PATH,
-];
-
-function logRequest(response: AxiosResponse) {
-  try {
-    if (!process.env.HUBSPOT_NETWORK_LOGGING) {
-      return;
-    }
-
-    if (
-      response?.config?.url &&
-      IGNORE_URLS_NETWORK_DEBUG.includes(response.config.url)
-    ) {
-      return;
-    }
-
-    logger.debug(
-      util.inspect(
-        {
-          method: response.config.method,
-          baseURL: response.config.baseURL,
-          url: response.config.url,
-          data: response.data,
-          status: response.status,
-        },
-        false,
-        null,
-        true
-      )
-    );
-  } catch (error) {
-    // Ignore any errors that occur while logging the response
-  }
-}
-
-axios.interceptors.response.use(
-  (response: AxiosResponse) => {
-    logRequest(response);
-    return response;
-  },
-  error => {
-    try {
-      if (isAxiosError(error) && error.response) {
-        logRequest(error.response);
-      }
-    } catch (e) {
-      // Ignore any errors that occur while logging the response
-    }
-
-    // Wrap all axios errors in our own Error class.  Attach the error
-    // as the cause for the new error, so we maintain the stack trace
-    return Promise.reject(
-      new HubSpotHttpError(error.message, { cause: error })
-    );
-  }
-);
 
 export function addUserAgentHeader(key: string, value: string) {
   USER_AGENTS[key] = value;
@@ -194,7 +126,7 @@ async function getRequest<T>(
   const optionsWithParams = addQueryParams(rest, params);
   const requestConfig = await withAuth(accountId, optionsWithParams);
 
-  return axios<T>(requestConfig);
+  return httpClient<T>(requestConfig);
 }
 
 async function postRequest<T>(
@@ -202,7 +134,7 @@ async function postRequest<T>(
   options: HttpOptions
 ): HubSpotPromise<T> {
   const requestConfig = await withAuth(accountId, options);
-  return axios<T>({ ...requestConfig, method: 'post' });
+  return httpClient<T>({ ...requestConfig, method: 'post' });
 }
 
 async function putRequest<T>(
@@ -210,7 +142,7 @@ async function putRequest<T>(
   options: HttpOptions
 ): HubSpotPromise<T> {
   const requestConfig = await withAuth(accountId, options);
-  return axios<T>({ ...requestConfig, method: 'put' });
+  return httpClient<T>({ ...requestConfig, method: 'put' });
 }
 
 async function patchRequest<T>(
@@ -218,7 +150,7 @@ async function patchRequest<T>(
   options: HttpOptions
 ): HubSpotPromise<T> {
   const requestConfig = await withAuth(accountId, options);
-  return axios<T>({ ...requestConfig, method: 'patch' });
+  return httpClient<T>({ ...requestConfig, method: 'patch' });
 }
 
 async function deleteRequest<T>(
@@ -226,7 +158,7 @@ async function deleteRequest<T>(
   options: HttpOptions
 ): HubSpotPromise<T> {
   const requestConfig = await withAuth(accountId, options);
-  return axios<T>({ ...requestConfig, method: 'delete' });
+  return httpClient<T>({ ...requestConfig, method: 'delete' });
 }
 
 function createGetRequestStream(contentType: string) {
@@ -242,7 +174,7 @@ function createGetRequestStream(contentType: string) {
     return new Promise<AxiosResponse>(async (resolve, reject) => {
       try {
         const { headers, ...opts } = await withAuth(accountId, axiosConfig);
-        const res = await axios({
+        const res = await httpClient({
           method: 'get',
           ...opts,
           headers: {

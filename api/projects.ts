@@ -15,7 +15,11 @@ import {
   ComponentStructureResponse,
   ProjectComponentsMetadata,
 } from '../types/ComponentStructure';
-import { Deploy, ProjectDeployResponse } from '../types/Deploy';
+import {
+  Deploy,
+  ProjectDeployResponse,
+  ProjectDeployResponseV1,
+} from '../types/Deploy';
 import {
   MigrateAppResponse,
   CloneAppResponse,
@@ -183,6 +187,9 @@ export function getBuildStructure(
   });
 }
 
+/**
+ * @deprecated Use the separate deployProjectV1 and deployProjectV2
+ */
 export function deployProject(
   accountId: number,
   projectName: string,
@@ -206,6 +213,38 @@ export function deployProject(
       projectName,
       buildId,
       skipRemovalWarning: force,
+    },
+  });
+}
+
+export function deployProjectV1(
+  accountId: number,
+  projectName: string,
+  buildId: number,
+  force = false
+): HubSpotPromise<ProjectDeployResponseV1> {
+  return http.post<ProjectDeployResponseV1>(accountId, {
+    url: `${PROJECTS_DEPLOY_API_PATH}/deploys/queue/async`,
+    data: {
+      projectName,
+      buildId,
+      skipRemovalWarning: force,
+    },
+  });
+}
+
+export function deployProjectV2(
+  accountId: number,
+  projectName: string,
+  buildId: number,
+  force = false
+): HubSpotPromise<ProjectDeployResponse> {
+  return http.post<ProjectDeployResponse>(accountId, {
+    url: `${PROJECTS_DEPLOY_API_PATH_V3}/deploys/queue/async`,
+    data: {
+      projectName,
+      targetBuildId: buildId,
+      ignoreWarnings: force,
     },
   });
 }

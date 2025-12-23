@@ -6,7 +6,7 @@ import { watch } from '../cms/watch';
 import { CMS_PUBLISH_MODE } from '../../constants/files';
 
 jest.mock('chokidar');
-jest.mock('axios');
+jest.mock('../../http/client');
 jest.mock('p-queue');
 jest.mock('../cms/uploadFolder');
 

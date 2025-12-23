@@ -1,4 +1,4 @@
-import axios from 'axios';
+import { httpClient } from '../http/client';
 import { getAxiosConfig } from '../http/getAxiosConfig';
 import { logger } from './logger';
 import { http } from '../http';
@@ -67,5 +67,10 @@ export async function trackUsage(
     resolveWithFullResponse: true,
   });
   logger.debug(i18n(`${i18nKey}.sendingEventUnauthenticated`));
-  return axios({ ...axiosConfig, method: 'post' });
+
+  try {
+    await httpClient({ ...axiosConfig, method: 'post' });
+  } catch (e) {
+    logger.debug(i18n(`${i18nKey}.unauthenticatedSendFailed`));
+  }
 }

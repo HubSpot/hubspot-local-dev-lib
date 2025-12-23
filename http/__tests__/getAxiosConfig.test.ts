@@ -53,7 +53,9 @@ describe('http/getAxiosConfig', () => {
 describe('hostnameMatchesNoProxyPattern', () => {
   it('matches exact hostname', () => {
     expect(hostnameMatchesNoProxyPattern('localhost', 'localhost')).toBe(true);
-    expect(hostnameMatchesNoProxyPattern('api.hubapi.com', 'api.hubapi.com')).toBe(true);
+    expect(
+      hostnameMatchesNoProxyPattern('api.hubapi.com', 'api.hubapi.com')
+    ).toBe(true);
   });
 
   it('matches wildcard *', () => {
@@ -62,30 +64,54 @@ describe('hostnameMatchesNoProxyPattern', () => {
   });
 
   it('matches domain suffix with leading dot', () => {
-    expect(hostnameMatchesNoProxyPattern('api.hubapi.com', '.hubapi.com')).toBe(true);
-    expect(hostnameMatchesNoProxyPattern('foo.bar.hubapi.com', '.hubapi.com')).toBe(true);
-    expect(hostnameMatchesNoProxyPattern('hubapi.com', '.hubapi.com')).toBe(false);
+    expect(hostnameMatchesNoProxyPattern('api.hubapi.com', '.hubapi.com')).toBe(
+      true
+    );
+    expect(
+      hostnameMatchesNoProxyPattern('foo.bar.hubapi.com', '.hubapi.com')
+    ).toBe(true);
+    expect(hostnameMatchesNoProxyPattern('hubapi.com', '.hubapi.com')).toBe(
+      false
+    );
   });
 
   it('matches domain suffix without leading dot', () => {
-    expect(hostnameMatchesNoProxyPattern('api.hubapi.com', 'hubapi.com')).toBe(true);
-    expect(hostnameMatchesNoProxyPattern('hubapi.com', 'hubapi.com')).toBe(true);
-    expect(hostnameMatchesNoProxyPattern('foo.bar.hubapi.com', 'hubapi.com')).toBe(true);
+    expect(hostnameMatchesNoProxyPattern('api.hubapi.com', 'hubapi.com')).toBe(
+      true
+    );
+    expect(hostnameMatchesNoProxyPattern('hubapi.com', 'hubapi.com')).toBe(
+      true
+    );
+    expect(
+      hostnameMatchesNoProxyPattern('foo.bar.hubapi.com', 'hubapi.com')
+    ).toBe(true);
   });
 
   it('does not match partial hostnames', () => {
-    expect(hostnameMatchesNoProxyPattern('nothubapi.com', 'hubapi.com')).toBe(false);
-    expect(hostnameMatchesNoProxyPattern('api.nothubapi.com', 'hubapi.com')).toBe(false);
+    expect(hostnameMatchesNoProxyPattern('nothubapi.com', 'hubapi.com')).toBe(
+      false
+    );
+    expect(
+      hostnameMatchesNoProxyPattern('api.nothubapi.com', 'hubapi.com')
+    ).toBe(false);
   });
 
   it('is case insensitive', () => {
-    expect(hostnameMatchesNoProxyPattern('API.HUBAPI.COM', 'hubapi.com')).toBe(true);
-    expect(hostnameMatchesNoProxyPattern('api.hubapi.com', 'HUBAPI.COM')).toBe(true);
+    expect(hostnameMatchesNoProxyPattern('API.HUBAPI.COM', 'hubapi.com')).toBe(
+      true
+    );
+    expect(hostnameMatchesNoProxyPattern('api.hubapi.com', 'HUBAPI.COM')).toBe(
+      true
+    );
   });
 
   it('trims whitespace from pattern', () => {
-    expect(hostnameMatchesNoProxyPattern('localhost', '  localhost  ')).toBe(true);
-    expect(hostnameMatchesNoProxyPattern('api.hubapi.com', ' .hubapi.com ')).toBe(true);
+    expect(hostnameMatchesNoProxyPattern('localhost', '  localhost  ')).toBe(
+      true
+    );
+    expect(
+      hostnameMatchesNoProxyPattern('api.hubapi.com', ' .hubapi.com ')
+    ).toBe(true);
   });
 });
 

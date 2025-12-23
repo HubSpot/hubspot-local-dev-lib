@@ -8,6 +8,7 @@ import {
   HUBSPOT_CONFIG_OPERATIONS,
   MIN_HTTP_TIMEOUT,
   HUBSPOT_CONFIG_ERROR_TYPES,
+  ENVIRONMENT_VARIABLES,
 } from '../constants/config';
 import { HubSpotConfigAccount } from '../types/Accounts';
 import {
@@ -46,13 +47,13 @@ export function getGlobalConfigFilePath(): string {
   return GLOBAL_CONFIG_PATH;
 }
 
-export function getLocalConfigFilePathIfExists(): string | null {
+export function getLocalConfigFilePathIfExists(cwd?: string): string | null {
   return findup(
     [
       DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME,
       DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME.replace('.yml', '.yaml'),
     ],
-    { cwd: getCwd() }
+    { cwd: cwd || getCwd() }
   );
 }
 
@@ -390,6 +391,10 @@ export function addConfigAccount(accountToAdd: HubSpotConfigAccount): void {
 export function updateConfigAccount(
   updatedAccount: HubSpotConfigAccount
 ): void {
+  // Skip updating the config file if we're using environment variables
+  if (process.env[ENVIRONMENT_VARIABLES.USE_ENVIRONMENT_HUBSPOT_CONFIG]) {
+    return;
+  }
   if (!validateConfigAccount(updatedAccount)) {
     throw new HubSpotConfigError(
       i18n('config.updateConfigAccount.invalidAccount', {
