@@ -7,6 +7,7 @@ import {
   GLOBAL_CONFIG_PATH,
   HUBSPOT_CONFIG_OPERATIONS,
   MIN_HTTP_TIMEOUT,
+  HUBSPOT_CONFIG_ERROR_TYPES,
   ENVIRONMENT_VARIABLES,
 } from '../constants/config';
 import { HubSpotConfigAccount } from '../types/Accounts';
@@ -37,7 +38,6 @@ import { i18n } from '../utils/lang';
 import { getDefaultAccountOverrideAccountId } from './defaultAccountOverride';
 import { getValidEnv } from '../lib/environment';
 import { HubSpotConfigError } from '../models/HubSpotConfigError';
-import { HUBSPOT_CONFIG_ERROR_TYPES } from '../constants/config';
 import { isDeepEqual } from '../lib/isDeepEqual';
 import { getCwd } from '../lib/path';
 

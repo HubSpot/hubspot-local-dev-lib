@@ -28,18 +28,37 @@ export const DEFAULT_ACCOUNT_OVERRIDE_ERROR_INVALID_ID =
 export const DEFAULT_ACCOUNT_OVERRIDE_ERROR_ACCOUNT_NOT_FOUND =
   'DEFAULT_ACCOUNT_OVERRIDE_ERROR_ACCOUNT_NOT_FOUND';
 
+/**
+ * @deprecated Use CONFIG_FLAGS.DEFAULT_CMS_PUBLISH_MODE instead
+ */
 export const DEFAULT_CMS_PUBLISH_MODE = 'defaultCmsPublishMode';
+/**
+ * @deprecated Use CONFIG_FLAGS.HTTP_TIMEOUT instead
+ */
 export const HTTP_TIMEOUT = 'httpTimeout';
-export const ENV = 'env';
+/**
+ * @deprecated Use CONFIG_FLAGS.HTTP_USE_LOCALHOST instead
+ */
 export const HTTP_USE_LOCALHOST = 'httpUseLocalhost';
+/**
+ * @deprecated Use CONFIG_FLAGS.ALLOW_USAGE_TRACKING instead
+ */
 export const ALLOW_USAGE_TRACKING = 'allowUsageTracking';
+/**
+ * @deprecated Use CONFIG_FLAGS.AUTO_OPEN_BROWSER instead
+ */
 export const AUTO_OPEN_BROWSER = 'autoOpenBrowser';
+/**
+ * @deprecated Use CONFIG_FLAGS.ALLOW_AUTO_UPDATES instead
+ */
 export const ALLOW_AUTO_UPDATES = 'allowAutoUpdates';
+export const ENV = 'env';
 export const DEFAULT_ACCOUNT = 'defaultAccount';
 export const DEFAULT_PORTAL = 'defaultPortal';
-
 export const MIN_HTTP_TIMEOUT = 3000;
-
+/**
+ * @deprecated Use STATE_FLAGS.MCP_TOTAL_TOOL_CALLS instead
+ */
 export const MCP_TOTAL_TOOL_CALLS_STATE = 'mcpTotalToolCalls';
 
 export const HUBSPOT_ACCOUNT_TYPES = {
@@ -58,9 +77,18 @@ export const HUBSPOT_ACCOUNT_TYPE_STRINGS = {
   STANDARD: i18n('lib.accountTypes.standard'),
 } as const;
 
+export const STATE_FLAGS = {
+  MCP_TOTAL_TOOL_CALLS: 'mcpTotalToolCalls',
+} as const;
+
 export const CONFIG_FLAGS = {
+  DEFAULT_CMS_PUBLISH_MODE: 'defaultCmsPublishMode',
   USE_CUSTOM_OBJECT_HUBFILE: 'useCustomObjectHubfile',
   HTTP_USE_LOCALHOST: 'httpUseLocalhost',
+  HTTP_TIMEOUT: 'httpTimeout',
+  ALLOW_AUTO_UPDATES: 'allowAutoUpdates',
+  ALLOW_USAGE_TRACKING: 'allowUsageTracking',
+  AUTO_OPEN_BROWSER: 'autoOpenBrowser',
 } as const;
 
 export const ENVIRONMENT_VARIABLES = {
