@@ -392,7 +392,7 @@ export function updateConfigAccount(
   updatedAccount: HubSpotConfigAccount
 ): void {
   // Skip updating the config file if we're using environment variables
-  if (!process.env[ENVIRONMENT_VARIABLES.USE_ENVIRONMENT_HUBSPOT_CONFIG]) {
+  if (process.env[ENVIRONMENT_VARIABLES.USE_ENVIRONMENT_HUBSPOT_CONFIG]) {
     return;
   }
   if (!validateConfigAccount(updatedAccount)) {
