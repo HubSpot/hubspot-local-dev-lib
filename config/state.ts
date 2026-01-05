@@ -4,12 +4,12 @@ import { i18n } from '../utils/lang.js';
 import { STATE_FILE_PATH } from '../constants/config.js';
 import { logger } from '../lib/logger.js';
 import { HubSpotState } from '../types/Config.js';
-import { MCP_TOTAL_TOOL_CALLS_STATE } from '../constants/config.js';
+import { STATE_FLAGS } from '../constants/config.js';
 
 const i18nKey = 'config.state';
 
 const DEFAULT_STATE: HubSpotState = {
-  [MCP_TOTAL_TOOL_CALLS_STATE]: 0,
+  [STATE_FLAGS.MCP_TOTAL_TOOL_CALLS]: 0,
 };
 
 function ensureCLIDirectory(): void {

@@ -3,15 +3,10 @@ import fs from 'fs';
 import { HubSpotConfig } from '../types/Config.js';
 import { createEmptyConfigFile, getGlobalConfigFilePath } from './index.js';
 import {
-  DEFAULT_CMS_PUBLISH_MODE,
-  HTTP_TIMEOUT,
   ENV,
-  HTTP_USE_LOCALHOST,
-  ALLOW_USAGE_TRACKING,
   DEFAULT_ACCOUNT,
-  AUTO_OPEN_BROWSER,
-  ALLOW_AUTO_UPDATES,
   ARCHIVED_HUBSPOT_CONFIG_YAML_FILE_NAME,
+  CONFIG_FLAGS,
 } from '../constants/config.js';
 import { parseConfig, readConfigFile, writeConfigFile } from './utils.js';
 import { ValueOf } from '../types/Utils.js';
@@ -77,13 +72,13 @@ export function mergeConfigProperties(
     toConfig.defaultAccount ||= fromConfig.defaultAccount;
 
     const propertiesToCheck = [
-      DEFAULT_CMS_PUBLISH_MODE,
-      HTTP_TIMEOUT,
+      CONFIG_FLAGS.DEFAULT_CMS_PUBLISH_MODE,
+      CONFIG_FLAGS.HTTP_TIMEOUT,
+      CONFIG_FLAGS.HTTP_USE_LOCALHOST,
+      CONFIG_FLAGS.ALLOW_USAGE_TRACKING,
+      CONFIG_FLAGS.AUTO_OPEN_BROWSER,
+      CONFIG_FLAGS.ALLOW_AUTO_UPDATES,
       ENV,
-      HTTP_USE_LOCALHOST,
-      ALLOW_USAGE_TRACKING,
-      AUTO_OPEN_BROWSER,
-      ALLOW_AUTO_UPDATES,
       DEFAULT_ACCOUNT,
     ] as const;
 

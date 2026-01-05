@@ -13,11 +13,8 @@ import {
 import { HubSpotConfig } from '../../types/Config';
 import { readConfigFile, writeConfigFile } from '../utils';
 import {
-  DEFAULT_CMS_PUBLISH_MODE,
-  HTTP_TIMEOUT,
+  CONFIG_FLAGS,
   ENV,
-  HTTP_USE_LOCALHOST,
-  ALLOW_USAGE_TRACKING,
   DEFAULT_ACCOUNT,
   ARCHIVED_HUBSPOT_CONFIG_YAML_FILE_NAME,
 } from '../../constants/config';
@@ -145,12 +142,12 @@ describe('config/migrate', () => {
       expect(result.configWithMergedProperties).toEqual(toConfig);
       expect(result.conflicts).toHaveLength(6);
       expect(result.conflicts).toContainEqual({
-        property: DEFAULT_CMS_PUBLISH_MODE,
+        property: CONFIG_FLAGS.DEFAULT_CMS_PUBLISH_MODE,
         oldValue: 'draft',
         newValue: 'publish',
       });
       expect(result.conflicts).toContainEqual({
-        property: HTTP_TIMEOUT,
+        property: CONFIG_FLAGS.HTTP_TIMEOUT,
         oldValue: 5000,
         newValue: 3000,
       });
@@ -160,12 +157,12 @@ describe('config/migrate', () => {
         newValue: ENVIRONMENTS.QA,
       });
       expect(result.conflicts).toContainEqual({
-        property: HTTP_USE_LOCALHOST,
+        property: CONFIG_FLAGS.HTTP_USE_LOCALHOST,
         oldValue: false,
         newValue: true,
       });
       expect(result.conflicts).toContainEqual({
-        property: ALLOW_USAGE_TRACKING,
+        property: CONFIG_FLAGS.ALLOW_USAGE_TRACKING,
         oldValue: true,
         newValue: false,
       });

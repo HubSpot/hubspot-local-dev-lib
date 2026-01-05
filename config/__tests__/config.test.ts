@@ -450,6 +450,18 @@ describe('config/index', () => {
 
       expect(() => updateConfigAccount(OAUTH_ACCOUNT)).toThrow();
     });
+
+    it('skips updating config file when using environment variables', () => {
+      mockConfig();
+      process.env[ENVIRONMENT_VARIABLES.USE_ENVIRONMENT_HUBSPOT_CONFIG] =
+        'true';
+
+      const newAccount = { ...PAK_ACCOUNT, name: 'new-name' };
+
+      updateConfigAccount(newAccount);
+
+      expect(mockFs.writeFileSync).not.toHaveBeenCalled();
+    });
   });
 
   describe('setConfigAccountAsDefault()', () => {
