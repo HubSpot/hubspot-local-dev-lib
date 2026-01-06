@@ -2,12 +2,14 @@ import fs from 'fs-extra';
 import os from 'os';
 import path from 'path';
 import { fork } from 'child_process';
+import { fileURLToPath } from 'url';
 import { escapeRegExp } from '../escapeRegExp.js';
 import { isModuleFolderChild } from '../../utils/cms/modules.js';
 import { logger } from '../logger.js';
 import { BaseError } from '../../types/Error.js';
 import { i18n } from '../../utils/lang.js';
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const i18nKey = 'lib.cms.handleFieldsJs';
 
 export class FieldsJs {
