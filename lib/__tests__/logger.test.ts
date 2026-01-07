@@ -1,4 +1,5 @@
 import chalk from 'chalk';
+import { vi, MockInstance } from 'vitest';
 import {
   Styles,
   stylize,
@@ -7,7 +8,7 @@ import {
   LOG_LEVEL,
   logger,
   shouldLog,
-} from '../logger';
+} from '../logger.js';
 
 describe('lib/logger', () => {
   afterEach(() => {
@@ -18,7 +19,7 @@ describe('lib/logger', () => {
     it('stylizes input', () => {
       const res = stylize('[ERROR]', Styles.error, ['test']);
 
-      expect(res[0]).toEqual(`${chalk.reset.red('[ERROR]')} test`);
+      expect(res[0]).toEqual(`${chalk.red('[ERROR]')} test`);
     });
   });
 
@@ -78,21 +79,21 @@ describe('lib/logger', () => {
   });
 
   describe('logger()', () => {
-    let warnSpy: jest.SpyInstance;
-    let logSpy: jest.SpyInstance;
-    let debugSpy: jest.SpyInstance;
-    let infoSpy: jest.SpyInstance;
-    let groupSpy: jest.SpyInstance;
-    let groupEndSpy: jest.SpyInstance;
+    let warnSpy: MockInstance;
+    let logSpy: MockInstance;
+    let debugSpy: MockInstance;
+    let infoSpy: MockInstance;
+    let groupSpy: MockInstance;
+    let groupEndSpy: MockInstance;
 
     beforeEach(() => {
       setLogLevel(LOG_LEVEL.LOG);
-      warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => null);
-      logSpy = jest.spyOn(console, 'log').mockImplementation(() => null);
-      debugSpy = jest.spyOn(console, 'debug').mockImplementation(() => null);
-      infoSpy = jest.spyOn(console, 'info').mockImplementation(() => null);
-      groupSpy = jest.spyOn(console, 'group').mockImplementation(() => null);
-      groupEndSpy = jest
+      warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => null);
+      logSpy = vi.spyOn(console, 'log').mockImplementation(() => null);
+      debugSpy = vi.spyOn(console, 'debug').mockImplementation(() => null);
+      infoSpy = vi.spyOn(console, 'info').mockImplementation(() => null);
+      groupSpy = vi.spyOn(console, 'group').mockImplementation(() => null);
+      groupEndSpy = vi
         .spyOn(console, 'groupEnd')
         .mockImplementation(() => null);
     });

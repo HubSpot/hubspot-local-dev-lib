@@ -3,25 +3,26 @@ import {
   downloadSchema,
   downloadSchemas,
   writeSchemaToDisk,
-} from '../customObjects';
+} from '../customObjects.js';
 import {
   fetchObjectSchema as __fetchObjectSchema,
   fetchObjectSchemas as __fetchObjectSchemas,
-} from '../../api/customObjects';
-import basicSchema from './fixtures/customObjects/basicSchema.json';
-import fullSchema from './fixtures/customObjects/fullSchema.json';
-import multipleSchemas from './fixtures/customObjects/multipleSchemas.json';
-import { mockAxiosResponse } from './__utils__/mockAxiosResponse';
+} from '../../api/customObjects.js';
+import basicSchema from './fixtures/customObjects/basicSchema.json' with { type: 'json' };
+import fullSchema from './fixtures/customObjects/fullSchema.json' with { type: 'json' };
+import multipleSchemas from './fixtures/customObjects/multipleSchemas.json' with { type: 'json' };
+import { mockAxiosResponse } from './__utils__/mockAxiosResponse.js';
+import { vi, type MockedFunction } from 'vitest';
 
-jest.mock('fs-extra');
-jest.mock('../../api/customObjects');
+vi.mock('fs-extra');
+vi.mock('../../api/customObjects');
 
-const outputFileSyncSpy = jest.spyOn(fs, 'outputFileSync');
-jest.spyOn(fs, 'existsSync').mockReturnValue(true);
-const fetchObjectSchema = __fetchObjectSchema as jest.MockedFunction<
+const outputFileSyncSpy = vi.spyOn(fs, 'outputFileSync');
+vi.spyOn(fs, 'existsSync').mockReturnValue(true);
+const fetchObjectSchema = __fetchObjectSchema as MockedFunction<
   typeof __fetchObjectSchema
 >;
-const fetchObjectSchemas = __fetchObjectSchemas as jest.MockedFunction<
+const fetchObjectSchemas = __fetchObjectSchemas as MockedFunction<
   typeof __fetchObjectSchemas
 >;
 

@@ -1,16 +1,18 @@
-jest.mock('../../http');
-import { http } from '../../http';
+import { http } from '../../http/index.js';
+import { vi, type MockedFunction } from 'vitest';
 import {
   addAppSecret,
   updateAppSecret,
   deleteAppSecret,
   fetchAppSecrets,
-} from '../devSecrets';
+} from '../devSecrets.js';
 
-const httpPostMock = http.post as jest.MockedFunction<typeof http.post>;
-const httpPatchMock = http.patch as jest.MockedFunction<typeof http.patch>;
-const httpDeleteMock = http.delete as jest.MockedFunction<typeof http.delete>;
-const httpGetMock = http.get as jest.MockedFunction<typeof http.get>;
+vi.mock('../../http');
+
+const httpPostMock = http.post as MockedFunction<typeof http.post>;
+const httpPatchMock = http.patch as MockedFunction<typeof http.patch>;
+const httpDeleteMock = http.delete as MockedFunction<typeof http.delete>;
+const httpGetMock = http.get as MockedFunction<typeof http.get>;
 
 describe('api/devSecrets', () => {
   const accountId = 123;

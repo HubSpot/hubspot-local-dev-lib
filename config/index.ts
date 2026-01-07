@@ -7,17 +7,16 @@ import {
   GLOBAL_CONFIG_PATH,
   HUBSPOT_CONFIG_OPERATIONS,
   MIN_HTTP_TIMEOUT,
-  HUBSPOT_CONFIG_ERROR_TYPES,
   ENVIRONMENT_VARIABLES,
-} from '../constants/config';
-import { HubSpotConfigAccount } from '../types/Accounts';
+} from '../constants/config.js';
+import { HubSpotConfigAccount } from '../types/Accounts.js';
 import {
   HubSpotConfig,
   ConfigFlag,
   HubSpotConfigValidationResult,
-} from '../types/Config';
-import { CmsPublishMode } from '../types/Files';
-import { logger } from '../lib/logger';
+} from '../types/Config.js';
+import { CmsPublishMode } from '../types/Files.js';
+import { logger } from '../lib/logger.js';
 import {
   readConfigFile,
   parseConfig,
@@ -31,15 +30,16 @@ import {
   getConfigAccountByInferredIdentifier,
   handleConfigFileSystemError,
   doesConfigFileExistAtPath,
-} from './utils';
-import { CMS_PUBLISH_MODE } from '../constants/files';
-import { Environment } from '../types/Config';
-import { i18n } from '../utils/lang';
-import { getDefaultAccountOverrideAccountId } from './defaultAccountOverride';
-import { getValidEnv } from '../lib/environment';
-import { HubSpotConfigError } from '../models/HubSpotConfigError';
-import { isDeepEqual } from '../lib/isDeepEqual';
-import { getCwd } from '../lib/path';
+} from './utils.js';
+import { CMS_PUBLISH_MODE } from '../constants/files.js';
+import { Environment } from '../types/Config.js';
+import { i18n } from '../utils/lang.js';
+import { getDefaultAccountOverrideAccountId } from './defaultAccountOverride.js';
+import { getValidEnv } from '../lib/environment.js';
+import { HubSpotConfigError } from '../models/HubSpotConfigError.js';
+import { HUBSPOT_CONFIG_ERROR_TYPES } from '../constants/config.js';
+import { isDeepEqual } from '../lib/isDeepEqual.js';
+import { getCwd } from '../lib/path.js';
 
 const EMPTY_CONFIG = { accounts: [] };
 

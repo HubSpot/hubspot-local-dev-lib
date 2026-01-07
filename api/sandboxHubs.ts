@@ -1,18 +1,18 @@
 import { AxiosPromise } from 'axios';
-import { httpClient } from '../http/client';
-import { http } from '../http';
-import { getAxiosConfig } from '../http/getAxiosConfig';
-import { ENVIRONMENTS } from '../constants/environments';
-import { SANDBOX_TIMEOUT } from '../constants/api';
-import { Environment } from '../types/Config';
+import { httpClient } from '../http/client.js';
+import { http } from '../http/index.js';
+import { getAxiosConfig } from '../http/getAxiosConfig.js';
+import { ENVIRONMENTS } from '../constants/environments.js';
+import { SANDBOX_TIMEOUT } from '../constants/api.js';
+import { Environment } from '../types/Config.js';
 import {
   SandboxPersonalAccessKey,
   SandboxHubData,
   SandboxResponse,
   SandboxUsageLimitsResponse,
   V2Sandbox,
-} from '../types/Sandbox';
-import { HubSpotPromise } from '../types/Http';
+} from '../types/Sandbox.js';
+import { HubSpotPromise } from '../types/Http.js';
 
 const SANDBOX_API_PATH = 'sandbox-hubs/v1';
 const SANDBOX_API_PATH_V2 = 'sandbox-hubs/v2';

@@ -6,25 +6,25 @@ import {
   FieldsJs,
   createTmpDirSync,
   cleanupTmpDirSync,
-} from './handleFieldsJS';
-import { getFileMapperQueryValues } from '../fileMapper';
-import { upload } from '../../api/fileMapper';
-import { isModuleFolderChild } from '../../utils/cms/modules';
-import { escapeRegExp } from '../escapeRegExp';
-import { convertToUnixPath, getExt } from '../path';
-import { isAuthError, isHubSpotHttpError } from '../../errors';
-import { FileMapperInputOptions } from '../../types/Files';
-import { logger } from '../logger';
-import { FILE_TYPES, FILE_UPLOAD_RESULT_TYPES } from '../../constants/files';
+} from './handleFieldsJS.js';
+import { getFileMapperQueryValues } from '../fileMapper.js';
+import { upload } from '../../api/fileMapper.js';
+import { isModuleFolderChild } from '../../utils/cms/modules.js';
+import { escapeRegExp } from '../escapeRegExp.js';
+import { convertToUnixPath, getExt } from '../path.js';
+import { isAuthError, isHubSpotHttpError } from '../../errors/index.js';
+import { FileMapperInputOptions } from '../../types/Files.js';
+import { logger } from '../logger.js';
+import { FILE_TYPES, FILE_UPLOAD_RESULT_TYPES } from '../../constants/files.js';
 import {
   FileType,
   UploadFolderResults,
   CommandOptions,
   FilePathsByType,
-} from '../../types/Files';
-import { CmsPublishMode } from '../../types/Files';
-import { i18n } from '../../utils/lang';
-import { HubSpotHttpError } from '../../models/HubSpotHttpError';
+} from '../../types/Files.js';
+import { CmsPublishMode } from '../../types/Files.js';
+import { i18n } from '../../utils/lang.js';
+import { HubSpotHttpError } from '../../models/HubSpotHttpError.js';
 
 const i18nKey = 'lib.cms.uploadFolder';
 

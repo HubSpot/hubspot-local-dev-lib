@@ -1,16 +1,25 @@
-import { getConfig as __getConfig } from '../../config';
-import { ENVIRONMENTS } from '../../constants/environments';
+import {
+  vi,
+  describe,
+  it,
+  expect,
+  beforeEach,
+  afterAll,
+  MockedFunction,
+} from 'vitest';
+import { getConfig as __getConfig } from '../../config/index.js';
+import { ENVIRONMENTS } from '../../constants/environments.js';
 import {
   getAxiosConfig,
   hostnameMatchesNoProxyPattern,
   shouldUseProxy,
-} from '../getAxiosConfig';
+} from '../getAxiosConfig.js';
 import { HttpProxyAgent } from 'http-proxy-agent';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 
-jest.mock('../../config');
+vi.mock('../../config');
 
-const getConfig = __getConfig as jest.MockedFunction<typeof __getConfig>;
+const getConfig = __getConfig as MockedFunction<typeof __getConfig>;
 
 const url = 'https://app.hubspot.com';
 
@@ -119,7 +128,7 @@ describe('shouldUseProxy', () => {
   const originalEnv = process.env;
 
   beforeEach(() => {
-    jest.resetModules();
+    vi.resetModules();
     process.env = { ...originalEnv };
     delete process.env.HTTPS_PROXY;
     delete process.env.https_proxy;
@@ -206,7 +215,7 @@ describe('getAxiosConfig proxy agents', () => {
   const originalEnv = process.env;
 
   beforeEach(() => {
-    jest.resetModules();
+    vi.resetModules();
     process.env = { ...originalEnv };
     delete process.env.HTTPS_PROXY;
     delete process.env.https_proxy;

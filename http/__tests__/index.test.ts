@@ -1,3 +1,12 @@
+import {
+  vi,
+  describe,
+  it,
+  expect,
+  beforeEach,
+  afterEach,
+  MockedFunction,
+} from 'vitest';
 import { AxiosError } from 'axios';
 import { httpClient } from '../client';
 import fs from 'fs-extra';
@@ -8,29 +17,33 @@ import {
 } from '../../config';
 import { ENVIRONMENTS } from '../../constants/environments';
 import { http } from '../';
-import { version } from '../../package.json';
+import pkg from '../../package.json' with { type: 'json' };
 import { HubSpotConfigAccount } from '../../types/Accounts';
 
-jest.mock('fs-extra');
-jest.mock('../client');
-jest.mock('../../config');
-jest.mock('../../lib/logger');
+vi.mock('fs-extra');
+vi.mock('../client');
+vi.mock('../../config');
+vi.mock('../../lib/logger');
 
-jest.mock('http', () => ({
-  Agent: jest.fn().mockReturnValue({
-    options: { keepAlive: true, maxSockets: 5, maxTotalSockets: 25 },
-  }),
+vi.mock('http', () => ({
+  default: {
+    Agent: vi.fn().mockReturnValue({
+      options: { keepAlive: true, maxSockets: 5, maxTotalSockets: 25 },
+    }),
+  },
 }));
 
-jest.mock('https', () => ({
-  Agent: jest.fn().mockReturnValue({
-    options: { keepAlive: true, maxSockets: 6, maxTotalSockets: 26 },
-  }),
+vi.mock('https', () => ({
+  default: {
+    Agent: vi.fn().mockReturnValue({
+      options: { keepAlive: true, maxSockets: 6, maxTotalSockets: 26 },
+    }),
+  },
 }));
 
-const mockedAxios = jest.mocked(httpClient);
-const getConfig = __getConfig as jest.MockedFunction<typeof __getConfig>;
-const getConfigAccountById = __getConfigAccountById as jest.MockedFunction<
+const mockedAxios = vi.mocked(httpClient);
+const getConfig = __getConfig as MockedFunction<typeof __getConfig>;
+const getConfigAccountById = __getConfigAccountById as MockedFunction<
   typeof __getConfigAccountById
 >;
 
@@ -42,8 +55,8 @@ const ACCOUNT: HubSpotConfigAccount = {
   authType: 'apikey',
 };
 
-fs.createWriteStream = jest.fn().mockReturnValue({
-  on: jest.fn((event, callback) => {
+fs.createWriteStream = vi.fn().mockReturnValue({
+  on: vi.fn((event, callback) => {
     if (event === 'close') {
       callback();
     }
@@ -70,7 +83,7 @@ describe('http/index', () => {
         status: 200,
         headers: [],
         data: {
-          pipe: jest.fn(),
+          pipe: vi.fn(),
         },
       });
       await http.getOctetStream(
@@ -95,7 +108,7 @@ describe('http/index', () => {
         status: 404,
         headers: [],
         data: {
-          pipe: jest.fn(),
+          pipe: vi.fn(),
         },
       });
 
@@ -149,7 +162,7 @@ describe('http/index', () => {
         baseURL: `https://api.hubapi.com`,
         url: 'some/endpoint/path',
         headers: {
-          'User-Agent': `HubSpot Local Dev Lib/${version}`,
+          'User-Agent': `HubSpot Local Dev Lib/${pkg.version}`,
           Authorization: `Bearer ${accessToken}`,
         },
         timeout: 15000,
@@ -194,7 +207,7 @@ describe('http/index', () => {
         baseURL: `https://api.hubapi.com`,
         url: 'some/endpoint/path',
         headers: {
-          'User-Agent': `HubSpot Local Dev Lib/${version}`,
+          'User-Agent': `HubSpot Local Dev Lib/${pkg.version}`,
           Authorization: `Bearer ${accessToken}`,
         },
         timeout: 15000,
@@ -227,7 +240,7 @@ describe('http/index', () => {
         baseURL: `https://api.hubapiqa.com`,
         url: 'some/endpoint/path',
         headers: {
-          'User-Agent': `HubSpot Local Dev Lib/${version}`,
+          'User-Agent': `HubSpot Local Dev Lib/${pkg.version}`,
         },
         timeout: 1000,
         params: {

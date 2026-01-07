@@ -1,8 +1,8 @@
 import path from 'path';
 
-import { isModuleFolder, isModuleFolderChild } from '../cms/modules';
+import { isModuleFolder, isModuleFolderChild } from '../cms/modules.js';
 
-import { PathInput } from '../../types/Modules';
+import { PathInput } from '../../types/Modules.js';
 
 const isLocal = true;
 const isHubSpot = true;

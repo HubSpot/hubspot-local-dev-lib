@@ -3,21 +3,21 @@ import fs from 'fs-extra';
 import contentDisposition from 'content-disposition';
 import { AxiosRequestConfig, AxiosResponse, AxiosPromise } from 'axios';
 
-import { getConfigAccountById } from '../config';
-import { USER_AGENTS, getAxiosConfig } from './getAxiosConfig';
-import { addQueryParams } from './addQueryParams';
-import { accessTokenForPersonalAccessKey } from '../lib/personalAccessKey';
-import { getOauthManager } from '../lib/oauth';
-import { HttpOptions, HubSpotPromise } from '../types/Http';
-import { logger } from '../lib/logger';
-import { i18n } from '../utils/lang';
-import { OAuthConfigAccount } from '../types/Accounts';
+import { getConfigAccountById } from '../config/index.js';
+import { USER_AGENTS, getAxiosConfig } from './getAxiosConfig.js';
+import { addQueryParams } from './addQueryParams.js';
+import { accessTokenForPersonalAccessKey } from '../lib/personalAccessKey.js';
+import { getOauthManager } from '../lib/oauth.js';
+import { HttpOptions, HubSpotPromise } from '../types/Http.js';
+import { logger } from '../lib/logger.js';
+import { i18n } from '../utils/lang.js';
+import { OAuthConfigAccount } from '../types/Accounts.js';
 import {
   PERSONAL_ACCESS_KEY_AUTH_METHOD,
   OAUTH_AUTH_METHOD,
   API_KEY_AUTH_METHOD,
-} from '../constants/auth';
-import { httpClient } from './client';
+} from '../constants/auth.js';
+import { httpClient } from './client.js';
 
 const i18nKey = 'http.index';
 

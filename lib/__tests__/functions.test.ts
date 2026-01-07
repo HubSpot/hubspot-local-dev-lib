@@ -1,32 +1,32 @@
 import fs, { PathLike } from 'fs-extra';
 import findup from 'findup-sync';
-import { getCwd } from '../path';
-import { fetchFileFromRepository as __fetchFileFromRepository } from '../github';
+import { getCwd } from '../path.js';
+import { fetchFileFromRepository as __fetchFileFromRepository } from '../github.js';
+import { vi, type MockedFunction } from 'vitest';
 import {
   createFunction,
   isObjectOrFunction,
   createEndpoint,
   createConfig,
-} from '../cms/functions';
+} from '../cms/functions.js';
 
-jest.mock('fs-extra');
-jest.mock('findup-sync');
-jest.mock('../path');
-jest.mock('../github');
+vi.mock('fs-extra');
+vi.mock('findup-sync');
+vi.mock('../path');
+vi.mock('../github');
 
-const mockedGetCwd = getCwd as jest.MockedFunction<typeof getCwd>;
-const mockedFindup = findup as jest.MockedFunction<typeof findup>;
-const mockedFsExistsSync = fs.existsSync as jest.MockedFunction<
+const mockedGetCwd = getCwd as MockedFunction<typeof getCwd>;
+const mockedFindup = findup as MockedFunction<typeof findup>;
+const mockedFsExistsSync = fs.existsSync as MockedFunction<
   typeof fs.existsSync
 >;
-const mockedFsReadFileSync = fs.readFileSync as jest.MockedFunction<
+const mockedFsReadFileSync = fs.readFileSync as MockedFunction<
   typeof fs.readFileSync
 >;
 
-const fetchFileFromRepository =
-  __fetchFileFromRepository as jest.MockedFunction<
-    typeof __fetchFileFromRepository
-  >;
+const fetchFileFromRepository = __fetchFileFromRepository as MockedFunction<
+  typeof __fetchFileFromRepository
+>;
 
 describe('lib/cms/functions', () => {
   describe('createFunction', () => {
@@ -39,6 +39,14 @@ describe('lib/cms/functions', () => {
     const mockDest = '/mock/dest';
 
     beforeEach(() => {
+      mockedGetCwd.mockReset();
+      mockedFindup.mockReset();
+      mockedFsExistsSync.mockReset();
+      mockedFsReadFileSync.mockReset();
+      vi.mocked(fs.mkdirp).mockReset();
+      vi.mocked(fs.writeFile).mockReset();
+      fetchFileFromRepository.mockReset();
+
       mockedGetCwd.mockReturnValue('/mock/cwd');
       mockedFindup.mockReturnValue(null);
 
@@ -98,7 +106,6 @@ describe('lib/cms/functions', () => {
     });
 
     it('should return true for functions', () => {
-      // eslint-disable-next-line @typescript-eslint/no-empty-function
       expect(isObjectOrFunction(() => {})).toBe(true);
     });
 

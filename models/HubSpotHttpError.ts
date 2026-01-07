@@ -1,8 +1,11 @@
 import { isAxiosError, AxiosError } from 'axios';
-import { HubSpotHttpErrorContext, ValidationError } from '../types/Error';
-import { HttpMethod } from '../types/Api';
-import { HTTP_METHOD_PREPOSITIONS, HTTP_METHOD_VERBS } from '../constants/api';
-import { i18n } from '../utils/lang';
+import { HubSpotHttpErrorContext, ValidationError } from '../types/Error.js';
+import { HttpMethod } from '../types/Api.js';
+import {
+  HTTP_METHOD_PREPOSITIONS,
+  HTTP_METHOD_VERBS,
+} from '../constants/api.js';
+import { i18n } from '../utils/lang.js';
 
 export const HubSpotHttpErrorName = 'HubSpotHttpError';
 

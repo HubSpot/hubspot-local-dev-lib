@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'fs-extra';
-import prettier from 'prettier';
 import { AxiosResponse } from 'axios';
+import { format } from 'prettier';
 import {
   createTable,
   updateTable,
@@ -10,10 +10,10 @@ import {
   fetchRows,
   publishTable,
   deleteRows,
-} from '../api/hubdb';
-import { getCwd } from './path';
-import { FetchRowsResponse, Row, Table } from '../types/Hubdb';
-import { i18n } from '../utils/lang';
+} from '../api/hubdb.js';
+import { getCwd } from './path.js';
+import { FetchRowsResponse, Row, Table } from '../types/Hubdb.js';
+import { i18n } from '../utils/lang.js';
 
 const i18nKey = 'lib.hubdb';
 
@@ -186,7 +186,8 @@ export async function downloadHubDbTable(
 
   const rows = await fetchAllRows(accountId, tableId);
   const tableToWrite = JSON.stringify(convertToJSON(table, rows));
-  const tableJson = await prettier.format(tableToWrite, {
+
+  const tableJson = await format(tableToWrite, {
     parser: 'json',
   });
 

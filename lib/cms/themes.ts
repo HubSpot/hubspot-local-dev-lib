@@ -1,7 +1,7 @@
 import findup from 'findup-sync';
-import { getHubSpotWebsiteOrigin } from '../urls';
-import { ENVIRONMENTS } from '../../constants/environments';
-import { getConfigAccountEnvironment } from '../../config';
+import { getHubSpotWebsiteOrigin } from '../urls.js';
+import { ENVIRONMENTS } from '../../constants/environments.js';
+import { getConfigAccountEnvironment } from '../../config/index.js';
 
 export function getThemeJSONPath(path: string): string | null {
   return findup('theme.json', {

@@ -1,8 +1,8 @@
-import { ValueOf } from './Utils';
-import { ACTIVITY_SOURCE } from '../enums/project';
-import { DEPLOY_ACTION, DEPLOY_STATUS } from '../enums/deploy';
-import { COMPONENT_TYPES, SUBCOMPONENT_TYPES } from '../enums/build';
-import { ProjectStandardError } from './Project';
+import { ValueOf } from './Utils.js';
+import { ACTIVITY_SOURCE } from '../enums/project.js';
+import { DEPLOY_ACTION, DEPLOY_STATUS } from '../enums/deploy.js';
+import { COMPONENT_TYPES, SUBCOMPONENT_TYPES } from '../enums/build.js';
+import { ProjectStandardError } from './Project.js';
 
 export type DeployStatus = ValueOf<typeof DEPLOY_STATUS>;
 

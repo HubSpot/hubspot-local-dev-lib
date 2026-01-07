@@ -1,3 +1,4 @@
+import { vi, describe, it, expect, MockedFunction } from 'vitest';
 import moment from 'moment';
 import {
   getConfig as __getConfig,
@@ -21,42 +22,40 @@ import {
 import { HubSpotConfigAccount } from '../../types/Accounts';
 import { mockAxiosResponse } from './__utils__/mockAxiosResponse';
 
-jest.mock('../../config');
-jest.mock('../logger');
-jest.mock('../../api/localDevAuth');
-jest.mock('../../api/sandboxHubs');
-jest.mock('../../api/developerTestAccounts');
+vi.mock('../../config');
+vi.mock('../logger');
+vi.mock('../../api/localDevAuth');
+vi.mock('../../api/sandboxHubs');
+vi.mock('../../api/developerTestAccounts');
 
-const updateConfigAccount = __updateConfigAccount as jest.MockedFunction<
+const updateConfigAccount = __updateConfigAccount as MockedFunction<
   typeof __updateConfigAccount
 >;
-const addConfigAccount = __addConfigAccount as jest.MockedFunction<
+const addConfigAccount = __addConfigAccount as MockedFunction<
   typeof __addConfigAccount
 >;
-const setConfigAccountAsDefault =
-  __setConfigAccountAsDefault as jest.MockedFunction<
-    typeof __setConfigAccountAsDefault
-  >;
-const getConfigAccountIfExists =
-  __getConfigAccountIfExists as jest.MockedFunction<
-    typeof __getConfigAccountIfExists
-  >;
+const setConfigAccountAsDefault = __setConfigAccountAsDefault as MockedFunction<
+  typeof __setConfigAccountAsDefault
+>;
+const getConfigAccountIfExists = __getConfigAccountIfExists as MockedFunction<
+  typeof __getConfigAccountIfExists
+>;
 const getConfigDefaultAccountIfExists =
-  __getConfigDefaultAccountIfExists as jest.MockedFunction<
+  __getConfigDefaultAccountIfExists as MockedFunction<
     typeof __getConfigDefaultAccountIfExists
   >;
-const getConfigAccountById = __getConfigAccountById as jest.MockedFunction<
+const getConfigAccountById = __getConfigAccountById as MockedFunction<
   typeof __getConfigAccountById
 >;
-const getConfig = __getConfig as jest.MockedFunction<typeof __getConfig>;
-const fetchAccessToken = __fetchAccessToken as jest.MockedFunction<
+const getConfig = __getConfig as MockedFunction<typeof __getConfig>;
+const fetchAccessToken = __fetchAccessToken as MockedFunction<
   typeof __fetchAccessToken
 >;
-const fetchSandboxHubData = __fetchSandboxHubData as jest.MockedFunction<
+const fetchSandboxHubData = __fetchSandboxHubData as MockedFunction<
   typeof __fetchSandboxHubData
 >;
 const fetchDeveloperTestAccountData =
-  __fetchDeveloperTestAccountData as jest.MockedFunction<
+  __fetchDeveloperTestAccountData as MockedFunction<
     typeof __fetchDeveloperTestAccountData
   >;
 

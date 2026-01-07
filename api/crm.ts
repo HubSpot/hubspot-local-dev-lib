@@ -2,10 +2,10 @@ import path from 'path';
 import fs from 'fs-extra';
 import FormData from 'form-data';
 
-import { http } from '../http';
-import { getCwd } from '../lib/path';
-import { HubSpotPromise } from '../types/Http';
-import { ImportRequest, ImportResponse } from '../types/Crm';
+import { http } from '../http/index.js';
+import { getCwd } from '../lib/path.js';
+import { HubSpotPromise } from '../types/Http.js';
+import { ImportRequest, ImportResponse } from '../types/Crm.js';
 
 const HUBSPOT_CRM_IMPORT_PATH = '/crm/v3/imports';
 

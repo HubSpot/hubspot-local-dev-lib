@@ -1,36 +1,37 @@
-import { FieldsJs, isConvertableFieldJs } from '../cms/handleFieldsJS';
+import { FieldsJs, isConvertableFieldJs } from '../cms/handleFieldsJS.js';
 import fs from 'fs-extra';
 import child_process from 'child_process';
+import { vi } from 'vitest';
 
-jest.mock('../fs');
-jest.mock('child_process');
+vi.mock('../fs');
+vi.mock('child_process');
 
 describe('lib/cms/handleFieldsJs', () => {
   describe('FieldsJs()', () => {
     beforeEach(() => {
-      (child_process.fork as jest.Mock).mockImplementation(() => {
+      vi.mocked(child_process.fork).mockImplementation(() => {
         return {
           pid: 123,
           on: () => {
             return {};
           },
-        };
+        } as unknown as ReturnType<typeof child_process.fork>;
       });
-      jest.resetModules();
+      vi.resetModules();
     });
 
     const projectRoot = 'folder';
     const filePath = 'folder/sample.module/fields.js';
     const defaultFieldsJs = new FieldsJs(projectRoot, filePath);
-    jest.spyOn(fs, 'existsSync').mockReturnValue(true);
+    vi.spyOn(fs, 'existsSync').mockReturnValue(true);
 
-    test('getOutputPathPromise() resolves to the correct path', async () => {
+    it('getOutputPathPromise() resolves to the correct path', async () => {
       const fieldsJs = new FieldsJs(
         'folder',
         'folder/sample.module/fields.js',
         'temp-dir'
       );
-      const convertSpy = jest
+      const convertSpy = vi
         .spyOn(FieldsJs.prototype, 'convertFieldsJs')
         .mockResolvedValue('temp-dir/sample.module/fields.js');
 
@@ -39,7 +40,7 @@ describe('lib/cms/handleFieldsJs', () => {
       convertSpy.mockRestore();
     });
 
-    test('getWriteDir() returns the correct path', () => {
+    it('getWriteDir() returns the correct path', () => {
       const fieldsJs = new FieldsJs(
         'folder',
         'folder/sample.module/fields.js',
@@ -49,8 +50,8 @@ describe('lib/cms/handleFieldsJs', () => {
       expect(returned).toBe('temp-dir/sample.module');
     });
 
-    test('saveOutput() sets the save path correctly', () => {
-      const copyFileSpy = jest
+    it('saveOutput() sets the save path correctly', () => {
+      const copyFileSpy = vi
         .spyOn(fs, 'copyFileSync')
         .mockImplementation(() => null);
       const fieldsJs = new FieldsJs(
@@ -68,7 +69,7 @@ describe('lib/cms/handleFieldsJs', () => {
       );
     });
 
-    test('convertFieldsJs returns a Promise', () => {
+    it('convertFieldsJs returns a Promise', () => {
       const returned = defaultFieldsJs.convertFieldsJs('');
       expect(returned).toBeInstanceOf(Promise);
     });

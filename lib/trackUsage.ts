@@ -1,11 +1,14 @@
-import { httpClient } from '../http/client';
-import { getAxiosConfig } from '../http/getAxiosConfig';
-import { logger } from './logger';
-import { http } from '../http';
-import { getConfigAccountById, getConfigAccountEnvironment } from '../config';
-import { FILE_MAPPER_API_PATH } from '../api/fileMapper';
-import { i18n } from '../utils/lang';
-import { getValidEnv } from './environment';
+import { httpClient } from '../http/client.js';
+import { getAxiosConfig } from '../http/getAxiosConfig.js';
+import { logger } from './logger.js';
+import { http } from '../http/index.js';
+import {
+  getConfigAccountById,
+  getConfigAccountEnvironment,
+} from '../config/index.js';
+import { FILE_MAPPER_API_PATH } from '../api/fileMapper.js';
+import { i18n } from '../utils/lang.js';
+import { getValidEnv } from './environment.js';
 
 const i18nKey = 'lib.trackUsage';
 export const CMS_CLI_USAGE_PATH = `${FILE_MAPPER_API_PATH}/cms-cli-usage`;
@@ -52,6 +55,7 @@ export async function trackUsage(
         resolveWithFullResponse: true,
       });
       return;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (e) {
       logger.debug(i18n(`${i18nKey}.retryingEventUnauthenticated`));
     }

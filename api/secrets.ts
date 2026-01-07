@@ -1,6 +1,6 @@
-import { http } from '../http';
-import { FetchSecretsResponse } from '../types/Secrets';
-import { HubSpotPromise } from '../types/Http';
+import { http } from '../http/index.js';
+import { FetchSecretsResponse } from '../types/Secrets.js';
+import { HubSpotPromise } from '../types/Http.js';
 
 const SECRETS_API_PATH = 'cms/v3/functions/secrets';
 

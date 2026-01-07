@@ -1,3 +1,4 @@
+import { vi, MockedFunction } from 'vitest';
 import { httpClient } from '../../http/client';
 import {
   trackUsage,
@@ -14,18 +15,18 @@ import { FILE_MAPPER_API_PATH } from '../../api/fileMapper';
 import { logger } from '../logger';
 import { http } from '../../http';
 
-jest.mock('../../config');
-jest.mock('../logger');
-jest.mock('../../http');
-jest.mock('../../http/client');
+vi.mock('../../config');
+vi.mock('../logger');
+vi.mock('../../http');
+vi.mock('../../http/client');
 
-const mockedAxios = jest.mocked(httpClient);
-const mockedLogger = jest.mocked(logger);
-const mockedHttp = jest.mocked(http);
-const getConfigAccountById = __getConfigAccountById as jest.MockedFunction<
+const mockedAxios = vi.mocked(httpClient);
+const mockedLogger = vi.mocked(logger);
+const mockedHttp = vi.mocked(http);
+const getConfigAccountById = __getConfigAccountById as MockedFunction<
   typeof __getConfigAccountById
 >;
-const getConfig = __getConfig as jest.MockedFunction<typeof __getConfig>;
+const getConfig = __getConfig as MockedFunction<typeof __getConfig>;
 
 mockedAxios.mockResolvedValue({});
 getConfig.mockReturnValue({ accounts: [] });

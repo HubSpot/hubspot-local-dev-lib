@@ -2,14 +2,14 @@ import {
   CONFIG_FLAGS,
   HUBSPOT_CONFIG_ERROR_TYPES,
   HUBSPOT_CONFIG_OPERATIONS,
-} from '../constants/config';
-import { ENVIRONMENTS } from '../constants/environments';
+} from '../constants/config.js';
+import { ENVIRONMENTS } from '../constants/environments.js';
 import {
   DeprecatedHubSpotConfigAccountFields,
   HubSpotConfigAccount,
-} from './Accounts';
-import { CmsPublishMode } from './Files';
-import { ValueOf } from './Utils';
+} from './Accounts.js';
+import { CmsPublishMode } from './Files.js';
+import { ValueOf } from './Utils.js';
 
 export interface HubSpotConfig {
   accounts: Array<HubSpotConfigAccount>;

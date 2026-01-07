@@ -1,4 +1,4 @@
-import { getHubSpotApiOrigin } from '../urls';
+import { getHubSpotApiOrigin } from '../urls.js';
 
 describe('lib/urls', () => {
   describe('getHubSpotApiOrigin()', () => {

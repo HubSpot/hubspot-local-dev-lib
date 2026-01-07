@@ -1,6 +1,6 @@
-import { http } from '../http';
-import { HubSpotPromise } from '../types/Http';
-import { FetchDevSecretsResponse } from '../types/DevSecrets';
+import { http } from '../http/index.js';
+import { HubSpotPromise } from '../types/Http.js';
+import { FetchDevSecretsResponse } from '../types/DevSecrets.js';
 
 const DEV_SECRETS_API_PATH = 'dev-secrets/management/v3';
 

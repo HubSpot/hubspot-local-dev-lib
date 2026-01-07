@@ -1,4 +1,4 @@
-import { Collision } from './Archive';
+import { Collision } from './Archive.js';
 
 type GithubAuthor = {
   login: string;

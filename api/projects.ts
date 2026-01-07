@@ -1,6 +1,6 @@
-import { http } from '../http';
+import { http } from '../http/index.js';
 import fs from 'fs';
-import { FormData, HubSpotPromise, QueryParams } from '../types/Http';
+import { FormData, HubSpotPromise, QueryParams } from '../types/Http.js';
 import {
   Project,
   FetchProjectResponse,
@@ -9,22 +9,22 @@ import {
   FetchPlatformVersionResponse,
   WarnLogsResponse,
   UploadIRResponse,
-} from '../types/Project';
-import { Build, FetchProjectBuildsResponse } from '../types/Build';
+} from '../types/Project.js';
+import { Build, FetchProjectBuildsResponse } from '../types/Build.js';
 import {
   ComponentStructureResponse,
   ProjectComponentsMetadata,
-} from '../types/ComponentStructure';
+} from '../types/ComponentStructure.js';
 import {
   Deploy,
   ProjectDeployResponse,
   ProjectDeployResponseV1,
-} from '../types/Deploy';
+} from '../types/Deploy.js';
 import {
   MigrateAppResponse,
   CloneAppResponse,
   PollAppResponse,
-} from '../types/Migration';
+} from '../types/Migration.js';
 
 const PROJECTS_API_PATH = 'dfs/v1/projects';
 const DEVELOPER_FILE_SYSTEM_PATH = 'dfs/v1';

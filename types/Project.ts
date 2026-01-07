@@ -1,6 +1,6 @@
-import { Build } from './Build';
-import { GithubSourceData } from './Github';
-import { ProjectLog } from './ProjectLog';
+import { Build } from './Build.js';
+import { GithubSourceData } from './Github.js';
+import { ProjectLog } from './ProjectLog.js';
 
 export type Project = {
   createdAt: number;

@@ -1,12 +1,13 @@
 import axios from 'axios';
 import moment from 'moment';
-import { OAuth2Manager } from '../OAuth2Manager';
-import { ENVIRONMENTS } from '../../constants/environments';
-import { HubSpotConfigAccount } from '../../types/Accounts';
+import { vi } from 'vitest';
+import { OAuth2Manager } from '../OAuth2Manager.js';
+import { ENVIRONMENTS } from '../../constants/environments.js';
+import { HubSpotConfigAccount } from '../../types/Accounts.js';
 
-jest.mock('axios');
+vi.mock('axios');
 
-const axiosMock = axios as jest.MockedFunction<typeof axios>;
+const axiosMock = vi.mocked(axios);
 
 const mockRefreshTokenResponse = {
   refresh_token: 'new-token',

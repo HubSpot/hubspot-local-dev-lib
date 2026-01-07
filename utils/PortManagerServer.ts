@@ -2,16 +2,16 @@ import express, { Express, Request, Response } from 'express';
 import { Server } from 'http';
 import cors from 'cors';
 
-import { detectPort } from './detectPort';
+import { detectPort } from './detectPort.js';
 import {
   MIN_PORT_NUMBER,
   MAX_PORT_NUMBER,
   PORT_MANAGER_SERVER_PORT,
-} from '../constants/ports';
-import { logger } from '../lib/logger';
-import { i18n } from './lang';
-import { BaseError } from '../types/Error';
-import { RequestPortsData, ServerPortMap } from '../types/PortManager';
+} from '../constants/ports.js';
+import { logger } from '../lib/logger.js';
+import { i18n } from './lang.js';
+import { BaseError } from '../types/Error.js';
+import { RequestPortsData, ServerPortMap } from '../types/PortManager.js';
 
 const i18nKey = 'utils.PortManagerServer';
 

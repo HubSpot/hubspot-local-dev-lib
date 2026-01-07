@@ -1,3 +1,4 @@
+import { vi, describe, it, expect, MockedFunction, Mocked } from 'vitest';
 import fs from 'fs-extra';
 import findup from 'findup-sync';
 import {
@@ -8,14 +9,14 @@ import * as config from '../index';
 import { PersonalAccessKeyConfigAccount } from '../../types/Accounts';
 import { PERSONAL_ACCESS_KEY_AUTH_METHOD } from '../../constants/auth';
 
-jest.mock('fs-extra');
-jest.mock('findup-sync');
-jest.mock('../index');
+vi.mock('fs-extra');
+vi.mock('findup-sync');
+vi.mock('../index');
 
-const mockFs = fs as jest.Mocked<typeof fs>;
-const mockFindup = findup as jest.MockedFunction<typeof findup>;
+const mockFs = fs as Mocked<typeof fs>;
+const mockFindup = findup as MockedFunction<typeof findup>;
 const mockGetAllConfigAccounts =
-  config.getAllConfigAccounts as jest.MockedFunction<
+  config.getAllConfigAccounts as MockedFunction<
     typeof config.getAllConfigAccounts
   >;
 

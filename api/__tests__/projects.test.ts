@@ -1,7 +1,8 @@
-jest.mock('../../http');
-jest.mock('fs');
+vi.mock('../../http');
+vi.mock('fs');
 import { createReadStream } from 'fs';
-import { http } from '../../http';
+import { http } from '../../http/index.js';
+import { vi, type MockedFunction } from 'vitest';
 import {
   cancelStagedBuild,
   checkCloneStatus,
@@ -30,13 +31,13 @@ import {
   queueBuild,
   uploadFileToBuild,
   uploadProject,
-} from '../projects';
+} from '../projects.js';
 
-const createReadStreamMock = createReadStream as jest.MockedFunction<
+const createReadStreamMock = createReadStream as MockedFunction<
   typeof createReadStream
 >;
 
-const httpPostMock = http.post as jest.MockedFunction<typeof http.post>;
+const httpPostMock = http.post as MockedFunction<typeof http.post>;
 
 describe('api/projects', () => {
   const accountId = 999999;
