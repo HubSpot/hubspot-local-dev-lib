@@ -73,4 +73,3 @@ export function fetchDeveloperTestAccountData(
 
   return httpClient<DeveloperTestAccount>(reqWithToken);
 }
-

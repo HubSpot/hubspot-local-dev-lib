@@ -1,4 +1,4 @@
-import { vi, describe, it, expect, beforeEach, Mock } from 'vitest';
+import { vi, describe, it, expect, beforeEach } from 'vitest';
 
 const { osTmpDirMock, osHomeDirMock } = vi.hoisted(() => ({
   osTmpDirMock: vi.fn(() => '/tmp'),

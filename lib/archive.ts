@@ -172,7 +172,6 @@ async function cleanupTempDir(tmpDir: string): Promise<void> {
   if (!tmpDir) return;
   try {
     await fs.remove(tmpDir);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (e) {
     logger.debug(i18n(`${i18nKey}.cleanupTempDir.error`, { tmpDir }));
   }

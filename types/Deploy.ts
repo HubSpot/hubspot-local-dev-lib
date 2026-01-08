@@ -2,7 +2,7 @@ import { ValueOf } from './Utils.js';
 import { ACTIVITY_SOURCE } from '../enums/project.js';
 import { DEPLOY_ACTION, DEPLOY_STATUS } from '../enums/deploy.js';
 import { COMPONENT_TYPES, SUBCOMPONENT_TYPES } from '../enums/build.js';
-import { ProjectStandardError, DeployStatusTaskLocator } from './ProjectComponents.js';
+import { ProjectStandardError } from './ProjectComponents.js';
 
 export type DeployStatus = ValueOf<typeof DEPLOY_STATUS>;
 
@@ -34,7 +34,6 @@ export type Deploy = {
   userId: number;
   source: ValueOf<typeof ACTIVITY_SOURCE>;
 };
-
 
 export type SubdeployValidationIssue = {
   uid: string;

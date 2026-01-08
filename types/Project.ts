@@ -52,7 +52,6 @@ export type FetchPlatformVersionResponse = {
   activePlatformVersions: Array<string>;
 };
 
-
 export type WarnLogsResponse = {
   logs: Array<ProjectLog>;
 };

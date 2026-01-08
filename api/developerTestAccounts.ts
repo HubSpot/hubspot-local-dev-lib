@@ -65,7 +65,6 @@ export function deleteDeveloperTestAccount(
   });
 }
 
-
 export function installOauthAppIntoDeveloperTestAccount(
   accountId: number,
   testAccountId: number,
