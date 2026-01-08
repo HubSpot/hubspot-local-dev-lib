@@ -12,7 +12,6 @@
     "access": "public"
   },
   "scripts": {
-    "prepare": "husky install",
     "build": "tsx ./scripts/build.ts",
     "circular-deps": "yarn madge --circular --extensions ts --exclude 'dist/.*' .",
     "lint": "eslint --max-warnings=0 . && prettier . --check",
