@@ -22,6 +22,7 @@ export const DEPLOYABLE_STATES = {
 export const COMPONENT_TYPES = {
   APP: 'APP',
   PRIVATE_APP: 'PRIVATE_APP',
+  PUBLIC_APP: 'PUBLIC_APP',
   THEME: 'THEME',
   REACT_THEME: 'REACT_THEME',
 } as const;
