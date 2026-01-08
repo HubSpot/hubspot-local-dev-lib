@@ -8,6 +8,8 @@ import {
 } from '../models/FileSystemError.js';
 import { HubSpotConfigError } from '../models/HubSpotConfigError.js';
 
+export { isSystemError } from './isSystemError.js';
+
 export function isSpecifiedError(
   err: unknown,
   {
