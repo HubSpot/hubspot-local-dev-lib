@@ -4,10 +4,9 @@ import contentDisposition from 'content-disposition';
 import { AxiosResponse } from 'axios';
 import { http } from '../http/index.js';
 import { getCwd } from '../lib/path.js';
+import { FILE_MAPPER_API_PATH } from '../constants/endpoints.js';
 import { FileMapperNode, FileMapperOptions, FileTree } from '../types/Files.js';
 import { HubSpotPromise } from '../types/Http.js';
-
-export const FILE_MAPPER_API_PATH = 'content/filemapper/v1';
 
 export function createFileMapperNodeFromStreamResponse(
   filePath: string,

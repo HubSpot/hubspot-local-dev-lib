@@ -1,9 +1,5 @@
-import { httpClient } from '../http/client.js';
 import { http } from '../http/index.js';
-import { getAxiosConfig } from '../http/getAxiosConfig.js';
-import { ENVIRONMENTS } from '../constants/environments.js';
 import {
-  DeveloperTestAccount,
   CreateDeveloperTestAccountResponse,
   FetchDeveloperTestAccountsResponse,
   DeveloperTestAccountConfig,
@@ -13,7 +9,6 @@ import {
   GenerateDeveloperTestAccountPersonalAccessKeyResponse,
 } from '../types/developerTestAccounts.js';
 import { SANDBOX_TIMEOUT } from '../constants/api.js';
-import { Environment } from '../types/Config.js';
 import { HubSpotPromise } from '../types/Http.js';
 
 const TEST_ACCOUNTS_API_PATH = 'integrators/test-portals/v2';
@@ -70,26 +65,6 @@ export function deleteDeveloperTestAccount(
   });
 }
 
-export function fetchDeveloperTestAccountData(
-  accessToken: string,
-  accountId: number,
-  env: Environment = ENVIRONMENTS.PROD
-): HubSpotPromise<DeveloperTestAccount> {
-  const axiosConfig = getAxiosConfig({
-    env,
-    url: `${TEST_ACCOUNTS_API_PATH}/self`,
-    params: { portalId: accountId },
-  });
-  const reqWithToken = {
-    ...axiosConfig,
-    headers: {
-      ...axiosConfig.headers,
-      Authorization: `Bearer ${accessToken}`,
-    },
-  };
-
-  return httpClient<DeveloperTestAccount>(reqWithToken);
-}
 
 export function installOauthAppIntoDeveloperTestAccount(
   accountId: number,

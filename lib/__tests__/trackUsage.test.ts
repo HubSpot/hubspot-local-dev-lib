@@ -1,17 +1,17 @@
 import { vi, MockedFunction } from 'vitest';
 import { httpClient } from '../../http/client';
-import {
-  trackUsage,
-  CMS_CLI_USAGE_PATH,
-  VSCODE_USAGE_PATH,
-} from '../trackUsage';
+import { trackUsage } from '../trackUsage';
 import {
   getConfigAccountById as __getConfigAccountById,
   getConfig as __getConfig,
 } from '../../config';
 import { HubSpotConfigAccount } from '../../types/Accounts';
 import { ENVIRONMENTS } from '../../constants/environments';
-import { FILE_MAPPER_API_PATH } from '../../api/fileMapper';
+import {
+  FILE_MAPPER_API_PATH,
+  CMS_CLI_USAGE_PATH,
+  VSCODE_USAGE_PATH,
+} from '../../constants/endpoints';
 import { logger } from '../logger';
 import { http } from '../../http';
 

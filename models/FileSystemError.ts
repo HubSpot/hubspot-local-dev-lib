@@ -1,6 +1,6 @@
 import { FileSystemErrorContext } from '../types/Error.js';
 import { i18n } from '../utils/lang.js';
-import { isSystemError } from '../errors/index.js';
+import { isSystemError } from '../errors/isSystemError.js';
 
 const i18nKey = 'errors.fileSystemErrors';
 

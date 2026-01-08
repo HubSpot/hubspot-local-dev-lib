@@ -1,5 +1,5 @@
 import { ValueOf } from './Utils.js';
-import { ProjectStandardError } from './Project.js';
+import { ProjectStandardError } from './ProjectComponents.js';
 
 export const MIGRATION_STATUS = {
   BUILDING: 'BUILDING',

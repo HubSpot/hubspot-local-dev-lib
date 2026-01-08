@@ -1,41 +1,12 @@
-import { getAxiosConfig } from '../http/getAxiosConfig.js';
 import { http } from '../http/index.js';
-import { ENVIRONMENTS } from '../constants/environments.js';
-import { Environment } from '../types/Config.js';
+import { LOCALDEVAUTH_API_AUTH_PATH } from '../constants/endpoints.js';
 import {
   ScopeData,
-  AccessTokenResponse,
   EnabledFeaturesResponse,
   ScopeAuthorizationResponse,
 } from '../types/Accounts.js';
-import { httpClient } from '../http/client.js';
 import { PublicAppInstallationData } from '../types/Apps.js';
 import { HubSpotPromise } from '../types/Http.js';
-
-const LOCALDEVAUTH_API_AUTH_PATH = 'localdevauth/v1/auth';
-
-export const LOCALDEVAUTH_ACCESS_TOKEN_PATH = `${LOCALDEVAUTH_API_AUTH_PATH}/refresh`;
-
-export function fetchAccessToken(
-  personalAccessKey: string,
-  env: Environment = ENVIRONMENTS.PROD,
-  portalId?: number
-): HubSpotPromise<AccessTokenResponse> {
-  const axiosConfig = getAxiosConfig({
-    env,
-    localHostOverride: true,
-    url: LOCALDEVAUTH_ACCESS_TOKEN_PATH,
-    data: {
-      encodedOAuthRefreshToken: personalAccessKey,
-    },
-    params: portalId ? { portalId } : {},
-  });
-
-  return httpClient<AccessTokenResponse>({
-    ...axiosConfig,
-    method: 'post',
-  });
-}
 
 export function fetchScopeData(
   accountId: number,

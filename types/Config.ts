@@ -3,9 +3,9 @@ import {
   HUBSPOT_CONFIG_ERROR_TYPES,
   HUBSPOT_CONFIG_OPERATIONS,
 } from '../constants/config.js';
-import { ENVIRONMENTS } from '../constants/environments.js';
 import {
   DeprecatedHubSpotConfigAccountFields,
+  Environment,
   HubSpotConfigAccount,
 } from './Accounts.js';
 import { CmsPublishMode } from './Files.js';
@@ -31,8 +31,6 @@ export type DeprecatedHubSpotConfigFields = {
   defaultPortal?: string;
   defaultMode?: CmsPublishMode;
 };
-
-export type Environment = ValueOf<typeof ENVIRONMENTS> | '';
 
 export type GitInclusionResult = {
   inGit: boolean;

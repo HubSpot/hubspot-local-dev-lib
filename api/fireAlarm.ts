@@ -1,8 +1,7 @@
 import { http } from '../http/index.js';
+import { FIREALARM_API_AUTH_PATH } from '../constants/endpoints.js';
 import { FireAlarm } from '../types/FireAlarm.js';
 import { HubSpotPromise } from '../types/Http.js';
-
-export const FIREALARM_API_AUTH_PATH = 'firealarm/v4/alarm';
 
 export function fetchFireAlarms(
   accountId: number

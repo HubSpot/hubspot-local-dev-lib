@@ -5,20 +5,14 @@ import {
   getDefaultAccountOverrideAccountId,
   getDefaultAccountOverrideFilePath,
 } from '../defaultAccountOverride';
-import * as config from '../index';
 import { PersonalAccessKeyConfigAccount } from '../../types/Accounts';
 import { PERSONAL_ACCESS_KEY_AUTH_METHOD } from '../../constants/auth';
 
 vi.mock('fs-extra');
 vi.mock('findup-sync');
-vi.mock('../index');
 
 const mockFs = fs as Mocked<typeof fs>;
 const mockFindup = findup as MockedFunction<typeof findup>;
-const mockGetAllConfigAccounts =
-  config.getAllConfigAccounts as MockedFunction<
-    typeof config.getAllConfigAccounts
-  >;
 
 const PAK_ACCOUNT: PersonalAccessKeyConfigAccount = {
   name: 'test-account',
@@ -36,27 +30,25 @@ describe('defaultAccountOverride', () => {
   describe('getDefaultAccountOverrideAccountId()', () => {
     it('returns null when override file does not exist', () => {
       mockFindup.mockReturnValueOnce(null);
-      expect(getDefaultAccountOverrideAccountId()).toBeNull();
+      expect(getDefaultAccountOverrideAccountId([PAK_ACCOUNT])).toBeNull();
     });
 
     it('throws an error when override file exists but is not a number', () => {
       mockFindup.mockReturnValueOnce('.hsaccount');
       mockFs.readFileSync.mockReturnValueOnce('string');
-      expect(() => getDefaultAccountOverrideAccountId()).toThrow();
+      expect(() => getDefaultAccountOverrideAccountId([PAK_ACCOUNT])).toThrow();
     });
 
     it('throws an error when account specified in override file does not exist in config', () => {
       mockFindup.mockReturnValueOnce('.hsaccount');
       mockFs.readFileSync.mockReturnValueOnce('234');
-      mockGetAllConfigAccounts.mockReturnValueOnce([PAK_ACCOUNT]);
-      expect(() => getDefaultAccountOverrideAccountId()).toThrow();
+      expect(() => getDefaultAccountOverrideAccountId([PAK_ACCOUNT])).toThrow();
     });
 
     it('returns the account ID when an account with that ID exists in config', () => {
       mockFindup.mockReturnValueOnce('.hsaccount');
       mockFs.readFileSync.mockReturnValueOnce('123');
-      mockGetAllConfigAccounts.mockReturnValueOnce([PAK_ACCOUNT]);
-      expect(getDefaultAccountOverrideAccountId()).toBe(123);
+      expect(getDefaultAccountOverrideAccountId([PAK_ACCOUNT])).toBe(123);
     });
   });
 

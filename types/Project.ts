@@ -1,4 +1,4 @@
-import { Build } from './Build.js';
+import type { Build } from './Build.js';
 import { GithubSourceData } from './Github.js';
 import { ProjectLog } from './ProjectLog.js';
 
@@ -52,22 +52,6 @@ export type FetchPlatformVersionResponse = {
   activePlatformVersions: Array<string>;
 };
 
-export type ProjectStandardError = {
-  status: string;
-  id?: string;
-  category: string;
-  subCategory?: string;
-  message?: string;
-  errors?: Array<{
-    message: string;
-    in?: string;
-    code?: string;
-    subcateogy?: string;
-    context: object;
-  }>;
-  context: object;
-  links: { [key: string]: string };
-};
 
 export type WarnLogsResponse = {
   logs: Array<ProjectLog>;

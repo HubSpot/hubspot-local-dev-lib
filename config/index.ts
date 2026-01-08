@@ -32,7 +32,7 @@ import {
   doesConfigFileExistAtPath,
 } from './utils.js';
 import { CMS_PUBLISH_MODE } from '../constants/files.js';
-import { Environment } from '../types/Config.js';
+import { Environment } from '../types/Accounts.js';
 import { i18n } from '../utils/lang.js';
 import { getDefaultAccountOverrideAccountId } from './defaultAccountOverride.js';
 import { getValidEnv } from '../lib/environment.js';
@@ -269,7 +269,7 @@ export function getConfigDefaultAccount(): HubSpotConfigAccount {
   const globalConfigPath = getGlobalConfigFilePath();
   if (currentConfigPath === globalConfigPath && globalConfigFileExists()) {
     const defaultAccountOverrideAccountId =
-      getDefaultAccountOverrideAccountId();
+      getDefaultAccountOverrideAccountId(accounts);
     defaultAccountToUse = defaultAccountOverrideAccountId || defaultAccount;
   }
 
@@ -311,7 +311,7 @@ export function getConfigDefaultAccountIfExists():
   const globalConfigPath = getGlobalConfigFilePath();
   if (currentConfigPath === globalConfigPath && globalConfigFileExists()) {
     const defaultAccountOverrideAccountId =
-      getDefaultAccountOverrideAccountId();
+      getDefaultAccountOverrideAccountId(accounts);
     defaultAccountToUse = defaultAccountOverrideAccountId || defaultAccount;
   }
 

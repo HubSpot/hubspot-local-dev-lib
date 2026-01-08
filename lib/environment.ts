@@ -1,5 +1,5 @@
 import { ENVIRONMENTS } from '../constants/environments.js';
-import { Environment } from '../types/Config.js';
+import { Environment } from '../types/Accounts.js';
 
 export function getValidEnv(
   env?: string | null,

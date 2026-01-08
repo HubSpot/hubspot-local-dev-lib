@@ -1,12 +1,14 @@
 import { HUBSPOT_ACCOUNT_TYPES } from '../constants/config.js';
+import { ENVIRONMENTS } from '../constants/environments.js';
 import { CmsPublishMode } from './Files.js';
-import { Environment } from './Config.js';
 import { ValueOf } from './Utils.js';
 import {
   PERSONAL_ACCESS_KEY_AUTH_METHOD,
   OAUTH_AUTH_METHOD,
   API_KEY_AUTH_METHOD,
 } from '../constants/auth.js';
+
+export type Environment = ValueOf<typeof ENVIRONMENTS> | '';
 export type AuthType = 'personalaccesskey' | 'apikey' | 'oauth2';
 
 interface BaseHubSpotConfigAccount {
