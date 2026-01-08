@@ -316,7 +316,7 @@
       },
       "buildConfigFromEnvironment": {
         "missingAccountId": "HUBSPOT_ACCOUNT_ID is required, but not currently set",
-        "invalidAuthType": "Auth type is invalid. Use HUBSPOT_CLIENT_ID, HUBSPOT_CLIENT_SECRET, and HUBSPOT_REFRESH_TOKEN to authenticate with Oauth2, PERSONAL_ACCESS_KEY to authenticate with Personal Access Key, or API_KEY to authenticate with API Key."
+        "invalidAuthType": "Auth type is invalid. Use HUBSPOT_CLIENT_ID, HUBSPOT_CLIENT_SECRET, and HUBSPOT_REFRESH_TOKEN to authenticate with Oauth2, HUBSPOT_PERSONAL_ACCESS_KEY to authenticate with Personal Access Key, or API_KEY to authenticate with API Key."
       }
     },
     "defaultAccountOverride": {
