@@ -6,8 +6,11 @@ import {
   fetchSandboxHubData,
   fetchDeveloperTestAccountData,
 } from '../utils/personalAccessKey.js';
-import { PersonalAccessKeyConfigAccount } from '../types/Accounts.js';
-import { Environment } from '../types/Accounts.js';
+import {
+  PersonalAccessKeyConfigAccount,
+  Environment,
+} from '../types/Accounts.js';
+
 import {
   getConfigAccountById,
   getConfigAccountIfExists,
