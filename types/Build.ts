@@ -5,8 +5,10 @@ import {
   DEPLOYABLE_STATES,
 } from '../enums/build.js';
 import { ActivitySource } from './Activity.js';
-import { DeployStatusTaskLocator } from './Deploy.js';
-import { ProjectStandardError } from './Project.js';
+import {
+  DeployStatusTaskLocator,
+  ProjectStandardError,
+} from './ProjectComponents.js';
 
 export type SubbuildStatus = {
   buildName: string;

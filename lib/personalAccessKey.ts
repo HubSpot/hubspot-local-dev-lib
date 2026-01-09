@@ -3,14 +3,14 @@ import { ENVIRONMENTS } from '../constants/environments.js';
 import { PERSONAL_ACCESS_KEY_AUTH_METHOD } from '../constants/auth.js';
 import {
   fetchAccessToken,
-  fetchScopeAuthorizationData,
-} from '../api/localDevAuth.js';
-import { fetchSandboxHubData } from '../api/sandboxHubs.js';
+  fetchSandboxHubData,
+  fetchDeveloperTestAccountData,
+} from '../utils/personalAccessKey.js';
 import {
   PersonalAccessKeyConfigAccount,
-  ScopeGroupAuthorization,
+  Environment,
 } from '../types/Accounts.js';
-import { Environment } from '../types/Config.js';
+
 import {
   getConfigAccountById,
   getConfigAccountIfExists,
@@ -19,7 +19,6 @@ import {
   setConfigAccountAsDefault,
 } from '../config/index.js';
 import { HUBSPOT_ACCOUNT_TYPES } from '../constants/config.js';
-import { fetchDeveloperTestAccountData } from '../api/developerTestAccounts.js';
 import { logger } from './logger.js';
 import { i18n } from '../utils/lang.js';
 import { isHubSpotHttpError } from '../errors/index.js';
@@ -166,12 +165,6 @@ export async function scopesOnAccessToken(
   accountId: number
 ): Promise<Array<string>> {
   return (await getNewAccessTokenByAccountId(accountId)).scopeGroups;
-}
-
-export async function authorizedScopesForPortalAndUser(
-  accountId: number
-): Promise<Array<ScopeGroupAuthorization>> {
-  return (await fetchScopeAuthorizationData(accountId)).data.results;
 }
 
 export async function updateConfigWithAccessToken(

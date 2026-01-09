@@ -1,4 +1,12 @@
-import { vi, describe, it, expect, afterEach, MockedFunction, Mocked } from 'vitest';
+import {
+  vi,
+  describe,
+  it,
+  expect,
+  afterEach,
+  MockedFunction,
+  Mocked,
+} from 'vitest';
 import fs from 'fs-extra';
 import {
   getLocalConfigDefaultFilePath,

@@ -9,11 +9,13 @@ import {
 } from '../constants/config.js';
 import { i18n } from '../utils/lang.js';
 import { FileSystemError } from '../models/FileSystemError.js';
-import { getAllConfigAccounts } from './index.js';
+import { HubSpotConfigAccount } from '../types/Accounts.js';
 
 const i18nKey = 'config.defaultAccountOverride';
 
-export function getDefaultAccountOverrideAccountId(): number | null {
+export function getDefaultAccountOverrideAccountId(
+  accounts: Array<HubSpotConfigAccount>
+): number | null {
   const defaultAccountOverrideFilePath = getDefaultAccountOverrideFilePath();
 
   if (!defaultAccountOverrideFilePath) {
@@ -46,8 +48,6 @@ export function getDefaultAccountOverrideAccountId(): number | null {
       }
     );
   }
-
-  const accounts = getAllConfigAccounts();
 
   const account = accounts?.find(account => account.accountId === accountId);
   if (!account) {

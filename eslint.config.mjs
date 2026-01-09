@@ -28,6 +28,7 @@ export default [
         clearTimeout: 'readonly',
         setInterval: 'readonly',
         clearInterval: 'readonly',
+        structuredClone: 'readonly',
       },
     },
     plugins: {
@@ -42,6 +43,8 @@ export default [
       'import/no-default-export': 'error',
       'no-redeclare': 'off',
       '@typescript-eslint/no-redeclare': 'off',
+      'no-unused-vars': 'off',
+      '@typescript-eslint/no-unused-vars': ['error', { caughtErrors: 'none' }],
     },
   },
   {

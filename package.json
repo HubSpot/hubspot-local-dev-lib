@@ -13,6 +13,7 @@
   },
   "scripts": {
     "build": "tsx ./scripts/build.ts",
+    "circular-deps": "yarn madge --circular --extensions ts --exclude 'dist/.*' .",
     "lint": "eslint --max-warnings=0 . && prettier . --check",
     "local-dev": "yarn build && cd dist && yarn link && cd .. && tsc --watch --rootDir . --outdir dist",
     "prettier:write": "prettier . --write",
@@ -37,6 +38,7 @@
     "eslint": "^9.38.0",
     "eslint-plugin-import": "^2.31.0",
     "husky": "^8.0.0",
+    "madge": "^8.0.0",
     "open": "^8.4.2",
     "tsx": "^4.20.6",
     "typescript": "^5.9.3",

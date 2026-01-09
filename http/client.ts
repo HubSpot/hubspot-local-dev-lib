@@ -1,10 +1,13 @@
 import axios, { AxiosResponse, isAxiosError } from 'axios';
 import { HubSpotHttpError } from '../models/HubSpotHttpError.js';
 import { logger } from '../lib/logger.js';
-import { LOCALDEVAUTH_ACCESS_TOKEN_PATH } from '../api/localDevAuth.js';
-import { FIREALARM_API_AUTH_PATH } from '../api/fireAlarm.js';
 import * as util from 'util';
-import { CMS_CLI_USAGE_PATH, VSCODE_USAGE_PATH } from '../lib/trackUsage.js';
+import {
+  LOCALDEVAUTH_ACCESS_TOKEN_PATH,
+  FIREALARM_API_AUTH_PATH,
+  CMS_CLI_USAGE_PATH,
+  VSCODE_USAGE_PATH,
+} from '../constants/endpoints.js';
 
 // Create an isolated axios instance for this copy of local-dev-lib.
 // This prevents issues when multiple copies are loaded and share the global

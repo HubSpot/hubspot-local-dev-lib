@@ -6,13 +6,15 @@ import {
   getConfigAccountById,
   getConfigAccountEnvironment,
 } from '../config/index.js';
-import { FILE_MAPPER_API_PATH } from '../api/fileMapper.js';
+import {
+  FILE_MAPPER_API_PATH,
+  CMS_CLI_USAGE_PATH,
+  VSCODE_USAGE_PATH,
+} from '../constants/endpoints.js';
 import { i18n } from '../utils/lang.js';
 import { getValidEnv } from './environment.js';
 
 const i18nKey = 'lib.trackUsage';
-export const CMS_CLI_USAGE_PATH = `${FILE_MAPPER_API_PATH}/cms-cli-usage`;
-export const VSCODE_USAGE_PATH = `${FILE_MAPPER_API_PATH}/vscode-extension-usage`;
 
 export async function trackUsage(
   eventName: string,
@@ -55,7 +57,6 @@ export async function trackUsage(
         resolveWithFullResponse: true,
       });
       return;
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (e) {
       logger.debug(i18n(`${i18nKey}.retryingEventUnauthenticated`));
     }

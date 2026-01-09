@@ -1,13 +1,7 @@
-import { AxiosPromise } from 'axios';
-import { httpClient } from '../http/client.js';
 import { http } from '../http/index.js';
-import { getAxiosConfig } from '../http/getAxiosConfig.js';
-import { ENVIRONMENTS } from '../constants/environments.js';
 import { SANDBOX_TIMEOUT } from '../constants/api.js';
-import { Environment } from '../types/Config.js';
 import {
   SandboxPersonalAccessKey,
-  SandboxHubData,
   SandboxResponse,
   SandboxUsageLimitsResponse,
   V2Sandbox,
@@ -44,27 +38,6 @@ export function getSandboxUsageLimits(
   return http.get<SandboxUsageLimitsResponse>(parentAccountId, {
     url: `${SANDBOX_API_PATH}/parent/${parentAccountId}/usage`,
   });
-}
-
-export function fetchSandboxHubData(
-  accessToken: string,
-  accountId: number,
-  env: Environment = ENVIRONMENTS.PROD
-): AxiosPromise<SandboxHubData> {
-  const axiosConfig = getAxiosConfig({
-    env,
-    url: `${SANDBOX_API_PATH}/self`,
-    params: { portalId: accountId },
-  });
-  const reqWithToken = {
-    ...axiosConfig,
-    headers: {
-      ...axiosConfig.headers,
-      Authorization: `Bearer ${accessToken}`,
-    },
-  };
-
-  return httpClient<SandboxHubData>(reqWithToken);
 }
 
 export function createV2Sandbox(

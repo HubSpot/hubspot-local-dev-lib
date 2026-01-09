@@ -2,12 +2,13 @@ import {
   HubSpotHttpError,
   HubSpotHttpErrorName,
 } from '../models/HubSpotHttpError.js';
-import { BaseError } from '../types/Error.js';
 import {
   FilerSystemErrorName,
   FileSystemError,
 } from '../models/FileSystemError.js';
 import { HubSpotConfigError } from '../models/HubSpotConfigError.js';
+
+export { isSystemError } from './isSystemError.js';
 
 export function isSpecifiedError(
   err: unknown,
@@ -88,18 +89,6 @@ export function isGithubRateLimitError(err: unknown): err is HubSpotHttpError {
     !!err.headers &&
     err.headers['x-ratelimit-remaining'] === '0' &&
     'x-github-request-id' in err.headers
-  );
-}
-
-export function isSystemError(err: unknown): err is BaseError {
-  return (
-    err instanceof Error &&
-    'errno' in err &&
-    err.errno != null &&
-    'code' in err &&
-    err.code != null &&
-    'syscall' in err &&
-    err.syscall != null
   );
 }
 

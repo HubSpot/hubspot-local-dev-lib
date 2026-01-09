@@ -9,9 +9,11 @@ import {
   getConfigAccountIfExists as __getConfigAccountIfExists,
   getConfigDefaultAccountIfExists as __getConfigDefaultAccountIfExists,
 } from '../../config';
-import { fetchAccessToken as __fetchAccessToken } from '../../api/localDevAuth';
-import { fetchSandboxHubData as __fetchSandboxHubData } from '../../api/sandboxHubs';
-import { fetchDeveloperTestAccountData as __fetchDeveloperTestAccountData } from '../../api/developerTestAccounts';
+import {
+  fetchAccessToken as __fetchAccessToken,
+  fetchSandboxHubData as __fetchSandboxHubData,
+  fetchDeveloperTestAccountData as __fetchDeveloperTestAccountData,
+} from '../../utils/personalAccessKey';
 import { ENVIRONMENTS } from '../../constants/environments';
 import { HUBSPOT_ACCOUNT_TYPES } from '../../constants/config';
 import {
@@ -24,9 +26,7 @@ import { mockAxiosResponse } from './__utils__/mockAxiosResponse';
 
 vi.mock('../../config');
 vi.mock('../logger');
-vi.mock('../../api/localDevAuth');
-vi.mock('../../api/sandboxHubs');
-vi.mock('../../api/developerTestAccounts');
+vi.mock('../../utils/personalAccessKey');
 
 const updateConfigAccount = __updateConfigAccount as MockedFunction<
   typeof __updateConfigAccount
