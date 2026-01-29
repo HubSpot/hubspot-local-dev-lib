@@ -58,7 +58,7 @@ export function buildPackage(
 
 export function getBuildStatus(
   accountId: number,
-  buildId: number
+  buildId: number | string
 ): HubSpotPromise<GetBuildStatusResponse> {
   return http.get(accountId, {
     url: `${FUNCTION_API_PATH}/build/${buildId}/poll`,
