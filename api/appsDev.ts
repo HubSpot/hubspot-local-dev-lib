@@ -71,3 +71,17 @@ export function fetchAppMetadataByUid(
     },
   });
 }
+
+// Note: This is intentionally Project ID and not name
+export function fetchAppMetadataBySourceId(
+  projectId: number,
+  appUid: string,
+  accountId: number
+): HubSpotPromise<PublicApp> {
+  return http.get<PublicApp>(accountId, {
+    url: `${APPS_DEV_API_PATH}/project-id/${projectId}/source-id/${appUid}`,
+    params: {
+      sourceId: appUid,
+    },
+  });
+}
