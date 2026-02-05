@@ -55,6 +55,7 @@
     "./config/defaultAccountOverride": "./config/defaultAccountOverride.js",
     "./config/migrate": "./config/migrate.js",
     "./config/state": "./config/state.js",
+    "./config/hsSettings": "./config/hsSettings.js",
     "./config": "./config/index.js",
     "./constants/*": "./constants/*.js",
     "./enums/*": "./enums/*.js",

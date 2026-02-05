@@ -40,6 +40,7 @@ import { HubSpotConfigError } from '../models/HubSpotConfigError.js';
 import { HUBSPOT_CONFIG_ERROR_TYPES } from '../constants/config.js';
 import { isDeepEqual } from '../lib/isDeepEqual.js';
 import { getCwd } from '../lib/path.js';
+import { getHsSettingsFile } from './hsSettings.js';
 
 const EMPTY_CONFIG = { accounts: [] };
 
@@ -315,6 +316,12 @@ export function getConfigDefaultAccountIfExists():
     defaultAccountToUse = defaultAccountOverrideAccountId || defaultAccount;
   }
 
+  // Use the default account if .hs/settings.json is present
+  const hsSettingsFile = getHsSettingsFile();
+  if (hsSettingsFile && hsSettingsFile.localDefaultAccount) {
+    defaultAccountToUse = hsSettingsFile.localDefaultAccount;
+  }
+
   if (!defaultAccountToUse) {
     return;
   }
@@ -327,8 +334,18 @@ export function getConfigDefaultAccountIfExists():
   return account;
 }
 
-export function getAllConfigAccounts(): HubSpotConfigAccount[] {
-  const { accounts } = getConfig();
+export function getAllConfigAccounts(
+  showAll?: boolean
+): HubSpotConfigAccount[] {
+  let { accounts } = getConfig();
+
+  // Show only accounts in the .hs/settings.json file
+  if (!showAll) {
+    const hsSettingsFile = getHsSettingsFile();
+    accounts = accounts.filter(a =>
+      hsSettingsFile ? hsSettingsFile.accounts.includes(a.accountId) : true
+    );
+  }
 
   return accounts;
 }
