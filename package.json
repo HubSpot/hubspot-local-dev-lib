@@ -1,6 +1,6 @@
 {
   "name": "@hubspot/local-dev-lib",
-  "version": "5.1.0",
+  "version": "5.1.1-beta.0",
   "type": "module",
   "description": "Provides library functionality for HubSpot local development tooling, including the HubSpot CLI",
   "repository": {
