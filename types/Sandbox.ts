@@ -146,11 +146,6 @@ export type V2Sandbox = {
   updatedByUser?: User | null;
 };
 
-export type SandboxResponse = {
-  sandbox: Sandbox;
-  personalAccessKey: string;
-};
-
 export type Usage = {
   STANDARD: {
     used: number;
@@ -188,10 +183,6 @@ export type SandboxType = {
   diffEnabled: boolean;
   groupType: string;
   syncMandatory: boolean;
-};
-
-export type FetchTypesResponse = {
-  results: Array<SandboxType>;
 };
 
 export type SandboxPersonalAccessKey = {

@@ -2,7 +2,6 @@ import { http } from '../http/index.js';
 import { SANDBOX_TIMEOUT } from '../constants/api.js';
 import {
   SandboxPersonalAccessKey,
-  SandboxResponse,
   SandboxUsageLimitsResponse,
   V2Sandbox,
 } from '../types/Sandbox.js';
@@ -10,18 +9,6 @@ import { HubSpotPromise } from '../types/Http.js';
 
 const SANDBOX_API_PATH = 'sandbox-hubs/v1';
 const SANDBOX_API_PATH_V2 = 'sandbox-hubs/v2';
-
-export function createSandbox(
-  accountId: number,
-  name: string,
-  type: 1 | 2
-): HubSpotPromise<SandboxResponse> {
-  return http.post<SandboxResponse>(accountId, {
-    data: { name, type, generatePersonalAccessKey: true }, // For CLI, generatePersonalAccessKey will always be true since we'll be saving the entry to the config
-    timeout: SANDBOX_TIMEOUT,
-    url: SANDBOX_API_PATH_V2, // Create uses v2 for sandbox type and PAK generation support
-  });
-}
 
 export function deleteSandbox(
   parentAccountId: number,

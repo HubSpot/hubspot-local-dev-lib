@@ -96,9 +96,8 @@ export function readConfigFile(configPath: string): string {
 }
 
 export function removeUndefinedFieldsFromConfigAccount<
-  T extends
-    | HubSpotConfigAccount
-    | Partial<HubSpotConfigAccount> = HubSpotConfigAccount,
+  T extends HubSpotConfigAccount | Partial<HubSpotConfigAccount> =
+    HubSpotConfigAccount,
 >(account: T): T {
   Object.keys(account).forEach(k => {
     const key = k as keyof T;
