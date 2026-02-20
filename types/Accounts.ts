@@ -34,8 +34,7 @@ export type TokenInfo = {
   refreshToken?: string;
 };
 
-export interface PersonalAccessKeyConfigAccount
-  extends BaseHubSpotConfigAccount {
+export interface PersonalAccessKeyConfigAccount extends BaseHubSpotConfigAccount {
   authType: typeof PERSONAL_ACCESS_KEY_AUTH_METHOD.value;
   personalAccessKey: string;
   auth: {

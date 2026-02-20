@@ -146,6 +146,7 @@ export type V2Sandbox = {
   updatedByUser?: User | null;
 };
 
+/* TODO: Delete this type in the next major release (as of 2/20/2026) */
 export type SandboxResponse = {
   sandbox: Sandbox;
   personalAccessKey: string;
@@ -190,6 +191,7 @@ export type SandboxType = {
   syncMandatory: boolean;
 };
 
+/* TODO: Delete this type in the next major release (as of 2/20/2026) */
 export type FetchTypesResponse = {
   results: Array<SandboxType>;
 };

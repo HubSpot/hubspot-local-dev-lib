@@ -21,8 +21,9 @@ export interface ComponentMetadata<T> {
   deployOutput: unknown;
 }
 
-export interface TopLevelComponent
-  extends ComponentMetadata<ValueOf<typeof COMPONENT_TYPES>> {
+export interface TopLevelComponent extends ComponentMetadata<
+  ValueOf<typeof COMPONENT_TYPES>
+> {
   featureComponents: FeatureComponents[];
 }
 
@@ -37,8 +38,9 @@ export type TopLevelComponents =
   | PrivateAppComponentMetadata
   | TopLevelComponent;
 
-export interface FeatureComponent<T = unknown>
-  extends ComponentMetadata<ValueOf<typeof SUBCOMPONENT_TYPES>> {
+export interface FeatureComponent<T = unknown> extends ComponentMetadata<
+  ValueOf<typeof SUBCOMPONENT_TYPES>
+> {
   deployOutput: T;
 }
 
