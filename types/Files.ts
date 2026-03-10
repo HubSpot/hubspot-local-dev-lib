@@ -34,6 +34,7 @@ export type FileMapperInputOptions = {
   staging?: boolean;
   assetVersion?: string;
   overwrite?: boolean;
+  timeout?: number;
 };
 
 export type FileType = ValueOf<typeof FILE_TYPES>;
