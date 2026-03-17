@@ -1,4 +1,4 @@
 export type HsSettingsFile = {
-  localDefaultAccount: number;
+  localDefaultAccount: number | undefined;
   accounts: number[];
 };
