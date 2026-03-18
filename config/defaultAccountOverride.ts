@@ -65,6 +65,24 @@ export function getDefaultAccountOverrideAccountId(
   return account.accountId;
 }
 
+export function removeDefaultAccountOverrideFile(): void {
+  const filePath = getDefaultAccountOverrideFilePath();
+  if (!filePath) {
+    return;
+  }
+  try {
+    fs.unlinkSync(filePath);
+  } catch (e) {
+    throw new FileSystemError(
+      { cause: e },
+      {
+        filepath: filePath,
+        operation: 'write',
+      }
+    );
+  }
+}
+
 export function getDefaultAccountOverrideFilePath(): string | null {
   return findup([DEFAULT_ACCOUNT_OVERRIDE_FILE_NAME], {
     cwd: getCwd(),
