@@ -5,7 +5,6 @@ import {
   HS_FOLDER,
   HS_README_FILENAME,
   HS_SETTINGS_FILENAME,
-  HS_SETTINGS_PATH,
 } from '../constants/config.js';
 import { getCwd } from '../lib/path.js';
 import { HsSettingsFile } from '../types/HsSettings.js';
@@ -61,7 +60,7 @@ export function writeHsSettingsFile(settingsFile: HsSettingsFile): void {
   try {
     fs.mkdirSync(hsFolderPath, { recursive: true });
     fs.writeFileSync(
-      HS_SETTINGS_PATH,
+      path.join(dir, HS_FOLDER, HS_SETTINGS_FILENAME),
       JSON.stringify(settingsFile, null, 2),
       'utf8'
     );

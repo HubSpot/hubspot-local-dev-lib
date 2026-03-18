@@ -1,7 +1,6 @@
 import { i18n } from '../utils/lang.js';
 import path from 'path';
 import os from 'os';
-import { getCwd } from '../lib/path.js';
 
 export const DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME = 'hubspot.config.yml';
 export const ARCHIVED_HUBSPOT_CONFIG_YAML_FILE_NAME =
@@ -135,8 +134,3 @@ export const HUBSPOT_CONFIG_OPERATIONS = {
 export const HS_FOLDER = '.hs';
 export const HS_SETTINGS_FILENAME = 'settings.json';
 export const HS_README_FILENAME = 'README.txt';
-export const HS_SETTINGS_PATH = path.join(
-  getCwd(),
-  HS_FOLDER,
-  HS_SETTINGS_FILENAME
-);
