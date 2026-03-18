@@ -1,6 +1,6 @@
 {
   "name": "@hubspot/local-dev-lib",
-  "version": "5.1.0",
+  "version": "5.1.2",
   "type": "module",
   "description": "Provides library functionality for HubSpot local development tooling, including the HubSpot CLI",
   "repository": {
@@ -81,7 +81,7 @@
     "http-proxy-agent": "7.0.2",
     "https-proxy-agent": "7.0.6",
     "ignore": "^7.0.0",
-    "js-yaml": "4.1.0",
+    "js-yaml": "4.1.1",
     "moment": "2.30.1",
     "p-queue": "^7.0.0",
     "prettier": "^3.6.2",
