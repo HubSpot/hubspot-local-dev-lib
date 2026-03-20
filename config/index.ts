@@ -266,12 +266,17 @@ export function getConfigDefaultAccount(): HubSpotConfigAccount {
 
   let defaultAccountToUse = defaultAccount;
 
-  const currentConfigPath = getConfigFilePath();
-  const globalConfigPath = getGlobalConfigFilePath();
-  if (currentConfigPath === globalConfigPath && globalConfigFileExists()) {
-    const defaultAccountOverrideAccountId =
-      getDefaultAccountOverrideAccountId(accounts);
-    defaultAccountToUse = defaultAccountOverrideAccountId || defaultAccount;
+  const hsSettingsFile = getHsSettingsFile();
+  if (hsSettingsFile && hsSettingsFile.localDefaultAccount) {
+    defaultAccountToUse = hsSettingsFile.localDefaultAccount;
+  } else {
+    const currentConfigPath = getConfigFilePath();
+    const globalConfigPath = getGlobalConfigFilePath();
+    if (currentConfigPath === globalConfigPath && globalConfigFileExists()) {
+      const defaultAccountOverrideAccountId =
+        getDefaultAccountOverrideAccountId(accounts);
+      defaultAccountToUse = defaultAccountOverrideAccountId || defaultAccount;
+    }
   }
 
   if (!defaultAccountToUse) {
@@ -307,19 +312,17 @@ export function getConfigDefaultAccountIfExists():
 
   let defaultAccountToUse = defaultAccount;
 
-  // Only check for default account override if we're using the global config
-  const currentConfigPath = getConfigFilePath();
-  const globalConfigPath = getGlobalConfigFilePath();
-  if (currentConfigPath === globalConfigPath && globalConfigFileExists()) {
-    const defaultAccountOverrideAccountId =
-      getDefaultAccountOverrideAccountId(accounts);
-    defaultAccountToUse = defaultAccountOverrideAccountId || defaultAccount;
-  }
-
-  // Use the default account if .hs/settings.json is present
   const hsSettingsFile = getHsSettingsFile();
   if (hsSettingsFile && hsSettingsFile.localDefaultAccount) {
     defaultAccountToUse = hsSettingsFile.localDefaultAccount;
+  } else {
+    const currentConfigPath = getConfigFilePath();
+    const globalConfigPath = getGlobalConfigFilePath();
+    if (currentConfigPath === globalConfigPath && globalConfigFileExists()) {
+      const defaultAccountOverrideAccountId =
+        getDefaultAccountOverrideAccountId(accounts);
+      defaultAccountToUse = defaultAccountOverrideAccountId || defaultAccount;
+    }
   }
 
   if (!defaultAccountToUse) {
@@ -334,20 +337,20 @@ export function getConfigDefaultAccountIfExists():
   return account;
 }
 
-export function getAllConfigAccounts(
-  showAll?: boolean
-): HubSpotConfigAccount[] {
-  let { accounts } = getConfig();
+export function getAllConfigAccounts(): HubSpotConfigAccount[] {
+  const { accounts } = getConfig();
+  return accounts;
+}
 
-  // Show only accounts in the .hs/settings.json file
-  if (!showAll) {
-    const hsSettingsFile = getHsSettingsFile();
-    accounts = accounts.filter(a =>
-      hsSettingsFile ? hsSettingsFile.accounts.includes(a.accountId) : true
-    );
+export function getLinkedConfigAccounts(): HubSpotConfigAccount[] {
+  const { accounts } = getConfig();
+  const hsSettingsFile = getHsSettingsFile();
+
+  if (!hsSettingsFile) {
+    return accounts;
   }
 
-  return accounts;
+  return accounts.filter(a => hsSettingsFile.accounts.includes(a.accountId));
 }
 
 export function getConfigAccountEnvironment(
