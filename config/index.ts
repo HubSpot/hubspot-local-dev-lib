@@ -339,6 +339,7 @@ export function getConfigDefaultAccountIfExists():
 
 export function getAllConfigAccounts(): HubSpotConfigAccount[] {
   const { accounts } = getConfig();
+
   return accounts;
 }
 
