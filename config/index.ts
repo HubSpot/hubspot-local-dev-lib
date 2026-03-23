@@ -40,7 +40,7 @@ import { HubSpotConfigError } from '../models/HubSpotConfigError.js';
 import { HUBSPOT_CONFIG_ERROR_TYPES } from '../constants/config.js';
 import { isDeepEqual } from '../lib/isDeepEqual.js';
 import { getCwd } from '../lib/path.js';
-import { getHsSettingsFile } from './hsSettings.js';
+import { getHsSettingsFileIfExists } from './hsSettings.js';
 
 const EMPTY_CONFIG = { accounts: [] };
 
@@ -266,7 +266,7 @@ export function getConfigDefaultAccount(): HubSpotConfigAccount {
 
   let defaultAccountToUse = defaultAccount;
 
-  const hsSettingsFile = getHsSettingsFile();
+  const hsSettingsFile = getHsSettingsFileIfExists();
   if (hsSettingsFile && hsSettingsFile.localDefaultAccount) {
     defaultAccountToUse = hsSettingsFile.localDefaultAccount;
   } else {
@@ -312,7 +312,7 @@ export function getConfigDefaultAccountIfExists():
 
   let defaultAccountToUse = defaultAccount;
 
-  const hsSettingsFile = getHsSettingsFile();
+  const hsSettingsFile = getHsSettingsFileIfExists();
   if (hsSettingsFile && hsSettingsFile.localDefaultAccount) {
     defaultAccountToUse = hsSettingsFile.localDefaultAccount;
   } else {
@@ -343,9 +343,9 @@ export function getAllConfigAccounts(): HubSpotConfigAccount[] {
   return accounts;
 }
 
-export function getLinkedConfigAccounts(): HubSpotConfigAccount[] {
+export function getLinkedOrAllConfigAccounts(): HubSpotConfigAccount[] {
   const { accounts } = getConfig();
-  const hsSettingsFile = getHsSettingsFile();
+  const hsSettingsFile = getHsSettingsFileIfExists();
 
   if (!hsSettingsFile) {
     return accounts;

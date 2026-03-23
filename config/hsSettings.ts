@@ -28,7 +28,7 @@ export function getHsSettingsFilePath(): string | null {
   });
 }
 
-export function getHsSettingsFile(): HsSettingsFile | null {
+export function getHsSettingsFileIfExists(): HsSettingsFile | null {
   const hsSettingsFilePath = getHsSettingsFilePath();
 
   if (!hsSettingsFilePath) {
