@@ -347,7 +347,7 @@ export function getLinkedOrAllConfigAccounts(): HubSpotConfigAccount[] {
   const { accounts } = getConfig();
   const hsSettingsFile = getHsSettingsFileIfExists();
 
-  if (!hsSettingsFile) {
+  if (!hsSettingsFile || hsSettingsFile.accounts.length === 0) {
     return accounts;
   }
 
