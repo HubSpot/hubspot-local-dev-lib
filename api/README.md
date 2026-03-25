@@ -19,12 +19,12 @@ This library also includes utils that handle request errors. Check out the [Erro
 
 Here's how to use the `addSecret` API util:
 
-```js
-const { loadConfig } = require('@hubspot/local-dev-lib/config');
-const { addSecret } = require('@hubspot/local-dev-lib/api/secrets');
+```typescript
+import { getConfig } from '@hubspot/local-dev-lib/config';
+import { addSecret } from '@hubspot/local-dev-lib/api/secrets';
 
 // Parse and store the config file information
-loadConfig();
+getConfig();
 const accountId = 12345;
 await addSecret(accountId, 'my-secret-name', 'my-secret-value');
 ```
