@@ -4,12 +4,7 @@
 
 These API utils simplify making requests to some of HubSpot's public API endpoints.
 
-To use these API utils, you need to:
-
-- Have a HubSpot configuration file, populated with valid account information
-- Parse and store the configuration file in memory using the available config file utils
-
-Once those steps are complete, you can make requests with these utils. The HTTP wrapper will handle all of the authentication requirements, such as formatting the header and token refreshes.
+To use these API utils, you need to have a HubSpot configuration file populated with valid account information. The HTTP wrapper will automatically load the config and handle all of the authentication requirements, such as formatting the header and token refreshes, so there is no need to call `getConfig()` before making requests.
 
 ## Error handling
 
@@ -20,11 +15,8 @@ This library also includes utils that handle request errors. Check out the [Erro
 Here's how to use the `addSecret` API util:
 
 ```typescript
-import { getConfig } from '@hubspot/local-dev-lib/config';
 import { addSecret } from '@hubspot/local-dev-lib/api/secrets';
 
-// Parse and store the config file information
-getConfig();
 const accountId = 12345;
 await addSecret(accountId, 'my-secret-name', 'my-secret-value');
 ```

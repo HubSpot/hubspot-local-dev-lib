@@ -9,7 +9,7 @@ The HubSpot local development tooling uses configuration files to store informat
 There are two types of config files:
 
 - **Global config** (`~/.hscli/config.yml`) — stores all authenticated accounts in one place. This is the recommended approach and is used by `hs account auth`.
-- **Local config** (`hubspot.config.yml`) — a legacy per-project config file found via findup. Deprecatedeeeeee in favor of global config.
+- **Local config** (`hubspot.config.yml`) — a legacy per-project config file found via findup. Deprecated in favor of global config.
 
 ### Per-directory linking (`.hs/settings.json`)
 

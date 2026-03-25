@@ -9,12 +9,13 @@ This is `@hubspot/local-dev-lib` — a shared TypeScript library that provides c
 - **Config utils** (`config/`) — manage HubSpot account configuration files. `getConfig()` resolves config using: env vars → global config (`~/.hscli/config.yml`) → local config (findup). Key functions: `getConfig()`, `updateConfigAccount()`, `getConfigAccountById()`, `getConfigAccountByName()`, `getLinkedOrAllConfigAccounts()`.
 - **Per-directory linking** (`config/hsSettings.ts`) — `.hs/settings.json` scopes which accounts are active for a directory. Created by `hs account link`. Contains `accounts` (array of linked account IDs) and `localDefaultAccount`.
 - **API utils** (`api/`) — HTTP calls to HubSpot public API endpoints. Requires a parsed config in memory. The HTTP wrapper handles auth headers and token refreshes automatically.
-- **Lib utils** (`lib/`) — filesystem navigation, HubSpot account connections (sandboxes), file parsing, and GitHub integration.
+- **Lib utils** (`lib/`) — exported functions and modules: filesystem navigation, HubSpot account connections (sandboxes), file parsing, and GitHub integration. Anything exported from the repo should live here (excluding special cases like `config/`).
+- **Internal utils** (`utils/`) — internal helper functions that are NOT exported from the repo.
 - **Error utils** (`errors/`) — standardized error handling. This library throws errors rather than logging them — consumers catch and handle. Custom errors: `HubSpotHttpError` (HTTP failures with status/method/payload metadata), `HubSpotConfigError` (config issues), `FileSystemError` (FS operations with read/write context). Type predicates help identify timeouts, auth errors, and missing scopes.
 
 # Key Consumers
 
-- **HubSpot CLI** (`hubspot-cli-private`) — the primary consumer
+- **HubSpot CLI** (`hubspot-cli`) — the primary consumer
 - **VS Code extension** — uses config and API functions
 
 Changes here affect all consumers. Be careful with breaking changes to exported function signatures.

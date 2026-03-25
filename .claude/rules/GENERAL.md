@@ -30,7 +30,7 @@ Before creating or modifying anything, study how the codebase already does it.
 
 ### Before adding a new function
 
-1. Check if it already exists in `lib/`, `config/`, or `api/`
+1. Check if it already exists in `lib/`, `config/`, `api/`, or `utils/`
 2. Read comparable functions to understand the pattern
 3. Follow the same structure exactly
 
@@ -38,6 +38,7 @@ Before creating or modifying anything, study how the codebase already does it.
 
 1. Check `types/` for existing type definitions
 2. Follow the discriminated union pattern used for account types
+3. Ensure the type is exported from the repo via `package.json` `exports`
 
 ### Before adding user-facing strings
 
@@ -57,7 +58,8 @@ Stop and alert the user. Do NOT silently pick one pattern over another.
 - `errors/` — Custom error classes (`HubSpotHttpError`, `HubSpotConfigError`, `FileSystemError`)
 - `http/` — Axios wrapper with HubSpot auth
 - `lang/` — i18n strings (`en.json`)
-- `lib/` — Utility functions (path, fileManager, logger, oauth, etc.)
+- `lib/` — Exported functions and modules (path, fileManager, logger, oauth, etc.). Anything exported from the repo should live here (excluding special cases like `config/`).
+- `utils/` — Internal helper functions that are NOT exported from the repo
 - `models/` — Business logic classes
 - `types/` — TypeScript type definitions
 
