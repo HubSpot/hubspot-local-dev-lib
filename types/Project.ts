@@ -60,13 +60,13 @@ export type WarnLogsResponse = {
 
 export type Release = {
   releaseTag: string;
-  buildId: string;
+  buildId: number;
   createdAt: string;
-  components?: Array<{ // TODO: should this by its own type? some of these values from the Subbuild status
+  components?: Array<{
     buildType: ValueOf<typeof SUBBUILD_TYPES>;
-    buildName: string;
-    rootPath: string;
-    id: string;
+    buildName?: string;
+    rootPath?: string;
+    id?: string;
   }>;
 };
 

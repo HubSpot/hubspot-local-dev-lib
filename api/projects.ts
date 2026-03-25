@@ -378,7 +378,6 @@ export function fetchDeployWarnLogs(
   });
 }
 
-// TODO: are there better function names?
 export function createRelease(
   accountId: number,
   projectName: string,
@@ -397,7 +396,7 @@ export function listReleases(
 ): HubSpotPromise<FetchListReleasesResponse> {
   return http.get<FetchListReleasesResponse>(accountId, {
     url: `${PROJECTS_API_PATH}/${encodeURIComponent(projectName)}/releases`,
-    data: params,
+    params,
   });
 }
 
@@ -405,9 +404,9 @@ export function getReleaseInfo(
   accountId: number,
   projectName: string,
   releaseTag: string
-): HubSpotPromise<Build> {
+): HubSpotPromise<Release> {
   return http.get(accountId, {
-    url: `${PROJECTS_API_PATH}/${encodeURIComponent(projectName)}/${encodeURIComponent(releaseTag)}`, // TODO: does releaseTag need to be encoded?
+    url: `${PROJECTS_API_PATH}/${encodeURIComponent(projectName)}/releases/${encodeURIComponent(releaseTag)}`,
   });
 }
 /**
