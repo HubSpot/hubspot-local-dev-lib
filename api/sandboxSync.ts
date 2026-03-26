@@ -8,6 +8,10 @@ import { SANDBOX_TIMEOUT } from '../constants/api.js';
 import { HubSpotPromise } from '../types/Http.js';
 const SANDBOXES_SYNC_API_PATH = 'sandboxes-sync/v1';
 
+/* TODO: Delete this entire file in the next major release (as of 2/20/2026) */
+/**
+ * @deprecated Sync functionality has been deprecated and will be removed in a future release.
+ */
 export async function initiateSync(
   fromHubId: number,
   toHubId: number,
@@ -27,6 +31,9 @@ export async function initiateSync(
   });
 }
 
+/**
+ * @deprecated
+ */
 export async function fetchTypes(
   accountId: number,
   toHubId: number

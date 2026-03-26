@@ -146,6 +146,9 @@ export type V2Sandbox = {
   updatedByUser?: User | null;
 };
 
+/**
+ * @deprecated This type is deprecated and will be removed in the next major release.
+ */
 export type SandboxResponse = {
   sandbox: Sandbox;
   personalAccessKey: string;
@@ -190,6 +193,9 @@ export type SandboxType = {
   syncMandatory: boolean;
 };
 
+/**
+ * @deprecated This type is deprecated and will be removed in the next major release.
+ */
 export type FetchTypesResponse = {
   results: Array<SandboxType>;
 };
