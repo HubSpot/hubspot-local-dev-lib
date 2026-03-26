@@ -11,6 +11,10 @@ import { HubSpotPromise } from '../types/Http.js';
 const SANDBOX_API_PATH = 'sandbox-hubs/v1';
 const SANDBOX_API_PATH_V2 = 'sandbox-hubs/v2';
 
+/* TODO: Delete createSandbox in the next major release (as of 2/20/2026) */
+/**
+ * @deprecated Use createV2Sandbox instead
+ */
 export function createSandbox(
   accountId: number,
   name: string,
