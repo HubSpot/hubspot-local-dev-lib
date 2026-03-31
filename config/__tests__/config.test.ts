@@ -35,29 +35,29 @@ import {
   isConfigFlagEnabled,
   getGlobalConfigFilePath,
   getLocalConfigFilePathIfExists,
-} from '../index';
-import { HubSpotConfigAccount } from '../../types/Accounts';
-import { HubSpotConfig } from '../../types/Config';
+} from '../index.js';
+import { HubSpotConfigAccount } from '../../types/Accounts.js';
+import { HubSpotConfig } from '../../types/Config.js';
 import {
   PersonalAccessKeyConfigAccount,
   OAuthConfigAccount,
   APIKeyConfigAccount,
-} from '../../types/Accounts';
+} from '../../types/Accounts.js';
 import {
   PERSONAL_ACCESS_KEY_AUTH_METHOD,
   OAUTH_AUTH_METHOD,
   API_KEY_AUTH_METHOD,
-} from '../../constants/auth';
-import { getLocalConfigDefaultFilePath, formatConfigForWrite } from '../utils';
-import { getDefaultAccountOverrideAccountId } from '../defaultAccountOverride';
+} from '../../constants/auth.js';
+import { getLocalConfigDefaultFilePath, formatConfigForWrite } from '../utils.js';
+import { getDefaultAccountOverrideAccountId } from '../defaultAccountOverride.js';
 import {
   CONFIG_FLAGS,
   ENVIRONMENT_VARIABLES,
   HUBSPOT_CONFIGURATION_FOLDER,
-} from '../../constants/config';
-import * as utils from '../utils';
-import { CmsPublishMode } from '../../types/Files';
-import { i18n } from '../../utils/lang';
+} from '../../constants/config.js';
+import * as utils from '../utils.js';
+import { CmsPublishMode } from '../../types/Files.js';
+import { i18n } from '../../utils/lang.js';
 
 vi.mock('findup-sync');
 vi.mock('../../lib/path');

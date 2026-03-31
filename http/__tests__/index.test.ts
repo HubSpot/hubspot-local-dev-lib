@@ -8,17 +8,17 @@ import {
   MockedFunction,
 } from 'vitest';
 import { AxiosError } from 'axios';
-import { httpClient } from '../client';
+import { httpClient } from '../client.js';
 import fs from 'fs-extra';
 import moment from 'moment';
 import {
   getConfig as __getConfig,
   getConfigAccountById as __getConfigAccountById,
-} from '../../config';
-import { ENVIRONMENTS } from '../../constants/environments';
-import { http } from '../';
+} from '../../config/index.js';
+import { ENVIRONMENTS } from '../../constants/environments.js';
+import { http } from '../index.js';
 import pkg from '../../package.json' with { type: 'json' };
-import { HubSpotConfigAccount } from '../../types/Accounts';
+import { HubSpotConfigAccount } from '../../types/Accounts.js';
 
 vi.mock('fs-extra');
 vi.mock('../client');
