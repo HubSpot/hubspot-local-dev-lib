@@ -19,6 +19,7 @@ import {
   Deploy,
   ProjectDeployResponse,
   ProjectDeployResponseV1,
+  ProjectDeletionResponse,
 } from '../types/Deploy.js';
 import {
   MigrateAppResponse,
@@ -141,6 +142,17 @@ export function deleteProject(
 ): HubSpotPromise<void> {
   return http.delete(accountId, {
     url: `${DEVELOPER_PROJECTS_API_PATH}/${encodeURIComponent(projectName)}`,
+  });
+}
+
+export function stageProjectForDeletion(
+  accountId: number,
+  projectName: string,
+  dryRun: boolean
+): HubSpotPromise<ProjectDeletionResponse> {
+  return http.post<ProjectDeletionResponse>(accountId, {
+    url: `${PROJECTS_DEPLOY_API_PATH_V3}/deploys/delete`,
+    data: { projectName, dryRun },
   });
 }
 

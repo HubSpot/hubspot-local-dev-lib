@@ -65,3 +65,14 @@ export type ProjectDeployResponseV1 = {
   id: string;
   links: DeployResponseLinks;
 };
+
+export type DeployedComponentInfo = {
+  componentType: string;
+  componentId: string;
+};
+
+export type ProjectDeletionResponse = {
+  deployId?: number;
+  componentsToRemove: DeployedComponentInfo[];
+  hasDeployedComponents: boolean;
+};
