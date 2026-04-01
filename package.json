@@ -3,6 +3,10 @@
   "version": "5.2.0",
   "type": "module",
   "description": "Provides library functionality for HubSpot local development tooling, including the HubSpot CLI",
+  "files": [
+    "**/*",
+    "!**/__tests__/**"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/HubSpot/hubspot-local-dev-lib"

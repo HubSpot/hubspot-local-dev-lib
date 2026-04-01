@@ -26,28 +26,28 @@ import {
   getConfigAccountIndexById,
   validateConfigAccount,
   handleConfigFileSystemError,
-} from '../utils';
-import { HubSpotConfigError } from '../../models/HubSpotConfigError';
-import { getCwd } from '../../lib/path';
+} from '../utils.js';
+import { HubSpotConfigError } from '../../models/HubSpotConfigError.js';
+import { getCwd } from '../../lib/path.js';
 import {
   DeprecatedHubSpotConfigAccountFields,
   HubSpotConfigAccount,
   PersonalAccessKeyConfigAccount,
   OAuthConfigAccount,
   APIKeyConfigAccount,
-} from '../../types/Accounts';
+} from '../../types/Accounts.js';
 import {
   DeprecatedHubSpotConfigFields,
   HubSpotConfig,
-} from '../../types/Config';
-import { ENVIRONMENT_VARIABLES } from '../../constants/config';
-import { FileSystemError } from '../../models/FileSystemError';
+} from '../../types/Config.js';
+import { ENVIRONMENT_VARIABLES } from '../../constants/config.js';
+import { FileSystemError } from '../../models/FileSystemError.js';
 import {
   PERSONAL_ACCESS_KEY_AUTH_METHOD,
   OAUTH_AUTH_METHOD,
   API_KEY_AUTH_METHOD,
-} from '../../constants/auth';
-import { i18n } from '../../utils/lang';
+} from '../../constants/auth.js';
+import { i18n } from '../../utils/lang.js';
 
 vi.mock('findup-sync');
 vi.mock('../../lib/path');

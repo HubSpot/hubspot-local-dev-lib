@@ -1,19 +1,19 @@
 import { vi, MockedFunction } from 'vitest';
-import { httpClient } from '../../http/client';
-import { trackUsage } from '../trackUsage';
+import { httpClient } from '../../http/client.js';
+import { trackUsage } from '../trackUsage.js';
 import {
   getConfigAccountById as __getConfigAccountById,
   getConfig as __getConfig,
-} from '../../config';
-import { HubSpotConfigAccount } from '../../types/Accounts';
-import { ENVIRONMENTS } from '../../constants/environments';
+} from '../../config/index.js';
+import { HubSpotConfigAccount } from '../../types/Accounts.js';
+import { ENVIRONMENTS } from '../../constants/environments.js';
 import {
   FILE_MAPPER_API_PATH,
   CMS_CLI_USAGE_PATH,
   VSCODE_USAGE_PATH,
-} from '../../constants/endpoints';
-import { logger } from '../logger';
-import { http } from '../../http';
+} from '../../constants/endpoints.js';
+import { logger } from '../logger.js';
+import { http } from '../../http/index.js';
 
 vi.mock('../../config');
 vi.mock('../logger');

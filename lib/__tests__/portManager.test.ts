@@ -152,7 +152,7 @@ describe('lib/portManager', () => {
 
   describe('requestPorts()', () => {
     beforeEach(() => {
-      mockedPortManagerServer.server = {}; // Mock running server
+      mockedPortManagerServer.server = {} as unknown as typeof mockedPortManagerServer.server; // Mock running server
     });
 
     it('returns ports when none are specified', async () => {
@@ -229,7 +229,7 @@ describe('lib/portManager', () => {
 
   describe('deleteServerInstance()', () => {
     beforeEach(() => {
-      mockedPortManagerServer.server = {}; // Mock running server
+      mockedPortManagerServer.server = {} as unknown as typeof mockedPortManagerServer.server; // Mock running server
     });
 
     it('deletes port data for a server instance', async () => {
@@ -252,7 +252,7 @@ describe('lib/portManager', () => {
 
   describe('portManagerHasActiveServers()', () => {
     beforeEach(() => {
-      mockedPortManagerServer.server = {}; // Mock running server
+      mockedPortManagerServer.server = {} as unknown as typeof mockedPortManagerServer.server; // Mock running server
     });
 
     it('returns false when no servers are active', async () => {
@@ -292,7 +292,7 @@ describe('lib/portManager', () => {
 
   describe('getActiveServers()', () => {
     beforeEach(() => {
-      mockedPortManagerServer.server = {}; // Mock running server
+      mockedPortManagerServer.server = {} as unknown as typeof mockedPortManagerServer.server; // Mock running server
     });
 
     it('returns the servers', async () => {
@@ -317,7 +317,7 @@ describe('lib/portManager', () => {
 
   describe('getServerPortByInstanceId()', () => {
     beforeEach(() => {
-      mockedPortManagerServer.server = {}; // Mock running server
+      mockedPortManagerServer.server = {} as unknown as typeof mockedPortManagerServer.server; // Mock running server
     });
 
     it('returns the port for known server instances', async () => {

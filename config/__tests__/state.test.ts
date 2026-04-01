@@ -1,6 +1,6 @@
 import { vi, describe, it, expect, beforeEach, afterEach, Mock } from 'vitest';
 import path from 'path';
-import { STATE_FILE_PATH } from '../../constants/config';
+import { STATE_FILE_PATH } from '../../constants/config.js';
 
 vi.mock('../../utils/lang', () => ({
   i18n: vi.fn((key: string) => key),
@@ -18,7 +18,7 @@ vi.mock('fs', async () => {
 });
 
 import * as fs from 'fs';
-import { getStateValue, setStateValue } from '../state';
+import { getStateValue, setStateValue } from '../state.js';
 
 const existsSyncSpy = fs.existsSync as unknown as Mock;
 const readFileSyncSpy = fs.readFileSync as unknown as Mock;

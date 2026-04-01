@@ -9,19 +9,19 @@ import {
   mergeConfigProperties,
   mergeConfigAccounts,
   archiveConfigAtPath,
-} from '../migrate';
-import { HubSpotConfig } from '../../types/Config';
-import { readConfigFile, writeConfigFile } from '../utils';
+} from '../migrate.js';
+import { HubSpotConfig } from '../../types/Config.js';
+import { readConfigFile, writeConfigFile } from '../utils.js';
 import {
   CONFIG_FLAGS,
   ENV,
   DEFAULT_ACCOUNT,
   ARCHIVED_HUBSPOT_CONFIG_YAML_FILE_NAME,
-} from '../../constants/config';
-import { ENVIRONMENTS } from '../../constants/environments';
-import { PERSONAL_ACCESS_KEY_AUTH_METHOD } from '../../constants/auth';
-import { PersonalAccessKeyConfigAccount } from '../../types/Accounts';
-import { createEmptyConfigFile, getGlobalConfigFilePath } from '../index';
+} from '../../constants/config.js';
+import { ENVIRONMENTS } from '../../constants/environments.js';
+import { PERSONAL_ACCESS_KEY_AUTH_METHOD } from '../../constants/auth.js';
+import { PersonalAccessKeyConfigAccount } from '../../types/Accounts.js';
+import { createEmptyConfigFile, getGlobalConfigFilePath } from '../index.js';
 
 vi.mock('fs', async () => {
   const actual = await vi.importActual<typeof import('fs')>('fs');
@@ -36,7 +36,7 @@ vi.mock('fs', async () => {
 });
 
 vi.mock('../utils', async () => {
-  const actual = await vi.importActual<typeof import('../utils')>('../utils');
+  const actual = await vi.importActual<typeof import('../utils.js')>('../utils.js');
   return {
     ...actual,
     readConfigFile: vi.fn(),
@@ -45,7 +45,7 @@ vi.mock('../utils', async () => {
 });
 
 vi.mock('../index', async () => {
-  const actual = await vi.importActual<typeof import('../index')>('../index');
+  const actual = await vi.importActual<typeof import('../index.js')>('../index.js');
   return {
     ...actual,
     createEmptyConfigFile: vi.fn(),

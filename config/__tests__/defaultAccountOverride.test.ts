@@ -4,9 +4,9 @@ import findup from 'findup-sync';
 import {
   getDefaultAccountOverrideAccountId,
   getDefaultAccountOverrideFilePath,
-} from '../defaultAccountOverride';
-import { PersonalAccessKeyConfigAccount } from '../../types/Accounts';
-import { PERSONAL_ACCESS_KEY_AUTH_METHOD } from '../../constants/auth';
+} from '../defaultAccountOverride.js';
+import { PersonalAccessKeyConfigAccount } from '../../types/Accounts.js';
+import { PERSONAL_ACCESS_KEY_AUTH_METHOD } from '../../constants/auth.js';
 
 vi.mock('fs-extra');
 vi.mock('findup-sync');

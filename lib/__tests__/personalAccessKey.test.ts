@@ -8,21 +8,21 @@ import {
   setConfigAccountAsDefault as __setConfigAccountAsDefault,
   getConfigAccountIfExists as __getConfigAccountIfExists,
   getConfigDefaultAccountIfExists as __getConfigDefaultAccountIfExists,
-} from '../../config';
+} from '../../config/index.js';
 import {
   fetchAccessToken as __fetchAccessToken,
   fetchSandboxHubData as __fetchSandboxHubData,
   fetchDeveloperTestAccountData as __fetchDeveloperTestAccountData,
-} from '../../utils/personalAccessKey';
-import { ENVIRONMENTS } from '../../constants/environments';
-import { HUBSPOT_ACCOUNT_TYPES } from '../../constants/config';
+} from '../../utils/personalAccessKey.js';
+import { ENVIRONMENTS } from '../../constants/environments.js';
+import { HUBSPOT_ACCOUNT_TYPES } from '../../constants/config.js';
 import {
   accessTokenForPersonalAccessKey,
   getAccessToken,
   updateConfigWithAccessToken,
-} from '../personalAccessKey';
-import { HubSpotConfigAccount } from '../../types/Accounts';
-import { mockAxiosResponse } from './__utils__/mockAxiosResponse';
+} from '../personalAccessKey.js';
+import { HubSpotConfigAccount } from '../../types/Accounts.js';
+import { mockAxiosResponse } from './__utils__/mockAxiosResponse.js';
 
 vi.mock('../../config');
 vi.mock('../logger');
