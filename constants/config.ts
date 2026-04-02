@@ -134,3 +134,4 @@ export const HUBSPOT_CONFIG_OPERATIONS = {
 export const HS_FOLDER = '.hs';
 export const HS_SETTINGS_FILENAME = 'settings.json';
 export const HS_README_FILENAME = 'README.txt';
+export const DEFAULT_HS_SETTINGS_PATH = `${HS_FOLDER}/${HS_SETTINGS_FILENAME}`;
