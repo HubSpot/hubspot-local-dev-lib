@@ -11,11 +11,11 @@ import findupSync from 'findup-sync';
 import fs from 'fs';
 import {
   getHsSettingsFilePath,
-  getHsSettingsFile,
+  getHsSettingsFileIfExists,
   writeHsSettingsFile,
-} from '../hsSettings';
-import { getCwd } from '../../lib/path';
-import { HsSettingsFile } from '../../types/HsSettings';
+} from '../hsSettings.js';
+import { getCwd } from '../../lib/path.js';
+import { HsSettingsFile } from '../../types/HsSettings.js';
 
 vi.mock('findup-sync');
 vi.mock('fs');
@@ -51,22 +51,22 @@ describe('hsSettings', () => {
     });
   });
 
-  describe('getHsSettingsFile()', () => {
+  describe('getHsSettingsFileIfExists()', () => {
     it('returns null when no settings file path found', () => {
       mockFindupSync.mockReturnValueOnce(null);
-      expect(getHsSettingsFile()).toBeNull();
+      expect(getHsSettingsFileIfExists()).toBeNull();
     });
 
     it('returns parsed settings file when it exists', () => {
       mockFindupSync.mockReturnValueOnce('/project/.hs/settings.json');
       mockFs.readFileSync.mockReturnValueOnce(JSON.stringify(SETTINGS));
-      expect(getHsSettingsFile()).toEqual(SETTINGS);
+      expect(getHsSettingsFileIfExists()).toEqual(SETTINGS);
     });
 
     it('throws FileSystemError when file cannot be parsed', () => {
       mockFindupSync.mockReturnValueOnce('/project/.hs/settings.json');
       mockFs.readFileSync.mockReturnValueOnce('invalid json');
-      expect(() => getHsSettingsFile()).toThrow();
+      expect(() => getHsSettingsFileIfExists()).toThrow();
     });
   });
 
@@ -78,10 +78,9 @@ describe('hsSettings', () => {
 
       writeHsSettingsFile(SETTINGS);
 
-      expect(mockFs.mkdirSync).toHaveBeenCalledWith(
-        '/mock/project/.hs',
-        { recursive: true }
-      );
+      expect(mockFs.mkdirSync).toHaveBeenCalledWith('/mock/project/.hs', {
+        recursive: true,
+      });
       expect(mockFs.writeFileSync).toHaveBeenCalledWith(
         '/mock/project/.hs/settings.json',
         JSON.stringify(SETTINGS, null, 2),

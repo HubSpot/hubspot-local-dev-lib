@@ -24,7 +24,7 @@ import {
   getConfigDefaultAccount,
   getConfigDefaultAccountIfExists,
   getAllConfigAccounts,
-  getLinkedConfigAccounts,
+  getLinkedOrAllConfigAccounts,
   getConfigAccountEnvironment,
   addConfigAccount,
   updateConfigAccount,
@@ -55,6 +55,7 @@ import {
   formatConfigForWrite,
 } from '../utils.js';
 import { getDefaultAccountOverrideAccountId } from '../defaultAccountOverride.js';
+import { getHsSettingsFileIfExists } from '../hsSettings.js';
 import {
   CONFIG_FLAGS,
   ENVIRONMENT_VARIABLES,
@@ -76,8 +77,8 @@ const mockGetDefaultAccountOverrideAccountId =
   getDefaultAccountOverrideAccountId as MockedFunction<
     typeof getDefaultAccountOverrideAccountId
   >;
-const mockGetHsSettingsFile = getHsSettingsFile as MockedFunction<
-  typeof getHsSettingsFile
+const mockGetHsSettingsFile = getHsSettingsFileIfExists as MockedFunction<
+  typeof getHsSettingsFileIfExists
 >;
 
 const PAK_ACCOUNT: PersonalAccessKeyConfigAccount = {
@@ -500,7 +501,7 @@ describe('config/index', () => {
     });
   });
 
-  describe('getLinkedConfigAccounts()', () => {
+  describe('getLinkedOrAllConfigAccounts()', () => {
     it('filters to linked accounts when .hs/settings.json is present', () => {
       mockConfig({
         ...CONFIG,
@@ -511,7 +512,7 @@ describe('config/index', () => {
         accounts: [OAUTH_ACCOUNT.accountId, API_KEY_ACCOUNT.accountId],
       });
 
-      expect(getLinkedConfigAccounts()).toEqual([
+      expect(getLinkedOrAllConfigAccounts()).toEqual([
         OAUTH_ACCOUNT,
         API_KEY_ACCOUNT,
       ]);
@@ -524,7 +525,10 @@ describe('config/index', () => {
       });
       mockGetHsSettingsFile.mockReturnValueOnce(null);
 
-      expect(getLinkedConfigAccounts()).toEqual([PAK_ACCOUNT, OAUTH_ACCOUNT]);
+      expect(getLinkedOrAllConfigAccounts()).toEqual([
+        PAK_ACCOUNT,
+        OAUTH_ACCOUNT,
+      ]);
     });
   });
 
