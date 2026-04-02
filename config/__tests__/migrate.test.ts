@@ -36,7 +36,8 @@ vi.mock('fs', async () => {
 });
 
 vi.mock('../utils', async () => {
-  const actual = await vi.importActual<typeof import('../utils.js')>('../utils.js');
+  const actual =
+    await vi.importActual<typeof import('../utils.js')>('../utils.js');
   return {
     ...actual,
     readConfigFile: vi.fn(),
@@ -45,7 +46,8 @@ vi.mock('../utils', async () => {
 });
 
 vi.mock('../index', async () => {
-  const actual = await vi.importActual<typeof import('../index.js')>('../index.js');
+  const actual =
+    await vi.importActual<typeof import('../index.js')>('../index.js');
   return {
     ...actual,
     createEmptyConfigFile: vi.fn(),
