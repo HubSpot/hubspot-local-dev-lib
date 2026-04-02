@@ -65,6 +65,8 @@ export type PublicApp = {
   };
   allowedExternalUrls: Array<string>;
   preventProjectMigrations?: boolean;
+  authType: string;
+  distributionType: string;
 };
 
 export type FetchPublicAppsForPortalResponse = {

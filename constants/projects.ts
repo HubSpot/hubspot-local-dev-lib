@@ -10,5 +10,6 @@ export const PLATFORM_VERSIONS = {
   v2025_1: '2025.1',
   v2025_2: '2025.2',
   v2026_03_beta: '2026.03-beta',
+  v2026_03: '2026.03',
   unstable: 'unstable',
 };
