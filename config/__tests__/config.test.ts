@@ -48,7 +48,10 @@ import {
   OAUTH_AUTH_METHOD,
   API_KEY_AUTH_METHOD,
 } from '../../constants/auth.js';
-import { getLocalConfigDefaultFilePath, formatConfigForWrite } from '../utils.js';
+import {
+  getLocalConfigDefaultFilePath,
+  formatConfigForWrite,
+} from '../utils.js';
 import { getDefaultAccountOverrideAccountId } from '../defaultAccountOverride.js';
 import {
   CONFIG_FLAGS,
