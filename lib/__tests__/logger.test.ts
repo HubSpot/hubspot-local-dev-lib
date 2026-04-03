@@ -8,9 +8,9 @@ import {
   LOG_LEVEL,
   logger,
   shouldLog,
-  isUnicodeSupported,
   getLabels,
 } from '../logger.js';
+import { isUnicodeSupported } from '../isUnicodeSupported.js';
 
 describe('lib/logger', () => {
   afterEach(() => {

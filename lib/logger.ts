@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import chalk, { type ChalkInstance } from 'chalk';
+import { isUnicodeSupported } from './isUnicodeSupported.js';
 
 export const LOG_LEVEL = {
   NONE: 0,
@@ -9,24 +10,6 @@ export const LOG_LEVEL = {
   WARN: 4,
   ERROR: 8,
 };
-
-// Adapted from https://github.com/sindresorhus/is-unicode-supported (MIT)
-export function isUnicodeSupported(): boolean {
-  if (process.platform !== 'win32') {
-    return process.env.TERM !== 'linux';
-  }
-
-  return (
-    Boolean(process.env.WT_SESSION) ||
-    Boolean(process.env.TERMINUS_SUBLIME) ||
-    process.env.ConEmuTask === '{cmd::Cmder}' ||
-    process.env.TERM_PROGRAM === 'Terminus-Sublime' ||
-    process.env.TERM_PROGRAM === 'vscode' ||
-    process.env.TERM === 'xterm-256color' ||
-    process.env.TERM === 'alacritty' ||
-    process.env.TERMINAL_EMULATOR === 'JetBrains-JediTerm'
-  );
-}
 
 interface LogLabels {
   success: string;
