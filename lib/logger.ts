@@ -28,7 +28,15 @@ export function isUnicodeSupported(): boolean {
   );
 }
 
-const UNICODE_LABELS = {
+interface LogLabels {
+  success: string;
+  warning: string;
+  error: string;
+  info: string;
+  debug: string;
+}
+
+const UNICODE_LABELS: LogLabels = {
   success: '✔',
   warning: '⚠',
   error: '✖',
@@ -36,7 +44,7 @@ const UNICODE_LABELS = {
   debug: '[DEBUG]',
 };
 
-const ASCII_LABELS = {
+const ASCII_LABELS: LogLabels = {
   success: '[SUCCESS]',
   warning: '[WARNING]',
   error: '[ERROR]',
@@ -44,7 +52,7 @@ const ASCII_LABELS = {
   debug: '[DEBUG]',
 };
 
-export function getLabels() {
+export function getLabels(): LogLabels {
   return isUnicodeSupported() ? UNICODE_LABELS : ASCII_LABELS;
 }
 
