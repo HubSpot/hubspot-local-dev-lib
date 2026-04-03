@@ -68,10 +68,10 @@ describe('lib/logger', () => {
       Object.defineProperty(process, 'platform', { value: 'darwin' });
       process.env = { ...originalEnv, TERM: 'xterm-256color' };
       const labels = getLabels();
-      expect(labels.success).toBe('✔');
-      expect(labels.warning).toBe('⚠');
-      expect(labels.error).toBe('✖');
-      expect(labels.info).toBe('ℹ');
+      expect(labels.success).toBe('✔ SUCCESS');
+      expect(labels.warning).toBe('⚠ WARNING');
+      expect(labels.error).toBe('✖ ERROR');
+      expect(labels.info).toBe('ℹ INFO');
     });
 
     it('returns ASCII labels when unicode is not supported', () => {

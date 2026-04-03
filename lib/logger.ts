@@ -37,11 +37,11 @@ interface LogLabels {
 }
 
 const UNICODE_LABELS: LogLabels = {
-  success: '✔',
-  warning: '⚠',
-  error: '✖',
-  info: 'ℹ',
-  debug: '[DEBUG]',
+  success: '✔ SUCCESS',
+  warning: '⚠ WARNING',
+  error: '✖ ERROR',
+  info: 'ℹ INFO',
+  debug: 'DEBUG',
 };
 
 const ASCII_LABELS: LogLabels = {
