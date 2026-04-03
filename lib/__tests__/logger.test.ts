@@ -8,11 +8,81 @@ import {
   LOG_LEVEL,
   logger,
   shouldLog,
+  isUnicodeSupported,
+  getLabels,
 } from '../logger.js';
 
 describe('lib/logger', () => {
   afterEach(() => {
     setLogLevel(LOG_LEVEL.LOG);
+  });
+
+  describe('isUnicodeSupported()', () => {
+    const originalEnv = process.env;
+    const originalPlatform = process.platform;
+
+    afterEach(() => {
+      process.env = originalEnv;
+      Object.defineProperty(process, 'platform', {
+        value: originalPlatform,
+      });
+    });
+
+    it('returns true on non-win32 when TERM is not linux', () => {
+      Object.defineProperty(process, 'platform', { value: 'darwin' });
+      process.env = { ...originalEnv, TERM: 'xterm-256color' };
+      expect(isUnicodeSupported()).toBe(true);
+    });
+
+    it('returns false on non-win32 when TERM is linux', () => {
+      Object.defineProperty(process, 'platform', { value: 'linux' });
+      process.env = { ...originalEnv, TERM: 'linux' };
+      expect(isUnicodeSupported()).toBe(false);
+    });
+
+    it('returns true on win32 when WT_SESSION is set', () => {
+      Object.defineProperty(process, 'platform', { value: 'win32' });
+      process.env = { ...originalEnv, WT_SESSION: '1' };
+      expect(isUnicodeSupported()).toBe(true);
+    });
+
+    it('returns false on win32 with no unicode-capable env vars', () => {
+      Object.defineProperty(process, 'platform', { value: 'win32' });
+      process.env = {};
+      expect(isUnicodeSupported()).toBe(false);
+    });
+  });
+
+  describe('getLabels()', () => {
+    const originalEnv = process.env;
+    const originalPlatform = process.platform;
+
+    afterEach(() => {
+      process.env = originalEnv;
+      Object.defineProperty(process, 'platform', {
+        value: originalPlatform,
+      });
+    });
+
+    it('returns unicode labels when unicode is supported', () => {
+      Object.defineProperty(process, 'platform', { value: 'darwin' });
+      process.env = { ...originalEnv, TERM: 'xterm-256color' };
+      const labels = getLabels();
+      expect(labels.success).toBe('✔');
+      expect(labels.warning).toBe('⚠');
+      expect(labels.error).toBe('✖');
+      expect(labels.info).toBe('ℹ');
+    });
+
+    it('returns ASCII labels when unicode is not supported', () => {
+      Object.defineProperty(process, 'platform', { value: 'linux' });
+      process.env = { ...originalEnv, TERM: 'linux' };
+      const labels = getLabels();
+      expect(labels.success).toBe('[SUCCESS]');
+      expect(labels.warning).toBe('[WARNING]');
+      expect(labels.error).toBe('[ERROR]');
+      expect(labels.info).toBe('[INFO]');
+    });
   });
 
   describe('stylize()', () => {
