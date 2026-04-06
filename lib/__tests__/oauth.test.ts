@@ -56,7 +56,6 @@ describe('lib/oauth', () => {
   describe('addOauthToAccountConfig', () => {
     it('should update the config', () => {
       const oauthManager = new OAuth2Manager(account, () => null);
-      console.log('oauthManager', oauthManager.account);
       addOauthToAccountConfig(oauthManager);
       expect(updateConfigAccount).toHaveBeenCalledTimes(1);
       expect(updateConfigAccount).toHaveBeenCalledWith(account);
