@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import chalk, { type ChalkInstance } from 'chalk';
+import { isUnicodeSupported } from './isUnicodeSupported.js';
 
 export const LOG_LEVEL = {
   NONE: 0,
@@ -9,6 +10,34 @@ export const LOG_LEVEL = {
   WARN: 4,
   ERROR: 8,
 };
+
+interface LogLabels {
+  success: string;
+  warning: string;
+  error: string;
+  info: string;
+  debug: string;
+}
+
+const UNICODE_LABELS: LogLabels = {
+  success: '✔ SUCCESS',
+  warning: '⚠ WARNING',
+  error: '✖ ERROR',
+  info: 'ℹ INFO',
+  debug: 'DEBUG',
+};
+
+const ASCII_LABELS: LogLabels = {
+  success: '[SUCCESS]',
+  warning: '[WARNING]',
+  error: '[ERROR]',
+  info: '[INFO]',
+  debug: '[DEBUG]',
+};
+
+export function getLabels(): LogLabels {
+  return isUnicodeSupported() ? UNICODE_LABELS : ASCII_LABELS;
+}
 
 /**
  * Chalk styles for logger strings.
@@ -33,22 +62,27 @@ export function stylize(label: string, style: ChalkInstance, args: any[]) {
 
 export class Logger {
   error(...args: any[]) {
-    console.error(...stylize('[ERROR]', Styles.error, args));
+    const labels = getLabels();
+    console.error(...stylize(labels.error, Styles.error, args));
   }
   warn(...args: any[]) {
-    console.warn(...stylize('[WARNING]', Styles.warn, args));
+    const labels = getLabels();
+    console.warn(...stylize(labels.warning, Styles.warn, args));
   }
   log(...args: any[]) {
     console.log(...args);
   }
   success(...args: any[]) {
-    console.log(...stylize('[SUCCESS]', Styles.success, args));
+    const labels = getLabels();
+    console.log(...stylize(labels.success, Styles.success, args));
   }
   info(...args: any[]) {
-    console.info(...stylize('[INFO]', Styles.info, args));
+    const labels = getLabels();
+    console.info(...stylize(labels.info, Styles.info, args));
   }
   debug(...args: any[]) {
-    console.debug(...stylize('[DEBUG]', Styles.log, args));
+    const labels = getLabels();
+    console.debug(...stylize(labels.debug, Styles.log, args));
   }
   group(...args: any[]) {
     console.group(...args);
