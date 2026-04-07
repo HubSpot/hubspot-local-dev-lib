@@ -33,7 +33,16 @@ function parseState(parsed: unknown): HubSpotState {
     return structuredClone(DEFAULT_STATE);
   }
 
-  return { ...DEFAULT_STATE, ...(parsed as HubSpotState) };
+  const record = parsed as Record<string, unknown>;
+  const result: HubSpotState = structuredClone(DEFAULT_STATE);
+
+  for (const key of Object.keys(DEFAULT_STATE)) {
+    if (key in record && record[key] !== undefined) {
+      Object.assign(result, { [key]: record[key] });
+    }
+  }
+
+  return result;
 }
 
 function getCurrentState(): HubSpotState {

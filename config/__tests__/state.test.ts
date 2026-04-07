@@ -1,6 +1,6 @@
 import { vi, describe, it, expect, beforeEach, afterEach, Mock } from 'vitest';
 import path from 'path';
-import { STATE_FILE_PATH } from '../../constants/config.js';
+import { STATE_FILE_PATH, STATE_FLAGS } from '../../constants/config.js';
 
 vi.mock('../../utils/lang', () => ({
   i18n: vi.fn((key: string) => key),
@@ -129,7 +129,7 @@ describe('config/state', () => {
       expect(result).toBe(0);
     });
 
-    it('returns default value when state file has invalid structure (wrong type)', () => {
+    it('accepts value even if type does not match default', () => {
       existsSyncSpy.mockReturnValue(true);
       readFileSyncSpy.mockReturnValue(
         JSON.stringify({ mcpTotalToolCalls: 'not-a-number' })
@@ -137,7 +137,7 @@ describe('config/state', () => {
 
       const result = getStateValue('mcpTotalToolCalls');
 
-      expect(result).toBe(0);
+      expect(result).toBe('not-a-number');
     });
 
     it('ignores extra keys in state file', () => {
@@ -172,6 +172,43 @@ describe('config/state', () => {
       const result = getStateValue('mcpTotalToolCalls');
 
       expect(result).toBe(0);
+    });
+
+    it('returns usageTrackingMessageLastShowVersion from state file', () => {
+      const mockState = {
+        mcpTotalToolCalls: 0,
+        usageTrackingMessageLastShowVersion: '5.3.2',
+      };
+      existsSyncSpy.mockReturnValue(true);
+      readFileSyncSpy.mockReturnValue(JSON.stringify(mockState));
+
+      const result = getStateValue(
+        STATE_FLAGS.USAGE_TRACKING_MESSAGE_LAST_SHOW_VERSION
+      );
+
+      expect(result).toBe('5.3.2');
+    });
+
+    it('returns undefined for usageTrackingMessageLastShowVersion when not in state file', () => {
+      const mockState = { mcpTotalToolCalls: 5 };
+      existsSyncSpy.mockReturnValue(true);
+      readFileSyncSpy.mockReturnValue(JSON.stringify(mockState));
+
+      const result = getStateValue(
+        STATE_FLAGS.USAGE_TRACKING_MESSAGE_LAST_SHOW_VERSION
+      );
+
+      expect(result).toBeUndefined();
+    });
+
+    it('returns undefined for usageTrackingMessageLastShowVersion when file does not exist', () => {
+      existsSyncSpy.mockReturnValue(false);
+
+      const result = getStateValue(
+        STATE_FLAGS.USAGE_TRACKING_MESSAGE_LAST_SHOW_VERSION
+      );
+
+      expect(result).toBeUndefined();
     });
 
     it('returns default state when JSON parses to an array', () => {
@@ -276,18 +313,36 @@ describe('config/state', () => {
     });
 
     it('preserves other state values when updating one value', () => {
-      const existingState = { mcpTotalToolCalls: 100 };
+      const existingState = {
+        mcpTotalToolCalls: 100,
+        usageTrackingMessageLastShowVersion: '5.3.0',
+      };
       existsSyncSpy.mockReturnValue(true);
       readFileSyncSpy.mockReturnValue(JSON.stringify(existingState));
       writeFileSyncSpy.mockImplementation(() => undefined);
 
       setStateValue('mcpTotalToolCalls', 150);
 
-      expect(writeFileSyncSpy).toHaveBeenCalledWith(
-        STATE_FILE_PATH,
-        JSON.stringify({ mcpTotalToolCalls: 150 }, null, 2),
-        'utf-8'
+      const written = JSON.parse(writeFileSyncSpy.mock.calls[0][1]);
+      expect(written.mcpTotalToolCalls).toBe(150);
+      expect(written.usageTrackingMessageLastShowVersion).toBe('5.3.0');
+    });
+
+    it('sets usageTrackingMessageLastShowVersion', () => {
+      existsSyncSpy.mockReturnValue(true);
+      readFileSyncSpy.mockReturnValue(
+        JSON.stringify({ mcpTotalToolCalls: 10 })
       );
+      writeFileSyncSpy.mockImplementation(() => undefined);
+
+      setStateValue(
+        STATE_FLAGS.USAGE_TRACKING_MESSAGE_LAST_SHOW_VERSION,
+        '5.3.2'
+      );
+
+      const written = JSON.parse(writeFileSyncSpy.mock.calls[0][1]);
+      expect(written.mcpTotalToolCalls).toBe(10);
+      expect(written.usageTrackingMessageLastShowVersion).toBe('5.3.2');
     });
 
     it('throws error when write fails with non-Error', () => {
