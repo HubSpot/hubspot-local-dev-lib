@@ -35,10 +35,8 @@ export function getHsSettingsFileIfExists(): HsSettingsFile | null {
     return null;
   }
 
-  let hsSettingsFile: HsSettingsFile;
-
   try {
-    hsSettingsFile = JSON.parse(fs.readFileSync(hsSettingsFilePath, 'utf-8'));
+    return JSON.parse(fs.readFileSync(hsSettingsFilePath, 'utf-8'));
   } catch (e) {
     throw new FileSystemError(
       { cause: e },
@@ -48,8 +46,6 @@ export function getHsSettingsFileIfExists(): HsSettingsFile | null {
       }
     );
   }
-
-  return hsSettingsFile;
 }
 
 export function writeHsSettingsFile(settingsFile: HsSettingsFile): void {
