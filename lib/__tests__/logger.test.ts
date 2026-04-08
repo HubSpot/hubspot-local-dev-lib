@@ -9,6 +9,7 @@ import {
   logger,
   shouldLog,
   getLabels,
+  getSymbols,
 } from '../logger.js';
 import { isUnicodeSupported } from '../isUnicodeSupported.js';
 
@@ -72,6 +73,7 @@ describe('lib/logger', () => {
       expect(labels.warning).toBe('⚠ WARNING');
       expect(labels.error).toBe('✖ ERROR');
       expect(labels.info).toBe('ℹ INFO');
+      expect(labels.debug).toBe('⚙ DEBUG');
     });
 
     it('returns ASCII labels when unicode is not supported', () => {
@@ -82,6 +84,41 @@ describe('lib/logger', () => {
       expect(labels.warning).toBe('[WARNING]');
       expect(labels.error).toBe('[ERROR]');
       expect(labels.info).toBe('[INFO]');
+      expect(labels.debug).toBe('[DEBUG]');
+    });
+  });
+
+  describe('getSymbols()', () => {
+    const originalEnv = process.env;
+    const originalPlatform = process.platform;
+
+    afterEach(() => {
+      process.env = originalEnv;
+      Object.defineProperty(process, 'platform', {
+        value: originalPlatform,
+      });
+    });
+
+    it('returns symbol-only labels when unicode is supported', () => {
+      Object.defineProperty(process, 'platform', { value: 'darwin' });
+      process.env = { ...originalEnv, TERM: 'xterm-256color' };
+      const symbols = getSymbols();
+      expect(symbols.success).toBe('✔');
+      expect(symbols.warning).toBe('⚠');
+      expect(symbols.error).toBe('✖');
+      expect(symbols.info).toBe('ℹ');
+      expect(symbols.debug).toBe('⚙');
+    });
+
+    it('returns ASCII labels when unicode is not supported', () => {
+      Object.defineProperty(process, 'platform', { value: 'linux' });
+      process.env = { ...originalEnv, TERM: 'linux' };
+      const symbols = getSymbols();
+      expect(symbols.success).toBe('[SUCCESS]');
+      expect(symbols.warning).toBe('[WARNING]');
+      expect(symbols.error).toBe('[ERROR]');
+      expect(symbols.info).toBe('[INFO]');
+      expect(symbols.debug).toBe('[DEBUG]');
     });
   });
 
