@@ -24,7 +24,15 @@ const UNICODE_LABELS: LogLabels = {
   warning: '⚠ WARNING',
   error: '✖ ERROR',
   info: 'ℹ INFO',
-  debug: 'DEBUG',
+  debug: '⚙ DEBUG',
+};
+
+const UNICODE_SYMBOLS: LogLabels = {
+  success: '✔',
+  warning: '⚠',
+  error: '✖',
+  info: 'ℹ',
+  debug: '⚙',
 };
 
 const ASCII_LABELS: LogLabels = {
@@ -39,14 +47,18 @@ export function getLabels(): LogLabels {
   return isUnicodeSupported() ? UNICODE_LABELS : ASCII_LABELS;
 }
 
+export function getSymbols(): LogLabels {
+  return isUnicodeSupported() ? UNICODE_SYMBOLS : ASCII_LABELS;
+}
+
 /**
  * Chalk styles for logger strings.
  */
 export const Styles = {
-  debug: chalk.reset.blue,
+  debug: chalk.reset.grey,
   log: chalk.reset.white,
   success: chalk.reset.green,
-  info: chalk.reset.white,
+  info: chalk.reset.blue,
   warn: chalk.reset.yellow,
   error: chalk.reset.red,
 };
@@ -82,7 +94,7 @@ export class Logger {
   }
   debug(...args: any[]) {
     const labels = getLabels();
-    console.debug(...stylize(labels.debug, Styles.log, args));
+    console.debug(...stylize(labels.debug, Styles.debug, args));
   }
   group(...args: any[]) {
     console.group(...args);
