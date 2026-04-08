@@ -79,6 +79,8 @@ export const HUBSPOT_ACCOUNT_TYPE_STRINGS = {
 
 export const STATE_FLAGS = {
   MCP_TOTAL_TOOL_CALLS: 'mcpTotalToolCalls',
+  USAGE_TRACKING_MESSAGE_LAST_SHOW_VERSION:
+    'usageTrackingMessageLastShowVersion',
 } as const;
 
 export const CONFIG_FLAGS = {
