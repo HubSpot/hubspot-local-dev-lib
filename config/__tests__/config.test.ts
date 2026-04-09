@@ -22,7 +22,9 @@ import {
   getConfigAccountById,
   getConfigAccountByName,
   getConfigDefaultAccount,
+  getConfigDefaultAccountIfExists,
   getAllConfigAccounts,
+  getLinkedOrAllConfigAccounts,
   getConfigAccountEnvironment,
   addConfigAccount,
   updateConfigAccount,
@@ -53,6 +55,7 @@ import {
   formatConfigForWrite,
 } from '../utils.js';
 import { getDefaultAccountOverrideAccountId } from '../defaultAccountOverride.js';
+import { getHsSettingsFileIfExists } from '../hsSettings.js';
 import {
   CONFIG_FLAGS,
   ENVIRONMENT_VARIABLES,
@@ -66,6 +69,7 @@ vi.mock('findup-sync');
 vi.mock('../../lib/path');
 vi.mock('fs-extra');
 vi.mock('../defaultAccountOverride');
+vi.mock('../hsSettings');
 
 const mockFindup = findup as MockedFunction<typeof findup>;
 const mockFs = fs as Mocked<typeof fs>;
@@ -73,6 +77,9 @@ const mockGetDefaultAccountOverrideAccountId =
   getDefaultAccountOverrideAccountId as MockedFunction<
     typeof getDefaultAccountOverrideAccountId
   >;
+const mockGetHsSettingsFile = getHsSettingsFileIfExists as MockedFunction<
+  typeof getHsSettingsFileIfExists
+>;
 
 const PAK_ACCOUNT: PersonalAccessKeyConfigAccount = {
   name: 'test-account',
@@ -375,6 +382,98 @@ describe('config/index', () => {
 
       expect(getConfigDefaultAccount()).toEqual(OAUTH_ACCOUNT);
     });
+
+    it('returns the .hs/settings.json default when present', () => {
+      mockConfig({
+        ...CONFIG,
+        accounts: [PAK_ACCOUNT, OAUTH_ACCOUNT],
+      });
+      mockGetHsSettingsFile.mockReturnValueOnce({
+        localDefaultAccount: OAUTH_ACCOUNT.accountId,
+        accounts: [OAUTH_ACCOUNT.accountId],
+      });
+
+      expect(getConfigDefaultAccount()).toEqual(OAUTH_ACCOUNT);
+    });
+
+    it('skips .hsaccount entirely when .hs/settings.json exists', () => {
+      mockConfig({
+        ...CONFIG,
+        accounts: [PAK_ACCOUNT, OAUTH_ACCOUNT, API_KEY_ACCOUNT],
+      });
+      mockGetHsSettingsFile.mockReturnValueOnce({
+        localDefaultAccount: API_KEY_ACCOUNT.accountId,
+        accounts: [API_KEY_ACCOUNT.accountId],
+      });
+
+      expect(getConfigDefaultAccount()).toEqual(API_KEY_ACCOUNT);
+      expect(mockGetDefaultAccountOverrideAccountId).not.toHaveBeenCalled();
+    });
+
+    it('falls back to .hsaccount when no .hs/settings.json exists', () => {
+      mockConfig({
+        ...CONFIG,
+        accounts: [PAK_ACCOUNT, OAUTH_ACCOUNT],
+      });
+      mockGetHsSettingsFile.mockReturnValueOnce(null);
+      mockGetDefaultAccountOverrideAccountId.mockReturnValueOnce(
+        OAUTH_ACCOUNT.accountId
+      );
+
+      expect(getConfigDefaultAccount()).toEqual(OAUTH_ACCOUNT);
+      expect(mockGetDefaultAccountOverrideAccountId).toHaveBeenCalled();
+    });
+  });
+
+  describe('getConfigDefaultAccountIfExists()', () => {
+    it('returns default account when set', () => {
+      mockConfig();
+
+      expect(getConfigDefaultAccountIfExists()).toEqual(PAK_ACCOUNT);
+    });
+
+    it('returns undefined when no default account', () => {
+      mockConfig({ accounts: [PAK_ACCOUNT], defaultAccount: undefined });
+
+      expect(getConfigDefaultAccountIfExists()).toBeUndefined();
+    });
+
+    it('returns the .hs/settings.json default when present', () => {
+      mockConfig({
+        ...CONFIG,
+        accounts: [PAK_ACCOUNT, OAUTH_ACCOUNT],
+      });
+      mockGetHsSettingsFile.mockReturnValueOnce({
+        localDefaultAccount: OAUTH_ACCOUNT.accountId,
+        accounts: [OAUTH_ACCOUNT.accountId],
+      });
+
+      expect(getConfigDefaultAccountIfExists()).toEqual(OAUTH_ACCOUNT);
+    });
+
+    it('skips .hsaccount entirely when .hs/settings.json exists', () => {
+      mockConfig({
+        ...CONFIG,
+        accounts: [PAK_ACCOUNT, OAUTH_ACCOUNT, API_KEY_ACCOUNT],
+      });
+      mockGetHsSettingsFile.mockReturnValueOnce({
+        localDefaultAccount: API_KEY_ACCOUNT.accountId,
+        accounts: [API_KEY_ACCOUNT.accountId],
+      });
+
+      expect(getConfigDefaultAccountIfExists()).toEqual(API_KEY_ACCOUNT);
+      expect(mockGetDefaultAccountOverrideAccountId).not.toHaveBeenCalled();
+    });
+
+    it('returns undefined when .hs/settings.json default account is not in config', () => {
+      mockConfig();
+      mockGetHsSettingsFile.mockReturnValueOnce({
+        localDefaultAccount: 999,
+        accounts: [999],
+      });
+
+      expect(getConfigDefaultAccountIfExists()).toBeUndefined();
+    });
   });
 
   describe('getAllConfigAccounts()', () => {
@@ -382,6 +481,54 @@ describe('config/index', () => {
       mockConfig();
 
       expect(getAllConfigAccounts()).toEqual([PAK_ACCOUNT]);
+    });
+
+    it('returns all accounts even when .hs/settings.json is present', () => {
+      mockConfig({
+        ...CONFIG,
+        accounts: [PAK_ACCOUNT, OAUTH_ACCOUNT, API_KEY_ACCOUNT],
+      });
+      mockGetHsSettingsFile.mockReturnValueOnce({
+        localDefaultAccount: OAUTH_ACCOUNT.accountId,
+        accounts: [OAUTH_ACCOUNT.accountId],
+      });
+
+      expect(getAllConfigAccounts()).toEqual([
+        PAK_ACCOUNT,
+        OAUTH_ACCOUNT,
+        API_KEY_ACCOUNT,
+      ]);
+    });
+  });
+
+  describe('getLinkedOrAllConfigAccounts()', () => {
+    it('filters to linked accounts when .hs/settings.json is present', () => {
+      mockConfig({
+        ...CONFIG,
+        accounts: [PAK_ACCOUNT, OAUTH_ACCOUNT, API_KEY_ACCOUNT],
+      });
+      mockGetHsSettingsFile.mockReturnValueOnce({
+        localDefaultAccount: OAUTH_ACCOUNT.accountId,
+        accounts: [OAUTH_ACCOUNT.accountId, API_KEY_ACCOUNT.accountId],
+      });
+
+      expect(getLinkedOrAllConfigAccounts()).toEqual([
+        OAUTH_ACCOUNT,
+        API_KEY_ACCOUNT,
+      ]);
+    });
+
+    it('returns all accounts when no .hs/settings.json exists', () => {
+      mockConfig({
+        ...CONFIG,
+        accounts: [PAK_ACCOUNT, OAUTH_ACCOUNT],
+      });
+      mockGetHsSettingsFile.mockReturnValueOnce(null);
+
+      expect(getLinkedOrAllConfigAccounts()).toEqual([
+        PAK_ACCOUNT,
+        OAUTH_ACCOUNT,
+      ]);
     });
   });
 
