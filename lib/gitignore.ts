@@ -6,7 +6,10 @@ import {
   getGitignoreFiles,
   configFilenameIsIgnoredByGitignore,
 } from '../utils/git.js';
-import { DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME } from '../constants/config.js';
+import {
+  DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME,
+  HS_FOLDER,
+} from '../constants/config.js';
 import { i18n } from '../utils/lang.js';
 import { GitInclusionResult } from '../types/Config.js';
 
@@ -29,6 +32,30 @@ export function checkAndAddConfigToGitignore(configPath: string): void {
 
     const gitignoreContents = fs.readFileSync(gitignoreFilePath).toString();
     const updatedContents = `${gitignoreContents.trim()}\n\n# HubSpot config file\n${DEFAULT_HUBSPOT_CONFIG_YAML_FILE_NAME}\n`;
+    fs.writeFileSync(gitignoreFilePath, updatedContents);
+  } catch (e) {
+    throw new Error(i18n(`${i18nKey}.errors.configIgnore`), { cause: e });
+  }
+}
+
+export function checkAndAddHsFolderToGitignore(settingsPath: string): void {
+  try {
+    const hsDirPath = path.resolve(path.dirname(settingsPath));
+    const { configIgnored, gitignoreFiles } = checkGitInclusion(hsDirPath);
+    if (configIgnored) return;
+
+    let gitignoreFilePath =
+      gitignoreFiles && gitignoreFiles.length ? gitignoreFiles[0] : null;
+
+    if (!gitignoreFilePath) {
+      gitignoreFilePath = path.join(path.dirname(hsDirPath), GITIGNORE_FILE);
+      fs.writeFileSync(gitignoreFilePath, '');
+    }
+
+    const gitignoreContents = fs.readFileSync(gitignoreFilePath).toString();
+    if (gitignoreContents.includes(HS_FOLDER)) return;
+
+    const updatedContents = `${gitignoreContents.trim()}\n\n# HubSpot link folder\n${HS_FOLDER}\n`;
     fs.writeFileSync(gitignoreFilePath, updatedContents);
   } catch (e) {
     throw new Error(i18n(`${i18nKey}.errors.configIgnore`), { cause: e });

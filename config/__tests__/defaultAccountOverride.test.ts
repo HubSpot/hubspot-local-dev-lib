@@ -4,9 +4,10 @@ import findup from 'findup-sync';
 import {
   getDefaultAccountOverrideAccountId,
   getDefaultAccountOverrideFilePath,
-} from '../defaultAccountOverride';
-import { PersonalAccessKeyConfigAccount } from '../../types/Accounts';
-import { PERSONAL_ACCESS_KEY_AUTH_METHOD } from '../../constants/auth';
+  removeDefaultAccountOverrideFile,
+} from '../defaultAccountOverride.js';
+import { PersonalAccessKeyConfigAccount } from '../../types/Accounts.js';
+import { PERSONAL_ACCESS_KEY_AUTH_METHOD } from '../../constants/auth.js';
 
 vi.mock('fs-extra');
 vi.mock('findup-sync');
@@ -61,6 +62,28 @@ describe('defaultAccountOverride', () => {
     it('returns null if no override file exists', () => {
       mockFindup.mockReturnValueOnce(null);
       expect(getDefaultAccountOverrideFilePath()).toBeNull();
+    });
+  });
+
+  describe('removeDefaultAccountOverrideFile()', () => {
+    it('does nothing when no override file exists', () => {
+      mockFindup.mockReturnValueOnce(null);
+      removeDefaultAccountOverrideFile();
+      expect(mockFs.unlinkSync).not.toHaveBeenCalled();
+    });
+
+    it('deletes the override file when it exists', () => {
+      mockFindup.mockReturnValueOnce('/project/.hsaccount');
+      removeDefaultAccountOverrideFile();
+      expect(mockFs.unlinkSync).toHaveBeenCalledWith('/project/.hsaccount');
+    });
+
+    it('throws FileSystemError when deletion fails', () => {
+      mockFindup.mockReturnValueOnce('/project/.hsaccount');
+      mockFs.unlinkSync.mockImplementation(() => {
+        throw new Error('EACCES');
+      });
+      expect(() => removeDefaultAccountOverrideFile()).toThrow();
     });
   });
 });

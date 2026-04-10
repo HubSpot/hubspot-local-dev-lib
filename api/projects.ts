@@ -21,6 +21,7 @@ import {
   Deploy,
   ProjectDeployResponse,
   ProjectDeployResponseV1,
+  ProjectDeletionResponse,
 } from '../types/Deploy.js';
 import {
   MigrateAppResponse,
@@ -143,6 +144,24 @@ export function deleteProject(
 ): HubSpotPromise<void> {
   return http.delete(accountId, {
     url: `${DEVELOPER_PROJECTS_API_PATH}/${encodeURIComponent(projectName)}`,
+  });
+}
+
+/**
+ * Stages the project for deletion.  Returns a deployId that can be polled using getDeployStatus.
+ * This needs to be called first before `deleteProject` for unified projects
+ * @param accountId
+ * @param projectName - The name of the project to delete
+ * @param dryRun - Should this be a dry run of the deletion.  If set to true, returns a list of the components that will be removed `componentsToRemove`
+ */
+export function stageProjectForDeletion(
+  accountId: number,
+  projectName: string,
+  dryRun: boolean
+): HubSpotPromise<ProjectDeletionResponse> {
+  return http.post<ProjectDeletionResponse>(accountId, {
+    url: `${PROJECTS_DEPLOY_API_PATH_V3}/deploys/delete`,
+    data: { projectName, dryRun },
   });
 }
 

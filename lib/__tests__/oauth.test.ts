@@ -6,12 +6,12 @@ vi.mock('../logger');
 vi.mock('../../errors');
 vi.mock('../../models/OAuth2Manager');
 
-import { updateConfigAccount } from '../../config';
-import * as OAuth2ManagerModule from '../../models/OAuth2Manager';
-import { ENVIRONMENTS } from '../../constants/environments';
-import { AUTH_METHODS } from '../../constants/auth';
-import { logger } from '../logger';
-import { HubSpotConfigAccount } from '../../types/Accounts';
+import { updateConfigAccount } from '../../config/index.js';
+import * as OAuth2ManagerModule from '../../models/OAuth2Manager.js';
+import { ENVIRONMENTS } from '../../constants/environments.js';
+import { AUTH_METHODS } from '../../constants/auth.js';
+import { logger } from '../logger.js';
+import { HubSpotConfigAccount } from '../../types/Accounts.js';
 
 const UnmockedOAuth2Manager = await vi.importActual<typeof OAuth2ManagerModule>(
   '../../models/OAuth2Manager'
@@ -56,7 +56,6 @@ describe('lib/oauth', () => {
   describe('addOauthToAccountConfig', () => {
     it('should update the config', () => {
       const oauthManager = new OAuth2Manager(account, () => null);
-      console.log('oauthManager', oauthManager.account);
       addOauthToAccountConfig(oauthManager);
       expect(updateConfigAccount).toHaveBeenCalledTimes(1);
       expect(updateConfigAccount).toHaveBeenCalledWith(account);

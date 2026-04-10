@@ -10,6 +10,7 @@ const i18nKey = 'config.state';
 
 const DEFAULT_STATE: HubSpotState = {
   [STATE_FLAGS.MCP_TOTAL_TOOL_CALLS]: 0,
+  [STATE_FLAGS.USAGE_TRACKING_MESSAGE_LAST_SHOW_VERSION]: undefined,
 };
 
 function ensureCLIDirectory(): void {
@@ -27,23 +28,18 @@ function ensureCLIDirectory(): void {
   }
 }
 
-function sanitizeAndMerge(parsed: unknown): HubSpotState {
+function parseState(parsed: unknown): HubSpotState {
   if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
     return structuredClone(DEFAULT_STATE);
   }
 
-  const state = parsed as HubSpotState;
+  const record = parsed as Record<string, unknown>;
   const result: HubSpotState = structuredClone(DEFAULT_STATE);
 
-  for (const key in DEFAULT_STATE) {
-    const typedKey = key as keyof HubSpotState;
-    if (
-      key in state &&
-      typeof state[typedKey] === typeof DEFAULT_STATE[typedKey]
-    ) {
-      result[typedKey] = state[typedKey];
+  for (const key of Object.keys(DEFAULT_STATE)) {
+    if (key in record && record[key] !== undefined) {
+      Object.assign(result, { [key]: record[key] });
     }
-    // keys not in parsed file remain as DEFAULT values
   }
 
   return result;
@@ -63,7 +59,7 @@ function getCurrentState(): HubSpotState {
     }
 
     const parsed = JSON.parse(data);
-    return sanitizeAndMerge(parsed);
+    return parseState(parsed);
   } catch (error) {
     logger.debug(
       i18n(`${i18nKey}.getCurrentState.errors.errorReading`, {

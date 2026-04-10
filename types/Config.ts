@@ -2,6 +2,7 @@ import {
   CONFIG_FLAGS,
   HUBSPOT_CONFIG_ERROR_TYPES,
   HUBSPOT_CONFIG_OPERATIONS,
+  STATE_FLAGS,
 } from '../constants/config.js';
 import {
   DeprecatedHubSpotConfigAccountFields,
@@ -41,7 +42,8 @@ export type GitInclusionResult = {
 export type ConfigFlag = ValueOf<typeof CONFIG_FLAGS>;
 
 export type HubSpotState = {
-  mcpTotalToolCalls: number;
+  [STATE_FLAGS.MCP_TOTAL_TOOL_CALLS]: number;
+  [STATE_FLAGS.USAGE_TRACKING_MESSAGE_LAST_SHOW_VERSION]?: string;
 };
 
 export type HubSpotConfigErrorType = ValueOf<typeof HUBSPOT_CONFIG_ERROR_TYPES>;
