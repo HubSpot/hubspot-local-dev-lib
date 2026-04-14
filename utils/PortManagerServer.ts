@@ -6,7 +6,7 @@ import { detectPort } from './detectPort.js';
 import {
   MIN_PORT_NUMBER,
   MAX_PORT_NUMBER,
-  PORT_MANAGER_SERVER_PORT,
+  PORT_MANAGER_SERVER_DEFAULT_PORT,
 } from '../constants/ports.js';
 import { logger } from '../lib/logger.js';
 import { i18n } from './lang.js';
@@ -19,21 +19,25 @@ export const HEALTH_CHECK_PATH = '/port-manager-health-check';
 export const SERVICE_HEALTHY = 'OK';
 
 class _PortManagerServer {
-  app?: Express;
-  server?: Server;
-  serverPortMap: ServerPortMap;
-  port: number;
+  private app?: Express;
+  private server?: Server;
+  private serverPortMap: ServerPortMap;
+  private port: number;
 
   constructor() {
     this.serverPortMap = {};
-    this.port = PORT_MANAGER_SERVER_PORT;
+    this.port = PORT_MANAGER_SERVER_DEFAULT_PORT;
   }
 
   get baseUrl(): string {
     return `http://localhost:${this.port}`;
   }
 
-  async init(): Promise<void> {
+  async init(port?: number): Promise<void> {
+    if (port) {
+      this.port = port;
+    }
+
     if (!(await this.portAvailable())) {
       throw new Error(
         i18n(`${i18nKey}.errors.portInUse`, {
@@ -58,7 +62,7 @@ class _PortManagerServer {
     this.app = undefined;
     this.server = undefined;
     this.serverPortMap = {};
-    this.port = PORT_MANAGER_SERVER_PORT;
+    this.port = PORT_MANAGER_SERVER_DEFAULT_PORT;
   }
 
   async portAvailable(): Promise<boolean> {

@@ -17,12 +17,7 @@ import _axios from 'axios';
 // Mock the PortManagerServer
 vi.mock('../../utils/PortManagerServer', () => ({
   PortManagerServer: {
-    server: undefined,
-    serverPortMap: {},
-    port: 8080,
-    get baseUrl() {
-      return `http://localhost:${this.port}`;
-    },
+    baseUrl: 'http://localhost:8080',
     init: vi.fn(),
     portAvailable: vi.fn(),
   },
@@ -75,8 +70,6 @@ const BAD_PORT_DATA = [
 describe('lib/portManager', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockedPortManagerServer.server = undefined;
-    mockedPortManagerServer.serverPortMap = {};
   });
 
   describe('isPortManagerPortAvailable()', () => {
@@ -155,11 +148,6 @@ describe('lib/portManager', () => {
   });
 
   describe('requestPorts()', () => {
-    beforeEach(() => {
-      mockedPortManagerServer.server =
-        {} as unknown as typeof mockedPortManagerServer.server; // Mock running server
-    });
-
     it('returns ports when none are specified', async () => {
       const mockResponse = {
         data: {
@@ -233,11 +221,6 @@ describe('lib/portManager', () => {
   });
 
   describe('deleteServerInstance()', () => {
-    beforeEach(() => {
-      mockedPortManagerServer.server =
-        {} as unknown as typeof mockedPortManagerServer.server; // Mock running server
-    });
-
     it('deletes port data for a server instance', async () => {
       axios.delete.mockResolvedValue({ status: 200 });
 
@@ -257,11 +240,6 @@ describe('lib/portManager', () => {
   });
 
   describe('portManagerHasActiveServers()', () => {
-    beforeEach(() => {
-      mockedPortManagerServer.server =
-        {} as unknown as typeof mockedPortManagerServer.server; // Mock running server
-    });
-
     it('returns false when no servers are active', async () => {
       const mockResponse = {
         data: {
@@ -298,11 +276,6 @@ describe('lib/portManager', () => {
   });
 
   describe('getActiveServers()', () => {
-    beforeEach(() => {
-      mockedPortManagerServer.server =
-        {} as unknown as typeof mockedPortManagerServer.server; // Mock running server
-    });
-
     it('returns the servers', async () => {
       const mockResponse = {
         data: {
@@ -324,11 +297,6 @@ describe('lib/portManager', () => {
   });
 
   describe('getServerPortByInstanceId()', () => {
-    beforeEach(() => {
-      mockedPortManagerServer.server =
-        {} as unknown as typeof mockedPortManagerServer.server; // Mock running server
-    });
-
     it('returns the port for known server instances', async () => {
       const mockResponse = {
         data: {

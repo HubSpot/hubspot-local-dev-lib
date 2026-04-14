@@ -25,14 +25,10 @@ export async function isPortManagerServerRunning(): Promise<boolean> {
 }
 
 export async function startPortManagerServer(port?: number): Promise<void> {
-  if (port) {
-    PortManagerServer.port = port;
-  }
-
   const isRunning = await isPortManagerServerRunning();
 
   if (!isRunning) {
-    await PortManagerServer.init();
+    await PortManagerServer.init(port);
   }
 }
 
