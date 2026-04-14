@@ -22,16 +22,22 @@ class _PortManagerServer {
   app?: Express;
   server?: Server;
   serverPortMap: ServerPortMap;
+  port: number;
 
   constructor() {
     this.serverPortMap = {};
+    this.port = PORT_MANAGER_SERVER_PORT;
   }
 
-  async init(): Promise<void> {
+  async init(port?: number): Promise<void> {
+    if (port) {
+      this.port = port;
+    }
+
     if (!(await this.portAvailable())) {
       throw new Error(
         i18n(`${i18nKey}.errors.portInUse`, {
-          port: PORT_MANAGER_SERVER_PORT,
+          port: this.port,
         })
       );
     }
@@ -52,20 +58,19 @@ class _PortManagerServer {
     this.app = undefined;
     this.server = undefined;
     this.serverPortMap = {};
+    this.port = PORT_MANAGER_SERVER_PORT;
   }
 
   async portAvailable(): Promise<boolean> {
-    return (
-      (await detectPort(PORT_MANAGER_SERVER_PORT)) === PORT_MANAGER_SERVER_PORT
-    );
+    return (await detectPort(this.port)) === this.port;
   }
 
   private listen(): Promise<Server> {
     return new Promise<Server>((resolve, reject) => {
-      const server = this.app!.listen(PORT_MANAGER_SERVER_PORT, () => {
+      const server = this.app!.listen(this.port, () => {
         logger.debug(
           i18n(`${i18nKey}.started`, {
-            port: PORT_MANAGER_SERVER_PORT,
+            port: this.port,
           })
         );
         resolve(server);
