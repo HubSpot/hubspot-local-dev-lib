@@ -71,8 +71,80 @@ describe('hsSettings', () => {
   });
 
   describe('writeHsSettingsFile()', () => {
-    it('creates .hs folder and writes settings file', () => {
+    it('creates .hs folder, settings file, and README when no settings file exists', () => {
+      mockFindupSync.mockReturnValueOnce(null);
       mockFs.existsSync.mockReturnValueOnce(false);
+      mockFs.mkdirSync.mockReturnValueOnce(undefined);
+      mockFs.writeFileSync.mockImplementation(() => undefined);
+
+      writeHsSettingsFile(SETTINGS);
+
+      expect(mockFs.mkdirSync).toHaveBeenCalledWith('/mock/project/.hs', {
+        recursive: true,
+      });
+      expect(mockFs.writeFileSync).toHaveBeenCalledWith(
+        '/mock/project/.hs/settings.json',
+        JSON.stringify(SETTINGS, null, 2),
+        'utf8'
+      );
+      const readmeCall = mockFs.writeFileSync.mock.calls.find(
+        call => typeof call[0] === 'string' && call[0].includes('README.txt')
+      );
+      expect(readmeCall).toBeDefined();
+    });
+
+    it('writes to existing settings file path when one exists', () => {
+      mockFindupSync.mockReturnValueOnce('/parent/.hs/settings.json');
+      mockFs.existsSync.mockReturnValueOnce(true);
+      mockFs.mkdirSync.mockReturnValueOnce(undefined);
+      mockFs.writeFileSync.mockImplementation(() => undefined);
+
+      writeHsSettingsFile(SETTINGS);
+
+      expect(mockFs.mkdirSync).toHaveBeenCalledWith('/parent/.hs', {
+        recursive: true,
+      });
+      expect(mockFs.writeFileSync).toHaveBeenCalledWith(
+        '/parent/.hs/settings.json',
+        JSON.stringify(SETTINGS, null, 2),
+        'utf8'
+      );
+    });
+
+    it('does not write README when updating existing settings file', () => {
+      mockFindupSync.mockReturnValueOnce('/parent/.hs/settings.json');
+      mockFs.existsSync.mockReturnValueOnce(true);
+      mockFs.mkdirSync.mockReturnValueOnce(undefined);
+      mockFs.writeFileSync.mockImplementation(() => undefined);
+
+      writeHsSettingsFile(SETTINGS);
+
+      const readmeCall = mockFs.writeFileSync.mock.calls.find(
+        call => typeof call[0] === 'string' && call[0].includes('README.txt')
+      );
+      expect(readmeCall).toBeUndefined();
+    });
+
+    it('targets parent .hs folder and does not create .hs in cwd when settings exist in parent directory', () => {
+      mockFindupSync.mockReturnValueOnce('/parent/.hs/settings.json');
+      mockFs.existsSync.mockReturnValueOnce(true);
+      mockFs.mkdirSync.mockReturnValueOnce(undefined);
+      mockFs.writeFileSync.mockImplementation(() => undefined);
+
+      writeHsSettingsFile(SETTINGS);
+
+      expect(mockFs.mkdirSync).not.toHaveBeenCalledWith(
+        '/mock/project/.hs',
+        expect.anything()
+      );
+      expect(mockFs.mkdirSync).toHaveBeenCalledWith('/parent/.hs', {
+        recursive: true,
+      });
+    });
+
+    it('writes to cwd .hs when settings file is in the same directory', () => {
+      mockFindupSync.mockReturnValueOnce('/mock/project/.hs/settings.json');
+      mockFs.existsSync.mockReturnValueOnce(true);
       mockFs.mkdirSync.mockReturnValueOnce(undefined);
       mockFs.writeFileSync.mockImplementation(() => undefined);
 
@@ -88,35 +160,8 @@ describe('hsSettings', () => {
       );
     });
 
-    it('writes README.txt on first scaffold', () => {
-      mockFs.existsSync.mockReturnValueOnce(false);
-      mockFs.mkdirSync.mockReturnValueOnce(undefined);
-      mockFs.writeFileSync.mockImplementation(() => undefined);
-
-      writeHsSettingsFile(SETTINGS);
-
-      const writeFileCalls = mockFs.writeFileSync.mock.calls;
-      const readmeCall = writeFileCalls.find(
-        call => typeof call[0] === 'string' && call[0].includes('README.txt')
-      );
-      expect(readmeCall).toBeDefined();
-    });
-
-    it('does not write README.txt when .hs folder already exists', () => {
-      mockFs.existsSync.mockReturnValueOnce(true);
-      mockFs.mkdirSync.mockReturnValueOnce(undefined);
-      mockFs.writeFileSync.mockImplementation(() => undefined);
-
-      writeHsSettingsFile(SETTINGS);
-
-      const writeFileCalls = mockFs.writeFileSync.mock.calls;
-      const readmeCall = writeFileCalls.find(
-        call => typeof call[0] === 'string' && call[0].includes('README.txt')
-      );
-      expect(readmeCall).toBeUndefined();
-    });
-
     it('throws FileSystemError when write fails', () => {
+      mockFindupSync.mockReturnValueOnce(null);
       mockFs.existsSync.mockReturnValueOnce(false);
       mockFs.mkdirSync.mockImplementation(() => {
         throw new Error('EACCES');
