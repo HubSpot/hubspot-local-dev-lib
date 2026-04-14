@@ -29,11 +29,11 @@ class _PortManagerServer {
     this.port = PORT_MANAGER_SERVER_PORT;
   }
 
-  async init(port?: number): Promise<void> {
-    if (port) {
-      this.port = port;
-    }
+  get baseUrl(): string {
+    return `http://localhost:${this.port}`;
+  }
 
+  async init(): Promise<void> {
     if (!(await this.portAvailable())) {
       throw new Error(
         i18n(`${i18nKey}.errors.portInUse`, {

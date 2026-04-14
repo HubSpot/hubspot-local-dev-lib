@@ -5,15 +5,8 @@ import {
   PortManagerServer,
   SERVICE_HEALTHY,
 } from '../utils/PortManagerServer.js';
-import { PORT_MANAGER_SERVER_PORT } from '../constants/ports.js';
 import { RequestPortsData, ServerPortMap } from '../types/PortManager.js';
 import { logger } from './logger.js';
-
-let portManagerPort = PORT_MANAGER_SERVER_PORT;
-
-function getBaseUrl(): string {
-  return `http://localhost:${portManagerPort}`;
-}
 
 export async function isPortManagerPortAvailable(): Promise<boolean> {
   return PortManagerServer.portAvailable();
@@ -21,7 +14,9 @@ export async function isPortManagerPortAvailable(): Promise<boolean> {
 
 export async function isPortManagerServerRunning(): Promise<boolean> {
   try {
-    const { data } = await axios.get(`${getBaseUrl()}${HEALTH_CHECK_PATH}`);
+    const { data } = await axios.get(
+      `${PortManagerServer.baseUrl}${HEALTH_CHECK_PATH}`
+    );
     return data.status === SERVICE_HEALTHY;
   } catch (e) {
     logger.debug(e);
@@ -31,13 +26,13 @@ export async function isPortManagerServerRunning(): Promise<boolean> {
 
 export async function startPortManagerServer(port?: number): Promise<void> {
   if (port) {
-    portManagerPort = port;
+    PortManagerServer.port = port;
   }
 
   const isRunning = await isPortManagerServerRunning();
 
   if (!isRunning) {
-    await PortManagerServer.init(port);
+    await PortManagerServer.init();
   }
 }
 
@@ -45,14 +40,14 @@ export async function stopPortManagerServer(): Promise<void> {
   const isRunning = await isPortManagerServerRunning();
 
   if (isRunning) {
-    await axios.post(`${getBaseUrl()}/close`);
+    await axios.post(`${PortManagerServer.baseUrl}/close`);
   }
 }
 
 export async function requestPorts(
   portData: Array<RequestPortsData>
 ): Promise<{ [instanceId: string]: number }> {
-  const { data } = await axios.post(`${getBaseUrl()}/servers`, {
+  const { data } = await axios.post(`${PortManagerServer.baseUrl}/servers`, {
     portData: portData,
   });
 
@@ -60,7 +55,7 @@ export async function requestPorts(
 }
 
 export async function getActiveServers(): Promise<ServerPortMap> {
-  const { data } = await axios.get(`${getBaseUrl()}/servers`);
+  const { data } = await axios.get(`${PortManagerServer.baseUrl}/servers`);
   return data.servers;
 }
 
@@ -68,7 +63,7 @@ export async function getServerPortByInstanceId(
   serverInstanceId: string
 ): Promise<number> {
   const { data } = await axios.get(
-    `${getBaseUrl()}/servers/${serverInstanceId}`
+    `${PortManagerServer.baseUrl}/servers/${serverInstanceId}`
   );
   return data.port;
 }
@@ -76,10 +71,12 @@ export async function getServerPortByInstanceId(
 export async function deleteServerInstance(
   serverInstanceId: string
 ): Promise<void> {
-  await axios.delete(`${getBaseUrl()}/servers/${serverInstanceId}`);
+  await axios.delete(
+    `${PortManagerServer.baseUrl}/servers/${serverInstanceId}`
+  );
 }
 
 export async function portManagerHasActiveServers(): Promise<boolean> {
-  const { data } = await axios.get(`${getBaseUrl()}/servers`);
+  const { data } = await axios.get(`${PortManagerServer.baseUrl}/servers`);
   return data.count > 0;
 }

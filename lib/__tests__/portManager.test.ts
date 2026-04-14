@@ -19,6 +19,10 @@ vi.mock('../../utils/PortManagerServer', () => ({
   PortManagerServer: {
     server: undefined,
     serverPortMap: {},
+    port: 8080,
+    get baseUrl() {
+      return `http://localhost:${this.port}`;
+    },
     init: vi.fn(),
     portAvailable: vi.fn(),
   },
