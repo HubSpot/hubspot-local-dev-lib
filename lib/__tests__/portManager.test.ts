@@ -1,5 +1,8 @@
 import { vi, describe, it, expect, beforeEach, Mocked } from 'vitest';
-import { MAX_PORT_NUMBER } from '../../constants/ports.js';
+import {
+  MAX_PORT_NUMBER,
+  PORT_MANAGER_SERVER_DEFAULT_PORT,
+} from '../../constants/ports.js';
 import { PortManagerServer } from '../../utils/PortManagerServer.js';
 import {
   deleteServerInstance,
@@ -17,7 +20,7 @@ import _axios from 'axios';
 // Mock the PortManagerServer
 vi.mock('../../utils/PortManagerServer', () => ({
   PortManagerServer: {
-    baseUrl: 'http://localhost:8080',
+    baseUrl: `http://localhost:${PORT_MANAGER_SERVER_DEFAULT_PORT}`,
     init: vi.fn(),
     portAvailable: vi.fn(),
   },
@@ -100,7 +103,7 @@ describe('lib/portManager', () => {
       await startPortManagerServer();
 
       expect(axios.get).toHaveBeenCalledWith(
-        'http://localhost:8080/port-manager-health-check'
+        `http://localhost:${PORT_MANAGER_SERVER_DEFAULT_PORT}/port-manager-health-check`
       );
       expect(mockedPortManagerServer.init).toHaveBeenCalled();
     });
@@ -112,7 +115,7 @@ describe('lib/portManager', () => {
       await startPortManagerServer();
 
       expect(axios.get).toHaveBeenCalledWith(
-        'http://localhost:8080/port-manager-health-check'
+        `http://localhost:${PORT_MANAGER_SERVER_DEFAULT_PORT}/port-manager-health-check`
       );
       expect(mockedPortManagerServer.init).not.toHaveBeenCalled();
     });
@@ -127,7 +130,7 @@ describe('lib/portManager', () => {
       await stopPortManagerServer();
 
       expect(axios.get).toHaveBeenCalledWith(
-        'http://localhost:8080/port-manager-health-check'
+        `http://localhost:${PORT_MANAGER_SERVER_DEFAULT_PORT}/port-manager-health-check`
       );
       expect(axios.post).toHaveBeenCalledWith(
         expect.stringContaining('/close')
@@ -141,7 +144,7 @@ describe('lib/portManager', () => {
       await stopPortManagerServer();
 
       expect(axios.get).toHaveBeenCalledWith(
-        'http://localhost:8080/port-manager-health-check'
+        `http://localhost:${PORT_MANAGER_SERVER_DEFAULT_PORT}/port-manager-health-check`
       );
       expect(axios.post).not.toHaveBeenCalled();
     });
