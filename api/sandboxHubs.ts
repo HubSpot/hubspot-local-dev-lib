@@ -33,6 +33,7 @@ export function deleteSandbox(
 ): HubSpotPromise<void> {
   return http.delete(parentAccountId, {
     url: `${SANDBOX_API_PATH}/${sandboxAccountId}`,
+    timeout: SANDBOX_TIMEOUT,
   });
 }
 
@@ -53,6 +54,7 @@ export function createV2Sandbox(
   return http.post<V2Sandbox>(accountId, {
     url: `${SANDBOX_API_PATH_V2}/sandboxes`,
     data: { name, type, syncObjectRecords },
+    timeout: SANDBOX_TIMEOUT,
   });
 }
 
