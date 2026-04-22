@@ -140,7 +140,13 @@ export class HubSpotHttpError<T = any> extends Error {
     }
 
     generatedContext.accountId = cause.config?.params?.portalId;
-    generatedContext.payload = JSON.stringify(cause.config?.data);
+    // Axios serializes request bodies before the error fires, so `config.data`
+    // is often already a JSON string. Avoid re-stringifying so debug output is
+    // readable instead of escape-soup.
+    generatedContext.payload =
+      typeof cause.config?.data === 'string'
+        ? cause.config.data
+        : JSON.stringify(cause.config?.data);
     // This will just be the url path
     generatedContext.request = cause.config?.url;
 
