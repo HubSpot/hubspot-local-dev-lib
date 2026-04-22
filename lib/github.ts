@@ -155,7 +155,7 @@ export async function fetchGitHubRepoContentFromDownloadUrl(
   const contentType = resp.headers['content-type'];
   let fileContents;
 
-  if (contentType.startsWith('text')) {
+  if (typeof contentType === 'string' && contentType.startsWith('text')) {
     fileContents = Buffer.from(resp.data).toString('utf8');
   } else {
     fileContents = resp.data;
