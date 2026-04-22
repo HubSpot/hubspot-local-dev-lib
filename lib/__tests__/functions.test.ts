@@ -151,7 +151,7 @@ describe('lib/cms/functions', () => {
       });
 
       expect(result).toEqual({
-        runtime: 'nodejs18.x',
+        runtime: 'nodejs20.x',
         version: '1.0',
         environment: {},
         secrets: [],
