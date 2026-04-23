@@ -16,6 +16,8 @@ export type SystemType =
 export type ResultsOrder = 'ASC' | 'DESC';
 
 export type SearchLogsRequest = {
+  loggingSystemType?: string;
+  logId?: string;
   limit?: number;
   offset?: number;
   startTime?: number;
@@ -26,6 +28,7 @@ export type SearchLogsRequest = {
   correlationGroupId?: string;
   traceId?: string;
   label?: string;
+  cardIds?: string[];
 };
 
 export type AppLogEntry = {

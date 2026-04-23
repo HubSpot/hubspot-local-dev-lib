@@ -6,7 +6,7 @@ import {
   SystemType,
 } from '../types/AppLogs.js';
 
-const APP_LOGS_API_PATH = 'developer/platform/logging/search/v1/logs';
+const APP_LOGS_API_PATH = 'developers/logs';
 
 export function searchAppLogs(
   accountId: number,
@@ -15,7 +15,7 @@ export function searchAppLogs(
   requestBody: SearchLogsRequest = {}
 ): HubSpotPromise<SearchLogsResponse> {
   return http.post<SearchLogsResponse>(accountId, {
-    url: `${APP_LOGS_API_PATH}/${appId}/${systemType}/search`,
+    url: `${APP_LOGS_API_PATH}/search/${appId}/${systemType}`,
     data: requestBody,
   });
 }
