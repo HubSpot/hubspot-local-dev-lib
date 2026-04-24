@@ -1,6 +1,7 @@
 import { http } from '../http/index.js';
 import { HubSpotPromise } from '../types/Http.js';
 import {
+  AppLogDetailsResponse,
   SearchLogsRequest,
   SearchLogsResponse,
   SystemType,
@@ -17,5 +18,15 @@ export function searchAppLogs(
   return http.post<SearchLogsResponse>(accountId, {
     url: `${APP_LOGS_API_PATH}/search/${appId}/${systemType}`,
     data: requestBody,
+  });
+}
+
+export function getAppLogDetails(
+  accountId: number,
+  appId: number,
+  logId: string
+): HubSpotPromise<AppLogDetailsResponse> {
+  return http.get<AppLogDetailsResponse>(accountId, {
+    url: `${APP_LOGS_API_PATH}/details/${appId}/${logId}`,
   });
 }

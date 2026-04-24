@@ -52,3 +52,38 @@ export type SearchLogsResponse = {
   offset: number;
   total: number;
 };
+
+export type AppLogDetails = {
+  loggingSystemType: string;
+  id: string;
+  requestExecutionTimestamp: number;
+  portalId?: number;
+  traceId?: string;
+  parentId?: string;
+  label?: string;
+  traceparentId?: string;
+  correlationGroupId?: string;
+  parentLogId?: string;
+  responseReceivedTimestamp?: number;
+  duration?: number;
+  errorType?: string;
+  appId: number;
+  serverlessFunction?: string;
+  location?: string;
+  userId?: number;
+  requestBody?: string;
+  responseBody?: string;
+  validatedResponse?: string;
+  extraInfo?: Record<string, string>;
+  errorMessage?: string;
+  cardId?: number;
+  objectTypeId?: string;
+  objectId?: number;
+  cardName?: string;
+  traceRoot?: boolean;
+  [key: string]: unknown;
+};
+
+export type AppLogDetailsResponse = {
+  log: AppLogDetails;
+};
