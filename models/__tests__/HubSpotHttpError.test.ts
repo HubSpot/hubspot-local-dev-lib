@@ -279,9 +279,27 @@ describe('models/HubSpotHttpError', () => {
       hubspotHttpError.extractDerivedContext(newCause);
       expect(hubspotHttpError.derivedContext).toStrictEqual({
         accountId: 888888,
-        payload: '"Yooooooo"',
+        payload: 'Yooooooo',
         request: '/some/different/path',
       });
+    });
+
+    it('should not re-stringify a payload that is already a string', () => {
+      const hubspotHttpError = new HubSpotHttpError();
+      const serializedBody = JSON.stringify({ foo: 'bar', nested: { n: 1 } });
+      const cause = new AxiosError(
+        '',
+        '',
+        // @ts-expect-error test double
+        {
+          params: { portalId: 123 },
+          data: serializedBody,
+          url: '/x',
+        }
+      );
+      // @ts-expect-error private method
+      hubspotHttpError.extractDerivedContext(cause);
+      expect(hubspotHttpError.derivedContext?.payload).toBe(serializedBody);
     });
   });
 
