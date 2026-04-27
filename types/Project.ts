@@ -1,6 +1,8 @@
 import type { Build } from './Build.js';
 import { GithubSourceData } from './Github.js';
 import { ProjectLog } from './ProjectLog.js';
+import { ValueOf } from './Utils.js';
+import { SUBBUILD_TYPES } from '../enums/build.js';
 
 export type Project = {
   createdAt: number;
@@ -54,4 +56,25 @@ export type FetchPlatformVersionResponse = {
 
 export type WarnLogsResponse = {
   logs: Array<ProjectLog>;
+};
+
+export type Release = {
+  releaseTag: string;
+  buildId: number;
+  createdAt: string;
+  components?: Array<{
+    buildType: ValueOf<typeof SUBBUILD_TYPES>;
+    buildName?: string;
+    rootPath?: string;
+    id?: string;
+  }>;
+};
+
+export type FetchListReleasesResponse = {
+  results: Array<Release>;
+  paging: {
+    next: {
+      after: string;
+    };
+  };
 };

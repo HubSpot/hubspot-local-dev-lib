@@ -9,6 +9,8 @@ import {
   FetchPlatformVersionResponse,
   WarnLogsResponse,
   UploadIRResponse,
+  Release,
+  FetchListReleasesResponse,
 } from '../types/Project.js';
 import { Build, FetchProjectBuildsResponse } from '../types/Build.js';
 import {
@@ -395,6 +397,37 @@ export function fetchDeployWarnLogs(
   });
 }
 
+export function createRelease(
+  accountId: number,
+  projectName: string,
+  buildId: number
+): HubSpotPromise<Release> {
+  return http.post<Release>(accountId, {
+    url: `${PROJECTS_API_PATH}/${encodeURIComponent(projectName)}/releases`,
+    data: { buildId },
+  });
+}
+
+export function listReleases(
+  accountId: number,
+  projectName: string,
+  params: QueryParams = {}
+): HubSpotPromise<FetchListReleasesResponse> {
+  return http.get<FetchListReleasesResponse>(accountId, {
+    url: `${PROJECTS_API_PATH}/${encodeURIComponent(projectName)}/releases`,
+    params,
+  });
+}
+
+export function getReleaseInfo(
+  accountId: number,
+  projectName: string,
+  releaseTag: string
+): HubSpotPromise<Release> {
+  return http.get(accountId, {
+    url: `${PROJECTS_API_PATH}/${encodeURIComponent(projectName)}/releases/${encodeURIComponent(releaseTag)}`,
+  });
+}
 /**
  * @deprecated
  */

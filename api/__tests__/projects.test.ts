@@ -9,6 +9,7 @@ import {
   checkMigrationStatus,
   cloneApp,
   createProject,
+  createRelease,
   deleteFileFromBuild,
   deleteProject,
   deployProject,
@@ -26,6 +27,8 @@ import {
   getBuildStructure,
   getDeployStatus,
   getDeployStructure,
+  getReleaseInfo,
+  listReleases,
   migrateApp,
   provisionBuild,
   queueBuild,
@@ -568,6 +571,76 @@ describe('api/projects', () => {
       expect(http.get).toHaveBeenCalledTimes(1);
       expect(http.get).toHaveBeenCalledWith(accountId, {
         url: `dfs/logging/v1/logs/projects/${encodeURIComponent(projectNameIllegalChars)}/deploys/${deployId}/combined/warn`,
+      });
+    });
+  });
+
+  describe('createRelease', () => {
+    const buildId = 12345;
+    it('should call http correctly', async () => {
+      await createRelease(accountId, projectName, buildId);
+      expect(http.post).toHaveBeenCalledTimes(1);
+      expect(http.post).toHaveBeenCalledWith(accountId, {
+        url: `dfs/v1/projects/${projectName}/releases`,
+        data: { buildId },
+      });
+    });
+
+    it('should encode the project name', async () => {
+      await createRelease(accountId, projectNameIllegalChars, buildId);
+      expect(http.post).toHaveBeenCalledTimes(1);
+      expect(http.post).toHaveBeenCalledWith(accountId, {
+        url: `dfs/v1/projects/${encodeURIComponent(projectNameIllegalChars)}/releases`,
+        data: { buildId },
+      });
+    });
+  });
+
+  describe('listReleases', () => {
+    it('should call http correctly', async () => {
+      const params = { limit: 10, after: 'abc' };
+      await listReleases(accountId, projectName, params);
+      expect(http.get).toHaveBeenCalledTimes(1);
+      expect(http.get).toHaveBeenCalledWith(accountId, {
+        url: `dfs/v1/projects/${projectName}/releases`,
+        params,
+      });
+    });
+
+    it('should default params to empty object', async () => {
+      await listReleases(accountId, projectName);
+      expect(http.get).toHaveBeenCalledTimes(1);
+      expect(http.get).toHaveBeenCalledWith(accountId, {
+        url: `dfs/v1/projects/${projectName}/releases`,
+        params: {},
+      });
+    });
+
+    it('should encode the project name', async () => {
+      await listReleases(accountId, projectNameIllegalChars);
+      expect(http.get).toHaveBeenCalledTimes(1);
+      expect(http.get).toHaveBeenCalledWith(accountId, {
+        url: `dfs/v1/projects/${encodeURIComponent(projectNameIllegalChars)}/releases`,
+        params: {},
+      });
+    });
+  });
+
+  describe('getReleaseInfo', () => {
+    const releaseTag = 'v1.0.0';
+    it('should call http correctly', async () => {
+      await getReleaseInfo(accountId, projectName, releaseTag);
+      expect(http.get).toHaveBeenCalledTimes(1);
+      expect(http.get).toHaveBeenCalledWith(accountId, {
+        url: `dfs/v1/projects/${projectName}/releases/${encodeURIComponent(releaseTag)}`,
+      });
+    });
+
+    it('should encode the project name', async () => {
+      await getReleaseInfo(accountId, projectNameIllegalChars, releaseTag);
+      expect(http.get).toHaveBeenCalledTimes(1);
+      expect(http.get).toHaveBeenCalledWith(accountId, {
+        url: `dfs/v1/projects/${encodeURIComponent(projectNameIllegalChars)}/releases/${encodeURIComponent(releaseTag)}`,
       });
     });
   });
