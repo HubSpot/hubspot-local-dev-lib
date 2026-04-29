@@ -6,7 +6,7 @@ import { detectPort } from './detectPort.js';
 import {
   MIN_PORT_NUMBER,
   MAX_PORT_NUMBER,
-  PORT_MANAGER_SERVER_DEFAULT_PORT,
+  PORT_MANAGER_SERVER_PORT,
 } from '../constants/ports.js';
 import { logger } from '../lib/logger.js';
 import { i18n } from './lang.js';
@@ -26,7 +26,7 @@ class _PortManagerServer {
 
   constructor() {
     this.serverPortMap = {};
-    this.port = PORT_MANAGER_SERVER_DEFAULT_PORT;
+    this.port = PORT_MANAGER_SERVER_PORT;
   }
 
   get baseUrl(): string {
@@ -62,7 +62,7 @@ class _PortManagerServer {
     this.app = undefined;
     this.server = undefined;
     this.serverPortMap = {};
-    this.port = PORT_MANAGER_SERVER_DEFAULT_PORT;
+    this.port = PORT_MANAGER_SERVER_PORT;
   }
 
   async portAvailable(): Promise<boolean> {
