@@ -38,7 +38,6 @@ Publish an experimental version to NPM from your branch:
 2. In the CLI repo, update `package.json` to point to the experimental version (e.g., `"@hubspot/local-dev-lib": "0.7.4-experimental.0"`).
 3. Run `yarn install --force` in the CLI repo to pull the experimental release.
 
-
 ## Merging
 
 To merge, either create, or have a maintainer create a blank branch, and set your PRs base branch to the blank branch. Merge your PR into the blank branch, and ensure that it passes the build. Then merge the new branch into main.
