@@ -78,3 +78,14 @@ export type FetchListReleasesResponse = {
     };
   };
 };
+
+export type AutoReleaseResponse = {
+  releaseTag: string;
+  status: string;
+  appId: number;
+};
+
+export type AutoReleaseStatusResponse = {
+  status: 'PENDING' | 'COMPLETE';
+  currentReleaseTag?: string;
+};

@@ -11,6 +11,8 @@ import {
   UploadIRResponse,
   Release,
   FetchListReleasesResponse,
+  AutoReleaseResponse,
+  AutoReleaseStatusResponse,
 } from '../types/Project.js';
 import { Build, FetchProjectBuildsResponse } from '../types/Build.js';
 import {
@@ -428,6 +430,41 @@ export function getReleaseInfo(
     url: `${PROJECTS_API_PATH}/${encodeURIComponent(projectName)}/releases/${encodeURIComponent(releaseTag)}`,
   });
 }
+
+export function triggerAutoRelease(
+  accountId: number,
+  projectId: number,
+  buildId: number,
+  targetPortalId: number
+): HubSpotPromise<AutoReleaseResponse> {
+  return http.post<AutoReleaseResponse>(accountId, {
+    url: `${PROJECTS_DEPLOY_API_PATH}/auto-release`,
+    data: {
+      projectId,
+      buildId,
+      targetPortalId,
+    },
+  });
+}
+
+export function getAutoReleaseStatus(
+  accountId: number,
+  projectId: number,
+  targetPortalId: number,
+  expectedReleaseTag: string,
+  appId: number
+): HubSpotPromise<AutoReleaseStatusResponse> {
+  return http.get<AutoReleaseStatusResponse>(accountId, {
+    url: `${PROJECTS_DEPLOY_API_PATH}/auto-release/status`,
+    params: {
+      projectId,
+      targetPortalId,
+      expectedReleaseTag,
+      appId,
+    },
+  });
+}
+
 /**
  * @deprecated
  */
