@@ -3,6 +3,7 @@ import { Server } from 'http';
 import cors from 'cors';
 
 import { detectPort } from './detectPort.js';
+import { isPortAvailable } from './isPortAvailable.js';
 import {
   MIN_PORT_NUMBER,
   MAX_PORT_NUMBER,
@@ -66,7 +67,7 @@ class _PortManagerServer {
   }
 
   async portAvailable(): Promise<boolean> {
-    return (await detectPort(this.port)) === this.port;
+    return isPortAvailable(this.port);
   }
 
   private listen(): Promise<Server> {
