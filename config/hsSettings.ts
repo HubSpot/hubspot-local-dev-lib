@@ -49,14 +49,17 @@ export function getHsSettingsFileIfExists(): HsSettingsFile | null {
 }
 
 export function writeHsSettingsFile(settingsFile: HsSettingsFile): void {
+  const existingFilePath = getHsSettingsFilePath();
   const dir = getCwd();
-  const hsFolderPath = path.join(dir, HS_FOLDER);
+  const hsFolderPath = existingFilePath
+    ? path.dirname(existingFilePath)
+    : path.join(dir, HS_FOLDER);
   const isFirstScaffold = !fs.existsSync(hsFolderPath);
 
   try {
     fs.mkdirSync(hsFolderPath, { recursive: true });
     fs.writeFileSync(
-      path.join(dir, HS_FOLDER, HS_SETTINGS_FILENAME),
+      path.join(hsFolderPath, HS_SETTINGS_FILENAME),
       JSON.stringify(settingsFile, null, 2),
       'utf8'
     );

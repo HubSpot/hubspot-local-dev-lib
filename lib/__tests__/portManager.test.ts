@@ -1,10 +1,15 @@
 import { vi, describe, it, expect, beforeEach, Mocked } from 'vitest';
-import { MAX_PORT_NUMBER } from '../../constants/ports.js';
+import {
+  MAX_PORT_NUMBER,
+  PORT_MANAGER_SERVER_PORT,
+} from '../../constants/ports.js';
 import { PortManagerServer } from '../../utils/PortManagerServer.js';
+import { detectPort as _detectPort } from '../../utils/detectPort.js';
 import {
   deleteServerInstance,
   getActiveServers,
   getServerPortByInstanceId,
+  isPortAvailable,
   isPortManagerPortAvailable,
   portManagerHasActiveServers,
   requestPorts,
@@ -17,13 +22,17 @@ import _axios from 'axios';
 // Mock the PortManagerServer
 vi.mock('../../utils/PortManagerServer', () => ({
   PortManagerServer: {
-    server: undefined,
-    serverPortMap: {},
+    baseUrl: `http://localhost:${PORT_MANAGER_SERVER_PORT}`,
     init: vi.fn(),
     portAvailable: vi.fn(),
   },
   HEALTH_CHECK_PATH: '/port-manager-health-check',
   SERVICE_HEALTHY: 'OK',
+}));
+
+// Mock detectPort (used by isPortAvailable)
+vi.mock('../../utils/detectPort', () => ({
+  detectPort: vi.fn(),
 }));
 
 // Mock axios for HTTP requests
@@ -38,6 +47,7 @@ vi.mock('axios', () => ({
 const mockedPortManagerServer = PortManagerServer as Mocked<
   typeof PortManagerServer
 >;
+const detectPort = vi.mocked(_detectPort);
 const axios = _axios as Mocked<typeof _axios>;
 
 const INSTANCE_ID_1 = 'test1';
@@ -71,8 +81,26 @@ const BAD_PORT_DATA = [
 describe('lib/portManager', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockedPortManagerServer.server = undefined;
-    mockedPortManagerServer.serverPortMap = {};
+  });
+
+  describe('isPortAvailable()', () => {
+    it('returns true when the port is available', async () => {
+      detectPort.mockResolvedValue(4828);
+
+      const result = await isPortAvailable(4828);
+
+      expect(result).toBe(true);
+      expect(detectPort).toHaveBeenCalledWith(4828);
+    });
+
+    it('returns false when the port is in use', async () => {
+      detectPort.mockResolvedValue(4829);
+
+      const result = await isPortAvailable(4828);
+
+      expect(result).toBe(false);
+      expect(detectPort).toHaveBeenCalledWith(4828);
+    });
   });
 
   describe('isPortManagerPortAvailable()', () => {
@@ -103,7 +131,7 @@ describe('lib/portManager', () => {
       await startPortManagerServer();
 
       expect(axios.get).toHaveBeenCalledWith(
-        'http://localhost:8080/port-manager-health-check'
+        `http://localhost:${PORT_MANAGER_SERVER_PORT}/port-manager-health-check`
       );
       expect(mockedPortManagerServer.init).toHaveBeenCalled();
     });
@@ -115,7 +143,7 @@ describe('lib/portManager', () => {
       await startPortManagerServer();
 
       expect(axios.get).toHaveBeenCalledWith(
-        'http://localhost:8080/port-manager-health-check'
+        `http://localhost:${PORT_MANAGER_SERVER_PORT}/port-manager-health-check`
       );
       expect(mockedPortManagerServer.init).not.toHaveBeenCalled();
     });
@@ -130,7 +158,7 @@ describe('lib/portManager', () => {
       await stopPortManagerServer();
 
       expect(axios.get).toHaveBeenCalledWith(
-        'http://localhost:8080/port-manager-health-check'
+        `http://localhost:${PORT_MANAGER_SERVER_PORT}/port-manager-health-check`
       );
       expect(axios.post).toHaveBeenCalledWith(
         expect.stringContaining('/close')
@@ -144,18 +172,13 @@ describe('lib/portManager', () => {
       await stopPortManagerServer();
 
       expect(axios.get).toHaveBeenCalledWith(
-        'http://localhost:8080/port-manager-health-check'
+        `http://localhost:${PORT_MANAGER_SERVER_PORT}/port-manager-health-check`
       );
       expect(axios.post).not.toHaveBeenCalled();
     });
   });
 
   describe('requestPorts()', () => {
-    beforeEach(() => {
-      mockedPortManagerServer.server =
-        {} as unknown as typeof mockedPortManagerServer.server; // Mock running server
-    });
-
     it('returns ports when none are specified', async () => {
       const mockResponse = {
         data: {
@@ -229,11 +252,6 @@ describe('lib/portManager', () => {
   });
 
   describe('deleteServerInstance()', () => {
-    beforeEach(() => {
-      mockedPortManagerServer.server =
-        {} as unknown as typeof mockedPortManagerServer.server; // Mock running server
-    });
-
     it('deletes port data for a server instance', async () => {
       axios.delete.mockResolvedValue({ status: 200 });
 
@@ -253,11 +271,6 @@ describe('lib/portManager', () => {
   });
 
   describe('portManagerHasActiveServers()', () => {
-    beforeEach(() => {
-      mockedPortManagerServer.server =
-        {} as unknown as typeof mockedPortManagerServer.server; // Mock running server
-    });
-
     it('returns false when no servers are active', async () => {
       const mockResponse = {
         data: {
@@ -294,11 +307,6 @@ describe('lib/portManager', () => {
   });
 
   describe('getActiveServers()', () => {
-    beforeEach(() => {
-      mockedPortManagerServer.server =
-        {} as unknown as typeof mockedPortManagerServer.server; // Mock running server
-    });
-
     it('returns the servers', async () => {
       const mockResponse = {
         data: {
@@ -320,11 +328,6 @@ describe('lib/portManager', () => {
   });
 
   describe('getServerPortByInstanceId()', () => {
-    beforeEach(() => {
-      mockedPortManagerServer.server =
-        {} as unknown as typeof mockedPortManagerServer.server; // Mock running server
-    });
-
     it('returns the port for known server instances', async () => {
       const mockResponse = {
         data: {
