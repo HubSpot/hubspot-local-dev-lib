@@ -5,8 +5,13 @@ import {
   PortManagerServer,
   SERVICE_HEALTHY,
 } from '../utils/PortManagerServer.js';
+import { detectPort } from '../utils/detectPort.js';
 import { RequestPortsData, ServerPortMap } from '../types/PortManager.js';
 import { logger } from './logger.js';
+
+export async function isPortAvailable(port: number): Promise<boolean> {
+  return (await detectPort(port)) === port;
+}
 
 export async function isPortManagerPortAvailable(): Promise<boolean> {
   return PortManagerServer.portAvailable();

@@ -4,10 +4,12 @@ import {
   PORT_MANAGER_SERVER_PORT,
 } from '../../constants/ports.js';
 import { PortManagerServer } from '../../utils/PortManagerServer.js';
+import { detectPort as _detectPort } from '../../utils/detectPort.js';
 import {
   deleteServerInstance,
   getActiveServers,
   getServerPortByInstanceId,
+  isPortAvailable,
   isPortManagerPortAvailable,
   portManagerHasActiveServers,
   requestPorts,
@@ -28,6 +30,11 @@ vi.mock('../../utils/PortManagerServer', () => ({
   SERVICE_HEALTHY: 'OK',
 }));
 
+// Mock detectPort (used by isPortAvailable)
+vi.mock('../../utils/detectPort', () => ({
+  detectPort: vi.fn(),
+}));
+
 // Mock axios for HTTP requests
 vi.mock('axios', () => ({
   default: {
@@ -40,6 +47,7 @@ vi.mock('axios', () => ({
 const mockedPortManagerServer = PortManagerServer as Mocked<
   typeof PortManagerServer
 >;
+const detectPort = vi.mocked(_detectPort);
 const axios = _axios as Mocked<typeof _axios>;
 
 const INSTANCE_ID_1 = 'test1';
@@ -73,6 +81,26 @@ const BAD_PORT_DATA = [
 describe('lib/portManager', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  describe('isPortAvailable()', () => {
+    it('returns true when the port is available', async () => {
+      detectPort.mockResolvedValue(4828);
+
+      const result = await isPortAvailable(4828);
+
+      expect(result).toBe(true);
+      expect(detectPort).toHaveBeenCalledWith(4828);
+    });
+
+    it('returns false when the port is in use', async () => {
+      detectPort.mockResolvedValue(4829);
+
+      const result = await isPortAvailable(4828);
+
+      expect(result).toBe(false);
+      expect(detectPort).toHaveBeenCalledWith(4828);
+    });
   });
 
   describe('isPortManagerPortAvailable()', () => {
