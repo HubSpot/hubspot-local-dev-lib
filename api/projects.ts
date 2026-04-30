@@ -9,6 +9,10 @@ import {
   FetchPlatformVersionResponse,
   WarnLogsResponse,
   UploadIRResponse,
+  Release,
+  FetchListReleasesResponse,
+  AutoReleaseResponse,
+  AutoReleaseStatusResponse,
 } from '../types/Project.js';
 import { Build, FetchProjectBuildsResponse } from '../types/Build.js';
 import {
@@ -392,6 +396,72 @@ export function fetchDeployWarnLogs(
     url: `${PROJECTS_LOGS_API_PATH}/logs/projects/${encodeURIComponent(
       projectName
     )}/deploys/${deployId}/combined/warn`,
+  });
+}
+
+export function createRelease(
+  accountId: number,
+  projectName: string,
+  buildId: number
+): HubSpotPromise<Release> {
+  return http.post<Release>(accountId, {
+    url: `${PROJECTS_API_PATH}/${encodeURIComponent(projectName)}/releases`,
+    data: { buildId },
+  });
+}
+
+export function listReleases(
+  accountId: number,
+  projectName: string,
+  params: QueryParams = {}
+): HubSpotPromise<FetchListReleasesResponse> {
+  return http.get<FetchListReleasesResponse>(accountId, {
+    url: `${PROJECTS_API_PATH}/${encodeURIComponent(projectName)}/releases`,
+    params,
+  });
+}
+
+export function getReleaseInfo(
+  accountId: number,
+  projectName: string,
+  releaseTag: string
+): HubSpotPromise<Release> {
+  return http.get(accountId, {
+    url: `${PROJECTS_API_PATH}/${encodeURIComponent(projectName)}/releases/${encodeURIComponent(releaseTag)}`,
+  });
+}
+
+export function triggerAutoRelease(
+  accountId: number,
+  projectId: number,
+  buildId: number,
+  targetPortalId: number
+): HubSpotPromise<AutoReleaseResponse> {
+  return http.post<AutoReleaseResponse>(accountId, {
+    url: `${PROJECTS_DEPLOY_API_PATH}/auto-release`,
+    data: {
+      projectId,
+      buildId,
+      targetPortalId,
+    },
+  });
+}
+
+export function getAutoReleaseStatus(
+  accountId: number,
+  projectId: number,
+  targetPortalId: number,
+  expectedReleaseTag: string,
+  appId: number
+): HubSpotPromise<AutoReleaseStatusResponse> {
+  return http.get<AutoReleaseStatusResponse>(accountId, {
+    url: `${PROJECTS_DEPLOY_API_PATH}/auto-release/status`,
+    params: {
+      projectId,
+      targetPortalId,
+      expectedReleaseTag,
+      appId,
+    },
   });
 }
 
