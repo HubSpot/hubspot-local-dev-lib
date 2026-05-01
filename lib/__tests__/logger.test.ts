@@ -13,6 +13,7 @@ import {
   shouldLog,
   getLabels,
   getSymbols,
+  setLogBufferByteLimit,
 } from '../logger.js';
 import { isUnicodeSupported } from '../isUnicodeSupported.js';
 
@@ -451,6 +452,75 @@ describe('lib/logger', () => {
       expect(remaining).toHaveLength(2);
       expect(remaining).not.toContain('a.log');
       expect(remaining).toContain('b.log');
+    });
+  });
+
+  describe('byte-limited buffer', () => {
+    beforeEach(() => {
+      logger.flushBuffer();
+      setLogBufferByteLimit(1024);
+      vi.spyOn(console, 'log').mockImplementation(() => null);
+      vi.spyOn(console, 'info').mockImplementation(() => null);
+      vi.spyOn(console, 'debug').mockImplementation(() => null);
+    });
+
+    afterEach(() => {
+      setLogBufferByteLimit(128 * 1024 * 1024);
+    });
+
+    it('drops oldest entries once the buffer exceeds the byte limit', () => {
+      setLogBufferByteLimit(300);
+      logger.log('A'.repeat(80));
+      logger.log('B'.repeat(80));
+      logger.log('C'.repeat(80));
+
+      const buffered = logger.viewBuffer();
+
+      expect(buffered).not.toContain('A'.repeat(80));
+      expect(buffered).toContain('B'.repeat(80));
+      expect(buffered).toContain('C'.repeat(80));
+    });
+
+    it('drops multiple oldest entries when a single push pushes well past the limit', () => {
+      setLogBufferByteLimit(200);
+      logger.log('A'.repeat(60));
+      logger.log('B'.repeat(60));
+      logger.log('C'.repeat(60));
+      logger.log('D'.repeat(60));
+      logger.log('huge'.repeat(50));
+
+      const buffered = logger.viewBuffer();
+      expect(buffered).not.toContain('A'.repeat(60));
+      expect(buffered).not.toContain('B'.repeat(60));
+      expect(buffered).toContain('huge'.repeat(50));
+    });
+
+    it('lowering the limit drops entries already in the buffer', () => {
+      setLogBufferByteLimit(10000);
+      for (let i = 0; i < 5; i++) {
+        logger.log('X'.repeat(200));
+      }
+      const before = logger.viewBuffer().split('\n').length;
+      expect(before).toBe(5);
+
+      setLogBufferByteLimit(500);
+
+      const after = logger.viewBuffer().split('\n').length;
+      expect(after).toBeLessThan(before);
+    });
+
+    it('flushBuffer resets the byte counter so the cap applies fresh after flush', () => {
+      setLogBufferByteLimit(400);
+      logger.log('X'.repeat(120));
+      logger.log('Y'.repeat(120));
+      expect(logger.flushBuffer()).not.toBe('');
+
+      logger.log('Z'.repeat(120));
+      logger.log('W'.repeat(120));
+
+      const buffered = logger.viewBuffer();
+      expect(buffered).toContain('Z'.repeat(120));
+      expect(buffered).toContain('W'.repeat(120));
     });
   });
 });

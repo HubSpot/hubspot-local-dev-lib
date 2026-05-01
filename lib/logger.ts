@@ -155,11 +155,35 @@ export function getLogLevel(): number {
   }
 }
 
+const DEFAULT_LOG_BUFFER_BYTE_LIMIT = 128 * 1024 * 1024;
+
 const logBuffer: string[] = [];
+let logBufferBytes = 0;
+let logBufferByteLimit = DEFAULT_LOG_BUFFER_BYTE_LIMIT;
+
+function entrySize(entry: string): number {
+  return Buffer.byteLength(entry, 'utf8') + 1;
+}
+
+function trimBufferToByteLimit(): void {
+  // Keep at least one entry so a single large message is still captured.
+  while (logBufferBytes > logBufferByteLimit && logBuffer.length > 1) {
+    const removed = logBuffer.shift() as string;
+    logBufferBytes -= entrySize(removed);
+  }
+}
+
+export function setLogBufferByteLimit(bytes: number): void {
+  logBufferByteLimit = bytes;
+  trimBufferToByteLimit();
+}
 
 function recordToBuffer(level: string, args: any[]): void {
   const message = args.map(arg => String(arg)).join(' ');
-  logBuffer.push(`[${new Date().toISOString()}] [${level}] ${message}`);
+  const entry = `[${new Date().toISOString()}] [${level}] ${message}`;
+  logBuffer.push(entry);
+  logBufferBytes += entrySize(entry);
+  trimBufferToByteLimit();
 }
 
 function sanitizeFilenamePart(name: string): string {
@@ -245,6 +269,7 @@ export const logger = {
   flushBuffer(): string {
     const out = logBuffer.join('\n');
     logBuffer.length = 0;
+    logBufferBytes = 0;
     return out;
   },
   writeBufferedLogsToFile(options: WriteBufferedLogsOptions): string | null {
