@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 
+// 128 MiB
 const DEFAULT_BYTE_LIMIT = 128 * 1024 * 1024;
 const DEFAULT_MAX_LOG_FILES = 3;
 
