@@ -19,7 +19,11 @@ function sanitizeFilenamePart(name: string): string {
 }
 
 function timestampForFilename(): string {
-  return new Date().toISOString().replace(/[:.]/g, '-');
+  const d = new Date();
+  const pad = (n: number, w = 2) => String(n).padStart(w, '0');
+  const date = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  const time = `${pad(d.getHours())}-${pad(d.getMinutes())}-${pad(d.getSeconds())}`;
+  return `${date}T${time}-${pad(d.getMilliseconds(), 3)}`;
 }
 
 function rotateLogFiles(dir: string, maxFiles: number): void {

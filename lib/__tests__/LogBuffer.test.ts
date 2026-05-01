@@ -122,6 +122,33 @@ describe('lib/LogBuffer', () => {
       );
     });
 
+    it('uses local time in the filename timestamp', () => {
+      const buf = new LogBuffer();
+      buf.record('LOG', ['captured']);
+
+      const before = new Date();
+      const filePath = buf.writeToFile({ dir: tmpDir, filenamePrefix: 'cmd' });
+      const after = new Date();
+      const pad = (n: number, w = 2) => String(n).padStart(w, '0');
+      const filename = path.basename(filePath as string);
+
+      // Filename is `cmd-<YYYY>-<MM>-<DD>T<HH>-<MM>-<SS>-<MS>.log` in local time.
+      const m = filename.match(
+        /^cmd-(\d{4})-(\d{2})-(\d{2})T(\d{2})-(\d{2})-(\d{2})-(\d{3})\.log$/
+      );
+      expect(m).not.toBeNull();
+      const [, year, month, day, hours] = m as RegExpMatchArray;
+      const localYear = String(before.getFullYear());
+      const localMonth = pad(before.getMonth() + 1);
+      const localDay = pad(before.getDate());
+      const localHour = pad(before.getHours());
+      const altLocalHour = pad(after.getHours());
+      expect(year).toBe(localYear);
+      expect(month).toBe(localMonth);
+      expect(day).toBe(localDay);
+      expect([localHour, altLocalHour]).toContain(hours);
+    });
+
     it('always clears the buffer regardless of write success', () => {
       const buf = new LogBuffer();
       buf.record('LOG', ['captured']);
