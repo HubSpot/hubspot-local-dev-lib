@@ -112,7 +112,7 @@ describe('lib/LogBuffer', () => {
 
     it('returns null and does not write when the buffer is empty', () => {
       const buf = new LogBuffer();
-      const result = buf.writeToFile({ dir: tmpDir, commandName: 'test' });
+      const result = buf.writeToFile({ dir: tmpDir, filenamePrefix: 'test' });
       expect(result).toBeNull();
       expect(fs.readdirSync(tmpDir)).toHaveLength(0);
     });
@@ -122,7 +122,7 @@ describe('lib/LogBuffer', () => {
       buf.record('LOG', ['captured']);
 
       const dir = path.join(tmpDir, 'logs');
-      const filePath = buf.writeToFile({ dir, commandName: 'account list' });
+      const filePath = buf.writeToFile({ dir, filenamePrefix: 'account list' });
 
       expect(filePath).not.toBeNull();
       expect(fs.existsSync(dir)).toBe(true);
@@ -141,7 +141,7 @@ describe('lib/LogBuffer', () => {
         throw new Error('disk full');
       });
 
-      const result = buf.writeToFile({ dir: tmpDir, commandName: 'cmd' });
+      const result = buf.writeToFile({ dir: tmpDir, filenamePrefix: 'cmd' });
       expect(result).toBeNull();
       expect(buf.view()).toBe('');
       writeSpy.mockRestore();
@@ -160,7 +160,7 @@ describe('lib/LogBuffer', () => {
 
       const buf = new LogBuffer();
       buf.record('LOG', ['fresh']);
-      buf.writeToFile({ dir, commandName: 'cmd', maxFiles: 3 });
+      buf.writeToFile({ dir, filenamePrefix: 'cmd', maxFiles: 3 });
 
       const remaining = fs.readdirSync(dir);
       expect(remaining).toHaveLength(3);

@@ -10,7 +10,7 @@ export type LogBufferOptions = {
 
 export type WriteBufferedLogsOptions = {
   dir: string;
-  commandName: string;
+  filenamePrefix: string;
   maxFiles?: number;
 };
 
@@ -98,7 +98,7 @@ export class LogBuffer {
   // on write failure). Returns the written file path on success, or null if
   // the buffer was empty or the write failed.
   writeToFile(options: WriteBufferedLogsOptions): string | null {
-    const { dir, commandName, maxFiles = DEFAULT_MAX_LOG_FILES } = options;
+    const { dir, filenamePrefix, maxFiles = DEFAULT_MAX_LOG_FILES } = options;
     const contents = this.flush();
     if (!contents) {
       return null;
@@ -106,7 +106,7 @@ export class LogBuffer {
     try {
       fs.mkdirSync(dir, { recursive: true });
       rotateLogFiles(dir, maxFiles);
-      const filename = `${sanitizeFilenamePart(commandName)}-${timestampForFilename()}.log`;
+      const filename = `${sanitizeFilenamePart(filenamePrefix)}-${timestampForFilename()}.log`;
       const filePath = path.join(dir, filename);
       fs.writeFileSync(filePath, contents, 'utf8');
       return filePath;

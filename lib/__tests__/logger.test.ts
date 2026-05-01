@@ -354,7 +354,7 @@ describe('lib/logger', () => {
       const dir = path.join(tmpDir, 'logs');
       const result = logger.writeBufferedLogsToFile({
         dir,
-        commandName: 'test',
+        filenamePrefix: 'test',
       });
 
       expect(result).toBeNull();
@@ -367,7 +367,7 @@ describe('lib/logger', () => {
 
       const filePath = logger.writeBufferedLogsToFile({
         dir,
-        commandName: 'account list',
+        filenamePrefix: 'account list',
       });
 
       expect(filePath).not.toBeNull();
@@ -384,7 +384,7 @@ describe('lib/logger', () => {
       logger.info('captured');
       logger.writeBufferedLogsToFile({
         dir: path.join(tmpDir, 'logs'),
-        commandName: 'cmd',
+        filenamePrefix: 'cmd',
       });
       expect(logger.viewLogBuffer()).toBe('');
     });
@@ -397,7 +397,7 @@ describe('lib/logger', () => {
 
       const result = logger.writeBufferedLogsToFile({
         dir: path.join(tmpDir, 'logs'),
-        commandName: 'cmd',
+        filenamePrefix: 'cmd',
       });
 
       expect(result).toBeNull();
@@ -419,7 +419,7 @@ describe('lib/logger', () => {
       logger.info('fresh');
       logger.writeBufferedLogsToFile({
         dir,
-        commandName: 'command',
+        filenamePrefix: 'command',
         maxFiles: 3,
       });
 
@@ -444,7 +444,7 @@ describe('lib/logger', () => {
       logger.info('fresh');
       logger.writeBufferedLogsToFile({
         dir,
-        commandName: 'command',
+        filenamePrefix: 'command',
         maxFiles: 2,
       });
 
