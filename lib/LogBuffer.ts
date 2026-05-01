@@ -89,11 +89,6 @@ export class LogBuffer {
     return out;
   }
 
-  setByteLimit(bytes: number): void {
-    this.byteLimit = bytes;
-    this.trimToByteLimit();
-  }
-
   // Flush the buffer to a rotating log file. Always clears the buffer (even
   // on write failure). Returns the written file path on success, or null if
   // the buffer was empty or the write failed.

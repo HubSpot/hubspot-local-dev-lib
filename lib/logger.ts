@@ -156,10 +156,6 @@ export function getLogLevel(): number {
 
 const _logBuffer = new LogBuffer();
 
-export function setLogBufferByteLimit(bytes: number): void {
-  _logBuffer.setByteLimit(bytes);
-}
-
 export const logger = {
   error(...args: any[]) {
     _logBuffer.record('ERROR', args);

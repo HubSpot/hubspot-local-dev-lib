@@ -72,18 +72,6 @@ describe('lib/LogBuffer', () => {
       expect(buf.view()).toContain('huge'.repeat(50));
     });
 
-    it('lowering the limit drops entries already in the buffer', () => {
-      const buf = new LogBuffer({ byteLimit: 10000 });
-      for (let i = 0; i < 5; i++) {
-        buf.record('LOG', ['X'.repeat(200)]);
-      }
-      const before = buf.view().split('\n').length;
-      expect(before).toBe(5);
-
-      buf.setByteLimit(500);
-      expect(buf.view().split('\n').length).toBeLessThan(before);
-    });
-
     it('flush resets the byte counter so the cap applies fresh', () => {
       const buf = new LogBuffer({ byteLimit: 400 });
       buf.record('LOG', ['X'.repeat(120)]);
