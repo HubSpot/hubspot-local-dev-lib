@@ -1,7 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import fs from 'fs';
+import path from 'path';
 import chalk, { type ChalkInstance } from 'chalk';
 import { isUnicodeSupported } from './isUnicodeSupported.js';
+
+const DEFAULT_MAX_LOG_FILES = 3;
 
 export const LOG_LEVEL = {
   NONE: 0,
@@ -151,41 +155,113 @@ export function getLogLevel(): number {
   }
 }
 
+const logBuffer: string[] = [];
+
+function recordToBuffer(level: string, args: any[]): void {
+  const message = args.map(arg => String(arg)).join(' ');
+  logBuffer.push(`[${new Date().toISOString()}] [${level}] ${message}`);
+}
+
+function sanitizeFilenamePart(name: string): string {
+  return name.replace(/[^a-zA-Z0-9._-]+/g, '-');
+}
+
+function timestampForFilename(): string {
+  return new Date().toISOString().replace(/[:.]/g, '-');
+}
+
+function rotateLogFiles(dir: string, maxFiles: number): void {
+  const entries = fs
+    .readdirSync(dir)
+    .map(name => {
+      const full = path.join(dir, name);
+      const stat = fs.statSync(full);
+      return { full, mtimeMs: stat.mtimeMs, isFile: stat.isFile() };
+    })
+    .filter(entry => entry.isFile)
+    .sort((a, b) => a.mtimeMs - b.mtimeMs);
+
+  while (entries.length >= maxFiles) {
+    const oldest = entries.shift();
+    if (oldest) {
+      fs.unlinkSync(oldest.full);
+    }
+  }
+}
+
+export type WriteBufferedLogsOptions = {
+  dir: string;
+  commandName: string;
+  maxFiles?: number;
+};
+
 export const logger = {
   error(...args: any[]) {
+    recordToBuffer('ERROR', args);
     if (shouldLog(LOG_LEVEL.ERROR)) {
       currentLogger.error(...args);
     }
   },
   warn(...args: any[]) {
+    recordToBuffer('WARN', args);
     if (shouldLog(LOG_LEVEL.WARN)) {
       currentLogger.warn(...args);
     }
   },
   log(...args: any[]) {
+    recordToBuffer('LOG', args);
     if (shouldLog(LOG_LEVEL.LOG)) {
       currentLogger.log(...args);
     }
   },
   success(...args: any[]) {
+    recordToBuffer('SUCCESS', args);
     if (shouldLog(LOG_LEVEL.LOG)) {
       currentLogger.success(...args);
     }
   },
   info(...args: any[]) {
+    recordToBuffer('INFO', args);
     if (shouldLog(LOG_LEVEL.LOG)) {
       currentLogger.info(...args);
     }
   },
   debug(...args: any[]) {
+    recordToBuffer('DEBUG', args);
     if (shouldLog(LOG_LEVEL.DEBUG)) {
       currentLogger.debug(...args);
     }
   },
   group(...args: any[]) {
+    recordToBuffer('GROUP', args);
     currentLogger.group(...args);
   },
   groupEnd() {
     currentLogger.groupEnd();
+  },
+  viewBuffer(): string {
+    return logBuffer.join('\n');
+  },
+  flushBuffer(): string {
+    const out = logBuffer.join('\n');
+    logBuffer.length = 0;
+    return out;
+  },
+  writeBufferedLogsToFile(options: WriteBufferedLogsOptions): string | null {
+    const { dir, commandName, maxFiles = DEFAULT_MAX_LOG_FILES } = options;
+    const contents = this.flushBuffer();
+    if (!contents) {
+      return null;
+    }
+    try {
+      fs.mkdirSync(dir, { recursive: true });
+      rotateLogFiles(dir, maxFiles);
+      const filename = `${sanitizeFilenamePart(commandName)}-${timestampForFilename()}.log`;
+      const filePath = path.join(dir, filename);
+      fs.writeFileSync(filePath, contents, 'utf8');
+      return filePath;
+    } catch (_e) {
+      return null;
+    }
   },
 };
