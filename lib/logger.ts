@@ -2,6 +2,9 @@
 
 import chalk, { type ChalkInstance } from 'chalk';
 import { isUnicodeSupported } from './isUnicodeSupported.js';
+import { LogBuffer, WriteBufferedLogsOptions } from './LogBuffer.js';
+
+export type { WriteBufferedLogsOptions };
 
 export const LOG_LEVEL = {
   NONE: 0,
@@ -151,41 +154,59 @@ export function getLogLevel(): number {
   }
 }
 
+const _logBuffer = new LogBuffer();
+
 export const logger = {
   error(...args: any[]) {
+    _logBuffer.record('ERROR', args);
     if (shouldLog(LOG_LEVEL.ERROR)) {
       currentLogger.error(...args);
     }
   },
   warn(...args: any[]) {
+    _logBuffer.record('WARN', args);
     if (shouldLog(LOG_LEVEL.WARN)) {
       currentLogger.warn(...args);
     }
   },
   log(...args: any[]) {
+    _logBuffer.record('LOG', args);
     if (shouldLog(LOG_LEVEL.LOG)) {
       currentLogger.log(...args);
     }
   },
   success(...args: any[]) {
+    _logBuffer.record('SUCCESS', args);
     if (shouldLog(LOG_LEVEL.LOG)) {
       currentLogger.success(...args);
     }
   },
   info(...args: any[]) {
+    _logBuffer.record('INFO', args);
     if (shouldLog(LOG_LEVEL.LOG)) {
       currentLogger.info(...args);
     }
   },
   debug(...args: any[]) {
+    _logBuffer.record('DEBUG', args);
     if (shouldLog(LOG_LEVEL.DEBUG)) {
       currentLogger.debug(...args);
     }
   },
   group(...args: any[]) {
+    _logBuffer.record('GROUP', args);
     currentLogger.group(...args);
   },
   groupEnd() {
     currentLogger.groupEnd();
+  },
+  viewLogBuffer(): string {
+    return _logBuffer.view();
+  },
+  flushLogBuffer(): string {
+    return _logBuffer.flush();
+  },
+  writeBufferedLogsToFile(options: WriteBufferedLogsOptions): string | null {
+    return _logBuffer.writeToFile(options);
   },
 };

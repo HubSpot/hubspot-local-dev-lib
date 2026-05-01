@@ -1,3 +1,6 @@
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
 import chalk from 'chalk';
 import { vi, MockInstance } from 'vitest';
 import {
@@ -249,6 +252,205 @@ describe('lib/logger', () => {
       logger.groupEnd();
       expect(groupSpy).toHaveBeenCalled();
       expect(groupEndSpy).toHaveBeenCalled();
+    });
+  });
+  describe('buffer', () => {
+    beforeEach(() => {
+      logger.flushLogBuffer();
+      vi.spyOn(console, 'log').mockImplementation(() => null);
+      vi.spyOn(console, 'warn').mockImplementation(() => null);
+      vi.spyOn(console, 'info').mockImplementation(() => null);
+      vi.spyOn(console, 'error').mockImplementation(() => null);
+      vi.spyOn(console, 'debug').mockImplementation(() => null);
+      vi.spyOn(console, 'group').mockImplementation(() => null);
+    });
+
+    it('captures messages from every level into the buffer', () => {
+      setLogLevel(LOG_LEVEL.DEBUG);
+
+      logger.log('a-log');
+      logger.error('a-error');
+      logger.warn('a-warn');
+      logger.success('a-success');
+      logger.info('a-info');
+      logger.debug('a-debug');
+      logger.group('a-group');
+
+      const buffered = logger.viewLogBuffer();
+
+      expect(buffered).toContain('[LOG] a-log');
+      expect(buffered).toContain('[ERROR] a-error');
+      expect(buffered).toContain('[WARN] a-warn');
+      expect(buffered).toContain('[SUCCESS] a-success');
+      expect(buffered).toContain('[INFO] a-info');
+      expect(buffered).toContain('[DEBUG] a-debug');
+      expect(buffered).toContain('[GROUP] a-group');
+    });
+
+    it('captures messages even when the log level filters them out', () => {
+      setLogLevel(LOG_LEVEL.ERROR);
+
+      logger.debug('hidden-from-console');
+      logger.info('also-hidden');
+
+      const buffered = logger.viewLogBuffer();
+
+      expect(buffered).toContain('[DEBUG] hidden-from-console');
+      expect(buffered).toContain('[INFO] also-hidden');
+    });
+
+    it('viewLogBuffer returns the joined buffer without clearing it', () => {
+      logger.info('first');
+      logger.info('second');
+
+      expect(logger.viewLogBuffer()).toContain('first');
+      expect(logger.viewLogBuffer()).toContain('second');
+      expect(logger.viewLogBuffer().split('\n')).toHaveLength(2);
+    });
+
+    it('flushLogBuffer returns and clears', () => {
+      logger.info('first');
+      logger.info('second');
+
+      const flushed = logger.flushLogBuffer();
+      expect(flushed).toContain('first');
+      expect(flushed).toContain('second');
+
+      expect(logger.viewLogBuffer()).toBe('');
+      expect(logger.flushLogBuffer()).toBe('');
+    });
+
+    it('prefixes entries with an ISO timestamp', () => {
+      logger.info('timed');
+      const buffered = logger.viewLogBuffer();
+      expect(buffered).toMatch(
+        /^\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z\] \[INFO\] timed$/
+      );
+    });
+
+    it('joins multiple args into a single message', () => {
+      logger.info('hello', 'world', 42);
+      const buffered = logger.viewLogBuffer();
+      expect(buffered).toContain('[INFO] hello world 42');
+    });
+  });
+
+  describe('writeBufferedLogsToFile()', () => {
+    let tmpDir: string;
+
+    beforeEach(() => {
+      logger.flushLogBuffer();
+      tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ldl-logger-test-'));
+      vi.spyOn(console, 'log').mockImplementation(() => null);
+      vi.spyOn(console, 'info').mockImplementation(() => null);
+    });
+
+    afterEach(() => {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    });
+
+    it('returns null and does not write a file when the buffer is empty', () => {
+      const dir = path.join(tmpDir, 'logs');
+      const result = logger.writeBufferedLogsToFile({
+        dir,
+        filenamePrefix: 'test',
+      });
+
+      expect(result).toBeNull();
+      expect(fs.existsSync(dir)).toBe(false);
+    });
+
+    it('creates the directory and writes the buffer to a sanitized filename', () => {
+      logger.info('captured');
+      const dir = path.join(tmpDir, 'logs');
+
+      const filePath = logger.writeBufferedLogsToFile({
+        dir,
+        filenamePrefix: 'account list',
+      });
+
+      expect(filePath).not.toBeNull();
+      expect(fs.existsSync(dir)).toBe(true);
+      const filename = path.basename(filePath as string);
+      expect(filename.startsWith('account-list-')).toBe(true);
+      expect(filename.endsWith('.log')).toBe(true);
+      expect(fs.readFileSync(filePath as string, 'utf8')).toContain(
+        '[INFO] captured'
+      );
+    });
+
+    it('clears the buffer regardless of whether the write succeeded', () => {
+      logger.info('captured');
+      logger.writeBufferedLogsToFile({
+        dir: path.join(tmpDir, 'logs'),
+        filenamePrefix: 'cmd',
+      });
+      expect(logger.viewLogBuffer()).toBe('');
+    });
+
+    it('clears the buffer when the write fails', () => {
+      logger.info('captured');
+      const writeSpy = vi.spyOn(fs, 'writeFileSync').mockImplementation(() => {
+        throw new Error('disk full');
+      });
+
+      const result = logger.writeBufferedLogsToFile({
+        dir: path.join(tmpDir, 'logs'),
+        filenamePrefix: 'cmd',
+      });
+
+      expect(result).toBeNull();
+      expect(logger.viewLogBuffer()).toBe('');
+      writeSpy.mockRestore();
+    });
+
+    it('rotates files so the directory holds at most maxFiles after writing', () => {
+      const dir = path.join(tmpDir, 'logs');
+      fs.mkdirSync(dir, { recursive: true });
+
+      ['oldest.log', 'middle.log', 'newest.log'].forEach((name, idx) => {
+        const full = path.join(dir, name);
+        fs.writeFileSync(full, name);
+        const t = new Date(2026, 0, idx + 1);
+        fs.utimesSync(full, t, t);
+      });
+
+      logger.info('fresh');
+      logger.writeBufferedLogsToFile({
+        dir,
+        filenamePrefix: 'command',
+        maxFiles: 3,
+      });
+
+      const remaining = fs.readdirSync(dir);
+      expect(remaining).toHaveLength(3);
+      expect(remaining).not.toContain('oldest.log');
+      expect(remaining).toContain('middle.log');
+      expect(remaining).toContain('newest.log');
+    });
+
+    it('honors a custom maxFiles', () => {
+      const dir = path.join(tmpDir, 'logs');
+      fs.mkdirSync(dir, { recursive: true });
+
+      ['a.log', 'b.log'].forEach((name, idx) => {
+        const full = path.join(dir, name);
+        fs.writeFileSync(full, name);
+        const t = new Date(2026, 0, idx + 1);
+        fs.utimesSync(full, t, t);
+      });
+
+      logger.info('fresh');
+      logger.writeBufferedLogsToFile({
+        dir,
+        filenamePrefix: 'command',
+        maxFiles: 2,
+      });
+
+      const remaining = fs.readdirSync(dir);
+      expect(remaining).toHaveLength(2);
+      expect(remaining).not.toContain('a.log');
+      expect(remaining).toContain('b.log');
     });
   });
 });
