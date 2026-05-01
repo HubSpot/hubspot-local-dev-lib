@@ -263,10 +263,10 @@ export const logger = {
   groupEnd() {
     currentLogger.groupEnd();
   },
-  viewBuffer(): string {
+  viewLogBuffer(): string {
     return logBuffer.join('\n');
   },
-  flushBuffer(): string {
+  flushLogBuffer(): string {
     const out = logBuffer.join('\n');
     logBuffer.length = 0;
     logBufferBytes = 0;
@@ -274,7 +274,7 @@ export const logger = {
   },
   writeBufferedLogsToFile(options: WriteBufferedLogsOptions): string | null {
     const { dir, commandName, maxFiles = DEFAULT_MAX_LOG_FILES } = options;
-    const contents = this.flushBuffer();
+    const contents = this.flushLogBuffer();
     if (!contents) {
       return null;
     }

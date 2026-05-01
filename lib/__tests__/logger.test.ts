@@ -257,7 +257,7 @@ describe('lib/logger', () => {
   });
   describe('buffer', () => {
     beforeEach(() => {
-      logger.flushBuffer();
+      logger.flushLogBuffer();
       vi.spyOn(console, 'log').mockImplementation(() => null);
       vi.spyOn(console, 'warn').mockImplementation(() => null);
       vi.spyOn(console, 'info').mockImplementation(() => null);
@@ -277,7 +277,7 @@ describe('lib/logger', () => {
       logger.debug('a-debug');
       logger.group('a-group');
 
-      const buffered = logger.viewBuffer();
+      const buffered = logger.viewLogBuffer();
 
       expect(buffered).toContain('[LOG] a-log');
       expect(buffered).toContain('[ERROR] a-error');
@@ -294,36 +294,36 @@ describe('lib/logger', () => {
       logger.debug('hidden-from-console');
       logger.info('also-hidden');
 
-      const buffered = logger.viewBuffer();
+      const buffered = logger.viewLogBuffer();
 
       expect(buffered).toContain('[DEBUG] hidden-from-console');
       expect(buffered).toContain('[INFO] also-hidden');
     });
 
-    it('viewBuffer returns the joined buffer without clearing it', () => {
+    it('viewLogBuffer returns the joined buffer without clearing it', () => {
       logger.info('first');
       logger.info('second');
 
-      expect(logger.viewBuffer()).toContain('first');
-      expect(logger.viewBuffer()).toContain('second');
-      expect(logger.viewBuffer().split('\n')).toHaveLength(2);
+      expect(logger.viewLogBuffer()).toContain('first');
+      expect(logger.viewLogBuffer()).toContain('second');
+      expect(logger.viewLogBuffer().split('\n')).toHaveLength(2);
     });
 
-    it('flushBuffer returns and clears', () => {
+    it('flushLogBuffer returns and clears', () => {
       logger.info('first');
       logger.info('second');
 
-      const flushed = logger.flushBuffer();
+      const flushed = logger.flushLogBuffer();
       expect(flushed).toContain('first');
       expect(flushed).toContain('second');
 
-      expect(logger.viewBuffer()).toBe('');
-      expect(logger.flushBuffer()).toBe('');
+      expect(logger.viewLogBuffer()).toBe('');
+      expect(logger.flushLogBuffer()).toBe('');
     });
 
     it('prefixes entries with an ISO timestamp', () => {
       logger.info('timed');
-      const buffered = logger.viewBuffer();
+      const buffered = logger.viewLogBuffer();
       expect(buffered).toMatch(
         /^\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z\] \[INFO\] timed$/
       );
@@ -331,7 +331,7 @@ describe('lib/logger', () => {
 
     it('joins multiple args into a single message', () => {
       logger.info('hello', 'world', 42);
-      const buffered = logger.viewBuffer();
+      const buffered = logger.viewLogBuffer();
       expect(buffered).toContain('[INFO] hello world 42');
     });
   });
@@ -340,7 +340,7 @@ describe('lib/logger', () => {
     let tmpDir: string;
 
     beforeEach(() => {
-      logger.flushBuffer();
+      logger.flushLogBuffer();
       tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ldl-logger-test-'));
       vi.spyOn(console, 'log').mockImplementation(() => null);
       vi.spyOn(console, 'info').mockImplementation(() => null);
@@ -386,7 +386,7 @@ describe('lib/logger', () => {
         dir: path.join(tmpDir, 'logs'),
         commandName: 'cmd',
       });
-      expect(logger.viewBuffer()).toBe('');
+      expect(logger.viewLogBuffer()).toBe('');
     });
 
     it('clears the buffer when the write fails', () => {
@@ -401,7 +401,7 @@ describe('lib/logger', () => {
       });
 
       expect(result).toBeNull();
-      expect(logger.viewBuffer()).toBe('');
+      expect(logger.viewLogBuffer()).toBe('');
       writeSpy.mockRestore();
     });
 
@@ -457,7 +457,7 @@ describe('lib/logger', () => {
 
   describe('byte-limited buffer', () => {
     beforeEach(() => {
-      logger.flushBuffer();
+      logger.flushLogBuffer();
       setLogBufferByteLimit(1024);
       vi.spyOn(console, 'log').mockImplementation(() => null);
       vi.spyOn(console, 'info').mockImplementation(() => null);
@@ -474,7 +474,7 @@ describe('lib/logger', () => {
       logger.log('B'.repeat(80));
       logger.log('C'.repeat(80));
 
-      const buffered = logger.viewBuffer();
+      const buffered = logger.viewLogBuffer();
 
       expect(buffered).not.toContain('A'.repeat(80));
       expect(buffered).toContain('B'.repeat(80));
@@ -489,7 +489,7 @@ describe('lib/logger', () => {
       logger.log('D'.repeat(60));
       logger.log('huge'.repeat(50));
 
-      const buffered = logger.viewBuffer();
+      const buffered = logger.viewLogBuffer();
       expect(buffered).not.toContain('A'.repeat(60));
       expect(buffered).not.toContain('B'.repeat(60));
       expect(buffered).toContain('huge'.repeat(50));
@@ -500,25 +500,25 @@ describe('lib/logger', () => {
       for (let i = 0; i < 5; i++) {
         logger.log('X'.repeat(200));
       }
-      const before = logger.viewBuffer().split('\n').length;
+      const before = logger.viewLogBuffer().split('\n').length;
       expect(before).toBe(5);
 
       setLogBufferByteLimit(500);
 
-      const after = logger.viewBuffer().split('\n').length;
+      const after = logger.viewLogBuffer().split('\n').length;
       expect(after).toBeLessThan(before);
     });
 
-    it('flushBuffer resets the byte counter so the cap applies fresh after flush', () => {
+    it('flushLogBuffer resets the byte counter so the cap applies fresh after flush', () => {
       setLogBufferByteLimit(400);
       logger.log('X'.repeat(120));
       logger.log('Y'.repeat(120));
-      expect(logger.flushBuffer()).not.toBe('');
+      expect(logger.flushLogBuffer()).not.toBe('');
 
       logger.log('Z'.repeat(120));
       logger.log('W'.repeat(120));
 
-      const buffered = logger.viewBuffer();
+      const buffered = logger.viewLogBuffer();
       expect(buffered).toContain('Z'.repeat(120));
       expect(buffered).toContain('W'.repeat(120));
     });
