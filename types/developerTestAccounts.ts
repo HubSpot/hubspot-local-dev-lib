@@ -39,6 +39,7 @@ export type DeveloperTestAccountConfig = {
   serviceLevel?: AccountLevel;
   salesLevel?: AccountLevel;
   contentLevel?: AccountLevel;
+  commerceLevel?: AccountLevel;
 };
 
 export type InstallOauthAppIntoDeveloperTestAccountResponse = {
