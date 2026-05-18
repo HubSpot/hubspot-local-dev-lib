@@ -24,6 +24,7 @@ import {
 } from '../../utils/git.js';
 import {
   checkAndAddConfigToGitignore,
+  checkAndAddHsFolderToGitignore,
   checkGitInclusion,
 } from '../gitignore.js';
 import { readFileSync, writeFileSync } from 'fs-extra';
@@ -95,6 +96,37 @@ describe('lib/gitignore', () => {
 
       expect(() => checkAndAddConfigToGitignore(configPath)).toThrow(
         'Unable to determine if config file is properly ignored by git.'
+      );
+    });
+  });
+
+  describe('checkAndAddHsFolderToGitignore', () => {
+    const settingsPath = `${configDirectoryPath}/.hs/settings.json`;
+
+    it('should return early when not in a git repo', () => {
+      isConfigPathInGitRepoMock.mockReturnValue(false);
+      checkAndAddHsFolderToGitignore(settingsPath);
+      expect(readFileSync).not.toHaveBeenCalled();
+      expect(writeFileSync).not.toHaveBeenCalled();
+    });
+
+    it('should return early when the .hs folder is already ignored', () => {
+      configFilenameIsIgnoredByGitignoreMock.mockReturnValue(true);
+      checkAndAddHsFolderToGitignore(settingsPath);
+      expect(writeFileSync).not.toHaveBeenCalled();
+    });
+
+    it('should return early when .gitignore already contains .hs', () => {
+      vi.mocked(readFileSync).mockReturnValue('.hs\n');
+      checkAndAddHsFolderToGitignore(settingsPath);
+      expect(writeFileSync).not.toHaveBeenCalled();
+    });
+
+    it('should add .hs to .gitignore when in a git repo and not yet ignored', () => {
+      checkAndAddHsFolderToGitignore(settingsPath);
+      expect(writeFileSync).toHaveBeenCalledWith(
+        gitIgnoreFiles[0],
+        `${fileContents}\n\n# HubSpot link folder\n.hs\n`
       );
     });
   });
