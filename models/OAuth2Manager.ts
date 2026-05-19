@@ -63,7 +63,9 @@ export class OAuth2Manager {
     try {
       const { data } = await axios({
         url: `${getHubSpotApiOrigin(
-          getValidEnv(this.account.env)
+          getValidEnv(this.account.env),
+          false,
+          this.account.hublet
         )}/oauth/v1/token`,
         method: 'post',
         data: exchangeProof,

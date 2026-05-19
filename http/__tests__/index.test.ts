@@ -259,5 +259,24 @@ describe('http/index', () => {
         },
       });
     });
+
+    it('uses the account hublet when constructing the base URL', async () => {
+      const account: HubSpotConfigAccount = {
+        ...ACCOUNT,
+        hublet: 'eu1',
+      };
+      getConfig.mockReturnValue({
+        accounts: [account],
+      });
+      getConfigAccountById.mockReturnValue(account);
+
+      await http.get(123, { url: 'some/endpoint/path' });
+
+      expect(mockedAxios).toHaveBeenCalledWith(
+        expect.objectContaining({
+          baseURL: 'https://api-eu1.hubapiqa.com',
+        })
+      );
+    });
   });
 });

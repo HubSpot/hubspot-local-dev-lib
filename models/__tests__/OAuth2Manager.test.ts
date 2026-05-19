@@ -80,5 +80,21 @@ describe('models/Oauth2Manager', () => {
         mockRefreshTokenResponse.access_token
       );
     });
+
+    it('uses the account hublet when refreshing the oauth access token', async () => {
+      axiosSpy.mockClear();
+      const oauthManager = new OAuth2Manager(
+        { ...oauthAccount, hublet: 'eu1' },
+        () => undefined
+      );
+
+      await oauthManager.refreshAccessToken();
+
+      expect(axiosSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: 'https://api-eu1.hubapi.com/oauth/v1/token',
+        })
+      );
+    });
   });
 });

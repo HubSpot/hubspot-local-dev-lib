@@ -9,6 +9,7 @@ import {
 import {
   PersonalAccessKeyConfigAccount,
   Environment,
+  Hublet,
 } from '../types/Accounts.js';
 
 import {
@@ -35,12 +36,14 @@ function getRefreshKey(personalAccessKey: string, expiration?: string): string {
 export async function getAccessToken(
   personalAccessKey: string,
   env: Environment = ENVIRONMENTS.PROD,
-  accountId?: number
+  accountId?: number,
+  hublet?: Hublet
 ): Promise<AccessToken> {
   const axiosResponse = await fetchAccessToken(
     personalAccessKey,
     env,
-    accountId
+    accountId,
+    hublet
   );
   const response = axiosResponse.data;
 
@@ -59,11 +62,12 @@ export async function getAccessToken(
 async function refreshAccessToken(
   account: PersonalAccessKeyConfigAccount
 ): Promise<AccessToken> {
-  const { personalAccessKey, env, accountId } = account;
+  const { personalAccessKey, env, accountId, hublet } = account;
   const accessTokenResponse = await getAccessToken(
     personalAccessKey,
     env,
-    accountId
+    accountId,
+    hublet
   );
   const { accessToken, expiresAt } = accessTokenResponse;
 
@@ -172,11 +176,13 @@ export async function updateConfigWithAccessToken(
   personalAccessKey: string,
   env?: Environment,
   name?: string,
-  makeDefault = false
+  makeDefault = false,
+  hublet?: Hublet
 ): Promise<PersonalAccessKeyConfigAccount> {
   const { portalId, accessToken, expiresAt, accountType } = token;
   const account = getConfigAccountIfExists(portalId);
   const accountEnv = env || account?.env || ENVIRONMENTS.PROD;
+  const accountHublet = hublet || account?.hublet;
 
   let parentAccountId;
   try {
@@ -187,7 +193,8 @@ export async function updateConfigWithAccessToken(
       const { data: sandboxDataResponse } = await fetchSandboxHubData(
         accessToken,
         portalId,
-        accountEnv
+        accountEnv,
+        accountHublet
       );
       if (sandboxDataResponse.parentHubId) {
         parentAccountId = sandboxDataResponse.parentHubId;
@@ -204,7 +211,12 @@ export async function updateConfigWithAccessToken(
   try {
     if (accountType === HUBSPOT_ACCOUNT_TYPES.DEVELOPER_TEST) {
       const { data: developerTestAccountResponse } =
-        await fetchDeveloperTestAccountData(accessToken, portalId, accountEnv);
+        await fetchDeveloperTestAccountData(
+          accessToken,
+          portalId,
+          accountEnv,
+          accountHublet
+        );
       if (developerTestAccountResponse) {
         parentAccountId = developerTestAccountResponse.parentPortalId;
       }
@@ -226,6 +238,7 @@ export async function updateConfigWithAccessToken(
     auth: { tokenInfo: { accessToken, expiresAt } },
     parentAccountId,
     env: accountEnv,
+    ...(accountHublet && { hublet: accountHublet }),
   } as PersonalAccessKeyConfigAccount; // Account may temporarily not have a name before prompted to add one in the CLI
 
   // Add new account if it doesn't exist, otherwise update existing account

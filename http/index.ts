@@ -84,10 +84,10 @@ async function withAuth(
 ): Promise<AxiosRequestConfig> {
   const account = getConfigAccountById(accountId);
 
-  const { env, authType } = account;
+  const { env, hublet, authType } = account;
   const axiosConfig = withPortalId(
     accountId,
-    getAxiosConfig({ env, ...options })
+    getAxiosConfig({ env, hublet, ...options })
   );
 
   if (authType === PERSONAL_ACCESS_KEY_AUTH_METHOD.value) {

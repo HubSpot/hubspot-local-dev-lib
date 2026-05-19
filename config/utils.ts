@@ -16,6 +16,7 @@ import {
   OAUTH_AUTH_METHOD,
   OAUTH_SCOPES,
 } from '../constants/auth.js';
+import { HUBSPOT_HUBLETS } from '../constants/hublets.js';
 import {
   HubSpotConfig,
   DeprecatedHubSpotConfigFields,
@@ -25,6 +26,7 @@ import {
 import { FileSystemError } from '../models/FileSystemError.js';
 import {
   HubSpotConfigAccount,
+  Hublet,
   OAuthConfigAccount,
   AccountType,
   TokenInfo,
@@ -150,12 +152,13 @@ export function formatConfigForWrite(config: HubSpotConfig): HubSpotConfig {
     allowUsageTracking,
     ...rest,
     accounts: accounts.map(account => {
-      const { name, accountId, env, authType, ...rest } = account;
+      const { name, accountId, env, hublet, authType, ...rest } = account;
 
       const orderedAccount = {
         name,
         accountId,
         env,
+        hublet,
         authType,
         ...rest,
         // using ...rest messes with the typing
@@ -321,6 +324,7 @@ export function buildConfigFromEnvironment(): HubSpotConfig {
   const refreshToken = process.env[ENVIRONMENT_VARIABLES.HUBSPOT_REFRESH_TOKEN];
   const hubspotEnvironment =
     process.env[ENVIRONMENT_VARIABLES.HUBSPOT_ENVIRONMENT];
+  const hubletVar = process.env[ENVIRONMENT_VARIABLES.HUBSPOT_HUBLET];
   const httpTimeoutVar = process.env[ENVIRONMENT_VARIABLES.HTTP_TIMEOUT];
   const httpUseLocalhostVar =
     process.env[ENVIRONMENT_VARIABLES.HTTP_USE_LOCALHOST];
@@ -352,6 +356,12 @@ export function buildConfigFromEnvironment(): HubSpotConfig {
       : undefined;
 
   const env = getValidEnv(hubspotEnvironment);
+  const normalizedHublet = hubletVar?.toLowerCase();
+  const hublet = Object.values(HUBSPOT_HUBLETS).includes(
+    normalizedHublet as Hublet
+  )
+    ? (normalizedHublet as Hublet)
+    : undefined;
 
   let account: HubSpotConfigAccount;
 
@@ -361,6 +371,7 @@ export function buildConfigFromEnvironment(): HubSpotConfig {
       accountId,
       personalAccessKey,
       env,
+      ...(hublet && { hublet }),
       name: accountIdVar,
       auth: {
         tokenInfo: {},
@@ -379,6 +390,7 @@ export function buildConfigFromEnvironment(): HubSpotConfig {
         },
       },
       env,
+      ...(hublet && { hublet }),
       name: accountIdVar,
     };
   } else if (apiKey) {
@@ -387,6 +399,7 @@ export function buildConfigFromEnvironment(): HubSpotConfig {
       accountId,
       apiKey,
       env,
+      ...(hublet && { hublet }),
       name: accountIdVar,
     };
   } else {
@@ -492,6 +505,19 @@ export function validateConfigAccount(
       })
     );
     return { isValid: false, errors: validationErrors };
+  }
+
+  if (
+    account.hublet &&
+    !Object.values(HUBSPOT_HUBLETS).includes(account.hublet as Hublet)
+  ) {
+    validationErrors.push(
+      i18n('config.utils.validateConfigAccount.unsupportedHublet', {
+        accountId: account.accountId,
+        hublet: account.hublet,
+        supportedHublets: Object.values(HUBSPOT_HUBLETS).join(', '),
+      })
+    );
   }
 
   if (account.authType === PERSONAL_ACCESS_KEY_AUTH_METHOD.value) {

@@ -377,6 +377,21 @@ describe('config/utils', () => {
       });
     });
 
+    it('builds config with a hublet from the environment', () => {
+      process.env[ENVIRONMENT_VARIABLES.HUBSPOT_PERSONAL_ACCESS_KEY] =
+        'test-key';
+      process.env[ENVIRONMENT_VARIABLES.HUBSPOT_ACCOUNT_ID] = '123';
+      process.env[ENVIRONMENT_VARIABLES.HUBSPOT_ENVIRONMENT] = 'qa';
+      process.env[ENVIRONMENT_VARIABLES.HUBSPOT_HUBLET] = 'eu1';
+
+      const config = buildConfigFromEnvironment();
+
+      expect(config.accounts[0]).toMatchObject({
+        accountId: 123,
+        hublet: 'eu1',
+      });
+    });
+
     it('builds OAuth config', () => {
       process.env[ENVIRONMENT_VARIABLES.HUBSPOT_CLIENT_ID] = 'test-client-id';
       process.env[ENVIRONMENT_VARIABLES.HUBSPOT_CLIENT_SECRET] =
@@ -470,6 +485,24 @@ describe('config/utils', () => {
       expect(validateConfigAccount(API_KEY_ACCOUNT)).toEqual({
         isValid: true,
         errors: [],
+      });
+    });
+
+    it('validates account hublet', () => {
+      expect(
+        validateConfigAccount({
+          ...PAK_ACCOUNT,
+          hublet: 'not-a-hublet',
+        } as unknown as Partial<HubSpotConfigAccount>)
+      ).toEqual({
+        isValid: false,
+        errors: [
+          i18n('config.utils.validateConfigAccount.unsupportedHublet', {
+            accountId: PAK_ACCOUNT.accountId,
+            hublet: 'not-a-hublet',
+            supportedHublets: 'na1, na2, na3, ap1, eu1',
+          }),
+        ],
       });
     });
 

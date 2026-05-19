@@ -1,4 +1,4 @@
-import { getHubSpotApiOrigin } from '../urls.js';
+import { getHubSpotApiOrigin, getHubSpotWebsiteOrigin } from '../urls.js';
 
 describe('lib/urls', () => {
   describe('getHubSpotApiOrigin()', () => {
@@ -19,10 +19,28 @@ describe('lib/urls', () => {
       expect(url).toBe('https://api.hubapiqa.com');
     });
 
+    it('gets hublet-specific qa url', () => {
+      const url = getHubSpotApiOrigin('qa', false, 'eu1');
+
+      expect(url).toBe('https://api-eu1.hubapiqa.com');
+    });
+
+    it('gets na1 qa url when hublet is explicitly set', () => {
+      const url = getHubSpotApiOrigin('qa', false, 'na1');
+
+      expect(url).toBe('https://api-na1.hubapiqa.com');
+    });
+
     it('gets prod url', () => {
       const url = getHubSpotApiOrigin('prod', false);
 
       expect(url).toBe('https://api.hubapi.com');
+    });
+
+    it('gets hublet-specific prod url', () => {
+      const url = getHubSpotApiOrigin('prod', false, 'na2');
+
+      expect(url).toBe('https://api-na2.hubapi.com');
     });
 
     it('gets qa local url', () => {
@@ -56,6 +74,33 @@ describe('lib/urls', () => {
       const url = getHubSpotApiOrigin('qa', true);
 
       expect(url).toBe('https://api.hubspotqa.com');
+    });
+
+    it('uses domain override before hublet', () => {
+      process.env.HUBAPI_DOMAIN_OVERRIDE = 'api.hubspot';
+      const url = getHubSpotApiOrigin('qa', false, 'eu1');
+
+      expect(url).toBe('https://api.hubspotqa.com');
+    });
+  });
+
+  describe('getHubSpotWebsiteOrigin()', () => {
+    it('gets qa url', () => {
+      const url = getHubSpotWebsiteOrigin('qa');
+
+      expect(url).toBe('https://app.hubspotqa.com');
+    });
+
+    it('gets hublet-specific qa url', () => {
+      const url = getHubSpotWebsiteOrigin('qa', 'eu1');
+
+      expect(url).toBe('https://app-eu1.hubspotqa.com');
+    });
+
+    it('gets app qa url when na1 hublet is explicitly set', () => {
+      const url = getHubSpotWebsiteOrigin('qa', 'na1');
+
+      expect(url).toBe('https://app.hubspotqa.com');
     });
   });
 });

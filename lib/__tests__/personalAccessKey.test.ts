@@ -115,7 +115,35 @@ describe('lib/personalAccessKey', () => {
       expect(fetchAccessToken).toHaveBeenCalledWith(
         'let-me-in-2',
         ENVIRONMENTS.PROD,
-        accountId
+        accountId,
+        undefined
+      );
+    });
+    it('uses account hublet when refreshing token', async () => {
+      const accountId = 123;
+      const account: HubSpotConfigAccount = {
+        accountId,
+        name: 'test-account',
+        authType: 'personalaccesskey',
+        personalAccessKey: 'let-me-in-hublet',
+        env: ENVIRONMENTS.QA,
+        hublet: 'eu1',
+        auth: {
+          tokenInfo: {},
+        },
+      };
+      getConfig.mockReturnValue({
+        accounts: [account],
+      });
+      getConfigAccountById.mockReturnValue(account);
+
+      await accessTokenForPersonalAccessKey(accountId);
+
+      expect(fetchAccessToken).toHaveBeenCalledWith(
+        'let-me-in-hublet',
+        ENVIRONMENTS.QA,
+        accountId,
+        'eu1'
       );
     });
     it('refreshes access token when the existing token is expired', async () => {

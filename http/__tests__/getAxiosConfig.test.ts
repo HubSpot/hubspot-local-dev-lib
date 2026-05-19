@@ -36,6 +36,17 @@ describe('http/getAxiosConfig', () => {
       baseURL: 'https://api.hubapiqa.com',
     });
   });
+  it('constructs hublet-specific baseURL when hublet is provided', () => {
+    getConfig.mockReturnValue({
+      accounts: [],
+    });
+
+    expect(
+      getAxiosConfig({ url, env: ENVIRONMENTS.QA, hublet: 'eu1' })
+    ).toMatchObject({
+      baseURL: 'https://api-eu1.hubapiqa.com',
+    });
+  });
   it('supports httpUseLocalhost config option to construct baseURL for local HTTP services', () => {
     getConfig.mockReturnValue({
       httpUseLocalhost: true,

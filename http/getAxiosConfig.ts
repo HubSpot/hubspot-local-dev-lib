@@ -135,7 +135,7 @@ export function shouldUseProxy(baseURL: string): boolean {
 }
 
 export function getAxiosConfig(options: HttpOptions): AxiosRequestConfig {
-  const { env, localHostOverride, headers, ...rest } = options;
+  const { env, hublet, localHostOverride, headers, ...rest } = options;
   let config: HubSpotConfig | null;
   try {
     config = getConfig();
@@ -156,7 +156,8 @@ export function getAxiosConfig(options: HttpOptions): AxiosRequestConfig {
 
   const baseURL = getHubSpotApiOrigin(
     env,
-    localHostOverride ? false : httpUseLocalhost
+    localHostOverride ? false : httpUseLocalhost,
+    hublet
   );
 
   return {

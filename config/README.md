@@ -39,6 +39,8 @@ Locates and parses the HubSpot config file. This function will automatically fin
 - `USE_ENVIRONMENT_HUBSPOT_CONFIG` - load config account from environment variables. The following environment variables are supported:
   - `HUBSPOT_PERSONAL_ACCESS_KEY`
   - `HUBSPOT_ACCOUNT_ID`
+  - `HUBSPOT_ENVIRONMENT`
+  - `HUBSPOT_HUBLET`
   - `HTTP_TIMEOUT`
   - `DEFAULT_CMS_PUBLISH_MODE`
 

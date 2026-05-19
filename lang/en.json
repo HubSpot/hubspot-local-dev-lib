@@ -306,7 +306,8 @@
         "missingAccountId": "At least one account in config is missing accountId",
         "missingApiKey": "Account {{ accountId }} has authType of apikey but is missing the apiKey field",
         "missingAuth": "Account {{ accountId }} has authtype of oauth2 but is missing auth data",
-        "missingPersonalAccessKey": "Account {{ accountId }} has authType of personalAccessKey but is missing the personalAccessKey field"
+        "missingPersonalAccessKey": "Account {{ accountId }} has authType of personalAccessKey but is missing the personalAccessKey field",
+        "unsupportedHublet": "Account {{ accountId }} has unsupported hublet {{ hublet }}. Supported hublets: {{ supportedHublets }}"
       },
       "getConfigPathEnvironmentVariables": {
         "invalidEnvironmentVariables": "USE_ENVIRONMENT_HUBSPOT_CONFIG and HUBSPOT_CONFIG_PATH cannot both be set simultaneously"

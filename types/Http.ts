@@ -1,6 +1,7 @@
 import { AxiosPromise, ResponseType } from 'axios';
 import { ReadStream } from 'fs';
 import { Stream } from 'stream';
+import { Hublet } from './Accounts.js';
 
 export type HubSpotPromise<T = unknown> = AxiosPromise<T>;
 
@@ -21,6 +22,7 @@ export type HttpOptions = {
   baseURL?: string;
   url: string;
   env?: string;
+  hublet?: Hublet;
   localHostOverride?: boolean;
   data?:
     | Data

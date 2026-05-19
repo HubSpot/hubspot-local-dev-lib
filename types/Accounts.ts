@@ -1,5 +1,6 @@
 import { HUBSPOT_ACCOUNT_TYPES } from '../constants/config.js';
 import { ENVIRONMENTS } from '../constants/environments.js';
+import { HUBSPOT_HUBLETS } from '../constants/hublets.js';
 import { CmsPublishMode } from './Files.js';
 import { ValueOf } from './Utils.js';
 import {
@@ -9,6 +10,7 @@ import {
 } from '../constants/auth.js';
 
 export type Environment = ValueOf<typeof ENVIRONMENTS> | '';
+export type Hublet = ValueOf<typeof HUBSPOT_HUBLETS>;
 export type AuthType = 'personalaccesskey' | 'apikey' | 'oauth2';
 
 interface BaseHubSpotConfigAccount {
@@ -17,6 +19,7 @@ interface BaseHubSpotConfigAccount {
   accountType?: AccountType;
   defaultCmsPublishMode?: CmsPublishMode;
   env: Environment;
+  hublet?: Hublet;
   authType: AuthType;
   parentAccountId?: number;
 }
