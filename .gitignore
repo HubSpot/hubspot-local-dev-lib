@@ -13,3 +13,6 @@ npm-debug.log.*
 /dist
 yarn.lock
 package-lock.json
+
+**/.claude/settings.local.json
+**/.claude/worktrees/

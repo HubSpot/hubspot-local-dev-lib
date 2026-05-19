@@ -1,17 +1,20 @@
 ## Description and Context
-
 <!-- Provide a summary of what has changed -->
 <!-- Provide links to relevant discussions or documentation to promote understanding and addressing this PR -->
 <!-- Describe any packages you'd like to add and the reasons why. -->
 
-## Screenshots
+## Pre-review checklist
+<!-- It is expected that all of these have been run before bringing in teammates for review -->
+- [ ] The `/ldl:code-check` skill has been run and the feedback has been addressed
+- [ ] All the SideKick feedback has been addressed, or marked resolved with an explanation
+- [ ] Tests have been added for new behaviors
+- [ ] Manually tested the changes
 
+## Screenshots
 <!-- Provide images of the before and after functionality -->
 
 ## TODO
-
 <!--Is there anything you're leaving behind that should be done? You can create issues for your TODOS, or simply suggest them here and we will help sort them out -->
 
 ## Who to Notify
-
 <!-- /cc those you wish to know about the PR -->
