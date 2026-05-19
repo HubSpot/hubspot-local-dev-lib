@@ -1,0 +1,28 @@
+---
+description: Shared agent entry point and side-effect policy
+alwaysApply: true
+---
+
+Follow `AGENTS.md` as the canonical repository instructions for agent work.
+
+If another Cursor rule conflicts with `AGENTS.md`, prefer `AGENTS.md`.
+
+Ask before making external side effects:
+
+- `git commit`
+- `git push`
+- `git commit --amend`, rebasing, squashing, or rewriting branch history
+- creating, commenting on, reviewing, editing, closing, or merging PRs
+- commenting on, editing, closing, or reopening GitHub issues
+
+When addressing review feedback on an existing PR, create a new follow-up commit
+by default. Do not amend commits unless the user explicitly asks for an amend,
+rebase, squash, or other history rewrite.
+
+For stacked PRs, prefer merging parent branch updates into the child branch over
+rebasing, because PRs are squash-merged into `main`.
+
+Do not post comments, close issues, merge PRs, or push branches unless the user
+explicitly asks for that action.
+
+@AGENTS.md
