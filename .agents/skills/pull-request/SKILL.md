@@ -1,12 +1,12 @@
 ---
-name: ldl:create-pull-request
-description: Commit changes and create a draft pull request. Trigger on "create a pull request", "create a PR", "open a PR", "make a PR".
+name: ldl:pull-request
+description: Commit changes and create a draft pull request
 disable-model-invocation: true
 allowed-tools: Bash(git:*, gh:*), Read, Write, Edit, Skill, AskUserQuestion
 argument-hint: '[pr-title]'
 ---
 
-# Create Pull Request Workflow
+# Pull Request Workflow
 
 Orchestration skill that commits changes and creates a draft pull request following team standards.
 
@@ -37,10 +37,8 @@ Do NOT send any acknowledgment message if push-changes succeeds - just continue 
 In ONE message:
 1. Analyze the context gathered above (diff summary, commit messages) to generate PR content
 2. Determine PR title:
-   - If an argument was provided to this skill: use that as the title (it should already follow Conventional Commits)
-   - Otherwise: generate a title following Conventional Commits format based on the changes
-   - Format: `<type>: <short description>` (e.g., `feat: add config resolution util`, `fix: handle missing exports field`)
-   - Types: `feat`, `fix`, `chore`, `refactor`, `test`, `docs`, `perf`, `ci`, `build`
+   - If an argument was provided to this skill: use that as the title
+   - Otherwise: extract the title from the latest commit message (first line)
 3. Generate PR body using this template:
 
   ```
@@ -81,7 +79,6 @@ Your PR is ready for you to review. Mark it as ready when you're done!
 ## Important Constraints
 
 - **Always draft mode**: PRs are ALWAYS created with `--draft`. Never create a non-draft PR.
-- **Conventional Commits**: PR titles MUST follow Conventional Commits format (`<type>: <description>`).
 - **Descriptive PR content**: Generate meaningful descriptions based on actual changes. Focus on the WHY, not the WHAT.
 - **Single-message execution**: Step 2 MUST be completed in a single message
 - **No intermediate messages**: Do NOT send progress updates during PR creation
@@ -98,7 +95,7 @@ Your PR is ready for you to review. Mark it as ready when you're done!
 ### Example 1: Simple usage with title
 
 ```
-/create-pull-request "feat: add config resolution util"
+/pull-request "Add new config resolution util"
 ```
 
 → Calls push-changes (runs checks, commits, pushes) → creates draft PR
@@ -106,15 +103,15 @@ Your PR is ready for you to review. Mark it as ready when you're done!
 ### Example 2: Usage without arguments
 
 ```
-/create-pull-request
+/pull-request
 ```
 
-→ Calls push-changes (runs checks, generates commit message, pushes) → creates draft PR with Conventional Commits title
+→ Calls push-changes (runs checks, generates commit message, pushes) → creates draft PR
 
 ### Example 3: Failed check scenario
 
 ```
-/create-pull-request
+/pull-request
 ```
 
 → Calls push-changes → code-check fails with issues → **STOPS**
@@ -122,7 +119,7 @@ Your PR is ready for you to review. Mark it as ready when you're done!
 User then fixes issues or asks Claude to fix them, then re-runs:
 
 ```
-/create-pull-request
+/pull-request
 ```
 
 → Calls push-changes → all checks pass → proceeds with commit, push, and draft PR creation

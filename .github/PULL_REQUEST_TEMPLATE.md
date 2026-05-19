@@ -6,7 +6,6 @@
 ## Pre-review checklist
 <!-- It is expected that all of these have been run before bringing in teammates for review -->
 - [ ] The `/ldl:code-check` skill has been run and the feedback has been addressed
-- [ ] All the SideKick feedback has been addressed, or marked resolved with an explanation
 - [ ] Tests have been added for new behaviors
 - [ ] Manually tested the changes
 
