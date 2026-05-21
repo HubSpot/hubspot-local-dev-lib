@@ -11,15 +11,25 @@ import { HsSettingsFile } from '../types/HsSettings.js';
 import { FileSystemError } from '../models/FileSystemError.js';
 
 const HS_README_CONTENTS = `Why do I have a folder named ".hs" in my project?
-The ".hs" folder is created when you link a directory to a HubSpot project.
+The ".hs" folder is created when you link a directory to a HubSpot account using "hs account link". The CLI walks up parent directories to find the nearest ".hs/settings.json", so subdirectories inherit the same configuration.
 
 What does the "settings.json" file contain?
 The "settings.json" file contains:
-- The ID(s) of the HubSpot account(s) that you linked ("accounts")
-- The ID of the HubSpot account that you set as the default for this directory ("linkedDefaultAccount")
+- The ID(s) of the HubSpot account(s) linked to this directory ("accounts")
+- The ID of the default account for this directory ("localDefaultAccount")
+
+These accounts are a subset of those authenticated in your global CLI config (~/.hscli/config.yml).
 
 Should I commit the ".hs" folder?
-No, the ".hs" folder should not be committed to version control. It is automatically added to your .gitignore file when the directory is linked.
+We recommend not committing this folder. These settings are per-developer configuration, and different team members typically use different accounts or defaults. If your directory is in a Git repository, ".hs" is automatically added to .gitignore when you link.
+
+If your team shares the same accounts, you can remove the .gitignore entry and commit the folder.
+
+How do I manage linked accounts?
+Run "hs account link" to add accounts, "hs account unlink" to remove them, or "hs account list" to see what's linked.
+
+Can I delete this file?
+Yes. This README is for your reference only and can be safely deleted.
 `;
 
 export function getHsSettingsFilePath(): string | null {

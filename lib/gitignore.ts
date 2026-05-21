@@ -41,8 +41,9 @@ export function checkAndAddConfigToGitignore(configPath: string): void {
 export function checkAndAddHsFolderToGitignore(settingsPath: string): void {
   try {
     const hsDirPath = path.resolve(path.dirname(settingsPath));
-    const { configIgnored, gitignoreFiles } = checkGitInclusion(hsDirPath);
-    if (configIgnored) return;
+    const { inGit, configIgnored, gitignoreFiles } =
+      checkGitInclusion(hsDirPath);
+    if (!inGit || configIgnored) return;
 
     let gitignoreFilePath =
       gitignoreFiles && gitignoreFiles.length ? gitignoreFiles[0] : null;
