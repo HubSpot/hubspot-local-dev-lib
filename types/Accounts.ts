@@ -101,6 +101,7 @@ export type EnabledFeaturesResponse = {
 
 export type AccessToken = {
   portalId: number;
+  userId?: number;
   accessToken: string;
   expiresAt: string;
   scopeGroups: Array<string>;

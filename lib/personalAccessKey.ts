@@ -46,6 +46,7 @@ export async function getAccessToken(
 
   return {
     portalId: response.hubId,
+    userId: response.userId,
     accessToken: response.oauthAccessToken,
     expiresAt: moment(response.expiresAtMillis).toISOString(),
     scopeGroups: response.scopeGroups,
