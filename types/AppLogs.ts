@@ -4,7 +4,6 @@ export type SystemType =
   | 'WEBHOOKS'
   | 'API_CALL'
   | 'APP_SETTINGS'
-  | 'UNDEFINED'
   | 'SERVERLESS_EXECUTION'
   | 'PROXY_EXECUTION'
   | 'EXTENSION_RENDER'
@@ -15,20 +14,34 @@ export type SystemType =
 
 export type ResultsOrder = 'ASC' | 'DESC';
 
-export type SearchLogsRequest = {
-  loggingSystemType?: string;
+export type LogSearchQuery = {
+  loggingSystemType: SystemType;
   logId?: string;
-  limit?: number;
-  offset?: number;
+  limit: number;
+  offset: number;
   startTime?: number;
   endTime?: number;
-  errorTypes?: string[];
-  resultsOrder?: ResultsOrder;
+  errorTypes: string[];
+  resultsOrder: ResultsOrder;
   portalId?: number;
   correlationGroupId?: string;
   traceId?: string;
   label?: string;
-  cardIds?: string[];
+};
+
+export type SearchLogsRequest = {
+  query: LogSearchQuery;
+  after?: string;
+  limit: number;
+};
+
+export type NextPage = {
+  after: string;
+  link?: string;
+};
+
+export type ForwardPaging = {
+  next?: NextPage;
 };
 
 export type AppLogEntry = {
@@ -48,9 +61,7 @@ export type AppLogEntry = {
 
 export type SearchLogsResponse = {
   results: AppLogEntry[];
-  hasMore: boolean;
-  offset: number;
-  total: number;
+  paging?: ForwardPaging;
 };
 
 export type AppLogDetails = {
@@ -86,4 +97,5 @@ export type AppLogDetails = {
 
 export type AppLogDetailsResponse = {
   log: AppLogDetails;
+  consoleOutput?: string;
 };
