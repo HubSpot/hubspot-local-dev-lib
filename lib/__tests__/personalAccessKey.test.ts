@@ -60,6 +60,33 @@ const fetchDeveloperTestAccountData =
   >;
 
 describe('lib/personalAccessKey', () => {
+  describe('getAccessToken()', () => {
+    it('includes userId when fetching an access token', async () => {
+      const accountId = 123;
+      const userId = 456;
+      fetchAccessToken.mockResolvedValue(
+        mockAxiosResponse({
+          oauthAccessToken: 'fresh-token',
+          expiresAtMillis: moment().add(1, 'hours').valueOf(),
+          encodedOAuthRefreshToken: 'let-me-in',
+          scopeGroups: ['content'],
+          hubId: accountId,
+          userId,
+          hubName: 'test-hub',
+          accountType: HUBSPOT_ACCOUNT_TYPES.STANDARD,
+        })
+      );
+
+      const accessToken = await getAccessToken(
+        'let-me-in',
+        ENVIRONMENTS.PROD,
+        accountId
+      );
+
+      expect(accessToken.userId).toBe(userId);
+    });
+  });
+
   describe('accessTokenForPersonalAccessKey()', () => {
     it('refreshes access token when access token is missing', async () => {
       const accountId = 123;
