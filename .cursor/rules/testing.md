@@ -1,6 +1,6 @@
 ---
 description: Testing Guidelines
-globs: "**/__tests__/**/*.ts"
+globs: '**/__tests__/**/*.ts'
 alwaysApply: false
 ---
 

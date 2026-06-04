@@ -25,17 +25,18 @@ When this skill is invoked:
 Invoke the `ldl:code-check` skill and wait for its completion.
 
 Look for the STATUS line in its output:
+
 - If output contains "STATUS: PASSED": **IMMEDIATELY continue to Step 2 without sending any message to the user**
 - If output contains "STATUS: FAILED": **STOP** and show the user the full code-check output
 
-Do NOT proceed to Step 2 if STATUS is not PASSED.
-Do NOT send any acknowledgment or summary message if checks pass - just continue to Step 2.
+Do NOT proceed to Step 2 if STATUS is not PASSED. Do NOT send any acknowledgment or summary message if checks pass - just continue to Step 2.
 
 ### 2. Atomic commit and push
 
 **CRITICAL**: After checks pass in Step 1, you MUST complete ALL of the following in a SINGLE message with multiple tool calls.
 
 Before executing any tool calls, analyze the context gathered above:
+
 1. Verify current branch is not main/master
    - If branch is "main" or "master": STOP and tell user: "You're currently on the main branch. Please create a feature branch first using `git checkout -b <branch-name>`"
 2. Check if there are uncommitted changes (from context above)
@@ -49,6 +50,7 @@ Before executing any tool calls, analyze the context gathered above:
    - If user declines: STOP and tell them to manually stage files
 
 After analysis, execute in ONE message:
+
 1. Stage changes: `git add .` (if there are uncommitted changes)
 2. Create commit (if there are uncommitted changes):
    - If an argument was provided to this skill: use that as the commit message (it should already follow Conventional Commits)
@@ -62,11 +64,7 @@ After analysis, execute in ONE message:
    - If upstream exists: `git push`
 4. Verify: `git status`
 
-You have the capability to call multiple tools in a single response.
-Execute ALL of the above git operations in ONE message using parallel tool calls where possible.
-Do not send any intermediate messages.
-Do not send any text before the tool calls.
-Do not report progress during execution.
+You have the capability to call multiple tools in a single response. Execute ALL of the above git operations in ONE message using parallel tool calls where possible. Do not send any intermediate messages. Do not send any text before the tool calls. Do not report progress during execution.
 
 After ALL tool calls complete, then display the completion message:
 

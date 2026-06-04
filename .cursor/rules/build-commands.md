@@ -15,5 +15,4 @@ Use these commands when working with this codebase:
 - Check circular dependencies: `yarn circular-deps`
 - Local dev (symlink to CLI): `yarn local-dev`
 
-Follow `AGENTS.md` for the validation scope. Ask before committing or pushing
-changes.
+Follow `AGENTS.md` for the validation scope. Ask before committing or pushing changes.

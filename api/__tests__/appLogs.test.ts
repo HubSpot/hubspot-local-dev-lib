@@ -34,7 +34,10 @@ describe('api/appLogs', () => {
     });
 
     it('should include optional after cursor when provided', async () => {
-      const bodyWithCursor: SearchLogsRequest = { ...requestBody, after: 'abc123' };
+      const bodyWithCursor: SearchLogsRequest = {
+        ...requestBody,
+        after: 'abc123',
+      };
       await searchAppLogs(accountId, appId, bodyWithCursor);
       expect(http.post).toHaveBeenCalledWith(accountId, {
         url: `developers/logs/search/${appId}`,
