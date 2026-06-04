@@ -1,6 +1,6 @@
 ---
 description: HubSpot Local Dev Lib Code Style Guidelines
-globs: "**/*.{js,ts}"
+globs: '**/*.{js,ts}'
 alwaysApply: true
 ---
 
@@ -16,8 +16,7 @@ Follow these guidelines when working with code in this repository:
 - No `process.exit()` — throw errors and let consumers handle them
 - No direct user prompts — return data and let the CLI prompt
 - All user-facing strings in `lang/en.json` using `i18n()` with interpolation
-- Throw custom errors from `errors/` (`HubSpotHttpError`, `HubSpotConfigError`,
-  `FileSystemError`)
+- Throw custom errors from `errors/` (`HubSpotHttpError`, `HubSpotConfigError`, `FileSystemError`)
 - Write tests in co-located `__tests__/` directories using Vitest
 - Use single quotes, 2-space indentation, trailing commas
 - Keep lines under 80 characters

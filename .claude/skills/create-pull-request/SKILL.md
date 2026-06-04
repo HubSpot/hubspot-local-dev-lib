@@ -25,6 +25,7 @@ When this skill is invoked:
 Invoke the `ldl:push-changes` skill with any arguments passed to this skill.
 
 Wait for completion. Look for the completion message:
+
 - If output contains "Branch pushed to remote": **IMMEDIATELY continue to Step 2 without sending any message**
 - If output contains error or failure: **STOP** and show the user the full output
 
@@ -35,6 +36,7 @@ Do NOT send any acknowledgment message if push-changes succeeds - just continue 
 **CRITICAL**: You MUST complete PR creation in a SINGLE message. PRs are ALWAYS created in draft mode.
 
 In ONE message:
+
 1. Analyze the context gathered above (diff summary, commit messages) to generate PR content
 2. Determine PR title:
    - If an argument was provided to this skill: use that as the title (it should already follow Conventional Commits)
@@ -43,32 +45,29 @@ In ONE message:
    - Types: `feat`, `fix`, `chore`, `refactor`, `test`, `docs`, `perf`, `ci`, `build`
 3. Generate PR body using this template:
 
-  ```
-  ## Description and Context
-  [Brief description of what changed and WHY — 2-3 sentences. The diff shows the "what", so focus on the motivation and context behind the change.]
+```
+## Description and Context
+[Brief description of what changed and WHY — 2-3 sentences. The diff shows the "what", so focus on the motivation and context behind the change.]
 
-  ## Pre-review checklist
-  - [ ] The `/ldl:code-check` skill has been run and the feedback has been addressed
-  - [ ] Tests have been added for new behaviors
-  - [ ] Manually tested the changes
+## Pre-review checklist
+- [ ] The `/ldl:code-check` skill has been run and the feedback has been addressed
+- [ ] Tests have been added for new behaviors
+- [ ] Manually tested the changes
 
-  ## Screenshots
-  [Add screenshots here if applicable, otherwise remove this section]
+## Screenshots
+[Add screenshots here if applicable, otherwise remove this section]
 
-  ## TODO
-  [Any remaining work or follow-ups, otherwise remove this section]
+## TODO
+[Any remaining work or follow-ups, otherwise remove this section]
 
-  ## Who to Notify
-  @brandenrodgers @camden11 @joe-yeager @chiragchadha1
-  ```
+## Who to Notify
+@brandenrodgers @camden11 @joe-yeager @chiragchadha1
+```
 
 4. Create the PR: `gh pr create --draft --title "..." --body "..."`
 5. Display completion message with PR URL
 
-You have the capability to call multiple tools in a single response.
-Complete the analysis and PR creation in ONE message.
-Do not send intermediate messages like "Analyzing changes..." or "Creating PR...".
-Do not send any text before the tool calls.
+You have the capability to call multiple tools in a single response. Complete the analysis and PR creation in ONE message. Do not send intermediate messages like "Analyzing changes..." or "Creating PR...". Do not send any text before the tool calls.
 
 After PR creation completes, display:
 

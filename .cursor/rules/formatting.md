@@ -1,6 +1,6 @@
 ---
 description: Code Formatting Guidelines
-globs: "**/*.{js,ts}"
+globs: '**/*.{js,ts}'
 alwaysApply: false
 ---
 
