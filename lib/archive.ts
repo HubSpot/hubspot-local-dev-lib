@@ -1,7 +1,7 @@
 import fs from 'fs-extra';
 import path, { join } from 'path';
 import { tmpdir } from 'os';
-import extract from 'extract-zip';
+import unzipper from 'unzipper';
 
 import { logger } from './logger.js';
 import { i18n } from '../utils/lang.js';
@@ -50,7 +50,8 @@ async function extractZip(
   // Extract zip
   try {
     const tmpExtractPath = join(result.tmpDir, 'extracted');
-    await extract(tmpZipPath, { dir: tmpExtractPath });
+    const directory = await unzipper.Open.file(tmpZipPath);
+    await directory.extract({ path: tmpExtractPath });
     result.extractDir = tmpExtractPath;
   } catch (err) {
     throw new Error(i18n(`${i18nKey}.extractZip.errors.extract`), {
