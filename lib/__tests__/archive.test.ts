@@ -6,7 +6,7 @@ const { osTmpDirMock, osHomeDirMock } = vi.hoisted(() => ({
 }));
 
 vi.mock('fs-extra');
-vi.mock('extract-zip');
+vi.mock('unzipper');
 vi.mock('os', async importOriginal => {
   const actual = await importOriginal<typeof import('os')>();
   return {
@@ -21,13 +21,13 @@ vi.mock('../fs');
 import { extractZipArchive } from '../archive.js';
 import { logger } from '../logger.js';
 import fs from 'fs-extra';
-import extract from 'extract-zip';
+import unzipper from 'unzipper';
 import { walk } from '../fs.js';
 
 const writeFileMock = vi.mocked(fs.writeFile);
 const makeDirMock = vi.mocked(fs.mkdtemp);
 const readDirMock = vi.mocked(fs.readdir);
-const extractMock = vi.mocked(extract);
+const unzipperOpenFileMock = vi.mocked(unzipper.Open.file);
 const fsCopyMock = vi.mocked(fs.copy);
 const fsRemoveMock = vi.mocked(fs.remove);
 const fsExistsSyncMock = vi.mocked(fs.existsSync);
@@ -53,7 +53,7 @@ describe('lib/archive', () => {
     writeFileMock.mockReset();
     fsCopyMock.mockReset();
     fsRemoveMock.mockReset();
-    extractMock.mockReset();
+    unzipperOpenFileMock.mockReset();
 
     // Set up default implementations
     makeDirMock.mockImplementation(value => Promise.resolve(value));
@@ -64,7 +64,9 @@ describe('lib/archive', () => {
     writeFileMock.mockResolvedValue();
     fsCopyMock.mockResolvedValue();
     fsRemoveMock.mockResolvedValue();
-    extractMock.mockResolvedValue();
+    unzipperOpenFileMock.mockResolvedValue({
+      extract: vi.fn().mockResolvedValue(undefined),
+    } as unknown as unzipper.CentralDirectory);
   });
 
   describe('extractZipArchive', () => {
@@ -85,10 +87,8 @@ describe('lib/archive', () => {
       expect(fs.writeFile).toHaveBeenCalledWith(tmpZipPath, zip, {
         mode: 0o777,
       });
-      expect(extract).toHaveBeenCalledTimes(1);
-      expect(extract).toHaveBeenCalledWith(tmpZipPath, {
-        dir: tmpExtractPath,
-      });
+      expect(unzipper.Open.file).toHaveBeenCalledTimes(1);
+      expect(unzipper.Open.file).toHaveBeenCalledWith(tmpZipPath);
       expect(logger.debug).toHaveBeenCalledWith(
         'Completed project source extraction.'
       );
@@ -139,9 +139,9 @@ describe('lib/archive', () => {
     });
 
     it('should throw a generic error when extract fails', async () => {
-      extractMock.mockImplementationOnce(() => {
-        throw new Error('failed to do the thing');
-      });
+      unzipperOpenFileMock.mockRejectedValueOnce(
+        new Error('failed to do the thing')
+      );
 
       await expect(extractZipArchive(zip, name, '')).rejects.toThrow(
         'An error occurred extracting project source.'
