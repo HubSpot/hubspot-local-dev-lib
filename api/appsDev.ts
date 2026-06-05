@@ -64,7 +64,7 @@ export function installStaticAuthAppOnCurrentAccount(
   appId: number,
   accountId: number,
   scopeGroupIds: number[]
-) {
+): HubSpotPromise<void> {
   return http.post<void>(accountId, {
     url: `${APPS_HUBLETS_API_PATH}/current-account`,
     data: {
