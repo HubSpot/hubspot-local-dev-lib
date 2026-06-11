@@ -9,7 +9,6 @@ import { logger } from '../logger.js';
 import { BaseError } from '../../types/Error.js';
 import { i18n } from '../../utils/lang.js';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const i18nKey = 'lib.cms.handleFieldsJs';
 
 export class FieldsJs {
@@ -48,6 +47,11 @@ export class FieldsJs {
   convertFieldsJs(writeDir: string): Promise<string | void> {
     const filePath = this.filePath;
     const dirName = path.dirname(filePath);
+    // Keep this inside the function: at module scope, webpack inlines
+    // `import.meta.url` as a build-machine string literal, which crashes
+    // bundled consumers (e.g. the VS Code extension) on Windows with
+    // "File URL path must be absolute".
+    const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
     return new Promise<string>((resolve, reject) => {
       const fieldOptionsAsString = Array.isArray(this.fieldOptions)
