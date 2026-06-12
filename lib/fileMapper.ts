@@ -395,6 +395,8 @@ async function downloadFolder(
 
     if (!rootMeta) return;
 
+    logger.log(i18n(`${i18nKey}.folderFetch`, { src, accountId }));
+
     const rootPath =
       dest === getCwd()
         ? convertToLocalFileSystemPath(
