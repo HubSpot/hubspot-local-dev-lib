@@ -412,14 +412,6 @@ describe('lib/fileMapper', () => {
         )
         .mockResolvedValueOnce(
           mockAxiosResponse({
-            name: 'ThemeDirectory',
-            path: '/ThemeDirectory',
-            folder: true,
-            children: ['modules'],
-          })
-        )
-        .mockResolvedValueOnce(
-          mockAxiosResponse({
             name: 'modules',
             path: '/ThemeDirectory/modules',
             folder: true,

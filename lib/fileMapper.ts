@@ -25,6 +25,7 @@ import {
 import { CMS_PUBLISH_MODE } from '../constants/files.js';
 import {
   FileMapperNode,
+  DirectoryMetaNode,
   CmsPublishMode,
   FileMapperOptions,
   FileMapperInputOptions,
@@ -215,57 +216,6 @@ async function fetchAndWriteFileStream(
   await writeUtimes(accountId, filepath, node);
 }
 
-// Writes an individual file or folder (not recursive).  If file source is missing, the
-//file is fetched.
-async function writeFileMapperNode(
-  accountId: number,
-  filepath: string,
-  node: FileMapperNode,
-  cmsPublishMode?: CmsPublishMode,
-  options: FileMapperInputOptions = {}
-): Promise<boolean> {
-  const localFilepath = convertToLocalFileSystemPath(path.resolve(filepath));
-  if (await skipExisting(localFilepath, options.overwrite)) {
-    logger.log(
-      i18n(`${i18nKey}.skippedExisting`, {
-        filepath: localFilepath,
-      })
-    );
-    return true;
-  }
-  if (!node.folder) {
-    try {
-      await fetchAndWriteFileStream(
-        accountId,
-        node.path,
-        localFilepath,
-        cmsPublishMode,
-        options
-      );
-      return true;
-    } catch (err) {
-      return false;
-    }
-  }
-  try {
-    await fs.ensureDir(localFilepath);
-    logger.log(
-      i18n(`${i18nKey}.wroteFolder`, {
-        filepath: localFilepath,
-      })
-    );
-  } catch (err) {
-    throw new FileSystemError(
-      { cause: err },
-      {
-        filepath: localFilepath,
-        accountId,
-        operation: 'write',
-      }
-    );
-  }
-  return true;
-}
 
 async function downloadFile(
   accountId: number,
@@ -305,7 +255,6 @@ async function downloadFile(
       cmsPublishMode,
       options
     );
-    await queue.onIdle();
     logger.success(
       i18n(`${i18nKey}.completedFetch`, {
         src,
@@ -358,27 +307,22 @@ async function queueFolderTree(
   accountId: number,
   src: string,
   localPath: string,
+  directoryNode: DirectoryMetaNode,
   cmsPublishMode: CmsPublishMode | undefined,
   options: FileMapperInputOptions,
   failedPaths: Set<string>
 ): Promise<void> {
+  if (!directoryNode.folder) return;
+
   const { isRoot } = getTypeDataFromPath(src);
-  const metaPath = isRoot ? '/' : src;
-  const queryValues = getFileMapperQueryValues(cmsPublishMode, options);
-  const { data: directoryNode } = await getDirectoryMetaByPath(
-    accountId,
-    metaPath,
-    queryValues
-  );
-
-  if (!directoryNode?.folder) return;
-
   let children: string[] = directoryNode.children || [];
   if (isRoot) {
     children = ['@hubspot', ...children];
   }
 
   await fs.ensureDir(localPath);
+
+  const queryValues = getFileMapperQueryValues(cmsPublishMode, options);
 
   for (const childName of children) {
     const childRemotePath = isRoot ? childName : `${src}/${childName}`;
@@ -407,14 +351,22 @@ async function queueFolderTree(
         }
       });
     } else {
-      await queueFolderTree(
+      const { data: childNode } = await getDirectoryMetaByPath(
         accountId,
         childRemotePath,
-        childLocalPath,
-        cmsPublishMode,
-        options,
-        failedPaths
+        queryValues
       );
+      if (childNode) {
+        await queueFolderTree(
+          accountId,
+          childRemotePath,
+          childLocalPath,
+          childNode,
+          cmsPublishMode,
+          options,
+          failedPaths
+        );
+      }
     }
   }
 }
@@ -453,6 +405,7 @@ async function downloadFolder(
       accountId,
       src,
       rootPath,
+      rootMeta,
       cmsPublishMode,
       options,
       failedPaths
