@@ -7,11 +7,13 @@ import {
   recurseFolder,
   fetchFolderFromApi,
   getTypeDataFromPath,
+  getFileMapperQueryValues,
   downloadFileOrFolder,
 } from '../fileMapper.js';
 import {
   download as __download,
   fetchFileStream as __fetchFileStream,
+  getDirectoryMetaByPath as __getDirectoryMetaByPath,
 } from '../../api/fileMapper.js';
 import folderWithoutSources from './fixtures/fileMapper/folderWithoutSources.json' with { type: 'json' };
 import { mockAxiosResponse } from './__utils__/mockAxiosResponse.js';
@@ -25,6 +27,9 @@ const pathExistsSpy = vi.spyOn(fs, 'pathExists');
 const download = __download as MockedFunction<typeof __download>;
 const fetchFileStream = __fetchFileStream as MockedFunction<
   typeof __fetchFileStream
+>;
+const getDirectoryMetaByPath = __getDirectoryMetaByPath as MockedFunction<
+  typeof __getDirectoryMetaByPath
 >;
 
 const rootPaths = ['', '/', '\\'];
@@ -274,20 +279,160 @@ describe('lib/fileMapper', () => {
       expect(utimesSpy).toHaveBeenCalled();
     });
     it('should execute downloadFolder', async () => {
-      pathExistsSpy.mockImplementationOnce(() => false);
-      download.mockResolvedValueOnce(
+      getDirectoryMetaByPath.mockResolvedValue(
         mockAxiosResponse({
-          name: '',
-          createdAt: 1,
-          updatedAt: 1,
-          source: null,
-          path: '',
+          name: 'c',
+          path: '/a/b/c',
           folder: true,
           children: [],
         })
       );
       await downloadFileOrFolder(accountId, '/a/b/c', './');
       expect(ensureDirSpy).toHaveBeenCalled();
+    });
+  });
+
+  describe('getFileMapperQueryValues()', () => {
+    it('should include timeout when provided', () => {
+      const result = getFileMapperQueryValues(undefined, { timeout: 60_000 });
+      expect(result.timeout).toBe(60_000);
+    });
+
+    it('should omit timeout when not provided', () => {
+      const result = getFileMapperQueryValues(undefined, {});
+      expect('timeout' in result).toBe(false);
+    });
+  });
+
+  describe('downloadFolder via downloadFileOrFolder()', () => {
+    const testAccountId = 67890;
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    it('downloads files discovered via /meta/', async () => {
+      getDirectoryMetaByPath.mockResolvedValue(
+        mockAxiosResponse({
+          name: 'templates',
+          path: '/templates',
+          folder: true,
+          children: ['page.html'],
+        })
+      );
+      pathExistsSpy.mockImplementation(async () => false);
+      fetchFileStream.mockResolvedValue({
+        name: 'page.html',
+        createdAt: 1,
+        updatedAt: 1,
+        source: null,
+        path: '/templates/page.html',
+        folder: false,
+        children: [],
+      });
+      utimesSpy.mockImplementation(async () => undefined);
+
+      await downloadFileOrFolder(testAccountId, '/templates', './');
+
+      expect(fetchFileStream).toHaveBeenCalledWith(
+        testAccountId,
+        '/templates/page.html',
+        expect.stringContaining('page.html'),
+        expect.any(Object)
+      );
+    });
+
+    it('tracks failed file downloads without throwing from the queue', async () => {
+      getDirectoryMetaByPath.mockResolvedValue(
+        mockAxiosResponse({
+          name: 'templates',
+          path: '/templates',
+          folder: true,
+          children: ['bad.html'],
+        })
+      );
+      pathExistsSpy.mockImplementation(async () => false);
+      fetchFileStream.mockRejectedValue(new Error('network error'));
+
+      await expect(
+        downloadFileOrFolder(testAccountId, '/templates', './')
+      ).rejects.toThrow();
+    });
+
+    it('wraps /meta/ failures as failedToFetchFolder', async () => {
+      getDirectoryMetaByPath.mockRejectedValue(new Error('server error'));
+
+      await expect(
+        downloadFileOrFolder(testAccountId, '/templates', './')
+      ).rejects.toThrow();
+    });
+
+    it('injects @hubspot into children for root paths', async () => {
+      getDirectoryMetaByPath
+        .mockResolvedValueOnce(
+          mockAxiosResponse({
+            name: '',
+            path: '/',
+            folder: true,
+            children: ['templates'],
+          })
+        )
+        .mockResolvedValueOnce(
+          mockAxiosResponse({
+            name: '@hubspot',
+            path: '/@hubspot',
+            folder: true,
+            children: [],
+          })
+        )
+        .mockResolvedValueOnce(
+          mockAxiosResponse({
+            name: 'templates',
+            path: '/templates',
+            folder: true,
+            children: [],
+          })
+        );
+
+      await downloadFileOrFolder(testAccountId, '/', './');
+
+      const calls = getDirectoryMetaByPath.mock.calls.map(c => c[1]);
+      expect(calls).toContain('@hubspot');
+    });
+
+    it('strips trailing slash from src before building child paths', async () => {
+      getDirectoryMetaByPath
+        .mockResolvedValueOnce(
+          mockAxiosResponse({
+            name: 'ThemeDirectory',
+            path: '/ThemeDirectory',
+            folder: true,
+            children: ['modules'],
+          })
+        )
+        .mockResolvedValueOnce(
+          mockAxiosResponse({
+            name: 'ThemeDirectory',
+            path: '/ThemeDirectory',
+            folder: true,
+            children: ['modules'],
+          })
+        )
+        .mockResolvedValueOnce(
+          mockAxiosResponse({
+            name: 'modules',
+            path: '/ThemeDirectory/modules',
+            folder: true,
+            children: [],
+          })
+        );
+      ensureDirSpy.mockImplementation(async () => undefined);
+
+      await downloadFileOrFolder(testAccountId, 'ThemeDirectory/', './');
+
+      const metaCalls = getDirectoryMetaByPath.mock.calls.map(c => c[1] as string);
+      expect(metaCalls.some(p => p.includes('//'))).toBe(false);
+      expect(metaCalls).toContain('ThemeDirectory/modules');
     });
   });
 });

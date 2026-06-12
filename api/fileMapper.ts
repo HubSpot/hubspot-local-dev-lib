@@ -5,7 +5,12 @@ import { AxiosResponse } from 'axios';
 import { http } from '../http/index.js';
 import { getCwd } from '../lib/path.js';
 import { FILE_MAPPER_API_PATH } from '../constants/endpoints.js';
-import { FileMapperNode, FileMapperOptions, FileTree } from '../types/Files.js';
+import {
+  DirectoryMetaNode,
+  FileMapperNode,
+  FileMapperOptions,
+  FileTree,
+} from '../types/Files.js';
 import { HubSpotPromise } from '../types/Http.js';
 
 export function createFileMapperNodeFromStreamResponse(
@@ -140,5 +145,17 @@ export function getDirectoryContentsByPath(
 ): HubSpotPromise<FileMapperNode> {
   return http.get(accountId, {
     url: `${FILE_MAPPER_API_PATH}/meta/${path}`,
+  });
+}
+
+// Get shallow directory listing — children are strings, not nested nodes
+export function getDirectoryMetaByPath(
+  accountId: number,
+  path: string,
+  options: FileMapperOptions = {}
+): HubSpotPromise<DirectoryMetaNode> {
+  return http.get<DirectoryMetaNode>(accountId, {
+    url: `${FILE_MAPPER_API_PATH}/meta/${path}`,
+    ...options,
   });
 }

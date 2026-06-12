@@ -15,6 +15,7 @@ import {
   fetchFileStream,
   download,
   downloadDefault,
+  getDirectoryMetaByPath,
 } from '../api/fileMapper.js';
 import {
   MODULE_EXTENSION,
@@ -56,6 +57,10 @@ export function isPathToRoot(filepath: string): boolean {
   return /^(\/|\\)?$/.test(filepath.trim());
 }
 
+export function isPathToFolder(filepath: string): boolean {
+  return !isPathToFile(filepath);
+}
+
 export function isPathToHubspot(filepath: string): boolean {
   if (typeof filepath !== 'string') return false;
   return /^(\/|\\)?@hubspot/i.test(filepath.trim());
@@ -68,7 +73,7 @@ function useApiBuffer(cmsPublishMode?: CmsPublishMode | null): boolean {
 // Determines API param based on publish mode and options
 export function getFileMapperQueryValues(
   cmsPublishMode?: CmsPublishMode | null,
-  { staging, assetVersion }: FileMapperInputOptions = {}
+  { staging, assetVersion, timeout }: FileMapperInputOptions = {}
 ): FileMapperOptions {
   return {
     params: {
@@ -76,6 +81,7 @@ export function getFileMapperQueryValues(
       environmentId: staging ? 2 : 1,
       version: assetVersion,
     },
+    ...(timeout !== undefined && { timeout }),
   };
 }
 
@@ -320,6 +326,11 @@ async function downloadFile(
   }
 }
 
+/**
+ * @deprecated Use downloadFileOrFolder instead. This function fetches the
+ * entire directory tree in a single request, which times out for large
+ * directories.
+ */
 export async function fetchFolderFromApi(
   accountId: number,
   src: string,
@@ -343,6 +354,71 @@ export async function fetchFolderFromApi(
   return node;
 }
 
+async function queueFolderTree(
+  accountId: number,
+  src: string,
+  localPath: string,
+  cmsPublishMode: CmsPublishMode | undefined,
+  options: FileMapperInputOptions,
+  failedPaths: Set<string>
+): Promise<void> {
+  const { isRoot } = getTypeDataFromPath(src);
+  const metaPath = isRoot ? '/' : src;
+  const queryValues = getFileMapperQueryValues(cmsPublishMode, options);
+  const { data: directoryNode } = await getDirectoryMetaByPath(
+    accountId,
+    metaPath,
+    queryValues
+  );
+
+  if (!directoryNode?.folder) return;
+
+  let children: string[] = directoryNode.children || [];
+  if (isRoot) {
+    children = ['@hubspot', ...children];
+  }
+
+  await fs.ensureDir(localPath);
+
+  for (const childName of children) {
+    const childRemotePath = isRoot ? childName : `${src}/${childName}`;
+    const childLocalPath = convertToLocalFileSystemPath(
+      path.join(localPath, childName)
+    );
+
+    if (isPathToFile(childRemotePath)) {
+      queue.add(async () => {
+        try {
+          await fetchAndWriteFileStream(
+            accountId,
+            childRemotePath,
+            childLocalPath,
+            cmsPublishMode,
+            options
+          );
+        } catch (err) {
+          failedPaths.add(childRemotePath);
+          logger.debug(
+            i18n(`${i18nKey}.errors.failedToFetchFile`, {
+              src: childRemotePath,
+              dest: childLocalPath,
+            })
+          );
+        }
+      });
+    } else {
+      await queueFolderTree(
+        accountId,
+        childRemotePath,
+        childLocalPath,
+        cmsPublishMode,
+        options,
+        failedPaths
+      );
+    }
+  }
+}
+
 async function downloadFolder(
   accountId: number,
   src: string,
@@ -350,62 +426,40 @@ async function downloadFolder(
   cmsPublishMode?: CmsPublishMode,
   options: FileMapperInputOptions = {}
 ) {
+  src = src.length > 1 ? src.replace(/\/+$/, '') : src;
+  const dest = path.resolve(destPath);
+  const { isRoot } = getTypeDataFromPath(src);
+  const metaPath = isRoot ? '/' : src;
+  const queryValues = getFileMapperQueryValues(cmsPublishMode, options);
+  const failedPaths = new Set<string>();
+
   try {
-    const node = await fetchFolderFromApi(
+    const { data: rootMeta } = await getDirectoryMetaByPath(
       accountId,
-      src,
-      cmsPublishMode,
-      options
+      metaPath,
+      queryValues
     );
-    if (!node) {
-      return;
-    }
-    const dest = path.resolve(destPath);
+
+    if (!rootMeta) return;
+
     const rootPath =
       dest === getCwd()
-        ? convertToLocalFileSystemPath(path.resolve(dest, node.name))
+        ? convertToLocalFileSystemPath(
+            path.resolve(dest, rootMeta.name || path.basename(src))
+          )
         : dest;
-    let success = true;
-    recurseFolder(
-      node,
-      (childNode, filepath) => {
-        queue.add(async () => {
-          const succeeded = await writeFileMapperNode(
-            accountId,
-            filepath || '',
-            childNode,
-            cmsPublishMode,
-            options
-          );
-          if (succeeded === false) {
-            success = false;
-            logger.debug(
-              i18n(`${i18nKey}.errors.failedToFetchFile`, {
-                src: childNode.path,
-                dest: filepath || '',
-              })
-            );
-          }
-        });
-        return success;
-      },
-      rootPath
+
+    await queueFolderTree(
+      accountId,
+      src,
+      rootPath,
+      cmsPublishMode,
+      options,
+      failedPaths
     );
     await queue.onIdle();
-
-    if (success) {
-      logger.success(
-        i18n(`${i18nKey}.completedFolderFetch`, {
-          src,
-          version: getAssetVersionIdentifier(options.assetVersion, src),
-          dest,
-        })
-      );
-    } else {
-      // TODO: Fix this exception. It is triggering the catch block so this error is being rewritten
-      throw new Error(i18n(`${i18nKey}.errors.incompleteFetch`, { src }));
-    }
   } catch (err) {
+    queue.clear();
     const error = err as AxiosError;
     if (isTimeoutError(error)) {
       throw new Error(i18n(`${i18nKey}.errors.assetTimeout`), { cause: error });
@@ -416,6 +470,18 @@ async function downloadFolder(
       );
     }
   }
+
+  if (failedPaths.size > 0) {
+    throw new Error(i18n(`${i18nKey}.errors.incompleteFetch`, { src }));
+  }
+
+  logger.success(
+    i18n(`${i18nKey}.completedFolderFetch`, {
+      src,
+      version: getAssetVersionIdentifier(options.assetVersion, src),
+      dest,
+    })
+  );
 }
 
 /**

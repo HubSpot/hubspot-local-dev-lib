@@ -26,6 +26,15 @@ export type FileMapperNode = {
   children: Array<FileMapperNode>;
 };
 
+export type DirectoryMetaNode = {
+  name: string;
+  path: string;
+  folder: boolean;
+  children: Array<string>;
+  createdAt?: number;
+  updatedAt?: number;
+};
+
 export type CmsPublishMode = ValueOf<typeof CMS_PUBLISH_MODE>;
 
 export type FileMapperOptions = Omit<HttpOptions, 'url'>;
