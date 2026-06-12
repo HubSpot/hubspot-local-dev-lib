@@ -38,9 +38,6 @@ import { FileSystemError } from '../models/FileSystemError.js';
 
 const i18nKey = 'lib.fileMapper';
 
-const queue = new PQueue({
-  concurrency: 10,
-});
 
 export function isPathToFile(filepath: string): boolean {
   const ext = getExt(filepath);
@@ -310,7 +307,8 @@ async function queueFolderTree(
   directoryNode: DirectoryMetaNode,
   cmsPublishMode: CmsPublishMode | undefined,
   options: FileMapperInputOptions,
-  failedPaths: Set<string>
+  failedPaths: Set<string>,
+  queue: PQueue
 ): Promise<void> {
   if (!directoryNode.folder) return;
 
@@ -364,7 +362,8 @@ async function queueFolderTree(
           childNode,
           cmsPublishMode,
           options,
-          failedPaths
+          failedPaths,
+          queue
         );
       }
     }
@@ -384,6 +383,7 @@ async function downloadFolder(
   const metaPath = isRoot ? '/' : src;
   const queryValues = getFileMapperQueryValues(cmsPublishMode, options);
   const failedPaths = new Set<string>();
+  const queue = new PQueue({ concurrency: 10 });
 
   try {
     const { data: rootMeta } = await getDirectoryMetaByPath(
@@ -408,7 +408,8 @@ async function downloadFolder(
       rootMeta,
       cmsPublishMode,
       options,
-      failedPaths
+      failedPaths,
+      queue
     );
     await queue.onIdle();
   } catch (err) {
