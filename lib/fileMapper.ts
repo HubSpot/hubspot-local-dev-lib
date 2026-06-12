@@ -319,6 +319,7 @@ async function queueFolderTree(
   }
 
   await fs.ensureDir(localPath);
+  logger.log(i18n(`${i18nKey}.wroteFolder`, { filepath: localPath }));
 
   const queryValues = getFileMapperQueryValues(cmsPublishMode, options);
 
