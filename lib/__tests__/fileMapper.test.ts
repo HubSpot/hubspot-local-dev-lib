@@ -422,7 +422,9 @@ describe('lib/fileMapper', () => {
 
       await downloadFileOrFolder(testAccountId, 'ThemeDirectory/', './');
 
-      const metaCalls = getDirectoryMetaByPath.mock.calls.map(c => c[1] as string);
+      const metaCalls = getDirectoryMetaByPath.mock.calls.map(
+        c => c[1] as string
+      );
       expect(metaCalls.some(p => p.includes('//'))).toBe(false);
       expect(metaCalls).toContain('ThemeDirectory/modules');
     });

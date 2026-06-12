@@ -148,7 +148,7 @@ export function getDirectoryContentsByPath(
   });
 }
 
-// Get shallow directory listing — children are strings, not nested nodes
+// getDirectoryContentsByPath has the wrong return type for /meta/ — children are strings, not FileMapperNodes
 export function getDirectoryMetaByPath(
   accountId: number,
   path: string,

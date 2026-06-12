@@ -38,7 +38,6 @@ import { FileSystemError } from '../models/FileSystemError.js';
 
 const i18nKey = 'lib.fileMapper';
 
-
 export function isPathToFile(filepath: string): boolean {
   const ext = getExt(filepath);
   return !!ext && ext !== MODULE_EXTENSION && ext !== FUNCTIONS_EXTENSION;
@@ -212,7 +211,6 @@ async function fetchAndWriteFileStream(
   );
   await writeUtimes(accountId, filepath, node);
 }
-
 
 async function downloadFile(
   accountId: number,
