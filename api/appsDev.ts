@@ -60,6 +60,21 @@ export function installStaticAuthAppOnTestAccount(
   });
 }
 
+export function installStaticAuthAppOnCurrentAccount(
+  appId: number,
+  accountId: number,
+  scopeGroupIds: number[]
+): HubSpotPromise<void> {
+  return http.post<void>(accountId, {
+    url: `${APPS_HUBLETS_API_PATH}/current-account`,
+    data: {
+      appId,
+      targetInstallPortalId: accountId,
+      scopeGroupIds,
+    },
+  });
+}
+
 export function fetchAppMetadataByUid(
   appUid: string,
   accountId: number
