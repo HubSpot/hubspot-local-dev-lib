@@ -211,6 +211,34 @@ describe('config/state', () => {
       expect(result).toBeUndefined();
     });
 
+    it('returns default value for Dev MCP promotion surface timestamps', () => {
+      existsSyncSpy.mockReturnValue(false);
+
+      expect(
+        getStateValue(STATE_FLAGS.MCP_PROMOTION_LAST_SHOWN_AT_BY_SURFACE)
+      ).toEqual({});
+    });
+
+    it('returns Dev MCP promotion surface timestamps from state file', () => {
+      const promotionSurfaceTimestamps = {
+        auth: '2026-06-16T20:59:14.493Z',
+        'project-create': '2026-06-21T09:30:00.000Z',
+      };
+      existsSyncSpy.mockReturnValue(true);
+      readFileSyncSpy.mockReturnValue(
+        JSON.stringify({
+          mcpTotalToolCalls: 0,
+          mcpPromotionLastShownAtBySurface: promotionSurfaceTimestamps,
+        })
+      );
+
+      const result = getStateValue(
+        STATE_FLAGS.MCP_PROMOTION_LAST_SHOWN_AT_BY_SURFACE
+      );
+
+      expect(result).toEqual(promotionSurfaceTimestamps);
+    });
+
     it('returns default state when JSON parses to an array', () => {
       existsSyncSpy.mockReturnValue(true);
       readFileSyncSpy.mockReturnValue(JSON.stringify([1, 2, 3]));
@@ -253,7 +281,14 @@ describe('config/state', () => {
       expect(readFileSyncSpy).toHaveBeenCalledWith(STATE_FILE_PATH, 'utf-8');
       expect(writeFileSyncSpy).toHaveBeenCalledWith(
         STATE_FILE_PATH,
-        JSON.stringify({ mcpTotalToolCalls: 20 }, null, 2),
+        JSON.stringify(
+          {
+            mcpTotalToolCalls: 20,
+            mcpPromotionLastShownAtBySurface: {},
+          },
+          null,
+          2
+        ),
         'utf-8'
       );
     });
@@ -266,7 +301,14 @@ describe('config/state', () => {
 
       expect(writeFileSyncSpy).toHaveBeenCalledWith(
         STATE_FILE_PATH,
-        JSON.stringify({ mcpTotalToolCalls: 5 }, null, 2),
+        JSON.stringify(
+          {
+            mcpTotalToolCalls: 5,
+            mcpPromotionLastShownAtBySurface: {},
+          },
+          null,
+          2
+        ),
         'utf-8'
       );
     });
@@ -293,7 +335,14 @@ describe('config/state', () => {
 
       expect(writeFileSyncSpy).toHaveBeenCalledWith(
         STATE_FILE_PATH,
-        JSON.stringify({ mcpTotalToolCalls: 25 }, null, 2),
+        JSON.stringify(
+          {
+            mcpTotalToolCalls: 25,
+            mcpPromotionLastShownAtBySurface: {},
+          },
+          null,
+          2
+        ),
         'utf-8'
       );
     });
@@ -307,7 +356,14 @@ describe('config/state', () => {
 
       expect(writeFileSyncSpy).toHaveBeenCalledWith(
         STATE_FILE_PATH,
-        JSON.stringify({ mcpTotalToolCalls: 30 }, null, 2),
+        JSON.stringify(
+          {
+            mcpTotalToolCalls: 30,
+            mcpPromotionLastShownAtBySurface: {},
+          },
+          null,
+          2
+        ),
         'utf-8'
       );
     });
@@ -343,6 +399,52 @@ describe('config/state', () => {
       const written = JSON.parse(writeFileSyncSpy.mock.calls[0][1]);
       expect(written.mcpTotalToolCalls).toBe(10);
       expect(written.usageTrackingMessageLastShowVersion).toBe('5.3.2');
+    });
+
+    it('round trips Dev MCP promotion surface timestamps', () => {
+      const promotionSurfaceTimestamps = {
+        auth: '2026-06-16T20:59:14.493Z',
+        'project-create': '2026-06-21T09:30:00.000Z',
+      };
+      existsSyncSpy.mockReturnValue(false);
+      writeFileSyncSpy.mockImplementation(() => undefined);
+
+      setStateValue(
+        STATE_FLAGS.MCP_PROMOTION_LAST_SHOWN_AT_BY_SURFACE,
+        promotionSurfaceTimestamps
+      );
+
+      const written = writeFileSyncSpy.mock.calls[0][1];
+      existsSyncSpy.mockReturnValue(true);
+      readFileSyncSpy.mockReturnValue(written);
+
+      const result = getStateValue(
+        STATE_FLAGS.MCP_PROMOTION_LAST_SHOWN_AT_BY_SURFACE
+      );
+
+      expect(result).toEqual(promotionSurfaceTimestamps);
+    });
+
+    it('drops unknown keys when writing state', () => {
+      const existingState = {
+        mcpTotalToolCalls: 10,
+        mcpPromotionLastShownAtBySurface: {
+          auth: '2026-06-16T20:59:14.493Z',
+        },
+        unknownKey: 'ignored',
+      };
+      existsSyncSpy.mockReturnValue(true);
+      readFileSyncSpy.mockReturnValue(JSON.stringify(existingState));
+      writeFileSyncSpy.mockImplementation(() => undefined);
+
+      setStateValue('mcpTotalToolCalls', 11);
+
+      const written = JSON.parse(writeFileSyncSpy.mock.calls[0][1]);
+      expect(written.mcpTotalToolCalls).toBe(11);
+      expect(written.mcpPromotionLastShownAtBySurface).toEqual({
+        auth: '2026-06-16T20:59:14.493Z',
+      });
+      expect(written.unknownKey).toBeUndefined();
     });
 
     it('throws error when write fails with non-Error', () => {
