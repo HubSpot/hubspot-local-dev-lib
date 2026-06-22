@@ -298,16 +298,21 @@ export async function fetchFolderFromApi(
   return node;
 }
 
+type QueueFolderTreeContext = {
+  cmsPublishMode: CmsPublishMode | undefined;
+  options: FileMapperInputOptions;
+  failedPaths: Set<string>;
+  queue: PQueue;
+};
+
 async function queueFolderTree(
   accountId: number,
   src: string,
   localPath: string,
   directoryNode: DirectoryMetaNode,
-  cmsPublishMode: CmsPublishMode | undefined,
-  options: FileMapperInputOptions,
-  failedPaths: Set<string>,
-  queue: PQueue
+  ctx: QueueFolderTreeContext
 ): Promise<void> {
+  const { cmsPublishMode, options, failedPaths, queue } = ctx;
   if (!directoryNode.folder) return;
 
   const { isRoot } = getTypeDataFromPath(src);
@@ -359,10 +364,7 @@ async function queueFolderTree(
           childRemotePath,
           childLocalPath,
           childNode,
-          cmsPublishMode,
-          options,
-          failedPaths,
-          queue
+          ctx
         );
       }
     }
@@ -402,16 +404,12 @@ async function downloadFolder(
           )
         : dest;
 
-    await queueFolderTree(
-      accountId,
-      src,
-      rootPath,
-      rootMeta,
+    await queueFolderTree(accountId, src, rootPath, rootMeta, {
       cmsPublishMode,
       options,
       failedPaths,
-      queue
-    );
+      queue,
+    });
     await queue.onIdle();
   } catch (err) {
     queue.clear();
