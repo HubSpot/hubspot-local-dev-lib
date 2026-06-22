@@ -155,7 +155,7 @@ export function getDirectoryMetaByPath(
   options: FileMapperOptions = {}
 ): HubSpotPromise<DirectoryMetaNode> {
   return http.get<DirectoryMetaNode>(accountId, {
-    url: `${FILE_MAPPER_API_PATH}/meta/${encodeURIComponent(path)}`,
+    url: `${FILE_MAPPER_API_PATH}/meta/${path.split('/').map(encodeURIComponent).join('/')}`,
     ...options,
   });
 }
