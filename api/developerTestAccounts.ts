@@ -19,6 +19,7 @@ export function fetchDeveloperTestAccounts(
 ): HubSpotPromise<FetchDeveloperTestAccountsResponse> {
   return http.get<FetchDeveloperTestAccountsResponse>(accountId, {
     url: TEST_ACCOUNTS_API_PATH,
+    timeout: SANDBOX_TIMEOUT,
   });
 }
 
