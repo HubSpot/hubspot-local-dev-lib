@@ -348,15 +348,34 @@ describe('lib/fileMapper', () => {
           name: 'templates',
           path: '/templates',
           folder: true,
-          children: ['bad.html'],
+          children: ['bad.html', 'good.html'],
         })
       );
       pathExistsSpy.mockImplementation(async () => false);
-      fetchFileStream.mockRejectedValue(new Error('network error'));
+      fetchFileStream.mockImplementation(async (_accountId, filePath) => {
+        if (filePath === '/templates/bad.html') throw new Error('network error');
+        return {
+          name: 'good.html',
+          createdAt: 1,
+          updatedAt: 1,
+          source: null,
+          path: filePath,
+          folder: false,
+          children: [],
+        };
+      });
+      utimesSpy.mockImplementation(async () => undefined);
 
       await expect(
         downloadFileOrFolder(testAccountId, '/templates', './')
-      ).rejects.toThrow();
+      ).rejects.toThrow('Not all files in folder');
+
+      expect(fetchFileStream).toHaveBeenCalledWith(
+        testAccountId,
+        '/templates/good.html',
+        expect.any(String),
+        expect.any(Object)
+      );
     });
 
     it('wraps /meta/ failures as failedToFetchFolder', async () => {
@@ -364,7 +383,7 @@ describe('lib/fileMapper', () => {
 
       await expect(
         downloadFileOrFolder(testAccountId, '/templates', './')
-      ).rejects.toThrow();
+      ).rejects.toThrow('Failed fetch of folder');
     });
 
     it('injects @hubspot into children for root paths', async () => {
