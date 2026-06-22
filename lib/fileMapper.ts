@@ -321,7 +321,14 @@ async function queueFolderTree(
     children = ['@hubspot', ...children];
   }
 
-  await fs.ensureDir(localPath);
+  try {
+    await fs.ensureDir(localPath);
+  } catch (err) {
+    throw new FileSystemError(
+      { cause: err },
+      { filepath: localPath, accountId, operation: 'write' }
+    );
+  }
   logger.log(i18n(`${i18nKey}.wroteFolder`, { filepath: localPath }));
 
   const queryValues = getFileMapperQueryValues(cmsPublishMode, options);
