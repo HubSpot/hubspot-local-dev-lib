@@ -326,32 +326,36 @@ async function queueFolderTree(
 
   const queryValues = getFileMapperQueryValues(cmsPublishMode, options);
 
+  const queueFileDownload = (remotePath: string, destPath: string) => {
+    queue.add(async () => {
+      try {
+        await fetchAndWriteFileStream(
+          accountId,
+          remotePath,
+          destPath,
+          cmsPublishMode,
+          options
+        );
+      } catch (err) {
+        failedPaths.add(remotePath);
+        logger.debug(
+          i18n(`${i18nKey}.errors.failedToFetchFile`, {
+            src: remotePath,
+            dest: destPath,
+          })
+        );
+      }
+    });
+  };
+
   for (const childName of children) {
     const childRemotePath = isRoot ? childName : `${src}/${childName}`;
     const childLocalPath = convertToLocalFileSystemPath(
       path.join(localPath, childName)
     );
 
-    if (isPathToFile(childRemotePath)) {
-      queue.add(async () => {
-        try {
-          await fetchAndWriteFileStream(
-            accountId,
-            childRemotePath,
-            childLocalPath,
-            cmsPublishMode,
-            options
-          );
-        } catch (err) {
-          failedPaths.add(childRemotePath);
-          logger.debug(
-            i18n(`${i18nKey}.errors.failedToFetchFile`, {
-              src: childRemotePath,
-              dest: childLocalPath,
-            })
-          );
-        }
-      });
+    if (isAllowedExtension(childRemotePath, [...JSR_ALLOWED_EXTENSIONS])) {
+      queueFileDownload(childRemotePath, childLocalPath);
     } else {
       const { data: childNode } = await getDirectoryMetaByPath(
         accountId,
@@ -359,13 +363,17 @@ async function queueFolderTree(
         queryValues
       );
       if (childNode) {
-        await queueFolderTree(
-          accountId,
-          childRemotePath,
-          childLocalPath,
-          childNode,
-          ctx
-        );
+        if (childNode.folder) {
+          await queueFolderTree(
+            accountId,
+            childRemotePath,
+            childLocalPath,
+            childNode,
+            ctx
+          );
+        } else {
+          queueFileDownload(childRemotePath, childLocalPath);
+        }
       }
     }
   }
