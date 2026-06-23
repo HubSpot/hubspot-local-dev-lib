@@ -54,10 +54,6 @@ export function isPathToRoot(filepath: string): boolean {
   return /^(\/|\\)?$/.test(filepath.trim());
 }
 
-export function isPathToFolder(filepath: string): boolean {
-  return !isPathToFile(filepath);
-}
-
 export function isPathToHubspot(filepath: string): boolean {
   if (typeof filepath !== 'string') return false;
   return /^(\/|\\)?@hubspot/i.test(filepath.trim());
