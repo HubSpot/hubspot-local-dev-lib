@@ -43,7 +43,7 @@ export type ConfigFlag = ValueOf<typeof CONFIG_FLAGS>;
 
 export type HubSpotState = {
   [STATE_FLAGS.MCP_TOTAL_TOOL_CALLS]: number;
-  [STATE_FLAGS.MCP_PROMOTION_LAST_SHOWN_AT_BY_SURFACE]: Record<string, string>;
+  [STATE_FLAGS.MCP_PROMOTION_LAST_SHOWN_AT]?: string;
   [STATE_FLAGS.USAGE_TRACKING_MESSAGE_LAST_SHOW_VERSION]?: string;
 };
 

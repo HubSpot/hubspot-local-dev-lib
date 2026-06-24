@@ -211,32 +211,27 @@ describe('config/state', () => {
       expect(result).toBeUndefined();
     });
 
-    it('returns default value for Dev MCP promotion surface timestamps', () => {
+    it('returns default value for Dev MCP promotion last shown timestamp', () => {
       existsSyncSpy.mockReturnValue(false);
 
       expect(
-        getStateValue(STATE_FLAGS.MCP_PROMOTION_LAST_SHOWN_AT_BY_SURFACE)
-      ).toEqual({});
+        getStateValue(STATE_FLAGS.MCP_PROMOTION_LAST_SHOWN_AT)
+      ).toBeUndefined();
     });
 
-    it('returns Dev MCP promotion surface timestamps from state file', () => {
-      const promotionSurfaceTimestamps = {
-        auth: '2026-06-16T20:59:14.493Z',
-        'project-create': '2026-06-21T09:30:00.000Z',
-      };
+    it('returns Dev MCP promotion last shown timestamp from state file', () => {
+      const promotionLastShownAt = '2026-06-16T20:59:14.493Z';
       existsSyncSpy.mockReturnValue(true);
       readFileSyncSpy.mockReturnValue(
         JSON.stringify({
           mcpTotalToolCalls: 0,
-          mcpPromotionLastShownAtBySurface: promotionSurfaceTimestamps,
+          mcpPromotionLastShownAt: promotionLastShownAt,
         })
       );
 
-      const result = getStateValue(
-        STATE_FLAGS.MCP_PROMOTION_LAST_SHOWN_AT_BY_SURFACE
-      );
+      const result = getStateValue(STATE_FLAGS.MCP_PROMOTION_LAST_SHOWN_AT);
 
-      expect(result).toEqual(promotionSurfaceTimestamps);
+      expect(result).toBe(promotionLastShownAt);
     });
 
     it('returns default state when JSON parses to an array', () => {
@@ -284,7 +279,6 @@ describe('config/state', () => {
         JSON.stringify(
           {
             mcpTotalToolCalls: 20,
-            mcpPromotionLastShownAtBySurface: {},
           },
           null,
           2
@@ -304,7 +298,6 @@ describe('config/state', () => {
         JSON.stringify(
           {
             mcpTotalToolCalls: 5,
-            mcpPromotionLastShownAtBySurface: {},
           },
           null,
           2
@@ -338,7 +331,6 @@ describe('config/state', () => {
         JSON.stringify(
           {
             mcpTotalToolCalls: 25,
-            mcpPromotionLastShownAtBySurface: {},
           },
           null,
           2
@@ -359,7 +351,6 @@ describe('config/state', () => {
         JSON.stringify(
           {
             mcpTotalToolCalls: 30,
-            mcpPromotionLastShownAtBySurface: {},
           },
           null,
           2
@@ -401,36 +392,29 @@ describe('config/state', () => {
       expect(written.usageTrackingMessageLastShowVersion).toBe('5.3.2');
     });
 
-    it('round trips Dev MCP promotion surface timestamps', () => {
-      const promotionSurfaceTimestamps = {
-        auth: '2026-06-16T20:59:14.493Z',
-        'project-create': '2026-06-21T09:30:00.000Z',
-      };
+    it('round trips Dev MCP promotion last shown timestamp', () => {
+      const promotionLastShownAt = '2026-06-16T20:59:14.493Z';
       existsSyncSpy.mockReturnValue(false);
       writeFileSyncSpy.mockImplementation(() => undefined);
 
       setStateValue(
-        STATE_FLAGS.MCP_PROMOTION_LAST_SHOWN_AT_BY_SURFACE,
-        promotionSurfaceTimestamps
+        STATE_FLAGS.MCP_PROMOTION_LAST_SHOWN_AT,
+        promotionLastShownAt
       );
 
       const written = writeFileSyncSpy.mock.calls[0][1];
       existsSyncSpy.mockReturnValue(true);
       readFileSyncSpy.mockReturnValue(written);
 
-      const result = getStateValue(
-        STATE_FLAGS.MCP_PROMOTION_LAST_SHOWN_AT_BY_SURFACE
-      );
+      const result = getStateValue(STATE_FLAGS.MCP_PROMOTION_LAST_SHOWN_AT);
 
-      expect(result).toEqual(promotionSurfaceTimestamps);
+      expect(result).toBe(promotionLastShownAt);
     });
 
     it('drops unknown keys when writing state', () => {
       const existingState = {
         mcpTotalToolCalls: 10,
-        mcpPromotionLastShownAtBySurface: {
-          auth: '2026-06-16T20:59:14.493Z',
-        },
+        mcpPromotionLastShownAt: '2026-06-16T20:59:14.493Z',
         unknownKey: 'ignored',
       };
       existsSyncSpy.mockReturnValue(true);
@@ -441,9 +425,7 @@ describe('config/state', () => {
 
       const written = JSON.parse(writeFileSyncSpy.mock.calls[0][1]);
       expect(written.mcpTotalToolCalls).toBe(11);
-      expect(written.mcpPromotionLastShownAtBySurface).toEqual({
-        auth: '2026-06-16T20:59:14.493Z',
-      });
+      expect(written.mcpPromotionLastShownAt).toBe('2026-06-16T20:59:14.493Z');
       expect(written.unknownKey).toBeUndefined();
     });
 
