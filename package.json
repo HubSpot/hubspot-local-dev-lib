@@ -72,7 +72,7 @@
   },
   "dependencies": {
     "address": "2.0.2",
-    "axios": "1.15.2",
+    "axios": "1.16.0",
     "chalk": "5.6.2",
     "chokidar": "3.6.0",
     "content-disposition": "0.5.4",
