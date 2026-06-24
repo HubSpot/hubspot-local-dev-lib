@@ -15,6 +15,7 @@ import {
   fetchFileStream,
   download,
   downloadDefault,
+  getDirectoryMetaByPath,
 } from '../api/fileMapper.js';
 import {
   MODULE_EXTENSION,
@@ -24,6 +25,7 @@ import {
 import { CMS_PUBLISH_MODE } from '../constants/files.js';
 import {
   FileMapperNode,
+  DirectoryMetaNode,
   CmsPublishMode,
   FileMapperOptions,
   FileMapperInputOptions,
@@ -35,10 +37,6 @@ import { i18n } from '../utils/lang.js';
 import { FileSystemError } from '../models/FileSystemError.js';
 
 const i18nKey = 'lib.fileMapper';
-
-const queue = new PQueue({
-  concurrency: 10,
-});
 
 export function isPathToFile(filepath: string): boolean {
   const ext = getExt(filepath);
@@ -68,7 +66,7 @@ function useApiBuffer(cmsPublishMode?: CmsPublishMode | null): boolean {
 // Determines API param based on publish mode and options
 export function getFileMapperQueryValues(
   cmsPublishMode?: CmsPublishMode | null,
-  { staging, assetVersion }: FileMapperInputOptions = {}
+  { staging, assetVersion, timeout }: FileMapperInputOptions = {}
 ): FileMapperOptions {
   return {
     params: {
@@ -76,6 +74,7 @@ export function getFileMapperQueryValues(
       environmentId: staging ? 2 : 1,
       version: assetVersion,
     },
+    ...(timeout !== undefined && { timeout }),
   };
 }
 
@@ -209,58 +208,6 @@ async function fetchAndWriteFileStream(
   await writeUtimes(accountId, filepath, node);
 }
 
-// Writes an individual file or folder (not recursive).  If file source is missing, the
-//file is fetched.
-async function writeFileMapperNode(
-  accountId: number,
-  filepath: string,
-  node: FileMapperNode,
-  cmsPublishMode?: CmsPublishMode,
-  options: FileMapperInputOptions = {}
-): Promise<boolean> {
-  const localFilepath = convertToLocalFileSystemPath(path.resolve(filepath));
-  if (await skipExisting(localFilepath, options.overwrite)) {
-    logger.log(
-      i18n(`${i18nKey}.skippedExisting`, {
-        filepath: localFilepath,
-      })
-    );
-    return true;
-  }
-  if (!node.folder) {
-    try {
-      await fetchAndWriteFileStream(
-        accountId,
-        node.path,
-        localFilepath,
-        cmsPublishMode,
-        options
-      );
-      return true;
-    } catch (err) {
-      return false;
-    }
-  }
-  try {
-    await fs.ensureDir(localFilepath);
-    logger.log(
-      i18n(`${i18nKey}.wroteFolder`, {
-        filepath: localFilepath,
-      })
-    );
-  } catch (err) {
-    throw new FileSystemError(
-      { cause: err },
-      {
-        filepath: localFilepath,
-        accountId,
-        operation: 'write',
-      }
-    );
-  }
-  return true;
-}
-
 async function downloadFile(
   accountId: number,
   src: string,
@@ -299,7 +246,6 @@ async function downloadFile(
       cmsPublishMode,
       options
     );
-    await queue.onIdle();
     logger.success(
       i18n(`${i18nKey}.completedFetch`, {
         src,
@@ -320,6 +266,11 @@ async function downloadFile(
   }
 }
 
+/**
+ * @deprecated Use downloadFileOrFolder instead. This function fetches the
+ * entire directory tree in a single request, which times out for large
+ * directories.
+ */
 export async function fetchFolderFromApi(
   accountId: number,
   src: string,
@@ -343,6 +294,94 @@ export async function fetchFolderFromApi(
   return node;
 }
 
+type QueueFolderTreeContext = {
+  cmsPublishMode: CmsPublishMode | undefined;
+  options: FileMapperInputOptions;
+  failedPaths: Set<string>;
+  queue: PQueue;
+};
+
+async function queueFolderTree(
+  accountId: number,
+  src: string,
+  localPath: string,
+  directoryNode: DirectoryMetaNode,
+  ctx: QueueFolderTreeContext
+): Promise<void> {
+  const { cmsPublishMode, options, failedPaths, queue } = ctx;
+  if (!directoryNode.folder) return;
+
+  const { isRoot } = getTypeDataFromPath(src);
+  let children: string[] = directoryNode.children || [];
+  if (isRoot) {
+    children = ['@hubspot', ...children];
+  }
+
+  try {
+    await fs.ensureDir(localPath);
+  } catch (err) {
+    throw new FileSystemError(
+      { cause: err },
+      { filepath: localPath, accountId, operation: 'write' }
+    );
+  }
+  logger.log(i18n(`${i18nKey}.wroteFolder`, { filepath: localPath }));
+
+  const queryValues = getFileMapperQueryValues(cmsPublishMode, options);
+
+  const queueFileDownload = (remotePath: string, destPath: string) => {
+    queue.add(async () => {
+      try {
+        await fetchAndWriteFileStream(
+          accountId,
+          remotePath,
+          destPath,
+          cmsPublishMode,
+          options
+        );
+      } catch (err) {
+        failedPaths.add(remotePath);
+        logger.debug(
+          i18n(`${i18nKey}.errors.failedToFetchFile`, {
+            src: remotePath,
+            dest: destPath,
+          })
+        );
+      }
+    });
+  };
+
+  for (const childName of children) {
+    const childRemotePath = isRoot ? childName : `${src}/${childName}`;
+    const childLocalPath = convertToLocalFileSystemPath(
+      path.join(localPath, childName)
+    );
+
+    if (isAllowedExtension(childRemotePath, [...JSR_ALLOWED_EXTENSIONS])) {
+      queueFileDownload(childRemotePath, childLocalPath);
+    } else {
+      const { data: childNode } = await getDirectoryMetaByPath(
+        accountId,
+        childRemotePath,
+        queryValues
+      );
+      if (childNode) {
+        if (childNode.folder) {
+          await queueFolderTree(
+            accountId,
+            childRemotePath,
+            childLocalPath,
+            childNode,
+            ctx
+          );
+        } else {
+          queueFileDownload(childRemotePath, childLocalPath);
+        }
+      }
+    }
+  }
+}
+
 async function downloadFolder(
   accountId: number,
   src: string,
@@ -350,62 +389,41 @@ async function downloadFolder(
   cmsPublishMode?: CmsPublishMode,
   options: FileMapperInputOptions = {}
 ) {
+  src = src.length > 1 ? src.replace(/\/+$/, '') : src;
+  const dest = path.resolve(destPath);
+  const { isRoot } = getTypeDataFromPath(src);
+  const metaPath = isRoot ? '/' : src;
+  const queryValues = getFileMapperQueryValues(cmsPublishMode, options);
+  const failedPaths = new Set<string>();
+  const queue = new PQueue({ concurrency: 10 });
+
   try {
-    const node = await fetchFolderFromApi(
+    const { data: rootMeta } = await getDirectoryMetaByPath(
       accountId,
-      src,
-      cmsPublishMode,
-      options
+      metaPath,
+      queryValues
     );
-    if (!node) {
-      return;
-    }
-    const dest = path.resolve(destPath);
+
+    if (!rootMeta) return;
+
+    logger.log(i18n(`${i18nKey}.folderFetch`, { src, accountId }));
+
     const rootPath =
       dest === getCwd()
-        ? convertToLocalFileSystemPath(path.resolve(dest, node.name))
+        ? convertToLocalFileSystemPath(
+            path.resolve(dest, rootMeta.name || path.basename(src))
+          )
         : dest;
-    let success = true;
-    recurseFolder(
-      node,
-      (childNode, filepath) => {
-        queue.add(async () => {
-          const succeeded = await writeFileMapperNode(
-            accountId,
-            filepath || '',
-            childNode,
-            cmsPublishMode,
-            options
-          );
-          if (succeeded === false) {
-            success = false;
-            logger.debug(
-              i18n(`${i18nKey}.errors.failedToFetchFile`, {
-                src: childNode.path,
-                dest: filepath || '',
-              })
-            );
-          }
-        });
-        return success;
-      },
-      rootPath
-    );
-    await queue.onIdle();
 
-    if (success) {
-      logger.success(
-        i18n(`${i18nKey}.completedFolderFetch`, {
-          src,
-          version: getAssetVersionIdentifier(options.assetVersion, src),
-          dest,
-        })
-      );
-    } else {
-      // TODO: Fix this exception. It is triggering the catch block so this error is being rewritten
-      throw new Error(i18n(`${i18nKey}.errors.incompleteFetch`, { src }));
-    }
+    await queueFolderTree(accountId, src, rootPath, rootMeta, {
+      cmsPublishMode,
+      options,
+      failedPaths,
+      queue,
+    });
+    await queue.onIdle();
   } catch (err) {
+    queue.clear();
     const error = err as AxiosError;
     if (isTimeoutError(error)) {
       throw new Error(i18n(`${i18nKey}.errors.assetTimeout`), { cause: error });
@@ -416,6 +434,18 @@ async function downloadFolder(
       );
     }
   }
+
+  if (failedPaths.size > 0) {
+    throw new Error(i18n(`${i18nKey}.errors.incompleteFetch`, { src }));
+  }
+
+  logger.success(
+    i18n(`${i18nKey}.completedFolderFetch`, {
+      src,
+      version: getAssetVersionIdentifier(options.assetVersion, src),
+      dest,
+    })
+  );
 }
 
 /**
