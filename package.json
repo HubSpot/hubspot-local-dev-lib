@@ -9,7 +9,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/HubSpot/hubspot-local-dev-lib"
+    "url": "git+https://github.com/HubSpot/hubspot-local-dev-lib.git"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org/",
