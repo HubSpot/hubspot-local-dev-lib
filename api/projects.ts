@@ -63,7 +63,8 @@ export async function uploadProject(
   projectFile: string,
   uploadMessage: string,
   platformVersion?: string,
-  intermediateRepresentation?: unknown
+  intermediateRepresentation?: unknown,
+  skipAutoDeploy?: boolean
 ): HubSpotPromise<UploadProjectResponse | UploadIRResponse> {
   if (intermediateRepresentation) {
     const formData = {
@@ -73,6 +74,7 @@ export async function uploadProject(
         ...intermediateRepresentation,
         projectName,
         buildMessage: uploadMessage,
+        skipAutoDeploy: skipAutoDeploy || false,
       }),
     };
 
@@ -95,6 +97,9 @@ export async function uploadProject(
   };
   if (platformVersion) {
     formData.platformVersion = platformVersion;
+  }
+  if (skipAutoDeploy) {
+    formData.skipAutoDeploy = String(skipAutoDeploy);
   }
   return http.post<UploadProjectResponse>(accountId, {
     url: `${PROJECTS_API_PATH}/upload/${encodeURIComponent(projectName)}`,
