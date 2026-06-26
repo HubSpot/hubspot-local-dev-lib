@@ -175,6 +175,70 @@ describe('api/projects', () => {
             ...intermediateRepresentation,
             projectName,
             buildMessage: uploadMessage,
+            skipAutoDeploy: false,
+          }),
+        },
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+    });
+
+    it('should include skipAutoDeploy in the v1 form data when true', async () => {
+      await uploadProject(
+        accountId,
+        projectName,
+        projectFile,
+        uploadMessage,
+        platformVersion,
+        undefined,
+        true
+      );
+      expect(http.post).toHaveBeenCalledTimes(1);
+      expect(http.post).toHaveBeenCalledWith(accountId, {
+        url: `dfs/v1/projects/upload/${projectName}`,
+        timeout: 60_000,
+        data: {
+          file: formData,
+          uploadMessage,
+          platformVersion,
+          skipAutoDeploy: 'true',
+        },
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+    });
+
+    it('should include skipAutoDeploy in the v3 uploadRequest when true', async () => {
+      // @ts-expect-error Wants full axios response
+      httpPostMock.mockResolvedValue({
+        data: {
+          createdBuildId: 123,
+        },
+      });
+
+      const intermediateRepresentation = {
+        intermediateNodesIndexedByUid: {},
+      };
+
+      await uploadProject(
+        accountId,
+        projectName,
+        projectFile,
+        uploadMessage,
+        platformVersion,
+        intermediateRepresentation,
+        true
+      );
+      expect(http.post).toHaveBeenCalledTimes(1);
+      expect(http.post).toHaveBeenCalledWith(accountId, {
+        url: `project-components-external/v3/upload/new-api`,
+        timeout: 60_000,
+        data: {
+          projectFilesZip: formData,
+          platformVersion,
+          uploadRequest: JSON.stringify({
+            ...intermediateRepresentation,
+            projectName,
+            buildMessage: uploadMessage,
+            skipAutoDeploy: true,
           }),
         },
         headers: { 'Content-Type': 'multipart/form-data' },
