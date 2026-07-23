@@ -1,6 +1,35 @@
-import { getHubSpotApiOrigin } from '../urls.js';
+import { vi, MockedFunction } from 'vitest';
+import { getHubSpotApiOrigin, getBaseUrl } from '../urls.js';
+import { getConfigAccountEnvironment } from '../../config/index.js';
+
+vi.mock('../../config');
+
+const mockedGetConfigAccountEnvironment =
+  getConfigAccountEnvironment as MockedFunction<
+    typeof getConfigAccountEnvironment
+  >;
 
 describe('lib/urls', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  describe('getBaseUrl()', () => {
+    it('returns prod origin for prod accounts', () => {
+      mockedGetConfigAccountEnvironment.mockReturnValue('prod');
+
+      expect(getBaseUrl(123)).toBe('https://app.hubspot.com');
+      expect(getConfigAccountEnvironment).toHaveBeenCalledWith(123);
+    });
+
+    it('returns qa origin for qa accounts', () => {
+      mockedGetConfigAccountEnvironment.mockReturnValue('qa');
+
+      expect(getBaseUrl(456)).toBe('https://app.hubspotqa.com');
+      expect(getConfigAccountEnvironment).toHaveBeenCalledWith(456);
+    });
+  });
+
   describe('getHubSpotApiOrigin()', () => {
     // Suggestion taken from stack overflow https://stackoverflow.com/a/48042799
     const OLD_ENV = process.env;
