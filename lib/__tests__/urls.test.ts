@@ -1,5 +1,5 @@
 import { vi, MockedFunction } from 'vitest';
-import { getHubSpotApiOrigin, getBaseUrl } from '../urls.js';
+import { getHubSpotApiOrigin, getHubSpotWebsiteOriginByAccountId } from '../urls.js';
 import { getConfigAccountEnvironment } from '../../config/index.js';
 
 vi.mock('../../config');
@@ -14,18 +14,18 @@ describe('lib/urls', () => {
     vi.restoreAllMocks();
   });
 
-  describe('getBaseUrl()', () => {
+  describe('getHubSpotWebsiteOriginByAccountId()', () => {
     it('returns prod origin for prod accounts', () => {
       mockedGetConfigAccountEnvironment.mockReturnValue('prod');
 
-      expect(getBaseUrl(123)).toBe('https://app.hubspot.com');
+      expect(getHubSpotWebsiteOriginByAccountId(123)).toBe('https://app.hubspot.com');
       expect(getConfigAccountEnvironment).toHaveBeenCalledWith(123);
     });
 
     it('returns qa origin for qa accounts', () => {
       mockedGetConfigAccountEnvironment.mockReturnValue('qa');
 
-      expect(getBaseUrl(456)).toBe('https://app.hubspotqa.com');
+      expect(getHubSpotWebsiteOriginByAccountId(456)).toBe('https://app.hubspotqa.com');
       expect(getConfigAccountEnvironment).toHaveBeenCalledWith(456);
     });
   });

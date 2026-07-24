@@ -1,5 +1,5 @@
 import findup from 'findup-sync';
-import { getBaseUrl } from '../urls.js';
+import { getHubSpotWebsiteOriginByAccountId } from '../urls.js';
 
 export function getThemeJSONPath(path: string): string | null {
   return findup('theme.json', {
@@ -23,7 +23,7 @@ export function getThemePreviewUrl(
   const themeName = getThemeNameFromPath(filePath);
   if (!themeName) return;
 
-  const baseUrl = getBaseUrl(accountId);
+  const baseUrl = getHubSpotWebsiteOriginByAccountId(accountId);
 
   return `${baseUrl}/theme-previewer/${accountId}/edit/${encodeURIComponent(
     themeName

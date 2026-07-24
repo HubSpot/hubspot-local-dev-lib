@@ -1,13 +1,13 @@
 import findup from 'findup-sync';
 import { vi, MockedFunction } from 'vitest';
-import { getBaseUrl } from '../urls.js';
+import { getHubSpotWebsiteOriginByAccountId } from '../urls.js';
 import { getThemeJSONPath, getThemePreviewUrl } from '../cms/themes.js';
 
 vi.mock('findup-sync');
 vi.mock('../urls');
 
 const mockedFindup = findup as MockedFunction<typeof findup>;
-const mockedGetBaseUrl = getBaseUrl as MockedFunction<typeof getBaseUrl>;
+const mockedGetBaseUrl = getHubSpotWebsiteOriginByAccountId as MockedFunction<typeof getHubSpotWebsiteOriginByAccountId>;
 
 describe('lib/cms/themes', () => {
   describe('getThemeJSONPath', () => {
@@ -43,7 +43,7 @@ describe('lib/cms/themes', () => {
 
       const result = getThemePreviewUrl('/path/to/file', 12345);
 
-      expect(getBaseUrl).toHaveBeenCalledWith(12345);
+      expect(getHubSpotWebsiteOriginByAccountId).toHaveBeenCalledWith(12345);
       expect(result).toBe(
         'https://app.hubspot.com/theme-previewer/12345/edit/my-theme'
       );
@@ -55,7 +55,7 @@ describe('lib/cms/themes', () => {
 
       const result = getThemePreviewUrl('/path/to/file', 12345);
 
-      expect(getBaseUrl).toHaveBeenCalledWith(12345);
+      expect(getHubSpotWebsiteOriginByAccountId).toHaveBeenCalledWith(12345);
       expect(result).toBe(
         'https://app.hubspotqa.com/theme-previewer/12345/edit/my-theme'
       );

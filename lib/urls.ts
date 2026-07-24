@@ -12,7 +12,7 @@ function getEnvUrlString(env?: string): string {
 export const getHubSpotWebsiteOrigin = (env: string) =>
   `https://app.hubspot${getEnvUrlString(env)}.com`;
 
-export function getBaseUrl(accountId: number): string {
+export function getHubSpotWebsiteOriginByAccountId(accountId: number): string {
   return getHubSpotWebsiteOrigin(
     getConfigAccountEnvironment(accountId) === ENVIRONMENTS.QA
       ? ENVIRONMENTS.QA
