@@ -1,28 +1,13 @@
 import findup from 'findup-sync';
 import { vi, MockedFunction } from 'vitest';
-import { getHubSpotWebsiteOrigin } from '../urls.js';
+import { getHubSpotWebsiteOriginByAccountId } from '../urls.js';
 import { getThemeJSONPath, getThemePreviewUrl } from '../cms/themes.js';
-import { getConfigAccountEnvironment } from '../../config/index.js';
-import { ENVIRONMENTS } from '../../constants/environments.js';
 
 vi.mock('findup-sync');
 vi.mock('../urls');
-vi.mock('../../config');
-vi.mock('../../constants/environments', () => ({
-  ENVIRONMENTS: {
-    PROD: 'https://prod.hubspot.com',
-    QA: 'https://qa.hubspot.com',
-  },
-}));
 
 const mockedFindup = findup as MockedFunction<typeof findup>;
-const mockedGetConfigAccountEnvironment =
-  getConfigAccountEnvironment as MockedFunction<
-    typeof getConfigAccountEnvironment
-  >;
-const mockedGetHubSpotWebsiteOrigin = getHubSpotWebsiteOrigin as MockedFunction<
-  typeof getHubSpotWebsiteOrigin
->;
+const mockedGetBaseUrl = getHubSpotWebsiteOriginByAccountId as MockedFunction<typeof getHubSpotWebsiteOriginByAccountId>;
 
 describe('lib/cms/themes', () => {
   describe('getThemeJSONPath', () => {
@@ -54,29 +39,25 @@ describe('lib/cms/themes', () => {
   describe('getThemePreviewUrl', () => {
     it('should return the correct theme preview URL for PROD environment', () => {
       mockedFindup.mockReturnValue('/src/my-theme/theme.json');
-      mockedGetConfigAccountEnvironment.mockReturnValue('prod');
-      mockedGetHubSpotWebsiteOrigin.mockReturnValue('https://prod.hubspot.com');
+      mockedGetBaseUrl.mockReturnValue('https://app.hubspot.com');
 
       const result = getThemePreviewUrl('/path/to/file', 12345);
 
-      expect(getConfigAccountEnvironment).toHaveBeenCalledWith(12345);
-      expect(getHubSpotWebsiteOrigin).toHaveBeenCalledWith(ENVIRONMENTS.PROD);
+      expect(getHubSpotWebsiteOriginByAccountId).toHaveBeenCalledWith(12345);
       expect(result).toBe(
-        'https://prod.hubspot.com/theme-previewer/12345/edit/my-theme'
+        'https://app.hubspot.com/theme-previewer/12345/edit/my-theme'
       );
     });
 
     it('should return the correct theme preview URL for QA environment', () => {
       mockedFindup.mockReturnValue('/src/my-theme/theme.json');
-      mockedGetConfigAccountEnvironment.mockReturnValue('qa');
-      mockedGetHubSpotWebsiteOrigin.mockReturnValue('https://qa.hubspot.com');
+      mockedGetBaseUrl.mockReturnValue('https://app.hubspotqa.com');
 
       const result = getThemePreviewUrl('/path/to/file', 12345);
 
-      expect(getConfigAccountEnvironment).toHaveBeenCalledWith(12345);
-      expect(getHubSpotWebsiteOrigin).toHaveBeenCalledWith(ENVIRONMENTS.QA);
+      expect(getHubSpotWebsiteOriginByAccountId).toHaveBeenCalledWith(12345);
       expect(result).toBe(
-        'https://qa.hubspot.com/theme-previewer/12345/edit/my-theme'
+        'https://app.hubspotqa.com/theme-previewer/12345/edit/my-theme'
       );
     });
 

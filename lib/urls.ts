@@ -1,4 +1,5 @@
 import { ENVIRONMENTS } from '../constants/environments.js';
+import { getConfigAccountEnvironment } from '../config/index.js';
 
 function getEnvUrlString(env?: string): string {
   if (typeof env !== 'string') {
@@ -10,6 +11,14 @@ function getEnvUrlString(env?: string): string {
 
 export const getHubSpotWebsiteOrigin = (env: string) =>
   `https://app.hubspot${getEnvUrlString(env)}.com`;
+
+export function getHubSpotWebsiteOriginByAccountId(accountId: number): string {
+  return getHubSpotWebsiteOrigin(
+    getConfigAccountEnvironment(accountId) === ENVIRONMENTS.QA
+      ? ENVIRONMENTS.QA
+      : ENVIRONMENTS.PROD
+  );
+}
 
 export function getHubSpotApiOrigin(
   env?: string,
