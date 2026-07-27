@@ -1,5 +1,10 @@
 # hubspot/local-dev-lib
 
+[![npm version](https://img.shields.io/npm/v/@hubspot/local-dev-lib.svg)](https://www.npmjs.com/package/@hubspot/local-dev-lib)
+[![npm downloads](https://img.shields.io/npm/dm/@hubspot/local-dev-lib)](https://www.npmjs.com/package/@hubspot/local-dev-lib)
+[![npm license](https://img.shields.io/npm/l/@hubspot/local-dev-lib)](https://www.npmjs.com/package/@hubspot/local-dev-lib)
+[![node version](https://img.shields.io/node/v/@hubspot/local-dev-lib)](https://www.npmjs.com/package/@hubspot/local-dev-lib)
+
 Provides library functionality for HubSpot local development tooling, including the [HubSpot CLI](https://github.com/HubSpot/hubspot-cli).
 
 **NOTE:** This library is intended to replace the deprecated [@hubspot/cli-lib](https://github.com/HubSpot/cli-lib) library.
