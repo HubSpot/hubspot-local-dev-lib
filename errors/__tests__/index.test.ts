@@ -1,8 +1,10 @@
+import { AxiosError } from 'axios';
 import {
   isMissingScopeError,
   isGatingError,
   isSpecifiedError,
   isSystemError,
+  isGithubError,
 } from '../index.js';
 import { BaseError } from '../../types/Error.js';
 import { HubSpotHttpError } from '../../models/HubSpotHttpError.js';
@@ -169,6 +171,50 @@ describe('errors/errors', () => {
       expect(isSystemError(error1)).toBe(false);
       expect(isSystemError(error2)).toBe(false);
       expect(isSystemError(error3)).toBe(false);
+    });
+  });
+
+  describe('isGithubError()', () => {
+    it('returns true for a HubSpotHttpError with a GitHub request id header', () => {
+      const error = newHubSpotHttpError({
+        response: { status: 200, headers: { 'x-github-request-id': 'ABC' } },
+      });
+      expect(isGithubError(error)).toBe(true);
+    });
+
+    it('returns true for an AxiosError with a GitHub request id response header', () => {
+      const error = Object.assign(new AxiosError('Request failed'), {
+        response: { status: 403, headers: { 'x-github-request-id': 'ABC' } },
+      });
+      expect(isGithubError(error)).toBe(true);
+    });
+
+    it('returns true for an AxiosError whose request URL is a GitHub host', () => {
+      const error = Object.assign(new AxiosError('Network Error'), {
+        config: {
+          url: 'https://api.github.com/repos/HubSpot/example/zipball/main',
+        },
+      });
+      expect(isGithubError(error)).toBe(true);
+    });
+
+    it('returns false for a non-GitHub HubSpotHttpError', () => {
+      const error = newHubSpotHttpError({
+        response: { status: 403, headers: {} },
+      });
+      expect(isGithubError(error)).toBe(false);
+    });
+
+    it('returns false for a non-GitHub AxiosError', () => {
+      const error = Object.assign(new AxiosError('Server error'), {
+        response: { status: 500, headers: {} },
+        config: { url: 'https://api.hubapi.com/foo' },
+      });
+      expect(isGithubError(error)).toBe(false);
+    });
+
+    it('returns false for a plain error', () => {
+      expect(isGithubError(new Error('nope'))).toBe(false);
     });
   });
 });

@@ -1,3 +1,4 @@
+import { AxiosError } from 'axios';
 import {
   HubSpotHttpError,
   HubSpotHttpErrorName,
@@ -90,6 +91,24 @@ export function isGithubRateLimitError(err: unknown): err is HubSpotHttpError {
     err.headers['x-ratelimit-remaining'] === '0' &&
     'x-github-request-id' in err.headers
   );
+}
+
+export function isGithubError(err: unknown): boolean {
+  if (isHubSpotHttpError(err)) {
+    return !!err.headers && 'x-github-request-id' in err.headers;
+  }
+  if (err instanceof AxiosError) {
+    const headers = err.response?.headers;
+    if (headers && 'x-github-request-id' in headers) {
+      return true;
+    }
+    const url = err.config?.url;
+    return (
+      typeof url === 'string' &&
+      (url.includes('github.com') || url.includes('githubusercontent.com'))
+    );
+  }
+  return false;
 }
 
 export function isFileSystemError(err: unknown): err is FileSystemError {
