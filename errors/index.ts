@@ -1,4 +1,4 @@
-import { AxiosError } from 'axios';
+import { isAxiosError } from 'axios';
 import {
   HubSpotHttpError,
   HubSpotHttpErrorName,
@@ -97,7 +97,7 @@ export function isGithubError(err: unknown): boolean {
   if (isHubSpotHttpError(err)) {
     return !!err.headers && 'x-github-request-id' in err.headers;
   }
-  if (err instanceof AxiosError) {
+  if (isAxiosError(err)) {
     const headers = err.response?.headers;
     if (headers && 'x-github-request-id' in headers) {
       return true;
