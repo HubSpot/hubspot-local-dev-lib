@@ -7,7 +7,9 @@ vi.mock('findup-sync');
 vi.mock('../urls');
 
 const mockedFindup = findup as MockedFunction<typeof findup>;
-const mockedGetBaseUrl = getHubSpotWebsiteOriginByAccountId as MockedFunction<typeof getHubSpotWebsiteOriginByAccountId>;
+const mockedGetBaseUrl = getHubSpotWebsiteOriginByAccountId as MockedFunction<
+  typeof getHubSpotWebsiteOriginByAccountId
+>;
 
 describe('lib/cms/themes', () => {
   describe('getThemeJSONPath', () => {

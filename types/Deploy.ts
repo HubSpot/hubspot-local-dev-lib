@@ -10,8 +10,7 @@ export type SubdeployStatus = {
   action: ValueOf<typeof DEPLOY_ACTION>;
   deployName: string;
   deployType:
-    | ValueOf<typeof COMPONENT_TYPES>
-    | ValueOf<typeof SUBCOMPONENT_TYPES>;
+    ValueOf<typeof COMPONENT_TYPES> | ValueOf<typeof SUBCOMPONENT_TYPES>;
   errorMessage: string;
   finishedAt: string;
   standardError: ProjectStandardError | null;
@@ -58,8 +57,7 @@ export type ProjectDeployResponseBlocked = {
 };
 
 export type ProjectDeployResponse =
-  | ProjectDeployResponseQueued
-  | ProjectDeployResponseBlocked;
+  ProjectDeployResponseQueued | ProjectDeployResponseBlocked;
 
 export type ProjectDeployResponseV1 = {
   id: string;

@@ -306,8 +306,7 @@ export function getConfigDefaultAccount(): HubSpotConfigAccount {
 }
 
 export function getConfigDefaultAccountIfExists():
-  | HubSpotConfigAccount
-  | undefined {
+  HubSpotConfigAccount | undefined {
   const { accounts, defaultAccount } = getConfig();
 
   let defaultAccountToUse = defaultAccount;
