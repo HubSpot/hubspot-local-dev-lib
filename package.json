@@ -96,7 +96,4 @@
   "engines": {
     "node": ">=20.0.0"
   },
-  "resolutions": {
-    "qs": "6.15.2"
-  }
 }
