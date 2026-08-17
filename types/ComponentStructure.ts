@@ -35,7 +35,8 @@ export interface PrivateAppComponentMetadata extends TopLevelComponent {
 }
 
 export type TopLevelComponents =
-  PrivateAppComponentMetadata | TopLevelComponent;
+  | PrivateAppComponentMetadata
+  | TopLevelComponent;
 
 export interface FeatureComponent<T = unknown> extends ComponentMetadata<
   ValueOf<typeof SUBCOMPONENT_TYPES>

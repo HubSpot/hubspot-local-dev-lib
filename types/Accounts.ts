@@ -58,7 +58,9 @@ export interface APIKeyConfigAccount extends BaseHubSpotConfigAccount {
 }
 
 export type HubSpotConfigAccount =
-  PersonalAccessKeyConfigAccount | OAuthConfigAccount | APIKeyConfigAccount;
+  | PersonalAccessKeyConfigAccount
+  | OAuthConfigAccount
+  | APIKeyConfigAccount;
 
 export type ScopeData = {
   portalScopesInGroup: Array<string>;
