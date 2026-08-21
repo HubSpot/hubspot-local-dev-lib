@@ -82,10 +82,6 @@ export function isHubSpotHttpError(error?: unknown): error is HubSpotHttpError {
   );
 }
 
-// GitHub error guards accept both a raw error and one wrapped via
-// `new Error(message, { cause })`, because this library re-throws GitHub
-// failures wrapped that way (see lib/github.ts). They also handle both
-// HubSpotHttpError and raw AxiosError shapes so consumers don't have to.
 export function isGithubRateLimitError(err: unknown): boolean {
   return (
     hasGithubRateLimitSignal(err) ||
@@ -137,9 +133,6 @@ function hasGithubErrorSignal(err: unknown): boolean {
   return false;
 }
 
-// Extracts the HTTP status from HubSpotHttpError or AxiosError, unwrapping a
-// wrapped `cause` so consumers can classify failures without knowing whether
-// the error was re-thrown by this library.
 export function getHttpStatusFromError(err: unknown): number | undefined {
   const status = getStatusCode(err);
   if (status !== undefined) {
