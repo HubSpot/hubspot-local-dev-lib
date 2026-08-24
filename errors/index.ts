@@ -82,7 +82,18 @@ export function isHubSpotHttpError(error?: unknown): error is HubSpotHttpError {
   );
 }
 
-export function isGithubRateLimitError(err: unknown): boolean {
+export function isGithubRateLimitError(err: unknown): err is HubSpotHttpError {
+  if (!isHubSpotHttpError(err)) {
+    return false;
+  }
+  return (
+    !!err.headers &&
+    err.headers['x-ratelimit-remaining'] === '0' &&
+    'x-github-request-id' in err.headers
+  );
+}
+
+export function hasGithubRateLimitError(err: unknown): boolean {
   return (
     hasGithubRateLimitSignal(err) ||
     (err instanceof Error && hasGithubRateLimitSignal(err.cause))
@@ -90,12 +101,8 @@ export function isGithubRateLimitError(err: unknown): boolean {
 }
 
 function hasGithubRateLimitSignal(err: unknown): boolean {
-  if (isHubSpotHttpError(err)) {
-    return (
-      !!err.headers &&
-      err.headers['x-ratelimit-remaining'] === '0' &&
-      'x-github-request-id' in err.headers
-    );
+  if (isGithubRateLimitError(err)) {
+    return true;
   }
   if (isAxiosError(err)) {
     const headers = err.response?.headers;

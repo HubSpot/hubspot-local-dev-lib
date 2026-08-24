@@ -6,6 +6,7 @@ import {
   isSystemError,
   isGithubError,
   isGithubRateLimitError,
+  hasGithubRateLimitError,
   getHttpStatusFromError,
 } from '../index.js';
 import { BaseError } from '../../types/Error.js';
@@ -249,6 +250,62 @@ describe('errors/errors', () => {
       expect(isGithubRateLimitError(error)).toBe(true);
     });
 
+    it('returns false for a HubSpotHttpError without rate-limit headers', () => {
+      const error = newHubSpotHttpError({
+        response: { status: 403, headers: { 'x-github-request-id': 'ABC' } },
+      });
+      expect(isGithubRateLimitError(error)).toBe(false);
+    });
+
+    it('returns false for a rate-limited AxiosError (predicate matches only HubSpotHttpError)', () => {
+      const error = Object.assign(new AxiosError('Request failed'), {
+        response: {
+          status: 403,
+          headers: {
+            'x-ratelimit-remaining': '0',
+            'x-github-request-id': 'ABC',
+          },
+        },
+      });
+      expect(isGithubRateLimitError(error)).toBe(false);
+    });
+
+    it('returns false when the rate-limit signal is only on error.cause', () => {
+      const cause = newHubSpotHttpError({
+        response: {
+          status: 403,
+          headers: {
+            'x-ratelimit-remaining': '0',
+            'x-github-request-id': 'ABC',
+          },
+        },
+      });
+      const wrapped = new Error('An error occurred fetching the source.', {
+        cause,
+      });
+      expect(isGithubRateLimitError(wrapped)).toBe(false);
+    });
+
+    it('returns false for null or undefined', () => {
+      expect(isGithubRateLimitError(null)).toBe(false);
+      expect(isGithubRateLimitError(undefined)).toBe(false);
+    });
+  });
+
+  describe('hasGithubRateLimitError()', () => {
+    it('returns true for a HubSpotHttpError with rate-limit headers', () => {
+      const error = newHubSpotHttpError({
+        response: {
+          status: 403,
+          headers: {
+            'x-ratelimit-remaining': '0',
+            'x-github-request-id': 'ABC',
+          },
+        },
+      });
+      expect(hasGithubRateLimitError(error)).toBe(true);
+    });
+
     it('returns true for an AxiosError with rate-limit response headers', () => {
       const error = Object.assign(new AxiosError('Request failed'), {
         response: {
@@ -259,7 +316,7 @@ describe('errors/errors', () => {
           },
         },
       });
-      expect(isGithubRateLimitError(error)).toBe(true);
+      expect(hasGithubRateLimitError(error)).toBe(true);
     });
 
     it('returns true when a rate-limit error is wrapped in error.cause', () => {
@@ -275,7 +332,7 @@ describe('errors/errors', () => {
       const wrapped = new Error('An error occurred fetching the source.', {
         cause,
       });
-      expect(isGithubRateLimitError(wrapped)).toBe(true);
+      expect(hasGithubRateLimitError(wrapped)).toBe(true);
     });
 
     it('returns false for a GitHub error that is not rate limited', () => {
@@ -285,7 +342,7 @@ describe('errors/errors', () => {
           headers: { 'x-github-request-id': 'ABC' },
         },
       });
-      expect(isGithubRateLimitError(error)).toBe(false);
+      expect(hasGithubRateLimitError(error)).toBe(false);
     });
 
     it('returns false when the request id header is missing', () => {
@@ -295,12 +352,12 @@ describe('errors/errors', () => {
           headers: { 'x-ratelimit-remaining': '0' },
         },
       });
-      expect(isGithubRateLimitError(error)).toBe(false);
+      expect(hasGithubRateLimitError(error)).toBe(false);
     });
 
     it('returns false for null or undefined', () => {
-      expect(isGithubRateLimitError(null)).toBe(false);
-      expect(isGithubRateLimitError(undefined)).toBe(false);
+      expect(hasGithubRateLimitError(null)).toBe(false);
+      expect(hasGithubRateLimitError(undefined)).toBe(false);
     });
   });
 
