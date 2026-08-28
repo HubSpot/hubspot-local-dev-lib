@@ -5,6 +5,9 @@ import {
   isSpecifiedError,
   isSystemError,
   isGithubError,
+  isGithubRateLimitError,
+  hasGithubRateLimitError,
+  getHttpStatusFromError,
 } from '../index.js';
 import { BaseError } from '../../types/Error.js';
 import { HubSpotHttpError } from '../../models/HubSpotHttpError.js';
@@ -213,8 +216,183 @@ describe('errors/errors', () => {
       expect(isGithubError(error)).toBe(false);
     });
 
+    it('returns true when the GitHub error is wrapped in error.cause', () => {
+      const cause = Object.assign(new AxiosError('Request failed'), {
+        response: { status: 403, headers: { 'x-github-request-id': 'ABC' } },
+      });
+      const wrapped = new Error('An error occurred fetching the source.', {
+        cause,
+      });
+      expect(isGithubError(wrapped)).toBe(true);
+    });
+
     it('returns false for a plain error', () => {
       expect(isGithubError(new Error('nope'))).toBe(false);
+    });
+
+    it('returns false for null or undefined', () => {
+      expect(isGithubError(null)).toBe(false);
+      expect(isGithubError(undefined)).toBe(false);
+    });
+  });
+
+  describe('isGithubRateLimitError()', () => {
+    it('returns true for a HubSpotHttpError with rate-limit headers', () => {
+      const error = newHubSpotHttpError({
+        response: {
+          status: 403,
+          headers: {
+            'x-ratelimit-remaining': '0',
+            'x-github-request-id': 'ABC',
+          },
+        },
+      });
+      expect(isGithubRateLimitError(error)).toBe(true);
+    });
+
+    it('returns false for a HubSpotHttpError without rate-limit headers', () => {
+      const error = newHubSpotHttpError({
+        response: { status: 403, headers: { 'x-github-request-id': 'ABC' } },
+      });
+      expect(isGithubRateLimitError(error)).toBe(false);
+    });
+
+    it('returns false for a rate-limited AxiosError (predicate matches only HubSpotHttpError)', () => {
+      const error = Object.assign(new AxiosError('Request failed'), {
+        response: {
+          status: 403,
+          headers: {
+            'x-ratelimit-remaining': '0',
+            'x-github-request-id': 'ABC',
+          },
+        },
+      });
+      expect(isGithubRateLimitError(error)).toBe(false);
+    });
+
+    it('returns false when the rate-limit signal is only on error.cause', () => {
+      const cause = newHubSpotHttpError({
+        response: {
+          status: 403,
+          headers: {
+            'x-ratelimit-remaining': '0',
+            'x-github-request-id': 'ABC',
+          },
+        },
+      });
+      const wrapped = new Error('An error occurred fetching the source.', {
+        cause,
+      });
+      expect(isGithubRateLimitError(wrapped)).toBe(false);
+    });
+
+    it('returns false for null or undefined', () => {
+      expect(isGithubRateLimitError(null)).toBe(false);
+      expect(isGithubRateLimitError(undefined)).toBe(false);
+    });
+  });
+
+  describe('hasGithubRateLimitError()', () => {
+    it('returns true for a HubSpotHttpError with rate-limit headers', () => {
+      const error = newHubSpotHttpError({
+        response: {
+          status: 403,
+          headers: {
+            'x-ratelimit-remaining': '0',
+            'x-github-request-id': 'ABC',
+          },
+        },
+      });
+      expect(hasGithubRateLimitError(error)).toBe(true);
+    });
+
+    it('returns true for an AxiosError with rate-limit response headers', () => {
+      const error = Object.assign(new AxiosError('Request failed'), {
+        response: {
+          status: 403,
+          headers: {
+            'x-ratelimit-remaining': '0',
+            'x-github-request-id': 'ABC',
+          },
+        },
+      });
+      expect(hasGithubRateLimitError(error)).toBe(true);
+    });
+
+    it('returns true when a rate-limit error is wrapped in error.cause', () => {
+      const cause = Object.assign(new AxiosError('Request failed'), {
+        response: {
+          status: 403,
+          headers: {
+            'x-ratelimit-remaining': '0',
+            'x-github-request-id': 'ABC',
+          },
+        },
+      });
+      const wrapped = new Error('An error occurred fetching the source.', {
+        cause,
+      });
+      expect(hasGithubRateLimitError(wrapped)).toBe(true);
+    });
+
+    it('returns false for a GitHub error that is not rate limited', () => {
+      const error = Object.assign(new AxiosError('Server error'), {
+        response: {
+          status: 500,
+          headers: { 'x-github-request-id': 'ABC' },
+        },
+      });
+      expect(hasGithubRateLimitError(error)).toBe(false);
+    });
+
+    it('returns false when the request id header is missing', () => {
+      const error = Object.assign(new AxiosError('Request failed'), {
+        response: {
+          status: 403,
+          headers: { 'x-ratelimit-remaining': '0' },
+        },
+      });
+      expect(hasGithubRateLimitError(error)).toBe(false);
+    });
+
+    it('returns false for null or undefined', () => {
+      expect(hasGithubRateLimitError(null)).toBe(false);
+      expect(hasGithubRateLimitError(undefined)).toBe(false);
+    });
+  });
+
+  describe('getHttpStatusFromError()', () => {
+    it('returns the status from a HubSpotHttpError', () => {
+      const error = newHubSpotHttpError({
+        response: { status: 404, headers: {} },
+      });
+      expect(getHttpStatusFromError(error)).toBe(404);
+    });
+
+    it('returns the status from an AxiosError response', () => {
+      const error = Object.assign(new AxiosError('Not found'), {
+        response: { status: 404, headers: {} },
+      });
+      expect(getHttpStatusFromError(error)).toBe(404);
+    });
+
+    it('returns the status from an AxiosError wrapped in error.cause', () => {
+      const cause = Object.assign(new AxiosError('Not found'), {
+        response: { status: 404, headers: {} },
+      });
+      const wrapped = new Error('An error occurred fetching the source.', {
+        cause,
+      });
+      expect(getHttpStatusFromError(wrapped)).toBe(404);
+    });
+
+    it('returns undefined for an error with no status', () => {
+      expect(getHttpStatusFromError(new Error('plain'))).toBeUndefined();
+    });
+
+    it('returns undefined for null or undefined', () => {
+      expect(getHttpStatusFromError(null)).toBeUndefined();
+      expect(getHttpStatusFromError(undefined)).toBeUndefined();
     });
   });
 });
