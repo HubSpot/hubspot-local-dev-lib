@@ -82,6 +82,7 @@ export const STATE_FLAGS = {
   MCP_PROMOTION_LAST_SHOWN_AT: 'mcpPromotionLastShownAt',
   USAGE_TRACKING_MESSAGE_LAST_SHOW_VERSION:
     'usageTrackingMessageLastShowVersion',
+  LAST_DEPRECATION_WARNING_SHOWN: 'lastDeprecationWarningShown',
 } as const;
 
 export const CONFIG_FLAGS = {

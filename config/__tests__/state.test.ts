@@ -234,6 +234,29 @@ describe('config/state', () => {
       expect(result).toBe(promotionLastShownAt);
     });
 
+    it('returns default value for last deprecation warning shown', () => {
+      existsSyncSpy.mockReturnValue(false);
+
+      expect(
+        getStateValue(STATE_FLAGS.LAST_DEPRECATION_WARNING_SHOWN)
+      ).toBeUndefined();
+    });
+
+    it('returns last deprecation warning shown from state file', () => {
+      const lastDeprecationWarningShown = '2026-06-16T20:59:14.493Z';
+      existsSyncSpy.mockReturnValue(true);
+      readFileSyncSpy.mockReturnValue(
+        JSON.stringify({
+          mcpTotalToolCalls: 0,
+          lastDeprecationWarningShown,
+        })
+      );
+
+      const result = getStateValue(STATE_FLAGS.LAST_DEPRECATION_WARNING_SHOWN);
+
+      expect(result).toBe(lastDeprecationWarningShown);
+    });
+
     it('returns default state when JSON parses to an array', () => {
       existsSyncSpy.mockReturnValue(true);
       readFileSyncSpy.mockReturnValue(JSON.stringify([1, 2, 3]));
@@ -409,6 +432,25 @@ describe('config/state', () => {
       const result = getStateValue(STATE_FLAGS.MCP_PROMOTION_LAST_SHOWN_AT);
 
       expect(result).toBe(promotionLastShownAt);
+    });
+
+    it('round trips last deprecation warning shown', () => {
+      const lastDeprecationWarningShown = '2026-06-16T20:59:14.493Z';
+      existsSyncSpy.mockReturnValue(false);
+      writeFileSyncSpy.mockImplementation(() => undefined);
+
+      setStateValue(
+        STATE_FLAGS.LAST_DEPRECATION_WARNING_SHOWN,
+        lastDeprecationWarningShown
+      );
+
+      const written = writeFileSyncSpy.mock.calls[0][1];
+      existsSyncSpy.mockReturnValue(true);
+      readFileSyncSpy.mockReturnValue(written);
+
+      const result = getStateValue(STATE_FLAGS.LAST_DEPRECATION_WARNING_SHOWN);
+
+      expect(result).toBe(lastDeprecationWarningShown);
     });
 
     it('drops unknown keys when writing state', () => {
