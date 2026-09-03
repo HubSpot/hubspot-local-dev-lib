@@ -45,6 +45,7 @@ export type HubSpotState = {
   [STATE_FLAGS.MCP_TOTAL_TOOL_CALLS]: number;
   [STATE_FLAGS.MCP_PROMOTION_LAST_SHOWN_AT]?: string;
   [STATE_FLAGS.USAGE_TRACKING_MESSAGE_LAST_SHOW_VERSION]?: string;
+  [STATE_FLAGS.LAST_DEPRECATION_WARNING_SHOWN]?: string;
 };
 
 export type HubSpotConfigErrorType = ValueOf<typeof HUBSPOT_CONFIG_ERROR_TYPES>;
