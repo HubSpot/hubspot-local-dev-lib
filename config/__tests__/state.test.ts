@@ -234,6 +234,57 @@ describe('config/state', () => {
       expect(result).toBe(promotionLastShownAt);
     });
 
+    it('returns default value for last deprecation warning shown', () => {
+      existsSyncSpy.mockReturnValue(false);
+
+      expect(
+        getStateValue(STATE_FLAGS.CLI_VERSION_DEPRECATION_WARNING_LAST_SHOWN_AT)
+      ).toBeUndefined();
+    });
+
+    it('returns last deprecation warning shown from state file', () => {
+      const cliVersionDeprecationWarningLastShownAt =
+        '2026-06-16T20:59:14.493Z';
+      existsSyncSpy.mockReturnValue(true);
+      readFileSyncSpy.mockReturnValue(
+        JSON.stringify({
+          mcpTotalToolCalls: 0,
+          cliVersionDeprecationWarningLastShownAt,
+        })
+      );
+
+      const result = getStateValue(
+        STATE_FLAGS.CLI_VERSION_DEPRECATION_WARNING_LAST_SHOWN_AT
+      );
+
+      expect(result).toBe(cliVersionDeprecationWarningLastShownAt);
+    });
+
+    it('returns default value for last end of life warning shown', () => {
+      existsSyncSpy.mockReturnValue(false);
+
+      expect(
+        getStateValue(STATE_FLAGS.CLI_VERSION_END_OF_LIFE_WARNING_LAST_SHOWN_AT)
+      ).toBeUndefined();
+    });
+
+    it('returns last end of life warning shown from state file', () => {
+      const cliVersionEndOfLifeWarningLastShownAt = '2026-06-16T20:59:14.493Z';
+      existsSyncSpy.mockReturnValue(true);
+      readFileSyncSpy.mockReturnValue(
+        JSON.stringify({
+          mcpTotalToolCalls: 0,
+          cliVersionEndOfLifeWarningLastShownAt,
+        })
+      );
+
+      const result = getStateValue(
+        STATE_FLAGS.CLI_VERSION_END_OF_LIFE_WARNING_LAST_SHOWN_AT
+      );
+
+      expect(result).toBe(cliVersionEndOfLifeWarningLastShownAt);
+    });
+
     it('returns default state when JSON parses to an array', () => {
       existsSyncSpy.mockReturnValue(true);
       readFileSyncSpy.mockReturnValue(JSON.stringify([1, 2, 3]));
@@ -409,6 +460,49 @@ describe('config/state', () => {
       const result = getStateValue(STATE_FLAGS.MCP_PROMOTION_LAST_SHOWN_AT);
 
       expect(result).toBe(promotionLastShownAt);
+    });
+
+    it('round trips last deprecation warning shown', () => {
+      const cliVersionDeprecationWarningLastShownAt =
+        '2026-06-16T20:59:14.493Z';
+      existsSyncSpy.mockReturnValue(false);
+      writeFileSyncSpy.mockImplementation(() => undefined);
+
+      setStateValue(
+        STATE_FLAGS.CLI_VERSION_DEPRECATION_WARNING_LAST_SHOWN_AT,
+        cliVersionDeprecationWarningLastShownAt
+      );
+
+      const written = writeFileSyncSpy.mock.calls[0][1];
+      existsSyncSpy.mockReturnValue(true);
+      readFileSyncSpy.mockReturnValue(written);
+
+      const result = getStateValue(
+        STATE_FLAGS.CLI_VERSION_DEPRECATION_WARNING_LAST_SHOWN_AT
+      );
+
+      expect(result).toBe(cliVersionDeprecationWarningLastShownAt);
+    });
+
+    it('round trips last end of life warning shown', () => {
+      const cliVersionEndOfLifeWarningLastShownAt = '2026-06-16T20:59:14.493Z';
+      existsSyncSpy.mockReturnValue(false);
+      writeFileSyncSpy.mockImplementation(() => undefined);
+
+      setStateValue(
+        STATE_FLAGS.CLI_VERSION_END_OF_LIFE_WARNING_LAST_SHOWN_AT,
+        cliVersionEndOfLifeWarningLastShownAt
+      );
+
+      const written = writeFileSyncSpy.mock.calls[0][1];
+      existsSyncSpy.mockReturnValue(true);
+      readFileSyncSpy.mockReturnValue(written);
+
+      const result = getStateValue(
+        STATE_FLAGS.CLI_VERSION_END_OF_LIFE_WARNING_LAST_SHOWN_AT
+      );
+
+      expect(result).toBe(cliVersionEndOfLifeWarningLastShownAt);
     });
 
     it('drops unknown keys when writing state', () => {
