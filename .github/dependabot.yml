@@ -22,10 +22,10 @@ updates:
         update-types:
           - "version-update:semver-major"
     groups:
-      hubspot-libraries:
+      hubspot-dependencies:
         patterns:
           - "@hubspot/*"
-      minor-and-patch:
+      external-dependencies:
         patterns:
           - "*"
         exclude-patterns:
