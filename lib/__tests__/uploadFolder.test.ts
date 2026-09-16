@@ -45,25 +45,27 @@ const cleanupTmpDirSync = __cleanupTmpDirSync as MockedFunction<
 //folder/fields.js -> folder/fields.converted.js
 // We add the .converted to differentiate from a unconverted fields.json
 const mockSaveOutput = vi.fn();
-const defaultFieldsJsImplementation = vi.fn(
-  (src: string, filePath: string, rootWriteDir: string | undefined | null) => {
-    const outputPath =
-      filePath.substring(0, filePath.lastIndexOf('.')) + '.converted.json';
-    const instance = {
-      projectDir: src,
-      filePath,
-      rootWriteDir,
-      rejected: false,
-      fieldOptions: '',
-      outputPath,
-      saveOutput: mockSaveOutput,
-    };
-    return {
-      ...instance,
-      init: vi.fn().mockReturnValue(instance),
-    };
-  }
-);
+const defaultFieldsJsImplementation = vi.fn(function (
+  src: string,
+  filePath: string,
+  rootWriteDir: string | undefined | null
+) {
+  const outputPath =
+    filePath.substring(0, filePath.lastIndexOf('.')) + '.converted.json';
+  const instance = {
+    projectDir: src,
+    filePath,
+    rootWriteDir,
+    rejected: false,
+    fieldOptions: '',
+    outputPath,
+    saveOutput: mockSaveOutput,
+  };
+  return {
+    ...instance,
+    init: vi.fn().mockReturnValue(instance),
+  };
+});
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (FieldsJs as any).mockImplementation(defaultFieldsJsImplementation);
 
