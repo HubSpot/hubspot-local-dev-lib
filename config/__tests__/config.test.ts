@@ -488,10 +488,6 @@ describe('config/index', () => {
         ...CONFIG,
         accounts: [PAK_ACCOUNT, OAUTH_ACCOUNT, API_KEY_ACCOUNT],
       });
-      mockGetHsSettingsFile.mockReturnValueOnce({
-        localDefaultAccount: OAUTH_ACCOUNT.accountId,
-        accounts: [OAUTH_ACCOUNT.accountId],
-      });
 
       expect(getAllConfigAccounts()).toEqual([
         PAK_ACCOUNT,

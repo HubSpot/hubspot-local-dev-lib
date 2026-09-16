@@ -27,16 +27,20 @@ vi.mock('../../lib/logger');
 
 vi.mock('http', () => ({
   default: {
-    Agent: vi.fn().mockReturnValue({
-      options: { keepAlive: true, maxSockets: 5, maxTotalSockets: 25 },
+    Agent: vi.fn().mockImplementation(function () {
+      return {
+        options: { keepAlive: true, maxSockets: 5, maxTotalSockets: 25 },
+      };
     }),
   },
 }));
 
 vi.mock('https', () => ({
   default: {
-    Agent: vi.fn().mockReturnValue({
-      options: { keepAlive: true, maxSockets: 6, maxTotalSockets: 26 },
+    Agent: vi.fn().mockImplementation(function () {
+      return {
+        options: { keepAlive: true, maxSockets: 6, maxTotalSockets: 26 },
+      };
     }),
   },
 }));
