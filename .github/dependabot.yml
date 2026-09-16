@@ -1,0 +1,50 @@
+version: 2
+# Routine updates never include major versions: majors are breaking and cannot
+# be merged without additional work, so they are handled manually. The
+# `version-update:semver-major` ignore below applies only to version updates;
+# Dependabot security updates are exempt from update-types ignores, so a major
+# bump can still be proposed when it is required to fix a vulnerability.
+updates:
+  # Root library package. A committed yarn.lock lets Dependabot see the full
+  # transitive graph, so security and version updates cover nested deps, not
+  # just direct ones.
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    # Wait before proposing newly published versions; a fresh release can be
+    # malicious or unstable (supply-chain hardening).
+    cooldown:
+      default-days: 7
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - "version-update:semver-major"
+    groups:
+      hubspot-libraries:
+        patterns:
+          - "@hubspot/*"
+      minor-and-patch:
+        patterns:
+          - "*"
+        exclude-patterns:
+          - "@hubspot/*"
+        update-types:
+          - "minor"
+          - "patch"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 7
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - "version-update:semver-major"
+    groups:
+      github-actions:
+        patterns:
+          - "*"
