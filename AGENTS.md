@@ -121,7 +121,6 @@ Portable project skills are exposed under `.agents/skills/`. When a task matches
 
 - `code-check`: review branch changes against repo conventions.
 - `push-changes`: run pre-commit checks, commit, and push to remote.
-- `create-pull-request`: commit, push, and create a draft PR.
 
 Claude-specific skills and orchestration workflows may still live only under `.claude/skills/`.
 
