@@ -13,6 +13,11 @@ export const PERSONAL_ACCESS_KEY_AUTH_METHOD = {
   name: 'Personal Access Key',
 } as const;
 
+export const ACCESS_TOKEN_AUTH_METHOD = {
+  value: 'accesstoken',
+  name: 'Access Token',
+} as const;
+
 export const DEFAULT_OAUTH_SCOPES = ['content'] as const;
 
 export const OAUTH_SCOPES = [

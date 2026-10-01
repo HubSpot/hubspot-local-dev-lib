@@ -73,6 +73,14 @@
         "invalidJsonFile": "The '{{{ src }}' path is not a path to a file"
       }
     },
+    "accessToken": {
+      "errors": {
+        "accountNotFound": "Account with id {{ accountId }} does not exist.",
+        "invalidAuthType": "Error fetching access token: account {{ accountId }} uses an auth type other than accesstoken",
+        "missingAccessToken": "Account {{ accountId }} is missing an access token",
+        "expired": "The access token for account {{ accountId }} expired at {{ expiresAt }}. It cannot be refreshed; provide a new token."
+      }
+    },
     "personalAccessKey": {
       "errors": {
         "accountNotFound": "Account with id {{ accountId }} does not exist.",
@@ -306,7 +314,8 @@
         "missingAccountId": "At least one account in config is missing accountId",
         "missingApiKey": "Account {{ accountId }} has authType of apikey but is missing the apiKey field",
         "missingAuth": "Account {{ accountId }} has authtype of oauth2 but is missing auth data",
-        "missingPersonalAccessKey": "Account {{ accountId }} has authType of personalAccessKey but is missing the personalAccessKey field"
+        "missingPersonalAccessKey": "Account {{ accountId }} has authType of personalAccessKey but is missing the personalAccessKey field",
+        "missingAccessToken": "Account {{ accountId }} has authType of accesstoken but is missing the auth.tokenInfo.accessToken field"
       },
       "getConfigPathEnvironmentVariables": {
         "invalidEnvironmentVariables": "USE_ENVIRONMENT_HUBSPOT_CONFIG and HUBSPOT_CONFIG_PATH cannot both be set simultaneously"
@@ -316,7 +325,7 @@
       },
       "buildConfigFromEnvironment": {
         "missingAccountId": "HUBSPOT_ACCOUNT_ID is required, but not currently set",
-        "invalidAuthType": "Auth type is invalid. Use HUBSPOT_CLIENT_ID, HUBSPOT_CLIENT_SECRET, and HUBSPOT_REFRESH_TOKEN to authenticate with Oauth2, HUBSPOT_PERSONAL_ACCESS_KEY to authenticate with Personal Access Key, or API_KEY to authenticate with API Key."
+        "invalidAuthType": "Auth type is invalid. Use HUBSPOT_CLIENT_ID, HUBSPOT_CLIENT_SECRET, and HUBSPOT_REFRESH_TOKEN to authenticate with Oauth2, HUBSPOT_PERSONAL_ACCESS_KEY to authenticate with Personal Access Key, HUBSPOT_ACCESS_TOKEN to authenticate with a pre-issued Access Token, or API_KEY to authenticate with API Key."
       }
     },
     "defaultAccountOverride": {
