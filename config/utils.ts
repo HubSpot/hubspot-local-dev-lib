@@ -14,6 +14,7 @@ import {
   PERSONAL_ACCESS_KEY_AUTH_METHOD,
   API_KEY_AUTH_METHOD,
   OAUTH_AUTH_METHOD,
+  ACCESS_TOKEN_AUTH_METHOD,
   OAUTH_SCOPES,
 } from '../constants/auth.js';
 import {
@@ -315,6 +316,9 @@ export function buildConfigFromEnvironment(): HubSpotConfig {
   const clientSecret = process.env[ENVIRONMENT_VARIABLES.HUBSPOT_CLIENT_SECRET];
   const personalAccessKey =
     process.env[ENVIRONMENT_VARIABLES.HUBSPOT_PERSONAL_ACCESS_KEY];
+  const accessToken = process.env[ENVIRONMENT_VARIABLES.HUBSPOT_ACCESS_TOKEN];
+  const accessTokenExpiresAt =
+    process.env[ENVIRONMENT_VARIABLES.HUBSPOT_ACCESS_TOKEN_EXPIRES_AT];
   const accountIdVar =
     process.env[ENVIRONMENT_VARIABLES.HUBSPOT_ACCOUNT_ID] ||
     process.env[ENVIRONMENT_VARIABLES.HUBSPOT_PORTAL_ID];
@@ -355,7 +359,20 @@ export function buildConfigFromEnvironment(): HubSpotConfig {
 
   let account: HubSpotConfigAccount;
 
-  if (personalAccessKey) {
+  if (accessToken) {
+    account = {
+      authType: ACCESS_TOKEN_AUTH_METHOD.value,
+      accountId,
+      env,
+      name: accountIdVar,
+      auth: {
+        tokenInfo: {
+          accessToken,
+          expiresAt: accessTokenExpiresAt,
+        },
+      },
+    };
+  } else if (personalAccessKey) {
     account = {
       authType: PERSONAL_ACCESS_KEY_AUTH_METHOD.value,
       accountId,
@@ -501,6 +518,19 @@ export function validateConfigAccount(
     if (!isValidPersonalAccessKeyAccount) {
       validationErrors.push(
         i18n('config.utils.validateConfigAccount.missingPersonalAccessKey', {
+          accountId: account.accountId,
+        })
+      );
+    }
+  }
+
+  if (account.authType === ACCESS_TOKEN_AUTH_METHOD.value) {
+    const isValidAccessTokenAccount =
+      'auth' in account && Boolean(account.auth?.tokenInfo?.accessToken);
+
+    if (!isValidAccessTokenAccount) {
+      validationErrors.push(
+        i18n('config.utils.validateConfigAccount.missingAccessToken', {
           accountId: account.accountId,
         })
       );

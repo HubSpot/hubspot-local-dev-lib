@@ -6,10 +6,12 @@ import {
   PERSONAL_ACCESS_KEY_AUTH_METHOD,
   OAUTH_AUTH_METHOD,
   API_KEY_AUTH_METHOD,
+  ACCESS_TOKEN_AUTH_METHOD,
 } from '../constants/auth.js';
 
 export type Environment = ValueOf<typeof ENVIRONMENTS> | '';
-export type AuthType = 'personalaccesskey' | 'apikey' | 'oauth2';
+export type AuthType =
+  'personalaccesskey' | 'apikey' | 'oauth2' | 'accesstoken';
 
 interface BaseHubSpotConfigAccount {
   name: string;
@@ -57,10 +59,18 @@ export interface APIKeyConfigAccount extends BaseHubSpotConfigAccount {
   apiKey: string;
 }
 
+export interface AccessTokenConfigAccount extends BaseHubSpotConfigAccount {
+  authType: typeof ACCESS_TOKEN_AUTH_METHOD.value;
+  auth: {
+    tokenInfo: TokenInfo;
+  };
+}
+
 export type HubSpotConfigAccount =
   | PersonalAccessKeyConfigAccount
   | OAuthConfigAccount
-  | APIKeyConfigAccount;
+  | APIKeyConfigAccount
+  | AccessTokenConfigAccount;
 
 export type ScopeData = {
   portalScopesInGroup: Array<string>;
