@@ -600,19 +600,8 @@ describe('api/projects', () => {
   });
 
   describe('project logs', () => {
-    const betaLogsPath = (name: string) =>
-      `developers/logs/2027-03-beta/projects/${encodeURIComponent(name)}`;
-    const stableLogsPath = (name: string) =>
+    const logsPath = (name: string) =>
       `developers/logs/2027-03/projects/${encodeURIComponent(name)}`;
-
-    beforeEach(() => {
-      vi.useFakeTimers();
-      vi.setSystemTime(new Date('2027-02-15T00:00:00Z'));
-    });
-
-    afterEach(() => {
-      vi.useRealTimers();
-    });
 
     describe('fetchBuildLogs', () => {
       const buildId = 1;
@@ -620,22 +609,14 @@ describe('api/projects', () => {
         await fetchBuildLogs(accountId, projectName, buildId);
         expect(http.get).toHaveBeenCalledTimes(1);
         expect(http.get).toHaveBeenCalledWith(accountId, {
-          url: `${betaLogsPath(projectName)}/builds/${buildId}`,
+          url: `${logsPath(projectName)}/builds/${buildId}`,
         });
       });
 
       it('should encode the project name', async () => {
         await fetchBuildLogs(accountId, projectNameIllegalChars, buildId);
         expect(http.get).toHaveBeenCalledWith(accountId, {
-          url: `${betaLogsPath(projectNameIllegalChars)}/builds/${buildId}`,
-        });
-      });
-
-      it('should use the stable version path from the stable start date', async () => {
-        vi.setSystemTime(new Date('2027-03-01T00:00:00Z'));
-        await fetchBuildLogs(accountId, projectName, buildId);
-        expect(http.get).toHaveBeenCalledWith(accountId, {
-          url: `${stableLogsPath(projectName)}/builds/${buildId}`,
+          url: `${logsPath(projectNameIllegalChars)}/builds/${buildId}`,
         });
       });
     });
@@ -646,7 +627,7 @@ describe('api/projects', () => {
         await fetchBuildWarnLogs(accountId, projectName, buildId);
         expect(http.get).toHaveBeenCalledTimes(1);
         expect(http.get).toHaveBeenCalledWith(accountId, {
-          url: `${betaLogsPath(projectName)}/builds/${buildId}/combined/warn`,
+          url: `${logsPath(projectName)}/builds/${buildId}/combined/warn`,
         });
       });
 
@@ -654,15 +635,7 @@ describe('api/projects', () => {
         await fetchBuildWarnLogs(accountId, projectNameIllegalChars, buildId);
         expect(http.get).toHaveBeenCalledTimes(1);
         expect(http.get).toHaveBeenCalledWith(accountId, {
-          url: `${betaLogsPath(projectNameIllegalChars)}/builds/${buildId}/combined/warn`,
-        });
-      });
-
-      it('should use the stable version path from the stable start date', async () => {
-        vi.setSystemTime(new Date('2027-03-01T00:00:00Z'));
-        await fetchBuildWarnLogs(accountId, projectName, buildId);
-        expect(http.get).toHaveBeenCalledWith(accountId, {
-          url: `${stableLogsPath(projectName)}/builds/${buildId}/combined/warn`,
+          url: `${logsPath(projectNameIllegalChars)}/builds/${buildId}/combined/warn`,
         });
       });
     });
@@ -673,7 +646,7 @@ describe('api/projects', () => {
         await fetchDeployWarnLogs(accountId, projectName, deployId);
         expect(http.get).toHaveBeenCalledTimes(1);
         expect(http.get).toHaveBeenCalledWith(accountId, {
-          url: `${betaLogsPath(projectName)}/deploys/${deployId}/combined/warn`,
+          url: `${logsPath(projectName)}/deploys/${deployId}/combined/warn`,
         });
       });
 
@@ -681,15 +654,7 @@ describe('api/projects', () => {
         await fetchDeployWarnLogs(accountId, projectNameIllegalChars, deployId);
         expect(http.get).toHaveBeenCalledTimes(1);
         expect(http.get).toHaveBeenCalledWith(accountId, {
-          url: `${betaLogsPath(projectNameIllegalChars)}/deploys/${deployId}/combined/warn`,
-        });
-      });
-
-      it('should use the stable version path from the stable start date', async () => {
-        vi.setSystemTime(new Date('2027-03-01T00:00:00Z'));
-        await fetchDeployWarnLogs(accountId, projectName, deployId);
-        expect(http.get).toHaveBeenCalledWith(accountId, {
-          url: `${stableLogsPath(projectName)}/deploys/${deployId}/combined/warn`,
+          url: `${logsPath(projectNameIllegalChars)}/deploys/${deployId}/combined/warn`,
         });
       });
     });

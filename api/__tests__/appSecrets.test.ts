@@ -18,33 +18,14 @@ describe('api/appSecrets', () => {
   const appId = 456;
   const key = 'SECRET_KEY';
   const value = 'SECRET_VALUE';
-  const betaSecretsPath = `developers/secrets/2027-03-beta/apps/${appId}/secrets`;
-  const stableSecretsPath = `developers/secrets/2027-03/apps/${appId}/secrets`;
-
-  beforeEach(() => {
-    vi.useFakeTimers();
-    vi.setSystemTime(new Date('2027-02-15T00:00:00Z'));
-  });
-
-  afterEach(() => {
-    vi.useRealTimers();
-  });
+  const secretsPath = `developers/secrets/2027-03/apps/${appId}/secrets`;
 
   describe('createAppSecret', () => {
     it('should call http.post with correct arguments', async () => {
       await createAppSecret(accountId, appId, key, value);
       expect(httpPostMock).toHaveBeenCalledTimes(1);
       expect(httpPostMock).toHaveBeenCalledWith(accountId, {
-        url: betaSecretsPath,
-        data: { key, value },
-      });
-    });
-
-    it('should use the stable version path from the stable start date', async () => {
-      vi.setSystemTime(new Date('2027-03-01T00:00:00Z'));
-      await createAppSecret(accountId, appId, key, value);
-      expect(httpPostMock).toHaveBeenCalledWith(accountId, {
-        url: stableSecretsPath,
+        url: secretsPath,
         data: { key, value },
       });
     });
@@ -55,15 +36,7 @@ describe('api/appSecrets', () => {
       await fetchAppSecrets(accountId, appId);
       expect(httpGetMock).toHaveBeenCalledTimes(1);
       expect(httpGetMock).toHaveBeenCalledWith(accountId, {
-        url: betaSecretsPath,
-      });
-    });
-
-    it('should use the stable version path from the stable start date', async () => {
-      vi.setSystemTime(new Date('2027-03-01T00:00:00Z'));
-      await fetchAppSecrets(accountId, appId);
-      expect(httpGetMock).toHaveBeenCalledWith(accountId, {
-        url: stableSecretsPath,
+        url: secretsPath,
       });
     });
   });
@@ -73,16 +46,7 @@ describe('api/appSecrets', () => {
       await updateAppSecret(accountId, appId, key, value);
       expect(httpPatchMock).toHaveBeenCalledTimes(1);
       expect(httpPatchMock).toHaveBeenCalledWith(accountId, {
-        url: betaSecretsPath,
-        data: { key, value },
-      });
-    });
-
-    it('should use the stable version path from the stable start date', async () => {
-      vi.setSystemTime(new Date('2027-03-01T00:00:00Z'));
-      await updateAppSecret(accountId, appId, key, value);
-      expect(httpPatchMock).toHaveBeenCalledWith(accountId, {
-        url: stableSecretsPath,
+        url: secretsPath,
         data: { key, value },
       });
     });
@@ -93,16 +57,7 @@ describe('api/appSecrets', () => {
       await deleteAppSecret(accountId, appId, key);
       expect(httpPostMock).toHaveBeenCalledTimes(1);
       expect(httpPostMock).toHaveBeenCalledWith(accountId, {
-        url: `${betaSecretsPath}/delete`,
-        data: { key },
-      });
-    });
-
-    it('should use the stable version path from the stable start date', async () => {
-      vi.setSystemTime(new Date('2027-03-01T00:00:00Z'));
-      await deleteAppSecret(accountId, appId, key);
-      expect(httpPostMock).toHaveBeenCalledWith(accountId, {
-        url: `${stableSecretsPath}/delete`,
+        url: `${secretsPath}/delete`,
         data: { key },
       });
     });

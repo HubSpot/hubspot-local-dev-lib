@@ -22,7 +22,6 @@ import {
   ProjectDeletionResponse,
 } from '../types/Deploy.js';
 import { ProjectLogsResponse } from '../types/ProjectLog.js';
-import { getDateBasedVersionSegment } from '../utils/dateBasedVersion.js';
 import {
   MigrateAppResponse,
   CloneAppResponse,
@@ -38,15 +37,10 @@ const MIGRATIONS_API_PATH_V1 = 'dfs/migrations/v1';
 
 const PROJECTS_V3_API_PATH = 'project-components-external/v3';
 
-const PROJECT_LOGS_VERSION = '2027-03';
-const PROJECT_LOGS_STABLE_START_DATE = new Date('2027-03-01T00:00:00Z');
+const PROJECT_LOGS_API_PATH = 'developers/logs/2027-03';
 
 function getProjectLogsPath(projectName: string): string {
-  const version = getDateBasedVersionSegment(
-    PROJECT_LOGS_VERSION,
-    PROJECT_LOGS_STABLE_START_DATE
-  );
-  return `developers/logs/${version}/projects/${encodeURIComponent(projectName)}`;
+  return `${PROJECT_LOGS_API_PATH}/projects/${encodeURIComponent(projectName)}`;
 }
 
 export function fetchProjects(

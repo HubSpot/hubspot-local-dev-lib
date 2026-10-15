@@ -1,17 +1,11 @@
 import { http } from '../http/index.js';
 import { HubSpotPromise } from '../types/Http.js';
 import { AppSecret, FetchAppSecretsResponse } from '../types/AppSecrets.js';
-import { getDateBasedVersionSegment } from '../utils/dateBasedVersion.js';
 
-const APP_SECRETS_VERSION = '2027-03';
-const APP_SECRETS_STABLE_START_DATE = new Date('2027-03-01T00:00:00Z');
+const APP_SECRETS_API_PATH = 'developers/secrets/2027-03';
 
 function getAppSecretsPath(appId: number): string {
-  const version = getDateBasedVersionSegment(
-    APP_SECRETS_VERSION,
-    APP_SECRETS_STABLE_START_DATE
-  );
-  return `developers/secrets/${version}/apps/${appId}/secrets`;
+  return `${APP_SECRETS_API_PATH}/apps/${appId}/secrets`;
 }
 
 export function createAppSecret(
