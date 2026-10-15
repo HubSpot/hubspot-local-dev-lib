@@ -14,6 +14,7 @@ import {
   deployProject,
   downloadClonedProject,
   downloadProject,
+  fetchBuildLogs,
   fetchBuildWarnLogs,
   fetchDeployWarnLogs,
   fetchPlatformVersions,
@@ -598,40 +599,98 @@ describe('api/projects', () => {
     });
   });
 
-  describe('fetchBuildWarnLogs', () => {
-    const buildId = 1;
-    it('should call http correctly', async () => {
-      await fetchBuildWarnLogs(accountId, projectName, buildId);
-      expect(http.get).toHaveBeenCalledTimes(1);
-      expect(http.get).toHaveBeenCalledWith(accountId, {
-        url: `dfs/logging/v1/logs/projects/${projectName}/builds/${buildId}/combined/warn`,
+  describe('project logs', () => {
+    const betaLogsPath = (name: string) =>
+      `developers/logs/2027-03-beta/projects/${encodeURIComponent(name)}`;
+    const stableLogsPath = (name: string) =>
+      `developers/logs/2027-03/projects/${encodeURIComponent(name)}`;
+
+    beforeEach(() => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date('2027-02-15T00:00:00Z'));
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    describe('fetchBuildLogs', () => {
+      const buildId = 1;
+      it('should call http correctly', async () => {
+        await fetchBuildLogs(accountId, projectName, buildId);
+        expect(http.get).toHaveBeenCalledTimes(1);
+        expect(http.get).toHaveBeenCalledWith(accountId, {
+          url: `${betaLogsPath(projectName)}/builds/${buildId}`,
+        });
+      });
+
+      it('should encode the project name', async () => {
+        await fetchBuildLogs(accountId, projectNameIllegalChars, buildId);
+        expect(http.get).toHaveBeenCalledWith(accountId, {
+          url: `${betaLogsPath(projectNameIllegalChars)}/builds/${buildId}`,
+        });
+      });
+
+      it('should use the stable version path from the stable start date', async () => {
+        vi.setSystemTime(new Date('2027-03-01T00:00:00Z'));
+        await fetchBuildLogs(accountId, projectName, buildId);
+        expect(http.get).toHaveBeenCalledWith(accountId, {
+          url: `${stableLogsPath(projectName)}/builds/${buildId}`,
+        });
       });
     });
 
-    it('should encode the project name', async () => {
-      await fetchBuildWarnLogs(accountId, projectNameIllegalChars, buildId);
-      expect(http.get).toHaveBeenCalledTimes(1);
-      expect(http.get).toHaveBeenCalledWith(accountId, {
-        url: `dfs/logging/v1/logs/projects/${encodeURIComponent(projectNameIllegalChars)}/builds/${buildId}/combined/warn`,
+    describe('fetchBuildWarnLogs', () => {
+      const buildId = 1;
+      it('should call http correctly', async () => {
+        await fetchBuildWarnLogs(accountId, projectName, buildId);
+        expect(http.get).toHaveBeenCalledTimes(1);
+        expect(http.get).toHaveBeenCalledWith(accountId, {
+          url: `${betaLogsPath(projectName)}/builds/${buildId}/combined/warn`,
+        });
+      });
+
+      it('should encode the project name', async () => {
+        await fetchBuildWarnLogs(accountId, projectNameIllegalChars, buildId);
+        expect(http.get).toHaveBeenCalledTimes(1);
+        expect(http.get).toHaveBeenCalledWith(accountId, {
+          url: `${betaLogsPath(projectNameIllegalChars)}/builds/${buildId}/combined/warn`,
+        });
+      });
+
+      it('should use the stable version path from the stable start date', async () => {
+        vi.setSystemTime(new Date('2027-03-01T00:00:00Z'));
+        await fetchBuildWarnLogs(accountId, projectName, buildId);
+        expect(http.get).toHaveBeenCalledWith(accountId, {
+          url: `${stableLogsPath(projectName)}/builds/${buildId}/combined/warn`,
+        });
       });
     });
-  });
 
-  describe('fetchDeployWarnLogs', () => {
-    const deployId = 1;
-    it('should call http correctly', async () => {
-      await fetchDeployWarnLogs(accountId, projectName, deployId);
-      expect(http.get).toHaveBeenCalledTimes(1);
-      expect(http.get).toHaveBeenCalledWith(accountId, {
-        url: `dfs/logging/v1/logs/projects/${projectName}/deploys/${deployId}/combined/warn`,
+    describe('fetchDeployWarnLogs', () => {
+      const deployId = 1;
+      it('should call http correctly', async () => {
+        await fetchDeployWarnLogs(accountId, projectName, deployId);
+        expect(http.get).toHaveBeenCalledTimes(1);
+        expect(http.get).toHaveBeenCalledWith(accountId, {
+          url: `${betaLogsPath(projectName)}/deploys/${deployId}/combined/warn`,
+        });
       });
-    });
 
-    it('should encode the project name', async () => {
-      await fetchDeployWarnLogs(accountId, projectNameIllegalChars, deployId);
-      expect(http.get).toHaveBeenCalledTimes(1);
-      expect(http.get).toHaveBeenCalledWith(accountId, {
-        url: `dfs/logging/v1/logs/projects/${encodeURIComponent(projectNameIllegalChars)}/deploys/${deployId}/combined/warn`,
+      it('should encode the project name', async () => {
+        await fetchDeployWarnLogs(accountId, projectNameIllegalChars, deployId);
+        expect(http.get).toHaveBeenCalledTimes(1);
+        expect(http.get).toHaveBeenCalledWith(accountId, {
+          url: `${betaLogsPath(projectNameIllegalChars)}/deploys/${deployId}/combined/warn`,
+        });
+      });
+
+      it('should use the stable version path from the stable start date', async () => {
+        vi.setSystemTime(new Date('2027-03-01T00:00:00Z'));
+        await fetchDeployWarnLogs(accountId, projectName, deployId);
+        expect(http.get).toHaveBeenCalledWith(accountId, {
+          url: `${stableLogsPath(projectName)}/deploys/${deployId}/combined/warn`,
+        });
       });
     });
   });
