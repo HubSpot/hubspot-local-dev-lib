@@ -81,7 +81,7 @@
     "express": "4.22.3",
     "findup-sync": "5.0.0",
     "form-data": "4.0.6",
-    "fs-extra": "11.4.0",
+    "fs-extra": "11.4.1",
     "http-proxy-agent": "7.0.2",
     "https-proxy-agent": "7.0.6",
     "ignore": "^7.0.0",
