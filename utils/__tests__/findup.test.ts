@@ -1,10 +1,13 @@
 import fs from 'fs';
 import path from 'path';
+import { findUpSync, Match } from 'find-up';
 import { vi, describe, it, expect, afterEach } from 'vitest';
 import { findup } from '../findup.js';
 
 vi.mock('fs');
+vi.mock('find-up');
 
+const mockFindUpSync = vi.mocked(findUpSync);
 const mockExistsSync = vi.mocked(fs.existsSync);
 const mockReaddirSync = vi.mocked(
   fs.readdirSync as (dir: fs.PathLike) => Array<string>
@@ -25,86 +28,85 @@ function mockFileSystem(filePaths: Array<string>): void {
   });
 }
 
+function runMatcherIn(dir: string): void {
+  mockFindUpSync.mockImplementation((matcher: (directory: string) => Match) => {
+    const match = matcher(dir);
+    return typeof match === 'string' ? path.resolve(dir, match) : undefined;
+  });
+}
+
 describe('utils/findup', () => {
   afterEach(() => {
     vi.restoreAllMocks();
   });
 
-  it('returns the file in cwd when it exists', () => {
-    mockFileSystem(['/project/src/theme.json']);
-
-    expect(findup('theme.json', { cwd: '/project/src' })).toBe(
-      '/project/src/theme.json'
-    );
-  });
-
-  it('walks up to parent directories', () => {
-    mockFileSystem(['/project/hubspot.config.yml']);
-
-    expect(findup('hubspot.config.yml', { cwd: '/project/src/a/b' })).toBe(
-      '/project/hubspot.config.yml'
-    );
-  });
-
-  it('returns null when no parent directory contains the file', () => {
-    mockFileSystem(['/other/hubspot.config.yml']);
-
-    expect(findup('hubspot.config.yml', { cwd: '/project/src' })).toBeNull();
-  });
-
-  it('checks every name in a directory before moving to the parent', () => {
-    mockFileSystem([
-      '/project/hubspot.config.yml',
-      '/project/src/hubspot.config.yaml',
-    ]);
+  it('finds files and directories with find-up', () => {
+    mockFindUpSync.mockReturnValue('/project/hubspot.config.yml');
 
     expect(
       findup(['hubspot.config.yml', 'hubspot.config.yaml'], {
         cwd: '/project/src',
       })
-    ).toBe('/project/src/hubspot.config.yaml');
-  });
-
-  it('returns the first matching name when several exist in one directory', () => {
-    mockFileSystem([
-      '/project/hubspot.config.yml',
-      '/project/hubspot.config.yaml',
-    ]);
-
-    expect(
-      findup(['hubspot.config.yaml', 'hubspot.config.yml'], {
-        cwd: '/project',
-      })
-    ).toBe('/project/hubspot.config.yaml');
-  });
-
-  it('supports names that include a subdirectory', () => {
-    mockFileSystem(['/project/.hs/settings.json']);
-
-    expect(findup('.hs/settings.json', { cwd: '/project/src' })).toBe(
-      '/project/.hs/settings.json'
+    ).toBe('/project/hubspot.config.yml');
+    expect(mockFindUpSync).toHaveBeenCalledWith(
+      ['hubspot.config.yml', 'hubspot.config.yaml'],
+      { cwd: '/project/src', type: 'both' }
     );
   });
 
-  it('matches names case-insensitively when nocase is set', () => {
+  it('returns null when find-up finds no match', () => {
+    mockFindUpSync.mockReturnValue(undefined);
+
+    expect(findup('.hsignore')).toBeNull();
+    expect(mockFindUpSync).toHaveBeenCalledWith('.hsignore', {
+      cwd: undefined,
+      type: 'both',
+    });
+  });
+
+  it('uses a case-insensitive matcher when nocase is set', () => {
     mockFileSystem(['/project/theme/Theme.JSON']);
+    runMatcherIn('/project/theme');
 
     expect(
       findup('theme.json', { cwd: '/project/theme/templates', nocase: true })
     ).toBe('/project/theme/Theme.JSON');
+    expect(mockFindUpSync).toHaveBeenCalledWith(expect.any(Function), {
+      cwd: '/project/theme/templates',
+      type: 'both',
+    });
   });
 
-  it('does not match names case-insensitively by default', () => {
-    mockFileSystem(['/project/theme/Theme.JSON']);
+  it('prefers the exact name when nocase is set', () => {
+    mockFileSystem(['/project/theme/theme.json']);
+    runMatcherIn('/project/theme');
 
-    expect(findup('theme.json', { cwd: '/project/theme' })).toBeNull();
+    expect(findup('theme.json', { nocase: true })).toBe(
+      '/project/theme/theme.json'
+    );
     expect(mockReaddirSync).not.toHaveBeenCalled();
   });
 
-  it('defaults cwd to process.cwd()', () => {
-    mockFileSystem(['/project/.hsignore']);
-    vi.spyOn(process, 'cwd').mockReturnValue('/project/src');
+  it('supports names that include a subdirectory when nocase is set', () => {
+    mockFileSystem(['/project/.hs/Settings.json']);
+    runMatcherIn('/project');
 
-    expect(findup('.hsignore')).toBe('/project/.hsignore');
+    expect(findup('.hs/settings.json', { nocase: true })).toBe(
+      '/project/.hs/Settings.json'
+    );
+  });
+
+  it('returns null when the nocase matcher finds no match', () => {
+    mockFileSystem(['/project/theme/other.json']);
+    runMatcherIn('/project/theme');
+
+    expect(findup('theme.json', { nocase: true })).toBeNull();
+  });
+
+  it('returns null when the directory cannot be read', () => {
+    mockFileSystem([]);
+    runMatcherIn('/project/theme/page.html');
+
+    expect(findup('theme.json', { nocase: true })).toBeNull();
   });
 });

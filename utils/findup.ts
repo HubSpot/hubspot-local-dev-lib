@@ -1,60 +1,59 @@
 import fs from 'fs';
 import path from 'path';
+import { findUpSync } from 'find-up';
 
 type FindupOptions = {
   cwd?: string;
   nocase?: boolean;
 };
 
-function findCaseInsensitiveMatch(filePath: string): string | null {
-  const dir = path.dirname(filePath);
-  const upperCaseFileName = path.basename(filePath).toUpperCase();
-  let entries: Array<string>;
+function findCaseInsensitiveName(
+  dir: string,
+  fileName: string
+): string | undefined {
+  const upperCaseFileName = fileName.toUpperCase();
 
   try {
-    entries = fs.readdirSync(dir);
+    return fs
+      .readdirSync(dir)
+      .find(entry => entry.toUpperCase() === upperCaseFileName);
   } catch (e) {
-    return null;
+    return undefined;
   }
-
-  const match = entries.find(
-    entry => entry.toUpperCase() === upperCaseFileName
-  );
-  return match ? path.resolve(dir, match) : null;
 }
 
-function findInDir(
-  dir: string,
-  fileName: string,
-  nocase: boolean
-): string | null {
-  const filePath = path.resolve(dir, fileName);
-
-  if (fs.existsSync(filePath)) {
-    return filePath;
+function findNameInDir(dir: string, fileName: string): string | undefined {
+  if (fs.existsSync(path.resolve(dir, fileName))) {
+    return fileName;
   }
-  return nocase ? findCaseInsensitiveMatch(filePath) : null;
+
+  const match = findCaseInsensitiveName(
+    path.resolve(dir, path.dirname(fileName)),
+    path.basename(fileName)
+  );
+  return match ? path.join(path.dirname(fileName), match) : undefined;
 }
 
 export function findup(
   fileNames: string | Array<string>,
   options: FindupOptions = {}
 ): string | null {
-  const names = Array.isArray(fileNames) ? fileNames : [fileNames];
-  const nocase = options.nocase === true;
-  let currentDir = path.resolve(options.cwd || '');
-  let previousDir: string | null = null;
+  const findUpOptions = { cwd: options.cwd, type: 'both' } as const;
 
-  while (currentDir !== previousDir) {
-    for (const fileName of names) {
-      const match = findInDir(currentDir, fileName, nocase);
-      if (match) {
-        return match;
-      }
-    }
-    previousDir = currentDir;
-    currentDir = path.dirname(currentDir);
+  if (!options.nocase) {
+    return findUpSync(fileNames, findUpOptions) ?? null;
   }
 
-  return null;
+  const names = Array.isArray(fileNames) ? fileNames : [fileNames];
+  const match = findUpSync(dir => {
+    for (const fileName of names) {
+      const nameInDir = findNameInDir(dir, fileName);
+      if (nameInDir) {
+        return nameInDir;
+      }
+    }
+    return undefined;
+  }, findUpOptions);
+
+  return match ?? null;
 }
