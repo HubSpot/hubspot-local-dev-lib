@@ -1,7 +1,7 @@
-import findup from 'findup-sync';
 import fs from 'fs-extra';
 
 import { getCwd } from '../lib/path.js';
+import { findup } from '../utils/findup.js';
 import {
   DEFAULT_ACCOUNT_OVERRIDE_ERROR_INVALID_ID,
   DEFAULT_ACCOUNT_OVERRIDE_ERROR_ACCOUNT_NOT_FOUND,

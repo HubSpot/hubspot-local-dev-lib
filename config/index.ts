@@ -1,5 +1,4 @@
 import fs from 'fs-extra';
-import findup from 'findup-sync';
 
 import {
   ACCOUNT_IDENTIFIERS,
@@ -40,6 +39,7 @@ import { HubSpotConfigError } from '../models/HubSpotConfigError.js';
 import { HUBSPOT_CONFIG_ERROR_TYPES } from '../constants/config.js';
 import { isDeepEqual } from '../lib/isDeepEqual.js';
 import { getCwd } from '../lib/path.js';
+import { findup } from '../utils/findup.js';
 import { getHsSettingsFileIfExists } from './hsSettings.js';
 
 const EMPTY_CONFIG = { accounts: [] };

@@ -7,7 +7,7 @@ import {
   MockedFunction,
   Mocked,
 } from 'vitest';
-import findup from 'findup-sync';
+import { findup } from '../../utils/findup.js';
 import fs from 'fs-extra';
 import yaml from 'js-yaml';
 
@@ -65,7 +65,7 @@ import * as utils from '../utils.js';
 import { CmsPublishMode } from '../../types/Files.js';
 import { i18n } from '../../utils/lang.js';
 
-vi.mock('findup-sync');
+vi.mock('../../utils/findup');
 vi.mock('../../lib/path');
 vi.mock('fs-extra');
 vi.mock('../defaultAccountOverride');

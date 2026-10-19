@@ -1,10 +1,10 @@
 import fs from 'fs-extra';
 import path from 'path';
-import findup from 'findup-sync';
 import { getCwd } from '../path.js';
 import { fetchFileFromRepository } from '../github.js';
 import { logger } from '../logger.js';
 import { i18n } from '../../utils/lang.js';
+import { findup } from '../../utils/findup.js';
 import { FileSystemError } from '../../models/FileSystemError.js';
 
 import {
