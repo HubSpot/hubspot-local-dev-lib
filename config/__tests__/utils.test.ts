@@ -49,7 +49,7 @@ import {
 } from '../../constants/auth.js';
 import { i18n } from '../../utils/lang.js';
 
-vi.mock('../../utils/findup');
+vi.mock('../../lib/findup');
 vi.mock('../../lib/path');
 vi.mock('fs-extra');
 

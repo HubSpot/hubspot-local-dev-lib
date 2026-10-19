@@ -35,7 +35,7 @@ function runMatcherIn(dir: string): void {
   });
 }
 
-describe('utils/findup', () => {
+describe('lib/findup', () => {
   afterEach(() => {
     vi.restoreAllMocks();
   });

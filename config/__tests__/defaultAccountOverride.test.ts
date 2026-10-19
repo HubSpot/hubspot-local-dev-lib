@@ -1,6 +1,6 @@
 import { vi, describe, it, expect, MockedFunction, Mocked } from 'vitest';
 import fs from 'fs-extra';
-import { findup } from '../../utils/findup.js';
+import { findup } from '../../lib/findup.js';
 import {
   getDefaultAccountOverrideAccountId,
   getDefaultAccountOverrideFilePath,
@@ -10,7 +10,7 @@ import { PersonalAccessKeyConfigAccount } from '../../types/Accounts.js';
 import { PERSONAL_ACCESS_KEY_AUTH_METHOD } from '../../constants/auth.js';
 
 vi.mock('fs-extra');
-vi.mock('../../utils/findup');
+vi.mock('../../lib/findup');
 
 const mockFs = fs as Mocked<typeof fs>;
 const mockFindup = findup as MockedFunction<typeof findup>;

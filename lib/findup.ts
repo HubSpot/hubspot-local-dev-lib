@@ -1,11 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { findUpSync } from 'find-up';
-
-type FindupOptions = {
-  cwd?: string;
-  nocase?: boolean;
-};
+import { FindupOptions } from '../types/Files.js';
 
 function findCaseInsensitiveName(
   dir: string,

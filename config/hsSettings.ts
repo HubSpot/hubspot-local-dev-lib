@@ -6,7 +6,7 @@ import {
   HS_SETTINGS_FILENAME,
 } from '../constants/config.js';
 import { getCwd } from '../lib/path.js';
-import { findup } from '../utils/findup.js';
+import { findup } from '../lib/findup.js';
 import { HsSettingsFile } from '../types/HsSettings.js';
 import { FileSystemError } from '../models/FileSystemError.js';
 

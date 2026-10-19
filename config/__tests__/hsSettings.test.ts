@@ -7,7 +7,7 @@ import {
   beforeEach,
   MockedFunction,
 } from 'vitest';
-import { findup } from '../../utils/findup.js';
+import { findup } from '../../lib/findup.js';
 import fs from 'fs';
 import {
   getHsSettingsFilePath,
@@ -17,7 +17,7 @@ import {
 import { getCwd } from '../../lib/path.js';
 import { HsSettingsFile } from '../../types/HsSettings.js';
 
-vi.mock('../../utils/findup');
+vi.mock('../../lib/findup');
 vi.mock('fs');
 vi.mock('../../lib/path');
 

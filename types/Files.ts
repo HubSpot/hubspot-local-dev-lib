@@ -119,3 +119,8 @@ export type WatchOptions = {
 };
 
 export type WatchErrorHandler = (error: AxiosError) => void;
+
+export type FindupOptions = {
+  cwd?: string;
+  nocase?: boolean;
+};

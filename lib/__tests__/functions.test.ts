@@ -1,5 +1,5 @@
 import fs, { PathLike } from 'fs-extra';
-import { findup } from '../../utils/findup.js';
+import { findup } from '../findup.js';
 import { getCwd } from '../path.js';
 import { fetchFileFromRepository as __fetchFileFromRepository } from '../github.js';
 import { vi, type MockedFunction } from 'vitest';
@@ -11,7 +11,7 @@ import {
 } from '../cms/functions.js';
 
 vi.mock('fs-extra');
-vi.mock('../../utils/findup');
+vi.mock('../findup');
 vi.mock('../path');
 vi.mock('../github');
 

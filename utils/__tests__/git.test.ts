@@ -3,9 +3,9 @@ import {
   getGitignoreFiles,
 } from '../../utils/git.js';
 import fs from 'fs-extra';
-vi.mock('../../utils/findup');
+vi.mock('../../lib/findup');
 
-import { findup } from '../../utils/findup.js';
+import { findup } from '../../lib/findup.js';
 import path from 'path';
 import { vi, type MockedFunction } from 'vitest';
 

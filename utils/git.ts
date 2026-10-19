@@ -1,7 +1,7 @@
 import fs from 'fs-extra';
 import path from 'path';
 import ignore from 'ignore';
-import { findup } from './findup.js';
+import { findup } from '../lib/findup.js';
 
 const GITIGNORE_FILE = '.gitignore';
 
