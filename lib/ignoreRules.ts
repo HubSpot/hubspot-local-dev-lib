@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import ignore from 'ignore';
-import findup from 'findup-sync';
+import { findup } from './findup.js';
 
 const ignoreList = [
   'fields.output.json',

@@ -7,7 +7,7 @@ import {
   beforeEach,
   MockedFunction,
 } from 'vitest';
-import findupSync from 'findup-sync';
+import { findup } from '../../lib/findup.js';
 import fs from 'fs';
 import {
   getHsSettingsFilePath,
@@ -17,11 +17,11 @@ import {
 import { getCwd } from '../../lib/path.js';
 import { HsSettingsFile } from '../../types/HsSettings.js';
 
-vi.mock('findup-sync');
+vi.mock('../../lib/findup');
 vi.mock('fs');
 vi.mock('../../lib/path');
 
-const mockFindupSync = findupSync as MockedFunction<typeof findupSync>;
+const mockFindup = findup as MockedFunction<typeof findup>;
 const mockFs = vi.mocked(fs);
 const mockGetCwd = getCwd as MockedFunction<typeof getCwd>;
 
@@ -41,30 +41,30 @@ describe('hsSettings', () => {
 
   describe('getHsSettingsFilePath()', () => {
     it('returns the path when .hs/settings.json exists', () => {
-      mockFindupSync.mockReturnValueOnce('/project/.hs/settings.json');
+      mockFindup.mockReturnValueOnce('/project/.hs/settings.json');
       expect(getHsSettingsFilePath()).toBe('/project/.hs/settings.json');
     });
 
     it('returns null when no .hs/settings.json exists', () => {
-      mockFindupSync.mockReturnValueOnce(null);
+      mockFindup.mockReturnValueOnce(null);
       expect(getHsSettingsFilePath()).toBeNull();
     });
   });
 
   describe('getHsSettingsFileIfExists()', () => {
     it('returns null when no settings file path found', () => {
-      mockFindupSync.mockReturnValueOnce(null);
+      mockFindup.mockReturnValueOnce(null);
       expect(getHsSettingsFileIfExists()).toBeNull();
     });
 
     it('returns parsed settings file when it exists', () => {
-      mockFindupSync.mockReturnValueOnce('/project/.hs/settings.json');
+      mockFindup.mockReturnValueOnce('/project/.hs/settings.json');
       mockFs.readFileSync.mockReturnValueOnce(JSON.stringify(SETTINGS));
       expect(getHsSettingsFileIfExists()).toEqual(SETTINGS);
     });
 
     it('throws FileSystemError when file cannot be parsed', () => {
-      mockFindupSync.mockReturnValueOnce('/project/.hs/settings.json');
+      mockFindup.mockReturnValueOnce('/project/.hs/settings.json');
       mockFs.readFileSync.mockReturnValueOnce('invalid json');
       expect(() => getHsSettingsFileIfExists()).toThrow();
     });
@@ -72,7 +72,7 @@ describe('hsSettings', () => {
 
   describe('writeHsSettingsFile()', () => {
     it('creates .hs folder, settings file, and README when no settings file exists', () => {
-      mockFindupSync.mockReturnValueOnce(null);
+      mockFindup.mockReturnValueOnce(null);
       mockFs.existsSync.mockReturnValueOnce(false);
       mockFs.mkdirSync.mockReturnValueOnce(undefined);
       mockFs.writeFileSync.mockImplementation(() => undefined);
@@ -94,7 +94,7 @@ describe('hsSettings', () => {
     });
 
     it('writes to existing settings file path when one exists', () => {
-      mockFindupSync.mockReturnValueOnce('/parent/.hs/settings.json');
+      mockFindup.mockReturnValueOnce('/parent/.hs/settings.json');
       mockFs.existsSync.mockReturnValueOnce(true);
       mockFs.mkdirSync.mockReturnValueOnce(undefined);
       mockFs.writeFileSync.mockImplementation(() => undefined);
@@ -112,7 +112,7 @@ describe('hsSettings', () => {
     });
 
     it('does not write README when updating existing settings file', () => {
-      mockFindupSync.mockReturnValueOnce('/parent/.hs/settings.json');
+      mockFindup.mockReturnValueOnce('/parent/.hs/settings.json');
       mockFs.existsSync.mockReturnValueOnce(true);
       mockFs.mkdirSync.mockReturnValueOnce(undefined);
       mockFs.writeFileSync.mockImplementation(() => undefined);
@@ -126,7 +126,7 @@ describe('hsSettings', () => {
     });
 
     it('targets parent .hs folder and does not create .hs in cwd when settings exist in parent directory', () => {
-      mockFindupSync.mockReturnValueOnce('/parent/.hs/settings.json');
+      mockFindup.mockReturnValueOnce('/parent/.hs/settings.json');
       mockFs.existsSync.mockReturnValueOnce(true);
       mockFs.mkdirSync.mockReturnValueOnce(undefined);
       mockFs.writeFileSync.mockImplementation(() => undefined);
@@ -143,7 +143,7 @@ describe('hsSettings', () => {
     });
 
     it('writes to cwd .hs when settings file is in the same directory', () => {
-      mockFindupSync.mockReturnValueOnce('/mock/project/.hs/settings.json');
+      mockFindup.mockReturnValueOnce('/mock/project/.hs/settings.json');
       mockFs.existsSync.mockReturnValueOnce(true);
       mockFs.mkdirSync.mockReturnValueOnce(undefined);
       mockFs.writeFileSync.mockImplementation(() => undefined);
@@ -161,7 +161,7 @@ describe('hsSettings', () => {
     });
 
     it('throws FileSystemError when write fails', () => {
-      mockFindupSync.mockReturnValueOnce(null);
+      mockFindup.mockReturnValueOnce(null);
       mockFs.existsSync.mockReturnValueOnce(false);
       mockFs.mkdirSync.mockImplementation(() => {
         throw new Error('EACCES');

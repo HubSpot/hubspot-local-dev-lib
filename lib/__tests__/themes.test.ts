@@ -1,9 +1,9 @@
-import findup from 'findup-sync';
+import { findup } from '../findup.js';
 import { vi, MockedFunction } from 'vitest';
 import { getHubSpotWebsiteOriginByAccountId } from '../urls.js';
 import { getThemeJSONPath, getThemePreviewUrl } from '../cms/themes.js';
 
-vi.mock('findup-sync');
+vi.mock('../findup');
 vi.mock('../urls');
 
 const mockedFindup = findup as MockedFunction<typeof findup>;

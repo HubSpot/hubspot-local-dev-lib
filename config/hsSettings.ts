@@ -1,4 +1,3 @@
-import findupSync from 'findup-sync';
 import fs from 'fs';
 import path from 'path';
 import {
@@ -7,6 +6,7 @@ import {
   HS_SETTINGS_FILENAME,
 } from '../constants/config.js';
 import { getCwd } from '../lib/path.js';
+import { findup } from '../lib/findup.js';
 import { HsSettingsFile } from '../types/HsSettings.js';
 import { FileSystemError } from '../models/FileSystemError.js';
 
@@ -33,7 +33,7 @@ Yes. This README is for your reference only and can be safely deleted.
 `;
 
 export function getHsSettingsFilePath(): string | null {
-  return findupSync([`${HS_FOLDER}/${HS_SETTINGS_FILENAME}`], {
+  return findup([`${HS_FOLDER}/${HS_SETTINGS_FILENAME}`], {
     cwd: getCwd(),
   });
 }

@@ -1,4 +1,4 @@
-import findup from 'findup-sync';
+import { findup } from '../findup.js';
 import { getHubSpotWebsiteOriginByAccountId } from '../urls.js';
 
 export function getThemeJSONPath(path: string): string | null {
