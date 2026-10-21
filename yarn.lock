@@ -239,9 +239,9 @@
     levn "^0.4.1"
 
 "@hubspot/npm-scripts@^0.3.3":
-  version "0.3.3"
-  resolved "https://registry.yarnpkg.com/@hubspot/npm-scripts/-/npm-scripts-0.3.3.tgz#ccc0d21fb4ad9faf51eeaa896ff4e997ae419339"
-  integrity sha512-DszkvYZJD8zqE4vhBqq+tnKdGxGZBZndHOwjuq4iHJrGWQKIskrICeYkKAikLua5X/HpNj+aU+zEg7pjDY4vBQ==
+  version "0.3.4"
+  resolved "https://registry.yarnpkg.com/@hubspot/npm-scripts/-/npm-scripts-0.3.4.tgz#c11315c4cf6d3342d3918513647c593a13d85832"
+  integrity sha512-wqX9Hzh+vbwjRjh0SbjtZGfBjxQX+508b3EoBylc5DpIvH68y4ahdl9t53tyGAg6OfFeKmW+kHENF2Ip4YUo+Q==
   dependencies:
     "@inquirer/prompts" "^7.8.6"
     chalk "^5.6.2"
@@ -3849,12 +3849,7 @@ signal-exit@^4.1.0:
   resolved "https://registry.npmjs.org/signal-exit/-/signal-exit-4.1.0.tgz"
   integrity sha512-bzyZ1e88w9O1iNJbKnOlvYTrWPDl46O1bG0D3XInv+9tkPrxrN8jUUTiFlDkkmKWgn1M6CfIA13SuGqOa9Korw==
 
-source-map-js@^1.2.1:
-  version "1.2.2"
-  resolved "https://registry.yarnpkg.com/source-map-js/-/source-map-js-1.2.2.tgz#79fb88d97535a21cb27162cb05d211b67acea4ab"
-  integrity sha512-KGj/8Y43x35aZVDtt+J4mK1hoLGHULMYfSkODJNQjNDC3oW1PqPoxMwo0pLUsWM/UEGzON/NxeHywEfNXNP3Vw==
-
-source-map-js@^1.2.2:
+source-map-js@^1.2.1, source-map-js@^1.2.2:
   version "1.2.2"
   resolved "https://registry.yarnpkg.com/source-map-js/-/source-map-js-1.2.2.tgz#79fb88d97535a21cb27162cb05d211b67acea4ab"
   integrity sha512-KGj/8Y43x35aZVDtt+J4mK1hoLGHULMYfSkODJNQjNDC3oW1PqPoxMwo0pLUsWM/UEGzON/NxeHywEfNXNP3Vw==
