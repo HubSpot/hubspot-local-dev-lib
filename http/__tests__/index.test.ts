@@ -19,11 +19,13 @@ import { ENVIRONMENTS } from '../../constants/environments.js';
 import { http } from '../index.js';
 import pkg from '../../package.json' with { type: 'json' };
 import { HubSpotConfigAccount } from '../../types/Accounts.js';
+import { fetchAccessToken } from '../../utils/personalAccessKey.js';
 
 vi.mock('fs-extra');
 vi.mock('../client');
 vi.mock('../../config');
 vi.mock('../../lib/logger');
+vi.mock('../../utils/personalAccessKey');
 
 vi.mock('http', () => ({
   default: {
@@ -229,6 +231,39 @@ describe('http/index', () => {
           options: { keepAlive: true, maxSockets: 6, maxTotalSockets: 26 },
         },
       });
+    });
+
+    it('adds authorization header from an injected access token without refreshing', async () => {
+      const accessToken = 'injected-token';
+      const account: HubSpotConfigAccount = {
+        name: 'test-account',
+        accountId: 123,
+        env: ENVIRONMENTS.PROD,
+        authType: 'accesstoken',
+        auth: {
+          tokenInfo: {
+            expiresAt: moment().add(2, 'hours').toISOString(),
+            accessToken,
+          },
+        },
+      };
+      getConfig.mockReturnValue({
+        accounts: [account],
+      });
+      getConfigAccountById.mockReturnValue(account);
+
+      await http.get(123, { url: 'some/endpoint/path' });
+
+      expect(mockedAxios).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: 'some/endpoint/path',
+          headers: expect.objectContaining({
+            Authorization: `Bearer ${accessToken}`,
+          }),
+          params: { portalId: 123 },
+        })
+      );
+      expect(fetchAccessToken).not.toHaveBeenCalled();
     });
 
     it('supports setting a custom timeout', async () => {

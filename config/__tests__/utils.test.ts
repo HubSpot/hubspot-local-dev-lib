@@ -35,6 +35,7 @@ import {
   PersonalAccessKeyConfigAccount,
   OAuthConfigAccount,
   APIKeyConfigAccount,
+  AccessTokenConfigAccount,
 } from '../../types/Accounts.js';
 import {
   DeprecatedHubSpotConfigFields,
@@ -46,6 +47,7 @@ import {
   PERSONAL_ACCESS_KEY_AUTH_METHOD,
   OAUTH_AUTH_METHOD,
   API_KEY_AUTH_METHOD,
+  ACCESS_TOKEN_AUTH_METHOD,
 } from '../../constants/auth.js';
 import { i18n } from '../../utils/lang.js';
 
@@ -105,6 +107,19 @@ const DEPRECATED_ACCOUNT: HubSpotConfigAccount &
     tokenInfo: {},
   },
   accountType: undefined,
+};
+
+const ACCESS_TOKEN_ACCOUNT: AccessTokenConfigAccount = {
+  name: '123',
+  accountId: 123,
+  authType: ACCESS_TOKEN_AUTH_METHOD.value,
+  env: 'qa',
+  auth: {
+    tokenInfo: {
+      accessToken: 'injected-token',
+      expiresAt: '2099-01-01T00:00:00.000Z',
+    },
+  },
 };
 
 const CONFIG: HubSpotConfig = {
@@ -398,6 +413,78 @@ describe('config/utils', () => {
       });
     });
 
+    it('builds access token config', () => {
+      process.env[ENVIRONMENT_VARIABLES.HUBSPOT_ACCESS_TOKEN] =
+        'injected-token';
+      process.env[ENVIRONMENT_VARIABLES.HUBSPOT_ACCESS_TOKEN_EXPIRES_AT] =
+        '2099-01-01T00:00:00.000Z';
+      process.env[ENVIRONMENT_VARIABLES.HUBSPOT_ACCOUNT_ID] = '123';
+      process.env[ENVIRONMENT_VARIABLES.HUBSPOT_ENVIRONMENT] = 'qa';
+
+      const config = buildConfigFromEnvironment();
+
+      expect(config.accounts).toEqual([ACCESS_TOKEN_ACCOUNT]);
+      expect(config.defaultAccount).toBe(123);
+    });
+
+    it('builds access token config without an expiration', () => {
+      process.env[ENVIRONMENT_VARIABLES.HUBSPOT_ACCESS_TOKEN] =
+        'injected-token';
+      process.env[ENVIRONMENT_VARIABLES.HUBSPOT_ACCOUNT_ID] = '123';
+      process.env[ENVIRONMENT_VARIABLES.HUBSPOT_ENVIRONMENT] = 'qa';
+
+      const config = buildConfigFromEnvironment();
+
+      expect(config.accounts).toEqual([
+        {
+          ...ACCESS_TOKEN_ACCOUNT,
+          auth: { tokenInfo: { accessToken: 'injected-token' } },
+        },
+      ]);
+    });
+
+    it('prefers a personal access key over the access token', () => {
+      process.env[ENVIRONMENT_VARIABLES.HUBSPOT_ACCESS_TOKEN] =
+        'injected-token';
+      process.env[ENVIRONMENT_VARIABLES.HUBSPOT_PERSONAL_ACCESS_KEY] =
+        'test-key';
+      process.env[ENVIRONMENT_VARIABLES.HUBSPOT_ACCOUNT_ID] = '123';
+      process.env[ENVIRONMENT_VARIABLES.HUBSPOT_ENVIRONMENT] = 'qa';
+
+      const config = buildConfigFromEnvironment();
+
+      expect(config.accounts[0].authType).toBe(
+        PERSONAL_ACCESS_KEY_AUTH_METHOD.value
+      );
+    });
+
+    it('prefers an api key over the access token', () => {
+      process.env[ENVIRONMENT_VARIABLES.HUBSPOT_ACCESS_TOKEN] =
+        'injected-token';
+      process.env[ENVIRONMENT_VARIABLES.HUBSPOT_API_KEY] = 'test-api-key';
+      process.env[ENVIRONMENT_VARIABLES.HUBSPOT_ACCOUNT_ID] = '123';
+      process.env[ENVIRONMENT_VARIABLES.HUBSPOT_ENVIRONMENT] = 'qa';
+
+      const config = buildConfigFromEnvironment();
+
+      expect(config.accounts[0].authType).toBe(API_KEY_AUTH_METHOD.value);
+    });
+
+    it('prefers oauth credentials over the access token', () => {
+      process.env[ENVIRONMENT_VARIABLES.HUBSPOT_ACCESS_TOKEN] =
+        'injected-token';
+      process.env[ENVIRONMENT_VARIABLES.HUBSPOT_CLIENT_ID] = 'client-id';
+      process.env[ENVIRONMENT_VARIABLES.HUBSPOT_CLIENT_SECRET] =
+        'client-secret';
+      process.env[ENVIRONMENT_VARIABLES.HUBSPOT_REFRESH_TOKEN] = 'refresh';
+      process.env[ENVIRONMENT_VARIABLES.HUBSPOT_ACCOUNT_ID] = '123';
+      process.env[ENVIRONMENT_VARIABLES.HUBSPOT_ENVIRONMENT] = 'qa';
+
+      const config = buildConfigFromEnvironment();
+
+      expect(config.accounts[0].authType).toBe(OAUTH_AUTH_METHOD.value);
+    });
+
     it('throws when required variables missing', () => {
       expect(() => {
         process.env[ENVIRONMENT_VARIABLES.HUBSPOT_ACCOUNT_ID] = '123';
@@ -470,6 +557,51 @@ describe('config/utils', () => {
       expect(validateConfigAccount(API_KEY_ACCOUNT)).toEqual({
         isValid: true,
         errors: [],
+      });
+    });
+
+    it('validates access token account', () => {
+      expect(validateConfigAccount(ACCESS_TOKEN_ACCOUNT)).toEqual({
+        isValid: true,
+        errors: [],
+      });
+    });
+
+    it('returns false for access token account missing the access token', () => {
+      expect(
+        validateConfigAccount({
+          ...ACCESS_TOKEN_ACCOUNT,
+          auth: { tokenInfo: {} },
+        })
+      ).toEqual({
+        isValid: false,
+        errors: [
+          i18n('config.utils.validateConfigAccount.missingAccessToken', {
+            accountId: ACCESS_TOKEN_ACCOUNT.accountId,
+          }),
+        ],
+      });
+    });
+
+    it('returns false for access token account with an unparseable expiration', () => {
+      expect(
+        validateConfigAccount({
+          ...ACCESS_TOKEN_ACCOUNT,
+          auth: {
+            tokenInfo: { accessToken: 'injected-token', expiresAt: 'tomorrow' },
+          },
+        })
+      ).toEqual({
+        isValid: false,
+        errors: [
+          i18n(
+            'config.utils.validateConfigAccount.invalidAccessTokenExpiresAt',
+            {
+              accountId: ACCESS_TOKEN_ACCOUNT.accountId,
+              expiresAt: 'tomorrow',
+            }
+          ),
+        ],
       });
     });
 
