@@ -7,6 +7,7 @@ import { getConfigAccountById } from '../config/index.js';
 import { USER_AGENTS, getAxiosConfig } from './getAxiosConfig.js';
 import { addQueryParams } from './addQueryParams.js';
 import { accessTokenForPersonalAccessKey } from '../lib/personalAccessKey.js';
+import { accessTokenForInjectedAccessToken } from '../lib/accessToken.js';
 import { getOauthManager } from '../lib/oauth.js';
 import { HttpOptions, HubSpotPromise } from '../types/Http.js';
 import { logger } from '../lib/logger.js';
@@ -16,6 +17,7 @@ import {
   PERSONAL_ACCESS_KEY_AUTH_METHOD,
   OAUTH_AUTH_METHOD,
   API_KEY_AUTH_METHOD,
+  ACCESS_TOKEN_AUTH_METHOD,
 } from '../constants/auth.js';
 import { httpClient } from './client.js';
 
@@ -63,6 +65,21 @@ async function withPersonalAccessKey(
   };
 }
 
+function withAccessToken(
+  accountId: number,
+  axiosConfig: AxiosRequestConfig
+): AxiosRequestConfig {
+  const { headers } = axiosConfig;
+  const accessToken = accessTokenForInjectedAccessToken(accountId);
+  return {
+    ...axiosConfig,
+    headers: {
+      ...headers,
+      Authorization: `Bearer ${accessToken}`,
+    },
+  };
+}
+
 function withPortalId(
   portalId: number,
   axiosConfig: AxiosRequestConfig
@@ -92,6 +109,10 @@ async function withAuth(
 
   if (authType === PERSONAL_ACCESS_KEY_AUTH_METHOD.value) {
     return withPersonalAccessKey(accountId, axiosConfig);
+  }
+
+  if (authType === ACCESS_TOKEN_AUTH_METHOD.value) {
+    return withAccessToken(accountId, axiosConfig);
   }
 
   if (authType === OAUTH_AUTH_METHOD.value) {
