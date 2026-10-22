@@ -239,9 +239,9 @@
     levn "^0.4.1"
 
 "@hubspot/npm-scripts@^0.3.3":
-  version "0.3.3"
-  resolved "https://registry.yarnpkg.com/@hubspot/npm-scripts/-/npm-scripts-0.3.3.tgz#ccc0d21fb4ad9faf51eeaa896ff4e997ae419339"
-  integrity sha512-DszkvYZJD8zqE4vhBqq+tnKdGxGZBZndHOwjuq4iHJrGWQKIskrICeYkKAikLua5X/HpNj+aU+zEg7pjDY4vBQ==
+  version "0.3.4"
+  resolved "https://registry.yarnpkg.com/@hubspot/npm-scripts/-/npm-scripts-0.3.4.tgz#c11315c4cf6d3342d3918513647c593a13d85832"
+  integrity sha512-wqX9Hzh+vbwjRjh0SbjtZGfBjxQX+508b3EoBylc5DpIvH68y4ahdl9t53tyGAg6OfFeKmW+kHENF2Ip4YUo+Q==
   dependencies:
     "@inquirer/prompts" "^7.8.6"
     chalk "^5.6.2"
