@@ -1,9 +1,6 @@
 import { ENVIRONMENTS } from '../constants/environments.js';
 import { getConfigAccountEnvironment } from '../config/index.js';
 
-const DEFAULT_HUBLET = 'na1';
-const HUBLET_PATTERN = /^[a-z]{2}\d+$/;
-
 function getEnvUrlString(env?: string): string {
   if (typeof env !== 'string') {
     return '';
@@ -23,19 +20,6 @@ export function getHubSpotWebsiteOriginByAccountId(accountId: number): string {
   );
 }
 
-function getApiSubdomain(env?: string, hublet?: string): string {
-  if (
-    getEnvUrlString(env) !== ENVIRONMENTS.QA ||
-    !hublet ||
-    hublet === DEFAULT_HUBLET ||
-    !HUBLET_PATTERN.test(hublet)
-  ) {
-    return 'api';
-  }
-
-  return `api-${hublet}`;
-}
-
 export function getHubSpotApiOrigin(
   env?: string,
   useLocalHost?: boolean,
@@ -47,8 +31,10 @@ export function getHubSpotApiOrigin(
     domain = `${domainOverride}${getEnvUrlString(env)}`;
   }
   if (!domain || typeof domain !== 'string') {
-    const subdomain = useLocalHost ? 'local' : getApiSubdomain(env, hublet);
-    domain = `${subdomain}.hubapi${getEnvUrlString(env)}`;
+    const envUrlString = getEnvUrlString(env);
+    const apiSubdomain =
+      hublet && envUrlString === ENVIRONMENTS.QA ? `api-${hublet}` : 'api';
+    domain = `${useLocalHost ? 'local' : apiSubdomain}.hubapi${envUrlString}`;
   }
   return `https://${domain}.com`;
 }

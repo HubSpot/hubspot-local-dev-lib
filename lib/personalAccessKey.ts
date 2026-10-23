@@ -5,7 +5,6 @@ import {
   fetchAccessToken,
   fetchSandboxHubData,
   fetchDeveloperTestAccountData,
-  getHubletFromPersonalAccessKey,
 } from '../utils/personalAccessKey.js';
 import {
   PersonalAccessKeyConfigAccount,
@@ -179,7 +178,6 @@ export async function updateConfigWithAccessToken(
   const { portalId, accessToken, expiresAt, accountType } = token;
   const account = getConfigAccountIfExists(portalId);
   const accountEnv = env || account?.env || ENVIRONMENTS.PROD;
-  const hublet = getHubletFromPersonalAccessKey(personalAccessKey);
 
   let parentAccountId;
   try {
@@ -190,8 +188,7 @@ export async function updateConfigWithAccessToken(
       const { data: sandboxDataResponse } = await fetchSandboxHubData(
         accessToken,
         portalId,
-        accountEnv,
-        hublet
+        accountEnv
       );
       if (sandboxDataResponse.parentHubId) {
         parentAccountId = sandboxDataResponse.parentHubId;
@@ -208,12 +205,7 @@ export async function updateConfigWithAccessToken(
   try {
     if (accountType === HUBSPOT_ACCOUNT_TYPES.DEVELOPER_TEST) {
       const { data: developerTestAccountResponse } =
-        await fetchDeveloperTestAccountData(
-          accessToken,
-          portalId,
-          accountEnv,
-          hublet
-        );
+        await fetchDeveloperTestAccountData(accessToken, portalId, accountEnv);
       if (developerTestAccountResponse) {
         parentAccountId = developerTestAccountResponse.parentPortalId;
       }

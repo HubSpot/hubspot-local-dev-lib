@@ -21,7 +21,7 @@ import pkg from '../../package.json' with { type: 'json' };
 import { HubSpotConfigAccount } from '../../types/Accounts.js';
 import {
   fetchAccessToken,
-  getHubletFromPersonalAccessKey as __getHubletFromPersonalAccessKey,
+  getHubletFromToken as __getHubletFromToken,
 } from '../../utils/personalAccessKey.js';
 
 vi.mock('fs-extra');
@@ -55,10 +55,9 @@ const getConfig = __getConfig as MockedFunction<typeof __getConfig>;
 const getConfigAccountById = __getConfigAccountById as MockedFunction<
   typeof __getConfigAccountById
 >;
-const getHubletFromPersonalAccessKey =
-  __getHubletFromPersonalAccessKey as MockedFunction<
-    typeof __getHubletFromPersonalAccessKey
-  >;
+const getHubletFromToken = __getHubletFromToken as MockedFunction<
+  typeof __getHubletFromToken
+>;
 
 const ACCOUNT: HubSpotConfigAccount = {
   name: 'test-account',
@@ -80,7 +79,7 @@ describe('http/index', () => {
   afterEach(() => {
     getConfig.mockReset();
     getConfigAccountById.mockReset();
-    getHubletFromPersonalAccessKey.mockReset();
+    getHubletFromToken.mockReset();
   });
 
   describe('http.getOctetStream()', () => {
@@ -259,13 +258,11 @@ describe('http/index', () => {
         accounts: [account],
       });
       getConfigAccountById.mockReturnValue(account);
-      getHubletFromPersonalAccessKey.mockReturnValue('eu1');
+      getHubletFromToken.mockReturnValue('eu1');
 
       await http.get(123, { url: 'some/endpoint/path' });
 
-      expect(getHubletFromPersonalAccessKey).toHaveBeenCalledWith(
-        'some-secret'
-      );
+      expect(getHubletFromToken).toHaveBeenCalledWith('some-secret');
       expect(mockedAxios).toHaveBeenCalledWith(
         expect.objectContaining({
           baseURL: 'https://api-eu1.hubapiqa.com',

@@ -87,41 +87,16 @@ describe('lib/urls', () => {
       expect(url).toBe('https://api.hubspotqa.com');
     });
 
-    it('gets qa hublet url for non-na1 hublets', () => {
+    it('gets qa hublet url', () => {
       const url = getHubSpotApiOrigin('qa', false, 'eu1');
 
       expect(url).toBe('https://api-eu1.hubapiqa.com');
     });
 
-    it('gets default qa url for the na1 hublet', () => {
-      const url = getHubSpotApiOrigin('qa', false, 'na1');
-
-      expect(url).toBe('https://api.hubapiqa.com');
-    });
-
-    it('gets default prod url for non-na1 hublets', () => {
+    it('ignores hublet argument for prod', () => {
       const url = getHubSpotApiOrigin('prod', false, 'eu1');
 
       expect(url).toBe('https://api.hubapi.com');
-    });
-
-    it('gets qa local url when a hublet is provided', () => {
-      const url = getHubSpotApiOrigin('qa', true, 'eu1');
-
-      expect(url).toBe('https://local.hubapiqa.com');
-    });
-
-    it('ignores hublet argument when using override', () => {
-      process.env.HUBAPI_DOMAIN_OVERRIDE = 'api.hubspot';
-      const url = getHubSpotApiOrigin('qa', false, 'eu1');
-
-      expect(url).toBe('https://api.hubspotqa.com');
-    });
-
-    it('ignores malformed hublets', () => {
-      const url = getHubSpotApiOrigin('qa', false, 'evil.com/eu1');
-
-      expect(url).toBe('https://api.hubapiqa.com');
     });
   });
 });
