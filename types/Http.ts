@@ -21,6 +21,7 @@ export type HttpOptions = {
   baseURL?: string;
   url: string;
   env?: string;
+  hublet?: string;
   localHostOverride?: boolean;
   data?:
     | Data

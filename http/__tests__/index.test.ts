@@ -19,7 +19,10 @@ import { ENVIRONMENTS } from '../../constants/environments.js';
 import { http } from '../index.js';
 import pkg from '../../package.json' with { type: 'json' };
 import { HubSpotConfigAccount } from '../../types/Accounts.js';
-import { fetchAccessToken } from '../../utils/personalAccessKey.js';
+import {
+  fetchAccessToken,
+  getHubletFromPersonalAccessKey as __getHubletFromPersonalAccessKey,
+} from '../../utils/personalAccessKey.js';
 
 vi.mock('fs-extra');
 vi.mock('../client');
@@ -52,6 +55,10 @@ const getConfig = __getConfig as MockedFunction<typeof __getConfig>;
 const getConfigAccountById = __getConfigAccountById as MockedFunction<
   typeof __getConfigAccountById
 >;
+const getHubletFromPersonalAccessKey =
+  __getHubletFromPersonalAccessKey as MockedFunction<
+    typeof __getHubletFromPersonalAccessKey
+  >;
 
 const ACCOUNT: HubSpotConfigAccount = {
   name: 'test-account',
@@ -73,6 +80,7 @@ describe('http/index', () => {
   afterEach(() => {
     getConfig.mockReset();
     getConfigAccountById.mockReset();
+    getHubletFromPersonalAccessKey.mockReset();
   });
 
   describe('http.getOctetStream()', () => {
@@ -231,6 +239,39 @@ describe('http/index', () => {
           options: { keepAlive: true, maxSockets: 6, maxTotalSockets: 26 },
         },
       });
+    });
+
+    it('uses the qa hublet from the personal access key', async () => {
+      const account: HubSpotConfigAccount = {
+        name: 'test-account',
+        accountId: 123,
+        env: ENVIRONMENTS.QA,
+        authType: 'personalaccesskey',
+        personalAccessKey: 'some-secret',
+        auth: {
+          tokenInfo: {
+            expiresAt: moment().add(2, 'hours').toISOString(),
+            accessToken: 'let-me-in',
+          },
+        },
+      };
+      getConfig.mockReturnValue({
+        accounts: [account],
+      });
+      getConfigAccountById.mockReturnValue(account);
+      getHubletFromPersonalAccessKey.mockReturnValue('eu1');
+
+      await http.get(123, { url: 'some/endpoint/path' });
+
+      expect(getHubletFromPersonalAccessKey).toHaveBeenCalledWith(
+        'some-secret'
+      );
+      expect(mockedAxios).toHaveBeenCalledWith(
+        expect.objectContaining({
+          baseURL: 'https://api-eu1.hubapiqa.com',
+          url: 'some/endpoint/path',
+        })
+      );
     });
 
     it('adds authorization header from an injected access token without refreshing', async () => {

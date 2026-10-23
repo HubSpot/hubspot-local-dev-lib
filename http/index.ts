@@ -7,6 +7,7 @@ import { getConfigAccountById } from '../config/index.js';
 import { USER_AGENTS, getAxiosConfig } from './getAxiosConfig.js';
 import { addQueryParams } from './addQueryParams.js';
 import { accessTokenForPersonalAccessKey } from '../lib/personalAccessKey.js';
+import { getHubletFromPersonalAccessKey } from '../utils/personalAccessKey.js';
 import { accessTokenForInjectedAccessToken } from '../lib/accessToken.js';
 import { getOauthManager } from '../lib/oauth.js';
 import { HttpOptions, HubSpotPromise } from '../types/Http.js';
@@ -102,9 +103,13 @@ async function withAuth(
   const account = getConfigAccountById(accountId);
 
   const { env, authType } = account;
+  const hublet =
+    account.authType === PERSONAL_ACCESS_KEY_AUTH_METHOD.value
+      ? getHubletFromPersonalAccessKey(account.personalAccessKey)
+      : undefined;
   const axiosConfig = withPortalId(
     accountId,
-    getAxiosConfig({ env, ...options })
+    getAxiosConfig({ env, hublet, ...options })
   );
 
   if (authType === PERSONAL_ACCESS_KEY_AUTH_METHOD.value) {

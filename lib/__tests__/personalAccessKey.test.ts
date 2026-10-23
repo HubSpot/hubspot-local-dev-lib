@@ -13,6 +13,7 @@ import {
   fetchAccessToken as __fetchAccessToken,
   fetchSandboxHubData as __fetchSandboxHubData,
   fetchDeveloperTestAccountData as __fetchDeveloperTestAccountData,
+  getHubletFromPersonalAccessKey as __getHubletFromPersonalAccessKey,
 } from '../../utils/personalAccessKey.js';
 import { ENVIRONMENTS } from '../../constants/environments.js';
 import { HUBSPOT_ACCOUNT_TYPES } from '../../constants/config.js';
@@ -57,6 +58,10 @@ const fetchSandboxHubData = __fetchSandboxHubData as MockedFunction<
 const fetchDeveloperTestAccountData =
   __fetchDeveloperTestAccountData as MockedFunction<
     typeof __fetchDeveloperTestAccountData
+  >;
+const getHubletFromPersonalAccessKey =
+  __getHubletFromPersonalAccessKey as MockedFunction<
+    typeof __getHubletFromPersonalAccessKey
   >;
 
 describe('lib/personalAccessKey', () => {
@@ -365,6 +370,41 @@ describe('lib/personalAccessKey', () => {
           authType: 'personalaccesskey',
           parentAccountId: 789,
         })
+      );
+    });
+
+    it('uses the hublet from the personal access key for sandbox lookups', async () => {
+      getConfigAccountIfExists.mockReturnValue(undefined);
+      getHubletFromPersonalAccessKey.mockReturnValue('eu1');
+      fetchSandboxHubData.mockResolvedValue(
+        mockAxiosResponse({
+          type: 'DEVELOPER',
+          parentHubId: 789,
+        })
+      );
+
+      await updateConfigWithAccessToken(
+        {
+          portalId: 123,
+          accessToken: 'fresh-token',
+          expiresAt: moment().add(1, 'hours').toISOString(),
+          scopeGroups: ['content'],
+          enabledFeatures: {},
+          encodedOAuthRefreshToken: 'pak_123',
+          hubName: 'test-hub',
+          accountType: HUBSPOT_ACCOUNT_TYPES.DEVELOPMENT_SANDBOX,
+        },
+        'pak_123',
+        ENVIRONMENTS.QA,
+        'account-name'
+      );
+
+      expect(getHubletFromPersonalAccessKey).toHaveBeenCalledWith('pak_123');
+      expect(fetchSandboxHubData).toHaveBeenCalledWith(
+        'fresh-token',
+        123,
+        ENVIRONMENTS.QA,
+        'eu1'
       );
     });
 
