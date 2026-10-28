@@ -1,53 +1,73 @@
 name: Release
 
+# Publishes whenever main has a package.json version that isn't on npm yet.
+# Release PRs are opened by `yarn release -t <latest|next>`; merging one
+# lands the version bump on main and triggers this workflow.
 on:
+  push:
+    branches: [main]
+    paths: [package.json]
   workflow_dispatch:
-    inputs:
-      tag:
-        description: 'npm dist-tag to publish to'
-        required: true
-        type: choice
-        options:
-          - next
-          - latest
-          - experimental
-      version-increment:
-        description: 'SemVer increment for the next release'
-        required: true
-        type: choice
-        options:
-          - prerelease
-          - patch
-          - minor
-          - major
-      dry-run:
-        description: 'Run every step without publishing or pushing'
-        required: true
-        type: boolean
-        default: true
 
 concurrency:
   group: release
   cancel-in-progress: false
 
 jobs:
-  release:
+  check:
+    runs-on: ubuntu-latest
+    outputs:
+      should-publish: ${{ steps.check.outputs.should-publish }}
+      version: ${{ steps.check.outputs.version }}
+      tag: ${{ steps.check.outputs.tag }}
+      current-latest: ${{ steps.check.outputs.current-latest }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check for an unpublished version
+        id: check
+        run: |
+          PACKAGE_NAME=$(node -p "require('./package.json').name")
+          VERSION=$(node -p "require('./package.json').version")
+
+          if npm view "$PACKAGE_NAME@$VERSION" version --silent >/dev/null 2>&1; then
+            echo "$PACKAGE_NAME@$VERSION is already published, nothing to do"
+            echo "should-publish=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+-beta\.[0-9]+$ ]]; then
+            TAG=next
+          elif [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            TAG=latest
+          else
+            echo "::error::Version $VERSION is neither a beta nor a stable release. Experimental releases are published locally with \`yarn release -t experimental\`."
+            exit 1
+          fi
+
+          echo "Publishing $PACKAGE_NAME@$VERSION to $TAG"
+          {
+            echo "should-publish=true"
+            echo "version=$VERSION"
+            echo "tag=$TAG"
+            echo "current-latest=$(npm view "$PACKAGE_NAME" dist-tags.latest)"
+          } >> "$GITHUB_OUTPUT"
+
+  publish:
+    needs: check
+    if: needs.check.outputs.should-publish == 'true'
     runs-on: ubuntu-latest
     environment: npm-release
     permissions:
       contents: write
-      pull-requests: write
       id-token: write
     env:
-      TAG: ${{ inputs.tag }}
-      VERSION_INCREMENT: ${{ inputs.version-increment }}
-      DRY_RUN: ${{ inputs.dry-run }}
-      BRANCH: ${{ github.ref_name }}
+      VERSION: ${{ needs.check.outputs.version }}
+      TAG: ${{ needs.check.outputs.tag }}
+      CURRENT_LATEST: ${{ needs.check.outputs.current-latest }}
       GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
@@ -58,69 +78,31 @@ jobs:
       - run: npm install -g npm@11.6.2
 
       - run: yarn install --frozen-lockfile
-
-      - name: Validate and compute version
-        id: version
-        run: >
-          yarn tsx ./scripts/release-ci.ts --tag "$TAG" --version-increment "$VERSION_INCREMENT" --branch "$BRANCH"
-
-      - name: Configure git
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-      - name: Bump version
-        env:
-          NEW_VERSION: ${{ steps.version.outputs.new-version }}
-        run: |
-          npm version "$NEW_VERSION" --no-git-tag-version
-          if [ "$TAG" != "experimental" ]; then
-            git checkout -b "v$NEW_VERSION-publish"
-            git commit -am "v$NEW_VERSION"
-            git tag "v$NEW_VERSION"
-          fi
-
       - run: yarn build
       - run: yarn test
 
       - name: Publish to npm
         working-directory: dist
+        run: npm publish --tag "$TAG" --provenance
+
+      - name: Tag release commit
         run: |
-          if [ "$DRY_RUN" = "true" ]; then
-            npm publish --tag "$TAG" --dry-run
-          else
-            npm publish --tag "$TAG" --provenance
-          fi
+          git tag "v$VERSION"
+          git push origin "v$VERSION"
 
       # Trusted publishing only authenticates `npm publish`, so dist-tag
       # updates still need a token
       - name: Update dist-tags
-        if: inputs.tag == 'latest' && !inputs.dry-run
+        if: needs.check.outputs.tag == 'latest'
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_DIST_TAG_TOKEN }}
-          NEW_VERSION: ${{ steps.version.outputs.new-version }}
-          CURRENT_LATEST: ${{ steps.version.outputs.current-latest }}
         run: |
           PACKAGE_NAME=$(node -p "require('./package.json').name")
-          npm dist-tag add "$PACKAGE_NAME@$NEW_VERSION" next
-          if [ "$VERSION_INCREMENT" = "major" ]; then
+          npm dist-tag add "$PACKAGE_NAME@$VERSION" next
+          if [ "${VERSION%%.*}" != "${CURRENT_LATEST%%.*}" ]; then
             npm dist-tag add "$PACKAGE_NAME@$CURRENT_LATEST" previous
           fi
 
-      - name: Push version bump and open PR
-        if: inputs.tag != 'experimental' && !inputs.dry-run
-        env:
-          NEW_VERSION: ${{ steps.version.outputs.new-version }}
-        run: |
-          git push --atomic origin "v$NEW_VERSION-publish" "v$NEW_VERSION"
-          gh pr create \
-            --base main \
-            --head "v$NEW_VERSION-publish" \
-            --title "v$NEW_VERSION" \
-            --body "Version bump for the \`$NEW_VERSION\` release published by ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-
       - name: Create GitHub release
-        if: inputs.tag == 'latest' && !inputs.dry-run
-        env:
-          NEW_VERSION: ${{ steps.version.outputs.new-version }}
-        run: gh release create "v$NEW_VERSION" --generate-notes --latest
+        if: needs.check.outputs.tag == 'latest'
+        run: gh release create "v$VERSION" --generate-notes --latest

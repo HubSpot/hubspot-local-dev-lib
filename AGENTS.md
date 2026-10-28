@@ -107,6 +107,14 @@ To stop: run `yarn unlink` here, then `yarn install --force` in CLI.
 1. In this repo: `yarn release -v=prerelease -t=experimental`
 2. In CLI: update `package.json` to the experimental version and run `yarn install --force`.
 
+## Releasing
+
+Use the `release` skill. In short: `yarn release -v <patch|minor|major|prerelease> -t <latest|next|experimental> -y`.
+
+- `latest` and `next` only open a version-bump PR from `main`. Merging that PR publishes from the `Release` GitHub Action.
+- `experimental` builds and publishes from the local machine.
+- Ask the user before running a release that isn't a dry run (`-d`).
+
 ## Git And PR Workflow
 
 - Use Conventional Commits for all commit messages and PR titles. Format: `<type>: <short description>`. Types: `feat`, `fix`, `chore`, `refactor`, `test`, `docs`, `perf`, `ci`, `build`.
@@ -121,6 +129,7 @@ Portable project skills are exposed under `.agents/skills/`. When a task matches
 
 - `code-check`: review branch changes against repo conventions.
 - `push-changes`: run pre-commit checks, commit, and push to remote.
+- `release`: release to npm with `yarn release` (latest, next, or experimental).
 
 Claude-specific skills and orchestration workflows may still live only under `.claude/skills/`.
 
