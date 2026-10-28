@@ -1,0 +1,126 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'npm dist-tag to publish to'
+        required: true
+        type: choice
+        options:
+          - next
+          - latest
+          - experimental
+      version-increment:
+        description: 'SemVer increment for the next release'
+        required: true
+        type: choice
+        options:
+          - prerelease
+          - patch
+          - minor
+          - major
+      dry-run:
+        description: 'Run every step without publishing or pushing'
+        required: true
+        type: boolean
+        default: true
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    environment: npm-release
+    permissions:
+      contents: write
+      pull-requests: write
+      id-token: write
+    env:
+      TAG: ${{ inputs.tag }}
+      VERSION_INCREMENT: ${{ inputs.version-increment }}
+      DRY_RUN: ${{ inputs.dry-run }}
+      BRANCH: ${{ github.ref_name }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.x
+          registry-url: 'https://registry.npmjs.org'
+
+      # Trusted publishing (OIDC) requires npm >= 11.5.1
+      - run: npm install -g npm@11.6.2
+
+      - run: yarn install --frozen-lockfile
+
+      - name: Validate and compute version
+        id: version
+        run: >
+          yarn tsx ./scripts/release-ci.ts --tag "$TAG" --version-increment "$VERSION_INCREMENT" --branch "$BRANCH"
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Bump version
+        env:
+          NEW_VERSION: ${{ steps.version.outputs.new-version }}
+        run: |
+          npm version "$NEW_VERSION" --no-git-tag-version
+          if [ "$TAG" != "experimental" ]; then
+            git checkout -b "v$NEW_VERSION-publish"
+            git commit -am "v$NEW_VERSION"
+            git tag "v$NEW_VERSION"
+          fi
+
+      - run: yarn build
+      - run: yarn test
+
+      - name: Publish to npm
+        working-directory: dist
+        run: |
+          if [ "$DRY_RUN" = "true" ]; then
+            npm publish --tag "$TAG" --dry-run
+          else
+            npm publish --tag "$TAG" --provenance
+          fi
+
+      # Trusted publishing only authenticates `npm publish`, so dist-tag
+      # updates still need a token
+      - name: Update dist-tags
+        if: inputs.tag == 'latest' && !inputs.dry-run
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_DIST_TAG_TOKEN }}
+          NEW_VERSION: ${{ steps.version.outputs.new-version }}
+          CURRENT_LATEST: ${{ steps.version.outputs.current-latest }}
+        run: |
+          PACKAGE_NAME=$(node -p "require('./package.json').name")
+          npm dist-tag add "$PACKAGE_NAME@$NEW_VERSION" next
+          if [ "$VERSION_INCREMENT" = "major" ]; then
+            npm dist-tag add "$PACKAGE_NAME@$CURRENT_LATEST" previous
+          fi
+
+      - name: Push version bump and open PR
+        if: inputs.tag != 'experimental' && !inputs.dry-run
+        env:
+          NEW_VERSION: ${{ steps.version.outputs.new-version }}
+        run: |
+          git push --atomic origin "v$NEW_VERSION-publish" "v$NEW_VERSION"
+          gh pr create \
+            --base main \
+            --head "v$NEW_VERSION-publish" \
+            --title "v$NEW_VERSION" \
+            --body "Version bump for the \`$NEW_VERSION\` release published by ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+      - name: Create GitHub release
+        if: inputs.tag == 'latest' && !inputs.dry-run
+        env:
+          NEW_VERSION: ${{ steps.version.outputs.new-version }}
+        run: gh release create "v$NEW_VERSION" --generate-notes --latest
