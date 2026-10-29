@@ -1,7 +1,7 @@
 name: Release
 
 # Publishes whenever main has a package.json version that isn't on npm yet.
-# Release PRs are opened by `yarn release -t <latest|next>`; merging one
+# Release PRs are opened by `yarn release` and `yarn beta-release`; merging one
 # lands the version bump on main and triggers this workflow.
 on:
   push:
