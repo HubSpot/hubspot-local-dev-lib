@@ -1,10 +1,8 @@
 name: Release
 
-# Release PRs are opened by `yarn release`, `yarn beta-release`, and
-# `yarn previous-release`. On a release PR this builds and runs
-# `npm publish --dry-run`; once merged, it publishes the new version.
-# To support previous releases, add the previous branch to both trigger
-# lists and set PREVIOUS_BRANCH.
+# Release PRs are opened by `yarn release` and `yarn beta-release`. On a
+# release PR this builds and runs `npm publish --dry-run`; once merged, it
+# publishes the new version.
 on:
   push:
     branches: [main]
@@ -16,7 +14,6 @@ on:
 
 env:
   MAIN_BRANCH: main
-  PREVIOUS_BRANCH: ''
   IGNORE_SCRIPTS: 'false'
 
 concurrency:
@@ -36,7 +33,6 @@ jobs:
       version: ${{ steps.check.outputs.version }}
       tag: ${{ steps.check.outputs.tag }}
       registry: ${{ steps.check.outputs.registry }}
-      current-latest: ${{ steps.check.outputs.current-latest }}
     steps:
       - uses: actions/checkout@v4
 
@@ -66,10 +62,8 @@ jobs:
             TAG=next
           elif [ "$TARGET_BRANCH" = "$MAIN_BRANCH" ] && [[ "$VERSION" =~ $STABLE ]]; then
             TAG=latest
-          elif [ -n "$PREVIOUS_BRANCH" ] && [ "$TARGET_BRANCH" = "$PREVIOUS_BRANCH" ] && [[ "$VERSION" =~ $STABLE ]]; then
-            TAG=previous
           else
-            echo "::error::Can't publish $VERSION from $TARGET_BRANCH. Expected X.Y.Z or X.Y.Z-beta.N on $MAIN_BRANCH, or X.Y.Z on the previous branch. Experimental releases use \`yarn experimental-release\`."
+            echo "::error::Can't publish $VERSION from $TARGET_BRANCH. Expected X.Y.Z or X.Y.Z-beta.N on $MAIN_BRANCH. Experimental releases use \`yarn experimental-release\`."
             exit 1
           fi
 
@@ -79,7 +73,6 @@ jobs:
             echo "version=$VERSION"
             echo "tag=$TAG"
             echo "registry=$REGISTRY"
-            echo "current-latest=$(npm view "$PACKAGE_NAME" dist-tags.latest --registry "$REGISTRY")"
           } >> "$GITHUB_OUTPUT"
 
   dry-run:
@@ -119,7 +112,6 @@ jobs:
       VERSION: ${{ needs.check.outputs.version }}
       TAG: ${{ needs.check.outputs.tag }}
       REGISTRY: ${{ needs.check.outputs.registry }}
-      CURRENT_LATEST: ${{ needs.check.outputs.current-latest }}
       GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
@@ -151,7 +143,7 @@ jobs:
       # Trusted publishing only authenticates `npm publish`, so dist-tag
       # updates still need a token. As before, a failure here doesn't fail
       # the release.
-      - name: Update dist-tags
+      - name: Update next dist-tag
         if: needs.check.outputs.tag == 'latest'
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_DIST_TAG_TOKEN }}
@@ -159,19 +151,10 @@ jobs:
           PACKAGE_NAME=$(node -p "require('./package.json').name")
           npm dist-tag add "$PACKAGE_NAME@$VERSION" next --registry "$REGISTRY" ||
             echo "::warning::Failed to update the next tag. Run: npm dist-tag add $PACKAGE_NAME@$VERSION next"
-          if [ "${VERSION%%.*}" -gt "${CURRENT_LATEST%%.*}" ]; then
-            npm dist-tag add "$PACKAGE_NAME@$CURRENT_LATEST" previous --registry "$REGISTRY" ||
-              echo "::warning::Failed to update the previous tag. Run: npm dist-tag add $PACKAGE_NAME@$CURRENT_LATEST previous"
-          fi
 
       - name: Create GitHub release
-        if: needs.check.outputs.tag == 'latest' || needs.check.outputs.tag == 'previous'
-        run: |
-          if [ "$TAG" = "latest" ]; then
-            gh release create "v$VERSION" --generate-notes --latest
-          else
-            gh release create "v$VERSION" --generate-notes --latest=false
-          fi
+        if: needs.check.outputs.tag == 'latest'
+        run: gh release create "v$VERSION" --generate-notes --latest
 
       - name: Summary
         run: |
