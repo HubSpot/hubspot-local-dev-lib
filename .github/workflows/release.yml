@@ -1,0 +1,162 @@
+name: Release
+
+# Release PRs are opened by `yarn release` and `yarn beta-release`. On a
+# release PR this builds and runs `npm publish --dry-run`; once merged, it
+# publishes the new version.
+on:
+  push:
+    branches: [main]
+    paths: [package.json]
+  pull_request:
+    branches: [main]
+    paths: [package.json]
+  workflow_dispatch:
+
+env:
+  MAIN_BRANCH: main
+  IGNORE_SCRIPTS: 'false'
+
+concurrency:
+  group: release-${{ github.event_name == 'pull_request' && github.head_ref || 'publish' }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    if: >
+      github.event_name != 'pull_request' || (startsWith(github.head_ref, 'v') && endsWith(github.head_ref, '-publish'))
+    runs-on: ubuntu-latest
+    outputs:
+      should-publish: ${{ steps.check.outputs.should-publish }}
+      version: ${{ steps.check.outputs.version }}
+      tag: ${{ steps.check.outputs.tag }}
+      registry: ${{ steps.check.outputs.registry }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Determine version and tag
+        id: check
+        env:
+          TARGET_BRANCH: ${{ github.event_name == 'pull_request' && github.base_ref || github.ref_name }}
+        run: |
+          PACKAGE_NAME=$(node -p "require('./package.json').name")
+          VERSION=$(node -p "require('./package.json').version")
+          REGISTRY=$(node -p "require('./package.json').publishConfig?.registry ?? ''")
+
+          if [ -z "$REGISTRY" ]; then
+            echo "::error::publishConfig.registry must be set in package.json"
+            exit 1
+          fi
+
+          if npm view "$PACKAGE_NAME@$VERSION" version --registry "$REGISTRY" >/dev/null 2>&1; then
+            echo "$PACKAGE_NAME@$VERSION is already published, nothing to do"
+            echo "should-publish=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          STABLE='^[0-9]+\.[0-9]+\.[0-9]+$'
+          BETA='^[0-9]+\.[0-9]+\.[0-9]+-beta\.[0-9]+$'
+          if [ "$TARGET_BRANCH" = "$MAIN_BRANCH" ] && [[ "$VERSION" =~ $BETA ]]; then
+            TAG=next
+          elif [ "$TARGET_BRANCH" = "$MAIN_BRANCH" ] && [[ "$VERSION" =~ $STABLE ]]; then
+            TAG=latest
+          else
+            echo "::error::Can't publish $VERSION from $TARGET_BRANCH. Expected X.Y.Z or X.Y.Z-beta.N on $MAIN_BRANCH. Experimental releases use \`yarn experimental-release\`."
+            exit 1
+          fi
+
+          echo "Publishing $PACKAGE_NAME@$VERSION to $TAG"
+          {
+            echo "should-publish=true"
+            echo "version=$VERSION"
+            echo "tag=$TAG"
+            echo "registry=$REGISTRY"
+          } >> "$GITHUB_OUTPUT"
+
+  dry-run:
+    needs: check
+    if: github.event_name == 'pull_request' && needs.check.outputs.should-publish == 'true'
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ needs.check.outputs.tag }}
+      REGISTRY: ${{ needs.check.outputs.registry }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.x
+
+      - run: yarn install --frozen-lockfile
+      - run: yarn build
+      - run: yarn test
+
+      - name: Publish dry run
+        working-directory: dist
+        run: |
+          ARGS=(--tag "$TAG" --registry "$REGISTRY" --dry-run)
+          if [ "$IGNORE_SCRIPTS" = "true" ]; then ARGS+=(--ignore-scripts); fi
+          npm publish "${ARGS[@]}"
+
+  publish:
+    needs: check
+    if: github.event_name != 'pull_request' && needs.check.outputs.should-publish == 'true'
+    runs-on: ubuntu-latest
+    environment: npm-release
+    permissions:
+      contents: write
+      id-token: write
+    env:
+      VERSION: ${{ needs.check.outputs.version }}
+      TAG: ${{ needs.check.outputs.tag }}
+      REGISTRY: ${{ needs.check.outputs.registry }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.x
+          registry-url: ${{ needs.check.outputs.registry }}
+
+      # Trusted publishing (OIDC) requires npm >= 11.5.1
+      - run: npm install -g npm@11.6.2
+
+      - run: yarn install --frozen-lockfile
+      - run: yarn build
+      - run: yarn test
+
+      - name: Publish to npm
+        working-directory: dist
+        run: |
+          ARGS=(--tag "$TAG" --registry "$REGISTRY" --provenance)
+          if [ "$IGNORE_SCRIPTS" = "true" ]; then ARGS+=(--ignore-scripts); fi
+          npm publish "${ARGS[@]}"
+
+      - name: Tag release commit
+        run: |
+          git tag "v$VERSION"
+          git push origin "v$VERSION"
+
+      # Trusted publishing only authenticates `npm publish`, so dist-tag
+      # updates still need a token. As before, a failure here doesn't fail
+      # the release.
+      - name: Update next dist-tag
+        if: needs.check.outputs.tag == 'latest'
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_DIST_TAG_TOKEN }}
+        run: |
+          PACKAGE_NAME=$(node -p "require('./package.json').name")
+          npm dist-tag add "$PACKAGE_NAME@$VERSION" next --registry "$REGISTRY" ||
+            echo "::warning::Failed to update the next tag. Run: npm dist-tag add $PACKAGE_NAME@$VERSION next"
+
+      - name: Create GitHub release
+        if: needs.check.outputs.tag == 'latest'
+        run: gh release create "v$VERSION" --generate-notes --latest
+
+      - name: Summary
+        run: |
+          PACKAGE_NAME=$(node -p "require('./package.json').name")
+          echo "Published \`$PACKAGE_NAME@$VERSION\` on the \`$TAG\` tag: https://www.npmjs.com/package/$PACKAGE_NAME?activeTab=versions" >> "$GITHUB_STEP_SUMMARY"

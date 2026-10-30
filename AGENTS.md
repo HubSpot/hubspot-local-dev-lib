@@ -104,8 +104,17 @@ To stop: run `yarn unlink` here, then `yarn install --force` in CLI.
 
 ### Option 2: Experimental NPM release (for CI testing or sharing)
 
-1. In this repo: `yarn release -v=prerelease -t=experimental`
+1. Push your branch, then in this repo: `yarn experimental-release`
 2. In CLI: update `package.json` to the experimental version and run `yarn install --force`.
+
+## Releasing
+
+Use the `release` skill. In short:
+
+- `yarn release -v <patch|minor|major> -y` (`latest`) and `yarn beta-release -v <patch|minor|major|prerelease> -y` (`next`) only open a version-bump PR from `main`. Merging that PR publishes from the `Release` GitHub Action.
+- `yarn experimental-release -y` publishes the current pushed branch from the `Experimental Release` GitHub Action. It takes no increment and commits nothing.
+- None of these need an npm login, only an authenticated `gh` CLI.
+- Ask the user before running a release that isn't a dry run (`-d`).
 
 ## Git And PR Workflow
 
@@ -121,6 +130,7 @@ Portable project skills are exposed under `.agents/skills/`. When a task matches
 
 - `code-check`: review branch changes against repo conventions.
 - `push-changes`: run pre-commit checks, commit, and push to remote.
+- `release`: release to npm (`yarn release`, `yarn beta-release`, or `yarn experimental-release`).
 
 Claude-specific skills and orchestration workflows may still live only under `.claude/skills/`.
 

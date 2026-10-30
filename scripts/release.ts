@@ -15,5 +15,6 @@ buildReleaseScript({
     repositoryUrl: 'https://github.com/HubSpot/hubspot-local-dev-lib',
     build,
     mainBranch: 'main',
+    publishFromCI: true,
   },
 });

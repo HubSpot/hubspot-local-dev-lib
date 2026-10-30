@@ -21,7 +21,9 @@
     "lint": "eslint --max-warnings=0 . && prettier . --check",
     "local-dev": "yarn build && cd dist && yarn link && cd .. && tsc --watch --rootDir . --outdir dist",
     "prettier:write": "prettier . --write",
-    "release": "tsx ./scripts/release.ts release",
+    "release": "tsx ./scripts/release.ts latest",
+    "beta-release": "tsx ./scripts/release.ts next",
+    "experimental-release": "tsx ./scripts/release.ts experimental",
     "test": "NODE_NO_WARNINGS=1 vitest run",
     "test:watch": "NODE_NO_WARNINGS=1 vitest"
   },
