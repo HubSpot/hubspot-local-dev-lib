@@ -44,5 +44,72 @@ describe('lib/ignoreRules', () => {
     it('does not ignore the current folder', () => {
       expect(shouldIgnoreFile('.')).toBe(false);
     });
+
+    it('should use the default behavior when passed by reference to Array.filter', () => {
+      const ignoreFile: (file: string) => boolean = shouldIgnoreFile;
+      const files = [`${REPO_FOLDER}/index.js`, `${REPO_FOLDER}/.env`];
+
+      expect(files.filter(ignoreFile)).toEqual([`${REPO_FOLDER}/.env`]);
+    });
+
+    describe('with rootDir', () => {
+      const HIDDEN_PARENT_ROOT = '/Users/me/.workspaces/my-project/src';
+
+      beforeEach(() => {
+        vi.spyOn(process, 'cwd').mockReturnValue('/Users/me/.workspaces/cwd');
+      });
+
+      afterEach(() => {
+        vi.restoreAllMocks();
+      });
+
+      it('should not ignore relative files when the root is nested under a hidden directory', () => {
+        expect(
+          shouldIgnoreFile('app/app-logo.png', true, HIDDEN_PARENT_ROOT)
+        ).toBe(false);
+        expect(shouldIgnoreFile('app', true, HIDDEN_PARENT_ROOT)).toBe(false);
+      });
+
+      it('should not ignore absolute files when the root is nested under a hidden directory', () => {
+        expect(
+          shouldIgnoreFile(
+            `${HIDDEN_PARENT_ROOT}/app/app-logo.png`,
+            true,
+            HIDDEN_PARENT_ROOT
+          )
+        ).toBe(false);
+      });
+
+      it('should not ignore the root directory itself', () => {
+        expect(
+          shouldIgnoreFile(HIDDEN_PARENT_ROOT, true, HIDDEN_PARENT_ROOT)
+        ).toBe(false);
+      });
+
+      it('should still ignore hidden files and folders inside the root', () => {
+        expect(shouldIgnoreFile('.env', true, HIDDEN_PARENT_ROOT)).toBe(true);
+        expect(shouldIgnoreFile('.git', true, HIDDEN_PARENT_ROOT)).toBe(true);
+        expect(
+          shouldIgnoreFile('app/.hidden/file.js', true, HIDDEN_PARENT_ROOT)
+        ).toBe(true);
+        expect(
+          shouldIgnoreFile(
+            `${HIDDEN_PARENT_ROOT}/app/.hidden/file.js`,
+            true,
+            HIDDEN_PARENT_ROOT
+          )
+        ).toBe(true);
+      });
+
+      it('should still ignore node_modules inside the root', () => {
+        expect(
+          shouldIgnoreFile(
+            'app/node_modules/pkg/index.js',
+            true,
+            HIDDEN_PARENT_ROOT
+          )
+        ).toBe(true);
+      });
+    });
   });
 });

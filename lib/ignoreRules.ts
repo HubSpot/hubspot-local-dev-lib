@@ -54,10 +54,20 @@ function loadIgnoreConfig(isInProject = false): void {
   loaded = true;
 }
 
-export function shouldIgnoreFile(file: string, isInProject = false): boolean {
+function getRelativePath(file: string, rootDir?: string): string {
+  if (typeof rootDir === 'string' && rootDir !== '') {
+    return path.relative(rootDir, path.resolve(rootDir, file));
+  }
+  return path.relative(searchDomain || '/', file);
+}
+
+export function shouldIgnoreFile(
+  file: string,
+  isInProject = false,
+  rootDir?: string
+): boolean {
   loadIgnoreConfig(isInProject);
-  const relativeTo = searchDomain || '/';
-  const relativePath = path.relative(relativeTo, file);
+  const relativePath = getRelativePath(file, rootDir);
 
   return !!relativePath && ignoreRules.ignores(relativePath);
 }
