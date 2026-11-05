@@ -61,6 +61,12 @@ function getRelativePath(file: string, rootDir?: string): string {
   return path.relative(searchDomain || '/', file);
 }
 
+/**
+ * When rootDir is a non-empty string, file is matched relative to rootDir
+ * instead of "/" or the .hsignore directory, so directories above rootDir never
+ * match a rule and .hsignore patterns are anchored at rootDir. file must be
+ * inside rootDir, otherwise the ignore library throws a RangeError.
+ */
 export function shouldIgnoreFile(
   file: string,
   isInProject = false,

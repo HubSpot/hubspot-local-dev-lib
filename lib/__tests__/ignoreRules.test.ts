@@ -1,3 +1,6 @@
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
 import { shouldIgnoreFile } from '../ignoreRules.js';
 
 const CWD = '/Path/To/My/Repo';
@@ -53,7 +56,7 @@ describe('lib/ignoreRules', () => {
     });
 
     describe('with rootDir', () => {
-      const HIDDEN_PARENT_ROOT = '/Users/me/.workspaces/my-project/src';
+      const ROOT_UNDER_HIDDEN_DIR = '/Users/me/.workspaces/my-project/src';
 
       beforeEach(() => {
         vi.spyOn(process, 'cwd').mockReturnValue('/Users/me/.workspaces/cwd');
@@ -65,38 +68,44 @@ describe('lib/ignoreRules', () => {
 
       it('should not ignore relative files when the root is nested under a hidden directory', () => {
         expect(
-          shouldIgnoreFile('app/app-logo.png', true, HIDDEN_PARENT_ROOT)
+          shouldIgnoreFile('app/app-logo.png', true, ROOT_UNDER_HIDDEN_DIR)
         ).toBe(false);
-        expect(shouldIgnoreFile('app', true, HIDDEN_PARENT_ROOT)).toBe(false);
+        expect(shouldIgnoreFile('app', true, ROOT_UNDER_HIDDEN_DIR)).toBe(
+          false
+        );
       });
 
       it('should not ignore absolute files when the root is nested under a hidden directory', () => {
         expect(
           shouldIgnoreFile(
-            `${HIDDEN_PARENT_ROOT}/app/app-logo.png`,
+            `${ROOT_UNDER_HIDDEN_DIR}/app/app-logo.png`,
             true,
-            HIDDEN_PARENT_ROOT
+            ROOT_UNDER_HIDDEN_DIR
           )
         ).toBe(false);
       });
 
       it('should not ignore the root directory itself', () => {
         expect(
-          shouldIgnoreFile(HIDDEN_PARENT_ROOT, true, HIDDEN_PARENT_ROOT)
+          shouldIgnoreFile(ROOT_UNDER_HIDDEN_DIR, true, ROOT_UNDER_HIDDEN_DIR)
         ).toBe(false);
       });
 
       it('should still ignore hidden files and folders inside the root', () => {
-        expect(shouldIgnoreFile('.env', true, HIDDEN_PARENT_ROOT)).toBe(true);
-        expect(shouldIgnoreFile('.git', true, HIDDEN_PARENT_ROOT)).toBe(true);
+        expect(shouldIgnoreFile('.env', true, ROOT_UNDER_HIDDEN_DIR)).toBe(
+          true
+        );
+        expect(shouldIgnoreFile('.git', true, ROOT_UNDER_HIDDEN_DIR)).toBe(
+          true
+        );
         expect(
-          shouldIgnoreFile('app/.hidden/file.js', true, HIDDEN_PARENT_ROOT)
+          shouldIgnoreFile('app/.hidden/file.js', true, ROOT_UNDER_HIDDEN_DIR)
         ).toBe(true);
         expect(
           shouldIgnoreFile(
-            `${HIDDEN_PARENT_ROOT}/app/.hidden/file.js`,
+            `${ROOT_UNDER_HIDDEN_DIR}/app/.hidden/file.js`,
             true,
-            HIDDEN_PARENT_ROOT
+            ROOT_UNDER_HIDDEN_DIR
           )
         ).toBe(true);
       });
@@ -106,9 +115,58 @@ describe('lib/ignoreRules', () => {
           shouldIgnoreFile(
             'app/node_modules/pkg/index.js',
             true,
-            HIDDEN_PARENT_ROOT
+            ROOT_UNDER_HIDDEN_DIR
           )
         ).toBe(true);
+      });
+
+      it('should use the default behavior when rootDir is an empty string', () => {
+        expect(
+          shouldIgnoreFile(
+            `${ROOT_UNDER_HIDDEN_DIR}/app/app-logo.png`,
+            true,
+            ''
+          )
+        ).toBe(true);
+      });
+
+      it('should throw when the file is outside the root', () => {
+        expect(() =>
+          shouldIgnoreFile(
+            '/Users/me/other/file.js',
+            true,
+            ROOT_UNDER_HIDDEN_DIR
+          )
+        ).toThrow();
+      });
+    });
+
+    describe('with rootDir and an .hsignore', () => {
+      let hsignoreDir: string;
+
+      beforeEach(() => {
+        hsignoreDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ignore-rules-'));
+        fs.writeFileSync(path.join(hsignoreDir, '.hsignore'), '/generated\n');
+        vi.spyOn(process, 'cwd').mockReturnValue(hsignoreDir);
+        vi.resetModules();
+      });
+
+      afterEach(() => {
+        fs.rmSync(hsignoreDir, { recursive: true, force: true });
+        vi.restoreAllMocks();
+      });
+
+      it('should anchor .hsignore patterns at the root instead of the .hsignore directory', async () => {
+        const { shouldIgnoreFile: shouldIgnoreFileWithHsignore } =
+          await import('../ignoreRules.js');
+        const rootDir = path.join(hsignoreDir, 'project', 'src');
+
+        expect(
+          shouldIgnoreFileWithHsignore('generated/output.js', true, rootDir)
+        ).toBe(true);
+        expect(
+          shouldIgnoreFileWithHsignore('app/generated/output.js', true, rootDir)
+        ).toBe(false);
       });
     });
   });
