@@ -282,6 +282,16 @@ describe('config/utils', () => {
       });
     });
 
+    it('preserves the sensitive flag', () => {
+      const sensitiveConfig = {
+        ...CONFIG,
+        accounts: [{ ...PAK_ACCOUNT, sensitive: true }],
+      };
+      const deprecated = convertToDeprecatedConfig(sensitiveConfig);
+
+      expect(deprecated.portals![0]).toHaveProperty('sensitive', true);
+    });
+
     it('preserves OAuth account fields', () => {
       const oauthConfig = {
         ...CONFIG,
@@ -695,6 +705,24 @@ describe('config/utils', () => {
       expect(formattedConfig.accounts[0]).not.toHaveProperty(
         'someUndefinedField'
       );
+    });
+
+    it('preserves the sensitive flag on accounts', () => {
+      const sensitiveConfig = {
+        ...CONFIG,
+        accounts: [{ ...PAK_ACCOUNT, sensitive: true }],
+      };
+      const formattedConfig = formatConfigForWrite(sensitiveConfig);
+      expect(formattedConfig.accounts[0]).toHaveProperty('sensitive', true);
+    });
+
+    it('omits the sensitive flag when it is undefined', () => {
+      const unflaggedConfig = {
+        ...CONFIG,
+        accounts: [{ ...PAK_ACCOUNT, sensitive: undefined }],
+      };
+      const formattedConfig = formatConfigForWrite(unflaggedConfig);
+      expect(formattedConfig.accounts[0]).not.toHaveProperty('sensitive');
     });
 
     it('preserves all account types', () => {
