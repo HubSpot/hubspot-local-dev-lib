@@ -227,6 +227,7 @@ export async function updateConfigWithAccessToken(
     auth: { tokenInfo: { accessToken, expiresAt } },
     parentAccountId,
     env: accountEnv,
+    sensitive: account?.sensitive,
   } as PersonalAccessKeyConfigAccount; // Account may temporarily not have a name before prompted to add one in the CLI
 
   // Add new account if it doesn't exist, otherwise update existing account
