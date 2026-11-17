@@ -21,6 +21,7 @@ interface BaseHubSpotConfigAccount {
   env: Environment;
   authType: AuthType;
   parentAccountId?: number;
+  sensitive?: boolean;
 }
 
 export type DeprecatedHubSpotConfigAccountFields = {

@@ -285,6 +285,51 @@ describe('config/index', () => {
         ],
       });
     });
+
+    it('returns false for config with duplicate account names that contain uppercase characters', () => {
+      const accountName = 'Test-Account';
+      mockConfig({
+        accounts: [
+          { ...PAK_ACCOUNT, accountId: 111, name: accountName },
+          { ...PAK_ACCOUNT, accountId: 222, name: accountName },
+        ],
+      });
+
+      expect(validateConfig()).toEqual({
+        isValid: false,
+        errors: [
+          i18n('config.validateConfig.duplicateAccountNames', { accountName }),
+        ],
+      });
+    });
+
+    it.each([
+      ['Test-Account', 'test-account'],
+      ['test-account', 'Test-Account'],
+    ])(
+      'returns true for config with account names that differ only by case (%s, %s)',
+      (firstName, secondName) => {
+        mockConfig({
+          accounts: [
+            { ...PAK_ACCOUNT, accountId: 111, name: firstName },
+            { ...PAK_ACCOUNT, accountId: 222, name: secondName },
+          ],
+        });
+
+        expect(validateConfig()).toEqual({ isValid: true, errors: [] });
+      }
+    );
+
+    it('returns true for config with distinct account names', () => {
+      mockConfig({
+        accounts: [
+          { ...PAK_ACCOUNT, accountId: 111, name: 'First-Account' },
+          { ...PAK_ACCOUNT, accountId: 222, name: 'Second-Account' },
+        ],
+      });
+
+      expect(validateConfig()).toEqual({ isValid: true, errors: [] });
+    });
   });
 
   describe('createEmptyConfigFile()', () => {

@@ -310,6 +310,80 @@ describe('lib/personalAccessKey', () => {
       );
     });
 
+    it('preserves the sensitive flag when re-authenticating an existing account', async () => {
+      const existingAccount = {
+        accountId: 123,
+        name: 'account-name',
+        authType: 'personalaccesskey' as const,
+        personalAccessKey: 'old-key',
+        env: ENVIRONMENTS.QA,
+        sensitive: true,
+        auth: {
+          tokenInfo: {
+            accessToken: 'old-token',
+            expiresAt: moment().add(1, 'hours').toISOString(),
+          },
+        },
+      };
+      getConfigAccountIfExists.mockReturnValue(existingAccount);
+
+      fetchAccessToken.mockResolvedValue(
+        mockAxiosResponse({
+          oauthAccessToken: 'fresh-token',
+          expiresAtMillis: moment().add(1, 'hours').valueOf(),
+          encodedOAuthRefreshToken: 'let-me-in-5',
+          scopeGroups: ['content'],
+          hubId: 123,
+          userId: 456,
+          hubName: 'test-hub',
+          accountType: HUBSPOT_ACCOUNT_TYPES.STANDARD,
+        })
+      );
+
+      const token = await getAccessToken('pak_123', ENVIRONMENTS.QA, 123);
+
+      await updateConfigWithAccessToken(
+        token,
+        'pak_123',
+        ENVIRONMENTS.QA,
+        'account-name'
+      );
+
+      expect(updateConfigAccount).toHaveBeenCalledWith(
+        expect.objectContaining({ accountId: 123, sensitive: true })
+      );
+    });
+
+    it('does not set the sensitive flag when adding a new account', async () => {
+      getConfigAccountIfExists.mockReturnValue(undefined);
+
+      fetchAccessToken.mockResolvedValue(
+        mockAxiosResponse({
+          oauthAccessToken: 'fresh-token',
+          expiresAtMillis: moment().add(1, 'hours').valueOf(),
+          encodedOAuthRefreshToken: 'let-me-in-5',
+          scopeGroups: ['content'],
+          hubId: 123,
+          userId: 456,
+          hubName: 'test-hub',
+          accountType: HUBSPOT_ACCOUNT_TYPES.STANDARD,
+        })
+      );
+
+      const token = await getAccessToken('pak_123', ENVIRONMENTS.QA, 123);
+
+      await updateConfigWithAccessToken(
+        token,
+        'pak_123',
+        ENVIRONMENTS.QA,
+        'account-name'
+      );
+
+      expect(addConfigAccount).toHaveBeenCalledWith(
+        expect.objectContaining({ accountId: 123, sensitive: undefined })
+      );
+    });
+
     it('updates the config with the new account for sandbox accounts', async () => {
       const existingAccount = {
         accountId: 123,

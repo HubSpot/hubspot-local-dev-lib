@@ -1,6 +1,6 @@
 {
   "name": "@hubspot/local-dev-lib",
-  "version": "5.14.0",
+  "version": "5.15.0",
   "type": "module",
   "description": "Provides library functionality for HubSpot local development tooling, including the HubSpot CLI",
   "files": [
@@ -73,7 +73,7 @@
   },
   "dependencies": {
     "address": "2.0.3",
-    "axios": "1.20.0",
+    "axios": "1.21.0",
     "chalk": "5.6.2",
     "chokidar": "4.0.3",
     "content-disposition": "0.5.4",
@@ -90,7 +90,7 @@
     "moment": "2.31.0",
     "p-queue": "^7.0.0",
     "prettier": "^3.6.2",
-    "semver": "6.3.1",
+    "semver": "6.3.2",
     "unixify": "1.0.0",
     "unzipper": "0.12.5"
   },
