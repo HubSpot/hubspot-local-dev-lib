@@ -14,10 +14,9 @@ on:
 
 env:
   MAIN_BRANCH: main
-  IGNORE_SCRIPTS: 'false'
 
 concurrency:
-  group: release-${{ github.event_name == 'pull_request' && github.head_ref || 'publish' }}
+  group: release-${{ github.event_name == 'pull_request' && github.head_ref || github.ref_name }}
   cancel-in-progress: false
 
 permissions:
@@ -34,7 +33,7 @@ jobs:
       tag: ${{ steps.check.outputs.tag }}
       registry: ${{ steps.check.outputs.registry }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
 
       - name: Determine version and tag
         id: check
@@ -83,11 +82,11 @@ jobs:
       TAG: ${{ needs.check.outputs.tag }}
       REGISTRY: ${{ needs.check.outputs.registry }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
-          node-version: 24.x
+          node-version: 22.x
 
       - run: yarn install --frozen-lockfile
       - run: yarn build
@@ -95,16 +94,13 @@ jobs:
 
       - name: Publish dry run
         working-directory: dist
-        run: |
-          ARGS=(--tag "$TAG" --registry "$REGISTRY" --dry-run)
-          if [ "$IGNORE_SCRIPTS" = "true" ]; then ARGS+=(--ignore-scripts); fi
-          npm publish "${ARGS[@]}"
+        run: npm publish --tag "$TAG" --registry "$REGISTRY" --dry-run
 
   publish:
     needs: check
     if: github.event_name != 'pull_request' && needs.check.outputs.should-publish == 'true'
     runs-on: ubuntu-latest
-    environment: npm-release
+    environment: npm-publish
     permissions:
       contents: write
       id-token: write
@@ -114,15 +110,15 @@ jobs:
       REGISTRY: ${{ needs.check.outputs.registry }}
       GH_TOKEN: ${{ github.token }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
-          node-version: 24.x
+          node-version: 22.x
           registry-url: ${{ needs.check.outputs.registry }}
 
-      # Trusted publishing (OIDC) requires npm >= 11.5.1
-      - run: npm install -g npm@11.6.2
+      # Trusted publishing (OIDC) for dist-tags requires npm >= 11.21.0
+      - run: npm install -g npm@11.21.0
 
       - run: yarn install --frozen-lockfile
       - run: yarn build
@@ -130,31 +126,25 @@ jobs:
 
       - name: Publish to npm
         working-directory: dist
-        run: |
-          ARGS=(--tag "$TAG" --registry "$REGISTRY" --provenance)
-          if [ "$IGNORE_SCRIPTS" = "true" ]; then ARGS+=(--ignore-scripts); fi
-          npm publish "${ARGS[@]}"
+        run: npm publish --tag "$TAG" --registry "$REGISTRY" --provenance
 
       - name: Tag release commit
         run: |
           git tag "v$VERSION"
           git push origin "v$VERSION"
 
-      # Trusted publishing only authenticates `npm publish`, so dist-tag
-      # updates still need a token. As before, a failure here doesn't fail
-      # the release.
-      - name: Update next dist-tag
-        if: needs.check.outputs.tag == 'latest'
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_DIST_TAG_TOKEN }}
-        run: |
-          PACKAGE_NAME=$(node -p "require('./package.json').name")
-          npm dist-tag add "$PACKAGE_NAME@$VERSION" next --registry "$REGISTRY" ||
-            echo "::warning::Failed to update the next tag. Run: npm dist-tag add $PACKAGE_NAME@$VERSION next"
-
       - name: Create GitHub release
         if: needs.check.outputs.tag == 'latest'
         run: gh release create "v$VERSION" --generate-notes --latest
+
+      - name: Update next dist-tag
+        if: needs.check.outputs.tag == 'latest'
+        run: |
+          PACKAGE_NAME=$(node -p "require('./package.json').name")
+          if ! npm dist-tag add "$PACKAGE_NAME@$VERSION" next --registry "$REGISTRY"; then
+            echo "::error::Failed to update the next tag. Run: npm dist-tag add $PACKAGE_NAME@$VERSION next"
+            exit 1
+          fi
 
       - name: Summary
         run: |

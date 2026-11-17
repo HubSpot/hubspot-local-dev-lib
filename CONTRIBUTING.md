@@ -34,8 +34,8 @@ To stop using your local local-dev-lib:
 
 Publish an experimental version to NPM from your branch:
 
-1. Run `yarn release -v=prerelease --t=experimental`
-2. In the CLI repo, update `package.json` to point to the experimental version (e.g., `"@hubspot/local-dev-lib": "0.7.4-experimental.0"`).
+1. Push your branch, then run `yarn experimental-release`
+2. In the CLI repo, update `package.json` to point to the experimental version (e.g., `"@hubspot/local-dev-lib": "5.15.0-experimental.0"`).
 3. Run `yarn install --force` in the CLI repo to pull the experimental release.
 
 ## Merging

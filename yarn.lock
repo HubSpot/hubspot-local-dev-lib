@@ -238,10 +238,10 @@
     "@eslint/core" "^0.17.0"
     levn "^0.4.1"
 
-"@hubspot/npm-scripts@^0.3.3":
-  version "0.3.4"
-  resolved "https://registry.yarnpkg.com/@hubspot/npm-scripts/-/npm-scripts-0.3.4.tgz#c11315c4cf6d3342d3918513647c593a13d85832"
-  integrity sha512-wqX9Hzh+vbwjRjh0SbjtZGfBjxQX+508b3EoBylc5DpIvH68y4ahdl9t53tyGAg6OfFeKmW+kHENF2Ip4YUo+Q==
+"@hubspot/npm-scripts@^0.4.0":
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/@hubspot/npm-scripts/-/npm-scripts-0.4.0.tgz#55d7f07a8342560cd38a9799747bd9a86b575433"
+  integrity sha512-XMN1G8OxaN7IGyVCwPU/e2lZJ42FJao34C8gkASzYGZKyboiFOg2yahIbrVUqMzbofRcAEAnbRWBCxksf2auBw==
   dependencies:
     "@inquirer/prompts" "^7.8.6"
     chalk "^5.6.2"
