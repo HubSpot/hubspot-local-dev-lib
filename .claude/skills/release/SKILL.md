@@ -2,7 +2,7 @@
 name: ldl:release
 description: Release @hubspot/local-dev-lib to npm. Use when asked to "release", "cut a release", "publish a beta/next/latest/experimental version", or "release a minor to next".
 disable-model-invocation: false
-allowed-tools: Bash(git:*), Bash(yarn release:*), Bash(yarn beta-release:*), Bash(yarn experimental-release:*), Bash(npm view:*), Bash(gh pr view:*), Bash(gh run view:*), Read, AskUserQuestion
+allowed-tools: Bash(git:*), Bash(yarn release:*), Bash(yarn beta-release:*), Bash(yarn experimental-release:*), Bash(npm view:*), Bash(gh pr view:*), Bash(gh run list:*), Bash(gh run view:*), Read, AskUserQuestion
 argument-hint: '[latest|beta|experimental] [increment]'
 ---
 
@@ -57,11 +57,15 @@ Examples:
    - The working tree must be clean. Stop and tell the user if it isn't.
 2. Run the command with `-d` (dry run) first and show the user the version it computes.
 3. Ask the user to confirm the version. The real run pushes a branch and opens a PR (`release`/`beta-release`) or publishes to npm (`experimental-release`), so it needs explicit approval.
+   - If the dry run printed "The current changes have not yet been released in beta", tell the user. With `-y` the release continues anyway, so they won't see it otherwise. Offer `yarn beta-release -v <same increment> -y` instead.
 4. Run the same command without `-d`.
 5. Report the result:
-   - `release`/`beta-release`: the PR URL. Explain that merging it publishes from the `Release` GitHub Action.
+   - `release`/`beta-release`: the PR URL. Explain that merging it publishes from the `Release` GitHub Action. The PR needs a code owner's approval to merge. Don't merge it unless the user asks.
    - `experimental-release`: the published version and the install line `yarn add @hubspot/local-dev-lib@<version>`. If the workflow fails, give the user the run URL the script prints.
+6. If the user asks whether a merged release PR published, check `gh run list --workflow release.yml --branch main --limit 1` and `npm view @hubspot/local-dev-lib dist-tags`.
 
 ## If it fails
 
 The script prints an actionable error and returns you to your original branch. Relay the error to the user rather than retrying with `--skipBranchValidation` or `--skipVersionCheck`. Those flags exist for humans recovering from a broken release.
+
+If a workflow's publish step fails with `ENEEDAUTH`, or with a 404 from the OIDC token exchange, the npm trusted publisher for that workflow is missing or expired. Only the user can fix it, on npmjs.com under the package's Trusted publishing settings. Don't suggest `npm login` or an npm token.
