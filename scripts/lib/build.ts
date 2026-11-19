@@ -34,7 +34,9 @@ export async function build(): Promise<void> {
   fs.cpSync('LICENSE', 'dist/LICENSE');
 
   // Remove postinstall from built package.json
-  await exec('npm pkg delete scripts.postinstall', { cwd: './dist' });
+  await exec('npm pkg delete scripts.postinstall scripts.prepare', {
+    cwd: './dist',
+  });
 
   logger.success('Build successful');
 }

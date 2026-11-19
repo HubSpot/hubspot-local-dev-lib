@@ -179,8 +179,7 @@ export function watch(
     filePaths,
   }: WatchOptions,
   postInitialUploadCallback:
-    | ((result: Array<UploadFolderResults>) => void)
-    | null = null,
+    ((result: Array<UploadFolderResults>) => void) | null = null,
   onUploadFolderError?: WatchErrorHandler,
   onQueueAddError?: WatchErrorHandler,
   onUploadFileError?: (

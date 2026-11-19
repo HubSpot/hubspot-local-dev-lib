@@ -353,7 +353,8 @@ describe('lib/fileMapper', () => {
       );
       pathExistsSpy.mockImplementation(async () => false);
       fetchFileStream.mockImplementation(async (_accountId, filePath) => {
-        if (filePath === '/templates/bad.html') throw new Error('network error');
+        if (filePath === '/templates/bad.html')
+          throw new Error('network error');
         return {
           name: 'good.html',
           createdAt: 1,
