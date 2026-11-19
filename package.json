@@ -20,6 +20,7 @@
     "circular-deps": "yarn madge --circular --extensions ts --exclude 'dist/.*' .",
     "lint": "eslint --max-warnings=0 . && prettier . --check",
     "local-dev": "yarn build && cd dist && yarn link && cd .. && tsc --watch --rootDir . --outdir dist",
+    "prepare": "husky install",
     "prettier:write": "prettier . --write",
     "release": "tsx ./scripts/release.ts latest",
     "beta-release": "tsx ./scripts/release.ts next",
