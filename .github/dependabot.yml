@@ -8,43 +8,43 @@ updates:
   # Root library package. A committed yarn.lock lets Dependabot see the full
   # transitive graph, so security and version updates cover nested deps, not
   # just direct ones.
-  - package-ecosystem: "npm"
-    directory: "/"
+  - package-ecosystem: 'npm'
+    directory: '/'
     schedule:
-      interval: "weekly"
+      interval: 'weekly'
     open-pull-requests-limit: 10
     # Wait before proposing newly published versions; a fresh release can be
     # malicious or unstable (supply-chain hardening).
     cooldown:
       default-days: 7
     ignore:
-      - dependency-name: "*"
+      - dependency-name: '*'
         update-types:
-          - "version-update:semver-major"
+          - 'version-update:semver-major'
     groups:
       hubspot-dependencies:
         patterns:
-          - "@hubspot/*"
+          - '@hubspot/*'
       external-dependencies:
         patterns:
-          - "*"
+          - '*'
         exclude-patterns:
-          - "@hubspot/*"
+          - '@hubspot/*'
         update-types:
-          - "minor"
-          - "patch"
+          - 'minor'
+          - 'patch'
 
-  - package-ecosystem: "github-actions"
-    directory: "/"
+  - package-ecosystem: 'github-actions'
+    directory: '/'
     schedule:
-      interval: "weekly"
+      interval: 'weekly'
     cooldown:
       default-days: 7
     ignore:
-      - dependency-name: "*"
+      - dependency-name: '*'
         update-types:
-          - "version-update:semver-major"
+          - 'version-update:semver-major'
     groups:
       github-actions:
         patterns:
-          - "*"
+          - '*'
