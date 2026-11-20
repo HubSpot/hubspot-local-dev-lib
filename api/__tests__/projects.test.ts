@@ -14,6 +14,7 @@ import {
   deployProject,
   downloadClonedProject,
   downloadProject,
+  fetchBuildLogs,
   fetchBuildWarnLogs,
   fetchDeployWarnLogs,
   fetchPlatformVersions,
@@ -598,40 +599,63 @@ describe('api/projects', () => {
     });
   });
 
-  describe('fetchBuildWarnLogs', () => {
-    const buildId = 1;
-    it('should call http correctly', async () => {
-      await fetchBuildWarnLogs(accountId, projectName, buildId);
-      expect(http.get).toHaveBeenCalledTimes(1);
-      expect(http.get).toHaveBeenCalledWith(accountId, {
-        url: `dfs/logging/v1/logs/projects/${projectName}/builds/${buildId}/combined/warn`,
+  describe('project logs', () => {
+    const logsPath = (name: string) =>
+      `developers/logs/2027-03/projects/${encodeURIComponent(name)}`;
+
+    describe('fetchBuildLogs', () => {
+      const buildId = 1;
+      it('should call http correctly', async () => {
+        await fetchBuildLogs(accountId, projectName, buildId);
+        expect(http.get).toHaveBeenCalledTimes(1);
+        expect(http.get).toHaveBeenCalledWith(accountId, {
+          url: `${logsPath(projectName)}/builds/${buildId}`,
+        });
+      });
+
+      it('should encode the project name', async () => {
+        await fetchBuildLogs(accountId, projectNameIllegalChars, buildId);
+        expect(http.get).toHaveBeenCalledWith(accountId, {
+          url: `${logsPath(projectNameIllegalChars)}/builds/${buildId}`,
+        });
       });
     });
 
-    it('should encode the project name', async () => {
-      await fetchBuildWarnLogs(accountId, projectNameIllegalChars, buildId);
-      expect(http.get).toHaveBeenCalledTimes(1);
-      expect(http.get).toHaveBeenCalledWith(accountId, {
-        url: `dfs/logging/v1/logs/projects/${encodeURIComponent(projectNameIllegalChars)}/builds/${buildId}/combined/warn`,
+    describe('fetchBuildWarnLogs', () => {
+      const buildId = 1;
+      it('should call http correctly', async () => {
+        await fetchBuildWarnLogs(accountId, projectName, buildId);
+        expect(http.get).toHaveBeenCalledTimes(1);
+        expect(http.get).toHaveBeenCalledWith(accountId, {
+          url: `${logsPath(projectName)}/builds/${buildId}/combined/warn`,
+        });
+      });
+
+      it('should encode the project name', async () => {
+        await fetchBuildWarnLogs(accountId, projectNameIllegalChars, buildId);
+        expect(http.get).toHaveBeenCalledTimes(1);
+        expect(http.get).toHaveBeenCalledWith(accountId, {
+          url: `${logsPath(projectNameIllegalChars)}/builds/${buildId}/combined/warn`,
+        });
       });
     });
-  });
 
-  describe('fetchDeployWarnLogs', () => {
-    const deployId = 1;
-    it('should call http correctly', async () => {
-      await fetchDeployWarnLogs(accountId, projectName, deployId);
-      expect(http.get).toHaveBeenCalledTimes(1);
-      expect(http.get).toHaveBeenCalledWith(accountId, {
-        url: `dfs/logging/v1/logs/projects/${projectName}/deploys/${deployId}/combined/warn`,
+    describe('fetchDeployWarnLogs', () => {
+      const deployId = 1;
+      it('should call http correctly', async () => {
+        await fetchDeployWarnLogs(accountId, projectName, deployId);
+        expect(http.get).toHaveBeenCalledTimes(1);
+        expect(http.get).toHaveBeenCalledWith(accountId, {
+          url: `${logsPath(projectName)}/deploys/${deployId}/combined/warn`,
+        });
       });
-    });
 
-    it('should encode the project name', async () => {
-      await fetchDeployWarnLogs(accountId, projectNameIllegalChars, deployId);
-      expect(http.get).toHaveBeenCalledTimes(1);
-      expect(http.get).toHaveBeenCalledWith(accountId, {
-        url: `dfs/logging/v1/logs/projects/${encodeURIComponent(projectNameIllegalChars)}/deploys/${deployId}/combined/warn`,
+      it('should encode the project name', async () => {
+        await fetchDeployWarnLogs(accountId, projectNameIllegalChars, deployId);
+        expect(http.get).toHaveBeenCalledTimes(1);
+        expect(http.get).toHaveBeenCalledWith(accountId, {
+          url: `${logsPath(projectNameIllegalChars)}/deploys/${deployId}/combined/warn`,
+        });
       });
     });
   });

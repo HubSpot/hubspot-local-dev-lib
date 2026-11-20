@@ -21,6 +21,7 @@ import {
   ProjectDeployResponseV1,
   ProjectDeletionResponse,
 } from '../types/Deploy.js';
+import { ProjectLogsResponse } from '../types/ProjectLog.js';
 import {
   MigrateAppResponse,
   CloneAppResponse,
@@ -31,11 +32,16 @@ const PROJECTS_API_PATH = 'dfs/v1/projects';
 const DEVELOPER_FILE_SYSTEM_PATH = 'dfs/v1';
 const PROJECTS_DEPLOY_API_PATH = 'dfs/deploy/v1';
 const PROJECTS_DEPLOY_API_PATH_V3 = 'dfs/deploy/v3';
-const PROJECTS_LOGS_API_PATH = 'dfs/logging/v1';
 const DEVELOPER_PROJECTS_API_PATH = 'developer/projects/v1';
 const MIGRATIONS_API_PATH_V1 = 'dfs/migrations/v1';
 
 const PROJECTS_V3_API_PATH = 'project-components-external/v3';
+
+const PROJECT_LOGS_API_PATH = 'developers/logs/2027-03';
+
+function getProjectLogsPath(projectName: string): string {
+  return `${PROJECT_LOGS_API_PATH}/projects/${encodeURIComponent(projectName)}`;
+}
 
 export function fetchProjects(
   accountId: number
@@ -376,15 +382,23 @@ export function cancelStagedBuild(
   });
 }
 
+export function fetchBuildLogs(
+  accountId: number,
+  projectName: string,
+  buildId: number
+): HubSpotPromise<ProjectLogsResponse> {
+  return http.get<ProjectLogsResponse>(accountId, {
+    url: `${getProjectLogsPath(projectName)}/builds/${buildId}`,
+  });
+}
+
 export function fetchBuildWarnLogs(
   accountId: number,
   projectName: string,
   buildId: number
 ): HubSpotPromise<WarnLogsResponse> {
   return http.get<WarnLogsResponse>(accountId, {
-    url: `${PROJECTS_LOGS_API_PATH}/logs/projects/${encodeURIComponent(
-      projectName
-    )}/builds/${buildId}/combined/warn`,
+    url: `${getProjectLogsPath(projectName)}/builds/${buildId}/combined/warn`,
   });
 }
 
@@ -394,9 +408,7 @@ export function fetchDeployWarnLogs(
   deployId: number
 ): HubSpotPromise<WarnLogsResponse> {
   return http.get<WarnLogsResponse>(accountId, {
-    url: `${PROJECTS_LOGS_API_PATH}/logs/projects/${encodeURIComponent(
-      projectName
-    )}/deploys/${deployId}/combined/warn`,
+    url: `${getProjectLogsPath(projectName)}/deploys/${deployId}/combined/warn`,
   });
 }
 

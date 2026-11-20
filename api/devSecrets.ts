@@ -4,6 +4,7 @@ import { FetchDevSecretsResponse } from '../types/DevSecrets.js';
 
 const DEV_SECRETS_API_PATH = 'dev-secrets/management/v3';
 
+/** @deprecated Use createAppSecret from api/appSecrets instead */
 export function addAppSecret(
   accountId: number,
   appId: number,
@@ -19,6 +20,7 @@ export function addAppSecret(
   });
 }
 
+/** @deprecated Use updateAppSecret from api/appSecrets instead */
 export function updateAppSecret(
   accountId: number,
   appId: number,
@@ -34,6 +36,7 @@ export function updateAppSecret(
   });
 }
 
+/** @deprecated Use deleteAppSecret from api/appSecrets instead */
 export function deleteAppSecret(
   accountId: number,
   appId: number,
@@ -47,6 +50,7 @@ export function deleteAppSecret(
   });
 }
 
+/** @deprecated Use fetchAppSecrets from api/appSecrets instead */
 export function fetchAppSecrets(
   accountId: number,
   appId: number
